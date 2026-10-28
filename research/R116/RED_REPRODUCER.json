@@ -1,0 +1,9 @@
+{
+  "assertion": "expected NON_COMPARABLE; observed ENGINE_COMPARABLE_SAME_PACKAGE",
+  "command": "python3 -B -m unittest -v test_workload_bound_compare.BoundCompareTests.test_declared_per_request_output_limit_is_enforced",
+  "exit_code": 1,
+  "pre_fix_adapter_sha256": "51f10d3745314acdf49c37794c9cb7ae30b00632b9b88c669a49f4c127b5184d",
+  "pre_fix_admission_sha256": "04ca282e61ac18d16aa63e3ec9626937e613b1c50ff5da1c719754f7d75fa3c9",
+  "regression_test_sha256": "730b1b08a81fc39601ff3f76903d29ffa3e3e222034577c2a46b9b435a803968",
+  "status": "RED_REPRODUCED_BEFORE_FIX"
+}
