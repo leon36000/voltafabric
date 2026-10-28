@@ -9,3 +9,5 @@ Le dépôt ne contient ni les cibles de compilation, environnements locaux, mod�
 Le fichier SHA256SUMS initial et scripts/check_integrity.py concernent un état historique et ne constituent pas un contrôle de l'état R59. Ne pas réécrire cette histoire ; pour contrôler cet instantané, comparer les fichiers listés dans `provenance/source_final_r59.json`. Aucun CPU_FULL_PASS récent, modèle complet, gain de performance ou qualification GPU globale n'est déduit de ce commit.
 
 Les documents `PROMPT_CODEX.md`, `evidence/DELIVERY.json` et `evidence/RESULTATS.md` sont inclus pour résoudre les références des documents du projet ; ils décrivent une livraison historique et ne remplacent pas le manifeste R59 ni les résultats récents.
+
+`research/R104/` conserve également les sources, tests et reçus CPU de comparaison des workloads. Ce module est privé et non promu dans le moteur canonique ; il ne prouve ni un modèle complet ni un benchmark réel. Ses journaux historiques incluent des chemins PC6.

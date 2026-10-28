@@ -1,0 +1,6 @@
+ARGV=["/usr/bin/python3", "-c", "import importlib.util,json,sys;p=sys.argv[1];s=importlib.util.spec_from_file_location('bound',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);r=m.compare_bound_files(*sys.argv[2:]);print(json.dumps(r));sys.exit(0 if r.get('verdict')=='NON_COMPARABLE' else 1)", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/workload_bound_compare.py", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/.private-tmp/r104-test-2prrph8j/left.json", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/.private-tmp/r104-test-2prrph8j/right.json", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/.private-tmp/r104-test-2prrph8j/corpus.json", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/.private-tmp/r104-test-2prrph8j/input.json", "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028/.private-tmp/r104-test-2prrph8j/output.json"]
+ELAPSED_SECONDS=0.020151503034867346
+STDOUT={"verdict": "NON_COMPARABLE", "reasons": ["quality evidence is not a regular file"]}
+
+STDERR=
+EXIT_CODE=0
