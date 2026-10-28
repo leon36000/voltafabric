@@ -1,0 +1,21 @@
+{
+  "hidden": 4096,
+  "counts": [
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1
+  ],
+  "wire": {
+    "input_bytes": 2,
+    "expert_output_bytes": 2,
+    "partial_output_bytes": 4,
+    "header_bytes": 0,
+    "slot_metadata_bytes": 0,
+    "alignment": 1
+  }
+}

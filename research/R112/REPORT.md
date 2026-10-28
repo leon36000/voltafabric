@@ -1,0 +1,5 @@
+# R112 — espace ciblé sur PC6
+
+La mesure low-priority `du -x` sur la racine .runs a trouvé environ 43,04 milliards d’octets alloués à cette racine, incluant ses enfants ; les tailles par sous-dossier ne sont pas additionnées comme économie libérable à cause des liens et preuves partagés. Les plus grands dossiers connus comprennent notamment R11, A67, A58, A66, A57 et A56 ; ces noms ne démontrent pas qu'ils sont désuets. L'inventaire et les argv sont dans START.json/RESULT.json.
+
+Un examen borné des répertoires `target`, `mutation-target` et `discarded-target-r1` directement sous les enfants de .runs, chemins debug/release/incremental, n'a trouvé qu'un répertoire à 4096 octets alloués. Il ne couvre pas toutes les formes possibles de caches ni toutes les machines. Aucun fichier supprimé, déplacé ou modifié dans les historiques ; aucune économie n'est alléguée. Le disque système reste très rempli. PC4 n'a pas fourni de sauvegarde vérifiée (voir R111) : conserver les preuves et archives incertaines.

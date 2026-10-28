@@ -1,0 +1,43 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r70-v100-20261027-03-memcheck",
+  "effective_run_id": "r53-r70-v100-20261027-03-memcheck",
+  "reserved_ns": 220935355898613,
+  "context": {
+    "phase": "R70",
+    "case_id": "03-memcheck",
+    "case_plan_sha256": "8bc811c0c00bd85aadd64544eb01f99b311410e365dceaea978ee5a508089365",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-03-memcheck",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 20
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-03-memcheck",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 20
+        },
+        "attempt_id": 2,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      20
+    ],
+    "source_harness_sha256": "82cf8a825fb236b9f73637045f5947a01420d1f9e44906a04112a0065bf38e6a",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-faults-r70-20261027/vm-03-memcheck/operation.json"
+  }
+}

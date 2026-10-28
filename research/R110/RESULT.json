@@ -1,0 +1,40 @@
+{
+  "status": "UNIVERSAL_EXACT_IQ3S_TO_E2M1_E8M0_REJECTED_BY_SYNTHETIC_WITNESS",
+  "synthetic": true,
+  "actual_model_payload_read": false,
+  "actual_kernel_executed": false,
+  "target": "5/16",
+  "nearest_mxfp4": "4/16 or 6/16",
+  "absolute_error": "1/16",
+  "relative_error": "20%",
+  "finite_scale_bytes": 255,
+  "nibble_codes": 16,
+  "actual_rust_functions": [
+    "voltafabric::quant::decode_fp4",
+    "voltafabric::deepseek_v41::decode_e8m0"
+  ],
+  "only_one_synthetic_lane": true,
+  "IQ3S_256_bytes": 110,
+  "MXFP4_256_bytes": 136,
+  "scope": "Historical R46 archived GGML grid and documented IQ3_S lane decode; no claim on actual SC117 payload or installed Strata binary.",
+  "commands": {
+    "iq3_witness": {
+      "argv": [
+        "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-vf-compat-r110-20261028/iq3_witness"
+      ],
+      "binary_sha256": "dd08a2f1ca3eb5f95d8f7972d0085da96466cb72ab05d99752e602ad0f0a17d7",
+      "stdout": "{\"block_bytes\":110,\"grid_index\":2,\"grid_word\":16843013,\"d_binary16_bits\":11264,\"scale_multiplier\":1,\"first_weight_numerator\":5,\"denominator\":16,\"control_grid_index\":0,\"control_weight_numerator\":1}\n",
+      "stderr": "",
+      "exit_code": 0
+    },
+    "mxfp4_witness": {
+      "argv": [
+        "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-vf-compat-r110-20261028/mxfp4_witness"
+      ],
+      "binary_sha256": "e89c6ec98f3956eee14659ba3d38b9809b0e8007f91f2fc44cbf05d75dc4b36a",
+      "stdout": "{\"pairs_tested\":4080,\"matches_5_over_16\":0,\"matches_1_over_16\":4,\"best_absolute_error_numerator\":1,\"denominator\":16,\"reserved_scale_rejected\":true}\n",
+      "stderr": "",
+      "exit_code": 0
+    }
+  }
+}

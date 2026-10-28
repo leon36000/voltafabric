@@ -1,0 +1,44 @@
+{
+  "layers": [
+    {
+      "bytes": 4,
+      "compute_us_by_stage": [
+        10,
+        8
+      ]
+    },
+    {
+      "bytes": 4,
+      "compute_us_by_stage": [
+        6,
+        7
+      ]
+    },
+    {
+      "bytes": 4,
+      "compute_us_by_stage": [
+        8,
+        6
+      ]
+    },
+    {
+      "bytes": 4,
+      "compute_us_by_stage": [
+        4,
+        9
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "rank": 2,
+      "available_bytes": 12,
+      "boundary_after_us": 3
+    },
+    {
+      "rank": 9,
+      "available_bytes": 12,
+      "boundary_after_us": 0
+    }
+  ]
+}

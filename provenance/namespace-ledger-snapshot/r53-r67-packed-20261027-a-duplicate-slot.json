@@ -1,0 +1,15 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r67-packed-20261027-a",
+  "effective_run_id": "r53-r67-packed-20261027-a-duplicate-slot",
+  "reserved_ns": 206796763067655,
+  "context": {
+    "phase": "R67_READY_TOKEN_GROUPING",
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/engine-comparison-residency-r67-20261027/packed/input.json",
+    "case_plan_sha256": "2ef9ec83886b613169601110bd9e7c822cfb838d9e028b5bd94135ba2a15ab3d",
+    "batches": 1,
+    "tokens_per_batch": 8,
+    "epoch": 67
+  }
+}

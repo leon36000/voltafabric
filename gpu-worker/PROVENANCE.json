@@ -1,0 +1,12 @@
+{
+  "internal_source": "../.runs/gpu-resident-contract-20261024-r13/resident.rs",
+  "original_sha256": "b648ecd89710b578206d32b68cc76534912f6474980cc3d5171d546d7a5a3e72",
+  "adaptation": "Safe R13 owner wrapper plus library_symbol address accessor for Linux loader identity. New session executor and startup gate; qualified C++/CUDA owner unchanged.",
+  "new_external_code": false,
+  "ownership": "Local project sources; no publication or license reassignment. Upstream checkpoint MIT notice belongs to the checkpoint, not a blanket project license.",
+  "native_abi_version": 1,
+  "platforms_qualified": [
+    "Linux x86_64 SM70 CUDA12.8",
+    "Linux aarch64 SM121 CUDA13.0"
+  ]
+}

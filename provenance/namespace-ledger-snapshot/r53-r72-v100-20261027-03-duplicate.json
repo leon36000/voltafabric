@@ -1,0 +1,31 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r72-v100-20261027-03-duplicate",
+  "effective_run_id": "r53-r72-v100-20261027-03-duplicate",
+  "reserved_ns": 227820254373892,
+  "context": {
+    "phase": "R72",
+    "case_id": "03-duplicate",
+    "case_plan_sha256": "a9e26f48ad791300c167e95e854f27d79f436e47a2074065a0cbc3e0fb68be4f",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r72-v100-20261027-03-duplicate-duplicate-slot",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "duplicate-token-expert",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 80
+        },
+        "attempt_id": 1,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      80
+    ],
+    "source_harness_sha256": "967b72dc6dfd5ea7869f539e7a1a104b6a52ff2d04d0535a8a6d68d404237980",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-remaining-faults-r72-20261027/vm-03-duplicate/operation.json"
+  }
+}

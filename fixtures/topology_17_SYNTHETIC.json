@@ -1,0 +1,4687 @@
+{
+  "schema_version": 1,
+  "origin": "synthetic",
+  "source_note": "Illustration only: 17 logical 16-GiB devices in hypothetical islands; NOT owner inventory, benchmarks, measured paths, or performance forecast.",
+  "devices": [
+    {
+      "rank": 0,
+      "host": "SYNTHETIC_NODE_0",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 1,
+      "host": "SYNTHETIC_NODE_0",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 2,
+      "host": "SYNTHETIC_NODE_0",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 3,
+      "host": "SYNTHETIC_NODE_0",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 4,
+      "host": "SYNTHETIC_NODE_1",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 5,
+      "host": "SYNTHETIC_NODE_1",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 6,
+      "host": "SYNTHETIC_NODE_1",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 7,
+      "host": "SYNTHETIC_NODE_1",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 8,
+      "host": "SYNTHETIC_NODE_2",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 9,
+      "host": "SYNTHETIC_NODE_2",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 10,
+      "host": "SYNTHETIC_NODE_2",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 11,
+      "host": "SYNTHETIC_NODE_2",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 12,
+      "host": "SYNTHETIC_NODE_3",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 13,
+      "host": "SYNTHETIC_NODE_3",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 14,
+      "host": "SYNTHETIC_NODE_3",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 15,
+      "host": "SYNTHETIC_NODE_3",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    },
+    {
+      "rank": 16,
+      "host": "SYNTHETIC_NODE_4",
+      "capacity_bytes": 17179869184,
+      "reserved_bytes": 3221225472
+    }
+  ],
+  "links": [
+    {
+      "id": "synthetic-0-1",
+      "src": 0,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-2",
+      "src": 0,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-3",
+      "src": 0,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-4",
+      "src": 0,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-5",
+      "src": 0,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-6",
+      "src": 0,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-7",
+      "src": 0,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-8",
+      "src": 0,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-9",
+      "src": 0,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-10",
+      "src": 0,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-11",
+      "src": 0,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-12",
+      "src": 0,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-13",
+      "src": 0,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-14",
+      "src": 0,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-15",
+      "src": 0,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-0-16",
+      "src": 0,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-0",
+      "src": 1,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-2",
+      "src": 1,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-3",
+      "src": 1,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-4",
+      "src": 1,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-5",
+      "src": 1,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-6",
+      "src": 1,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-7",
+      "src": 1,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-8",
+      "src": 1,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-9",
+      "src": 1,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-10",
+      "src": 1,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-11",
+      "src": 1,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-12",
+      "src": 1,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-13",
+      "src": 1,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-14",
+      "src": 1,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-15",
+      "src": 1,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-1-16",
+      "src": 1,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-0",
+      "src": 2,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-1",
+      "src": 2,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-3",
+      "src": 2,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-4",
+      "src": 2,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-5",
+      "src": 2,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-6",
+      "src": 2,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-7",
+      "src": 2,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-8",
+      "src": 2,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-9",
+      "src": 2,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-10",
+      "src": 2,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-11",
+      "src": 2,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-12",
+      "src": 2,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-13",
+      "src": 2,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-14",
+      "src": 2,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-15",
+      "src": 2,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-2-16",
+      "src": 2,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-0",
+      "src": 3,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-1",
+      "src": 3,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-2",
+      "src": 3,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-4",
+      "src": 3,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-5",
+      "src": 3,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-6",
+      "src": 3,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-7",
+      "src": 3,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-8",
+      "src": 3,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-9",
+      "src": 3,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-10",
+      "src": 3,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-11",
+      "src": 3,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-12",
+      "src": 3,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-13",
+      "src": 3,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-14",
+      "src": 3,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-15",
+      "src": 3,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-3-16",
+      "src": 3,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-0",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-0",
+      "src": 4,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-1",
+      "src": 4,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-2",
+      "src": 4,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-3",
+      "src": 4,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-5",
+      "src": 4,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-6",
+      "src": 4,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-7",
+      "src": 4,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-8",
+      "src": 4,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-9",
+      "src": 4,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-10",
+      "src": 4,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-11",
+      "src": 4,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-12",
+      "src": 4,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-13",
+      "src": 4,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-14",
+      "src": 4,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-15",
+      "src": 4,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-4-16",
+      "src": 4,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-0",
+      "src": 5,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-1",
+      "src": 5,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-2",
+      "src": 5,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-3",
+      "src": 5,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-4",
+      "src": 5,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-6",
+      "src": 5,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-7",
+      "src": 5,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-8",
+      "src": 5,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-9",
+      "src": 5,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-10",
+      "src": 5,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-11",
+      "src": 5,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-12",
+      "src": 5,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-13",
+      "src": 5,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-14",
+      "src": 5,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-15",
+      "src": 5,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-5-16",
+      "src": 5,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-0",
+      "src": 6,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-1",
+      "src": 6,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-2",
+      "src": 6,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-3",
+      "src": 6,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-4",
+      "src": 6,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-5",
+      "src": 6,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-7",
+      "src": 6,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-8",
+      "src": 6,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-9",
+      "src": 6,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-10",
+      "src": 6,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-11",
+      "src": 6,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-12",
+      "src": 6,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-13",
+      "src": 6,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-14",
+      "src": 6,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-15",
+      "src": 6,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-6-16",
+      "src": 6,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-0",
+      "src": 7,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-1",
+      "src": 7,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-2",
+      "src": 7,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-3",
+      "src": 7,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-4",
+      "src": 7,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-5",
+      "src": 7,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-6",
+      "src": 7,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-8",
+      "src": 7,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-9",
+      "src": 7,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-10",
+      "src": 7,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-11",
+      "src": 7,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-12",
+      "src": 7,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-13",
+      "src": 7,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-14",
+      "src": 7,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-15",
+      "src": 7,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-7-16",
+      "src": 7,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-1",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-0",
+      "src": 8,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-1",
+      "src": 8,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-2",
+      "src": 8,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-3",
+      "src": 8,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-4",
+      "src": 8,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-5",
+      "src": 8,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-6",
+      "src": 8,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-7",
+      "src": 8,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-9",
+      "src": 8,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-10",
+      "src": 8,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-11",
+      "src": 8,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-12",
+      "src": 8,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-13",
+      "src": 8,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-14",
+      "src": 8,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-15",
+      "src": 8,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-8-16",
+      "src": 8,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-0",
+      "src": 9,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-1",
+      "src": 9,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-2",
+      "src": 9,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-3",
+      "src": 9,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-4",
+      "src": 9,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-5",
+      "src": 9,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-6",
+      "src": 9,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-7",
+      "src": 9,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-8",
+      "src": 9,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-10",
+      "src": 9,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-11",
+      "src": 9,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-12",
+      "src": 9,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-13",
+      "src": 9,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-14",
+      "src": 9,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-15",
+      "src": 9,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-9-16",
+      "src": 9,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-0",
+      "src": 10,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-1",
+      "src": 10,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-2",
+      "src": 10,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-3",
+      "src": 10,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-4",
+      "src": 10,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-5",
+      "src": 10,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-6",
+      "src": 10,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-7",
+      "src": 10,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-8",
+      "src": 10,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-9",
+      "src": 10,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-11",
+      "src": 10,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-12",
+      "src": 10,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-13",
+      "src": 10,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-14",
+      "src": 10,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-15",
+      "src": 10,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-10-16",
+      "src": 10,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-0",
+      "src": 11,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-1",
+      "src": 11,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-2",
+      "src": 11,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-3",
+      "src": 11,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-4",
+      "src": 11,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-5",
+      "src": 11,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-6",
+      "src": 11,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-7",
+      "src": 11,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-8",
+      "src": 11,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-9",
+      "src": 11,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-10",
+      "src": 11,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-12",
+      "src": 11,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-13",
+      "src": 11,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-14",
+      "src": 11,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-15",
+      "src": 11,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-11-16",
+      "src": 11,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-2",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-0",
+      "src": 12,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-1",
+      "src": 12,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-2",
+      "src": 12,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-3",
+      "src": 12,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-4",
+      "src": 12,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-5",
+      "src": 12,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-6",
+      "src": 12,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-7",
+      "src": 12,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-8",
+      "src": 12,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-9",
+      "src": 12,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-10",
+      "src": 12,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-11",
+      "src": 12,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-13",
+      "src": 12,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-14",
+      "src": 12,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-15",
+      "src": 12,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-12-16",
+      "src": 12,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-0",
+      "src": 13,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-1",
+      "src": 13,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-2",
+      "src": 13,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-3",
+      "src": 13,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-4",
+      "src": 13,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-5",
+      "src": 13,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-6",
+      "src": 13,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-7",
+      "src": 13,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-8",
+      "src": 13,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-9",
+      "src": 13,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-10",
+      "src": 13,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-11",
+      "src": 13,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-12",
+      "src": 13,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-14",
+      "src": 13,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-15",
+      "src": 13,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-13-16",
+      "src": 13,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-0",
+      "src": 14,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-1",
+      "src": 14,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-2",
+      "src": 14,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-3",
+      "src": 14,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-4",
+      "src": 14,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-5",
+      "src": 14,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-6",
+      "src": 14,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-7",
+      "src": 14,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-8",
+      "src": 14,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-9",
+      "src": 14,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-10",
+      "src": 14,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-11",
+      "src": 14,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-12",
+      "src": 14,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-13",
+      "src": 14,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-15",
+      "src": 14,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-14-16",
+      "src": 14,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-0",
+      "src": 15,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-1",
+      "src": 15,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-2",
+      "src": 15,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-3",
+      "src": 15,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-4",
+      "src": 15,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-5",
+      "src": 15,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-6",
+      "src": 15,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-7",
+      "src": 15,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-8",
+      "src": 15,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-9",
+      "src": 15,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-10",
+      "src": 15,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-11",
+      "src": 15,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-12",
+      "src": 15,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-13",
+      "src": 15,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-14",
+      "src": 15,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 10000000000.0,
+      "latency_us": 8,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "island-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-15-16",
+      "src": 15,
+      "dst": 16,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-3",
+        "host-uplink-4"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-0",
+      "src": 16,
+      "dst": 0,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-1",
+      "src": 16,
+      "dst": 1,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-2",
+      "src": 16,
+      "dst": 2,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-3",
+      "src": 16,
+      "dst": 3,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-0"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-4",
+      "src": 16,
+      "dst": 4,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-5",
+      "src": 16,
+      "dst": 5,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-6",
+      "src": 16,
+      "dst": 6,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-7",
+      "src": 16,
+      "dst": 7,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-1"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-8",
+      "src": 16,
+      "dst": 8,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-9",
+      "src": 16,
+      "dst": 9,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-10",
+      "src": 16,
+      "dst": 10,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-11",
+      "src": 16,
+      "dst": 11,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-2"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-12",
+      "src": 16,
+      "dst": 12,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-13",
+      "src": 16,
+      "dst": 13,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-14",
+      "src": 16,
+      "dst": 14,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    },
+    {
+      "id": "synthetic-16-15",
+      "src": 16,
+      "dst": 15,
+      "bandwidth_bytes_per_s": 5000000000.0,
+      "latency_us": 60,
+      "enabled": true,
+      "transport": "synthetic",
+      "resources": [
+        "host-uplink-4",
+        "host-uplink-3"
+      ],
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/topology_17_SYNTHETIC.json: illustrative directed link"
+      }
+    }
+  ]
+}

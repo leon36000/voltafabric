@@ -1,0 +1,810 @@
+[
+  {
+    "input_f64_bits": "0000000000000000",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "8000000000000000",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3e60000000000000",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3e5fffffffffffff",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3e60000000000001",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "3e70000000000000",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "be70000000000000",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "3e78000000000000",
+    "expected_fp16_bits": "0002"
+  },
+  {
+    "input_f64_bits": "3f0ff80000000000",
+    "expected_fp16_bits": "03ff"
+  },
+  {
+    "input_f64_bits": "3f0ffc0000000000",
+    "expected_fp16_bits": "0400"
+  },
+  {
+    "input_f64_bits": "3f0ffbffffffffff",
+    "expected_fp16_bits": "03ff"
+  },
+  {
+    "input_f64_bits": "3f0ffc0000000001",
+    "expected_fp16_bits": "0400"
+  },
+  {
+    "input_f64_bits": "3f10000000000000",
+    "expected_fp16_bits": "0400"
+  },
+  {
+    "input_f64_bits": "bf10000000000000",
+    "expected_fp16_bits": "8400"
+  },
+  {
+    "input_f64_bits": "3ff0000000000000",
+    "expected_fp16_bits": "3c00"
+  },
+  {
+    "input_f64_bits": "bff0000000000000",
+    "expected_fp16_bits": "bc00"
+  },
+  {
+    "input_f64_bits": "3ff0020000000000",
+    "expected_fp16_bits": "3c00"
+  },
+  {
+    "input_f64_bits": "3ff0060000000000",
+    "expected_fp16_bits": "3c02"
+  },
+  {
+    "input_f64_bits": "40effc0000000000",
+    "expected_fp16_bits": "7bff"
+  },
+  {
+    "input_f64_bits": "40effc0000000001",
+    "expected_fp16_bits": "7bff"
+  },
+  {
+    "input_f64_bits": "40effdffffffffff",
+    "expected_fp16_bits": "7bff"
+  },
+  {
+    "input_f64_bits": "40effe0000000000",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "40effe0000000001",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "c0effc0000000000",
+    "expected_fp16_bits": "fbff"
+  },
+  {
+    "input_f64_bits": "c0effe0000000000",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "7ff8000000000000",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "7ff0000000000000",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "fff0000000000000",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "7fe1ccf385ebc8a0",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "ffe1ccf385ebc8a0",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "3ff001ffffffffff",
+    "expected_fp16_bits": "3c00"
+  },
+  {
+    "input_f64_bits": "3ff0020000000000",
+    "expected_fp16_bits": "3c00"
+  },
+  {
+    "input_f64_bits": "3ff0020000000001",
+    "expected_fp16_bits": "3c01"
+  },
+  {
+    "input_f64_bits": "3ff005ffffffffff",
+    "expected_fp16_bits": "3c01"
+  },
+  {
+    "input_f64_bits": "3ff0060000000000",
+    "expected_fp16_bits": "3c02"
+  },
+  {
+    "input_f64_bits": "3ff0060000000001",
+    "expected_fp16_bits": "3c02"
+  },
+  {
+    "input_f64_bits": "bff0020000000001",
+    "expected_fp16_bits": "bc01"
+  },
+  {
+    "input_f64_bits": "bff0020000000000",
+    "expected_fp16_bits": "bc00"
+  },
+  {
+    "input_f64_bits": "bff001ffffffffff",
+    "expected_fp16_bits": "bc00"
+  },
+  {
+    "input_f64_bits": "bff0060000000001",
+    "expected_fp16_bits": "bc02"
+  },
+  {
+    "input_f64_bits": "bff0060000000000",
+    "expected_fp16_bits": "bc02"
+  },
+  {
+    "input_f64_bits": "bff005ffffffffff",
+    "expected_fp16_bits": "bc01"
+  },
+  {
+    "input_f64_bits": "3e72bf03a28f7300",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "c09e9b5b1ee81114",
+    "expected_fp16_bits": "e7a7"
+  },
+  {
+    "input_f64_bits": "b9bb174c382fe7d6",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "be6e30d8e32e34da",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "bf00f6c2995c509d",
+    "expected_fp16_bits": "821f"
+  },
+  {
+    "input_f64_bits": "c0dba6c72f1ec136",
+    "expected_fp16_bits": "f6ea"
+  },
+  {
+    "input_f64_bits": "c0ff263c7df50c2a",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "c0d047dcc8a0a81c",
+    "expected_fp16_bits": "f412"
+  },
+  {
+    "input_f64_bits": "40e8baa7c5489004",
+    "expected_fp16_bits": "7a2f"
+  },
+  {
+    "input_f64_bits": "3e79bd1df596d74c",
+    "expected_fp16_bits": "0002"
+  },
+  {
+    "input_f64_bits": "0036b1ba869b36e0",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3e6ef1ae6c3efc19",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "40fe310bd1d776a0",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "409a14bc23e6353e",
+    "expected_fp16_bits": "6685"
+  },
+  {
+    "input_f64_bits": "be62efc6ff058d94",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "be717a28d8aad018",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "40055e77ce44fb63",
+    "expected_fp16_bits": "4158"
+  },
+  {
+    "input_f64_bits": "bffeaf6cf0915bb0",
+    "expected_fp16_bits": "bfac"
+  },
+  {
+    "input_f64_bits": "3e55f426c7cab2c9",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "00359ef21a4c94ba",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3e6d802c47b14cc4",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "bff041e09900f310",
+    "expected_fp16_bits": "bc10"
+  },
+  {
+    "input_f64_bits": "3e6f53af87ddee50",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "be77298442017e5a",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "3e50d25641599659",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "b9bb7c8cd1461364",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "803d801503f74947",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3ffe6a736214bdcd",
+    "expected_fp16_bits": "3f9b"
+  },
+  {
+    "input_f64_bits": "b9b86ef14378bd58",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "409e122026dec77f",
+    "expected_fp16_bits": "6785"
+  },
+  {
+    "input_f64_bits": "bf251ee914ef8764",
+    "expected_fp16_bits": "8948"
+  },
+  {
+    "input_f64_bits": "be6794f520686736",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "be649bf24d109ea3",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "be6863af66b9e4f8",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "400cf3f6714b9529",
+    "expected_fp16_bits": "433d"
+  },
+  {
+    "input_f64_bits": "3e76bec289c72a88",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "be55ef28b1448eed",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "bd70454f64c65dbd",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "c097cb40ce16c3ae",
+    "expected_fp16_bits": "e5f3"
+  },
+  {
+    "input_f64_bits": "b9bb4db0987c3303",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "c09d64030bdeae40",
+    "expected_fp16_bits": "e759"
+  },
+  {
+    "input_f64_bits": "bf0ce47a17471b73",
+    "expected_fp16_bits": "839d"
+  },
+  {
+    "input_f64_bits": "40ef5199c50471d0",
+    "expected_fp16_bits": "7bd4"
+  },
+  {
+    "input_f64_bits": "bfea66fe1a5df59a",
+    "expected_fp16_bits": "ba9a"
+  },
+  {
+    "input_f64_bits": "b9b03c339607aba7",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "003d20f31225a698",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "40d6913c21c61bb2",
+    "expected_fp16_bits": "75a4"
+  },
+  {
+    "input_f64_bits": "4001377aef56303f",
+    "expected_fp16_bits": "404e"
+  },
+  {
+    "input_f64_bits": "3d764c3b2415bb4e",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "b9beec1cf30e453f",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "40f8fd883aad510b",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "c008a4d37798be8a",
+    "expected_fp16_bits": "c229"
+  },
+  {
+    "input_f64_bits": "3f20ca705a34a1d0",
+    "expected_fp16_bits": "0833"
+  },
+  {
+    "input_f64_bits": "bf14e03b484e8784",
+    "expected_fp16_bits": "8538"
+  },
+  {
+    "input_f64_bits": "bd7594ac75377a12",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "be5dab9d6cb2983a",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "40dca449c0e246c6",
+    "expected_fp16_bits": "7729"
+  },
+  {
+    "input_f64_bits": "bfe499b4b1866216",
+    "expected_fp16_bits": "b926"
+  },
+  {
+    "input_f64_bits": "3f0ac291f86aaeda",
+    "expected_fp16_bits": "0358"
+  },
+  {
+    "input_f64_bits": "3f2ad48e184b0d0c",
+    "expected_fp16_bits": "0ab5"
+  },
+  {
+    "input_f64_bits": "40e175cf139a9c42",
+    "expected_fp16_bits": "785d"
+  },
+  {
+    "input_f64_bits": "3fef6526afc41402",
+    "expected_fp16_bits": "3bd9"
+  },
+  {
+    "input_f64_bits": "003b65319c2a4787",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "0035aa3174889ad5",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "409475009494ccf7",
+    "expected_fp16_bits": "651d"
+  },
+  {
+    "input_f64_bits": "4003eba4131be9ab",
+    "expected_fp16_bits": "40fb"
+  },
+  {
+    "input_f64_bits": "3ffd0ab9e17e3a5f",
+    "expected_fp16_bits": "3f43"
+  },
+  {
+    "input_f64_bits": "c0f09b15275a9c8e",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "bf20017f32018898",
+    "expected_fp16_bits": "8800"
+  },
+  {
+    "input_f64_bits": "8039ba8f2523b1f7",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "bf293e8407591e65",
+    "expected_fp16_bits": "8a50"
+  },
+  {
+    "input_f64_bits": "be79ea95d6a1be3b",
+    "expected_fp16_bits": "8002"
+  },
+  {
+    "input_f64_bits": "bfe95e1c5ba43ada",
+    "expected_fp16_bits": "ba58"
+  },
+  {
+    "input_f64_bits": "3f0d52d08988a14b",
+    "expected_fp16_bits": "03aa"
+  },
+  {
+    "input_f64_bits": "3fec147be9247126",
+    "expected_fp16_bits": "3b05"
+  },
+  {
+    "input_f64_bits": "3fe83ff2578d7d70",
+    "expected_fp16_bits": "3a10"
+  },
+  {
+    "input_f64_bits": "39bc71ff81a5c076",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "803dcb23eddf76db",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "c09b8bb8581a5d4a",
+    "expected_fp16_bits": "e6e3"
+  },
+  {
+    "input_f64_bits": "4003b0bd5ceb8854",
+    "expected_fp16_bits": "40ec"
+  },
+  {
+    "input_f64_bits": "3feadc2b3ba8f050",
+    "expected_fp16_bits": "3ab7"
+  },
+  {
+    "input_f64_bits": "c0fa63a67f3449cd",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "bf276cbb05c7cd05",
+    "expected_fp16_bits": "89db"
+  },
+  {
+    "input_f64_bits": "bf0502b86e719563",
+    "expected_fp16_bits": "82a0"
+  },
+  {
+    "input_f64_bits": "40940c69b50923e4",
+    "expected_fp16_bits": "6503"
+  },
+  {
+    "input_f64_bits": "c0fc38c2015b5cb2",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "3ffe4f0e4afca551",
+    "expected_fp16_bits": "3f94"
+  },
+  {
+    "input_f64_bits": "be79f505706f8177",
+    "expected_fp16_bits": "8002"
+  },
+  {
+    "input_f64_bits": "3e7397adc25294f7",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "3feaa22d6c919a0d",
+    "expected_fp16_bits": "3aa9"
+  },
+  {
+    "input_f64_bits": "bf081e502e70268f",
+    "expected_fp16_bits": "8304"
+  },
+  {
+    "input_f64_bits": "bff4546260243a39",
+    "expected_fp16_bits": "bd15"
+  },
+  {
+    "input_f64_bits": "c095c429edf5d4b8",
+    "expected_fp16_bits": "e571"
+  },
+  {
+    "input_f64_bits": "3e6609b8b12dd19a",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "3f27261d6c372773",
+    "expected_fp16_bits": "09ca"
+  },
+  {
+    "input_f64_bits": "c0d6ee10feebe1b8",
+    "expected_fp16_bits": "f5bc"
+  },
+  {
+    "input_f64_bits": "3d76d5d26581693a",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "c091f2ff023555ff",
+    "expected_fp16_bits": "e47d"
+  },
+  {
+    "input_f64_bits": "c00b7a6448e898e4",
+    "expected_fp16_bits": "c2df"
+  },
+  {
+    "input_f64_bits": "bf0952be3a594d93",
+    "expected_fp16_bits": "832a"
+  },
+  {
+    "input_f64_bits": "bd7c6934a3eb6182",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3e7ffc1646ed2f5e",
+    "expected_fp16_bits": "0002"
+  },
+  {
+    "input_f64_bits": "c09f98a11498efc8",
+    "expected_fp16_bits": "e7e6"
+  },
+  {
+    "input_f64_bits": "3f08e8fbc05a61d7",
+    "expected_fp16_bits": "031d"
+  },
+  {
+    "input_f64_bits": "bfef3fa6f40c169c",
+    "expected_fp16_bits": "bbd0"
+  },
+  {
+    "input_f64_bits": "3e5eae37dfea06d1",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "803723c767c59e78",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3e5392666c61212c",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3f187b729423a73c",
+    "expected_fp16_bits": "061f"
+  },
+  {
+    "input_f64_bits": "c0e9a7fafc9b2131",
+    "expected_fp16_bits": "fa6a"
+  },
+  {
+    "input_f64_bits": "40005f30828cdff1",
+    "expected_fp16_bits": "4018"
+  },
+  {
+    "input_f64_bits": "3fe0a2cd3f282cff",
+    "expected_fp16_bits": "3829"
+  },
+  {
+    "input_f64_bits": "be585e12dc38a55d",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3f23d0d747f85b20",
+    "expected_fp16_bits": "08f4"
+  },
+  {
+    "input_f64_bits": "8032a38c25bdcbd1",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3feb7d58740c2d12",
+    "expected_fp16_bits": "3adf"
+  },
+  {
+    "input_f64_bits": "c0e3461f1a1dd9c0",
+    "expected_fp16_bits": "f8d2"
+  },
+  {
+    "input_f64_bits": "8036f64c12e38399",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "3e642ed8e714d608",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "3e5fdff71f8ecb35",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "409f41208486ac08",
+    "expected_fp16_bits": "67d0"
+  },
+  {
+    "input_f64_bits": "be7f900449a79f35",
+    "expected_fp16_bits": "8002"
+  },
+  {
+    "input_f64_bits": "409e40ea38925914",
+    "expected_fp16_bits": "6790"
+  },
+  {
+    "input_f64_bits": "40062b4207263247",
+    "expected_fp16_bits": "418b"
+  },
+  {
+    "input_f64_bits": "3e7f5eb8752200a2",
+    "expected_fp16_bits": "0002"
+  },
+  {
+    "input_f64_bits": "003f098217bdcf96",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "3e6ed13276c6070c",
+    "expected_fp16_bits": "0001"
+  },
+  {
+    "input_f64_bits": "40e9fed832bbb1c6",
+    "expected_fp16_bits": "7a80"
+  },
+  {
+    "input_f64_bits": "bd72f3738da82c11",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "be7782324c9b9dba",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "40f7999eddebf162",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "3f0c238e60ed02fc",
+    "expected_fp16_bits": "0384"
+  },
+  {
+    "input_f64_bits": "4094e0772db4e61e",
+    "expected_fp16_bits": "6538"
+  },
+  {
+    "input_f64_bits": "40f5ac557b07a162",
+    "expected_fp16_bits": null
+  },
+  {
+    "input_f64_bits": "bf125a387f413231",
+    "expected_fp16_bits": "8497"
+  },
+  {
+    "input_f64_bits": "c0ef61aa7f6bfd1b",
+    "expected_fp16_bits": "fbd8"
+  },
+  {
+    "input_f64_bits": "40e6ab4f4e85989f",
+    "expected_fp16_bits": "79ab"
+  },
+  {
+    "input_f64_bits": "3ff006191b98b319",
+    "expected_fp16_bits": "3c02"
+  },
+  {
+    "input_f64_bits": "3e577ce4ea48b5be",
+    "expected_fp16_bits": "0000"
+  },
+  {
+    "input_f64_bits": "bff3cc9e8df35db5",
+    "expected_fp16_bits": "bcf3"
+  },
+  {
+    "input_f64_bits": "c0d699a791becda7",
+    "expected_fp16_bits": "f5a6"
+  },
+  {
+    "input_f64_bits": "bf20facc950e32c5",
+    "expected_fp16_bits": "883f"
+  },
+  {
+    "input_f64_bits": "8036908d53abee4e",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "bffb7d3b82eb8045",
+    "expected_fp16_bits": "bedf"
+  },
+  {
+    "input_f64_bits": "c00224c0e4de3406",
+    "expected_fp16_bits": "c089"
+  },
+  {
+    "input_f64_bits": "c09fc28ade6442ad",
+    "expected_fp16_bits": "e7f1"
+  },
+  {
+    "input_f64_bits": "3f0e950f41cf75e3",
+    "expected_fp16_bits": "03d3"
+  },
+  {
+    "input_f64_bits": "c004d5028da8aca8",
+    "expected_fp16_bits": "c135"
+  },
+  {
+    "input_f64_bits": "bfe8d59b68e881b1",
+    "expected_fp16_bits": "ba35"
+  },
+  {
+    "input_f64_bits": "bf129d610e10be03",
+    "expected_fp16_bits": "84a7"
+  },
+  {
+    "input_f64_bits": "be7020198cc639e7",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "40dcb1d3819290f9",
+    "expected_fp16_bits": "772c"
+  },
+  {
+    "input_f64_bits": "bf1394cbbf7925c4",
+    "expected_fp16_bits": "84e5"
+  },
+  {
+    "input_f64_bits": "3f21fe5de73c1680",
+    "expected_fp16_bits": "0880"
+  },
+  {
+    "input_f64_bits": "be65521156aae949",
+    "expected_fp16_bits": "8001"
+  },
+  {
+    "input_f64_bits": "be5c9f00f0e053df",
+    "expected_fp16_bits": "8000"
+  },
+  {
+    "input_f64_bits": "bf07d48b5ba96dcc",
+    "expected_fp16_bits": "82fb"
+  },
+  {
+    "input_f64_bits": "3f0bba85b491b4cd",
+    "expected_fp16_bits": "0377"
+  },
+  {
+    "input_f64_bits": "bf2490ea71d0640f",
+    "expected_fp16_bits": "8924"
+  },
+  {
+    "input_f64_bits": "bf2bec00086614d4",
+    "expected_fp16_bits": "8afb"
+  }
+]

@@ -1,0 +1,12 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r61-r64-pc6-real-experts-20261026-a",
+  "effective_run_id": "r53-r61-r64-pc6-real-experts-20261026-a",
+  "reserved_ns": 192081343572377,
+  "context": {
+    "phase": "R64_EXPLICIT_TWO_RANK_CPU_NO_GPU",
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc3-pc6-resource-continuation-r64/cpu-two-real-experts-input.json",
+    "case_plan_sha256": "55f8c717381a83c02f6621e7ec04135a8e9a53aa156ada0cc3b1247e631ea9a9"
+  }
+}

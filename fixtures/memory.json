@@ -1,0 +1,11 @@
+{
+  "capacity": 17179869184,
+  "weights": 10737418240,
+  "kv": 1073741824,
+  "recurrent": 268435456,
+  "workspace": 536870912,
+  "graphs": 268435456,
+  "communication": 268435456,
+  "margin": 536870912,
+  "load_temporary": 1073741824
+}

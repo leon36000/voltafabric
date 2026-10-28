@@ -1,0 +1,84 @@
+[
+  {
+    "id": "collector_review",
+    "model_key": "muse",
+    "objective": "Find a concrete collector/identity bug or report none. Propose the smallest failing regression. Do not claim execution.",
+    "files": [
+      "src/moe.rs",
+      "tests/moe.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "placement_review",
+    "model_key": "deepseek",
+    "objective": "Find a minimal placement/cost counterexample. Distinguish greedy failure from global infeasibility and bytes from critical-path time.",
+    "files": [
+      "src/planner.rs",
+      "src/topology.rs",
+      "tests/planning.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "memory_review",
+    "model_key": "glm",
+    "objective": "Audit row padding, global scale bytes, checked arithmetic, and loading peak. Give a reproducible counterexample or explicitly no finding.",
+    "files": [
+      "src/memory.rs",
+      "tests/memory.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "quant_review",
+    "model_key": "luna",
+    "objective": "Audit the CPU E2M1/E4M3 decoder. Do not confuse linear format with QPN2/swizzled kernels or global quantizer scale with dequant multiplier.",
+    "files": [
+      "src/quant.rs",
+      "tests/quant.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "oracle_review",
+    "model_key": "muse",
+    "objective": "Review the independence and sensitivity of the Python numerical oracle. Target false-positive validation.",
+    "files": [
+      "scripts/crosscheck.py",
+      "src/moe.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "pipeline_review",
+    "model_key": "deepseek",
+    "objective": "Check the fixed-stage DP assumptions and overflow/invalid input cases. No general distributed throughput claim.",
+    "files": [
+      "src/pipeline.rs",
+      "tests/planning.rs"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "agent_review",
+    "model_key": "glm",
+    "objective": "Audit replay, credentials, scope, budget and timeout behavior. Outputs are untrusted proposals and never executable evidence.",
+    "files": [
+      "scripts/vf_agents.py",
+      "tests/python/test_agents.py"
+    ],
+    "write_set": []
+  },
+  {
+    "id": "integration_review",
+    "model_key": "luna",
+    "objective": "Find mismatches between exposed CLI capabilities and implemented contracts. No broad redesign.",
+    "files": [
+      "src/main.rs",
+      "Cargo.toml",
+      "docs/BUILD_SPEC.md"
+    ],
+    "write_set": []
+  }
+]

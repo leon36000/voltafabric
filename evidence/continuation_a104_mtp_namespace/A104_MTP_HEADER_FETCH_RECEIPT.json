@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+  "payload_downloaded": false,
+  "max_header_bytes": 16777216,
+  "shards": [
+    {
+      "file": "model-00044-of-00048.safetensors",
+      "http_status": 206,
+      "range_0_7": "bytes 0-7/2652728736",
+      "range_header": "bytes 8-84935/2652728736",
+      "file_bytes": 2652728736,
+      "header_bytes": 84928,
+      "header_sha256": "bcfa221d7a325e0a910e262d782c0e97bd5e5b7cbde6c9b480bb88ab7c23a36e",
+      "header_path": "evidence/continuation_a104_mtp_namespace/model-00044-of-00048.safetensors.header.314113f8.json",
+      "header_tensor_count": 801,
+      "index_name_set_matches": true,
+      "mtp_expert_count": 128,
+      "mtp_tensor_count": 768,
+      "mtp_layers": [
+        0
+      ],
+      "expert_id_min": 0,
+      "expert_id_max": 127,
+      "non_mtp_tensor_count": 33,
+      "all_experts_exactly_six_planes": true
+    },
+    {
+      "file": "model-00045-of-00048.safetensors",
+      "http_status": 206,
+      "range_0_7": "bytes 0-7/2573998176",
+      "range_header": "bytes 8-84615/2573998176",
+      "file_bytes": 2573998176,
+      "header_bytes": 84608,
+      "header_sha256": "c8f2cad66c6387793b335cbc10231661b61f2ec7a8c814bccb8d6ae418200675",
+      "header_path": "evidence/continuation_a104_mtp_namespace/model-00045-of-00048.safetensors.header.314113f8.json",
+      "header_tensor_count": 798,
+      "index_name_set_matches": true,
+      "mtp_expert_count": 128,
+      "mtp_tensor_count": 768,
+      "mtp_layers": [
+        1
+      ],
+      "expert_id_min": 0,
+      "expert_id_max": 127,
+      "non_mtp_tensor_count": 30,
+      "all_experts_exactly_six_planes": true
+    },
+    {
+      "file": "model-00046-of-00048.safetensors",
+      "http_status": 206,
+      "range_0_7": "bytes 0-7/2706402896",
+      "range_header": "bytes 8-85623/2706402896",
+      "file_bytes": 2706402896,
+      "header_bytes": 85616,
+      "header_sha256": "1baad4e59ff44a15727f0c294d015da70a90502fd5d1e844c1c0939a8194793e",
+      "header_path": "evidence/continuation_a104_mtp_namespace/model-00046-of-00048.safetensors.header.314113f8.json",
+      "header_tensor_count": 802,
+      "index_name_set_matches": true,
+      "mtp_expert_count": 128,
+      "mtp_tensor_count": 768,
+      "mtp_layers": [
+        2
+      ],
+      "expert_id_min": 0,
+      "expert_id_max": 127,
+      "non_mtp_tensor_count": 34,
+      "all_experts_exactly_six_planes": true
+    }
+  ],
+  "network_payload_bytes_read_from_response_bodies": 255176,
+  "full_checkpoint_downloaded": false,
+  "all_indexed_mtp_headers_verified": true
+}

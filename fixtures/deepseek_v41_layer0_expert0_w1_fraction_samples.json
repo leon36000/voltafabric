@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "model": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "artifact": "fixtures/deepseek_v41_layer0_expert0_314113f8.safetensors",
+  "artifact_sha256": "f1bdb87fe86fcafa8ae72e4154a8b4a0e66b90eaba8366a398676cb2fbe4510b",
+  "tensor": "layers.0.ffn.experts.0.w1.weight",
+  "scale_tensor": "layers.0.ffn.experts.0.w1.scale",
+  "logical_shape": [
+    2304,
+    5120
+  ],
+  "input_pattern_f64": [
+    0.25,
+    -0.5,
+    1.0,
+    -2.0,
+    0.0,
+    0.125,
+    -1.0
+  ],
+  "rows": [
+    0,
+    1,
+    17,
+    1024,
+    2047,
+    2303
+  ],
+  "output_f64_bits": {
+    "0": "bfdc300000000000",
+    "1": "3fd9480000000000",
+    "17": "3ff9c20000000000",
+    "1024": "4008520000000000",
+    "2047": "3fe3d80000000000",
+    "2303": "bfe08c0000000000"
+  },
+  "oracle": "Python Fraction; E2M1/E8M0 bit-fields; binary64 product rounding then ordered binary64 add rounding",
+  "gpu_executed": false,
+  "full_expert_forward": false,
+  "full_layer_inference": false
+}

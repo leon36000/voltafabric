@@ -1,0 +1,160 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r77-v100-memcheck-20261027-a",
+  "effective_run_id": "r53-r77-v100-memcheck-20261027-a-duplicate-slot",
+  "reserved_ns": 251176672425279,
+  "context": {
+    "phase": "R77",
+    "case_plan_sha256": "67bef5391d013c17b754c9999e6629ee610d7e8037e8329a12432dc6ce551aa8",
+    "native_calls": [
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 0,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 1,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 2,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 3,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 4,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 5,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 6,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 7,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 0,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 1,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 2,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 3,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 4,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 5,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 6,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 7,
+        "hidden": 5120,
+        "intermediate": 2304,
+        "coefficient_bits": "3ec00000",
+        "scope": "direct native call; no Session Stamp"
+      }
+    ],
+    "hardware_invocation_limit": 1,
+    "tool": "memcheck",
+    "native_sha256": "faa20005507693e0077c20b9a15748ec91a9cc8de50699f536ae739713324228"
+  }
+}

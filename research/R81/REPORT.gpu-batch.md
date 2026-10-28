@@ -1,0 +1,11 @@
+# R81 via R101 — première session du worker host-input vérifiée
+
+Une seule invocation réelle V100 a terminé normalement le 28 octobre 2026. Le worker R80 contre la native privée R76 a réalisé 1 LOAD comprimé de 6688 B, 2 EXEC et BYE2 via les vrais Session/Collector Rust. Les 276 slots et 2944 valeurs finales du Collector sont exacts contre les golden gelés et la réduction Fraction/RN32 indépendante. Les assertions numériques originales restent inchangées.
+
+Les trois Owners ont chacun 92 forwards, six copies de poids initiales, 736 kernels ; les totaux audit sont input H2D9108 B, output35328 B, status2208 B, poids4896 B/18 copies, kernels2208 et API4845. LOADtraffic6993 B inclut header305+artefact6688. Il s'agit de compteurs natifs, pas d'une nouvelle trace Runtime, de PCIe physique ou d'un gain de vitesse. Tous les raw slot bits ne sont pas individuellement journalisés.
+
+La chaîne observée est outer49274 → guard49275 → harness49281 → worker49283. Les proc/exe/PPID/starttime et HELLO sont liés aux hashes attendus. Le guard et le harness ont des sorties normales0, trois transports complets0. Les assertions Rust couvrent BYE et le worker ; le reçu de garde porte le harness et ne doit pas être renommé waitpid direct du worker. Le postflight constate les quatre PID et deux groupes absents, GPU apps vide et la même lease (dev64769,inode339746,uid1000) libre. Ce constat vaut à l'instant du postflight.
+
+Namespace r53-r81-v100-hostinput-session-20261027-a et suffixe -duplicate-slot réservés avant submit dans SAMEledgerR53. Le reçu conservateur CASE_SUBMISSION et les réservations restent UNKNOWN_NO_REPLAY historiques ; final-result.json est le verdict final lié aux preuves. Budget1/1 consommé : aucun submit, readiness ou collect à relancer. Les commandes submit/collect/verify ont terminé0 ; argv exacts transport sont dans *.command et les reçus *.terminal.json. La vérification indépendante en lecture seule reproduit le verdict.
+
+Le manifeste CPU MANIFEST.json original reste intact. GPU_FINAL_MANIFEST.json scelle le lot supplémentaire. Aucun fichier moteur, kernel ou ABI canonique promu. R77 reste FULL_GATE_UNKNOWN ; ce succès ne qualifie ni sanitizer du candidat, ni fautes, grandes formes, modèle complet, RDMA, longue session ou performance.

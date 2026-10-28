@@ -1,0 +1,137 @@
+{
+  "format": "voltafabric-fp32-sequential-add-v1",
+  "semantics": "Each term is an already-preweighted finite FP32 contribution. Start at +0; add in listed order with one binary32 RNE rounding after each addition. Any rounded infinity fails the entire case.",
+  "cases": [
+    {
+      "id": "single_roundtrip",
+      "terms": [
+        "3f800000"
+      ],
+      "status": "ok",
+      "result": "3f800000"
+    },
+    {
+      "id": "half_ulp_even_down",
+      "terms": [
+        "3f800000",
+        "33800000"
+      ],
+      "status": "ok",
+      "result": "3f800000"
+    },
+    {
+      "id": "half_ulp_even_up",
+      "terms": [
+        "3f800001",
+        "33800000"
+      ],
+      "status": "ok",
+      "result": "3f800002"
+    },
+    {
+      "id": "large_small_cancel_fixed",
+      "terms": [
+        "4b800000",
+        "3f800000",
+        "cb800000"
+      ],
+      "status": "ok",
+      "result": "00000000"
+    },
+    {
+      "id": "large_small_cancel_permuted",
+      "terms": [
+        "4b800000",
+        "cb800000",
+        "3f800000"
+      ],
+      "status": "ok",
+      "result": "3f800000"
+    },
+    {
+      "id": "subnormal_min_plus_min",
+      "terms": [
+        "00000001",
+        "00000001"
+      ],
+      "status": "ok",
+      "result": "00000002"
+    },
+    {
+      "id": "subnormal_halfway_to_zero",
+      "terms": [
+        "00000001",
+        "80000001"
+      ],
+      "status": "ok",
+      "result": "00000000"
+    },
+    {
+      "id": "signed_negative_zero_inputs",
+      "terms": [
+        "80000000",
+        "80000000"
+      ],
+      "status": "ok",
+      "result": "00000000"
+    },
+    {
+      "id": "negative_zero_plus_negative_value_then_cancel",
+      "terms": [
+        "80000000",
+        "bf800000",
+        "3f800000"
+      ],
+      "status": "ok",
+      "result": "00000000"
+    },
+    {
+      "id": "max_finite_plus_zero",
+      "terms": [
+        "7f7fffff",
+        "00000000"
+      ],
+      "status": "ok",
+      "result": "7f7fffff"
+    },
+    {
+      "id": "overflow_positive",
+      "terms": [
+        "7f7fffff",
+        "7f7fffff"
+      ],
+      "status": "overflow",
+      "result": null
+    },
+    {
+      "id": "overflow_after_prior_lane_work_fails_case",
+      "terms": [
+        "3f800000",
+        "7f7fffff",
+        "7f7fffff"
+      ],
+      "status": "overflow",
+      "result": null
+    },
+    {
+      "id": "three_quarters_order_a",
+      "terms": [
+        "3f000000",
+        "3e800000",
+        "be000000"
+      ],
+      "status": "ok",
+      "result": "3f200000"
+    },
+    {
+      "id": "three_quarters_order_b",
+      "terms": [
+        "3f000000",
+        "be000000",
+        "3e800000"
+      ],
+      "status": "ok",
+      "result": "3f200000"
+    }
+  ]
+}

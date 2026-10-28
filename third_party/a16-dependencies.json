@@ -1,0 +1,46 @@
+[
+  {
+    "crate": "num-bigint-0.4.6",
+    "upstream": "https://github.com/rust-num/num-bigint",
+    "license": "MIT OR Apache-2.0",
+    "files": [
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ],
+    "adaptations": "dependency locked; no source copied",
+    "ownership": "BigUint exact bounded fallback for subnormal rounding only"
+  },
+  {
+    "crate": "num-integer-0.1.47",
+    "upstream": "https://github.com/rust-num/num-integer",
+    "license": "MIT OR Apache-2.0",
+    "files": [
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ],
+    "adaptations": "dependency locked; no source copied",
+    "ownership": "BigUint exact bounded fallback for subnormal rounding only"
+  },
+  {
+    "crate": "num-traits-0.2.19",
+    "upstream": "https://github.com/rust-num/num-traits",
+    "license": "MIT OR Apache-2.0",
+    "files": [
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ],
+    "adaptations": "dependency locked; no source copied",
+    "ownership": "BigUint exact bounded fallback for subnormal rounding only"
+  },
+  {
+    "crate": "autocfg-1.5.1",
+    "upstream": "https://github.com/cuviper/autocfg",
+    "license": "MIT OR Apache-2.0",
+    "files": [
+      "LICENSE-APACHE",
+      "LICENSE-MIT"
+    ],
+    "adaptations": "dependency locked; no source copied",
+    "ownership": "BigUint exact bounded fallback for subnormal rounding only"
+  }
+]

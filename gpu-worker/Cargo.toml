@@ -1,0 +1,18 @@
+[package]
+name = "vf-mxfp4-gpu-worker"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+build = "build.rs"
+
+[dependencies]
+voltafabric = { path = ".." }
+libc = "=0.2.190"
+serde_json = { version = "1.0.145", features = ["float_roundtrip"] }
+
+[profile.release]
+overflow-checks = true
+lto = "thin"
+
+[workspace]

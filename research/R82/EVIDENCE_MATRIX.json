@@ -1,0 +1,74 @@
+[
+  {
+    "component": "Canonical source identity",
+    "status": "PASS_FRESH",
+    "evidence": "AUDIT_SCOPE.json + source manifest370 SHA41f179ce…",
+    "limit": "Hash identity proves exact reviewed bytes, not correctness"
+  },
+  {
+    "component": "Current existing full core CPU gate",
+    "status": "FAIL_FRESH_TIMEOUT",
+    "evidence": "evidence/current-CPU-gate-assessment.json:10passed/1timeout/34notrun",
+    "limit": "600s C ABI release phase timed out; build-budget cause plausible, not a proven numerical regression; no retry. Worker/GPU excluded."
+  },
+  {
+    "component": "R9 FP32 quantizer/projection/expert contracts",
+    "status": "PASS_COMPONENT_SCOPED",
+    "evidence": "agents/numerics-tests-audit.md; R48/R50 oracles and exact shape evidence",
+    "limit": "Large standalone synthetic inputs + tiny diagonal end-to-end do not qualify full transformer activations"
+  },
+  {
+    "component": "Persistent GPU expert workers SM70/SM120",
+    "status": "PASS_HISTORICAL_LIMITED_DOMAIN",
+    "evidence": "R51/R54/R69/R70/R71; rechecked pinned R69 manifest",
+    "limit": "Bounded owners/shapes/MAC; qualification tied to artifact/host/runtime; not arbitrary production model"
+  },
+  {
+    "component": "Mixed V100/RTX5080 real expert sessions over SSH",
+    "status": "PASS_HISTORICAL_TWO_EXPERT_SCOPE",
+    "evidence": "R64/R67/R69 reports, 40960 exact final values for R69",
+    "limit": "Eight synthetic BF16 vectors with real expert weights; no autoregressive loop"
+  },
+  {
+    "component": "Latest compact host-input native candidate",
+    "status": "PARTIAL_PRIVATE",
+    "evidence": "R76 exact81920 and Runtime copy arguments; R79 refusal/sticky; R80 CPU package; R81 CPU only",
+    "limit": "No accepted R81 actual-worker Session; no promotion"
+  },
+  {
+    "component": "Candidate memcheck complete release gate",
+    "status": "UNKNOWN_REJECT_PROMOTION",
+    "evidence": "R77 final-result.json, normal exit codes missing after observer ESRCH",
+    "limit": "Zero CS reports cannot replace absent normal terminal receipt"
+  },
+  {
+    "component": "GPU host-staged RDMA / GPUDirect",
+    "status": "PENDING_NOT_QUALIFIED",
+    "evidence": "R59–R63 readiness/contracts and checkpoints",
+    "limit": "CPU/RDMA transport proofs and SSH GPU sessions do not compose into a GPU RDMA proof"
+  },
+  {
+    "component": "Prompt→full model→generated tokens",
+    "status": "ABSENT_FROM_REVIEWED_DELIVERY",
+    "evidence": "CLI capabilities fresh run; architecture/source; full_model_qualified=false",
+    "limit": "No full tokenizer/backbone/KV/generation integrated and qualified"
+  },
+  {
+    "component": "Quality/perplexity/instruction following",
+    "status": "UNMEASURED_FULL_MODEL",
+    "evidence": "No complete-model output acceptance evidence in current indexed state",
+    "limit": "Bit exactness of expert components is not model-level quality"
+  },
+  {
+    "component": "vLLM/llama.cpp/Strata comparative speed",
+    "status": "UNMEASURED",
+    "evidence": "agents/engine-comparison-audit.md + official benchmark docs",
+    "limit": "No same hardware/model/quant/workload comparison; no relative speed factor"
+  },
+  {
+    "component": "Daily unattended deployment/long session/energy",
+    "status": "NOT_QUALIFIED",
+    "evidence": "Current handoff + component README bounds + explicit separate future gates",
+    "limit": "No fleet service SLO, restart/load/concurrency/energy qualification"
+  }
+]

@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/rust-lang/libc",
+  "version": "0.2.190",
+  "commit": "7b0ab5528dc7f361f3a0b4c06c2cad9971617f75",
+  "registry_checksum": "ce5d3ddc6d3fa000eb1536d85e147bfe31aacaba692ed6a876f95cb7c855be78",
+  "license": "MIT OR Apache-2.0",
+  "rust_compatibility": "Rust1.90.0 debug/release/clippy actual PASS",
+  "files_used": [
+    "platform O_NONBLOCK constant"
+  ],
+  "integration": "unmodified dependency via Cargo.lock; no upstream source copied",
+  "adaptations": "safe Unix OpenOptionsExt custom_flags; no own unsafe code"
+}

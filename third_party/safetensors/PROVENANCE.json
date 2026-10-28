@@ -1,0 +1,13 @@
+{
+  "repository": "https://github.com/huggingface/safetensors",
+  "version": "0.8.0",
+  "commit": "a406ca3e7a90598be0cd05a50069cb9bf5ef6ba6",
+  "registry_checksum": "79b079b829cb27a1c3c374341345ed2e8b2c0c839034522cee576c140bd7f846",
+  "license": "Apache-2.0",
+  "rust_compatibility": "Rust1.90.0 debug/release/clippy actual PASS",
+  "files_used": [
+    "src/tensor.rs Metadata/Dtype/TensorInfo"
+  ],
+  "integration": "unmodified dependency via Cargo.lock; no upstream source copied",
+  "adaptations": "bounded header duplicate checks, exact file length and selected Read/Seek into resident::pack"
+}

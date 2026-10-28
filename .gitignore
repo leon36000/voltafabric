@@ -1,0 +1,12 @@
+target/
+.tools/
+.runs/
+.env
+.env.*
+*.key
+__pycache__/
+*.pyc
+
+# Local execution state and credentials are not project source.
+/.work/
+*.pem

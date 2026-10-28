@@ -1,0 +1,26 @@
+{
+  "status": "CPU_PARTIAL_PROFILE_NO_REAL_POST_NOT_READY",
+  "plan_sha256": "ac4a835d9d7f72446fbf0aa2b90744abe9392f5cb4c4e014f83d1411e895e584",
+  "host_sha256": "a52e493b210d9f4700ad912c6c07d266b2033fd3ac565de1ea02a5bc675cea4d",
+  "relay_sha256": "7f34c81662af2563a585048d7015fdb07883c77f342a2cfb8a3bb354738f584a",
+  "container_sha256": "52a31bd7522bd6888132b3b4a61dca44a6fa58dfadf87bb737c817f608c04cdb",
+  "launcher_sha256": "779b5b7a7c46166e39bae991a8930691535c3e9112f5cecc3a2dfd5f8b7100a4",
+  "launcher_externally_pinned": false,
+  "tests": {
+    "profile_methods": 28,
+    "fake_relay_unix_methods": 1,
+    "independent_task_stub_red": 9
+  },
+  "pc1_cpu_transport_exit": 255,
+  "pc1_failure": "SSH banner timed out before authentication and remote script",
+  "true_aider_executed": false,
+  "real_model_post": false,
+  "quality_accepted": false,
+  "remaining": [
+    "External launcher source pin and same-bytes execution",
+    "Fresh PC1 connectivity and final true-Aider fake-upstream qualification",
+    "External staging + one-shot controller review",
+    "Independent tests of any future candidate"
+  ],
+  "historical_R99_unchanged": true
+}

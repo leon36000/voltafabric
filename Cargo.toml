@@ -1,0 +1,48 @@
+[package]
+name = "voltafabric"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[dependencies]
+num-bigint = "=0.4.6"
+vf-qpn2-ffi = { path = "crates/qpn2-ffi", optional = true }
+safetensors = { version = "=0.8.0", default-features = false, features = ["alloc", "std"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.145", features = ["float_roundtrip"] }
+
+[features]
+c-abi-validation = ["dep:vf-qpn2-ffi"]
+
+[lib]
+name = "voltafabric"
+path = "src/lib.rs"
+
+[[bin]]
+name = "vf"
+path = "src/main.rs"
+
+[profile.release]
+overflow-checks = true
+lto = "thin"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[[bin]]
+name = "vf-rank-worker"
+path = "src/bin/vf-rank-worker.rs"
+
+[[bin]]
+name = "vf-rank-session"
+path = "src/bin/vf-rank-session.rs"
+
+[target.'cfg(unix)'.dependencies]
+libc = "=0.2.190"
+
+[workspace]
+members = ["crates/qpn2-ffi"]
+exclude = ["gpu-worker"]
+default-members = ["."]
+resolver = "2"

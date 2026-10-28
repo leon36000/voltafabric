@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "observed_utc": "2026-10-19T21:16:50.397832+00:00",
+  "status": "PASS_PINNED_OFFICIAL_FULL_HEADER_INDEX_SCHEMA_ONLY",
+  "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+  "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "license": "MIT",
+  "shard": "model-00003-of-00048.safetensors",
+  "shard_bytes": 7389759032,
+  "full_shard_payload_downloaded": false,
+  "full_checkpoint_downloaded": false,
+  "header": {
+    "path": "evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json",
+    "sha256": "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449",
+    "bytes": 258136,
+    "data_start_bytes": 258144,
+    "payload_bytes": 7389500888,
+    "max_tensor_data_end": 7389500888,
+    "tensor_count": 2334
+  },
+  "index": {
+    "path": "evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json",
+    "sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+    "all_header_names_map_to_source_shard": true
+  },
+  "expert_contract": {
+    "layers": [
+      0
+    ],
+    "expert_ids": [
+      0,
+      383
+    ],
+    "expert_count": 384,
+    "expert_tensor_count": 2304,
+    "non_expert_tensor_count": 30,
+    "planes_per_expert": 6,
+    "projection_shapes": {
+      "w1": {
+        "weight": [
+          2304,
+          2560
+        ],
+        "scale": [
+          2304,
+          160
+        ]
+      },
+      "w2": {
+        "weight": [
+          5120,
+          1152
+        ],
+        "scale": [
+          5120,
+          72
+        ]
+      },
+      "w3": {
+        "weight": [
+          2304,
+          2560
+        ],
+        "scale": [
+          2304,
+          160
+        ]
+      }
+    },
+    "dtypes": {
+      "weight": "I8",
+      "scale": "F8_E8M0"
+    },
+    "all_experts_have_exactly_six_expected_planes": true,
+    "all_ids_use_canonical_decimal_spelling": true
+  },
+  "limits": [
+    "This verifies only a pinned Safetensors index and JSON header, not the 7.39 GB shard payload.",
+    "No Rust Safetensors deserialization of the complete shard, GPU, CUDA, V100, or inference was run."
+  ]
+}

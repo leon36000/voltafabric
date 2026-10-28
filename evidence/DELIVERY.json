@@ -1,0 +1,1490 @@
+{
+  "schema_version": 1,
+  "project": "VoltaFabric",
+  "version": "0.1.0-cpu-a51",
+  "utc": "2026-10-12T06:00:06+00:00",
+  "scope": "CPU gate reproducible with no implicit environment variable; SM70 compilation bit-reproducible; H1 launcher refuses an unqualified SM70 library before any CUDA action; Rust identity guards covered by mutation evidence; relocatable H1 package requalified without GPU execution",
+  "status": "PY_RAISE_REASONS_CPU_VERIFIED_NO_GPU",
+  "rust_version": "1.90.0",
+  "rust_unique_tests": 306,
+  "rust_profiles": [
+    "debug",
+    "release"
+  ],
+  "rust_fmt_check": "PASS",
+  "rust_clippy_warnings_denied": "PASS",
+  "python_runner_tests": 107,
+  "inherited_numpy_tests_rerun": 32,
+  "independent_oracle": {
+    "status": "PASS",
+    "evidence_level": "CPU_ONLY",
+    "seed_range": [
+      0,
+      191
+    ],
+    "counts": {
+      "moe_random": 192,
+      "registry_permutation": 24,
+      "collection_reordered": 24,
+      "collection_invalid": 38,
+      "memory_random": 192,
+      "pipeline_exhaustive": 192,
+      "nvfp4_scale_cases": 256,
+      "cli_invalid": 5
+    },
+    "total_cases": 923,
+    "max_abs_error": 1.0658141036401503e-14,
+    "tolerance": {
+      "atol": 2e-11,
+      "rtol": 2e-11
+    },
+    "sensitivity_control": "detected deliberate output corruption",
+    "elapsed_seconds_cpu_harness": 0.49381302400001914,
+    "gpu_claim": null,
+    "tolerance_now_tied_by_test": true,
+    "tolerance_test": "continuation_a36/ORACLE_TOLERANCE.json"
+  },
+  "source_sha256": {
+    "src/bin/vf-rank-worker.rs": "baa4f3ed85bc679ffc91df8b22dd4fd8c4f79bb7709c01694976afb3980b8d7b",
+    "src/checkpoint.rs": "1926267b9f30abb8508a0077f0c296094162611425bc2e5c514f89dbcd8700e5",
+    "src/completion.rs": "be52c43c0eccd048842a92a9b013469e2e5ce1bef0d873a6596c6e811acc2529",
+    "src/cost.rs": "cea931c1b402af1a25f79bf04fefd0a53c704ea1f98a2967c807548e711b21d9",
+    "src/launch.rs": "56fcf47db3c428c2a40c9775f16141add597154f8663926631394ca5a7d15158",
+    "src/lib.rs": "7176976de052e6c2edb7fe376e122c04e4ae382ec9698904775702b5141547e0",
+    "src/main.rs": "982db2ed6caba892e3832a692ef942e5b4dd0b438915f1f6f3b0f1fcd82bbc8f",
+    "src/memory.rs": "9509e67a105212b3c3ccc55b16eaa8b642d4a443b88644cb0126e75ccbb64fe5",
+    "src/moe.rs": "382326c6eeb7683add8700bd6c105817fd665171899daeb01290db10fe31d921",
+    "src/pipeline.rs": "9f0313297895ec7ea71f2318ead050f719c1ec46073cb867905f0a556e7d0693",
+    "src/planner.rs": "099d5e0968c3a16cea6624e0cf598117d331c07abf621efa91611959595cbed5",
+    "src/process.rs": "015e059bf1c53dcf174a2c529faf7ea3adc6b66e58c05b184711cdb0c49cad05",
+    "src/qpn2.rs": "76c44cd2687ed1b57d56a2a7d6981f862d5a61fbe134c17018c504f80c1b2dba",
+    "src/quant.rs": "55d90f3ebb6c825f604833a27b16cc48d715795b2a838876ee6170c6b30f512c",
+    "src/resident.rs": "d835410081c7c3228abbeadc18c2fe7dfabacb65c555adfc3047b5275db981fd",
+    "src/resident_artifact.rs": "94e1090102af9e4e26d8e0a354f178baf34431638b59f4fbc0d2a7925de1f75b",
+    "src/routing.rs": "d3354c880707a3a194952a4e477e2bccb1e74ace2c55d20d5f59f4aecf0c3149",
+    "src/schedule.rs": "2950a2720b59cdf1d4f5ec212d2726e856d37de9c207e1523bcb054e68f2c56b",
+    "src/topology.rs": "c87735e26a0ae6ac6b6523f1178f115f29a78ba507072564232cceb0657941bc",
+    "src/traffic.rs": "e4290d36554e6cfc2dff98ad731ca9758ddd02b6264491f22021cad5894c4e7a",
+    "src/work.rs": "341999c12422a7dfbed488e85e457e7345014a5b824e75859141c5d9e8fc2c91",
+    "crates/qpn2-ffi/Cargo.toml": "971cec91247f0e9f8fcb7a225f3acf9ac831af8c8fc750e5d5f4e2cb8dda6e06",
+    "crates/qpn2-ffi/abi_probe.c": "3f9da156e87e844bb193147a338ba9b834d67513543336350463b79dc4ef4f58",
+    "crates/qpn2-ffi/build.rs": "f5b4f52bf95c1767fb9708ed9a7c517a893d06eca7edcca006f432c4950cc1f8",
+    "crates/qpn2-ffi/src/lib.rs": "86a760093ba507d8a69baf8b1e3bd9123d78f02a86d53dbc0fdcbfcddde3cafa",
+    "crates/qpn2-ffi/tests/validate.rs": "01d1a7e0a0cef0c4ec13a29a5481da18c373ca3f9607d300d6a732bed4183de7",
+    "tests/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/a13_pipeline.rs": "dd27f725ca6ac41b3d38e60a578fc013a9dd076e2e8cf57c5be0db4242b50aee",
+    "tests/a13_planner.rs": "64d9f182774684d861c463274667e40a3cd2a609485b4dc9a6671fce538c9f3c",
+    "tests/a14_planner.rs": "6715536eef756d4764287948b0cc5692ead40907b9bb8b4eae188ed3d448177f",
+    "tests/a14_scale_domain.rs": "245f9f100d9bfd1ddf8180372bfad112ef28ee588441065932f9fc890eef9e43",
+    "tests/a15_inspection.rs": "729c343515ee6ee0075b7fbc51e508a846048f4eb7b574d2acddc4c59765f4f0",
+    "tests/a16_planner_properties.rs": "c40f01f2e9fd8d92a9621c8c0ad336616839e3c29825e8ae64566bda92ee34f6",
+    "tests/a16_scale_domain.rs": "9ecdf45496270635496e5e058e96deab7ce6b93e0dee31333086b3b8bf3aa793",
+    "tests/a18_packing.rs": "5bbe876752734bade6cb622d218dd74a97311aadb3c4244a73c1134249a5efed",
+    "tests/a19_artifact.rs": "37113b2ba0e8c084b08aeb066829fdab3470dabb57bff0250d27c67cde50b949",
+    "tests/a27_invariants.rs": "0265e81af76c5f10f5c96bb8608f2077f3cc9ccb32be27d15a76f5a7eddf0933",
+    "tests/a28_invariants.rs": "3a594017bff08a8648cbaa2d05456260782cd871a56e3521cb1e350eeb8ba1d5",
+    "tests/a48_map_err_reasons.rs": "8a52858cfec8bc73863a147c4c33fef173913e480499f8162fa8e10106ff6c4d",
+    "tests/a49_forged_completion.rs": "8b0240ebdc31ed4e05a3d1752d32739a6290da3b017ea44d61408a33ff93df2c",
+    "tests/a49_return_reasons.rs": "297e028c84c03bcd2f34c285c9f35b5d14392c268b59552701a12620bd041b9a",
+    "tests/adapter/test_a14_boundaries.py": "c274485821a56e098f0dd9d49f7d7b23b41b20facdbe2a8515c123440c25268b",
+    "tests/adapter/test_a16_h1_bundle.py": "ede32fe7be1014134422fbc09457662cfa551304b3449b5b10352c06e100ae97",
+    "tests/adapter/test_a16_numerical.py": "58e135037d0ee47c16d112fbcb3df4c1c17ac1627e2b6ba0724b4cd1a03e088d",
+    "tests/adapter/test_a17_provider.py": "7c0a1681c08d055a59b7160aeec8c062bd04c5bb0611a1f7e7546754251cf61e",
+    "tests/adapter/test_a19_artifact.py": "943014d919a021e3e97f880779f5d97fb38be070d064b702f7958223e72dfc6a",
+    "tests/adapter/test_a19_canary.py": "c68cc154053ecae168f6d03806248ec3d766c25962d53df4d864d90c599dcae3",
+    "tests/adapter/test_a20_full_canary.py": "1e37065efbddb7d03808418c39cc6c7a2355449dbce21504e13031f62b202b0f",
+    "tests/adapter/test_a36_oracle_tolerance.py": "53bcb3687115ef3106e1c8fb1cdd0867f3f4ba83b0605b48a67de97573eb373e",
+    "tests/adapter/test_a43_adapter_refusals.py": "32d6963cbb1d29a6c3825fad45525166586093da5a6aa3e54b7e847a3b3e59ac",
+    "tests/adapter/test_a43_canary_refusals.py": "82da7b34992283a5a52d7b89e5065460a286873c76f5dca5871ba9653abc7aca",
+    "tests/adapter/test_a43_package_refusals.py": "565bad92b2d5510ec3f397bd167ab29cd92fe5cdbc857e8a2527a8a86924d3dc",
+    "tests/adapter/test_a43_preflight_refusals.py": "3670e5dab369e722493b6393a97244cc34e2ebc9f0b60b80a7f312dc19ab5503",
+    "tests/adapter/test_a44_artifact_refusals.py": "f5cd4ba1a73c4c6e4b78d730a5bd35a43fcbf8c943d3a66cf5f0479e7e86a52f",
+    "tests/adapter/test_a44_full_expert_refusals.py": "ffc82d1faf4105a2801cfd1feaf4c0c09691310521914988c23368a465349026",
+    "tests/adapter/test_a45_handler_refusals.py": "6cff1ccbe70eb0b1bad6a21347606c11a2647eb47f37eadc180d0759dc92e2f0",
+    "tests/adapter/test_a46_defect_fixes.py": "3f5b0c52d128295c019250b7e3425cdc815d04041f090456fdb2931af0ffdc74",
+    "tests/adapter/test_a47_launcher_refusals.py": "8985c2f40e4e6eb89fbcb97010c109d9e10de740a345082c9a9a27cfcefb8978",
+    "tests/adapter/test_a51_raise_reasons.py": "c0bb8f9e47a5cf96c46209bf4ae472a5093d07195f64ae9c5d97793046f5d2ad",
+    "tests/adapter/test_canary_integration.py": "a9335c81c7e1a575c6dfd8b83791f5655e98fecd931bdfb59ae44e0397ce2cdd",
+    "tests/adapter/test_h1_preflight.py": "24bde40608ee317242b69e52fb285366f6eea9884d25daddcd191fe1849738a0",
+    "tests/adapter/test_hardware_contract.py": "a34d1d93a7ee062baf80cdf354bf95278bf5a3576b5a718fcc0215da08607a75",
+    "tests/adapter/test_metadata_collection.py": "2613ff0afc2fbe78d5e340cc1226c9472fa293d8480dbba3fd4cfaffe986899f",
+    "tests/adapter/test_skinny_adapter.py": "48221ba16d05189450865d4423cb617b86745647da3e33029c710238f6318ae9",
+    "tests/checkpoint_import.rs": "af6c2267adce688c46c934f517adaf78862a51437c6abd2ea261318f295899ca",
+    "tests/collection_metadata.rs": "374d89eafbcdba95668655bc5804f2636414ef5c7805d61a98f36142da152052",
+    "tests/common/mod.rs": "fa13754c43d65feecdd37370cd521dc533a20d1a9ddba262f6a279287448c86f",
+    "tests/completion.rs": "28129f3ece2d3ceb5e7e76ab391263e2c7b5fb6fbbaa484cf068b13496217e2c",
+    "tests/ffi_bridge.rs": "e599fce21486e4966ae1a8939ddd1ea5b81e5f870ff4dfb637cd6bc8c118d767",
+    "tests/fixtures/qpn2_golden.json": "108331e366b3b77e621474b51c93731651e41685061399b719fe7de361e49673",
+    "tests/launch.rs": "056ea887cf2c746f8a61257c904e47cf302ea67b10ec2b1fa36d2d4cfdbcf222",
+    "tests/memory.rs": "71e1142b5c560ae88b4d916642a32c9c4c3290aa3551b60c340b2bce9dbbd91a",
+    "tests/moe.rs": "231fdf7343c2b6b727ff7b36a86211d298c2e1ee29f2f2f8170c692dfc09cc3d",
+    "tests/planner_adversarial.rs": "52f3191dbfa270bd3d59e998ed840c7f273c38f44ba2fe1b52770b79f0f77dfe",
+    "tests/planning.rs": "fd717c12d4c4866c2726557eec8746d0af909896c614c2efd86b56ee3fdef98d",
+    "tests/process.rs": "244bd80370181208ce3bc8eef97621e454b79e07a60bab2980e2bde11f1539de",
+    "tests/process_attempt_limit.rs": "1cbcb46b321a3f5760020fb98061b9b5e4181d8a510eb97e4d333f12056a1f0b",
+    "tests/process_cli.rs": "0896db0dca5f9627d48091e6926e77b2c7de722fb9bdf485f239d9ecc457de50",
+    "tests/process_forged_events.rs": "f527f66c1f6a44fa56f14edad3112e0e685e4a6bc67d1b81118b97ba4ae20e14",
+    "tests/python/test_a43_agent_refusals.py": "aa44401c48e49a7f82ec414252d67d1f8d271e4c0c58661f258f81c1b9f5b7fc",
+    "tests/python/test_a45_agent_handlers.py": "c64904f930654040bf9da35bbef7c842f7b8b35dccd12de6952d00afb77f54c9",
+    "tests/python/test_agents.py": "392da0472957e3ae3c3db7aed01dbd071d0c5314af57b045f1cedd494e13a5e3",
+    "tests/qpn2.rs": "b6a568c958ed5ed6282f5392adfb3dfec0faf16e20582af3099b823bae452801",
+    "tests/qpn2_moe_validate.c": "1a3537f02de3902fa992c9f6fab93366f01ce67f4b9876b6e44008254ffdc4bf",
+    "tests/quant.rs": "9a985c513430f0a87a54d83d9715feafae666d9bd9a5c9e24f62979a4dc4f507",
+    "tests/reference/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "tests/reference/qpn_prepack.py": "cf64be0f9cca470c3e5ab9ed504f8c5b98a903398289a459cad1c0c576c546ee",
+    "tests/resident.rs": "d4fd7777b1893233688a9c7207833160ff314e8c520b6f06ece1e68aacc4376f",
+    "tests/routing.rs": "1fb6698790de9af525090d14eb55d1bbf4bb0504665dd317e1e68836bf0ae64b",
+    "scripts/a13_crosscheck.py": "5496eaf8de8c26a75e431274cbb4a01a1a52dd5c5d32c4c9f3004b4a0b21133f",
+    "scripts/a14_crosscheck.py": "52747d6d2fd59df5be82c4c8c524c394d3d86413157f9d62b74d3a2b883e1653",
+    "scripts/a16_planner_crosscheck.py": "9758ae9868ee90d15f40c125eea65152a2fd41101ea2ccac502b4fccb3dbf76b",
+    "scripts/check_integrity.py": "9e34adebc7a35a76702b4dd720bf03e29feec10aa544ec5d6eb2b087b4232ea0",
+    "scripts/checkpoint_crosscheck.py": "77dffdf8874e5c42f5b69d498b53de18536892ca717d7946b30bd77d02422672",
+    "scripts/completion_crosscheck.py": "7ed82552ae0d06393626ebaf5c902186b7c45c1144103b03d27b55d6e7bfb742",
+    "scripts/crosscheck.py": "2862d87e4d93cac67c23240e63b01ab6b8fc8c2d3b1c0a1528fb1bf3fbb45dc3",
+    "scripts/frontier_mutations.py": "6f8b3e6b1a362a30295278b0744008a0faa49dfc1c9f9622bb6f4160e377798c",
+    "scripts/full_expert_canary.py": "1bcad596a0d3e5fd49aed9236928d67c8b4aec35617caf4994ad3c971f1c700a",
+    "scripts/full_expert_crosscheck.py": "0000fff5a5562df693db902da4e22c9d8a72ef56cca41e5a6b8404562437f820",
+    "scripts/guard_schemata.py": "f5953034792d78883abd3bb2dc09d7e0860bab10688908a178a40c6a297df086",
+    "scripts/h1_preflight.py": "f02130d218144a626f806e0cfb329ef1e77c737f73d2b5f08e3b42637a5b4102",
+    "scripts/hardware_canary.py": "d7fc2e06211b76f155c9a9cf737979dc932071323b9fdcc8a6c6a425a771ee24",
+    "scripts/inspection_crosscheck.py": "0c61c2351effd4f78e9e4b53403339d640a149fd18204c515ce7701199a25df4",
+    "scripts/launch_crosscheck.py": "fda4bcbe4717fba306a3ea0bbd12a4487d50a8c73ad669d9a3a3930facd53745",
+    "scripts/oracle_sensitivity.py": "051e24bd75e905a7c2b7a8e0790aa66a0ab9a2b2263834acfa01ab6801a4fbe9",
+    "scripts/package_h1.py": "e23fccbe7dbdd0219a4ca3adfa78c1dc70fd34ce0678beab658a77a2af3c426c",
+    "scripts/planner_crosscheck.py": "2f7d7439ee2724d1f665a2972649d0765e3c58ed673e1c56be4655149bbfe325",
+    "scripts/resident_artifact.py": "0574613cc3ec98b5cd1e5877384b9ee54ca937e670676cf3510e1f2a2232dbe6",
+    "scripts/resident_crosscheck.py": "1fd15b3d184054dd42b21ea727752599c98aa36e9224e0d4c0313333c9bf834b",
+    "scripts/rust_mutations.py": "0dbb70cb9a483858f7d1cf9b374242ee41df564c6083ca1dddc2eb5dca5799ca",
+    "scripts/verify.py": "621e13b2d0d4b65a21ef1338fe4065dcdd56017a939e45c595ce1d67f1b225ef",
+    "scripts/vf_agents.py": "1c17933e7681f75ba1ced38bd30af411e80efbd18d144cae8adb89889727efdf",
+    "adapters/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "adapters/skinny_moe.py": "b68042362379af4ffd7ac89de1a7532ce609c87fd70644c10ecbbdc4eed99b7c",
+    "cuda/README.sm70.md": "7bc855ece339bad7b3927d5b2f24219971bf9ae02d2d26aa907a1e2e7afd6f8e",
+    "cuda/build_sm70.sh": "f6ae597494af868575ffceb0787f81eabb48a0839e588a26e58694c4f855a60b",
+    "cuda/qpn2_moe_core.cuh": "3d9b7c3569222d7517abc08739b6c710546dbe289d0d18a70cb5903a3f8ee6be",
+    "cuda/qpn2_moe_ffi.h": "4d9e25a854e5c2c23968ffe325d4e13fe0ffd735e72b38a1f6cb2ecd8474798a",
+    "cuda/qpn2_moe_sm70.cu": "b9e33e779a6aaa603c47c9e402c8ad14efb1854fa30eba4ac000e3a07a158aef",
+    "cuda/qpn2_moe_validate.c": "ffa36154b51148284e2fa5a775aa9cf6ec28c424cac22aca9cd1832efee6be03",
+    "cuda/third_party/ATTRIBUTION": "6d9467f5356f2138885adc87eb3f13c942e207644095c84fbcfdc920abe25dab",
+    "cuda/third_party/LICENSE-APACHE-2.0": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "cuda/third_party/LICENSE.skinny": "ea8d0bfb05424067d00b913000fff307526d0e84010d60bf6dc5003c461bf273",
+    "cuda/third_party/NOTICE": "1d9ac30258f015c2351636c2195d2a9d7ffe4d5d6b8a55e9f3c4f7ae50624578",
+    "fixtures/checkpoint_qwen36_expert0_crop.json": "4f0dba3f4186652571d2430f9fab9b382ddc3a392bc6d54b7054c364b8e2e2ce",
+    "fixtures/checkpoint_qwen36_expert0_crop.safetensors": "dc75ea43514f6c76d673027eaa16048f0eea06004410007d29c8fede21066074",
+    "fixtures/checkpoint_qwen36_expert0_full.provenance.json": "022ed72b46858405b9011677d49db4f5b6f775e95f66a788ec89596232c80860",
+    "fixtures/checkpoint_qwen36_expert0_full.safetensors": "7ede48f5bb49caa171eaf03c691b8d78d11e8644c465e4d008f8bcedf52c1c3a",
+    "fixtures/collection_metadata.json": "c18ff42fb42be3e2407b5db5d16a1794db60b973825a7a48f5d9fa13404ec535",
+    "fixtures/layout.json": "ebefa04b7b03ae150aeb150c1e1f0ac0e3d6a3ffe0efbc53ca6b155cf9d298bc",
+    "fixtures/memory.json": "5b5f7e9bc6b3d437ac3da547bea9b1063d0059c477cdf3f0a385a1001f6d7784",
+    "fixtures/moe_seed_0.json": "8334a55b2d349c4b0404c0d4163886fc67fa474d9720b8e55161a8db5e64fc94",
+    "fixtures/moe_seed_1.json": "62324392e0bac686b93638144b1f9346e311af2fad929d9d0ad3f9e73fda5fb2",
+    "fixtures/moe_seed_8.json": "38bb6808893a7c41fd761cac51ae8e785facef7547b09ccd2dc2f5db134a6750",
+    "fixtures/pipeline.json": "0ac6b402c56a68100c283199f86a09aacf3ca5d7dda0a1bcd6bb34f3434650c6",
+    "fixtures/placement_SYNTHETIC.json": "c5cbee00b75077c68c7c07d4188199a8a5d20e96291a7292803cb16131c55208",
+    "fixtures/process_cpu.json": "401c786f9160f0bab0058c7f66c97b5108ed2a36765728220a794a77ec005225",
+    "fixtures/resident_import_qwen_expert0.json": "4600794ccf3df1f37ecc0d88cbc944e88c1dd0878abfbfecfaa828903185c587",
+    "fixtures/topology_17_SYNTHETIC.json": "69139a53a90e9774ed7188c1644a2ae2fa9700d71bff26b3e9c667bee9c741bb",
+    "fixtures/traffic_grouped_loss.json": "3f72aab1d0c5c390a537fdc1c0f88caacffa4c68487e360064b331ec7d3dd4cc",
+    "fixtures/traffic_grouped_win.json": "52c8df26b5d779ed493fdd43a961995579d03602c42f9439cbcd9e98e30a29be",
+    "third_party/A19_CRATES.json": "3afa6906c1c1fb3752148df81642249aae3acf246e9ca70efe03ff104d2c35d2",
+    "third_party/a16-dependencies.json": "55a520ec8d045846b6e786041105df4913b70ee782f66f9a2cce7dc2c6ae6760",
+    "third_party/a19-crates/bitflags-2.13.2/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/bitflags-2.13.2/LICENSE-MIT": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+    "third_party/a19-crates/cfg-if-1.0.5/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/cfg-if-1.0.5/LICENSE-MIT": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397",
+    "third_party/a19-crates/errno-0.3.14/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/errno-0.3.14/LICENSE-MIT": "8764a597675778ddfd4e25f81b08a05dbcf089ac05662df7613fe67f150e3aa2",
+    "third_party/a19-crates/fastrand-2.5.0/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/fastrand-2.5.0/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+    "third_party/a19-crates/getrandom-0.4.3/LICENSE-APACHE": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf",
+    "third_party/a19-crates/getrandom-0.4.3/LICENSE-MIT": "523a42c25d245dde9c015f882cec7f4555aad883382a6cf19b4b7d9b2cd5419b",
+    "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-Apache-2.0_WITH_LLVM-exception": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
+    "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+    "third_party/a19-crates/once_cell-1.21.4/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/once_cell-1.21.4/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+    "third_party/a19-crates/rustix-1.1.5/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/rustix-1.1.5/LICENSE-Apache-2.0_WITH_LLVM-exception": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5",
+    "third_party/a19-crates/rustix-1.1.5/LICENSE-MIT": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3",
+    "third_party/a19-crates/safetensors-0.8.0/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "third_party/a19-crates/tempfile-3.27.0/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/a19-crates/tempfile-3.27.0/LICENSE-MIT": "8b427f5bc501764575e52ba4f9d95673cf8f6d80a86d0d06599852e1a9a20a36",
+    "third_party/a19-crates/windows-link-0.2.1/license-apache-2.0": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b",
+    "third_party/a19-crates/windows-link-0.2.1/license-mit": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+    "third_party/a19-crates/windows-sys-0.61.2/license-apache-2.0": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b",
+    "third_party/a19-crates/windows-sys-0.61.2/license-mit": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383",
+    "third_party/autocfg-1.5.1/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/autocfg-1.5.1/LICENSE-MIT": "27995d58ad5c1145c1a8cd86244ce844886958a35eb2b78c6b772748669999ac",
+    "third_party/libc/LICENSE-APACHE": "62c7a1e35f56406896d7aa7ca52d0cc0d272ac022b5d2796e7d6905db8a3636a",
+    "third_party/libc/LICENSE-MIT": "123a331b5dbf04c30097fa43b8f858bc85df671fe776de498d01f3d6b7c1f69e",
+    "third_party/libc/PROVENANCE.json": "155960daa09214d3a60787b293e29e875b60585d8951da1a7fe6268d1c7422dc",
+    "third_party/num-bigint-0.4.6/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/num-bigint-0.4.6/LICENSE-MIT": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+    "third_party/num-integer-0.1.47/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/num-integer-0.1.47/LICENSE-MIT": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+    "third_party/num-traits-0.2.19/LICENSE-APACHE": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2",
+    "third_party/num-traits-0.2.19/LICENSE-MIT": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb",
+    "third_party/safetensors/LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "third_party/safetensors/PROVENANCE.json": "5f149f967502be2ae6ae4ff85b9b677c5e515104549ad9bca6225f33c2c6e6c1",
+    "third_party/volta-nvfp4/LICENSE": "ea8d0bfb05424067d00b913000fff307526d0e84010d60bf6dc5003c461bf273",
+    "third_party/volta-nvfp4/LICENSE-APACHE-2.0": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/volta-nvfp4/NOTICE": "1d9ac30258f015c2351636c2195d2a9d7ffe4d5d6b8a55e9f3c4f7ae50624578",
+    "Cargo.toml": "068b6bed79f08aa8993170d2210e5e7d61b9f0d8484062650c41049213e01eac",
+    "Cargo.lock": "c82b752e27bc570280db8e435a7681bd7c3269195e5c160fbeb11823fe683407",
+    "rust-toolchain.toml": "c33d1f0b1b8fda448bea32d7dc867aa64947c87169fd9de7122ffccad1dd80f9",
+    "requirements-cpu.txt": "d9d95b7b84edd5f170985b90bac1ef90fbcf800f623d2526bcd4997f4c551290",
+    "agents/routes.example.json": "54bc396f3b66e009f1841aee24019cd9e13516fe94bc5dcaeae9f73e2ebb7570",
+    "agents/queue.example.json": "bb313108d7ddce485ec1196a0b7476df4f1a121f4e2c2882b8736e101aac4839",
+    "handoff/h1_bundle_run.sh": "7fbad120206f0799f2eb10cb920407ee4babb20109832033a89302de48484050",
+    "handoff/hardware_canary.sh": "d736cb54927b1793a8c51059850849d069153f9d8b5543196be453a28a0d823f"
+  },
+  "proofs": {
+    "final_rust_gate": "runs/phase-a51-final-20261012/summary.json",
+    "rust_debug": "runs/phase-a51-final-20261012/rust_debug.log",
+    "rust_release": "runs/phase-a29-final-20261011/rust_release.log",
+    "crosscheck": "runs/phase-native-ffi-hardened-20261008/crosscheck.json",
+    "python_final": "runs/phase-a51-final-20261012/python_agents.log",
+    "python_reproducer": "runs/phase-a4-baseline-20261008/summary.json",
+    "inherited_rerun": "current/inherited_numpy_rerun.log",
+    "independent_planner": "runs/phase-native-ffi-hardened-20261008/planner_crosscheck.json",
+    "quantized_adapter": "runs/phase-a51-final-20261012/quantized_adapter.log",
+    "checkpoint": "runs/phase-native-ffi-hardened-20261008/checkpoint_crosscheck.json",
+    "ffi_cpu": "runs/phase-native-ffi-hardened-20261008/ffi_cpu_validation.log",
+    "cuda_compiled": "continuation_a23/CUDA_COMPILED.json",
+    "review": "continuation_a123/independent-review.txt",
+    "a56_cpu_gate": "runs/phase-a56-final-20261008/summary.json",
+    "a56_phase": "continuation_a56/phase.json",
+    "resident": "runs/phase-native-ffi-hardened-20261008/resident_crosscheck.json",
+    "launch": "runs/phase-native-ffi-hardened-20261008/launch_crosscheck.json",
+    "a7_phase": "continuation_a7/phase.json",
+    "completion": "runs/phase-native-ffi-hardened-20261008/completion_crosscheck.json",
+    "a8_phase": "continuation_a8/phase.json",
+    "a910_phase": "continuation_a910/phase.json",
+    "full_expert": "runs/phase-native-ffi-hardened-20261008/full_expert_crosscheck.json",
+    "a11_phase": "continuation_a11/phase.json",
+    "a12_phase": "continuation_a12/phase.json",
+    "c_abi_debug": "runs/phase-a19-final4-20261010/c_abi_rust_debug.log",
+    "c_abi_release": "runs/phase-a19-final4-20261010/c_abi_rust_release.log",
+    "c_abi_review": "continuation_a12/review-ffi.txt",
+    "a16_phase": "continuation_a16/phase.json",
+    "h1_package": "continuation_a19/H1_PACKAGE.json",
+    "h1_relocated_cpu": "continuation_a19/H1_RELOCATED_CPU_FINAL.json",
+    "a17_phase": "continuation_a17/phase.json",
+    "a18_phase": "continuation_a18/phase.json",
+    "a19_phase": "continuation_a19/phase.json",
+    "a22_phase": "continuation_a22/phase.json",
+    "a22_reproducible_without_tmpdir": "runs/phase-a22-no-tmpdir-20261010/summary.json",
+    "a22_environment_defect_red": "runs/phase-a22-baseline-20261010/summary.json",
+    "a22_h1_package": "continuation_a22/H1_PACKAGE_FINAL.json",
+    "a22_hardware_probe": "continuation_a22/HARDWARE_PROBE.json",
+    "cuda_compiled_a16_historical": "continuation_a16/CUDA_COMPILED.json",
+    "a23_phase": "continuation_a23/phase.json",
+    "a23_sm70_reproducibility": "continuation_a23/SM70_REPRODUCIBILITY.json",
+    "a23_h1_package": "continuation_a23/H1_PACKAGE_FINAL.json",
+    "a23_sm70_rebuild_log": "../.runs/phase-a23-20261010/bundle-rebuild.stdout.log",
+    "a24_phase": "continuation_a24/phase.json",
+    "a24_launcher_provenance": "continuation_a24/LAUNCHER_PROVENANCE.json",
+    "a24_h1_package": "continuation_a24/H1_PACKAGE_FINAL.json",
+    "a24_launcher_refusal_receipt": "../.runs/phase-a24-20261010/launcher-mismatched-library.json",
+    "a24_format_red": "runs/phase-a24-final-20261010/python_format.log",
+    "a25_phase": "continuation_a25/phase.json",
+    "a25_environment_contract": "continuation_a25/ENVIRONMENT_CONTRACT.json",
+    "a25_shipped_artifact_reproducibility": "continuation_a25/SHIPPED_ARTIFACT_REPRODUCIBILITY.json",
+    "a25_scrubbed_gate": "runs/phase-a25-scrubbed-env-20261010/summary.json",
+    "a25_toolchain_pin_gate": "runs/phase-a25-toolchain-pin-20261010/summary.json",
+    "a26_phase": "continuation_a26/phase.json",
+    "a26_rust_mutations": "continuation_a26/RUST_MUTATIONS.json",
+    "a26_h1_package": "continuation_a26/H1_PACKAGE_FINAL.json",
+    "a26_mutation_red": "../.runs/phase-a26-20261010/fullsuite/SUMMARY.json",
+    "a26_mutation_green": "../.runs/phase-a26-20261010/after-fix/SUMMARY.json",
+    "a26_rustfmt_red": "runs/phase-a26-final-20261010/rustfmt.log",
+    "a27_phase": "continuation_a27/phase.json",
+    "a27_rust_mutations": "continuation_a27/RUST_MUTATIONS_EXTENDED.json",
+    "a27_h1_package": "continuation_a27/H1_PACKAGE_FINAL.json",
+    "a27_isolated_campaign": "../.runs/phase-a27-20261010/isolated/SUMMARY.json",
+    "a27_gap_closed": "../.runs/phase-a27-20261010/after-fix/SUMMARY.json",
+    "a28_phase": "continuation_a28/phase.json",
+    "a28_rust_mutations": "continuation_a28/RUST_MUTATIONS_COMPLETE.json",
+    "a28_h1_package": "continuation_a28/H1_PACKAGE_FINAL.json",
+    "a28_campaign_red": "../.runs/phase-a28-20261011/campaign/SUMMARY.json",
+    "a28_campaign_green": "../.runs/phase-a28-20261011/after-fix/SUMMARY.json",
+    "a29_phase": "continuation_a29/phase.json",
+    "a29_numerical_mutations": "continuation_a29/NUMERICAL_MUTATIONS.json",
+    "a29_h1_package": "continuation_a29/H1_PACKAGE_FINAL.json",
+    "a30_phase": "continuation_a30/phase.json",
+    "a30_foreign_architecture": "continuation_a30/FOREIGN_ARCHITECTURE.json",
+    "a30_aarch64_preflight_refusal": "continuation_a30/AARCH64_PREFLIGHT_REFUSAL.json",
+    "a30_aarch64_memfd_sealing": "continuation_a30/AARCH64_MEMFD_SEALING.json",
+    "a31_phase": "continuation_a31/phase.json",
+    "a31_agent_gateway_mutations": "continuation_a31/AGENT_GATEWAY_MUTATIONS.json",
+    "a31_h1_package": "continuation_a31/H1_PACKAGE_FINAL.json",
+    "a32_phase": "continuation_a32/phase.json",
+    "a32_h1_canary_mutations": "continuation_a32/H1_CANARY_MUTATIONS.json",
+    "a32_h1_package": "continuation_a32/H1_PACKAGE_FINAL.json",
+    "a33_phase": "continuation_a33/phase.json",
+    "a33_preflight_mutations": "continuation_a33/PREFLIGHT_MUTATIONS.json",
+    "a33_h1_package": "continuation_a33/H1_PACKAGE_FINAL.json",
+    "a34_phase": "continuation_a34/phase.json",
+    "a34_packager_mutations": "continuation_a34/PACKAGER_MUTATIONS.json",
+    "a34_h1_package": "continuation_a34/H1_PACKAGE_FINAL.json",
+    "a35_phase": "continuation_a35/phase.json",
+    "a35_adapter_mutations": "continuation_a35/ADAPTER_MUTATIONS.json",
+    "a35_h1_package": "continuation_a35/H1_PACKAGE_FINAL.json",
+    "a36_phase": "continuation_a36/phase.json",
+    "a36_oracle_tolerance": "continuation_a36/ORACLE_TOLERANCE.json",
+    "a36_h1_package": "continuation_a36/H1_PACKAGE_FINAL.json",
+    "a37_phase": "continuation_a37/phase.json",
+    "a37_oracle_exactness": "continuation_a37/ORACLE_EXACTNESS.json",
+    "a37_h1_package": "continuation_a37/H1_PACKAGE_FINAL.json",
+    "a38_phase": "continuation_a38/phase.json",
+    "a38_oracle_matrix": "continuation_a38/ORACLE_SENSITIVITY_MATRIX.json",
+    "a38_h1_package": "continuation_a38/H1_PACKAGE_FINAL.json",
+    "a39_phase": "continuation_a39/phase.json",
+    "a39_q07_classification": "continuation_a39/Q07_CAP_CLASSIFICATION.json",
+    "a39_h1_package": "continuation_a39/H1_PACKAGE_FINAL.json",
+    "a40_phase": "continuation_a40/phase.json",
+    "a40_guard_sweep": "continuation_a40/GUARD_SWEEP.json",
+    "a40_h1_package": "continuation_a40/H1_PACKAGE_FINAL.json",
+    "a41_phase": "continuation_a41/phase.json",
+    "a41_reason_sweep": "continuation_a41/REASON_SWEEP.json",
+    "a41_a40_gap_behaviour": "continuation_a41/A40_GAP_BEHAVIOUR.json",
+    "a41_h1_package": "continuation_a41/H1_PACKAGE_FINAL.json",
+    "a42_phase": "continuation_a42/phase.json",
+    "a42_c_validator_sweep": "continuation_a42/C_VALIDATOR_SWEEP.json",
+    "a42_h1_package": "continuation_a42/H1_PACKAGE_FINAL.json"
+  },
+  "not_run": [
+    "live LiteLLM model aliases/canaries",
+    "GPU kernels/capture",
+    "PCIe/P2P/RDMA/inter-PC",
+    "full real checkpoint/model inference",
+    "long-running model service",
+    "energy/performance benchmark"
+  ],
+  "remote_build_root": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c",
+  "remote_copy_scope": "complete handoff source and qualified CPU/SM70 evidence",
+  "gpu_accessed": false,
+  "live_llm_calls": true,
+  "pipeline_model": "fixed stage order, contiguous layers, additive costs",
+  "planner": "bounded heuristic, not global optimum",
+  "worker_model": "Codex root and native reviewers; exact model IDs not exposed by followup receipts",
+  "all_dependencies_vendored": false,
+  "prompt_compared_across_models": false,
+  "prior_registry_reaudited": false,
+  "continuation_source_manifest_sha256": "211b7dbc29121d6b381c6f6196c25d3d09710bb7f9f4246c25dbdb8e70f6df5a",
+  "continuation": "evidence/continuation_a51/phase.json",
+  "historical_delivery": "continuation_a123/DELIVERY.a4.json",
+  "independent_planner": {
+    "status": "PASS",
+    "evidence_level": "CPU_TESTED_ANALYTICAL",
+    "cases": 198,
+    "seed": 90210,
+    "max_abs_error": 0.0,
+    "atol": 2e-09,
+    "scope": "two equal-cost remote experts; asymmetric directed transfers; optional shared bus",
+    "sensitivity_control": "detected deliberate scalar corruption",
+    "gpu_claim": null,
+    "tolerance_now_tied_by_test": true
+  },
+  "native_agents": {
+    "contributors": [
+      "luna_compatibility",
+      "luna_moe_transport"
+    ],
+    "critic": "luna_sm70_research",
+    "effective_model_identity": "Not returned by current native collaboration API",
+    "descendants": 0,
+    "cost_usd": null,
+    "shared_weekly_used_percent": 18,
+    "gateway_get_calls": 0,
+    "gateway_post_calls": 0,
+    "caps_raised": false
+  },
+  "python_adapter_abi_tests": 519,
+  "python_total_tests": 133,
+  "checkpoint_crop": {
+    "status": "PASS",
+    "evidence_level": "CPU_TESTED_REAL_CHECKPOINT_CROP",
+    "source_model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+    "source_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "source_fixture_sha256": "4f0dba3f4186652571d2430f9fab9b382ddc3a392bc6d54b7054c364b8e2e2ce",
+    "export_sha256": "dc75ea43514f6c76d673027eaa16048f0eea06004410007d29c8fede21066074",
+    "exporter": "safetensors.torch save_file/load_file 0.6.2",
+    "prepack_reference": "unchanged donor _qpn_prepack executed with torch CPU",
+    "planes": 3,
+    "decoded_values": 12288,
+    "max_abs_error": 0.0,
+    "atol": 0.0,
+    "rtol": 0.0,
+    "scope": "cropped expert0 layer0, not full model inference",
+    "cuda_executed": false,
+    "tolerance_now_tied_by_test": true
+  },
+  "cuda_compilation": {
+    "status": "CUDA_COMPILED",
+    "architecture": "sm_70",
+    "device_executed": false,
+    "hardware_qualification": "pending",
+    "torch_extension_qualified": false,
+    "cpu_validator": "51 assertions ASan/UBSan PASS",
+    "link_no_undefined": true,
+    "libcudart_dependency": "libcudart.so.12",
+    "toolchain": "CUDA 12.8.93 / official GCC14.3.0-14ubuntu1 (g++-14 14.3.0), gcc 15.2.0 for the C steps; six declaration-only noexcept compatibility edits",
+    "download_bytes": 136379112,
+    "donor": "b1a2181702e609dc92591343e46c63d1324ade43",
+    "negative_arch_test": "sm_80 rejected by the explicit SM70 #error guard: nvcc exit 1, no object produced (replayed in A23)",
+    "sass_optional": "failed: system nvdisasm rejects SM70; ffi_sass.log retained",
+    "hashes": {
+      "cuda/qpn2_moe_ffi.h": "4d9e25a854e5c2c23968ffe325d4e13fe0ffd735e72b38a1f6cb2ecd8474798a",
+      "cuda/qpn2_moe_core.cuh": "3d9b7c3569222d7517abc08739b6c710546dbe289d0d18a70cb5903a3f8ee6be",
+      "cuda/qpn2_moe_sm70.cu": "b9e33e779a6aaa603c47c9e402c8ad14efb1854fa30eba4ac000e3a07a158aef",
+      "cuda/qpn2_moe_validate.c": "ffa36154b51148284e2fa5a775aa9cf6ec28c424cac22aca9cd1832efee6be03",
+      "tests/qpn2_moe_validate.c": "4de9883ab56174a5e4edb206429432eacbca1c7f7d7158f36729624ad9feff4d",
+      "cuda/build_sm70.sh": "f6ae597494af868575ffceb0787f81eabb48a0839e588a26e58694c4f855a60b",
+      "build/qpn2_moe_sm70.o": "aab47ac46f6fd4da11774de5b9800e17a4cb67631335021c69f899f2a063a606",
+      "build/libvf_qpn2_moe_sm70.a": "594c794012fa999d0e86db69b340486759f54962462f0c8f46c981ba849468aa",
+      "build/libvf_qpn2_moe_sm70.so": "85a49f5018d6284187a6be06dafe0d48e1bab5cfd6ef6c48185ca5f87cc5be9e"
+    },
+    "integration_revision": "A16 parameterized recipe; unchanged kernel/C ABI source",
+    "compiled_commands": [
+      [
+        "bash",
+        "cuda/build_sm70.sh",
+        "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c"
+      ]
+    ],
+    "canonical_proof": "h1-sm70-recompile.log",
+    "compile_cwd": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.worktrees/a16-cuda",
+    "reused_unchanged_in_a17": true,
+    "reproducible": true,
+    "receipt": "continuation_a23/CUDA_COMPILED.json",
+    "reproducibility_evidence": "continuation_a23/SM70_REPRODUCIBILITY.json",
+    "independent_builds_compared": 5,
+    "nondeterminism_before_a23": "nvcc embedded tmpxft_<pid-hex>_..._qpn2_moe_sm70.cudafe1.cpp; two builds differed in exactly 2 bytes",
+    "device_code_identical_to_a16": true,
+    "recipient_can_rebuild_shipped_library": true
+  },
+  "gpu_access_scope": "read-only PC1 nvidia-smi inventory; no CUDA execution",
+  "owned_resident_buffers": {
+    "status": "PASS",
+    "evidence_level": "CPU_COMPRESSED_RESIDENT_BUFFERS_ONLY",
+    "source_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "sample_sha256": "4f0dba3f4186652571d2430f9fab9b382ddc3a392bc6d54b7054c364b8e2e2ce",
+    "scope": "synthetic IDs10/99 carrying real expert0 crops; up factor for ID10 doubled as declared sensitivity control; not full model",
+    "reference": "unchanged upstream Torch _qpn_prepack, compressed safetensors-derived crop",
+    "cases": [
+      {
+        "name": "reversed_sparse_order",
+        "payload_bytes": 13872,
+        "exact_byte_and_f32_bits": true
+      },
+      {
+        "name": "forward_sparse_order",
+        "payload_bytes": 13872,
+        "exact_byte_and_f32_bits": true
+      }
+    ],
+    "packed_bytes_compared": 27648,
+    "f32_factors_compared": 24,
+    "roundtrip_projections": 12,
+    "binding_negative_cases": 6,
+    "empty_rank": true,
+    "float_weights_materialized": false,
+    "cuda_executed": false,
+    "performance_claim": null
+  },
+  "launch_metadata": {
+    "status": "PASS",
+    "evidence_level": "CPU_FFI_LAUNCH_METADATA_ONLY",
+    "cases": 66,
+    "ffi_validator_calls": 521,
+    "negative_cli_cases": 455,
+    "semantic_mapping_sensitivity": true,
+    "abi_size": 208,
+    "validator_sha256": "ca18d3461b7a8ac1e0a7a9c9f44929507ad9acdb9d1497185665b083098b95c7",
+    "real_crop_source_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "scope": "synthetic routes/IDs with real expert0 crops; opaque addresses checked by CPU C validator only",
+    "cuda_executed": false,
+    "device_addresses_verified": false,
+    "performance_claim": null
+  },
+  "completion_output": {
+    "status": "PASS",
+    "evidence_level": "CPU_COMPACT_OUTPUT_RECEIPTS_ONLY",
+    "finite_half_encodings_bit_exact": 63488,
+    "nonfinite_encoding_count": 2048,
+    "nonfinite_scope": "all 2048 rejected in Rust exhaustive test; five packet representatives here",
+    "negative_cli_cases": 24,
+    "collector_receipts": 6,
+    "collector_max_abs_error": 0.0,
+    "signed_zero_preserved": true,
+    "double_weight_sensitivity": true,
+    "empty_rank": true,
+    "source_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "cuda_executed": false,
+    "scope": "real crop retained compressed; activations are explicit synthetic FP16 outputs, no GEMM/kernel simulated",
+    "performance_claim": null
+  },
+  "complete_checkpoint_expert": {
+    "status": "PASS",
+    "native_import": {
+      "full_export_io_bytes": 1770932,
+      "sparse_file_bytes": 270206484,
+      "sparse_io_bytes": 1771028,
+      "unselected_payload_bytes_not_read": 268435456,
+      "exact_stack_equal": true,
+      "no_python_weight_lists_at_native_boundary": true
+    },
+    "evidence_level": "CPU_COMPLETE_REAL_EXPERT_COMPRESSED_ONLY",
+    "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+    "revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "license": "Apache-2.0",
+    "layer": 0,
+    "expert": 0,
+    "hidden": 2048,
+    "intermediate": 512,
+    "payload_bytes": 1769856,
+    "comparisons": {
+      "codes13": {
+        "bytes": 1048576,
+        "sha256": "b136151c8de4793fdb8c806eee6049dcbad534a18a437115e30777bd8c56b872",
+        "equal": true
+      },
+      "scales13": {
+        "bytes": 131072,
+        "sha256": "ba361a090fce95ae9c1d95c37f7435ae7adff4d48c36313c3e68dffd558dec39",
+        "equal": true
+      },
+      "codes2": {
+        "bytes": 524288,
+        "sha256": "a5e2976ed8737e65301e9800601f0c25af3ca5c6120f8869c716cd1e89f53805",
+        "equal": true
+      },
+      "scales2": {
+        "bytes": 65536,
+        "sha256": "c38682114220d0465012459120a5a6441c3b4fe908ae06d25c4430a1aac0d696",
+        "equal": true
+      },
+      "gscales13": {
+        "elements": 32,
+        "bytes": 128,
+        "sha256": "5f7342cc9eac825d5e43926a8a23478fd7a11fcc5f1c0d482f6a969ab1aa8478",
+        "equal": true
+      },
+      "gscales2": {
+        "elements": 64,
+        "bytes": 256,
+        "sha256": "3c3fb2dbf2326554184e354aa74026e7d0b2aec35ab7f15f3d0c16b72960bc05",
+        "equal": true
+      }
+    },
+    "source_safetensors_sha256": "7ede48f5bb49caa171eaf03c691b8d78d11e8644c465e4d008f8bcedf52c1c3a",
+    "cropped_prefixes_exact": true,
+    "global_factor_convention": "direct F32 weight_scale_2; no reciprocal",
+    "source_endian": "little",
+    "dequantized_weight_matrices": 0,
+    "cuda_executed": false,
+    "full_model_inference": false,
+    "performance_claim": null
+  },
+  "canary_integration": {
+    "status": "CPU_TESTED_HARDWARE_PENDING",
+    "tests": 13,
+    "exclusive_persistent_receipt": true,
+    "no_implicit_replay": true,
+    "real_process_claim_and_crash_tests": true,
+    "rust_plans_and_strict_collector": true,
+    "hardware_executed": false,
+    "exactly_once": false
+  },
+  "native_checkpoint_import": {
+    "full_export_io_bytes": 1770932,
+    "sparse_file_bytes": 270206484,
+    "sparse_io_bytes": 1771028,
+    "unselected_payload_bytes_not_read": 268435456,
+    "exact_stack_equal": true,
+    "no_python_weight_lists_at_native_boundary": true
+  },
+  "rust_default_core_unique_tests": 239,
+  "rust_c_abi_integration": {
+    "version": 1,
+    "size": 208,
+    "alignment": 8,
+    "fields": 31,
+    "offset_size_alignment_checked": "independent native C probe plus Rust compile-time assertions",
+    "statuses": [
+      0,
+      -1,
+      -2,
+      -3,
+      -4,
+      -5,
+      -6,
+      -7,
+      -8
+    ]
+  },
+  "audit_corrections": {
+    "schema_version": 1,
+    "utc": "2026-10-09T01:40:44.080241+00:00",
+    "scope": "A13 CPU corrections and independent critiques; H1-H3 OPEN",
+    "status": "COMPLETE_CPU",
+    "source_code_manifest_sha256": "7e603c252077ef55e620d871c7dbfd88514b45867478d6567b4618013ec9c190",
+    "source_files_changed": [
+      "src/pipeline.rs",
+      "src/planner.rs",
+      "tests/a13_pipeline.rs",
+      "tests/a13_planner.rs",
+      "adapters/skinny_moe.py",
+      "tests/adapter/test_skinny_adapter.py",
+      "scripts/a13_crosscheck.py",
+      "scripts/verify.py"
+    ],
+    "final_gate": "evidence/runs/phase-a13-qualified-20261008/summary.json",
+    "default_rust_tests": 197,
+    "workspace_c_abi_tests": 211,
+    "python_tests": 101,
+    "independent_a13_cases": 473,
+    "hardware_executed": false,
+    "claude_model": "claude-sonnet-5-5",
+    "claude_effort": "high",
+    "claude_accounting_usd": 4.4839834,
+    "actual_billing_usd": null,
+    "native_cost_usd": null,
+    "native_used_percent": 81,
+    "active_workers": [],
+    "findings_resolved": [
+      "C1",
+      "C2",
+      "C3",
+      "review-F1-CPU-mask",
+      "review-F3-test-sensitivity"
+    ],
+    "limitations": [
+      "GPU scratch/RSS not measured",
+      "legacy whole-stage-profile finite domain preserved",
+      "out job order lacks a separate system ablation",
+      "service/multi-GPU/RDMA/energy not qualified"
+    ]
+  },
+  "latest_cpu_gate": "runs/phase-a21-final5-20261010/summary.json",
+  "deep_audit": {
+    "status": "COMPLETE_AUDIT_FINDINGS_RESOLVED_CPU",
+    "utc": "2026-10-09T22:28:40.110695+00:00",
+    "source_code_manifest_sha256": "7e603c252077ef55e620d871c7dbfd88514b45867478d6567b4618013ec9c190",
+    "report": "../.runs/deep-audit-20261009/AUDIT.md",
+    "research": "../.runs/deep-audit-20261009/RESEARCH.md",
+    "findings_open": [],
+    "production_changed": false,
+    "gpu_executed": false,
+    "native_luna_agents": 3,
+    "native_luna_cost_usd": null,
+    "native_usage_observed_percent": [
+      1,
+      2
+    ],
+    "usage_delta_exclusive_attribution": false,
+    "gateway_generation_calls": 0,
+    "claude_calls": 0,
+    "verdict": "CPU suite PASS; engineering readiness PARTIAL",
+    "historical_findings": [
+      "D01",
+      "D02",
+      "D03",
+      "D04",
+      "D05",
+      "D06"
+    ],
+    "findings_resolved_by": "A14"
+  },
+  "a14_a15": {
+    "schema_version": 1,
+    "status": "CPU_FULL_PASS",
+    "utc": "2026-10-10T00:04:41.121896+00:00",
+    "owner": "root",
+    "source_code_manifest_sha256": "4687b7511092c25891a653d038f114e36819c1f37444acf186f26d924b87f0ff",
+    "gate": "evidence/runs/phase-a1415-final-20261009/summary.json",
+    "steps": 26,
+    "modified_files": [
+      "adapters/skinny_moe.py",
+      "scripts/hardware_canary.py",
+      "scripts/verify.py",
+      "src/main.rs",
+      "src/quant.rs",
+      "src/launch.rs",
+      "src/topology.rs",
+      "src/planner.rs",
+      "src/resident.rs",
+      "src/checkpoint.rs",
+      "tests/adapter/test_skinny_adapter.py",
+      "tests/adapter/test_a14_boundaries.py",
+      "tests/a14_planner.rs",
+      "tests/a14_scale_domain.rs",
+      "tests/a15_inspection.rs",
+      "scripts/a14_crosscheck.py",
+      "scripts/inspection_crosscheck.py"
+    ],
+    "findings_closed": [
+      "D01",
+      "D02",
+      "D03",
+      "D04",
+      "D05",
+      "D06"
+    ],
+    "rust_tests": {
+      "rust_debug": 211,
+      "rust_release": 211,
+      "c_abi_rust_debug": 225,
+      "c_abi_rust_release": 225
+    },
+    "python_unique_tests": 109,
+    "numerical_oracle": {
+      "cases": 2131,
+      "acceptance": "exact",
+      "scope": "CPU_SCALE_ADMISSION_ONLY"
+    },
+    "inspection": {
+      "summary_bytes": 734,
+      "baseline_rss_median_kib": 114864,
+      "streaming_rss_median_kib": 7792,
+      "summary_rss_median_kib": 7916,
+      "snapshot_bytes": 22308553,
+      "snapshot_sha256": "2599d26d52eaf1ca6758492fb35154c441a643dac49b1256c97b9a8f52382bb4",
+      "scope": "three sequential GNU-time process runs, one real expert; not a peak-loading bound"
+    },
+    "agents": {
+      "native_luna": 3,
+      "descendants": 0,
+      "weekly_used_percent_observed": [
+        5,
+        6
+      ],
+      "delta_exclusive_attribution": false,
+      "cost_usd": null,
+      "paid_gateway_generation_calls": 0,
+      "claude_calls": 0,
+      "caps_raised": false
+    },
+    "reviews": [
+      "REVIEW_A14.json",
+      "REVIEW_A15.json"
+    ],
+    "gpu_executed": false,
+    "rdma_tested": false,
+    "open_invariants": [
+      "H1 kernel/layer numerical oracle and actual CUDA memory/lifetime",
+      "H2 actual PCIe and inter-PC qualified paths and EP vs TP+PP",
+      "H3 service long sessions latency/energy",
+      "SM70 arithmetic extension beyond admitted half-scale domain requires independent GPU oracle",
+      "Python dynamic routing and reduction scratch/cost not GPU-qualified",
+      "Inspector still loads and packs selected compressed planes; RSS measured for one expert only"
+    ]
+  },
+  "qualification_runner_live_llm_calls": false,
+  "hardware_status": "H1/H2/H3_PENDING",
+  "h1_package": {
+    "archive": "delivery/VoltaFabric-H1-A51-R1-20261012.tar.gz",
+    "archive_sha256": "73f621a1e30fb7809bd1b54c0ae62713e3ce7cdda159ff9d81402afadd86d6a4",
+    "status": "H1_PACKAGE_VERIFIED_NO_GPU",
+    "bundle_files": 217,
+    "relocated_cpu_gate": "CPU_FULL_PASS 30/30",
+    "receipt": "continuation_a51/H1_PACKAGE_FINAL.json"
+  },
+  "active_native_agents": [],
+  "gateway_generation_calls_this_phase": 0,
+  "usd_agent_cost_this_phase": null,
+  "prior_delivery_snapshot": "../.runs/phase-a20-20261010/baseline/evidence/DELIVERY.json",
+  "historical_cuda_compilation": {
+    "status": "CUDA_COMPILED",
+    "architecture": "sm_70",
+    "device_executed": false,
+    "hardware_qualification": "pending",
+    "torch_extension_qualified": false,
+    "cpu_validator": "51 assertions ASan/UBSan PASS",
+    "link_no_undefined": true,
+    "libcudart_dependency": "libcudart.so.12",
+    "toolchain": "CUDA 12.8.93 / official GCC14.3.0-14ubuntu1; six declaration-only noexcept compatibility edits",
+    "download_bytes": 136379112,
+    "donor": "b1a2181702e609dc92591343e46c63d1324ade43",
+    "negative_arch_test": "sm_80 rejected by explicit SM70 guard",
+    "sass_optional": "failed: system nvdisasm rejects SM70; ffi_sass.log retained",
+    "hashes": {
+      "cuda/qpn2_moe_ffi.h": "4d9e25a854e5c2c23968ffe325d4e13fe0ffd735e72b38a1f6cb2ecd8474798a",
+      "cuda/qpn2_moe_core.cuh": "3d9b7c3569222d7517abc08739b6c710546dbe289d0d18a70cb5903a3f8ee6be",
+      "cuda/qpn2_moe_sm70.cu": "b9e33e779a6aaa603c47c9e402c8ad14efb1854fa30eba4ac000e3a07a158aef",
+      "cuda/qpn2_moe_validate.c": "ffa36154b51148284e2fa5a775aa9cf6ec28c424cac22aca9cd1832efee6be03",
+      "tests/qpn2_moe_validate.c": "4de9883ab56174a5e4edb206429432eacbca1c7f7d7158f36729624ad9feff4d",
+      "cuda/build_sm70.sh": "4d643f79e94e84b2ab9974518c5b41b7710fb06acc0197240563dddf3b5f46e2",
+      "build/qpn2_moe_sm70.o": "508c8310d927780f4c33d92a1aebc82bf6fb17043e41b32de1b9be27485e7732",
+      "build/libvf_qpn2_moe_sm70.a": "ad1d0d22b3f337130c26dc56bf36fca08dfb6bebd36fc6c52a98a19ba1c3a4ac",
+      "build/libvf_qpn2_moe_sm70.so": "3cfaa80ec99d66cffe5cc876916bd37dd1776326c157c18be98511777f0ce911"
+    },
+    "integration_revision": "canonical source after non-overlap/address-wrap correction",
+    "compiled_commands": [
+      "bash cuda/build_sm70.sh /run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c"
+    ],
+    "canonical_proof": "final-ffi-overlap-sm70.log"
+  },
+  "historical_proofs_before_a17": {
+    "final_rust_gate": "runs/phase-a16-v4-final-20261009/summary.json",
+    "rust_debug": "runs/phase-native-ffi-hardened-20261008/rust_debug.log",
+    "rust_release": "runs/phase-native-ffi-hardened-20261008/rust_release.log",
+    "crosscheck": "runs/phase-native-ffi-hardened-20261008/crosscheck.json",
+    "python_final": "runs/phase-native-ffi-hardened-20261008/python_agents.log",
+    "python_reproducer": "runs/phase-a4-baseline-20261008/summary.json",
+    "inherited_rerun": "current/inherited_numpy_rerun.log",
+    "independent_planner": "runs/phase-native-ffi-hardened-20261008/planner_crosscheck.json",
+    "quantized_adapter": "runs/phase-native-ffi-hardened-20261008/quantized_adapter.log",
+    "checkpoint": "runs/phase-native-ffi-hardened-20261008/checkpoint_crosscheck.json",
+    "ffi_cpu": "runs/phase-native-ffi-hardened-20261008/ffi_cpu_validation.log",
+    "cuda_compiled": "continuation_a123/cuda/CUDA_COMPILED.integrated.json",
+    "review": "continuation_a123/independent-review.txt",
+    "a56_cpu_gate": "runs/phase-a56-final-20261008/summary.json",
+    "a56_phase": "continuation_a56/phase.json",
+    "resident": "runs/phase-native-ffi-hardened-20261008/resident_crosscheck.json",
+    "launch": "runs/phase-native-ffi-hardened-20261008/launch_crosscheck.json",
+    "a7_phase": "continuation_a7/phase.json",
+    "completion": "runs/phase-native-ffi-hardened-20261008/completion_crosscheck.json",
+    "a8_phase": "continuation_a8/phase.json",
+    "a910_phase": "continuation_a910/phase.json",
+    "full_expert": "runs/phase-native-ffi-hardened-20261008/full_expert_crosscheck.json",
+    "a11_phase": "continuation_a11/phase.json",
+    "a12_phase": "continuation_a12/phase.json",
+    "c_abi_debug": "runs/phase-native-ffi-hardened-20261008/c_abi_rust_debug.log",
+    "c_abi_release": "runs/phase-native-ffi-hardened-20261008/c_abi_rust_release.log",
+    "c_abi_review": "continuation_a12/review-ffi.txt",
+    "a16_phase": "continuation_a16/phase.json",
+    "h1_package": "continuation_a16/H1_PACKAGE.json",
+    "h1_relocated_cpu": "continuation_a16/H1_RELOCATED_CPU.json"
+  },
+  "state": "FIXES_CPU_VERIFIED_H1_PACKAGE_VERIFIED_NO_GPU_H1_H2_H3_PENDING",
+  "latest_phase": "A21_SEALED_MEMFD_CPU_VERIFIED_H1_PACKAGE_NO_GPU",
+  "a20": {
+    "schema_version": 1,
+    "utc": "2026-10-10T07:03:30.073887+00:00",
+    "status": "FIXES_CPU_VERIFIED_H1_PACKAGE_VERIFIED_NO_GPU",
+    "owner": "root",
+    "source_code_manifest_sha256": "914bb38ae303f20c5e74581f68acaa50ca4f5a429ffa5ba9010c89411a269c77",
+    "final_gate": "evidence/runs/phase-a20-final2-20261010/summary.json",
+    "steps": 30,
+    "source_files": 169,
+    "modified_files": [
+      "scripts/full_expert_canary.py",
+      "scripts/hardware_canary.py",
+      "scripts/package_h1.py",
+      "scripts/verify.py",
+      "tests/adapter/test_a20_full_canary.py",
+      "handoff/hardware_canary.sh",
+      "docs/H1_FULL_EXPERT.md"
+    ],
+    "counts": {
+      "rust_debug": 239,
+      "rust_release": 239,
+      "c_abi_rust_debug": 253,
+      "c_abi_rust_release": 253,
+      "python_agents": 45,
+      "quantized_adapter": 120,
+      "ffi_assertions": "CPU_VALIDATE checks=51 PASS (no CUDA runtime/device calls)"
+    },
+    "numerical_crosscheck": {
+      "status": "PASS",
+      "cases": 12192,
+      "finite_exact_matches": 9408,
+      "expected_nonfinite_rejections": 2784,
+      "factors": [
+        3.2152449421118945e-05,
+        3.233410097891465e-05,
+        1.401298464324817e-45,
+        3.0517578125e-05,
+        4.0,
+        0.5
+      ],
+      "zero_sign_ignored": true,
+      "independent_script_sha256": "6b8bc4651ff7fb1feecd2b629727c831aa2fcc4f6d5331631d883ce4dc5e4f22",
+      "production_script_sha256": "113ffeb291fc785bfaed2fa9bdf1c1cf6c8f09f67be9ed46b0d03a673fa8d8cc",
+      "scope": "CPU_IEEE_HALF_STAGES_ONLY_NO_GPU"
+    },
+    "real_probe_outputs": 18432,
+    "probes": {
+      "gate_proj": {
+        "n": 512,
+        "k": 2048,
+        "probes": [
+          [
+            0,
+            0.5
+          ],
+          [
+            17,
+            -0.5
+          ],
+          [
+            513,
+            0.5
+          ],
+          [
+            1025,
+            -0.5
+          ],
+          [
+            1537,
+            0.5
+          ],
+          [
+            2047,
+            -0.5
+          ]
+        ],
+        "subnormal_weights": 0,
+        "subnormal_outputs": 0,
+        "subnormal_fp4_inputs": 221
+      },
+      "up_proj": {
+        "n": 512,
+        "k": 2048,
+        "probes": [
+          [
+            0,
+            0.5
+          ],
+          [
+            17,
+            -0.5
+          ],
+          [
+            513,
+            0.5
+          ],
+          [
+            1025,
+            -0.5
+          ],
+          [
+            1537,
+            0.5
+          ],
+          [
+            2047,
+            -0.5
+          ]
+        ],
+        "subnormal_weights": 0,
+        "subnormal_outputs": 0,
+        "subnormal_fp4_inputs": 188
+      },
+      "down_proj": {
+        "n": 2048,
+        "k": 512,
+        "probes": [
+          [
+            0,
+            0.5
+          ],
+          [
+            17,
+            -0.5
+          ],
+          [
+            129,
+            0.5
+          ],
+          [
+            257,
+            -0.5
+          ],
+          [
+            385,
+            0.5
+          ],
+          [
+            511,
+            -0.5
+          ]
+        ],
+        "subnormal_weights": 0,
+        "subnormal_outputs": 0,
+        "subnormal_fp4_inputs": 629
+      }
+    },
+    "h1_package": {
+      "status": "H1_PACKAGE_VERIFIED_NO_GPU",
+      "archive": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/delivery/VoltaFabric-H1-A20-R2-20261010.tar.gz",
+      "archive_sha256": "5e3c225bb6c2f553dbf2ae2be3fd7f7f3aa599016d92fc9d9c078a9b88fd25ef",
+      "archive_bytes": 2658481,
+      "source_manifest_sha256": "7e3d377f79876ee09c016657e20cd954934beafbe9fe4d2d8e7b622c9cf402cd",
+      "code_manifest_sha256": "914bb38ae303f20c5e74581f68acaa50ca4f5a429ffa5ba9010c89411a269c77",
+      "source_files": 182,
+      "extracted_bundle": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/phase-a20-20261010/H1 final archive relocated with spaces/VoltaFabric-H1-A20-R2-20261010",
+      "static_preflight": "STATIC_PREFLIGHT_PASS_NO_GPU",
+      "relocated_cpu": "CPU_FULL_PASS30_SAME_CODE_AND_BINARY",
+      "host_requirement": "Linux x86_64 glibc>=2.39; native rebuild for other architecture/olderlibc",
+      "gpu_executed": false,
+      "h1_pending": true,
+      "artifacts_count": 3,
+      "receipt_correction": "Original source_files field counted the three binary artifacts; original receipt retained under the run directory."
+    },
+    "mutants": [
+      {
+        "name": "snapshot",
+        "argv": [
+          "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.tools/adapter-cpu/bin/python",
+          "-m",
+          "unittest",
+          "tests.adapter.test_a20_full_canary.FullExpertTests.test_changed_tensor_file_or_static_identity_never_calls_provider",
+          "-v"
+        ],
+        "cwd": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/phase-a20-20261010/mutants-final/snapshot",
+        "exit_code": 1,
+        "expected": "ASSERTION_FAILURE",
+        "observed": "ASSERTION_FAILURE",
+        "script_sha256": "0df64242f8c60d033a03939bddbb13b0dc5ff2b414189c380160f8d9819ff4f5",
+        "baseline_script_sha256": "113ffeb291fc785bfaed2fa9bdf1c1cf6c8f09f67be9ed46b0d03a673fa8d8cc"
+      },
+      {
+        "name": "seam",
+        "argv": [
+          "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.tools/adapter-cpu/bin/python",
+          "-m",
+          "unittest",
+          "tests.adapter.test_a20_full_canary.FullExpertTests.test_real_three_projections_use_exact_packed_buffers_and_staged_native_reference",
+          "-v"
+        ],
+        "cwd": "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/phase-a20-20261010/mutants-final/seam",
+        "exit_code": 1,
+        "expected": "ASSERTION_FAILURE",
+        "observed": "ASSERTION_FAILURE",
+        "script_sha256": "13a22891c9f7d8936dcf11a171d45d010007ebf97d2bc7a7d191a51c3669726a",
+        "baseline_script_sha256": "113ffeb291fc785bfaed2fa9bdf1c1cf6c8f09f67be9ed46b0d03a673fa8d8cc"
+      }
+    ],
+    "agents": {
+      "native_distinct_workers": 2,
+      "descendants": 0,
+      "requested_family": "Luna",
+      "effective_model_ids_not_returned": true,
+      "cost_usd": null,
+      "shared_weekly_usage_percent_observed": [
+        26,
+        28
+      ],
+      "exclusive_attribution": false,
+      "project_financial_budget_verified": false,
+      "gateway_gets": 0,
+      "gateway_posts": 0,
+      "claude_calls": 0,
+      "caps_raised": false
+    },
+    "hardware_executed": false,
+    "rdma_tested": false,
+    "performance_measured": false,
+    "dependencies_changed": false,
+    "open_invariants": [
+      "V100 numeric/kernel/layer/memory/synchronization including biased FP4 subnormal behavior",
+      "Full model admission/accuracy and useful service coverage",
+      "H2 actual communication topology and TP+PP vs EP vs hierarchical placement",
+      "H3 long session latency/concurrency/energy",
+      "Python tensors/files must be quiescent through launch; fingerprint is not concurrent immutability"
+    ],
+    "historical_a20_package": "Initial A20 directory retained before biased-subnormal reporting correction; A20-R2 is final"
+  },
+  "a21": {
+    "schema_version": 1,
+    "utc": "2026-10-10T11:15:40+00:00",
+    "status": "FIXES_CPU_VERIFIED_H1_PACKAGE_VERIFIED_NO_GPU",
+    "source_code_manifest": "evidence/continuation_a21/SOURCE_CODE_SHA256SUMS_FINAL",
+    "source_code_manifest_sha256": "47f3e9636d44edb5e0472e2a8423de32df9d267d2ba3a574c555185f1f1ca4bb",
+    "source_files": 169,
+    "final_gate": "evidence/runs/phase-a21-final5-20261010/summary.json",
+    "steps": 30,
+    "all_steps_exit_0": true,
+    "changed_files": [
+      "scripts/full_expert_canary.py",
+      "scripts/hardware_canary.py",
+      "tests/adapter/test_a20_full_canary.py",
+      "docs/H1_FULL_EXPERT.md"
+    ],
+    "focused_test_count": 12,
+    "independent_review": "evidence/continuation_a21/REVIEW.json",
+    "agent_cost_usd": null,
+    "gateway_calls": 0,
+    "hardware_executed": false,
+    "rdma_tested": false,
+    "cuda_compiled_not_executed": true,
+    "relocated_cpu_gate": ".runs/phase-a21-final5-20261010/H1 staged archive relocated with spaces/VoltaFabric-H1-A21-R1-20261010/source/evidence/runs/phase-a21-relocated-final5-20261010/summary.json",
+    "relocated_cpu_status": "CPU_FULL_PASS",
+    "relocated_static_preflight": ".runs/phase-a21-final5-20261010/h1-preflight-a21-relocated.json",
+    "h1_package": {
+      "status": "H1_PACKAGE_VERIFIED_NO_GPU",
+      "bundle_directory": "delivery/VoltaFabric-H1-A21-R1-20261010",
+      "archive": "delivery/VoltaFabric-H1-A21-R1-20261010.tar.gz",
+      "archive_sha256": "b0374ead9d185fe52c2a4ea1bc8e096f0a48bfaeb1ad161316c332541dd096d7",
+      "archive_bytes": 2729107,
+      "package_directory_preflight": "STATIC_PREFLIGHT_PASS_NO_GPU",
+      "relocated_archive_preflight": "STATIC_PREFLIGHT_PASS_NO_GPU",
+      "relocated_full_cpu": "CPU_FULL_PASS",
+      "relocated_steps": 30,
+      "binary_sha256": "b207151ff7db17fa310c52e68d01250726ae8fbe05cc19d3fd90b42192ab03fa",
+      "binary_bytes": 2509464,
+      "sm70_library_sha256": "19e3e78fe97ec7dc87b3f277accafe29e6e32fc20464d9126354f6cb4d3b4885",
+      "cuda_proof": "evidence/continuation_a16/CUDA_COMPILED.json",
+      "cuda_proof_source_match": true,
+      "cuda_executed": false,
+      "gpu_h1_pending": true,
+      "host": "Linux x86_64 glibc 2.43",
+      "relocation_path": "H1 staged archive relocated with spaces/VoltaFabric-H1-A21-R1-20261010",
+      "bundle_files": 194,
+      "bundle_uncompressed_bytes": 6839080,
+      "reconciled_attempts": [
+        {
+          "operation_id": "de4f7581-2ccb-4c07-9f0f-20261010a043",
+          "exit_code": 1,
+          "result": "Rejected mismatched continuation_a123 CUDA proof; builder exited before creating output."
+        },
+        {
+          "operation_id": "de4f7581-2ccb-4c07-9f0f-20261010a047",
+          "exit_code": 0,
+          "result": "A16 CUDA_COMPILED source receipt and exactly matching 19e3e78... library reused from verified A20 bundle."
+        }
+      ],
+      "final_archive_preflight": "STATIC_PREFLIGHT_PASS_NO_GPU",
+      "final_archive_relocated_cpu": "CPU_FULL_PASS",
+      "final_archive_relocated_steps": 30,
+      "receipt": "evidence/continuation_a21/H1_PACKAGE_FINAL.json"
+    },
+    "package_receipt": "evidence/continuation_a21/H1_PACKAGE_FINAL.json",
+    "mutation": "evidence/continuation_a21/A21_MUTATION.json",
+    "process_inspection": "evidence/continuation_a21/PROCESS_INSPECTION.json"
+  },
+  "environment_contract": {
+    "status": "MINIMAL_AND_SUFFICIENT_A25",
+    "claim": "Both documented commands reach their pass state under env -i with only PATH, RUSTUP_HOME, CARGO_HOME and CARGO_TARGET_DIR",
+    "scrubbed_gate": "runs/phase-a25-scrubbed-env-20261010/summary.json",
+    "without_rustup_toolchain": "runs/phase-a25-toolchain-pin-20261010/summary.json",
+    "toolchain_pin_self_enforcing": "rust-toolchain.toml overrides the selection to 1.90.0; RUSTUP_TOOLCHAIN is redundant",
+    "temporaries": "TMPDIR when exported, otherwise evidence/adapter-temp; never /tmp",
+    "red": "runs/phase-a22-baseline-20261010/summary.json",
+    "evidence": "continuation_a25/ENVIRONMENT_CONTRACT.json"
+  },
+  "hardware_probe": {
+    "host": "pc1",
+    "sm70_device_present": false,
+    "nvidia_pci_devices": [
+      "GB202 GeForce RTX 5090"
+    ],
+    "nvml_state": "userspace 595.99.02 vs kernel module 595.91.07, nvidia-smi fails",
+    "evidence": "continuation_a22/HARDWARE_PROBE.json",
+    "settings_modified": false
+  },
+  "previous_phase_delivery": "continuation_a37/DELIVERY.md",
+  "test_counts_a22": {
+    "measured_in": "runs/phase-a22-final-20261010",
+    "python_agents_runner": 45,
+    "python_adapter_discovery": 125,
+    "python_adapter_discovery_before_a22": 123,
+    "added_by_a22": 2,
+    "rust_debug_reported": 239,
+    "note": "rust_unique_tests, python_adapter_abi_tests and python_total_tests above are the aggregates recorded by earlier phases and were not recomputed here."
+  },
+  "cuda_compilation_a16_historical": {
+    "receipt": "continuation_a16/CUDA_COMPILED.json",
+    "library_sha256": "19e3e78fe97ec7dc87b3f277accafe29e6e32fc20464d9126354f6cb4d3b4885",
+    "preserved": true,
+    "note": "Carried by every H1 package from A16 to A22; identical device code to the A23 library."
+  },
+  "test_counts_a23": {
+    "measured_in": "runs/phase-a23-final-20261010",
+    "python_agents_runner": 45,
+    "python_adapter_discovery": 125,
+    "note": "unchanged from A22; A23 touched no test file"
+  },
+  "h1_launcher_contract": {
+    "status": "PROVENANCE_GUARDED_A24",
+    "guard": "scripts/hardware_canary.py refuses, before any CUDA action, an SM70 library that no CUDA_COMPILED sm_70 non-executed receipt qualifies",
+    "receipt_fields_added": [
+      "cuda_proof",
+      "cuda_proof_sha256"
+    ],
+    "canonical_defaults": {
+      "VF_H1_LIBRARY": "build/libvf_qpn2_moe_sm70.so (85a49f50...)",
+      "VF_H1_CUDA_PROOF": "evidence/continuation_a23/CUDA_COMPILED.json"
+    },
+    "bundle_defaults": "run_h1.sh exports the bundle lib/ library and provenance/CUDA_COMPILED.json",
+    "default_before_a24": "evidence/continuation_a123/cuda/artifacts/libvf_qpn2_moe_sm70.so (3cfaa80e..., qualified only by the A123 receipt, unchecked)",
+    "end_to_end_refusal": "../.runs/phase-a24-20261010/launcher-mismatched-library.json",
+    "tests": 6,
+    "evidence": "continuation_a24/LAUNCHER_PROVENANCE.json"
+  },
+  "test_counts_a24": {
+    "measured_in": "runs/phase-a24-final3-20261010",
+    "python_agents_runner": 45,
+    "python_adapter_discovery": 131,
+    "python_adapter_discovery_before_a24": 125,
+    "added_by_a24": 6
+  },
+  "shipped_artifact_reproducibility": {
+    "bin/vf": {
+      "sha256": "b207151ff7db17fa310c52e68d01250726ae8fbe05cc19d3fd90b42192ab03fa",
+      "independent_builds": 5,
+      "reproducible": true
+    },
+    "lib/libvf_qpn2_moe_sm70.so": {
+      "sha256": "85a49f5018d6284187a6be06dafe0d48e1bab5cfd6ef6c48185ca5f87cc5be9e",
+      "independent_builds": 5,
+      "reproducible": true
+    },
+    "lib/libcudart.so.12": {
+      "sha256": "c3a75b33af334a3486d197dbd1584a2985183ba4688d237a2be5f2f679329920",
+      "reproducible": "not applicable, unchanged vendor bytes"
+    },
+    "evidence": "continuation_a25/SHIPPED_ARTIFACT_REPRODUCIBILITY.json"
+  },
+  "rust_mutation_campaign": {
+    "tool": "scripts/rust_mutations.py",
+    "isolation": "one CARGO_TARGET_DIR per mutant since A27",
+    "cumulative_mutants": 24,
+    "killed": 55,
+    "equivalent": 7,
+    "not_classified": 1,
+    "survivors": 0,
+    "test_gaps_found_and_closed": 25,
+    "guards_changed": 0,
+    "every_src_module_probed": true,
+    "breadth_not_exhaustive": "one or a few guards per module; most guards in each module remain unmutated",
+    "evidence": [
+      "continuation_a26/RUST_MUTATIONS.json",
+      "continuation_a27/RUST_MUTATIONS_EXTENDED.json",
+      "continuation_a28/RUST_MUTATIONS_COMPLETE.json",
+      "continuation_a29/NUMERICAL_MUTATIONS.json",
+      "continuation_a31/AGENT_GATEWAY_MUTATIONS.json",
+      "continuation_a32/H1_CANARY_MUTATIONS.json",
+      "continuation_a33/PREFLIGHT_MUTATIONS.json",
+      "continuation_a34/PACKAGER_MUTATIONS.json",
+      "continuation_a35/ADAPTER_MUTATIONS.json",
+      "continuation_a36/ORACLE_TOLERANCE.json",
+      "continuation_a37/ORACLE_EXACTNESS.json"
+    ],
+    "numerical_mutants": 6,
+    "total": 66,
+    "oracle_sensitivity": {
+      "crosscheck": "detects a 1e-9 relative perturbation against its declared 2e-11 tolerance",
+      "checkpoint_crosscheck": "detects the FP4 level change, 141/4096 elements, max relative difference 0.1667",
+      "a13_crosscheck": "insensitive to both measured mutants, by construction",
+      "full_expert_crosscheck": "insensitive to both measured mutants, by construction",
+      "resident_crosscheck": "insensitive to both measured mutants, by construction",
+      "evidence": "continuation_a29/NUMERICAL_MUTATIONS.json"
+    },
+    "agent_gateway_mutants": 6,
+    "h1_canary_mutants": 6,
+    "preflight_mutants": 6,
+    "requirement_documented": "docs/EVIDENCE_CONTRACT.md: a changed or added guard needs a compilable mutant that removes it and a test that dies with it",
+    "packager_mutants": 6,
+    "adapter_identity_mutants": 6,
+    "oracle_mutants": 6,
+    "survivors_reported": 1
+  },
+  "test_counts_a26": {
+    "measured_in": "runs/phase-a26-final2-20261010",
+    "rust_debug_reported": 241,
+    "rust_debug_before_a26": 239,
+    "python_agents_runner": 45,
+    "python_adapter_discovery": 131
+  },
+  "test_counts_a27": {
+    "measured_in": "runs/phase-a27-final-20261010",
+    "rust_debug_reported": 245,
+    "rust_debug_before_a27": 241
+  },
+  "test_counts_a28": {
+    "measured_in": "runs/phase-a28-final-20261011",
+    "rust_debug_reported": 249,
+    "rust_debug_before_a28": 245
+  },
+  "foreign_architecture": {
+    "host": "aarch64, glibc 2.39, Python 3.12.3, no Rust toolchain",
+    "preflight_refusal": "BLOCKED, exit 1, empty checks list; architecture gate isolated because libc was satisfied",
+    "integrity_verifiable_anywhere": true,
+    "a21_aarch64_sealing_gap": "closed, SOURCE_REVIEWED -> CPU_TESTED",
+    "aarch64_rust_build": "not attempted, no toolchain on the agent host",
+    "evidence": "continuation_a30/FOREIGN_ARCHITECTURE.json"
+  },
+  "agent_gateway_coverage": {
+    "status": "MUTATION_COVERED_A31",
+    "high_stakes_gaps_closed": [
+      "authorized-spend requirement",
+      "secret and credential path filter",
+      "unknown transport outcome uncertainty"
+    ],
+    "guards_changed": 0,
+    "tests_added": 3,
+    "gateway_calls": 0,
+    "proxy_financial_limits": "still unverified; AGENTS.md requires verifying them separately and the mock gateway is not the real proxy",
+    "evidence": "continuation_a31/AGENT_GATEWAY_MUTATIONS.json"
+  },
+  "h1_canary_coverage": {
+    "status": "MUTATION_COVERED_A32",
+    "gaps_closed": [
+      "hardware-gate acknowledgement",
+      "pinned checkpoint revision and model",
+      "may_have_executed receipt honesty",
+      "device ordinal bound"
+    ],
+    "guards_changed": 0,
+    "tests_added": 4,
+    "evidence": "continuation_a32/H1_CANARY_MUTATIONS.json"
+  },
+  "preflight_coverage": {
+    "already_covered": [
+      "SHA-256 mismatch",
+      "unsafe manifest path"
+    ],
+    "gaps_closed": [
+      "duplicate manifest path",
+      "non-canonical POSIX path"
+    ],
+    "equivalent": [
+      "symlink component",
+      "non-regular file"
+    ],
+    "evidence": "continuation_a33/PREFLIGHT_MUTATIONS.json"
+  },
+  "delivery_chain_coverage": {
+    "sender": "package_h1.py, A34",
+    "recipient": "h1_preflight.py, A33",
+    "gaps_closed": 6,
+    "caveat": "static checks on bytes and receipts only",
+    "evidence": [
+      "continuation_a33/PREFLIGHT_MUTATIONS.json",
+      "continuation_a34/PACKAGER_MUTATIONS.json"
+    ]
+  },
+  "adapter_frontier_coverage": {
+    "already_covered": [
+      "expert aliasing",
+      "complete Stamp",
+      "coefficient identity",
+      "router weights on output"
+    ],
+    "gaps_closed": [
+      "resident order vs dispatch local index",
+      "resident order length"
+    ],
+    "evidence": "continuation_a35/ADAPTER_MUTATIONS.json"
+  },
+  "oracle_threshold_coverage": {
+    "numeric_tolerance_oracles_tied": {
+      "crosscheck": 2e-11,
+      "planner_crosscheck": 2e-09,
+      "checkpoint_crosscheck": 0.0
+    },
+    "structurally_exact_oracles_guarded": 9,
+    "still_open": "no test proves a structurally exact oracle still asserts anything, for seven of them",
+    "evidence": [
+      "continuation_a36/ORACLE_TOLERANCE.json",
+      "continuation_a37/ORACLE_EXACTNESS.json"
+    ]
+  },
+  "oracle_non_vacuity": {
+    "oracles": 11,
+    "proven_non_vacuous": 11,
+    "control_row": "canonical binary passes all eleven",
+    "single_point_of_failure_closed": "launch workspace accounting",
+    "evidence": "continuation_a38/ORACLE_SENSITIVITY_MATRIX.json"
+  },
+  "mutation_classification": {
+    "unclassified": 0,
+    "q07": "equivalent, unreachable (<=33664 blocks)",
+    "evidence": "continuation_a39/Q07_CAP_CLASSIFICATION.json"
+  },
+  "guard_sweep": {
+    "clauses": 324,
+    "killed": 294,
+    "equivalent": 30,
+    "killed_before": 121,
+    "evidence": "continuation_a40/GUARD_SWEEP.json",
+    "reason_sites": {
+      "sites": 55,
+      "checked": 24,
+      "equivalent": 31,
+      "checked_before": 5,
+      "evidence": "continuation_a41/REASON_SWEEP.json"
+    },
+    "c_validator": {
+      "clauses": 73,
+      "killed": 60,
+      "equivalent": 13,
+      "killed_before": 48,
+      "evidence": "continuation_a42/C_VALIDATOR_SWEEP.json"
+    },
+    "python_raises": {
+      "clauses": 563,
+      "killed": 538,
+      "equivalent": 25,
+      "a43": {
+        "clauses": 451,
+        "killed": 434,
+        "equivalent": 17,
+        "killed_before": 88,
+        "evidence": "continuation_a43/PY_RAISE_SWEEP.json"
+      },
+      "a44": {
+        "clauses": 111,
+        "killed": 103,
+        "equivalent": 8,
+        "killed_before": 14,
+        "evidence": "continuation_a44/PY_RAISE_SWEEP_A44.json"
+      }
+    },
+    "python_handlers": {
+      "sites": 29,
+      "killed": 29,
+      "equivalent": 0,
+      "killed_before": 5,
+      "evidence": "continuation_a45/PY_HANDLER_SWEEP.json"
+    },
+    "shell_launchers": {
+      "tool": "scripts/guard_schemata.py --sites sh-launchers",
+      "sites": 19,
+      "killed_before_a47": 0,
+      "killed_after_a47": 15,
+      "equivalent": 4,
+      "evidence": "continuation_a47/LAUNCHER_SWEEP.json"
+    },
+    "map_err_translations": {
+      "tool": "scripts/guard_schemata.py --sites map-reasons / map-reach",
+      "sites": 51,
+      "reached_before_a48": 6,
+      "reason_checked_before_a48": 3,
+      "reason_checked_after_a48": 22,
+      "equivalent": 29,
+      "evidence": "continuation_a48/MAP_ERR_SWEEP.json"
+    },
+    "return_err_reasons": {
+      "tool": "scripts/guard_schemata.py --sites ret-reasons / ret-reach",
+      "sites": 163,
+      "reached_before_a49": 146,
+      "reason_checked_before_a49": 121,
+      "reason_checked_after_a49": 150,
+      "equivalent": 13,
+      "evidence": "continuation_a49/RETURN_ERR_SWEEP.json"
+    },
+    "c_validator_codes": {
+      "tool": "scripts/guard_schemata.py --sites c-codes / c-reach",
+      "sites": 13,
+      "reached": 11,
+      "code_checked": 11,
+      "equivalent": 2,
+      "evidence": "continuation_a50/C_CODE_SWEEP.json"
+    },
+    "py_raise_reasons": {
+      "tool": "scripts/guard_schemata.py --sites py-reasons / py-reach",
+      "sites": 349,
+      "reached_before_a51": 340,
+      "reason_checked_before_a51": 319,
+      "reason_checked_after_a51": 341,
+      "equivalent": 8,
+      "evidence": "continuation_a51/PY_RAISE_REASON_SWEEP.json"
+    }
+  },
+  "recorded_defects_fixed": "continuation_a46/DEFECT_FIXES.json"
+}

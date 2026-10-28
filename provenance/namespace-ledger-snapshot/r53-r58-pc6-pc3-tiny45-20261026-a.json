@@ -1,0 +1,53 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r58-pc6-pc3-tiny45-20261026-a",
+  "effective_run_id": "r53-r58-pc6-pc3-tiny45-20261026-a",
+  "reserved_ns": 147458579189986,
+  "context": {
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58/CASE_PLAN.json",
+    "case_plan_sha256": "286a5e306192abc1fd60834805f8247a8b7adaa8127d1c3c7e866b9134e6cc98",
+    "remote_root": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r58-gpu-worker-nominal-20261026",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r58-pc6-pc3-tiny45-20261026-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 20
+        },
+        "rank": 7,
+        "attempt_id": 1
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r58-pc6-pc3-tiny45-20261026-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 20
+        },
+        "rank": 7,
+        "attempt_id": 2
+      }
+    ],
+    "remote_hashes": {
+      "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r58-gpu-worker-nominal-20261026/worker_release": "0f2c51dba34bf0e42cdf2740ce7e34d5a87c433de0df6afa6271151e6c55528a",
+      "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r58-gpu-worker-nominal-20261026/libvf_r13.so": "f856c9bdf5c4d021203b2b7ce5b1f393058370e3f5d2d0f05072fb067e739213",
+      "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r58-gpu-worker-nominal-20261026/remote_launcher.py": "657fdb037443b559b8eb6f74cc0de4560573cba4259ae81fd760daf64d51321c",
+      "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r58-gpu-worker-nominal-20261026/worker_guard.py": "3dcd4fe6c552192ea8f560b28c5a46fbd8da7e0b9ccc41cdb16fab98ebcee7a9"
+    },
+    "local_hashes": {
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58/bin/hardware_release": "2dd0fabb1a1be097deac0aef4fda8b69f992b0661e2e323ccb794371441c9993",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58/client_endpoint.py": "e652544e9c0423fe6bd1ba1a52d1fc137c91fc4ddc4ecfca9a3db8a6b7afb361",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58/ssh_bridge.py": "ba6e6fd72ff22b19441aa752371fa45144058c6e211983457b2fbcdc0352c514",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58/hardware_r55.rs": "e2e470ee06ea28eaf8b406b3ed40925f50fc49356f3cd71912ac5bce77a5bb84",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source/fixtures/preweighted_mxfp4_tiny.safetensors": "f0bfbf4220713b7aae0200e15f5232d118f0abfc65d7c322a6540a837fb279a7",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source/fixtures/preweighted_mxfp4_tiny_golden.json": "51e4c60545c4f29dcbe03d57f017e522095ec2d37e19f67d2fe890670227d1ed"
+    },
+    "max_gpu_sessions": 1
+  }
+}

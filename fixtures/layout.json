@@ -1,0 +1,6 @@
+{
+  "rows": 4096,
+  "columns": 2048,
+  "alignment": 256,
+  "global_scale_bytes": 4
+}

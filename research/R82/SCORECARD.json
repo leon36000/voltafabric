@@ -1,0 +1,118 @@
+{
+  "target_assumption": "A complete model receives a prompt and generates reliable responses on owner machines",
+  "score_kind": "Auditor judgment and evidence-weighted readiness index; not percent LOC, percent time or probability",
+  "overall_code_quality": {
+    "score": 7.5,
+    "scale": 10,
+    "range": [
+      7,
+      8
+    ],
+    "confidence": "medium",
+    "scope": "Canonical critical Rust/math/session paths plus sampled native/adapter and laboratory tooling"
+  },
+  "research_project_quality": {
+    "score": 7,
+    "scale": 10,
+    "confidence": "medium"
+  },
+  "product_maturity": {
+    "score": 3,
+    "scale": 10,
+    "confidence": "high about missing end-to-end path"
+  },
+  "dimensions": [
+    {
+      "name": "Numerical contracts and critical bounded arithmetic",
+      "score": 8.5
+    },
+    {
+      "name": "Regression tests/oracles and proof honesty",
+      "score": 8
+    },
+    {
+      "name": "Architecture and maintainability",
+      "score": 6.5
+    },
+    {
+      "name": "Security under trusted local-artifact use",
+      "score": 7
+    },
+    {
+      "name": "Documentation/current-state navigation",
+      "score": 5
+    },
+    {
+      "name": "Packaging/deployment/operability",
+      "score": 4
+    }
+  ],
+  "full_model_readiness_index": {
+    "value": 25,
+    "out_of": 100,
+    "uncertainty_range": [
+      15,
+      35
+    ],
+    "not_time_estimate": true,
+    "hard_gate": "NO complete prompt-to-generated-token model path qualified",
+    "breakdown": [
+      {
+        "category": "Formats, numerical/identity contracts",
+        "max": 10,
+        "earned": 9
+      },
+      {
+        "category": "Resident GPU expert execution",
+        "max": 15,
+        "earned": 10
+      },
+      {
+        "category": "Complete model execution and generation",
+        "max": 30,
+        "earned": 0
+      },
+      {
+        "category": "Integrated deployment and multi-host execution",
+        "max": 15,
+        "earned": 3
+      },
+      {
+        "category": "Operational reliability/recovery/long sessions",
+        "max": 15,
+        "earned": 2
+      },
+      {
+        "category": "End-to-end quality/performance/acceptance",
+        "max": 15,
+        "earned": 1
+      }
+    ],
+    "important_caveat": "The full current CPU release gate is not freshly confirmed; historical PASS remains historical."
+  },
+  "usage_scenarios": [
+    {
+      "usage": "Research and bounded expert/transport tests",
+      "status": "Usable today within qualified scope; expert operator required"
+    },
+    {
+      "usage": "Latest host-input candidate through actual GPU Session",
+      "status": "Pending R81; CPU package/harness is not runtime qualification"
+    },
+    {
+      "usage": "Complete chat/inference engine",
+      "status": "Not usable as delivered"
+    },
+    {
+      "usage": "Unattended production service",
+      "status": "Not qualified"
+    }
+  ],
+  "relative_engine_speed": {
+    "vllm": null,
+    "llama_cpp": null,
+    "strata": null,
+    "reason": "No matched hardware/model/quantization/workload/end-to-end benchmark executed"
+  },
+  "fresh_full_CPU_gate": "FAIL_TIMEOUT_10PASS_1TIMEOUT_34NOTRUN"
+}

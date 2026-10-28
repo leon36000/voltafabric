@@ -1,0 +1,129 @@
+{
+  "status": "COMPLETE",
+  "exit_code": 0,
+  "top30": [
+    {
+      "bytes": 43037093888,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs"
+    },
+    {
+      "bytes": 6671331328,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-collector-20261024-r11"
+    },
+    {
+      "bytes": 5614878720,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a67-bounded-cache-20261017"
+    },
+    {
+      "bytes": 3807899648,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a58-deepseek41-20261017"
+    },
+    {
+      "bytes": 3731189760,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a66-engram-deduplicate-20261017"
+    },
+    {
+      "bytes": 3665321984,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a57-binary-stdout-20261017"
+    },
+    {
+      "bytes": 3511992320,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a56-interpc-20261017"
+    },
+    {
+      "bytes": 2844545024,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/persistent-gpu-worker-20261024-r14"
+    },
+    {
+      "bytes": 863256576,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/python3123-cpu-qualification-20261017"
+    },
+    {
+      "bytes": 622624768,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a54-raw-qpn2"
+    },
+    {
+      "bytes": 622526464,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/stderr-integration-r58"
+    },
+    {
+      "bytes": 583217152,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/parallel-startup-20261024-r18"
+    },
+    {
+      "bytes": 547934208,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm120-rust-worker-r52"
+    },
+    {
+      "bytes": 533774336,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/full-expert-research-20261023-r9"
+    },
+    {
+      "bytes": 502546432,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/cpu-access-integration-r50"
+    },
+    {
+      "bytes": 491663360,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/remaining-reader-budget-20261025-r21"
+    },
+    {
+      "bytes": 489496576,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/shared-client-shard-20261025-r20"
+    },
+    {
+      "bytes": 479031296,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/resident-qualification-20261023-r7"
+    },
+    {
+      "bytes": 452816896,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/rdma-source-package-20261025-r31"
+    },
+    {
+      "bytes": 431255552,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/kimi-retry-20261024-r10"
+    },
+    {
+      "bytes": 411156480,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-resident-contract-20261024-r13"
+    },
+    {
+      "bytes": 345088000,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/research-experiments-20261025-r32"
+    },
+    {
+      "bytes": 326877184,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/a59-research-engram-20261017"
+    },
+    {
+      "bytes": 299458560,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-admission-r59"
+    },
+    {
+      "bytes": 283201536,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/component-lab-20261023-r6"
+    },
+    {
+      "bytes": 266878976,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/cross-arch-bf16-r33"
+    },
+    {
+      "bytes": 262537216,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-worker-stderr-r57"
+    },
+    {
+      "bytes": 234233856,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-immediate-load-state-r73-20261027"
+    },
+    {
+      "bytes": 222248960,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm120-worker-fresh-identities-r53"
+    },
+    {
+      "bytes": 216932352,
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/optimization-lab-20261023-r1"
+    }
+  ],
+  "entries": 138,
+  "stderr": "",
+  "reaped": true
+}

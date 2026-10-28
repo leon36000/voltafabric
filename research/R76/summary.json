@@ -1,0 +1,486 @@
+{
+  "status": "R76_PRIVATE_SM70_HOST_INPUT_EXACT_AND_PASSIVE_RUNTIME_COPY_REDUCTION_VERIFIED",
+  "created_utc": "2026-10-27T15:11:15.907010+00:00",
+  "canonical_functional_source_changed": false,
+  "canonical_files": 370,
+  "canonical_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
+  "material_invocations": 1,
+  "native_owner_instances": 2,
+  "native_forwards": 16,
+  "values_exact_total": 81920,
+  "values_exact_per_variant": 40960,
+  "native_PID": 43921,
+  "guard_PID": 43915,
+  "outer_PID": 43914,
+  "namespace": "r53-r76-v100-hostinput-20261027-a",
+  "namespace_base_and_suffix_consumed": true,
+  "native_case_not_Session_Stamp_Collector": true,
+  "candidate_sha256": "d1a5b39fe3f0ec6519a0e33cdcda80832650cf82db28f678ba516e6a22e90176",
+  "baseline_sha256": "6127d41a0744792ae48fa56220f528f624d30be14fff641f9e1f7f4d015feea3",
+  "trace_sha256": "78de1b536285e493eb6578a3972f1c84752f0f2987cf2d700114a75081d4da5e",
+  "trace_records": 152,
+  "trace_bytes": 9728,
+  "Runtime_copy_calls": 76,
+  "Runtime_copy_argument_sums": {
+    "baseline": {
+      "weight_h2d": 18800640,
+      "input_h2d": 163840,
+      "output_d2h": 163840,
+      "status_d2h": 64,
+      "runtime_copy_calls": 38
+    },
+    "candidate": {
+      "weight_h2d": 18800640,
+      "input_h2d": 42240,
+      "output_d2h": 163840,
+      "status_d2h": 64,
+      "runtime_copy_calls": 38
+    }
+  },
+  "input_h2d_saved_bytes": 121600,
+  "input_h2d_reduction_fraction": 0.7421875,
+  "kernel_counters": {
+    "baseline": 72,
+    "candidate": 64
+  },
+  "CUDA_API_counters": {
+    "baseline": 195,
+    "candidate": 187
+  },
+  "weight_copies_per_owner": 6,
+  "weight_H2D_per_owner": 18800640,
+  "device_allocations_per_owner": 16,
+  "predown_quantization_stays_GPU": true,
+  "caller_output_not_staging": true,
+  "public_FP32_ABI_unchanged": true,
+  "new_public_CPU_symbols_exported": false,
+  "trace_error_overflow_zero_enforced_by_hashed_driver": true,
+  "trace_error_counters_independently_serialized": false,
+  "trace_scope": "process-wide matching Runtime API requests; no per-owner/thread filter, physical PCIe bytes or bandwidth measurement",
+  "FP_context_mask": 57408,
+  "private_guard_sha256": "3718ad33b05306bce7932a3bb6158e70fede685eff5744f7b3d18c0396a1216b",
+  "private_guard_expected_lease_identity_checked_before_lock_inventory_and_spawn": true,
+  "old_guard_race_red_CPU_reproduced": true,
+  "new_guard_CPU_methods": 5,
+  "guard_mode": "gpu",
+  "guard_seconds": 90,
+  "outer_seconds": 105,
+  "GPU_UUID": "GPU-42d06a85-027a-75ea-7857-a8de27ad465e",
+  "lease_inode": 339746,
+  "processes_and_lease_reconciled": true,
+  "new_logical_unknowns": [],
+  "prior_unknowns_preserved": true,
+  "actual_proof_offline_corruptions_refused": 21,
+  "CPU_archive_corpus_cases": 33,
+  "CPU_codes_exact": 115584,
+  "CPU_scales_exact": 3612,
+  "CPU_Owner_fake_modes": [
+    "debug",
+    "release",
+    "ASanUBSan"
+  ],
+  "compiled_Cpp_Owner_mutants_detected": 4,
+  "CPU_CUPTI_stub_lifecycle_scenarios": 21,
+  "core45_suite_not_repeated": true,
+  "core45_gates_historical": true,
+  "no_GPU_replay": true,
+  "active_operations": [],
+  "operations": [
+    {
+      "path": "evidence/build-one-staticlib-output-after-mixed-type-diagnostic.json",
+      "sha256": "e5e022df1a9a4e6834397619b31202a02920e02c71f6c1e4d9b40f322774cea3",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/collect-PIC-static-archive.json",
+      "sha256": "3e9ddfa65616aa3ae7551bcf750b5c0e91df015797a02b7a3647a6c2c195caef",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/collect-staticlib-mixed-output-compile-refusal.json",
+      "sha256": "03f813f5850402f389c7fdf03df2b88527d00ef765a6961c006187bb8dffa796",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/cpu-package-contracts.json",
+      "sha256": "cfc52e1075f55bfce78056648a76ba22b2383099d58c0a47b6ecc58d83ac28fb",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/create-CPU-PIC-archive-from-existing-producer.json",
+      "sha256": "71b35e3ca3aa68c925461cf45ea8a9a440ea02f678ffe993f568050955f1653c",
+      "exit_code": 1,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/existing-guard-gpu-mode-fake-inventory-real-CPU-processes.json",
+      "sha256": "ef4d7171401ae1d8b203e4adca0adf4f8b3f7619c73595a7af06727b7974ead5",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/fresh-v100-readiness-once-bridge.json",
+      "sha256": "d598aa16aa1db995aa21ec7d60efb471027cc2c3777813b250ac482eb9973560",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/fresh-v100-readiness-once.json",
+      "sha256": "9c4e51175d543d4b0bafbe79ca724160207bb0c4678dde6538ebbc58dd05afec",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-driver-admit-real-assets-namespace-r2-no-CUDA.json",
+      "sha256": "6f4b42e2ad14722262167db3985fce12791f12878eb544c61c58fce9152c0492",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-driver-admit-real-assets-no-CUDA.json",
+      "sha256": "714a711a50878429cdba5bd1fd8ee66684a5746f1994aba699384582ad86b483",
+      "exit_code": 2,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-driver-current-cpu-admission-tests.json",
+      "sha256": "aebfe7815b4a03601f04b64f264e806fc60f4e49e80907e77bc3d9118b461af7",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-launch-contract-cpu-tests-r2-caps.json",
+      "sha256": "a782a8241cdcb97c1846e5fcaf8f9e599466becdc48697e7ca348434abdbdaaf",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-launch-contract-cpu-tests-r3-readiness-pin.json",
+      "sha256": "98ac5d79746e4e979347b285ee429e67c829d5c76808ced442dfb1f1299b7c76",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-launch-contract-cpu-tests.json",
+      "sha256": "da123b58c5f160a5421081725ef86bbacfcfcd8035d076605d8800c0c626b2e8",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-outer-real-pipes-cpu-tests.json",
+      "sha256": "0ff068536b4318d3666c1334406ab61c4f2a2c10fc07b78ba24b400f7ca329da",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-package-cpu-contracts.json",
+      "sha256": "2e95713887f8a82dd7a2ab1ea7ff975741b211f711d3a53cbd299c2aa587408c",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/gpu-private-guard-real-process-identity-tests.json",
+      "sha256": "02035808bd1b4927c1c8a990b9529370216768ab317cb471b4606808b55f0025",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/native-gpu-case-submit-once-bridge.json",
+      "sha256": "79fda9d21cf18a6b972f4ea3ec30df8c9ba84380fb21be01817331b18292a9f8",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/native-gpu-case-submit-once.json",
+      "sha256": "c181b1c3fd50457f27106d772e53027aad21ece46f3ad981d2af490760122bca",
+      "exit_code": 0,
+      "status": "MODEL_RESULT_PENDING_VERIFICATION"
+    },
+    {
+      "path": "evidence/native-gpu-readonly-proof-and-postflight-collection-bridge.json",
+      "sha256": "1a2643889c3ecbeabef9d0ba2723072159b4bcd97763654ab53a26997f668506",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/native-gpu-readonly-proof-and-postflight-collection.json",
+      "sha256": "3edb032bb7b339da58e42090260e87caea0dc5d6c8765c40abf1a54fe44901af",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/nvidia-skill-catalog-cached-only.json",
+      "sha256": "c224066d7b231bebbabbb101140f0ab71e032704df259a87b4b3d5e27d3fa09b",
+      "exit_code": 1,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/offline-independent-actual-GPU-proof-mutations.json",
+      "sha256": "1b951468a5e9d7c1375a15ecfd0dc293517a58877a0e862f8c020fd8bcb62a40",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/offline-runtime-copy-parser-tests.json",
+      "sha256": "185fe10bd1789c24c87355117c1f0473312f2edb539610f054e11d4c38631363",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/pc1-cpu-PIC-build-and-exactness.json",
+      "sha256": "34bf52a32494931bae599dba83a8b041cff1de3682456502f4aa30ca900cada6",
+      "exit_code": 1,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/pc1-cpu-archive-exclusive-dir.json",
+      "sha256": "3c4446c899d42c82b039c26a18194b78f5b9538f0b42caf84ac456b7af3553c1",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/pc1-cpu-archive-source-upload.json",
+      "sha256": "690ffcfe712833530b060b496f2a228f11287ee9b8fe2182ac340be47abaf3c6",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/pc1-cpu-final-postflight-readonly.json",
+      "sha256": "5b6f0c82a79fae72fefa763359499974b3f258ed327f366a7789e934dfebbf51",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/postcase-all-native-and-controller-hashes-readonly-bridge.json",
+      "sha256": "9f422e32ef653dc4cea5dca805344401320c657bb05acdeb195ba2f70ffb8bcd",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/postcase-all-native-and-controller-hashes-readonly.json",
+      "sha256": "34b5f228592582eab72965450d7c4548d1962ce3449c90492ab8d89b032f8856",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/prepare-gpu-native-package-offline-only.json",
+      "sha256": "e42a82288a31f6c58f53dfb407dda32a8bfd270870f7932de131e0841a1065ba",
+      "exit_code": 1,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/stage-runtime-private-guard-and-controller-bridge.json",
+      "sha256": "e577a47f8669068a314523e5010945097f3e1ecbb156e466b9a8eb5308fe7230",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/stage-runtime-private-guard-and-controller.json",
+      "sha256": "066bf379dfb2c00760dee82faff4bf1fc31929b600411fac90858128d954eacb",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/staged-VM-real-assets-cpu-admission-bridge.json",
+      "sha256": "315d0bd4dedc54a33e4fa0c2574c1f0ef853a1aee0eef45dd8f4d60795ab968f",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/staged-VM-real-assets-cpu-admission.json",
+      "sha256": "74271dc5a97fcb51cd949d94e91185bc5ea5c2b95af8ad993674ec66840bead6",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/submission-freshness-order-and-embedded-code-CPU.json",
+      "sha256": "68a9f350c53f9038a66197d334b7261c95958113adc64fe1b6229024184889bc",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/upload-staticlib-only-build-continuation.json",
+      "sha256": "416af38989eff153058f05a4a3556b903841984cbfc1ea372b1bd1cee6ce0e5d",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-continue-r2-bridge.json",
+      "sha256": "65767d8f9f6051fb7379dd80bfae2c26be457279ca375e065272a8ac69e066d2",
+      "exit_code": 1,
+      "status": "UNKNOWN_REMOTE_OUTCOME_NO_REPLAY"
+    },
+    {
+      "path": "evidence/vm-cpu-continue-r2.json",
+      "sha256": "0c78b7222b0d0296f8e904c07a29cca0a49466e48b4b2b42cb091a6e22b9b45c",
+      "exit_code": 2,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-final-readonly-postflight-bridge.json",
+      "sha256": "1ce913ea10b06a3581e2922eddea95f6a71009ec434d25463812a354ab6e3138",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-cpu-final-readonly-postflight.json",
+      "sha256": "7e608c8f5fafcd0c81dca1a3d8f0a1fb65e2799569bbc1e3a8e22f76e69950cf",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-gates-and-native-build-bridge.json",
+      "sha256": "944a87f3d264161932618825ff82242af61030220ee28b4674e011db210890f3",
+      "exit_code": 1,
+      "status": "UNKNOWN_REMOTE_OUTCOME_NO_REPLAY"
+    },
+    {
+      "path": "evidence/vm-cpu-gates-and-native-build.json",
+      "sha256": "e16a797aa469fcdb74354a168830acfa5a57603ac5f49b71e0127eb262c64b1f",
+      "exit_code": 2,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-r1-collect-readonly-bridge.json",
+      "sha256": "8b350a98fe674cb82da9af975979a5322fc1dbf743fa3f422635acb48a3948f8",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-cpu-r1-collect-readonly.json",
+      "sha256": "725ffa4dd0a0c266abf503f89f2d75fd16560c1cd6d15bcd8f105130cada8e9b",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-r2-collect-readonly-bridge.json",
+      "sha256": "9f5cdc3fce531a9c19ce6458f90551d30d56877acbc416e93c54c3564299c2f1",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-cpu-r2-collect-readonly.json",
+      "sha256": "3d84a710be42a42bcfe0d574bc4ee49da9faa314df2a0c7d40eae41af3fa7bee",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-source-stage.json",
+      "sha256": "5984f66cac33e9b474774b963c563f28b3d9bb2eeb8f2a4a8f35d480753f16a8",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-cpu-stage-bridge.json",
+      "sha256": "4a0b35917461479f4c1bb34863dc57ba676c0d1081ba594d2eb4922d7e0a9d73",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-cpu-trace-lifecycle-gates-bridge.json",
+      "sha256": "6d040b2b188508352d285c536988b20705db4684c3e0bb70e5392248a877365d",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-cpu-trace-lifecycle-gates.json",
+      "sha256": "648da1ea19bc1ed0f9927ed8f8781ea1814a1bd9a876321264a7e735d9cd6fc6",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-gpu-package-stage-bridge.json",
+      "sha256": "8832083ea9a4989e3a1e719d6a523f9b5d2da201156e4642f9abc2447f5fa435",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-gpu-package-stage-no-compute.json",
+      "sha256": "82ac89da611f8384dde01263dae3cd65b34cad5f9e8c2a64aeefe50133111961",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-native-loader-final-admission-bridge.json",
+      "sha256": "d9074f34531fa58faa97a3a2879831fb3c6b5018018c521394515c6b90060146",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-native-loader-final-admission.json",
+      "sha256": "94aa9c58eabcf5f172d5f7f3ccfb16a68e5d807899a52769025cc49162b55f33",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-readonly-cpu-sdk-inventory-bridge.json",
+      "sha256": "cb385ff2db40b35d46b2a7a5c35e41afe770485c0cdfc17b3529e0bdccbf1fd9",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-readonly-cpu-sdk-inventory.json",
+      "sha256": "7d914cca4f560125a3b206291d37f7da6a05303a1e508ce487076f69724a62cb",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    },
+    {
+      "path": "evidence/vm-sdk-headers-readonly-bridge.json",
+      "sha256": "49e91658c51b83c58ac289a581de8b795c107f1f1544b6c79a353f8a5c46a925",
+      "exit_code": 0,
+      "status": "TERMINAL_TRANSPORT"
+    },
+    {
+      "path": "evidence/vm-sdk-headers-readonly.json",
+      "sha256": "1b67d6208b9f3604f690b87f5aca788727305f119bff4bcb5760d892433a526d",
+      "exit_code": 0,
+      "status": "PROCESS_TERMINAL"
+    }
+  ],
+  "proof_sha256": {
+    "cpu-final-result.json": "7d29e2ecca89a6fd91cb7f6dee0f3f5935aa062a58e8ba492459203fbddc9e0a",
+    "CPU_SEAL.json": "c0351da9c3f079a257bf9cacb4642a9c02c641733a77c3b000d512f80597b99d",
+    "summary.cpu-batch.json": "2406dc5a9af2bb2d0facd7493700be7b42d047985c2720ec39833dd1cd62006c",
+    "GPU-PREPARATION.json": "d53955ae56fca5ae8f18065b521dcb51a3b904df5bf86321416986839e03ab9c",
+    "RUNTIME_ADMISSION.json": "e251ec10631140741e432f20a48b4c5e9f20b9ef4ba439a39885aa21d0eba09b",
+    "CASE_SUBMISSION.json": "a57e18f2bf5f590501115469731cad1645d864ae9645149a5d17f61ea32c8846",
+    "RESERVATION.json": "c55a6a5fa72095b389d77eb21d8f7466036788349e29e3f381a2ab41372f6d66",
+    "gpu-result/operation.json": "376a50a8c824437314c6ad058a00a5f4ec68b803d3c76d76aee86ccbd954c2f0",
+    "gpu-result/guard.json": "e86f69040cd034d9ab0ee77a3fe34758d6bf5e3fc196d4c0bb8e915dbbcfcfa5",
+    "gpu-result/postflight.json": "b1c556c2bef2fc8977989bf68e0d94bac9c4e11c88f6a5d45dc0491e7e91c108",
+    "gpu-result/READINESS.json": "c7c8cb02812142f2ad75420d15f9c3b5010d49addf90da1df2f38918d39d6169",
+    "gpu-result/RESERVATION.json": "c55a6a5fa72095b389d77eb21d8f7466036788349e29e3f381a2ab41372f6d66",
+    "gpu-result/result/result.json": "3260f413eacae7a59958d43a2e80dc710d2c09f277510ed79239fc7eeb05e7b7",
+    "gpu-result/result/runtime-trace.bin": "7a89c385c0e8e429245110496f0e70a9f1a3a64b64e9f88f5caa878e6edca5d2",
+    "gpu-result/result/baseline-output.bin": "eff9442fde16fdcd1c839ba14e090538aaa0aa4d656209e47bc43158f5929574",
+    "gpu-result/result/candidate-output.bin": "eff9442fde16fdcd1c839ba14e090538aaa0aa4d656209e47bc43158f5929574",
+    "evidence/independent-GPU-verification-r2-strict.json": "a02dbcdc5cee6b9bbaf0f4327e1ad1b5f821723b3d974aea83ebd913a2bf099a",
+    "evidence/final-dispatch-source-stability.json": "663b83ac0d2e30b8609870fc9a1a0ae975325c6a69f86deda074a8c366ae3845",
+    "evidence/local-final-process-reconciliation.json": "bbf871709cc4914680896a8853733de175c49d2a4d0e2c10aa8f53fca99f4f41",
+    "guard-private/source-transform.json": "b8e017e10f8e2b2108c6bb215286ac54172a936dd31e4ae394f8be1b9b3f7a34",
+    "agents/actual-GPU-review.md": "0c7ae393eb92c527bfea0b83ccd1c63353627db169655e0de03b4380591a4b28"
+  },
+  "global_defaults_changed": false,
+  "service_promoted": false,
+  "performance_promoted": false,
+  "physical_PCIe_bytes_measured": false,
+  "new_GPU_memcheck": false,
+  "initcheck": false,
+  "synccheck": false,
+  "h1_complete": false,
+  "gpu_rdma": false,
+  "gpudirect": false,
+  "full_model": false,
+  "quality": false,
+  "energy": false,
+  "long_session": false,
+  "native_weekly_used_percent": 73,
+  "agent_cost_usd": "UNKNOWN",
+  "gateway_calls": 0,
+  "exa_calls": 0,
+  "next_command": "python3 -B /home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/host-input-native-memcheck-r77-20261027/preflight.py"
+}

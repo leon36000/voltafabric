@@ -1,0 +1,198 @@
+{
+  "problem": {
+    "hidden": 2,
+    "experts": [
+      123,
+      510,
+      782
+    ],
+    "routes": [
+      [
+        {
+          "expert": 510,
+          "weight": 1.0105676411592008
+        },
+        {
+          "expert": 782,
+          "weight": 0.9604539460352057
+        }
+      ],
+      [
+        {
+          "expert": 510,
+          "weight": 0.7342476628541761
+        },
+        {
+          "expert": 782,
+          "weight": 0.0
+        }
+      ],
+      [
+        {
+          "expert": 510,
+          "weight": 0.7784426150001458
+        },
+        {
+          "expert": 123,
+          "weight": 0.37052266664574673
+        }
+      ]
+    ],
+    "registry": {
+      "epoch": 9,
+      "copies": [
+        {
+          "expert": 123,
+          "rank": 31,
+          "local": 0
+        },
+        {
+          "expert": 510,
+          "rank": 14,
+          "local": 0
+        },
+        {
+          "expert": 782,
+          "rank": 7,
+          "local": 0
+        }
+      ]
+    },
+    "stamp": {
+      "run_id": "seed-1",
+      "model_revision": "synthetic",
+      "plan_id": "fixed",
+      "layer": 5,
+      "batch": 1,
+      "epoch": 9
+    },
+    "preferred_owners": {},
+    "resident_order": {
+      "31": [
+        0
+      ],
+      "14": [
+        0
+      ],
+      "7": [
+        0
+      ]
+    }
+  },
+  "completions": [
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 0,
+      "slot": 0,
+      "expert": 510,
+      "rank": 14,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 0,
+      "slot": 1,
+      "expert": 782,
+      "rank": 7,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 1,
+      "slot": 0,
+      "expert": 510,
+      "rank": 14,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 1,
+      "slot": 1,
+      "expert": 782,
+      "rank": 7,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 2,
+      "slot": 0,
+      "expert": 510,
+      "rank": 14,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "stamp": {
+        "run_id": "seed-1",
+        "model_revision": "synthetic",
+        "plan_id": "fixed",
+        "layer": 5,
+        "batch": 1,
+        "epoch": 9
+      },
+      "token": 2,
+      "slot": 1,
+      "expert": 123,
+      "rank": 31,
+      "local": 0,
+      "value": [
+        1.0,
+        1.0
+      ]
+    }
+  ]
+}

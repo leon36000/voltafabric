@@ -1,0 +1,319 @@
+{
+  "topology": {
+    "schema_version": 1,
+    "origin": "synthetic",
+    "source_note": "Illustration only: four logical devices, a subset of the 17-device SYNTHETIC fixture. NOT owner inventory or measured performance.",
+    "devices": [
+      {
+        "rank": 0,
+        "host": "SYNTHETIC_NODE_0",
+        "capacity_bytes": 17179869184,
+        "reserved_bytes": 3221225472
+      },
+      {
+        "rank": 1,
+        "host": "SYNTHETIC_NODE_0",
+        "capacity_bytes": 17179869184,
+        "reserved_bytes": 3221225472
+      },
+      {
+        "rank": 2,
+        "host": "SYNTHETIC_NODE_0",
+        "capacity_bytes": 17179869184,
+        "reserved_bytes": 3221225472
+      },
+      {
+        "rank": 3,
+        "host": "SYNTHETIC_NODE_0",
+        "capacity_bytes": 17179869184,
+        "reserved_bytes": 3221225472
+      }
+    ],
+    "links": [
+      {
+        "id": "synthetic-0-1",
+        "src": 0,
+        "dst": 1,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-0-2",
+        "src": 0,
+        "dst": 2,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-0-3",
+        "src": 0,
+        "dst": 3,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-1-0",
+        "src": 1,
+        "dst": 0,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-1-2",
+        "src": 1,
+        "dst": 2,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-1-3",
+        "src": 1,
+        "dst": 3,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-2-0",
+        "src": 2,
+        "dst": 0,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-2-1",
+        "src": 2,
+        "dst": 1,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-2-3",
+        "src": 2,
+        "dst": 3,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-3-0",
+        "src": 3,
+        "dst": 0,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-3-1",
+        "src": 3,
+        "dst": 1,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      },
+      {
+        "id": "synthetic-3-2",
+        "src": 3,
+        "dst": 2,
+        "bandwidth_bytes_per_s": 10000000000.0,
+        "latency_us": 8,
+        "enabled": true,
+        "transport": "synthetic",
+        "resources": [
+          "island-0"
+        ],
+        "cost_provenance": {
+          "origin": "synthetic",
+          "source": "fixtures/placement_SYNTHETIC.json: illustrative directed link"
+        }
+      }
+    ]
+  },
+  "experts": [
+    {
+      "id": 3,
+      "resident_bytes": 5368709120,
+      "compute_us": 13,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    },
+    {
+      "id": 8,
+      "resident_bytes": 5368709120,
+      "compute_us": 18,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    },
+    {
+      "id": 19,
+      "resident_bytes": 5368709120,
+      "compute_us": 29,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    },
+    {
+      "id": 22,
+      "resident_bytes": 5368709120,
+      "compute_us": 32,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    },
+    {
+      "id": 37,
+      "resident_bytes": 5368709120,
+      "compute_us": 47,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    },
+    {
+      "id": 41,
+      "resident_bytes": 5368709120,
+      "compute_us": 51,
+      "cost_provenance": {
+        "origin": "synthetic",
+        "source": "fixtures/placement_SYNTHETIC.json: illustrative compute cost"
+      }
+    }
+  ],
+  "demands": [
+    {
+      "source_rank": 0,
+      "experts": [
+        3,
+        8
+      ],
+      "frequency": 4
+    },
+    {
+      "source_rank": 1,
+      "experts": [
+        19,
+        22
+      ],
+      "frequency": 3
+    },
+    {
+      "source_rank": 2,
+      "experts": [
+        37,
+        41
+      ],
+      "frequency": 1
+    }
+  ],
+  "hidden": 4096,
+  "wire": {
+    "input_bytes": 2,
+    "expert_output_bytes": 2,
+    "partial_output_bytes": 4,
+    "header_bytes": 0,
+    "slot_metadata_bytes": 0,
+    "alignment": 1
+  },
+  "max_iterations": 64
+}

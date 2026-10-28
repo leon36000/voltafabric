@@ -1,0 +1,44 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r72-v100-20261027-01-crash",
+  "effective_run_id": "r53-r72-v100-20261027-01-crash-duplicate-slot",
+  "reserved_ns": 227716970766270,
+  "context": {
+    "phase": "R72",
+    "case_id": "01-crash",
+    "case_plan_sha256": "fe93eaf13fb194cc62d7ce7887353499b6693392f6e58446c8ae3f7670899ea1",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r72-v100-20261027-01-crash",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 50
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r72-v100-20261027-01-crash",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 51
+        },
+        "attempt_id": 2,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      50,
+      51
+    ],
+    "source_harness_sha256": "967b72dc6dfd5ea7869f539e7a1a104b6a52ff2d04d0535a8a6d68d404237980",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-remaining-faults-r72-20261027/vm-01-crash/operation.json"
+  }
+}

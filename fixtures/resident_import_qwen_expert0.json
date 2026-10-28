@@ -1,0 +1,35 @@
+{
+  "path": "fixtures/checkpoint_qwen36_expert0_full.safetensors",
+  "spec": {
+    "model_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+    "layer": 0,
+    "rank": 0,
+    "registry": {
+      "epoch": 1,
+      "copies": [
+        {
+          "expert": 0,
+          "rank": 0,
+          "local": 900
+        }
+      ]
+    },
+    "resident_order": [
+      900
+    ],
+    "experts": [
+      {
+        "id": 0,
+        "local": 900,
+        "source_expert": 0
+      }
+    ],
+    "expected_metadata": {
+      "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+      "revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+      "license": "Apache-2.0",
+      "layer": "0",
+      "expert": "0"
+    }
+  }
+}

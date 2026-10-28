@@ -1,0 +1,80 @@
+{
+  "host": "pc1",
+  "architecture": "x86_64",
+  "model_name": "qwen3.8-flash-next-sc117-abliterated-iq3_s",
+  "model_architecture": "qwen4exp",
+  "format": "Strata native pack v3 plus split GGUFv3 IQ3_S",
+  "engine_executable": "/home/pc1/Strata-data/optimizations/2026-10-14/build-zen5/strata",
+  "engine_version_declared": "0.1.44.1",
+  "engine_source_declared": "296b59d2f73c8f04a805df29c2fa97655adace78",
+  "run_config": "/home/pc1/Strata/strata-sc117-abliterated-iq3_s.json",
+  "run_config_sha256": "57487ebe7907e9102ce2462674c1aa8515906d071415d5d063ee87ca14b497eb",
+  "pack": "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s",
+  "tokenizer": "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/tokenizer",
+  "original_GGUF_files": [
+    {
+      "path": "/home/pc1/Strata-data/models/SC117-Qwen3.8-Flash-Next-GSQ-RCO-abliterated/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00001-of-00002.gguf",
+      "bytes": 55063448064,
+      "inode": 13500439,
+      "device": 66312,
+      "version": 3,
+      "tensor_count": 1223,
+      "metadata": {
+        "general.architecture": "qwen4exp",
+        "general.name": "Qwen3.8-Flash-Next GSQ-RCO",
+        "general.size_label": "512x56B",
+        "qwen4exp.block_count": 48,
+        "qwen4exp.context_length": 262144,
+        "qwen4exp.embedding_length": 2560,
+        "qwen4exp.expert_count": 512,
+        "qwen4exp.expert_used_count": 10,
+        "tokenizer.ggml.model": "gpt2",
+        "tokenizer.ggml.pre": "qwen35",
+        "tokenizer.ggml.tokens": {
+          "array_type": 8,
+          "count": 248320
+        },
+        "tokenizer.ggml.merges": {
+          "array_type": 8,
+          "count": 247587
+        },
+        "tokenizer.ggml.eos_token_id": 248046,
+        "tokenizer.ggml.bos_token_id": 248044,
+        "tokenizer.chat_template": {
+          "string_bytes": 9993
+        },
+        "general.file_type": 26,
+        "split.no": 0,
+        "split.count": 2,
+        "split.tensors.count": 1224
+      },
+      "header_position": 10946733,
+      "physical_bytes_read": 3970136,
+      "payload_bytes_read": 0
+    },
+    {
+      "path": "/home/pc1/Strata-data/models/SC117-Qwen3.8-Flash-Next-GSQ-RCO-abliterated/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00002-of-00002.gguf",
+      "bytes": 28800138432,
+      "inode": 13500442,
+      "device": 66312,
+      "version": 3,
+      "tensor_count": 1,
+      "metadata": {
+        "split.no": 1,
+        "split.count": 2,
+        "split.tensors.count": 1224
+      },
+      "header_position": 106,
+      "physical_bytes_read": 106,
+      "payload_bytes_read": 0
+    }
+  ],
+  "profile": "/home/pc1/Strata/data/expert-profile.bin",
+  "profile_stat_verified": false,
+  "GGUF_file_set_present": true,
+  "payload_identity_verified": false,
+  "binary_identity_verified": false,
+  "generation_qualified": false,
+  "voltafabric_integrated": false,
+  "nativeVF_pack_adapter_delivered": false
+}

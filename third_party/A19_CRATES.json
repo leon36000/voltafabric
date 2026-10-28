@@ -1,0 +1,299 @@
+{
+  "scope": "Notices only, sources are not vendored",
+  "packages": [
+    {
+      "name": "bitflags",
+      "version": "2.13.2",
+      "repository": "https://github.com/bitflags/bitflags",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "3ded4057c258ba199e2d26386d3af3780957ecaee6c4ef4041c6b4b8b97c0b06",
+      "vcs": {
+        "git": {
+          "sha1": "80ce9b545acb0bd42150695fc351889cac1d8eb4"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/bitflags-2.13.2/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/bitflags-2.13.2/LICENSE-MIT",
+          "sha256": "6485b8ed310d3f0340bf1ad1f47645069ce4069dcc6bb46c7d5c6faf41de1fdb"
+        }
+      ]
+    },
+    {
+      "name": "cfg-if",
+      "version": "1.0.5",
+      "repository": "https://github.com/rust-lang/cfg-if",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "4e7648175b45a9a48536d676f68d918270699102aa8dab5496df06904c914600",
+      "vcs": {
+        "git": {
+          "sha1": "8b0a2b0fc1fa3b3741b9e72895f390cf499fe36f"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/cfg-if-1.0.5/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/cfg-if-1.0.5/LICENSE-MIT",
+          "sha256": "378f5840b258e2779c39418f3f2d7b2ba96f1c7917dd6be0713f88305dbda397"
+        }
+      ]
+    },
+    {
+      "name": "errno",
+      "version": "0.3.14",
+      "repository": "https://github.com/lambda-fairy/rust-errno",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb",
+      "vcs": {
+        "git": {
+          "sha1": "ffc03bfb9eb491013567115e6eea560948cd9e52"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/errno-0.3.14/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/errno-0.3.14/LICENSE-MIT",
+          "sha256": "8764a597675778ddfd4e25f81b08a05dbcf089ac05662df7613fe67f150e3aa2"
+        }
+      ]
+    },
+    {
+      "name": "fastrand",
+      "version": "2.5.0",
+      "repository": "https://github.com/smol-rs/fastrand",
+      "license_expression": "Apache-2.0 OR MIT",
+      "lock_checksum": "da7c62ceae207dd37ea5b845da6a0696c799f85e97da1ab5b7910be3c1c80223",
+      "vcs": {
+        "git": {
+          "sha1": "7a1cc2c69ebde6cb3442809213db3fe19a2cb0ba"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/fastrand-2.5.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/fastrand-2.5.0/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
+      "name": "getrandom",
+      "version": "0.4.3",
+      "repository": "https://github.com/rust-random/getrandom",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "300e883d756b2e4ec94e02791f39b04b522276138852cfc41d9fb7e904106099",
+      "vcs": {
+        "git": {
+          "sha1": "5e7cd5733536844a9856dc7259bd4696bbe5e3ae"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/getrandom-0.4.3/LICENSE-APACHE",
+          "sha256": "aaff376532ea30a0cd5330b9502ad4a4c8bf769c539c87ffe78819d188a18ebf"
+        },
+        {
+          "path": "third_party/a19-crates/getrandom-0.4.3/LICENSE-MIT",
+          "sha256": "523a42c25d245dde9c015f882cec7f4555aad883382a6cf19b4b7d9b2cd5419b"
+        }
+      ]
+    },
+    {
+      "name": "linux-raw-sys",
+      "version": "0.12.1",
+      "repository": "https://github.com/sunfishcode/linux-raw-sys",
+      "license_expression": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "lock_checksum": "32a66949e030da00e8c7d4434b251670a91556f4144941d37452769c25d58a53",
+      "vcs": {
+        "git": {
+          "sha1": "0e2918cf3e366d9c923d4ca05f169b49d826db56"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+        },
+        {
+          "path": "third_party/a19-crates/linux-raw-sys-0.12.1/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
+      "name": "once_cell",
+      "version": "1.21.4",
+      "repository": "https://github.com/matklad/once_cell",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50",
+      "vcs": {
+        "git": {
+          "sha1": "80fe900b21f6d76c1a2ed74d3343e8a3a88c46d0"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/once_cell-1.21.4/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/once_cell-1.21.4/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
+      "name": "r-efi",
+      "version": "6.0.0",
+      "repository": "https://github.com/r-efi/r-efi",
+      "license_expression": "MIT OR Apache-2.0 OR LGPL-2.1-or-later",
+      "lock_checksum": "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf",
+      "vcs": {
+        "git": {
+          "sha1": "7e1b0322d31d625f81a5656096330934f9cd835d"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": []
+    },
+    {
+      "name": "rustix",
+      "version": "1.1.5",
+      "repository": "https://github.com/bytecodealliance/rustix",
+      "license_expression": "Apache-2.0 WITH LLVM-exception OR Apache-2.0 OR MIT",
+      "lock_checksum": "891efababe418670775f199f0d233d84843c227a0949a883ce15b37c78d6629d",
+      "vcs": {
+        "git": {
+          "sha1": "287214b889865d8e1406a0ee71cc409b6f6191c8"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/rustix-1.1.5/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/rustix-1.1.5/LICENSE-Apache-2.0_WITH_LLVM-exception",
+          "sha256": "268872b9816f90fd8e85db5a28d33f8150ebb8dd016653fb39ef1f94f2686bc5"
+        },
+        {
+          "path": "third_party/a19-crates/rustix-1.1.5/LICENSE-MIT",
+          "sha256": "23f18e03dc49df91622fe2a76176497404e46ced8a715d9d2b67a7446571cca3"
+        }
+      ]
+    },
+    {
+      "name": "tempfile",
+      "version": "3.27.0",
+      "repository": "https://github.com/Stebalien/tempfile",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "32497e9a4c7b38532efcdebeef879707aa9f794296a4f0244f6f69e9bc8574bd",
+      "vcs": {
+        "git": {
+          "sha1": "5c8fa12eb584931b4f1bccfde87eb72fbfa7dc61"
+        },
+        "path_in_vcs": ""
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/tempfile-3.27.0/LICENSE-APACHE",
+          "sha256": "a60eea817514531668d7e00765731449fe14d059d3249e0bc93b36de45f759f2"
+        },
+        {
+          "path": "third_party/a19-crates/tempfile-3.27.0/LICENSE-MIT",
+          "sha256": "8b427f5bc501764575e52ba4f9d95673cf8f6d80a86d0d06599852e1a9a20a36"
+        }
+      ]
+    },
+    {
+      "name": "windows-link",
+      "version": "0.2.1",
+      "repository": "https://github.com/microsoft/windows-rs",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5",
+      "vcs": {
+        "git": {
+          "sha1": "d468916ac27a36fb8a12bafc1bf5c0ec2fe92238"
+        },
+        "path_in_vcs": "crates/libs/link"
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/windows-link-0.2.1/license-apache-2.0",
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
+        },
+        {
+          "path": "third_party/a19-crates/windows-link-0.2.1/license-mit",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ]
+    },
+    {
+      "name": "windows-sys",
+      "version": "0.61.2",
+      "repository": "https://github.com/microsoft/windows-rs",
+      "license_expression": "MIT OR Apache-2.0",
+      "lock_checksum": "ae137229bcbd6cdf0f7b80a31df61766145077ddf49416a728b02cb3921ff3fc",
+      "vcs": {
+        "git": {
+          "sha1": "32c3144490c016fe496a0aed769bce60987a2e9d"
+        },
+        "path_in_vcs": "crates/libs/sys"
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/windows-sys-0.61.2/license-apache-2.0",
+          "sha256": "c16f8dcf1a368b83be78d826ea23de4079fe1b4469a0ab9ee20563f37ff3d44b"
+        },
+        {
+          "path": "third_party/a19-crates/windows-sys-0.61.2/license-mit",
+          "sha256": "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383"
+        }
+      ]
+    },
+    {
+      "name": "safetensors",
+      "version": "0.8.0",
+      "repository": "https://github.com/huggingface/safetensors",
+      "license_expression": "Apache-2.0",
+      "lock_checksum": "79b079b829cb27a1c3c374341345ed2e8b2c0c839034522cee576c140bd7f846",
+      "vcs": {
+        "git": {
+          "sha1": "a406ca3e7a90598be0cd05a50069cb9bf5ef6ba6"
+        },
+        "path_in_vcs": "safetensors"
+      },
+      "notices": [
+        {
+          "path": "third_party/a19-crates/safetensors-0.8.0/LICENSE",
+          "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4"
+        }
+      ]
+    }
+  ]
+}

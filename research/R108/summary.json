@@ -1,0 +1,44 @@
+{
+  "status": "PARTIAL_HISTORICAL_SAMPLE_VERIFIED_PC1_SSH_BANNER_BLOCKED",
+  "network_attempts": [
+    {
+      "alias": "pc1",
+      "exit": 255,
+      "reached_auth": false
+    },
+    {
+      "alias": "pc1-ts",
+      "exit": 255,
+      "reached_auth": false
+    }
+  ],
+  "CPU_tests": 7,
+  "CPU_tests_exit": 0,
+  "sample_exit": 0,
+  "sampled_layers": 4,
+  "declared_layers": 48,
+  "checked_prefix_end": 3905945600,
+  "declared_experts_bytes": 50292326400,
+  "historical_shape_only": "output.weight",
+  "actual_native_argument_known": false,
+  "full_pack_admitted": false,
+  "payload_read": false,
+  "GPU": false,
+  "model_executed": false,
+  "canonical_changed": false,
+  "R107_manifest_sha256": "a99f64b2ac571a582aa5f122d36a8c1c1663bcdc95eafbe035accedcc4bb6742",
+  "R46_manifest_sha256": "59bf801788a61b11e51afbb4d4b6ff6354fe820c187801367776ca3656834cc4",
+  "tests_argv": [
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_sample"
+  ],
+  "sample_argv": [
+    "python3",
+    "-B",
+    "sample_discriminant.py"
+  ]
+}

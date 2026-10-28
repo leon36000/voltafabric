@@ -1,0 +1,39 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r81-v100-hostinput-session-20261027-a",
+  "effective_run_id": "r53-r81-v100-hostinput-session-20261027-a",
+  "reserved_ns": 284826625192497,
+  "context": {
+    "phase": "R81_R101",
+    "case_plan_sha256": "904d7c73a35d2c3293a98dba7e2cb6eb8b4b0e12ee79514ce4156d9dd88e601e",
+    "requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r81-v100-hostinput-session-20261027-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 20
+        },
+        "rank": 7,
+        "attempt": 1
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r81-v100-hostinput-session-20261027-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 20
+        },
+        "rank": 7,
+        "attempt": 2
+      }
+    ],
+    "hardware_invocation_limit": 1,
+    "adapter_manifest_sha256": "7360a6d920ce949d59f17f43f019eb1ef84c38e91713bfaa6f360325928997ad"
+  }
+}

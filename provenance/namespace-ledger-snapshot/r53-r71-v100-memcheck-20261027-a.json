@@ -1,0 +1,43 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r71-v100-memcheck-20261027-a",
+  "effective_run_id": "r53-r71-v100-memcheck-20261027-a",
+  "reserved_ns": 223646744160814,
+  "context": {
+    "phase": "R71",
+    "case_id": "01-memcheck",
+    "case_plan_sha256": "83266b7c48ec01550435c2d1e387b3a117d285db2d302de6589c61edb96c43b2",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r71-v100-memcheck-20261027-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 20
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r71-v100-memcheck-20261027-a",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 20
+        },
+        "attempt_id": 2,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      20
+    ],
+    "source_harness_sha256": "82cf8a825fb236b9f73637045f5947a01420d1f9e44906a04112a0065bf38e6a",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-sanitizer-tmpdir-r71-20261027/vm-01-memcheck/operation.json"
+  }
+}

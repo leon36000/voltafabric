@@ -1,0 +1,26 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r79-v100-mxcsr-20261027-a",
+  "effective_run_id": "r53-r79-v100-mxcsr-20261027-a",
+  "reserved_ns": 258824859060057,
+  "context": {
+    "phase": "R79",
+    "case_plan_sha256": "4385f32d9eefaca656cb22fd4d315c8655543bf873c44a8d0c822ca9b228fbab",
+    "native_calls": [
+      {
+        "ordinal": 0,
+        "FP_control": "FTZ_only",
+        "expected_rc": -10
+      },
+      {
+        "ordinal": 1,
+        "FP_control": "restored",
+        "expected_rc": -10
+      }
+    ],
+    "native_owner_max": 1,
+    "scope": "native public FP refusal/poison, no Session Stamp or accepted model output",
+    "hardware_invocation_limit": 1
+  }
+}

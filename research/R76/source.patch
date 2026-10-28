@@ -1,0 +1,36 @@
+--- R13/resident.cu
++++ R76/native/resident.cu
+@@ -11,6 +11,7 @@
+ #include "frozen-r9/quantize.cuh"
+ #include "frozen-r9/context/e8m0_candidate.cu"
+ #include "frozen-r9/candidate.cuh"
++#include "r76_host_input.hpp"
+ namespace {
+ std::atomic<uint64_t> api_calls{0},cleanup_errors{0};
+ struct GpuError {};
+@@ -46,6 +47,7 @@
+  uint32_t h,m;int device;CUcontext context=nullptr;bool closed=false;cudaStream_t stream=nullptr;std::mutex mutex;
+  Buffer weights[6],input,decoded_in,packed_in,gate,up,predown,decoded_down,packed_down,output,status;
+  float* host_output=nullptr;unsigned* host_status=nullptr;VfR13Stats stats{};
++ int r76_cpu_status=0;unsigned r76_mxcsr=0; // private diagnostics, not VfR13Stats/ABI
+  explicit Owner(const r13::HostWeights& host):h(host.h),m(host.m){
+   CUDA(cudaGetDevice(&device));cudaDeviceProp props{};CUDA(cudaGetDeviceProperties(&props,device));
+   if(!((props.major==7&&props.minor==0)||(props.major==12&&props.minor==1)))throw int(VF_R13_DEVICE);
+@@ -91,9 +93,15 @@
+  }
+  void read_status(){CUDA(cudaMemcpyAsync(host_status,status.p,4,cudaMemcpyDeviceToHost,stream));stats.status_d2h_bytes+=4;}
+  int exec(const uint32_t* in,uint32_t weight_bits,uint32_t* caller){
++  const auto r76_prepared=r76::prepare(in,h,reinterpret_cast<unsigned char*>(host_output),uint64_t(h)*4);
++  r76_cpu_status=r76_prepared.cpu_status;r76_mxcsr=r76_prepared.mxcsr;
++  if(r76_prepared.code){stats.poisoned=1;++stats.rejected;return r76_prepared.code;}
++  const uint64_t r76_bytes=uint64_t(h)+h/32;
+   CUDA(cudaMemsetAsync(status.p,0,4,stream));
+-  CUDA(cudaMemcpyAsync(input.p,in,uint64_t(h)*4,cudaMemcpyHostToDevice,stream));stats.input_h2d_bytes+=uint64_t(h)*4;
+-  quant(input,packed_in,decoded_in,h);project(0,decoded_in,gate,m,h);project(2,decoded_in,up,m,h);
++  CUDA(cudaMemcpyAsync(packed_in.p,host_output,r76_bytes,cudaMemcpyHostToDevice,stream));stats.input_h2d_bytes+=r76_bytes;
++  auto* r76_codes=static_cast<unsigned char*>(packed_in.p);auto* r76_scales=r76_codes+h;
++  vf_lab_predecode<<<(h+127)/128,128,0,stream>>>(r76_codes,r76_scales,static_cast<float*>(decoded_in.p),h);launched();
++  project(0,decoded_in,gate,m,h);project(2,decoded_in,up,m,h);
+ #ifdef VF_R13_TEST_SUBMISSION_FAILURE
+   static std::atomic<bool> inject_once{true};
+   if(inject_once.exchange(false)){

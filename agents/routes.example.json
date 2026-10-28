@@ -1,0 +1,13 @@
+{
+  "aliases": {
+    "muse": null,
+    "deepseek": null,
+    "glm": null,
+    "luna": null
+  },
+  "workers": 8,
+  "max_requests": 128,
+  "max_reserved_output_tokens": 524288,
+  "max_tokens": 4096,
+  "context_byte_limit": 65536
+}
