@@ -1,0 +1,13 @@
+{
+  "GPU": false,
+  "engine_started": false,
+  "error_class": null,
+  "exit_code": 0,
+  "source_sha256": "2304ec588529ffabd396c13c997f2e0325def01be34f735b45a61fe706bceb2a",
+  "ssh_pid": 1746813,
+  "status": "CPU_METADATA_COLLECTED",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 710,
+  "stdout_sha256": "9bd161580e874cd2509aef3d827587030f6bcbefe84d30759684c89a19193fb1"
+}
