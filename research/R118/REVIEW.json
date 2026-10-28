@@ -1,0 +1,12 @@
+{
+  "checked": [
+    "K16/QPN2 distinct from K32/R13",
+    "index_add not ordered Rust Collector equivalence",
+    "ownership mask and once-only coefficients",
+    "source and CPU observations distinct from proposed layer/generation",
+    "third-party notices and model licence distinct"
+  ],
+  "document_sha256": "7f71de12d8f98a06ac19fc7c180012c6709eec85f54fc493a5d0906c600c3203",
+  "scope": "source/design and evidence distinctions only; no runtime/GPU qualification",
+  "status": "BOUNDED_INDEPENDENT_SOURCE_DESIGN_REVIEW_NO_CONCRETE_FINDING"
+}

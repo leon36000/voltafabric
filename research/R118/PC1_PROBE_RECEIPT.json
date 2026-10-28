@@ -1,0 +1,12 @@
+{
+  "GPU": false,
+  "error_class": null,
+  "exit_code": 0,
+  "input_sha256": "d4fb01f1b667e605c486316f5f252428d0864910908136c413c07769b936715c",
+  "ssh_pid": 1597778,
+  "status": "CPU_METADATA_COLLECTED",
+  "stderr_bytes": 0,
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_bytes": 953,
+  "stdout_sha256": "701396b2d5b5ed68f205c5e911ff4fdeb4a3e20d487e8317924011ca16bd67ce"
+}

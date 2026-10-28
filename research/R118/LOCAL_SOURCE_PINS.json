@@ -1,0 +1,34 @@
+{
+  "strata_declared_r107_source": {
+    "files": {
+      "LICENSE": "949b9b0aada7476006469e58ee4ffb0e0f68c2d9137e90a356757b61a09d37f0",
+      "include/strata/core/layer.hpp": "b273603e633e63f93c877b278dd7f21dd4bb2909b4e94d8f174d84b2a975bfa2",
+      "include/strata/core/session.hpp": "ffe954333948aee170399252afaad2e8b2b1e81fb31ed9c4358597eba4ca2e3b",
+      "include/strata/core/verify.hpp": "12a7a1ca0323e2721cec2a91a11d2e32e0d3802db38b67494dbf9c2278d3d736",
+      "src/core/expert_source.cpp": "f3c79e9c28ae895a6e05d4d4aea8a5fc8ef4857e255f8b2e4ff148f409a017c3",
+      "src/core/session.cpp": "8b9d936fffb2b44af56198da3b330408e0997d30388b4e39da2082c16ba75a7b",
+      "src/program/generate.cpp": "fd85d08db152867dfe9a36afaee584b643bd26ddd70d791f9ef95ca47ab940c7"
+    },
+    "root": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-audit-20261016/upstream/Strata-296b59d2f73c8f04a805df29c2fa97655adace78"
+  },
+  "strata_r46": {
+    "files": {
+      "LICENSE": "949b9b0aada7476006469e58ee4ffb0e0f68c2d9137e90a356757b61a09d37f0",
+      "include/strata/core/layer.hpp": "b273603e633e63f93c877b278dd7f21dd4bb2909b4e94d8f174d84b2a975bfa2",
+      "include/strata/core/session.hpp": "ffe954333948aee170399252afaad2e8b2b1e81fb31ed9c4358597eba4ca2e3b",
+      "include/strata/core/verify.hpp": "ecfa771485baf268c47d21a67a89475173a7d280f0d5710786f6a6ee58965fa5",
+      "src/core/expert_source.cpp": "17bc84f1fc3ac11616a1f73100551c00d08e6dc6761545bc38180a81d3176ef4",
+      "src/core/session.cpp": "931e67a83f68e534a535c8aa5cdd2f5e034d99eccb8eda2d08a61d70a07780fd",
+      "src/program/generate.cpp": "0e88a54a83bd8cdaa1774fe86102436fab8191a11284314da1f9b85a22162acb"
+    },
+    "root": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-deep-audit-r46/strata"
+  },
+  "voltafabric": {
+    "files": {
+      "adapters/persistent_gpu_owner.py": "e12945ae9167843f7f056bcc12734ee222af5f361def1f108138960168d823f3",
+      "adapters/skinny_moe.py": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd",
+      "docs/DEPENDENCIES_AND_SOURCES.md": "0a5200eaf87d6434ca71e9799218374e3bc899591de53ee2721e690dacb576f4"
+    },
+    "root": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository"
+  }
+}

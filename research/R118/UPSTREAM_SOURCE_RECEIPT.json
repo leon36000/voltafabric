@@ -1,0 +1,79 @@
+{
+  "GPU": false,
+  "build": false,
+  "files": [
+    {
+      "bytes": 108469,
+      "functions": [
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply",
+        "process_weights_after_loading",
+        "apply"
+      ],
+      "path": "fork_patches/modelopt.py",
+      "sha256": "7d8288560318c37c340c6aff44c7d2c32ff80d7c22bd9b2eb82cb82e6bd1fb8f",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/fork_patches/modelopt.py"
+    },
+    {
+      "bytes": 31675,
+      "functions": [
+        "_qpn_prepack",
+        "_get_skinny_ext",
+        "process_weights_after_loading"
+      ],
+      "path": "fork_patches/marlin.py",
+      "sha256": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/fork_patches/marlin.py"
+    },
+    {
+      "bytes": 6482,
+      "functions": [
+        "prepack_experts",
+        "moe_apply"
+      ],
+      "path": "fork_patches/skinny_moe.py",
+      "sha256": "14de904780d8a867c6a3ee77a80633e6143a2a55f8de387dd3383eead53f517f",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/fork_patches/skinny_moe.py"
+    },
+    {
+      "bytes": 11506,
+      "path": "scripts/bootstrap-sm70.sh",
+      "sha256": "31728b46a6ddc85eb8b011110cf6727157b70416a6932e50eed4942405236fdd",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/scripts/bootstrap-sm70.sh"
+    },
+    {
+      "bytes": 2007,
+      "path": "LICENSE",
+      "sha256": "ea8d0bfb05424067d00b913000fff307526d0e84010d60bf6dc5003c461bf273",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/LICENSE"
+    },
+    {
+      "bytes": 11358,
+      "path": "LICENSE-APACHE-2.0",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/LICENSE-APACHE-2.0"
+    },
+    {
+      "bytes": 2188,
+      "path": "NOTICE",
+      "sha256": "1d9ac30258f015c2351636c2195d2a9d7ffe4d5d6b8a55e9f3c4f7ae50624578",
+      "url": "https://raw.githubusercontent.com/gilby/volta-nvfp4/b1a2181702e609dc92591343e46c63d1324ade43/NOTICE"
+    }
+  ],
+  "revision": "b1a2181702e609dc92591343e46c63d1324ade43",
+  "status": "PINNED_SOURCE_READ_ONLY"
+}

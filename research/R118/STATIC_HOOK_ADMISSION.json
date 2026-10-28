@@ -1,0 +1,58 @@
+{
+  "calls": [
+    {
+      "adapter_maximum": 1,
+      "adapter_minimum": 1,
+      "function": "prepack_experts",
+      "line": 1892,
+      "positional_arguments": 1
+    },
+    {
+      "adapter_maximum": 6,
+      "adapter_minimum": 6,
+      "function": "moe_apply",
+      "line": 2007,
+      "positional_arguments": 6
+    }
+  ],
+  "does_not_prove": [
+    "installed runtime compatibility",
+    "native symbol or GPU execution",
+    "checkpoint availability",
+    "CUDA graph safety",
+    "ordered distributed Collector integration",
+    "full-model generation"
+  ],
+  "imports": [
+    {
+      "module": "vllm.model_executor.layers.quantization",
+      "name": "skinny_moe"
+    }
+  ],
+  "next_gates": [
+    "admit exact Python3.12 fork environment without touching active services",
+    "use compatible NVFP4 K16 checkpoint; no IQ3 to MXFP4 alias",
+    "route full-engine calls through explicit per-rank identities and once-only coefficient/ordered reduction contract",
+    "real layer before full generation"
+  ],
+  "revision": "b1a2181702e609dc92591343e46c63d1324ade43",
+  "sources": {
+    "adapter": {
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/adapters/skinny_moe.py",
+      "sha256": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd"
+    },
+    "marlin": {
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/upstream-reuse-integration-r118-20261028/pinned-upstream/fork_patches__marlin.py",
+      "sha256": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147"
+    },
+    "modelopt": {
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/upstream-reuse-integration-r118-20261028/pinned-upstream/fork_patches__modelopt.py",
+      "sha256": "7d8288560318c37c340c6aff44c7d2c32ff80d7c22bd9b2eb82cb82e6bd1fb8f"
+    },
+    "owner": {
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/adapters/persistent_gpu_owner.py",
+      "sha256": "e12945ae9167843f7f056bcc12734ee222af5f361def1f108138960168d823f3"
+    }
+  },
+  "status": "STATIC_PINNED_HOOK_IMPORT_AND_ARITY_ADMITTED_RUNTIME_NOT_RUN"
+}
