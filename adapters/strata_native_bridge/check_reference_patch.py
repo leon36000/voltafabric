@@ -30,6 +30,7 @@ subprocess.run(['patch', '-p1', '--batch', '--forward', '-i', str(patch)], cwd=o
 #include "pool_hook.hpp"
 #include <type_traits>
 static_assert(std::is_convertible_v<decltype(&vf::strata_bridge::pool_cpu_only), strata::core::PoolMultiFn>);
+static_assert(std::is_convertible_v<decltype(&vf::strata_bridge::pool_cpu_by_layer), strata::core::PoolMultiFn>);
 int main() { strata::core::ExpertDispatch d; d.vf_cpu_pool = &vf::strata_bridge::pool_cpu_only; return d.vf_cpu_pool ? 0 : 1; }
 ''')
 includes = ['-I',str(overlay/'include'), '-I',str(root/'include'), '-I',str(script_dir), '-I',str(cuda), '-I',str(ggml/'ggml/include')]
@@ -51,12 +52,13 @@ if len(sys.argv) > 5:
     if optimization not in ('0', '2'):
         raise SystemExit('optimization must be 0 or 2')
     mode = sys.argv[7] if len(sys.argv) > 7 else 'extracted'
-    if mode not in ('extracted', 'full'):
-        raise SystemExit('mode must be extracted or full')
+    if mode not in ('extracted', 'full', 'full-fleet'):
+        raise SystemExit('mode must be extracted, full or full-fleet')
     # Full mode links the complete patched donor source with every unavailable
     # GPU, peer and fallback dependency replaced by an aborting test-only stub.
     # Reaching any such dependency fails the test, never launches CUDA.
     donor_sources = [str(extracted)] if mode == 'extracted' else [str(overlay/'src/core/expert_source.cpp'), str(script_dir/'donor_forbidden_stubs.cpp')]
     defines = ['-DVF_FULL_DONOR_TEST'] if mode == 'full' else []
-    subprocess.run(['c++','-std=c++20','-O'+optimization,'-pthread','-ffunction-sections','-fdata-sections','-Wl,--gc-sections',*defines,*includes, *donor_sources, str(script_dir/'pipe_client.cpp'), str(script_dir/'pool_hook.cpp'), str(script_dir/'donor_branch_live_test.cpp'), '-o',str(pathlib.Path(sys.argv[5]).resolve())], check=True)
+    test_source = 'donor_fleet_live_test.cpp' if mode == 'full-fleet' else 'donor_branch_live_test.cpp'
+    subprocess.run(['c++','-std=c++20','-O'+optimization,'-pthread','-ffunction-sections','-fdata-sections','-Wl,--gc-sections',*defines,*includes, *donor_sources, str(script_dir/'pipe_client.cpp'), str(script_dir/'pool_hook.cpp'), str(script_dir/test_source), '-o',str(pathlib.Path(sys.argv[5]).resolve())], check=True)
 print('candidate applies and four translation units pass syntax checking:', overlay)

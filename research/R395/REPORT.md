@@ -1,0 +1,7 @@
+# R395 — full Strata donor dispatch across local layers
+
+The R394 layer-indexed callback has now been exercised through the complete patched `expert_source.cpp` from Strata fb58e0dbc8399662c0e47c76578c6e878b14f6cf (MIT), rather than invoking the callback directly. The checker retains a private generated overlay and links test-only aborting stand-ins for unavailable GPU, peer and fallback functions. No CUDA runtime is linked or invoked.
+
+At both -O0 and -O2, the test invokes the actual `expert_pool_dispatch_multi` path for synthetic layers 0/7/0/7, through the C++ fleet, two Rust coordinators and four resident CPU rank sessions. It checks each output against its per-layer FP32 reference, separate batch counters, a miswired context refusal, and a missing-layer refusal through the donor with no modified output and a latched fleet. This establishes the selected CPU-only donor dispatch path across two layers, not the actual model driver: the test sets the donor layer explicitly and uses synthetic weights and local sockets.
+
+The candidate is not wired into the donor model initializer or deployed. Each coordinator is currently capped at four bound experts, and fleet construction still depends on externally supplied, consistently identified sessions. Full expert coverage, memory-bounded model setup, a complete generation, CUDA verifier/drain, real checkpoints and inter-PC execution are not qualified. No hardware admission or UNKNOWN was replayed.
