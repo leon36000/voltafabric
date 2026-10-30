@@ -1,0 +1,32 @@
+{
+  "status": "REAL_EXPERT_SUBTILES_RUST_PYTHON_DEQUANT_F64_BIT_EXACT",
+  "projections": [
+    {
+      "projection": "down",
+      "values": 2048,
+      "nonzero_values": 617,
+      "bit_mismatches": 0,
+      "pack_stdout_sha256": "3cc8b0c819cf0b8f89aea0dbb54a1d89240ecc5bfe123a92d14a6aa44b3f59dc",
+      "dequant_stdout_sha256": "f85609b295729420cc57271837cfe553afdf7e96e60c197f21df166e42ab9ffd"
+    },
+    {
+      "projection": "gate",
+      "values": 2048,
+      "nonzero_values": 727,
+      "bit_mismatches": 0,
+      "pack_stdout_sha256": "12f3fd7b13cbfdf84b9d2033a49ef83101e19339d6f8dbef1977cd6e61cb9403",
+      "dequant_stdout_sha256": "2c477db8c68151d0958de344b9a14e7bbe81d3d1257181c535c4afbb4d5cc5fd"
+    },
+    {
+      "projection": "up",
+      "values": 2048,
+      "nonzero_values": 716,
+      "bit_mismatches": 0,
+      "pack_stdout_sha256": "cb5f17f4846221a7476065a3f5ad6224654777e9c31c553a771262890b6d61a5",
+      "dequant_stdout_sha256": "88180e29bc962238993b4fc9264f6d90fb8dfb23211b6c2ee0a82dcc617a57c1"
+    }
+  ],
+  "values": 6144,
+  "gpu": false,
+  "limitations": "Three 32x64 slices only, ideal binary64 decode, no kernel FP16 intermediate/forward, model or full shard LFS hash."
+}

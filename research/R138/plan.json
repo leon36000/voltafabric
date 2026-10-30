@@ -1,0 +1,9 @@
+{
+  "gpu": false,
+  "method": "source-derived QPN2 binary16 dequant LUT vs ideal E2M1*E4M3*global in binary64",
+  "no_retry": true,
+  "result": "descriptive absolute error, equality and underflow counts; no performance claims",
+  "sample": "R132 full actual expert, 3 planes",
+  "sample_hashes": "R133",
+  "values": 3145728
+}

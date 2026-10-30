@@ -1,0 +1,1 @@
+{"status": "FOUR_MANUAL_SENTINELS_PASS", "tests": ["low_high_nibble", "reversed_nibble", "scale_change", "global_factor_change"]}

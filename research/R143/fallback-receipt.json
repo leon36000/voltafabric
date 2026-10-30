@@ -1,0 +1,13 @@
+{
+  "metadata_sha256": "09f83baa3202ec3da98a284a56afdf1ba69976e4af7172488887e5b2b20591a9",
+  "metadata_size": 7277,
+  "name": "pydantic-core",
+  "plan_sha256": "dab0ccb1e06635420697255f689e0f73f887d4cd586ae3de9069d39b1223be07",
+  "requires_dist": [
+    "typing-extensions>=4.14.1"
+  ],
+  "requires_python": ">=3.9",
+  "status": "VERIFIED_WHEEL_AND_METADATA",
+  "version": "2.41.5",
+  "wheel_sha256": "eceb81a8d74f9267ef4081e246ffd6d129da5d87e37a77c9bde550cb04870c1c"
+}

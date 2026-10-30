@@ -1,0 +1,13 @@
+{
+  "aggregate_cap": 33554432,
+  "gpu": false,
+  "network_timeout_seconds": 8,
+  "no_wheel_download": true,
+  "per_response_cap": 2097152,
+  "requests_max": 188,
+  "retry": false,
+  "semantics": "Release JSON metadata and selected artifact SHA; not wheel bytes, not exact PEP658 metadata or verified dependency lock",
+  "source_count": 189,
+  "source_sha256": "4962e7cf230fa04cbbd2e1b2542807aacf4e52bf964f8449b68afbe35a8d69c1",
+  "workers": 4
+}

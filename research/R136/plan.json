@@ -1,0 +1,10 @@
+{
+  "candidate": "Rust qpn2-pack then qpn2-dequant historical CLI",
+  "cli_sha256": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+  "comparison": "Python independent bit formula vs Rust f64 bit-exact including signed zero",
+  "dtype_contract": "E2M1 low nibble first, E4M3 fn block16, F32 global promoted to f64",
+  "full_shard_sha_verified": false,
+  "gpu": false,
+  "input_slice": "first 32 rows and first 64 columns of each of three experts projections",
+  "source_sample": "R132 SHA linked"
+}

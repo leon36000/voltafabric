@@ -1,0 +1,10 @@
+{
+  "coefficient": 0.375,
+  "gpu": false,
+  "input": "((i%31)-15)/16",
+  "mathematics": "source-derived FP16 dequant weights, float64 matrix products and silu, coefficient once",
+  "no_retry": true,
+  "oracle": "struct FP16 scalar versus torch FP16 vectorization, both with f64 reduction; absolute+relative tol1e-10",
+  "sample": "R132 real expert partial TLS ranges, no full shard hash",
+  "scope": "CPU surrogate only; explicitly does not model native GPU accumulation, activation rounding or output"
+}

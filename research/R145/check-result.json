@@ -1,0 +1,19 @@
+{
+  "donors": [
+    {
+      "direct_tilelang_imports": 0,
+      "name": "fork_patches__skinny_moe.py",
+      "sha256": "14de904780d8a867c6a3ee77a80633e6143a2a55f8de387dd3383eead53f517f"
+    },
+    {
+      "direct_tilelang_imports": 0,
+      "name": "fork_patches__marlin.py",
+      "sha256": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147"
+    }
+  ],
+  "gdn_default_enabled_line": 290,
+  "gdn_lazy_tilelang_import_line": 1668,
+  "gdn_sha256": "9bcf5ca97363d8e08a669105fe27f163c51e443fc686580ac4842e6c84d3e7f3",
+  "limits": "Direct static imports only; transitive, dynamic, compiled code and whether a selected model executes this path remain unproven.",
+  "status": "STATIC_CALL_BOUNDARIES_IDENTIFIED"
+}

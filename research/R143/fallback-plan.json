@@ -1,0 +1,7 @@
+{
+  "metadata_limit": 1048576,
+  "operation": "one exact wheel; no install, one request, no retry",
+  "sha256": "eceb81a8d74f9267ef4081e246ffd6d129da5d87e37a77c9bde550cb04870c1c",
+  "size": 2075366,
+  "url": "https://files.pythonhosted.org/packages/0d/76/941cc9f73529988688a665a5c0ecff1112b3d95ab48f81db5f7606f522d3/pydantic_core-2.41.5-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+}

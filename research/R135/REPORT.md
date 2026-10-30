@@ -1,0 +1,9 @@
+# R135 — prépacking réel de trois projections d'un expert MoE
+
+Le plan `plan.json` SHA-256 `ca84e77c33efafeaf21921a3be1a67d0afe76c011dfe72d84db2395ec3cd223b` prédéclare une comparaison bit à bit, CPU uniquement, des trois projections de l'expert réel R132. Les codes et scales échantillonnés ont été re-hachés ; le SHA LFS du shard complet reste non vérifié.
+
+La véritable fonction `_qpn_prepack` a été extraite par AST du fichier `fork_patches/marlin.py` du donneur épinglé, après vérification de son SHA `b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147`. Elle a été exécutée avec Torch CPU sur PC1, sans charger le reste du moteur ni le kernel CUDA. Indépendamment, la commande réelle `qpn2-pack` du CLI Rust ARM historique lié au core canonique a été exécutée sur PC6 ; SHA du CLI `11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4`.
+
+Pour chaque projection down, gate et up, les deux sorties sont **identiques octet par octet** : 524 288 octets de codes et 65 536 octets d'échelles par projection. Les SHA des six sorties sont dans `result.json`, et les trois reçus Rust sont conservés. Le donneur énonce dans le même fichier l'ordre bas nibble en premier et la formule `E2M1 × scale FP8 × weight_scale_2` pour son chemin NVFP4 ; il s'agit de la sémantique source déclarée, pas d'une preuve indépendante sur l'export de chaque poids.
+
+Ce résultat est une preuve de permutation CPU pour cet échantillon seulement. Il ne teste ni kernel CUDA, ni ses arrondis, ni l'activation/Collector, ni un modèle complet ou un entraînement. Les sorties binaires restent sous `.runs/r135-real-expert-prepack-cpu/` et ne sont pas incluses dans le dépôt. Le runtime 1Cat et ses dépendances restent incomplets ; aucune promotion canonique. Les licences et notices du code donneur doivent être conservées.

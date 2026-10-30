@@ -1,0 +1,8 @@
+{
+  "comparison": "Python struct binary16 vs Torch CPU binary16 exact bits, all 16 nibbles for each distinct scale and factor",
+  "gpu": false,
+  "kernel": "volta-nvfp4 b1a2181702e609dc92591343e46c63d1324ade43 skinny_kernels.cu SHA256 9c47c43ee5c1c69f688bf897062efea6c459f9ad9803869e2a9e9eb0f33fa136",
+  "limits": "dequant intermediate only, no native kernel, no accumulation or model",
+  "sample": "R132 distinct E4M3 scales and 3 F32 global factors",
+  "steps": "bitcast scale<<7 to half; half*256; half(global*16384); half multiply scale; bitcast E2M1 magnitude<<9 and sign; half multiply"
+}

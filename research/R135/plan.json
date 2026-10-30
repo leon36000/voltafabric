@@ -1,0 +1,25 @@
+{
+  "expectation": "bit-exact donor Torch CPU permutation vs actual Rust qpn2-pack, codes and scales",
+  "gpu": false,
+  "rust_cli_sha256": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+  "sample_codes_sha256": "c1bbdf2d6c0c15d7da34352689d65530b4daf981aa6392bfb17d17010dd7e993",
+  "sample_full_shard_lfs_verified": false,
+  "sample_scales_sha256": "98aa1d1823f373ff28fc078a0443c1de7fa45594a9cfee1751e6d3f4cacc85aa",
+  "source": "volta-nvfp4 b1a2181702e609dc92591343e46c63d1324ade43 fork_patches/marlin.py::_qpn_prepack AST only",
+  "source_sha256": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147",
+  "three_shapes": [
+    [
+      2048,
+      512
+    ],
+    [
+      512,
+      2048
+    ],
+    [
+      512,
+      2048
+    ]
+  ],
+  "timeout_per_call_seconds": 60
+}

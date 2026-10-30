@@ -1,0 +1,37 @@
+{
+  "status": "DONOR_TORCH_CPU_AND_RUST_QPN2_PACK_BIT_EXACT",
+  "projections": [
+    {
+      "projection": "down",
+      "rows": 2048,
+      "cols": 512,
+      "codes_bytes": 524288,
+      "scale_bytes": 65536,
+      "codes_sha256": "a5e2976ed8737e65301e9800601f0c25af3ca5c6120f8869c716cd1e89f53805",
+      "scale_sha256": "c38682114220d0465012459120a5a6441c3b4fe908ae06d25c4430a1aac0d696",
+      "equal": true
+    },
+    {
+      "projection": "gate",
+      "rows": 512,
+      "cols": 2048,
+      "codes_bytes": 524288,
+      "scale_bytes": 65536,
+      "codes_sha256": "504d6eb0ea9553dec92944de283000b9a6aba57cac53d762fd3adbd6e41079d7",
+      "scale_sha256": "6d7271865fe950dda2489a4c25a492b278ed86cc158def808f12b1de6979cd8c",
+      "equal": true
+    },
+    {
+      "projection": "up",
+      "rows": 512,
+      "cols": 2048,
+      "codes_bytes": 524288,
+      "scale_bytes": 65536,
+      "codes_sha256": "ac55e4048f4c5219ff83542dc2a24a3bbcd59d1f471320fbd3fd9d394a254662",
+      "scale_sha256": "84cb77db75588f812a905e33879f3a73e5b4567fd124802e7c3a71e6d7015f27",
+      "equal": true
+    }
+  ],
+  "gpu": false,
+  "scope": "Actual donor Torch CPU permutation vs actual historical Rust CLI; not CUDA or numerical forward, complete shard SHA unverified."
+}

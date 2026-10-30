@@ -1,0 +1,13 @@
+{
+  "aggregate_cap": 134217728,
+  "entries": 188,
+  "gpu": false,
+  "index_cap": 8388608,
+  "metadata_cap": 1048576,
+  "no_wheels": true,
+  "request_cap": 376,
+  "retry": false,
+  "source_sha256": "060a60ed822b7e42f9e3cd7de0b0633e33b3002bd4d13a6a151b0e9e2a5b367c",
+  "timeout": 8,
+  "workers": 4
+}

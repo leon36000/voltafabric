@@ -1,0 +1,6 @@
+{
+  "status": "CANDIDATE_FILENAMES_VALIDATED_NOT_A_LOCK",
+  "selected_count": 189,
+  "invalid": [],
+  "limitations": "Only each candidate filename vs its own reported requirement, not all transitive constraints; no artifact hashes, no installs; patched pip terminal2."
+}

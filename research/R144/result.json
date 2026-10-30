@@ -1,0 +1,24 @@
+{
+  "1cat_version": "1.2.2",
+  "donor_bootstrap_sha256": "31728b46a6ddc85eb8b011110cf6727157b70416a6932e50eed4942405236fdd",
+  "donor_revision": "b1a2181702e609dc92591343e46c63d1324ade43",
+  "metadata_sha256": "8c21ab87c8454d229c175deb0b8927f55529bc40f468113fb1f015f0001b0cd9",
+  "rows": [
+    {
+      "1cat_requirement": "tilelang==0.1.9",
+      "donor_requested": "==0.1.10",
+      "donor_version_satisfies_1cat": false,
+      "package": "tilelang",
+      "positive_control_0_1_9": true
+    },
+    {
+      "1cat_requirement": "apache-tvm-ffi==0.1.9",
+      "donor_requested": "==0.1.10",
+      "donor_version_satisfies_1cat": false,
+      "package": "apache-tvm-ffi",
+      "positive_control_0_1_9": true
+    }
+  ],
+  "scope": "Exact 1Cat wheel metadata and donor bootstrap only. No claim about other wheel versions or proof of actual runtime incompatibility; no install or GPU.",
+  "status": "INCOMPATIBLE_DECLARED_REQUIREMENTS"
+}

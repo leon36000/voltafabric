@@ -1,0 +1,590 @@
+{
+  "python_bytes_scanned": 28240527,
+  "python_files_scanned": 1876,
+  "scope": "static zipped Python sources only, no imports, no extensions, no GPU",
+  "targets": [
+    {
+      "direct_tilelang": false,
+      "imports": [
+        "torch",
+        "vllm",
+        "vllm.triton_utils",
+        "vllm.utils.math_utils"
+      ],
+      "path": "vllm/model_executor/layers/fused_moe/moe_align_block_size.py",
+      "sha256": "c3f7fc2087836f0160a32ab99ceb1d8f6e87c793679da34dd672e225cb7fa31b"
+    },
+    {
+      "direct_tilelang": false,
+      "imports": [
+        "enum",
+        "torch",
+        "vllm.envs",
+        "vllm.logger",
+        "vllm.model_executor.layers.fused_moe.config",
+        "vllm.model_executor.layers.fused_moe.fused_moe_method_base",
+        "vllm.model_executor.layers.quantization.base_config",
+        "vllm.platforms",
+        "vllm.utils.torch_utils",
+        "vllm.v1.worker.ubatching"
+      ],
+      "path": "vllm/model_executor/layers/fused_moe/runner/shared_experts.py",
+      "sha256": "e7504952e81b45ee69e4be5edce5f73b06186b6b309e3acd9c27bb6fe8109ee4"
+    }
+  ],
+  "tilelang_source_hits": [
+    {
+      "hits": [
+        {
+          "line": 115,
+          "text": "# When unset, TileLang routes JIT temp dirs through a world-shared"
+        },
+        {
+          "line": 120,
+          "text": "os.environ.setdefault(\"TILELANG_CLEANUP_TEMP_FILES\", \"1\")"
+        }
+      ],
+      "path": "vllm/env_override.py",
+      "sha256": "cb40c4779fa4fccfde869d93b6c308dd43f3d163523e5c7a4743fa085c9f8be7"
+    },
+    {
+      "hits": [
+        {
+          "line": 4,
+          "text": "from .tilelang import *"
+        },
+        {
+          "line": 17,
+          "text": "\"mhc_pre_tilelang\","
+        },
+        {
+          "line": 18,
+          "text": "\"mhc_post_tilelang\","
+        },
+        {
+          "line": 19,
+          "text": "\"mhc_fused_post_pre_tilelang\","
+        },
+        {
+          "line": 20,
+          "text": "\"hc_head_fused_tilelang\","
+        }
+      ],
+      "path": "vllm/model_executor/kernels/mhc/__init__.py",
+      "sha256": "91c1b1633e160ebd776bf89c6efcec8cd5b6318ac579a969ba3000090f3d76ad"
+    },
+    {
+      "hits": [
+        {
+          "line": 21,
+          "text": "def _tilelang_hc_prenorm_gemm("
+        },
+        {
+          "line": 32,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang_kernels import ("
+        },
+        {
+          "line": 33,
+          "text": "hc_prenorm_gemm_block_m_tilelang,"
+        },
+        {
+          "line": 34,
+          "text": "hc_prenorm_gemm_tilelang,"
+        },
+        {
+          "line": 44,
+          "text": "hc_prenorm_gemm_block_m_tilelang("
+        },
+        {
+          "line": 63,
+          "text": "hc_prenorm_gemm_tilelang("
+        },
+        {
+          "line": 76,
+          "text": "hc_prenorm_gemm_tilelang("
+        },
+        {
+          "line": 90,
+          "text": "def mhc_pre_tilelang("
+        },
+        {
+          "line": 129,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang_kernels import ("
+        },
+        {
+          "line": 131,
+          "text": "mhc_pre_big_fuse_tilelang,"
+        },
+        {
+          "line": 132,
+          "text": "mhc_pre_big_fuse_with_norm_tilelang,"
+        },
+        {
+          "line": 203,
+          "text": "_tilelang_hc_prenorm_gemm("
+        },
+        {
+          "line": 213,
+          "text": "mhc_pre_big_fuse_tilelang("
+        },
+        {
+          "line": 232,
+          "text": "mhc_pre_big_fuse_with_norm_tilelang("
+        },
+        {
+          "line": 260,
+          "text": "def _mhc_pre_tilelang_fake("
+        },
+        {
+          "line": 303,
+          "text": "def mhc_post_tilelang("
+        },
+        {
+          "line": 309,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang_kernels import ("
+        },
+        {
+          "line": 310,
+          "text": "mhc_post_tilelang as _mhc_post_kernel,"
+        },
+        {
+          "line": 326,
+          "text": "def mhc_fused_post_pre_tilelang("
+        },
+        {
+          "line": 358,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang_kernels import ("
+        },
+        {
+          "line": 360,
+          "text": "mhc_fused_tilelang,"
+        },
+        {
+          "line": 361,
+          "text": "mhc_post_tilelang,"
+        },
+        {
+          "line": 362,
+          "text": "mhc_pre_big_fuse_tilelang,"
+        },
+        {
+          "line": 363,
+          "text": "mhc_pre_big_fuse_with_norm_tilelang,"
+        },
+        {
+          "line": 461,
+          "text": "mhc_fused_tilelang("
+        },
+        {
+          "line": 477,
+          "text": "mhc_post_tilelang("
+        },
+        {
+          "line": 499,
+          "text": "_tilelang_hc_prenorm_gemm("
+        },
+        {
+          "line": 509,
+          "text": "mhc_pre_big_fuse_tilelang("
+        },
+        {
+          "line": 528,
+          "text": "mhc_pre_big_fuse_with_norm_tilelang("
+        },
+        {
+          "line": 557,
+          "text": "def _mhc_fused_post_pre_tilelang_fake("
+        }
+      ],
+      "path": "vllm/model_executor/kernels/mhc/tilelang.py",
+      "sha256": "f32dd4949e21e92d9d81e9b40b6ce77aa7b08c58aabc478079a3f3eba1ec6c3e"
+    },
+    {
+      "hits": [
+        {
+          "line": 10,
+          "text": "from vllm.utils.import_utils import has_tilelang"
+        },
+        {
+          "line": 13,
+          "text": "# TileLang is used for MHC on CUDA and ROCm. Keep non-GPU imports cheap so"
+        },
+        {
+          "line": 14,
+          "text": "# registering the Python wrapper modules does not require TileLang everywhere."
+        },
+        {
+          "line": 16,
+          "text": "if not has_tilelang():"
+        },
+        {
+          "line": 18,
+          "text": "\"tilelang is required for mhc but is not installed. Install it with \""
+        },
+        {
+          "line": 19,
+          "text": "\"`pip install tilelang`.\""
+        },
+        {
+          "line": 21,
+          "text": "import tilelang"
+        },
+        {
+          "line": 22,
+          "text": "import tilelang.language as T"
+        },
+        {
+          "line": 24,
+          "text": "tilelang = None  # type: ignore[assignment]"
+        },
+        {
+          "line": 43,
+          "text": "pass_configs: dict[tilelang.PassConfigKey, Any] = {"
+        },
+        {
+          "line": 44,
+          "text": "tilelang.PassConfigKey.TL_DISABLE_WARP_SPECIALIZED: True,"
+        },
+        {
+          "line": 45,
+          "text": "tilelang.PassConfigKey.TL_DISABLE_TMA_LOWER: True,"
+        },
+        {
+          "line": 49,
+          "text": "pass_configs[tilelang.PassConfigKey.TL_PTXAS_REGISTER_USAGE_LEVEL] = 10"
+        },
+        {
+          "line": 52,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 55,
+          "text": "def mhc_pre_big_fuse_tilelang("
+        },
+        {
+          "line": 194,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 197,
+          "text": "def mhc_pre_big_fuse_with_norm_tilelang("
+        },
+        {
+          "line": 356,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 359,
+          "text": "def mhc_fused_tilelang("
+        },
+        {
+          "line": 375,
+          "text": ") -> tilelang.JITKernel:"
+        },
+        {
+          "line": 479,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 482,
+          "text": "def mhc_post_tilelang("
+        },
+        {
+          "line": 492,
+          "text": ") -> tilelang.JITKernel:"
+        },
+        {
+          "line": 534,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 537,
+          "text": "def hc_prenorm_gemm_tilelang("
+        },
+        {
+          "line": 548,
+          "text": ") -> tilelang.JITKernel:"
+        },
+        {
+          "line": 620,
+          "text": "@tilelang.jit("
+        },
+        {
+          "line": 623,
+          "text": "def hc_prenorm_gemm_block_m_tilelang("
+        },
+        {
+          "line": 634,
+          "text": ") -> tilelang.JITKernel:"
+        },
+        {
+          "line": 715,
+          "text": "@tilelang.jit("
+        }
+      ],
+      "path": "vllm/model_executor/kernels/mhc/tilelang_kernels.py",
+      "sha256": "fb953419f3765e785f485eec020d0574c3359e1f45d64bb29ea9540956439729"
+    },
+    {
+      "hits": [
+        {
+          "line": 9,
+          "text": "from vllm.utils.import_utils import has_tilelang"
+        },
+        {
+          "line": 11,
+          "text": "HAS_TILELANG = has_tilelang()"
+        },
+        {
+          "line": 44,
+          "text": "return torch.ops.vllm.mhc_pre_tilelang("
+        },
+        {
+          "line": 92,
+          "text": "if HAS_TILELANG:"
+        },
+        {
+          "line": 93,
+          "text": "return torch.ops.vllm.mhc_pre_tilelang("
+        },
+        {
+          "line": 173,
+          "text": "return torch.ops.vllm.mhc_post_tilelang("
+        },
+        {
+          "line": 197,
+          "text": "if HAS_TILELANG:"
+        },
+        {
+          "line": 198,
+          "text": "return torch.ops.vllm.mhc_post_tilelang("
+        },
+        {
+          "line": 246,
+          "text": "out = torch.ops.vllm.hc_head_fused_kernel_tilelang("
+        },
+        {
+          "line": 269,
+          "text": "if HAS_TILELANG:"
+        },
+        {
+          "line": 270,
+          "text": "out = torch.ops.vllm.hc_head_fused_kernel_tilelang("
+        },
+        {
+          "line": 338,
+          "text": "return torch.ops.vllm.mhc_fused_post_pre_tilelang("
+        },
+        {
+          "line": 376,
+          "text": "return torch.ops.vllm.mhc_fused_post_pre_tilelang("
+        }
+      ],
+      "path": "vllm/model_executor/layers/mhc.py",
+      "sha256": "05b86d615719bdf5d8af4173d6318f994774d2fbae4519f034bb4c0e50ea10e2"
+    },
+    {
+      "hits": [
+        {
+          "line": 293,
+          "text": "raw = os.getenv(\"FLASH_QLA_SM70_USE_ORIGINAL_TILELANG\")"
+        },
+        {
+          "line": 1666,
+          "text": "use_original_tilelang = _sm70_flashqla_original_prefill_enabled()"
+        },
+        {
+          "line": 1667,
+          "text": "if use_original_tilelang:"
+        },
+        {
+          "line": 1669,
+          "text": "chunk_gated_delta_rule_fwd_sm70_tilelang,"
+        },
+        {
+          "line": 1673,
+          "text": "\"Using original FlashQLA-SM70 TileLang GDN prefill path \""
+        },
+        {
+          "line": 1736,
+          "text": "if use_original_tilelang:"
+        },
+        {
+          "line": 1739,
+          "text": "\"SM70 original TileLang FlashQLA prefill received exp(g); \""
+        },
+        {
+          "line": 1744,
+          "text": "_, _, out, _, final_state = chunk_gated_delta_rule_fwd_sm70_tilelang("
+        },
+        {
+          "line": 1786,
+          "text": "f\"original_tilelang={use_original_tilelang}\""
+        },
+        {
+          "line": 4373,
+          "text": "# random profile tensors cannot trigger pathological TileLang runtime"
+        },
+        {
+          "line": 4543,
+          "text": "\"indexed original TileLang variant.\","
+        }
+      ],
+      "path": "vllm/model_executor/layers/mamba/gdn/qwen_gdn_linear_attn.py",
+      "sha256": "9bcf5ca97363d8e08a669105fe27f163c51e443fc686580ac4842e6c84d3e7f3"
+    },
+    {
+      "hits": [
+        {
+          "line": 56,
+          "text": "from vllm.utils.import_utils import has_tilelang"
+        },
+        {
+          "line": 407,
+          "text": "# Lazy import to avoid top-level tilelang dependency."
+        },
+        {
+          "line": 476,
+          "text": "self.has_tilelang = has_tilelang()"
+        },
+        {
+          "line": 598,
+          "text": "if not self.has_tilelang:"
+        },
+        {
+          "line": 686,
+          "text": "self.has_tilelang = has_tilelang()"
+        },
+        {
+          "line": 753,
+          "text": "if layer is not None and self.has_tilelang:"
+        }
+      ],
+      "path": "vllm/models/deepseek_v4/amd/model.py",
+      "sha256": "08ec7c7f2ec4747439928c26a8ace66ed58ee851a7065057d2feb13d804b3630"
+    },
+    {
+      "hits": [
+        {
+          "line": 45,
+          "text": "from vllm.utils.import_utils import has_tilelang"
+        },
+        {
+          "line": 125,
+          "text": "self.has_tilelang = has_tilelang()"
+        },
+        {
+          "line": 158,
+          "text": "if self.has_tilelang:"
+        }
+      ],
+      "path": "vllm/models/deepseek_v4/amd/mtp.py",
+      "sha256": "b1ae8727019638d8452ca2f5cc9d8fc3cc8197d159f379356e6277c47622b49f"
+    },
+    {
+      "hits": [
+        {
+          "line": 18,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang import ("
+        },
+        {
+          "line": 19,
+          "text": "hc_head_fused_kernel_tilelang,"
+        },
+        {
+          "line": 20,
+          "text": "mhc_fused_post_pre_tilelang,"
+        },
+        {
+          "line": 21,
+          "text": "mhc_post_tilelang,"
+        },
+        {
+          "line": 22,
+          "text": "mhc_pre_tilelang,"
+        },
+        {
+          "line": 874,
+          "text": "post_mix, res_mix, x = mhc_pre_tilelang("
+        },
+        {
+          "line": 888,
+          "text": "residual, post_mix, res_mix, x = mhc_fused_post_pre_tilelang("
+        },
+        {
+          "line": 907,
+          "text": "# attn_norm is fused into mhc_pre_tilelang / mhc_fused_post_pre above."
+        },
+        {
+          "line": 912,
+          "text": "residual, post_mix, res_mix, x = mhc_fused_post_pre_tilelang("
+        },
+        {
+          "line": 1084,
+          "text": "hidden_states = mhc_post_tilelang("
+        },
+        {
+          "line": 1095,
+          "text": "hidden_states = hc_head_fused_kernel_tilelang("
+        }
+      ],
+      "path": "vllm/models/deepseek_v4/nvidia/model.py",
+      "sha256": "3d0ae4c744eec6e0e3f1f38ffd5d1a9210dcd4b866e6878e2dbbd4c5b8d0fc42"
+    },
+    {
+      "hits": [
+        {
+          "line": 27,
+          "text": "from vllm.model_executor.kernels.mhc.tilelang import ("
+        },
+        {
+          "line": 28,
+          "text": "hc_head_fused_kernel_tilelang,"
+        },
+        {
+          "line": 29,
+          "text": "mhc_post_tilelang,"
+        },
+        {
+          "line": 159,
+          "text": "hidden_states = mhc_post_tilelang(hidden_states, residual, post_mix, res_mix)"
+        },
+        {
+          "line": 239,
+          "text": "hidden_states = hc_head_fused_kernel_tilelang("
+        }
+      ],
+      "path": "vllm/models/deepseek_v4/nvidia/mtp.py",
+      "sha256": "833f26d4de9b265f3835b7f93b3d7afd728b174367d039509a241f6e6c07669d"
+    },
+    {
+      "hits": [
+        {
+          "line": 437,
+          "text": "def has_tilelang() -> bool:"
+        },
+        {
+          "line": 438,
+          "text": "\"\"\"Whether the optional `tilelang` package is available.\"\"\""
+        },
+        {
+          "line": 439,
+          "text": "return _has_module(\"tilelang\")"
+        }
+      ],
+      "path": "vllm/utils/import_utils.py",
+      "sha256": "697c56e9a91ed58ccb439986d1a55360d78a5c4bde3c898117397c6ef51a71c6"
+    },
+    {
+      "hits": [
+        {
+          "line": 226,
+          "text": "raw = os.getenv(\"FLASH_QLA_SM70_USE_ORIGINAL_TILELANG\")"
+        }
+      ],
+      "path": "vllm/v1/attention/backends/gdn_attn.py",
+      "sha256": "cc46be1fb2892b15c715db290ccb80028ed74fa52e650c6b9f38f60ffcd22e1a"
+    }
+  ],
+  "wheel_sha256": "8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6"
+}

@@ -1,0 +1,13 @@
+{
+  "config_sha256_declared": "58aefa1c9eff7989f431d748f2ddec39446cb1fd2a69acc46e285c6a37b0cecc",
+  "extracted_config_sha256": "6d96058437a78e4b9e01a7f1772d26c2e367210cc29529609b85403d572ab1b4",
+  "full_attention_layers": 10,
+  "layer0": "linear_attention",
+  "limits": "Config and Python source only; does not show runtime route, FlashQLA execution, model load, V100 support or full checkpoint hash.",
+  "linear_attention_layers": 30,
+  "model": "nvidia/Qwen3.6-35B-A3B-NVFP4",
+  "model_source_sha256": "483e47f77102865bb4df733cfbebaf82417126403b817b2efd1b53ef5ea3e425",
+  "revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+  "status": "MODEL_STATIC_ROUTE_CONFIRMED",
+  "wheel_sha256": "8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6"
+}

@@ -1,0 +1,1 @@
+{"argv": ["ssh", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=8", "pc1-lan", "python3", "-B", "-"], "source_sha256": "36987f3a09734ecf5448040fc440fae4681f5c161b200b23dcffe30c481677bb", "target": "r140-tvm-ffi-cpu-20261028", "gpu": false, "retry": false}

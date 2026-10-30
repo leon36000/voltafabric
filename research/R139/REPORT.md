@@ -1,0 +1,7 @@
+# R139 — calcul CPU d'expert avec déquantisation FP16 émulée
+
+Deux implémentations CPU ont utilisé les trois plans de poids réels échantillonnés R132, le même vecteur synthétique et le coefficient 0,375 de R134. La première émule les étapes de déquantisation FP16 QPN2 avec `struct` et calcule les produits scalaires en binaire64 ; la seconde utilise les opérations `torch.float16` CPU pour la déquantisation et les produits matriciels binaire64. Toutes deux appliquent gate, SiLU, up et down. Le plan externe SHA `87584f3fac4cc7ed69a93db66b920ee8762df9bd5e62ee62d8af15c3ebf5bd1f` préétablit les conventions et les tolérances absolue et relative de 1e-10.
+
+Les 2 048 valeurs résultantes concordent dans ces tolérances ; l'écart absolu maximum est `1.734723475976807e-18`. Le calcul couvre toutes les positions des trois matrices de l'expert, mais les deux programmes partagent les mêmes hypothèses de format. Les échelles et les résultats restent liés aux SHA R132/R139.
+
+Ce calcul est un **substitut CPU**, pas l'exécution CUDA : l'accumulation, l'activation et la sortie emploient ici binaire64 et ne reproduisent pas nécessairement l'ordre ou les arrondis FP32/FP16 du kernel. Aucun GPU, moteur ou modèle complet n'a été chargé ; le SHA LFS du shard complet n'est pas vérifié. Les sorties ne doivent pas être utilisées comme une tolérance empirique ajustée après mesure GPU. Le runtime 1Cat et les dépendances restent à qualifier.
