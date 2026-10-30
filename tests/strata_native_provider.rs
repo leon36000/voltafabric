@@ -958,7 +958,13 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     drop(input);
     assert!(child.wait().unwrap().success());
     #[cfg(unix)]
-    if let Some(client_path) = std::env::var_os("VF_STRATA_CPP_CLIENT") {
+    for client_path in [
+        std::env::var_os("VF_STRATA_CPP_CLIENT"),
+        std::env::var_os("VF_STRATA_CPP_POOL"),
+    ]
+    .into_iter()
+    .flatten()
+    {
         use std::os::{fd::OwnedFd, unix::net::UnixStream};
         let expected_path = base.join("expected-f32.bin");
         let mut expected_file = std::fs::File::create(&expected_path).unwrap();

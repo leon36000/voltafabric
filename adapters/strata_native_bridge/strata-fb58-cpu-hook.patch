@@ -1,0 +1,151 @@
+--- a/include/strata/core/verify.hpp
++++ b/include/strata/core/verify.hpp
+@@ -43,7 +43,7 @@
+ class RemoteExpertOpt;
+ 
+ /// The CPU pool for a window: x_f (n_tok, n_embd), ids (n_tok, k) -> out (n_tok * k, n_embd), hit rows zeroed.
+-using PoolMultiFn = void (*)(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
++using PoolMultiFn = bool (*)(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
+                              int64_t layer);
+ 
+ struct VerifyHits {
+--- a/include/strata/core/expert_source.hpp
++++ b/include/strata/core/expert_source.hpp
+@@ -289,6 +289,9 @@
+ struct ForesightSwap;
+ 
+ struct ExpertDispatch {
++    // VoltaFabric opt-in. The hook is admitted only for a CPU-only expert plan.
++    bool (*vf_cpu_pool)(void*, const float*, const int32_t*, int64_t, int64_t, float*, int64_t) = nullptr;
++    void* vf_cpu_context = nullptr;
+     ForesightSwap* fs = nullptr;   ///< Foresight swap space (STRATA_FS_SLOTS; null = off)
+     strata::kernels::cpu::ExpertPool* pool = nullptr;
+     ExpertSource* src = nullptr;
+--- a/src/core/expert_source.cpp
++++ b/src/core/expert_source.cpp
+@@ -3112,6 +3112,25 @@
+         d.fail_layer = d.layers;
+         return;
+     }
++    if (d.vf_cpu_pool != nullptr) {
++        // This first candidate refuses all other expert owners before launching them.
++        if (!x_f || !ids || !out || k < 1 || k > 64 || n_tok * k > kMaxWindowEntries ||
++            d.layers < 0 || d.layers >= 48 || d.n_expert != 512 || d.fs != nullptr ||
++            d.peer != nullptr || d.remote_count != 0 || d.lookahead != nullptr || d.pcie_num != 0) {
++            d.failed = true; d.fail = "VoltaFabric requires a CPU-only expert plan"; d.fail_layer = d.layers; return;
++        }
++        for (int64_t i = 0; i < n_tok * k; ++i) if (ids[i] < 0 || ids[i] >= d.n_expert) {
++            d.failed = true; d.fail = "VoltaFabric routed expert out of range"; d.fail_layer = d.layers; return;
++        }
++        for (int64_t i = 0; d.host_res != nullptr && i < n_tok * k; ++i)
++            if (d.host_res[(size_t) d.layers * (size_t) d.n_expert + (size_t) ids[i]] >= 0) {
++                d.failed = true; d.fail = "VoltaFabric routed expert has a GPU owner"; d.fail_layer = d.layers; return;
++            }
++        if (!d.vf_cpu_pool(d.vf_cpu_context, x_f, ids, n_tok, k, out, d.layers)) {
++            d.failed = true; d.fail = "VoltaFabric CPU pool failed"; d.fail_layer = d.layers; return;
++        }
++        ++d.layers; d.experts += n_tok * k; return;
++    }
+     if (d.lookahead != nullptr) d.lookahead->submit(d.layers, x_f, n_tok, d.host_res);   // CS-T: warm layer + 1
+     if (k < 1 || n_tok * k > kMaxWindowEntries) {
+         d.failed = true;
+--- a/src/core/verify.cpp
++++ b/src/core/verify.cpp
+@@ -284,7 +284,10 @@
+     const Clock::time_point t0 = Clock::now();
+     for (cudaStream_t s : {cs_, copy_}) {
+         if (s == nullptr) continue;
+-        while (cudaStreamQuery(s) == cudaErrorNotReady) {
++        for (;;) {
++            const cudaError_t query = cudaStreamQuery(s);
++            if (query == cudaSuccess) break;
++            if (query != cudaErrorNotReady) return false;
+             if (ms_since(t0) > timeout_ms) {
+                 trace_ev("RELEASE-NOT-DRAINED", -1, -1, (int64_t) ms_since(t0));
+                 return false;
+@@ -2005,10 +2008,11 @@
+         const int tb = gtb[grp], n = gte[grp] - gtb[grp];
+         progress_at("verify window: the CPU experts of layer", l);
+         if (remote_opt_) remote_opt_->begin(h_w_ + (size_t) tb * ss.k, tb, n);
+-        if (pool != nullptr)
++        const bool pool_ok = pool == nullptr ||
+             pool(user, h_x_ + (size_t) tb * g.n_embd, h_ids_ + (size_t) tb * ss.k, n, ss.k,
+                  h_ymiss_ + (size_t) tb * ss.k * g.n_embd, l);
+         if (remote_opt_) remote_opt_->end();
++        if (!pool_ok) { err = "verify: expert pool failed" + released_note(release_gpu_waits(5000)); return false; }
+         VDBG("layer %lld served\n", (long long) l);
+         if (g_trace) trace_ev(*(volatile uint32_t*) h_flagA_ == want ? "SERVED" : "SERVED-NO-PLAN-YET", k, l,
+                               (int64_t) ms_since(b));   // aux: ms the CPU experts took
+@@ -2688,7 +2692,9 @@
+         cur_layer_ = want - 1;
+         set_plan_slot(0);
+         progress_at("verify batch: the CPU experts of layer", l);
+-        if (pool != nullptr) pool(user, h_x_, h_ids_, S, ss_->k, h_ymiss_, l);
++        if (pool != nullptr && !pool(user, h_x_, h_ids_, S, ss_->k, h_ymiss_, l)) {
++            err = "verify batch: expert pool failed" + released_note(release_gpu_waits(5000)); return false;
++        }
+         progress_tick();
+         std::atomic_thread_fence(std::memory_order_seq_cst);
+         _mm_sfence();
+@@ -2840,7 +2846,9 @@
+         const Clock::time_point b = Clock::now();
+         cur_layer_ = want - 1;
+         set_plan_slot(0);
+-        if (pool != nullptr) pool(user, h_x_, h_ids_, S, ss_->k, h_ymiss_, lb_ + b_k_);
++        if (pool != nullptr && !pool(user, h_x_, h_ids_, S, ss_->k, h_ymiss_, lb_ + b_k_)) {
++            err = "verify batch: expert pool failed" + released_note(release_gpu_waits(5000)); b_running_ = false; return -1;
++        }
+         progress_tick();
+         std::atomic_thread_fence(std::memory_order_seq_cst);
+         _mm_sfence();
+@@ -3056,9 +3064,10 @@
+         set_plan_slot(grp);
+         const int tb = gtb[grp], n = gte[grp] - gtb[grp];
+         progress_at("verify window (pipelined): the CPU experts of layer", l);
+-        if (pool != nullptr)
+-            pool(user, h_x_ + (size_t) tb * g.n_embd, h_ids_ + (size_t) tb * ss.k, n, ss.k,
+-                 h_ymiss_ + (size_t) tb * ss.k * g.n_embd, l);
++        if (pool != nullptr && !pool(user, h_x_ + (size_t) tb * g.n_embd, h_ids_ + (size_t) tb * ss.k, n, ss.k,
++                 h_ymiss_ + (size_t) tb * ss.k * g.n_embd, l)) {
++            err = "verify: expert pool failed" + released_note(release_gpu_waits(5000)); fl_active_ = false; return -1;
++        }
+         if (g_trace) trace_ev(*(volatile uint32_t*) h_flagA_ == want ? "SERVED" : "SERVED-NO-PLAN-YET", fl_k_, l,
+                               (int64_t) ms_since(b));
+         progress_tick();
+--- a/src/program/generate.cpp
++++ b/src/program/generate.cpp
+@@ -952,7 +952,7 @@
+ }
+ 
+ /// Plan v0.3 P6: the pool for a verify window.
+-void drive_pool_multi(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
++bool drive_pool_multi(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
+                       int64_t layer) {
+     Drive* t = (Drive*) user;
+     t->d.layers = layer;
+@@ -973,6 +973,7 @@
+             std::fwrite(one, sizeof(float), (size_t) k, t->routing);
+         }
+     }
++    return !t->d.failed;
+ }
+ 
+ /// Layer split: every verify stage shares one Drive (its counters, usage and failure flags); the GPU plan, the expert
+@@ -987,7 +988,7 @@
+     const uint64_t* cache_slot_off[kMax] = {};
+     int pcie_num[kMax] = {};
+ };
+-void drive_pool_split(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
++bool drive_pool_split(void* user, const float* x_f, const int32_t* ids, int64_t n_tok, int64_t k, float* out,
+                       int64_t layer) {
+     SplitDrive* s = (SplitDrive*) user;
+     int st = 0;
+@@ -997,7 +998,7 @@
+     d.d.cache_base = s->cache_base[st];
+     d.d.cache_slot_off = s->cache_slot_off[st];
+     d.d.pcie_num = s->pcie_num[st];
+-    drive_pool_multi(s->base, x_f, ids, n_tok, k, out, layer);
++    return drive_pool_multi(s->base, x_f, ids, n_tok, k, out, layer);
+ }
+ 
+ /// Layer split across GPUs: a later stage on its own device, with its own copy of the dense weights, a session, an
