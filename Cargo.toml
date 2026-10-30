@@ -284,3 +284,8 @@ required-features = ["ple-cpu-qualification"]
 name = "vf-sc117-eight-layer-source"
 path = "src/bin/vf-sc117-eight-layer-source.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-multi-layer-source"
+path = "src/bin/vf-sc117-multi-layer-source.rs"
+required-features = ["ple-cpu-qualification"]
