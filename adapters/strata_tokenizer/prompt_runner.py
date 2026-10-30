@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import pathlib
+import selectors
 import stat
 import subprocess
 import sys
@@ -20,6 +21,7 @@ from .adapter import (MAX_GENERATED_TOKENS, MAX_PROMPT_TOKENS, _unique_object,
 
 MAX_PROMPT_BYTES = 4096
 MAX_RECEIPT_BYTES = 32 * 1024 * 1024
+MAX_STDERR_BYTES = 64 * 1024
 _ENGINE_FAILURES = {
     b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity\n": "rank_payload_capacity",
     b"prefill-greedy qualification refused: INVALID_INPUT: expert payload budget exceeded\n": "global_payload_capacity",
@@ -27,6 +29,35 @@ _ENGINE_FAILURES = {
     b"prefill-greedy qualification refused: INVALID_INPUT: eviction limit\n": "eviction_limit",
     b"prefill-greedy qualification refused: worker shutdown receipt\n": "worker_shutdown",
 }
+
+def _run_bounded(command, *, stdout_limit=MAX_RECEIPT_BYTES, stderr_limit=MAX_STDERR_BYTES,
+                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False):
+    """Drain both child pipes, retaining only bounded prefixes; never retry or kill."""
+    if stdout != subprocess.PIPE or stderr != subprocess.PIPE or check or stdout_limit < 0 or stderr_limit < 0:
+        raise ValueError("invalid bounded capture configuration")
+    output = [bytearray(), bytearray()]
+    truncated = [False, False]
+    limits = (stdout_limit, stderr_limit)
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as child:
+        with selectors.DefaultSelector() as selector:
+            selector.register(child.stdout, selectors.EVENT_READ, 0)
+            selector.register(child.stderr, selectors.EVENT_READ, 1)
+            while selector.get_map():
+                for key, _ in selector.select():
+                    chunk = os.read(key.fd, 65536)
+                    if not chunk:
+                        selector.unregister(key.fileobj)
+                        key.fileobj.close()
+                        continue
+                    idx = key.data
+                    available = limits[idx] - len(output[idx])
+                    output[idx].extend(chunk[:available])
+                    if len(chunk) > available:
+                        truncated[idx] = True
+        returncode = child.wait()
+    result = subprocess.CompletedProcess(command, returncode, bytes(output[0]), bytes(output[1]))
+    result.stdout_truncated, result.stderr_truncated = truncated
+    return result
 
 
 def _binary_sha(path: str) -> str:
@@ -46,7 +77,7 @@ def _binary_sha(path: str) -> str:
         os.close(fd)
 
 
-def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, runner=subprocess.run) -> dict:
+def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, runner=_run_bounded) -> dict:
     """Run once, and publish decoded text only after the full receipt validates."""
     if not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
         raise ValueError("prompt must be nonempty and bounded UTF-8")
@@ -63,9 +94,10 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         command.append(str(max_new_tokens))
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
-        category = _ENGINE_FAILURES.get(completed.stderr, "unclassified")
+        category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
         raise RuntimeError(f"engine failed ({category}, exit={completed.returncode}); reconcile its ledger and do not replay UNKNOWN claims")
-    if len(completed.stdout) > MAX_RECEIPT_BYTES or len(completed.stderr) > MAX_RECEIPT_BYTES:
+    if (getattr(completed, "stdout_truncated", False) or getattr(completed, "stderr_truncated", False)
+            or len(completed.stdout) > MAX_RECEIPT_BYTES or len(completed.stderr) > MAX_STDERR_BYTES):
         raise ValueError("engine response exceeds limit")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None

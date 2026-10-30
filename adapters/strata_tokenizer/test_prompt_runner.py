@@ -3,7 +3,7 @@ import subprocess
 import sys
 import unittest
 
-from adapters.strata_tokenizer.prompt_runner import run_prompt
+from adapters.strata_tokenizer.prompt_runner import _run_bounded, run_prompt
 from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 
@@ -19,6 +19,47 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_bounded_capture_drains_both_pipes_and_marks_overflow(self):
+        program = ('import sys; sys.stdout.buffer.write(b"x"*200000); sys.stdout.flush(); '
+                   'sys.stderr.buffer.write(b"y"*200000); sys.stderr.flush()')
+        result = _run_bounded([sys.executable, "-c", program], stdout_limit=1024, stderr_limit=512)
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"x"*1024)
+        self.assertEqual(result.stderr, b"y"*512)
+        self.assertTrue(result.stdout_truncated)
+        self.assertTrue(result.stderr_truncated)
+        exact = _run_bounded([sys.executable, "-c", 'print("abc", end="")'], stdout_limit=3)
+        self.assertEqual(exact.stdout, b"abc")
+        self.assertFalse(exact.stdout_truncated)
+
+    def test_large_complete_receipt_crosses_real_pipe(self):
+        program = ('import json; r={"layer_count":48,"run_id":"fresh","workers_closed":96,'
+                   '"prompt_tokens":[0]*8,"input_tokens":[0]*39,"generated_token_ids":[0]*32,'
+                   '"requested_max_new_tokens":32,"output_sha256":["a"*64]*39,'
+                   '"logits_sha256":["b"*64]*32,"padding":"x"*2000000}; print(json.dumps(r))')
+        def runner(args, **kwargs):
+            return _run_bounded([sys.executable, "-c", program], **kwargs)
+        result = run_prompt("eight", Tokenizer(), 3, "/engine", ["/input"]*8,
+                            max_new_tokens=32, runner=runner)
+        self.assertEqual(result["output"]["text"], "A"*32)
+
+    def test_truncated_success_is_not_decoded(self):
+        value = json.dumps(receipt()).encode()
+        def runner(args, **kwargs):
+            result = subprocess.CompletedProcess(args, 0, value, b"")
+            result.stdout_truncated = True
+            return result
+        with self.assertRaisesRegex(ValueError, "exceeds limit"):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+
+    def test_truncated_error_is_never_misclassified(self):
+        def runner(args, **kwargs):
+            result = subprocess.CompletedProcess(args, 1, b"", b"prefill-greedy qualification refused: worker shutdown receipt\n")
+            result.stderr_truncated = True
+            return result
+        with self.assertRaisesRegex(RuntimeError, "unclassified"):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+
     def test_runs_once_and_returns_complete_text(self):
         calls = []
         def runner(args, **kwargs):
