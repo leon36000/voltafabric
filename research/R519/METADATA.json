@@ -1,0 +1,10 @@
+{
+  "claims_parts": 18,
+  "claims_sha256": "3dadcb2de450bd363a4ceaf5cf23ccd1c1b36aff385ec9030865a1f12d17c897",
+  "observation_parts": 2,
+  "observation_sha256": "26482121eda34b84175e619d7b7ae2ed29d8f7ab806aa1ca8469abf6ac12a744",
+  "result_parts": 23,
+  "result_sha256": "3493dbf941b58189b47abc0e151f6cd6f94574a866841552bdb174ca36ea427a",
+  "selection_parts": 1,
+  "selection_sha256": "31cce83b4999e6085e3917f2d375f9eebe27fb9aff6eb2fa57b62e282050d223"
+}
