@@ -1,0 +1,9 @@
+# R164 — Dépendances DeepInfer épinglées : tri V100
+
+Examen documentaire des README et licences officiels aux gitlinks exacts de DeepInfer R163. Les quatre fichiers et leurs SHA256 sont conservés dans evidence.json. Aucun build, téléchargement de sous-module complet, test GPU ou modification du moteur.
+
+- DeepEP f6aa38fe06cd4a0489e7730365d4e0114970a2f3 : licence MIT ; le README exige NVIDIA Hopper ou plus récent, CUDA 13.1+, NCCL 2.32.3+, NVLink intra-nœud et réseau RDMA inter-nœuds. Cette révision ne constitue donc pas une implémentation V100 annoncée. Son interface EPBuffer reste une référence de conception : routes, poids, handle, rangées regroupées et comptes d'experts ; un nouveau routage exige un nouveau dispatch. La communication EP consomme des SM GPU.
+- DeepGEMM 1fc9c66975ee322d628b3288534ca0e9ce12a64d : licence MIT ; le README indique SM90 ou SM100. Les GEMM groupés concatènent les tokens par expert avec alignement de segments ; les échelles requises diffèrent entre SM90 (FP32) et SM100 (UE8M0 empaqueté). Mega MoE fusionne dispatch, calcul et combine avec communication NVLink. Ces noyaux ne sont pas une voie V100 documentée.
+- Les licences MIT des deux dépôts ne couvrent pas automatiquement leurs propres dépendances. Le README DeepEP cite DeepJIT, celui de DeepGEMM cite notamment CUTLASS et DeepJIT ; licences et versions transitives restent à vérifier avant réutilisation du code. Les documents ne prouvent ni compatibilité binaire R13/QPN2/IQ3, ni ordre du Collector Rust, ni fiabilité réseau inter-PC sur nos machines.
+
+Décision : ne pas chercher à installer ces deux révisions comme backend V100 tel quel. Exploiter leurs contrats comme référence pour une couture CPU testée, puis qualifier séparément un fournisseur SM70. Poursuivre également la dissection de leurs sources épinglées et des autres sous-modules sur un stockage suffisant. Aucun gain de vitesse ni modèle complet démontré.

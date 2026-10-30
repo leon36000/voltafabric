@@ -1,0 +1,9 @@
+# R169 — vraie Session Rust et trames construites à partir de captures owner
+
+La vraie commande CPU `session-run-compressed` a lancé deux processus Python de test, reçus HELLO/LOAD/EXEC/SHUTDOWN et consommé les trames FP16 composées avec `OwnerOutput.as_raw_output_bytes` et les fonctions de tramage R162. Les processus vérifient le SHA des artefacts et les activations mais renvoient des résultats **préenregistrés** d'owners R158 : ils ne chargent pas ni n'exécutent les propriétaires. Leurs capacités HELLO sont simulées pour cet essai privé ; elles ne décrivent pas un worker réel. Aucun GPU.
+
+Le test positif a transmis les artefacts, reçu deux lignes, fermé les processus avec BYE, et obtenu les 2048 valeurs exactes `0,75 × ligne capturée` ; le rapport de la Session passe aussi son oracle interne à tolérance absolue 0,01 (différence max environ 9,64e-6). Cette tolérance est spécifique à l'expérience, pas un seuil d'admission modèle. Le premier test rouge échouait car le worker n'existait pas ; un deuxième essai a révélé que la Session exige également la capacité générique HELLO, renseignée explicitement dans ce simulateur.
+
+Un essai négatif, identité run distincte, altère l'identité locale dans une trame après le STARTED : la Session refuse `INVALID_COMPLETION`, zéro batch réussi, aucun résultat enregistré ; le reçu de ce rang est `unknown` et n'a pas été rejoué. Les deux sorties JSON et hashes de sources sont préservés. Ne pas relancer ce test avec ses mêmes identités : choisir de nouvelles identités pour toute expérimentation ultérieure.
+
+Ceci prouve la lecture des trames par la vraie Session Rust depuis des processus de test et le refus d'identité mal formée ; ce n'est toujours pas une liaison en direct au propriétaire. Le prochain lot doit remplacer le simulateur par un worker chargé de l'owner réel et traiter le cycle de vie et poison, avec identités fraîches et sans rejouer UNKNOWN.

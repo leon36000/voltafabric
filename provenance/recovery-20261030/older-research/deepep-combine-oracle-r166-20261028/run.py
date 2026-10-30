@@ -1,0 +1,9 @@
+import ast, hashlib, json, pathlib, subprocess
+p=pathlib.Path('/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/deepinfer-source-audit-r163-20261028/source/vendor/DeepEP/deep_ep/utils/refs.py')
+s=p.read_bytes(); tree=ast.parse(s); funcs=[node for node in tree.body if isinstance(node,ast.FunctionDef) and node.name in ('ordered_accumulate','combine')]; assert [n.name for n in funcs]==['ordered_accumulate','combine']
+script='from typing import Optional, Tuple, Union\nimport torch,json\nassert torch.version.cuda is None\n'+ast.unparse(ast.Module(body=funcs,type_ignores=[]))+'''\ny=torch.tensor([[[2048.0],[1.0],[-2048.0]]],dtype=torch.float16)\nidx=torch.tensor([[0,1,2]],dtype=torch.int64)\nargs=dict(topk_idx=idx,num_scaleout_ranks=1,num_scaleup_ranks=2,num_experts=4,bias=None,reduce_in_scaleup=False)\na=combine(y.clone(),reduce_in_local=False,**args).item()\nb=combine(y.clone(),reduce_in_local=True,**args).item()\nref=sum(float(x) for x in (2048,1,-2048))\nassert (a,b,ref)==(1.0,0.0,1.0), (a,b,ref)\nprint(json.dumps(dict(torch=torch.__version__,cuda_build=torch.version.cuda,device=str(y.device),deepep_no_local_reduce=a,deepep_local_reduce=b,scalar_fp16_f64_unit_weights=ref)))\n'''
+argv=['ssh','-o','BatchMode=yes','-o','StrictHostKeyChecking=yes','-o','ConnectTimeout=8','pc1-lan','/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.tools/adapter-cpu/bin/python','-B','-']
+r=subprocess.run(argv,input=script,text=True,capture_output=True,timeout=30)
+receipt={'source_sha256':hashlib.sha256(s).hexdigest(),'remote_script_sha256':hashlib.sha256(script.encode()).hexdigest(),'returncode':r.returncode,'stdout':r.stdout,'stderr':r.stderr}
+pathlib.Path(__file__).with_name('receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+print(json.dumps(receipt,indent=2)); assert r.returncode==0

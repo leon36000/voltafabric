@@ -1,0 +1,7 @@
+# R166 — contre-exemple CPU de réduction DeepEP
+
+Sur PC1, Python 3.12 / Torch 2.10.0+cpu a exécuté les fonctions `ordered_accumulate` et `combine` extraites par AST du fichier réel DeepEP épinglé en R165. Le SHA256 de la source et celui du programme transmis figurent dans `receipt.json`. Aucun package DeepEP ni GPU n'a été chargé. Trois contributions FP16 prépondérées `[2048, 1, -2048]`, trois experts distincts `[0,1,2]`, quatre experts sur deux rangs et absence de biais forment un cas synthétique.
+
+La référence DeepEP renvoie **1** sans réduction locale, et **0** avec réduction locale : les deux premières contributions se trouvent sur le même rang, leur somme en FP32 est recodée en FP16 avant la réduction finale ; 2049 devient 2048. La somme scalaire de ces valeurs FP16 en f64 avec coefficients unitaires vaut **1**, comme spécifié par le contrat du Collector ordinaire. Cette dernière valeur est un oracle scalaire, pas une exécution du Collector Rust. Coefficients unitaires choisis uniquement pour isoler l'ordre et la précision ; aucune propriété de normalisation du gate n'est postulée.
+
+Cela démontre qu'une réduction locale DeepEP ne peut être substituée sans examen au contrat FP16/f64 ; cela ne conclut rien sur le résultat d'un kernel réel, les autres configurations, la qualité modèle ni le transport. Prochaine action : confronter ce cas au véritable collecteur Rust et poursuivre le pont Session–propriétaire avec contrôles d'identité et refus atomique.

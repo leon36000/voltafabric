@@ -1,0 +1,9 @@
+# R173 — Session Rust et owners CPU persistants : deux batches
+
+Sur la suite de R170, un endpoint de recherche local accepte plusieurs EXEC avec le même véritable `PersistentQPN2Owner`. La vraie Session Rust a transmis deux batches FP16 identiques à chacun des deux owners, chargé chaque artefact QPN2 une fois, reçu quatre EXEC et deux BYE sans erreur. L'endpoint vérifie quatre projections par owner synchronisées et l'identité des pointeurs des buffers résidents entre les deux EXEC. L'exécution finale `r173-c3fe90f7e8bf4ed98cf139ad365f8c13`, `python3 -B test.py`, sort 0.
+
+Le premier batch est exactement égal à la référence externe capturée R158 (2048 valeurs, coefficients 0,25 et 0,5) ; les deux batches identiques concordent aussi avec l'oracle dense interne à tolérance expérimentale 0,01, écart max 9,64e-6. Ce n'est pas une tolérance qualité modèle. Le test a d'abord échoué car l'endpoint n'existait pas, puis il a réussi avant et après l'ajout du contrôle de pointeurs. Chaque test utilise une nouvelle identité UUID.
+
+Portée : processus locaux, fournisseur CPU synthétique, un seul expert échantillonné copié sur deux rangs et entrées identiques. Aucun 1Cat, modèle complet, génération, réseau de production, V100 ou GPU. Pas de validation de variation d'activation, ni de changement d'epoch, ni d'échec multi-batch. Code privé sous .runs, pas intégré au canonique ni publié. Aucun ancien UNKNOWN rejoué.
+
+Suite prioritaire produit : identifier puis qualifier le chemin exact de génération d'un moteur et d'un checkpoint compatibles, utiliser les composants existants plutôt que multiplier des prototypes isolés ; durcir en parallèle la couture réelle avec des entrées distinctes et les échecs. Les deux sujets restent nécessaires avant de prétendre à une génération utilisant les experts VoltaFabric.
