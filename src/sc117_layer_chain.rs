@@ -388,13 +388,13 @@ pub struct Segment {
     timeout: Duration,
     cursor: Cursor,
 }
-fn require_supported_layer(layer: u32, has_ple: bool) -> Result<()> {
-    if layer == 1 {
+fn require_supported_layer(layer: u32, has_ple: bool, qualifying: bool) -> Result<()> {
+    if layer == 1 && !(qualifying && has_ple) {
         return Err(invalid(
             "SC117 layer 1 PLE transaction requires real-layer qualification",
         ));
     }
-    if has_ple {
+    if has_ple && layer != 1 {
         return Err(invalid("PLE is only valid for layer 1"));
     }
     Ok(())
@@ -405,6 +405,25 @@ impl Segment {
         plan_id: String,
         ledger: NativeBatchLedger,
         timeout: Duration,
+    ) -> Result<Self> {
+        Self::build(layers, plan_id, ledger, timeout, false)
+    }
+    /// Explicitly gated diagnostic only; does not qualify the complete layer or production use.
+    #[cfg(feature = "ple-cpu-qualification")]
+    pub fn new_ple_cpu_qualification(
+        layers: Vec<Layer>,
+        plan_id: String,
+        ledger: NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<Self> {
+        Self::build(layers, plan_id, ledger, timeout, true)
+    }
+    fn build(
+        layers: Vec<Layer>,
+        plan_id: String,
+        ledger: NativeBatchLedger,
+        timeout: Duration,
+        qualifying: bool,
     ) -> Result<Self> {
         let first = layers.first().ok_or_else(|| invalid("empty segment"))?;
         if plan_id.trim().is_empty()
@@ -419,7 +438,7 @@ impl Segment {
             return Err(invalid("segment identity or timeout"));
         }
         for (i, layer) in layers.iter().enumerate() {
-            require_supported_layer(layer.identity.layer, layer.ple.is_some())?;
+            require_supported_layer(layer.identity.layer, layer.ple.is_some(), qualifying)?;
             if first.identity.layer.checked_add(i as u32) != Some(layer.identity.layer)
                 || layer.identity.run_id != first.identity.run_id
                 || layer.identity.model_revision != first.identity.model_revision
@@ -558,11 +577,13 @@ mod tests {
 
     #[test]
     fn model_chain_refuses_to_skip_required_layer_one_ple() {
-        assert!(require_supported_layer(1, false).is_err());
-        assert!(require_supported_layer(1, true).is_err());
-        assert!(require_supported_layer(0, true).is_err());
-        assert!(require_supported_layer(0, false).is_ok());
-        assert!(require_supported_layer(2, false).is_ok());
+        assert!(require_supported_layer(1, false, false).is_err());
+        assert!(require_supported_layer(1, true, false).is_err());
+        assert!(require_supported_layer(1, true, true).is_ok());
+        assert!(require_supported_layer(1, false, true).is_err());
+        assert!(require_supported_layer(0, true, false).is_err());
+        assert!(require_supported_layer(0, false, false).is_ok());
+        assert!(require_supported_layer(2, false, false).is_ok());
     }
 
     #[test]

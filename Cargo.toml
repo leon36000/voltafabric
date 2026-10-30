@@ -16,6 +16,7 @@ serde_json = { version = "1.0.145", features = ["float_roundtrip"] }
 [features]
 c-abi-validation = ["dep:vf-qpn2-ffi"]
 native-ggml-cpu = ["dep:vf-ggml-native-ffi"]
+ple-cpu-qualification = ["native-ggml-cpu"]
 
 [lib]
 name = "voltafabric"
@@ -218,3 +219,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-route-loader-fault"
 path = "src/bin/vf-sc117-route-loader-fault.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-ple-layer-check"
+path = "src/bin/vf-sc117-ple-layer-check.rs"
+required-features = ["ple-cpu-qualification"]
