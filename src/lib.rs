@@ -56,6 +56,7 @@ pub mod sc117_gdn_stage;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_head_cpu;
 pub mod sc117_layer_completion;
+pub mod sc117_ple;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_layer_chain;
 #[cfg(feature = "native-ggml-cpu")]

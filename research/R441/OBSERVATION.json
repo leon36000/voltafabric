@@ -1,0 +1,64 @@
+{
+  "scope": "local PLE gather, not a PLE block or generation",
+  "shard_bytes": 28800138432,
+  "table_type": "GGML IQ4_NL (20)",
+  "table_offset": 192,
+  "observations": [
+    {
+      "token": 42,
+      "previous": [
+        -1,
+        -1
+      ],
+      "rows": [
+        4064167,
+        21428206,
+        43851727,
+        63435096,
+        89826284,
+        106088217,
+        121229381,
+        156147803,
+        175176707,
+        188463481,
+        216828809,
+        228933352,
+        248448227,
+        269188956,
+        283041664,
+        314347972
+      ],
+      "values_sha256": "c6f3ae9ea6339e04eac7ed27a3b4b23e29d9fe007dd886668e7751f81d54fe48",
+      "full_result_sha256": "975b5ad56b3cc89aa245a010d575a01f916e31f88b8601a48e8a03ac418637ca",
+      "independent_reference_bit_equal": true
+    },
+    {
+      "token": 73,
+      "previous": [
+        -1,
+        42
+      ],
+      "rows": [
+        13982154,
+        24942153,
+        40423254,
+        66098034,
+        96677589,
+        106871010,
+        132161395,
+        152548945,
+        164449685,
+        187346799,
+        209212351,
+        228193032,
+        243419405,
+        279005727,
+        297614510,
+        311257431
+      ],
+      "values_sha256": "904cba34e51d3afb02c55484ad83eb20ca2f68bdf4253f43000e6ba007d5c574",
+      "full_result_sha256": "7c54b1bc2a4b93eb53a2d011ec6d3d451cc8f8e0a27f7232092261d3fbca6d82",
+      "independent_reference_bit_equal": true
+    }
+  ]
+}

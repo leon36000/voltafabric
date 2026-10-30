@@ -275,6 +275,14 @@ pub struct Segment {
     timeout: Duration,
     cursor: Cursor,
 }
+fn require_supported_layer(layer: u32) -> Result<()> {
+    if layer == 1 {
+        return Err(invalid(
+            "SC117 layer 1 requires PLE; segment integration is not yet implemented",
+        ));
+    }
+    Ok(())
+}
 impl Segment {
     pub fn new(
         layers: Vec<Layer>,
@@ -295,6 +303,7 @@ impl Segment {
             return Err(invalid("segment identity or timeout"));
         }
         for (i, layer) in layers.iter().enumerate() {
+            require_supported_layer(layer.identity.layer)?;
             if first.identity.layer.checked_add(i as u32) != Some(layer.identity.layer)
                 || layer.identity.run_id != first.identity.run_id
                 || layer.identity.model_revision != first.identity.model_revision
@@ -409,6 +418,13 @@ impl Segment {
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn model_chain_refuses_to_skip_required_layer_one_ple() {
+        assert!(require_supported_layer(1).is_err());
+        assert!(require_supported_layer(0).is_ok());
+        assert!(require_supported_layer(2).is_ok());
+    }
 
     fn ledger() -> NativeBatchLedger {
         let directory = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
