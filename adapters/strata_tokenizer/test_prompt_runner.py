@@ -46,6 +46,8 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(prepare()["plan_id"], "r520-" + "a" * 64)
             state["body"] = json.dumps(dict(good, plan_id="r523-" + "a" * 64)).encode()
             self.assertEqual(prepare()["plan_id"], "r523-" + "a" * 64)
+            state["body"] = json.dumps(dict(good, plan_id="r525-" + "a" * 64)).encode()
+            self.assertEqual(prepare()["plan_id"], "r525-" + "a" * 64)
             for bad in ({"plan_id": good["plan_id"]},
                         dict(good, prompt_tokens_sha256="0" * 64),
                         dict(good, plan_id="r512-" + "A" * 64),
@@ -110,6 +112,8 @@ class RunnerTests(unittest.TestCase):
         value["plan_id"] = "r520-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
         value["plan_id"] = "r523-" + "a" * 64
+        self.assertEqual(run()["output"]["text"], "😀")
+        value["plan_id"] = "r525-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
         for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
                     "r512-" + "a" * 63, 123):

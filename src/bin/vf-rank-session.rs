@@ -74,15 +74,16 @@ fn main() {
     // This executable is the CPU session worker. Unknown flags must not silently
     // masquerade as an explicitly requested GPU backend before the HELLO frame.
     let args: Vec<_> = std::env::args_os().collect();
-    let guarded_remote = args.len() == 4
-        && args[1] == "--guarded-remote"
+    let guarded = args.len() == 4
+        && (args[1] == "--guarded-remote" || args[1] == "--guarded-local")
         && args[2] == "--expected-exe-sha256"
         && args[3]
             .to_str()
             .is_some_and(voltafabric::sha256::is_hex_digest);
-    if args.len() != 1 && !guarded_remote {
+    let guarded_remote = guarded && args[1] == "--guarded-remote";
+    if args.len() != 1 && !guarded {
         eprintln!(
-            "USAGE: vf-rank-session [--guarded-remote --expected-exe-sha256 SHA256] (CPU worker)"
+            "USAGE: vf-rank-session [--guarded-local|--guarded-remote --expected-exe-sha256 SHA256] (CPU worker)"
         );
         std::process::exit(2);
     }
@@ -92,7 +93,7 @@ fn main() {
         eprintln!("REMOTE_RESOURCE_REFUSED: fresh memory or swap floor not met");
         std::process::exit(2);
     }
-    if guarded_remote {
+    if guarded {
         #[cfg(unix)]
         let valid = std::fs::File::open("/proc/self/exe")
             .and_then(|mut file| executable_matches(&mut file, args[3].to_str().unwrap()))
@@ -100,7 +101,12 @@ fn main() {
         #[cfg(not(unix))]
         let valid = false;
         if !valid {
-            eprintln!("REMOTE_EXECUTABLE_REFUSED: executable digest mismatch or unreadable");
+            let category = if guarded_remote {
+                "REMOTE_EXECUTABLE_REFUSED"
+            } else {
+                "LOCAL_EXECUTABLE_REFUSED"
+            };
+            eprintln!("{category}: executable digest mismatch or unreadable");
             std::process::exit(2);
         }
     }
