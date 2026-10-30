@@ -1,0 +1,1 @@
+fn main(){let _=std::hint::black_box(vf_lab_quantizer_bridge::vf_lab_quantize);}
