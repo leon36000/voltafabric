@@ -1,0 +1,203 @@
+{
+  "schema_version": 1,
+  "project": "VoltaFabric",
+  "canonical_active_root": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
+  "canonical_work_root": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012",
+  "purpose": "Durable retrieval index: read this catalog and checkpoint before any archive move/delete. Paths marked planned are not existing backups.",
+  "local_required": [
+    {
+      "category": "Sources et état courant",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
+      "keep_local": true
+    },
+    {
+      "category": "Identités consommées et UNKNOWN à ne pas rejouer",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm120-worker-fresh-identities-r53/namespace-ledger",
+      "keep_local": true
+    },
+    {
+      "category": "Dépendances de compilation courantes",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-collector-20261024-r11/target/release/deps",
+      "keep_local": true
+    },
+    {
+      "category": "Oracles CPU récents",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source/.work/a92-cpu-venv",
+      "keep_local": true
+    },
+    {
+      "category": "Paquets workers et bibliothèques utilisés",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-case-contract-r61/assets",
+      "keep_local": true
+    },
+    {
+      "category": "Paquet deux hôtes et contrat RDMA en préparation",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-package-staging-r63",
+      "keep_local": true
+    },
+    {
+      "category": "Dernière preuve réelle V100/RTX5080 et sources de validation",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc3-pc6-resource-continuation-r64",
+      "keep_local": true
+    },
+    {
+      "category": "Dépôt Git préparé pour import GitLab, non encore publié",
+      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository",
+      "keep_local": true
+    }
+  ],
+  "archive_candidates_still_local": {
+    "status": "NO_MOVE_NO_DELETION_WHILE_BACKUP_UNVERIFIED",
+    "catalog": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-audit-r65-20261026/historical-build-candidates.json",
+    "important": "Do not delete source trees, executed binary evidence, golden/oracle data, receipts or sealed snapshots on the basis of age alone."
+  },
+  "pc4_backup": {
+    "status": "SSH_AUTHENTICATION_DENIED_BACKUP_NOT_VERIFIED",
+    "host": "pc4",
+    "tailscale_ip_observed": "100.76.101.48",
+    "disk_capacity_owner_declared": "8 TB",
+    "device_uuid": null,
+    "mountpoint": null,
+    "absolute_backup_path": null,
+    "planned_relative_root": "Projets en cours/VoltaFabric",
+    "planned_categories": [
+      "00_INDEX_ET_RESTAURATION",
+      "01_SOURCES_ET_ETAT",
+      "02_PREUVES_ET_ORACLES",
+      "03_PAQUETS_H1_ET_WORKERS",
+      "04_ARCHIVES_HISTORIQUES/PC6"
+    ],
+    "archives_written": [],
+    "restore_test_passed": false,
+    "backup_verified": false,
+    "rule": "Before a move: fresh PC4 identity, real mounted disk UUID/capacity/free space/permissions; exclusive archive name; source and target SHA-256 manifest; test restore; then record actual absolute path + UUID here and in remote catalog. An offline disk is never an implicit runtime dependency.",
+    "fresh_check_2026_10_28": {
+      "tailscale_online": false,
+      "ssh_result": "NO_ROUTE_TO_HOST",
+      "backup_verified": false,
+      "disk_uuid": null,
+      "mountpoint": null
+    },
+    "verification_r111": {
+      "utc": "2026-10-28T02:54:27.428612+00:00",
+      "tailscale_online": true,
+      "observed_ip": "100.76.101.48",
+      "old_ts_alias_ip": "100.124.95.18",
+      "server_key_matches_existing_pc4_lan_key": true,
+      "ssh_authentication": "DENIED_PUBLICKEY_PASSWORD",
+      "remote_command_executed": false,
+      "disk_identity_verified": false,
+      "backup_verified": false,
+      "report": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc4-backup-identity-r111-20261028/REPORT.md"
+    },
+    "previous_status_before_r111": "UNREACHABLE_NOT_VERIFIED"
+  },
+  "storage_operation": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-retention-r66-20261026/operation-r2.json",
+  "no_uncertain_archive_deleted": true,
+  "updated_utc": "2026-10-28T03:39:04.564686+00:00",
+  "cache_cleanup": {
+    "status": "COMPLETE_CACHE_ONLY_PURGED",
+    "removed_incremental_dirs": 60,
+    "observed_available_bytes_gain": 20428894208,
+    "proven_regenerable_categories": [
+      "Rust compiler .o files",
+      "query/dependency graph .bin caches",
+      "metadata.rmeta caches",
+      "compiler session .lock files"
+    ],
+    "uncertain_archives_deleted": false,
+    "local_source_or_weight_files_deleted": 0,
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-retention-r66-20261026/operation-r2.json"
+  },
+  "placeholder_cleanup": {
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-retention-r66-20261026/placeholder-removal.json",
+    "source_files_removed": 0,
+    "removed_root_names": [
+      "VoltaFabric-A52-20212",
+      "VoltaFabric-A52-20261212",
+      "/home/pc6/NAOS/VoltaFabric-A53-20261012 (empty sibling)"
+    ]
+  },
+  "retrieval_entry_fields_required": [
+    "archive_id",
+    "classification",
+    "source_host",
+    "original_absolute_paths",
+    "source_revision_or_manifest",
+    "destination_host",
+    "disk_filesystem_uuid",
+    "actual_mountpoint",
+    "actual_absolute_archive_path",
+    "size_bytes",
+    "sha256_manifest",
+    "verification_receipt",
+    "restore_test_receipt",
+    "local_copy_retained",
+    "created_utc"
+  ],
+  "backup_exclusions_policy": "No automatic copy of credentials/private keys/cookies. Any exclusion must be explicit in the archive manifest. No PC4 disk or backup path has been verified yet.",
+  "desktop_workspace": {
+    "path": "/home/pc6/Desktop/VoltaFabric WORK",
+    "kind": "real_directory_with_symlinks",
+    "canonical_root_preserved": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012",
+    "canonical_source_preserved": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
+    "links_verified": true,
+    "data_physically_moved": false,
+    "independent_backup": false,
+    "readme": "/home/pc6/Desktop/VoltaFabric WORK/LISEZ-MOI.md",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/desktop-workspace.json",
+    "additional_links_receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/desktop-all-links-verified.json",
+    "inventory_report": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/REPORT.md",
+    "final_links_receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/desktop-final-links.json",
+    "link_count": 13,
+    "gitlab_local_snapshot": {
+      "path": "/home/pc6/Desktop/VoltaFabric WORK/12 - VoltaFabric GitLab",
+      "target": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository",
+      "published": true,
+      "remote_auth_required": true,
+      "remote": "https://pc4.tail0c55ff.ts.net/root/voltafabric.git"
+    }
+  },
+  "cache_cleanup_followups": [
+    {
+      "operation": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/cleanup-cache-operation.json",
+      "status": "CACHE_ONLY_REMOVAL_COMPLETE",
+      "removed_paths": [
+        "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-collector-20261024-r11/target/debug/incremental",
+        "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/parallel-startup-20261024-r18/discarded-target-r1/debug/incremental"
+      ],
+      "observed_available_bytes_gain": 1287262208,
+      "source_or_evidence_deleted": false,
+      "cargo_and_incremental_locks_held": true,
+      "inventory": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/cache-inventory-before.json"
+    }
+  ],
+  "historical_A52_current_comparison": {
+    "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/a52-source-comparison.json",
+    "same": 144,
+    "different": 55,
+    "missing": 171,
+    "not_an_exact_duplicate": true,
+    "delete_authorized_by_age_only": false
+  },
+  "pc6_full_home_inventory": {
+    "status": "INVENTORY_COMPLETED_WITH_PERMISSION_LIMITATIONS",
+    "home": "/home/pc6",
+    "filesystem": "root ext4, find -xdev",
+    "matching_directories": 3516,
+    "outside_canonical_root": 274,
+    "outside_build_filtered": [
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-crossnode-CPU-A50-20261012",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-crossnode-CPU-A50-20261012/VoltaFabric-H1-A50-R1-20261012",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A52-20261012",
+      "/home/pc6/NAOS/60_travaux/VoltaFabric-A52-20261012/source/reference/prior_qualification/VoltaFabric_Qualification_20261007",
+      "/home/pc6/Documents/Codex/2026-10-07-mission-codex-voltafabric-impl-mentation-maximale",
+      "/home/pc6/Desktop/VoltaFabric WORK"
+    ],
+    "permission_error_count": 4,
+    "error_scope": "four directories under unrelated trash",
+    "full_inventory": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/full-home-directory-inventory.txt",
+    "stderr": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/storage-consolidation-r84-20261027/full-home-directory-inventory.stderr",
+    "all_files_are_known_safe_to_delete": false
+  }
+}
