@@ -1060,6 +1060,68 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
             "binary coordinator failed"
         );
     }
+    #[cfg(unix)]
+    if let Some(client_path) = std::env::var_os("VF_STRATA_CPP_FLEET") {
+        use std::os::{fd::OwnedFd, unix::net::UnixStream};
+        let mut init7: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
+        init7.template.stamp.layer = 7;
+        for binding in &mut init7.bindings {
+            binding.layer = 7;
+            binding.blob_sha256 = BLOB_SHA.into();
+        }
+        fn fleet_open(init: &Init) -> (Child, UnixStream) {
+            let (mut parent, remote) = UnixStream::pair().unwrap();
+            let remote_out = remote.try_clone().unwrap();
+            let bridge = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+                .stdin(Stdio::from(OwnedFd::from(remote)))
+                .stdout(Stdio::from(OwnedFd::from(remote_out)))
+                .stderr(Stdio::null())
+                .spawn()
+                .unwrap();
+            fn response(socket: &mut UnixStream) -> Reply {
+                let mut bytes = Vec::new();
+                loop {
+                    let mut b = [0_u8; 1];
+                    socket.read_exact(&mut b).unwrap();
+                    if b[0] == b'\n' {
+                        break;
+                    }
+                    bytes.push(b[0]);
+                    assert!(bytes.len() < 65536);
+                }
+                serde_json::from_slice(&bytes).unwrap()
+            }
+            serde_json::to_writer(&mut parent, init).unwrap();
+            parent.write_all(b"\n").unwrap();
+            assert!(matches!(response(&mut parent), Reply::Ready { .. }));
+            serde_json::to_writer(&mut parent, &Request::EnterBinary).unwrap();
+            parent.write_all(b"\n").unwrap();
+            assert!(matches!(response(&mut parent), Reply::BinaryReady));
+            (bridge, parent)
+        }
+        let expected_path = base.join("fleet-expected-f32.bin");
+        let mut expected_file = std::fs::File::create(&expected_path).unwrap();
+        for v in &expected {
+            expected_file.write_all(&v.to_le_bytes()).unwrap();
+        }
+        drop(expected_file);
+        let (mut bridge0, parent0) = fleet_open(&init);
+        let (mut bridge7, parent7) = fleet_open(&init7);
+        let parent0out = parent0.try_clone().unwrap();
+        let mut client = Command::new(client_path)
+            .arg(&expected_path)
+            .stdin(Stdio::from(OwnedFd::from(parent0)))
+            .stdout(Stdio::from(OwnedFd::from(parent0out)))
+            .stderr(Stdio::from(OwnedFd::from(parent7)))
+            .spawn()
+            .unwrap();
+        assert!(
+            client.wait().unwrap().success(),
+            "two-layer C++ fleet failed"
+        );
+        assert!(bridge0.wait().unwrap().success());
+        assert!(bridge7.wait().unwrap().success());
+    }
     let mut bad: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
     bad.bindings[0].blob_sha256 = "0".repeat(64);
     let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))

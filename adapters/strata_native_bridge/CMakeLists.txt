@@ -19,3 +19,6 @@ target_compile_options(vf_strata_pipe_client_live_test PRIVATE -Wall -Wextra -We
 add_executable(vf_strata_pool_hook_live_test pool_hook_live_test.cpp)
 target_link_libraries(vf_strata_pool_hook_live_test PRIVATE vf_strata_pipe_client)
 target_compile_options(vf_strata_pool_hook_live_test PRIVATE -Wall -Wextra -Werror)
+add_executable(vf_strata_pool_fleet_live_test pool_fleet_live_test.cpp)
+target_link_libraries(vf_strata_pool_fleet_live_test PRIVATE vf_strata_pipe_client)
+target_compile_options(vf_strata_pool_fleet_live_test PRIVATE -Wall -Wextra -Werror)

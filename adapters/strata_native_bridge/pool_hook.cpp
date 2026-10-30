@@ -23,4 +23,20 @@ bool pool_cpu_only(void* user,const float* x,const int32_t* ids,int64_t tokens,i
         return true;
     } catch (...) { return false; }
 }
+bool pool_cpu_by_layer(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
+    if (!user) return false;
+    auto& fleet=*static_cast<PoolFleet*>(user);
+    try {
+        std::lock_guard<std::mutex> lock(fleet.mutex_);
+        if(fleet.terminal_) return false;
+        fleet.terminal_=true;
+        if(layer<0 || layer>=int64_t(fleet.contexts_.size())) return false;
+        auto* ctx=fleet.contexts_[size_t(layer)];
+        if(!ctx || ctx->layer!=layer || ctx->client.layer()!=uint32_t(layer)) return false;
+        if(!pool_cpu_only(ctx,x,ids,tokens,k,out,layer)) return false;
+        fleet.terminal_=false;
+        return true;
+    } catch (...) { return false; }
+}
+
 }
