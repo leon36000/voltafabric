@@ -1,0 +1,98 @@
+[
+  {
+    "attempt": 1793373894712062413,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062412,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062412,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062412,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062412,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062413,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062413,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373894712062413,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r454-cpu-only",
+      "run_id": "r454-four-layers-3195577-1793373894712062412"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]
