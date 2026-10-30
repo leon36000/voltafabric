@@ -80,3 +80,27 @@ fn two_cell_softmax_uses_causal_cache_and_scores() {
     s.commit(p).unwrap();
     assert_eq!(s.len(), 2);
 }
+
+#[test]
+fn third_position_uses_all_three_causal_cells() {
+    let id = identity();
+    let mut state = State::new(id.clone(), 1, 1, 1, 3).unwrap();
+    for (position, key, value) in [(0, -1.0, 2.0), (1, 0.0, 4.0)] {
+        let candidate = state
+            .prepare(&id, position, &[1.0], &[key], &[value], &[0.0])
+            .unwrap();
+        state.commit(candidate).unwrap();
+    }
+    let candidate = state
+        .prepare(&id, 2, &[1.0], &[1.0], &[8.0], &[0.0])
+        .unwrap();
+    let e = std::f64::consts::E;
+    let expected = (2.0 / e + 4.0 + 8.0 * e) / (1.0 / e + 1.0 + e) / 2.0;
+    assert!((f64::from(candidate.output()[0]) - expected).abs() < 1e-6);
+    assert_eq!(state.len(), 2);
+    state.commit(candidate).unwrap();
+    assert_eq!(state.len(), 3);
+    assert!(state
+        .prepare(&id, 3, &[1.0], &[0.0], &[0.0], &[0.0])
+        .is_err());
+}

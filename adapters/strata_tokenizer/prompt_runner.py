@@ -1,4 +1,4 @@
-"""Bounded SC117 single-token prompt runner, with no automatic retry.
+"""Bounded SC117 one- or two-token prompt runner, with no automatic retry.
 
 Run under an externally admitted resource scope. The caller authenticates the
 model, tokenizer manifest, worker, engine binary, paths and ledger. A failure
@@ -45,11 +45,10 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
-    if (len(prompt_ids) != 1 or type(prompt_ids[0]) is not int or
-            not 0 <= prompt_ids[0] < len(tokenizer.tokens) or prompt_ids[0] == eos or
-            tokenizer.token_types[prompt_ids[0]] != 1):
-        raise ValueError("this qualification accepts exactly one ordinary prompt token")
-    completed = runner([binary, *engine_paths, "48", str(prompt_ids[0])],
+    if (not 1 <= len(prompt_ids) <= 2 or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
+            or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
+        raise ValueError("this qualification accepts one or two ordinary prompt tokens")
+    completed = runner([binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)],
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
         raise RuntimeError("engine failed; reconcile its ledger and do not replay UNKNOWN claims")
@@ -57,10 +56,10 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("engine response exceeds limit")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None
-    if not isinstance(input_tokens, list) or not input_tokens or input_tokens[0] != prompt_ids[0]:
+    if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
     decoded = decode_greedy_receipt(tokenizer, eos, receipt)
-    return {"prompt_token_id": prompt_ids[0], "output": decoded, "receipt": receipt}
+    return {"prompt_token_ids": prompt_ids, "output": decoded, "receipt": receipt}
 
 
 def main() -> int:

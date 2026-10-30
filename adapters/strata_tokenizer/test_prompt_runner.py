@@ -8,7 +8,7 @@ from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 class Tokenizer(FakeTokenizer):
     def encode(self, text, parse_special=False):
-        return {"A": [0], "multi": [0, 1], "special": [3]}.get(text, [])
+        return {"A": [0], "multi": [0, 1], "special": [3], "too many": [0, 1, 2]}.get(text, [])
 
 
 def receipt():
@@ -28,12 +28,27 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(len(calls), 1)
         self.assertEqual(calls[0][-2:], ["48", "0"])
 
+    def test_two_token_prompt_is_prefilled_before_generation(self):
+        calls = []
+        value = dict(receipt(), prompt_tokens=[0, 1], input_tokens=[0, 1, 0],
+                     generated_token_ids=[0, 0], output_sha256=["a" * 64] * 3)
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        out = run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertEqual(calls[0][-1], "0,1")
+        self.assertEqual(out["output"]["text"], "AA")
+        bad = dict(value, input_tokens=[0, 0, 0])
+        with self.assertRaises(ValueError):
+            run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8,
+                       runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(bad).encode(), b""))
+
     def test_refuses_prompt_before_spawning_and_never_retries_failure(self):
         calls = []
         def runner(args, **kwargs):
             calls.append(args)
             return subprocess.CompletedProcess(args, 1, b"partial", b"failure")
-        for prompt in ("", "multi", "special"):
+        for prompt in ("", "too many", "special"):
             with self.assertRaises(ValueError):
                 run_prompt(prompt, Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
         self.assertEqual(calls, [])

@@ -126,19 +126,22 @@ class GreedyDecoder:
 
 
 def decode_greedy_receipt(tokenizer: Tokenizer, eos: int, receipt: dict) -> dict:
-    """Decode a complete R459-style receipt atomically; caller authenticates it."""
+    """Decode a bounded R459/R462-style receipt atomically; caller authenticates it."""
     if not isinstance(receipt, dict) or receipt.get("layer_count") != 48:
         raise ValueError("full layer receipt required")
     inputs, generated = receipt.get("input_tokens"), receipt.get("generated_token_ids")
-    if (not isinstance(inputs, list) or not isinstance(generated, list) or not generated
-            or len(inputs) != len(generated) or len(generated) > 2 or inputs[1:] != generated[:-1]
+    if not isinstance(inputs, list) or not inputs or not isinstance(generated, list) or not 1 <= len(generated) <= 2:
+        raise ValueError("invalid autoregressive receipt")
+    prompt = receipt.get("prompt_tokens", inputs[:1])
+    if (not isinstance(prompt, list) or not 1 <= len(prompt) <= 2
+            or inputs != prompt + generated[:-1] or len(inputs) > 3
             or any(type(token) is not int or not 0 <= token < len(tokenizer.tokens) for token in inputs)
             or not isinstance(receipt.get("run_id"), str) or not receipt["run_id"].strip()
             or receipt.get("workers_closed") != 96):
         raise ValueError("invalid autoregressive receipt")
-    for key in ("output_sha256", "logits_sha256"):
+    for key, count in (("output_sha256", len(inputs)), ("logits_sha256", len(generated))):
         hashes = receipt.get(key)
-        if (not isinstance(hashes, list) or len(hashes) != len(generated)
+        if (not isinstance(hashes, list) or len(hashes) != count
                 or any(not isinstance(h, str) or len(h) != 64
                        or any(c not in "0123456789abcdef" for c in h) for h in hashes)):
             raise ValueError("invalid receipt output hashes")
