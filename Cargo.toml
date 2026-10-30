@@ -138,3 +138,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-two-token-live"
 path = "src/bin/vf-sc117-two-token-live.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-head-check"
+path = "src/bin/vf-sc117-head-check.rs"
+required-features = ["native-ggml-cpu"]
