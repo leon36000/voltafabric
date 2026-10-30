@@ -1,0 +1,1 @@
+{"attempt":1793371337480556749,"error":"SOURCE_FAULT","input_sha256":"4d8f178601bd212f053680fc31ac9b8abb6fcc27e5937986d96e01700a034ac9","run_id":"r440-fault-3001472-1793371337480556749","scope":"injected layer 4 missing-expert refusal after layer 3, local CPU only","source_calls_before_fault":8,"terminal":true,"worker_execs":[0,0,1,1]}

@@ -19,6 +19,106 @@ pub struct Owners {
     pub preferred: BTreeMap<u32, u32>,
     pub order: BTreeMap<u32, Vec<u32>>,
 }
+/// Caller-supplied, authenticated material and placement for one missing native expert.
+pub struct ExpertAdmission {
+    pub binding: crate::native_ggml_cpu::Binding,
+    pub index: String,
+    pub pack_bytes: u64,
+    pub bytes: Vec<u8>,
+}
+/// A source is consulted only for experts absent from the current registry.
+/// It must supply an independently trusted digest and enforce its own resource budget.
+pub trait MissingExpertSource {
+    fn load(
+        &mut self,
+        stamp: &Stamp,
+        attempt: u64,
+        expert: u32,
+        registry: &Registry,
+        resident_order: &BTreeMap<u32, Vec<u32>>,
+    ) -> Result<ExpertAdmission>;
+}
+impl Owners {
+    fn append(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        let order = self
+            .order
+            .get_mut(&binding.rank)
+            .ok_or_else(|| invalid("segment append rank order"))?;
+        if order.contains(&binding.local)
+            || self.registry.copies.iter().any(|r| {
+                r.rank == binding.rank && (r.local == binding.local || r.expert == binding.expert)
+            })
+        {
+            return Err(invalid("segment append duplicate expert or local"));
+        }
+        let mut matches = self
+            .sessions
+            .iter_mut()
+            .filter(|s| s.rank() == binding.rank);
+        let session = matches
+            .next()
+            .ok_or_else(|| invalid("segment append session missing"))?;
+        if matches.next().is_some() {
+            return Err(invalid("segment append duplicate rank"));
+        }
+        session.extend_native_ggml(binding, index, pack_bytes, bytes, timeout)?;
+        self.registry.copies.push(crate::moe::Replica {
+            expert: binding.expert,
+            rank: binding.rank,
+            local: binding.local,
+        });
+        order.push(binding.local);
+        Ok(())
+    }
+    fn ensure(
+        &mut self,
+        stamp: &Stamp,
+        attempt: u64,
+        choices: &[crate::sc117_router_cpu::Choice],
+        source: &mut Option<&mut dyn MissingExpertSource>,
+        timeout: Duration,
+    ) -> Result<()> {
+        let Some(source) = source.as_deref_mut() else {
+            return Ok(());
+        };
+        for choice in choices {
+            if self
+                .registry
+                .copies
+                .iter()
+                .any(|copy| copy.expert == choice.expert)
+            {
+                continue;
+            }
+            let material =
+                source.load(stamp, attempt, choice.expert, &self.registry, &self.order)?;
+            if material.binding.model_revision != stamp.model_revision
+                || material.binding.layer != stamp.layer
+                || material.binding.epoch != stamp.epoch
+                || material.binding.expert != choice.expert
+            {
+                return Err(invalid(
+                    "missing expert source returned a different identity",
+                ));
+            }
+            self.append(
+                &material.binding,
+                &material.index,
+                material.pack_bytes,
+                &material.bytes,
+                timeout,
+            )?;
+        }
+        Ok(())
+    }
+}
 enum Attention {
     Gdn(sc117_gdn_stage::Stage, sc117_post_attention::Stage),
     Qsa(sc117_qsa_stage::Stage, sc117_ffn_stage::Stage),
@@ -71,12 +171,17 @@ impl Layer {
         position: u64,
         input: &[f32],
         timeout: Duration,
+        source: &mut Option<&mut dyn MissingExpertSource>,
     ) -> Result<Vec<f32>> {
+        let stamp = ticket.stamp().clone();
+        let attempt = ticket.attempt();
         match &mut self.attention {
             Attention::Gdn(gdn, post) => {
                 let proposal = gdn.prepare_reserved(ledger, &ticket, position, input)?;
                 let routed =
                     sc117_bound_layer::Routed::prepare(post, ledger, &ticket, proposal, input)?;
+                self.owners
+                    .ensure(&stamp, attempt, routed.choices(), source, timeout)?;
                 let shared = routed.shared(&mut self.shared)?;
                 let collected = routed.dispatch(
                     &mut self.owners.sessions,
@@ -94,6 +199,8 @@ impl Layer {
                     usize::try_from(position).map_err(|_| invalid("QSA position overflow"))?;
                 let routed =
                     sc117_qsa_bound_layer::Routed::prepare(qsa, ffn, ledger, &ticket, pos, input)?;
+                self.owners
+                    .ensure(&stamp, attempt, routed.choices(), source, timeout)?;
                 let shared = routed.shared(&mut self.shared)?;
                 let collected = routed.dispatch(
                     &mut self.owners.sessions,
@@ -246,39 +353,12 @@ impl Segment {
             .iter_mut()
             .find(|l| l.identity.layer == binding.layer)
             .ok_or_else(|| invalid("segment append layer"))?;
-        let order = layer
-            .owners
-            .order
-            .get_mut(&binding.rank)
-            .ok_or_else(|| invalid("segment append rank order"))?;
-        if order.contains(&binding.local)
-            || layer.owners.registry.copies.iter().any(|r| {
-                r.rank == binding.rank && (r.local == binding.local || r.expert == binding.expert)
-            })
-        {
-            return Err(invalid("segment append duplicate expert or local"));
-        }
-        let mut matches = layer
-            .owners
-            .sessions
-            .iter_mut()
-            .filter(|s| s.rank() == binding.rank);
-        let session = matches
-            .next()
-            .ok_or_else(|| invalid("segment append session missing"))?;
-        if matches.next().is_some() {
-            return Err(invalid("segment append duplicate rank"));
-        }
         // Fail closed even if an error occurred before transmission. This keeps
         // the outer state from guessing whether a worker installed the weight.
         self.cursor.poisoned = true;
-        session.extend_native_ggml(binding, index, pack_bytes, bytes, self.timeout)?;
-        layer.owners.registry.copies.push(crate::moe::Replica {
-            expert: binding.expert,
-            rank: binding.rank,
-            local: binding.local,
-        });
-        order.push(binding.local);
+        layer
+            .owners
+            .append(binding, index, pack_bytes, bytes, self.timeout)?;
         self.cursor.poisoned = false;
         Ok(())
     }
@@ -291,6 +371,24 @@ impl Segment {
             .collect()
     }
     pub fn advance(&mut self, attempt: u64, input: &[f32]) -> Result<Vec<f32>> {
+        self.advance_inner(attempt, input, &mut None)
+    }
+    /// After routing, load absent experts through an explicitly supplied source
+    /// before dispatch. Any failure leaves this segment terminal and the claim consumed.
+    pub fn advance_with_source(
+        &mut self,
+        attempt: u64,
+        input: &[f32],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<f32>> {
+        self.advance_inner(attempt, input, &mut Some(source))
+    }
+    fn advance_inner(
+        &mut self,
+        attempt: u64,
+        input: &[f32],
+        source: &mut Option<&mut dyn MissingExpertSource>,
+    ) -> Result<Vec<f32>> {
         let position = self.cursor.position;
         let ledger = &self.ledger;
         let timeout = self.timeout;
@@ -302,7 +400,7 @@ impl Segment {
             layers.len(),
             attempt,
             input,
-            |i, ticket, values| layers[i].run(ledger, ticket, position, values, timeout),
+            |i, ticket, values| layers[i].run(ledger, ticket, position, values, timeout, source),
         )
     }
 }
@@ -342,6 +440,74 @@ mod tests {
             last_attempt: 0,
             poisoned: false,
         }
+    }
+
+    struct WrongSource;
+    impl MissingExpertSource for WrongSource {
+        fn load(
+            &mut self,
+            stamp: &Stamp,
+            attempt: u64,
+            expert: u32,
+            _: &Registry,
+            _: &BTreeMap<u32, Vec<u32>>,
+        ) -> Result<ExpertAdmission> {
+            assert_eq!((stamp.layer, attempt, expert), (3, 11, 7));
+            Ok(ExpertAdmission {
+                binding: crate::native_ggml_cpu::Binding {
+                    model_revision: stamp.model_revision.clone(),
+                    rank: 2,
+                    layer: stamp.layer,
+                    expert: 8,
+                    local: 0,
+                    epoch: stamp.epoch,
+                    index_sha256: String::new(),
+                    blob_sha256: String::new(),
+                },
+                index: String::new(),
+                pack_bytes: 0,
+                bytes: vec![],
+            })
+        }
+    }
+    #[test]
+    fn source_cannot_substitute_another_expert_and_is_skipped_for_residents() {
+        let mut owners = Owners {
+            sessions: vec![],
+            registry: Registry {
+                epoch: 9,
+                copies: vec![],
+            },
+            preferred: BTreeMap::new(),
+            order: BTreeMap::new(),
+        };
+        let choice = crate::sc117_router_cpu::Choice {
+            expert: 7,
+            weight: 1.0,
+            logit: 0.0,
+        };
+        let mut provider = WrongSource;
+        let mut source: Option<&mut dyn MissingExpertSource> = Some(&mut provider);
+        let error = owners
+            .ensure(
+                &base(),
+                11,
+                std::slice::from_ref(&choice),
+                &mut source,
+                Duration::from_secs(1),
+            )
+            .unwrap_err();
+        assert!(error.message.contains("different identity"));
+        assert!(owners.registry.copies.is_empty());
+        owners.registry.copies.push(crate::moe::Replica {
+            expert: 7,
+            rank: 2,
+            local: 0,
+        });
+        assert!(owners
+            .ensure(&base(), 11, &[choice], &mut source, Duration::from_secs(1))
+            .is_ok());
+        assert_eq!(owners.registry.copies.len(), 1);
     }
 
     #[test]

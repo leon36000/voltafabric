@@ -208,3 +208,13 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-chain-append-check"
 path = "src/bin/vf-sc117-chain-append-check.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-route-loader-check"
+path = "src/bin/vf-sc117-route-loader-check.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-route-loader-fault"
+path = "src/bin/vf-sc117-route-loader-fault.rs"
+required-features = ["native-ggml-cpu"]
