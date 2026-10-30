@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """One-shot local CPU route and expert check using operator-reviewed observations."""
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -19,11 +20,26 @@ def main():
     for name in ("pack", "index", "dense", "input", "observation", "bridge", "worker", "oracle", "router", "work-root", "router-digest"):
         ap.add_argument("--" + name, required=True)
     ap.add_argument("--collector", help="optional local vf executable for explicit FP16/f64 collection")
+    ap.add_argument("--model-input-sha256", help="expected SHA-256 of bounded model-derived input file")
     a = ap.parse_args()
     for path in (a.pack,a.index,a.dense,a.input,a.observation,a.bridge,a.worker,a.oracle,a.router,a.work_root):
         if not os.path.isabs(path): ap.error("all paths must be absolute")
     work = Path(tempfile.mkdtemp(prefix="routed-session-", dir=a.work_root)); ledger = work / "ledger"; ledger.mkdir()
-    route = json.loads(subprocess.run([a.router,a.dense,a.input,a.router_digest], check=True, timeout=30, capture_output=True, text=True).stdout)
+    input_path = a.input
+    if a.model_input_sha256:
+        fd = os.open(a.input, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        try:
+            st = os.fstat(fd)
+            import stat
+            if not stat.S_ISREG(st.st_mode) or not 10240 <= st.st_size <= 1048576: raise ValueError("invalid model input file")
+            raw = os.read(fd, st.st_size + 1)
+            after = os.fstat(fd)
+            if len(raw)!=st.st_size or (st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns)!=(after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns): raise ValueError("input changed")
+            if hashlib.sha256(raw).hexdigest()!=a.model_input_sha256: raise ValueError("model input digest mismatch")
+        finally: os.close(fd)
+        input_path = str(work / "activation.f32")
+        with open(input_path,"xb") as f: f.write(raw[:10240])
+    route = json.loads(subprocess.run([a.router,a.dense,input_path,a.router_digest], check=True, timeout=30, capture_output=True, text=True).stdout)
     # JSON decimal text must round-trip to the original binary32 coefficients.
     for entry in route:
         entry["weight"]=struct.unpack("<f",struct.pack("<f",entry["weight"]))[0]
@@ -37,11 +53,13 @@ def main():
     refs=[]
     for expert in ids:
         path=work / f"reference-{expert}.bin"
-        subprocess.run([a.oracle,a.pack,str(expert),str(path)],check=True,timeout=30,stdout=subprocess.DEVNULL)
+        command=[a.oracle,a.pack,str(expert),str(path)]
+        if a.model_input_sha256: command.append(input_path)
+        subprocess.run(command,check=True,timeout=30,stdout=subprocess.DEVNULL)
         raw=path.read_bytes()
         if len(raw)!=2560*12: raise ValueError("invalid oracle output")
         refs.append((struct.unpack("<2560f",raw[:10240]),struct.unpack("<2560d",raw[10240:])))
-    input_bytes=Path(a.input).read_bytes()[:10240]
+    input_bytes=Path(input_path).read_bytes()[:10240]
     if len(input_bytes)!=10240 or struct.unpack("<2560f",input_bytes)!=refs[0][0] or any(r[0]!=refs[0][0] for r in refs):
         raise ValueError("route and oracle inputs differ")
     run_id="sc117-gate-cpu-"+uuid.uuid4().hex
@@ -87,7 +105,7 @@ def main():
         if abs(observed-expected)>1e-7+1e-3*abs(expected): raise ValueError("weighted output differs")
     result_summary={"status":"ok","run_id":run_id,"ids":ids,"weights":[r["weight"] for r in route],
                     "max_row_error":max_error,"max_weighted_error":max_combined,"work_dir":str(work),
-                    "scope":"CPU reference route, local real expert sessions; synthetic activation"}
+                    "scope":"CPU reference route, local real expert sessions; " + ("model-derived activation" if a.model_input_sha256 else "synthetic activation")}
     if a.collector:
         if not os.path.isabs(a.collector): raise ValueError("collector path must be absolute")
         claims=list(ledger.glob("*.claim.json"))
@@ -125,6 +143,7 @@ def main():
             if not math.isfinite(got) or abs(got-want)>1e-15: raise ValueError("collector differs from ordered FP16 reference")
         result_summary.update({"collector":"FP16 decoded, f64 accumulation", "collector_max_diff":max_collector_diff,
                                "fp16_max_loss_vs_unweighted_fp32":max_fp16_loss,"attempt":attempt})
+        with open(work / "collector-output.json","x",encoding="utf-8") as f: json.dump(collected,f,allow_nan=False)
     print(json.dumps(result_summary,sort_keys=True))
 
 if __name__=="__main__":
