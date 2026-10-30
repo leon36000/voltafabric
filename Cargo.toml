@@ -224,3 +224,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-ple-layer-check"
 path = "src/bin/vf-sc117-ple-layer-check.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-ple-two-check"
+path = "src/bin/vf-sc117-ple-two-check.rs"
+required-features = ["ple-cpu-qualification"]
