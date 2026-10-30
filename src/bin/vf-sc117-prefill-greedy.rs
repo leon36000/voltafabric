@@ -10,7 +10,7 @@ use voltafabric::{
     native_ggml_cpu::Binding,
     native_ledger::NativeBatchLedger,
     sc117_ffn_stage, sc117_gdn_stage,
-    sc117_layer_chain::{Layer, Owners, Segment},
+    sc117_layer_chain::{Layer, Owners, QsaQualificationTrace, Segment},
     sc117_post_attention, sc117_qsa_stage, sc117_router_cpu, sc117_shared_stage,
     session::{Endpoint, Session},
     sha256,
@@ -18,6 +18,9 @@ use voltafabric::{
 };
 type E = Box<dyn std::error::Error>;
 const MAX_POSITIONS: usize = 128;
+const TRACE_MAX_POSITIONS: usize = 96;
+const TRACE_WORDS: usize = 37_380;
+const TRACE_DOMAIN: &[u8] = b"vf-qsa-trace-v1-layer3-96-f32le\0";
 const INDEX_HASH: &str = "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24";
 
 struct Manifests {
@@ -730,6 +733,64 @@ fn prompt_tokens_hash(tokens: &[u32]) -> String {
     sha256::hex(&bytes)
 }
 
+fn trace_plan(base: &str, enabled: bool) -> String {
+    if !enabled {
+        return base.to_owned();
+    }
+    let mut bytes = TRACE_DOMAIN.to_vec();
+    bytes.extend_from_slice(base.as_bytes());
+    format!("r537-{}", sha256::hex(&bytes))
+}
+
+fn append_qsa_trace(
+    bytes: &mut Vec<u8>,
+    trace: QsaQualificationTrace,
+    run_id: &str,
+    plan_id: &str,
+    position: usize,
+    attempt: u64,
+) -> Result<(), E> {
+    let stamp = &trace.stamp;
+    if position >= TRACE_MAX_POSITIONS
+        || bytes.len() != position * TRACE_WORDS * 4
+        || stamp.run_id != run_id
+        || stamp.model_revision != "sc117-local-observation"
+        || stamp.plan_id != plan_id
+        || stamp.layer != 3
+        || stamp.batch != position as u64
+        || stamp.epoch != 1
+        || trace.attempt != attempt
+    {
+        return Err("QSA trace identity or position".into());
+    }
+    let o = trace.output;
+    let slices: [(&[f32], usize); 10] = [
+        (&o.mixed, 2560),
+        (&o.inject, 4),
+        (&o.raw_query_gate, 12288),
+        (&o.query, 6144),
+        (&o.gate, 6144),
+        (&o.raw_key, 512),
+        (&o.key, 512),
+        (&o.value, 512),
+        (&o.gated_attention, 6144),
+        (&o.attention, 2560),
+    ];
+    if slices
+        .iter()
+        .any(|(s, n)| s.len() != *n || s.iter().any(|v| !v.is_finite()))
+    {
+        return Err("QSA trace shape or value".into());
+    }
+    for (slice, _) in slices {
+        for value in slice {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+    Ok(())
+}
+
+#[allow(clippy::too_many_arguments)]
 fn worker_plan_id(
     endpoints: &BTreeMap<u32, Endpoint>,
     payload_budget: u64,
@@ -755,8 +816,8 @@ fn worker_plan_id(
         || !(1..=MAX_POSITIONS).contains(&max_new_tokens)
         || prompt_length + max_new_tokens - 1 > MAX_POSITIONS
         || endpoints.len() != 2
-        || (shared_lease.is_some() != !known_hosts_sha256.is_empty())
-        || (r53_namespace.is_some() != !known_hosts_sha256.is_empty())
+        || (shared_lease.is_some() == known_hosts_sha256.is_empty())
+        || (r53_namespace.is_some() == known_hosts_sha256.is_empty())
         || known_hosts_sha256
             .iter()
             .any(|(rank, hash)| !endpoints.contains_key(rank) || !sha256::is_hex_digest(hash))
@@ -931,6 +992,14 @@ fn run() -> Result<(), E> {
     {
         return Err("invalid prompt tokens".into());
     }
+    let trace_qsa = match optional_env("VF_QSA_TRACE_LAYER")?.as_deref() {
+        None => false,
+        Some("3") => true,
+        _ => return Err("QSA trace layer must be 3".into()),
+    };
+    if trace_qsa && prompt_tokens.len() + max_new_tokens - 1 > TRACE_MAX_POSITIONS {
+        return Err("QSA trace position limit".into());
+    }
     let mut endpoints = BTreeMap::new();
     let mut host_pins = BTreeMap::new();
     let mut host_digests = BTreeMap::new();
@@ -956,6 +1025,9 @@ fn run() -> Result<(), E> {
             _ => return Err("SSH known-hosts path and digest must be supplied together".into()),
         }
         endpoints.insert(rank, endpoint);
+    }
+    if trace_qsa && !host_digests.is_empty() {
+        return Err("QSA trace requires local CPU workers".into());
     }
     let shared_lease: Option<SharedLease> = match (
         host_digests.is_empty(),
@@ -1034,7 +1106,7 @@ fn run() -> Result<(), E> {
     let manifest: voltafabric::sc117_ple_weights::Manifest =
         serde_json::from_slice(&manifest_bytes)?;
     let manifest_hash = sha256::hex(&manifest_bytes);
-    let plan_id = worker_plan_id(
+    let base_plan_id = worker_plan_id(
         &endpoints,
         budget,
         &rank_limits,
@@ -1047,6 +1119,7 @@ fn run() -> Result<(), E> {
         &shared_lease,
         &r53_namespace,
     )?;
+    let plan_id = trace_plan(&base_plan_id, trace_qsa);
     if plan_only {
         println!(
             "{}",
@@ -1233,6 +1306,7 @@ fn run() -> Result<(), E> {
     let mut generated = Vec::new();
     let mut evictions = Vec::new();
     let mut rank_history = Vec::new();
+    let mut trace_bytes = Vec::new();
     let mut current_token = prompt_tokens[0];
     for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
         if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
@@ -1245,14 +1319,36 @@ fn run() -> Result<(), E> {
         let embedding = token_table.gather(current_token)?;
         embedding_hashes.push(bytes_hash(&embedding));
         let input: Vec<f32> = (0..4).flat_map(|_| embedding.iter().copied()).collect();
-        let (output, removed) = segment.advance_token_with_headroom(
-            attempt.checked_add(pos as u64).ok_or("attempt overflow")?,
-            current_token as i32,
-            &input,
-            &mut source,
-            worst_case_headroom,
-            768,
-        )?;
+        let position_attempt = attempt.checked_add(pos as u64).ok_or("attempt overflow")?;
+        let (output, removed) = if trace_qsa {
+            let (output, removed, trace) = segment.advance_token_with_headroom_qsa_trace(
+                position_attempt,
+                current_token as i32,
+                &input,
+                &mut source,
+                worst_case_headroom,
+                768,
+                3,
+            )?;
+            append_qsa_trace(
+                &mut trace_bytes,
+                trace,
+                &run_id,
+                &plan_id,
+                pos,
+                position_attempt,
+            )?;
+            (output, removed)
+        } else {
+            segment.advance_token_with_headroom(
+                position_attempt,
+                current_token as i32,
+                &input,
+                &mut source,
+                worst_case_headroom,
+                768,
+            )?
+        };
         if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
             verify_shared_lease(spec, fd)?;
         }
@@ -1295,10 +1391,14 @@ fn run() -> Result<(), E> {
         return Err("worker shutdown receipt".into());
     }
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
-    println!(
-        "{}",
-        serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}})
-    );
+    let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
+    if trace_qsa {
+        if trace_bytes.len() != input_tokens.len() * TRACE_WORDS * 4 {
+            return Err("QSA trace incomplete".into());
+        }
+        receipt["qsa_trace"] = serde_json::json!({"version":"vf-qsa-trace-v1-layer3-f32le", "layer":3, "positions":input_tokens.len(), "words_per_position":TRACE_WORDS, "sha256":sha256::hex(&trace_bytes), "base64":voltafabric::base64::encode(&trace_bytes)});
+    }
+    println!("{receipt}");
     drop(host_pins);
     Ok(())
 }
@@ -1312,6 +1412,50 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn trace_plan_and_records_are_bound_and_reject_partial_data() {
+        let base = format!("r531-{}", "a".repeat(64));
+        let plan = trace_plan(&base, true);
+        assert_eq!(trace_plan(&base, false), base);
+        assert!(plan.starts_with("r537-"));
+        assert_ne!(plan, trace_plan(&format!("r531-{}", "b".repeat(64)), true));
+        let trace = || QsaQualificationTrace {
+            stamp: voltafabric::moe::Stamp {
+                run_id: "run".into(),
+                model_revision: "sc117-local-observation".into(),
+                plan_id: plan.clone(),
+                layer: 3,
+                batch: 0,
+                epoch: 1,
+            },
+            attempt: 17,
+            output: sc117_qsa_stage::Output {
+                mixed: vec![1.0; 2560],
+                inject: vec![0.0; 4],
+                raw_query_gate: vec![0.0; 12288],
+                query: vec![0.0; 6144],
+                gate: vec![0.0; 6144],
+                raw_key: vec![0.0; 512],
+                key: vec![0.0; 512],
+                value: vec![0.0; 512],
+                gated_attention: vec![0.0; 6144],
+                attention: vec![0.0; 2560],
+            },
+        };
+        let mut bytes = Vec::new();
+        assert!(append_qsa_trace(&mut bytes, trace(), "wrong", &plan, 0, 17).is_err());
+        assert!(bytes.is_empty());
+        let mut malformed = trace();
+        malformed.output.gate.pop();
+        assert!(append_qsa_trace(&mut bytes, malformed, "run", &plan, 0, 17).is_err());
+        assert!(bytes.is_empty());
+        append_qsa_trace(&mut bytes, trace(), "run", &plan, 0, 17).unwrap();
+        assert_eq!(bytes.len(), TRACE_WORDS * 4);
+        assert_eq!(&bytes[..4], &1.0f32.to_le_bytes());
+        assert!(append_qsa_trace(&mut bytes, trace(), "run", &plan, 1, 18).is_err());
+        assert_eq!(bytes.len(), TRACE_WORDS * 4);
+    }
     const DIGEST: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     #[test]
     fn expected_plan_is_checked_before_remote_work() {

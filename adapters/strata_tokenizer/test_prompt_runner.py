@@ -1,4 +1,5 @@
 import json
+import base64
 import os
 import hashlib
 import struct
@@ -7,7 +8,7 @@ import sys
 import unittest
 from unittest.mock import patch
 
-from adapters.strata_tokenizer.prompt_runner import _run_bounded, run_prompt as _run_prompt
+from adapters.strata_tokenizer.prompt_runner import _run_bounded, _verify_qsa_trace, run_prompt as _run_prompt
 from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 
@@ -29,6 +30,43 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_qsa_trace_validates_length_digest_and_metadata(self):
+        raw = b"\0" * (37380 * 4)
+        trace = {"version": "vf-qsa-trace-v1-layer3-f32le", "layer": 3,
+                 "positions": 1, "words_per_position": 37380,
+                 "sha256": hashlib.sha256(raw).hexdigest(),
+                 "base64": base64.b64encode(raw).decode("ascii")}
+        record = {"input_tokens": [0], "qsa_trace": trace}
+        _verify_qsa_trace(record)
+        for key, invalid in (("positions", 2), ("layer", 7), ("sha256", "0" * 64),
+                             ("base64", trace["base64"][:-4])):
+            bad = dict(trace, **{key: invalid})
+            with self.assertRaises(ValueError):
+                _verify_qsa_trace({"input_tokens": [0], "qsa_trace": bad})
+
+    def test_trace_is_required_for_trace_plan_and_refused_for_regular_plan(self):
+        raw = b"\0" * (2 * 37380 * 4)
+        trace = {"version": "vf-qsa-trace-v1-layer3-f32le", "layer": 3,
+                 "positions": 2, "words_per_position": 37380,
+                 "sha256": hashlib.sha256(raw).hexdigest(),
+                 "base64": base64.b64encode(raw).decode("ascii")}
+        value = dict(receipt(), prompt_tokens=[0], plan_id="r537-" + "a" * 64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest(),
+                     qsa_trace=trace)
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        def run():
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(run()["output"]["text"], "😀")
+            del value["qsa_trace"]
+            with self.assertRaisesRegex(ValueError, "QSA trace metadata"):
+                run()
+            value["qsa_trace"] = trace
+            value["plan_id"] = "r531-" + "a" * 64
+            with self.assertRaisesRegex(ValueError, "trace-bound plan"):
+                run()
+
     def test_prepare_plan_uses_tokenizer_and_rejects_bad_plan_receipts(self):
         prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
         good = {"plan_id": "r512-" + "a" * 64, "prompt_tokens_sha256": prompt_hash}

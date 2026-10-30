@@ -7,6 +7,7 @@ may leave consumed claims; inspect the ledger rather than replaying it.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -23,6 +24,28 @@ from .adapter import (MAX_GENERATED_TOKENS, MAX_INPUT_POSITIONS, MAX_PROMPT_TOKE
 MAX_PROMPT_BYTES = 4096
 MAX_RECEIPT_BYTES = 128 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024
+TRACE_WORDS = 37380
+TRACE_MAX_POSITIONS = 96
+
+
+def _verify_qsa_trace(receipt: dict) -> None:
+    trace = receipt.get("qsa_trace")
+    inputs = receipt.get("input_tokens")
+    if (not isinstance(trace, dict) or set(trace) != {"version", "layer", "positions", "words_per_position", "sha256", "base64"}
+            or trace["version"] != "vf-qsa-trace-v1-layer3-f32le" or trace["layer"] != 3
+            or type(trace["positions"]) is not int or not isinstance(inputs, list)
+            or trace["positions"] != len(inputs) or not 1 <= len(inputs) <= TRACE_MAX_POSITIONS
+            or trace["words_per_position"] != TRACE_WORDS or not isinstance(trace["base64"], str)
+            or not isinstance(trace["sha256"], str)):
+        raise ValueError("invalid QSA trace metadata")
+    encoded = trace["base64"].encode("ascii")
+    expected_bytes = len(inputs) * TRACE_WORDS * 4
+    if len(encoded) != ((expected_bytes + 2) // 3) * 4:
+        raise ValueError("invalid QSA trace size")
+    raw = base64.b64decode(encoded, validate=True)
+    if (len(raw) != expected_bytes or base64.b64encode(raw) != encoded
+            or hashlib.sha256(raw).hexdigest() != trace["sha256"]):
+        raise ValueError("invalid QSA trace digest or encoding")
 _ENGINE_FAILURES = {
     b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity\n": "rank_payload_capacity",
     b"prefill-greedy qualification refused: INVALID_INPUT: expert payload budget exceeded\n": "global_payload_capacity",
@@ -162,7 +185,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 128 input positions")
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
-    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-")) or len(expected_plan) != 69
+    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
     command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
@@ -193,7 +216,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
             raise ValueError("invalid prepared plan receipt")
         plan = receipt["plan_id"]
-        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-")) or len(plan) != 69
+        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-")) or len(plan) != 69
                 or any(c not in "0123456789abcdef" for c in plan[5:])):
             raise ValueError("current bound plan identity required")
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
@@ -212,10 +235,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
-        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-")) or len(plan_id) != 69
+        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-")) or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):
             raise ValueError("current bound plan identity required")
-    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-"))):
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")
@@ -225,6 +248,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("engine receipt differs from tokenizer EOS")
     if chat and receipt.get("prompt_mode") != "chat":
         raise ValueError("engine receipt differs from prompt mode")
+    if isinstance(plan_id, str) and plan_id.startswith("r537-"):
+        _verify_qsa_trace(receipt)
+    elif "qsa_trace" in receipt:
+        raise ValueError("QSA trace requires trace-bound plan")
     decoded = decode_greedy_receipt(tokenizer, eos, receipt)
     return {"prompt_token_ids": prompt_ids, "output": decoded, "receipt": receipt}
 
