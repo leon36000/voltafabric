@@ -314,3 +314,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-prefill-evict"
 path = "src/bin/vf-sc117-prefill-evict.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-prefill-eviction-fault"
+path = "src/bin/vf-sc117-prefill-eviction-fault.rs"
+required-features = ["ple-cpu-qualification"]

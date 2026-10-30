@@ -1,0 +1,601 @@
+{
+  "native-010921229a041c740ec5984b2073e073a89f092bb78030baee5511604e91c404.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 26,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-05a71677df6e8bdb5bae275d727d5e9e8f48c7ba534ba01c32c7f40eb7300cb5.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 14,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-07354c4105aa6bf18c47b0285db6d81c547751b57ce50fe9d15bdb39663e3ed5.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 37,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0a9f05bbe2bceb324017dabd886e3b03f2b47a78f24a2762de727d23a7c25218.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 46,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0ba8a5809f64e348ffdd3593977356e1b0ddf650ecd69f5ae4f7633cd28eb7af.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 11,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0bca925a46f751a7d02f758cc63b6c8aa2d4d1718d0bc9c3fa67e363ad2d2b0e.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 20,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-138a09806d63a7c99b10730ad42c3f3aa602b139d532dcb165681c6c69f80878.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 36,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-15ab9ba2b2b0fb60eb5255e6c65a17052c752f1328111f6eac5555a4c2313e88.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 24,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1a81a2e594141e266fc837b4e23264eb3119d147a22372f9412787bda1ea3e61.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 17,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-220797bff5f6d70091877d7979576d2bae7a8ba6ca5ee9e588e9610a82d59210.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 33,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2c23ae15f8d8f4591260ad9bf74b755a7e86a90ab380c73498acd5aa102314cb.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2eb4f6608ba7357738e9a085ae98c3143957458f7862996646913c692ee3b6a2.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 19,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2f4759a15213a8687e57734171b631e962c9467b272a270d5717284a1b0f99a4.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 15,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-374a1f03dc39fa51069800343256ab7bd9b6d67411b50fa58083e9e846bb25ce.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 43,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-3949771aabfe080d9aa8e86f5d578d392c2390193d700c432b22f711659b44e6.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 7,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-46fdcc9b54d0ff9aae0b338ca30629024448c9cde9030eea45fef303aac16e52.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 32,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4a8c92c6d5989fa230fe9cdc4551d8a75b7cfbe0f67f3db55c3746907f541a9a.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 31,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-514b81eef6ffce62a463e83ba101962c10bf3567aa60235a68c1359a9cf07ac6.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 16,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-57c47b4e7e3ff8a01711f9de9e4fc7a8201745fd871675a51d8e3383245525bf.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 10,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-61b0721e70fef96d01a6e3d38190ebf9c50c600aa53709088a4c3070e980ab69.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 21,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-664a0b88a2618b474ba36da85286b3c60899d148a82e59a34e494c96411e19b0.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 9,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-6891c3f4f5d3c4252d76eae329d037c8c4e957416d6479e62e655cbc111bc423.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 6,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-73704fc0631a52f67fb8a8fd390b437dd74b8a8c0d5f02f5f2f1fe9abbdf4f07.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 28,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-77867ca0b16cb2a1e6bcdc52c5cad9d42111081227fc396ca05227809beda49a.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 13,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7cb466ab06ae78dc46d224b185d5060ffab79228e815806d2d80046733e3d7fd.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 5,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-81db5e44135a9a590caef9f1c5d7e0eea93cf8f3bd32e7037babc4bcb601c5a2.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 25,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-89e536ecefbe3eebadb4ac2a1ccd1d52cbc04a8b3aa00c9ae2312e49946a36cc.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 44,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8a403f8d9b37e029c90960ddc8d2a281fe3bc15c17ac621f642051ecdeb87e53.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 35,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8c216bd95011a04b45753c01285431baca7553d6bab3e2ec773ff37d0d5878bc.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 30,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-9250e1efa02b8e6201d4f8743f275e354af399ec7c33e35d504b8c989bd38728.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 39,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a081e9f2f77f9e51c8258a55dd4a14faff4103d1ab642c5df72437e9781a67cb.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 12,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a3a56acb854d91442fd55e1721525d4a20c18e7d0aadc48f6e463e16b1144246.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 38,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-abf6d61de54c05bc53b98233f2659fc5c25ea3931d92852c28c702109d660fb2.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b0fc14edb0d2b4006dc51dd3e906cade4335a169b933afdf86858d846ed30ffe.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 18,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bd2caf08e7eb669da2ede7bb5befd7dcd17c979a58fa28b5b09374da3a4ba101.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 29,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-beefe33591ad48f8a654d1830d3e98e5b7f610a911e81b1bc83f93e319fe9956.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 8,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bf20a8074effda0d66da5e54e74c9a3a83ea7cf4fa889fed0b40267f61f82a1c.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c2ffb3dd6230a760d19d26c5a092eff750ff7553ef6aa27ac2890e935ee67503.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 34,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-cf69dc444a84948c49a16d4748eee427e02f0b778d92a6b9977427a6f15b6965.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 27,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-d986a50f7ae455a5c0ada97af4e6f9075570b99fdf47f5b01666373fcba107a0.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e073bcb44d32e13cc7fb1805ddaa1afb66ab0ba32bb61459d54a6e94602d6a2b.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 41,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e078992d9df91a8ec59e85b6c1aaec4b52dbf61a11dbe57faa88514e31081b9c.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 42,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e2c82e8bf96b4effbe014367a14e732d7dbc3dadcbe0536564b8d91fb2e64520.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 47,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e50a45cd32b23584b347890c9419068fcee7a02db1653060590789c843161f3e.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 22,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e8a099e4b11d31854b608edf8004e361408a552ed8a19ee5bf30f49727f006da.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 4,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-ef1517a24f45fc6480f6a61b78e8c57f5e8b0cbb44cfc60b0d114b9960712f73.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 45,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-evict-d7b48dbd49b36a8baca69e34c8aebc3404fb6cc402ca449a7a2fb6e1b92d5330.claim.json": {
+    "attempt": 1793377163617447839,
+    "binding": {
+      "blob_sha256": "f13d07f6ff33a274c4b22903c00ac13aafee621849c47e995ae133f5f61ca465",
+      "epoch": 1,
+      "expert": 0,
+      "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+      "layer": 0,
+      "local": 0,
+      "model_revision": "sc117-local-observation",
+      "rank": 2
+    },
+    "operation_id": "d7b48dbd49b36a8baca69e34c8aebc3404fb6cc402ca449a7a2fb6e1b92d5330",
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-f10865fb79ed6aaf9a5c18be500898940f46ec5b4b7fb22b6317977e5c508912.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 40,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-feb82db156e6c3ded568b28d444e20d314f70d74d2d05d252349c679bea38eec.claim.json": {
+    "attempt": 1793377163617447839,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 23,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r465-cpu-only",
+      "run_id": "r465-eviction-lost-3410428-1793377163617447839"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+}
