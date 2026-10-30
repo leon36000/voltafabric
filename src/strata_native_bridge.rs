@@ -272,13 +272,16 @@ fn binary_loop(
     fn u64_at(b: &[u8], offset: usize) -> u64 {
         u64::from_le_bytes(b[offset..offset + 8].try_into().unwrap())
     }
-    fn reply(batch: u64, status: u32, rows: &[SlotRow]) -> Vec<u8> {
+    fn reply(batch: u64, status: u32, rows: &[SlotRow], layer: Option<u32>) -> Vec<u8> {
         let mut out = Vec::with_capacity(24 + rows.len() * (4 + 2560 * 4));
-        out.extend_from_slice(b"VFR1");
+        out.extend_from_slice(if layer.is_some() { b"VFR2" } else { b"VFR1" });
         out.extend_from_slice(&status.to_le_bytes());
         out.extend_from_slice(&batch.to_le_bytes());
         out.extend_from_slice(&(rows.len() as u32).to_le_bytes());
         out.extend_from_slice(&(2560_u32).to_le_bytes());
+        if let Some(layer) = layer {
+            out.extend_from_slice(&layer.to_le_bytes());
+        }
         for row in rows {
             out.extend_from_slice(&(row.position as u32).to_le_bytes());
             for value in &row.value {
@@ -292,8 +295,24 @@ fn binary_loop(
         input
             .read_exact(&mut header)
             .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
-        if &header[..4] != b"VFB1" {
+        let v2 = &header[..4] == b"VFB2";
+        if !v2 && &header[..4] != b"VFB1" {
             return Err(invalid("native bridge binary magic"));
+        }
+        let layer = v2.then_some(coordinator.template.stamp.layer);
+        if v2 {
+            let mut requested = [0_u8; 4];
+            input
+                .read_exact(&mut requested)
+                .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+            if u32::from_le_bytes(requested) != coordinator.template.stamp.layer {
+                process::write_frame(
+                    output,
+                    &reply(u64_at(&header, 8), 1, &[], layer),
+                    "binary bridge layer rejection",
+                )?;
+                return Err(invalid("native bridge layer mismatch"));
+            }
         }
         let op = u32_at(&header, 4);
         let batch = u64_at(&header, 8);
@@ -301,7 +320,7 @@ fn binary_loop(
         let top_k = u32_at(&header, 20) as usize;
         if op == 2 && batch == 0 && tokens == 0 && top_k == 0 {
             coordinator.close()?;
-            process::write_frame(output, &reply(0, 2, &[]), "binary bridge shutdown")?;
+            process::write_frame(output, &reply(0, 2, &[], layer), "binary bridge shutdown")?;
             return Ok(());
         }
         if op != 1
@@ -309,7 +328,11 @@ fn binary_loop(
             || !(1..=64).contains(&top_k)
             || tokens * top_k > 128
         {
-            process::write_frame(output, &reply(batch, 1, &[]), "binary bridge rejection")?;
+            process::write_frame(
+                output,
+                &reply(batch, 1, &[], layer),
+                "binary bridge rejection",
+            )?;
             return Err(invalid("native bridge binary dimensions or operation"));
         }
         let slots = tokens * top_k;
@@ -328,11 +351,17 @@ fn binary_loop(
             .map(|i| u32_at(&body, (input_count + slots + i) * 4) as i32)
             .collect::<Vec<_>>();
         match coordinator.batch(batch, tokens, top_k, &floats, &ids, &kinds) {
-            Ok(rows) => {
-                process::write_frame(output, &reply(batch, 0, &rows), "binary bridge reply")?
-            }
+            Ok(rows) => process::write_frame(
+                output,
+                &reply(batch, 0, &rows, layer),
+                "binary bridge reply",
+            )?,
             Err(error) => {
-                process::write_frame(output, &reply(batch, 1, &[]), "binary bridge failure")?;
+                process::write_frame(
+                    output,
+                    &reply(batch, 1, &[], layer),
+                    "binary bridge failure",
+                )?;
                 return Err(error);
             }
         }

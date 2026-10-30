@@ -17,7 +17,7 @@ int main(int argc,char** argv) {
     if(argc!=2) return 1;
     std::ifstream file(argv[1],std::ios::binary); std::vector<float> expected(2560);
     if(!file.read(reinterpret_cast<char*>(expected.data()),expected.size()*sizeof(float))) return 2;
-    vf::strata_bridge::Client client(0,1,30000);
+    vf::strata_bridge::Client client(0,1,30000,0);
     vf::strata_bridge::PoolContext ctx{client,0,40,false,{}, {}};
     strata::core::ExpertDispatch dispatch;
     dispatch.vf_cpu_pool=&vf::strata_bridge::pool_cpu_only; dispatch.vf_cpu_context=&ctx; dispatch.n_expert=512;

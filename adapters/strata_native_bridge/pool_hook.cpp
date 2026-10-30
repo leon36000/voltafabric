@@ -10,7 +10,7 @@ bool pool_cpu_only(void* user,const float* x,const int32_t* ids,int64_t tokens,i
         std::lock_guard<std::mutex> lock(ctx.mutex);
         if(ctx.terminal) return false;
         ctx.terminal=true;
-        if(!x || !ids || !out || layer!=ctx.layer || tokens<1 || tokens>8 || k<1 || k>64 || tokens*k>128 || ctx.next_batch==std::numeric_limits<uint64_t>::max()) {
+        if(!x || !ids || !out || layer!=ctx.layer || layer!=int64_t(ctx.client.layer()) || tokens<1 || tokens>8 || k<1 || k>64 || tokens*k>128 || ctx.next_batch==std::numeric_limits<uint64_t>::max()) {
             ctx.terminal=true; ctx.error="invalid native pool input"; return false;
         }
         const size_t n=size_t(tokens*k), width=2560;

@@ -957,6 +957,45 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     assert_eq!(u32::from_le_bytes(header[4..8].try_into().unwrap()), 2);
     drop(input);
     assert!(child.wait().unwrap().success());
+    // A miswired client must be rejected before reserving or executing a batch.
+    let (mut child, mut input, mut output) = start(&init);
+    send(&mut input, &Request::EnterBinary);
+    assert!(matches!(recv(&mut output), Reply::BinaryReady));
+    let mut wrong_layer = Vec::from(&b"VFB2"[..]);
+    wrong_layer.extend_from_slice(&1_u32.to_le_bytes());
+    wrong_layer.extend_from_slice(&90_u64.to_le_bytes());
+    wrong_layer.extend_from_slice(&1_u32.to_le_bytes());
+    wrong_layer.extend_from_slice(&3_u32.to_le_bytes());
+    wrong_layer.extend_from_slice(&7_u32.to_le_bytes());
+    input.write_all(&wrong_layer).unwrap();
+    input.flush().unwrap();
+    let mut rejected = [0_u8; 28];
+    output.read_exact(&mut rejected).unwrap();
+    assert_eq!(&rejected[..4], b"VFR2");
+    assert_eq!(u32::from_le_bytes(rejected[4..8].try_into().unwrap()), 1);
+    assert_eq!(u32::from_le_bytes(rejected[24..28].try_into().unwrap()), 0);
+    drop(input);
+    assert!(!child.wait().unwrap().success());
+    let (mut child, mut input, mut output) = start(&init);
+    send(
+        &mut input,
+        &Request::Batch {
+            batch: 90,
+            tokens: 1,
+            top_k: 3,
+            inputs: x.clone(),
+            ids: vec![0, 2, 1],
+            kinds: vec![-1, 0, -1],
+        },
+    );
+    assert!(matches!(
+        recv(&mut output),
+        Reply::Completed { batch: 90, .. }
+    ));
+    send(&mut input, &Request::Shutdown);
+    assert!(matches!(recv(&mut output), Reply::Closed));
+    drop(input);
+    assert!(child.wait().unwrap().success());
     #[cfg(unix)]
     for client_path in [
         std::env::var_os("VF_STRATA_CPP_CLIENT"),

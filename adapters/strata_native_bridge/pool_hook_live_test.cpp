@@ -7,7 +7,7 @@ int main(int argc,char** argv) {
     if(argc!=2) return 1;
     std::ifstream file(argv[1],std::ios::binary); std::vector<float> expected(2560);
     if(!file.read(reinterpret_cast<char*>(expected.data()),expected.size()*sizeof(float))) return 2;
-    vf::strata_bridge::Client client(0,1,30000);
+    vf::strata_bridge::Client client(0,1,30000,0);
     vf::strata_bridge::PoolContext context{client,0,30,false,{}, {}};
     std::vector<float> x(2560,0.001f),out(2*2560,9.f); int32_t ids[2]={0,1};
     for(int i=0;i<2;++i) {

@@ -25,8 +25,8 @@ bool local_socket(int fd) {
            getsockopt(fd,SOL_SOCKET,SO_TYPE,&type,&t)==0 && type==SOCK_STREAM;
 }
 }
-Client::Client(int in, int out, int timeout_ms) : read_fd_(in), write_fd_(out), timeout_ms_(timeout_ms), usable_(false) {
-    if (timeout_ms<1 || timeout_ms>60000 || !local_socket(in) || !local_socket(out)) return;
+Client::Client(int in, int out, int timeout_ms, uint32_t layer) : read_fd_(in), write_fd_(out), timeout_ms_(timeout_ms), layer_(layer), usable_(false) {
+    if (layer>=48 || timeout_ms<1 || timeout_ms>60000 || !local_socket(in) || !local_socket(out)) return;
     int a=fcntl(in,F_GETFL), b=fcntl(out,F_GETFL);
     if (a<0 || b<0 || fcntl(in,F_SETFL,a|O_NONBLOCK)<0 || fcntl(out,F_SETFL,b|O_NONBLOCK)<0) return;
     usable_=true;
@@ -54,15 +54,15 @@ bool Client::run(uint64_t batch,int tokens,int k,const std::vector<float>& x,con
        std::any_of(x.begin(),x.end(),[](float v){return !std::isfinite(v);}) ||
        std::any_of(kinds.begin(),kinds.end(),[](int32_t v){return v < -1 || v > 2;})) { error="invalid bridge input or terminal client"; return false; }
     std::vector<uint8_t> request; request.reserve(24+4*(x.size()+ids.size()*2));
-    request.insert(request.end(),{'V','F','B','1'}); put32(request,1); put64(request,batch); put32(request,uint32_t(tokens)); put32(request,uint32_t(k));
+    request.insert(request.end(),{'V','F','B','2'}); put32(request,1); put64(request,batch); put32(request,uint32_t(tokens)); put32(request,uint32_t(k)); put32(request,layer_);
     for(float v:x) { uint32_t b; std::memcpy(&b,&v,4); put32(request,b); }
     for(int32_t v:ids) put32(request,uint32_t(v));
     for(int32_t v:kinds) put32(request,uint32_t(v));
-    const int64_t deadline=now_ms()+timeout_ms_; uint8_t header[24];
+    const int64_t deadline=now_ms()+timeout_ms_; uint8_t header[28];
     if(!transfer(true,request.data(),request.size(),deadline,error) || !transfer(false,header,sizeof(header),deadline,error)) { usable_=false; return false; }
     uint32_t status=get32(header+4), rows=get32(header+16), columns=get32(header+20);
     const size_t required=std::count(kinds.begin(),kinds.end(),-1);
-    if(std::memcmp(header,"VFR1",4)!=0 || status!=0 || get64(header+8)!=batch || rows!=required || columns!=2560) { usable_=false; error="invalid or refused bridge response"; return false; }
+    if(std::memcmp(header,"VFR2",4)!=0 || status!=0 || get64(header+8)!=batch || rows!=required || columns!=2560 || get32(header+24)!=layer_) { usable_=false; error="invalid or refused bridge response"; return false; }
     std::vector<uint8_t> response(size_t(rows)*(4+2560*4));
     if(!transfer(false,response.data(),response.size(),deadline,error)) { usable_=false; return false; }
     std::vector<std::pair<size_t,std::vector<float>>> staged; std::vector<bool> seen(ids.size(),false);
@@ -82,10 +82,10 @@ bool Client::run(uint64_t batch,int tokens,int k,const std::vector<float>& x,con
 }
 bool Client::shutdown(std::string& error) try {
     if(!usable_) { error="terminal bridge client"; return false; }
-    std::vector<uint8_t> req; req.insert(req.end(),{'V','F','B','1'}); put32(req,2); put64(req,0); put32(req,0); put32(req,0);
-    uint8_t h[24]; int64_t deadline=now_ms()+timeout_ms_; usable_=false;
+    std::vector<uint8_t> req; req.insert(req.end(),{'V','F','B','2'}); put32(req,2); put64(req,0); put32(req,0); put32(req,0); put32(req,layer_);
+    uint8_t h[28]; int64_t deadline=now_ms()+timeout_ms_; usable_=false;
     if(!transfer(true,req.data(),req.size(),deadline,error)||!transfer(false,h,sizeof(h),deadline,error)) return false;
-    if(std::memcmp(h,"VFR1",4)!=0 || get32(h+4)!=2 || get64(h+8)!=0 || get32(h+16)!=0 || get32(h+20)!=2560) {error="invalid bridge shutdown"; return false;}
+    if(std::memcmp(h,"VFR2",4)!=0 || get32(h+4)!=2 || get64(h+8)!=0 || get32(h+16)!=0 || get32(h+20)!=2560 || get32(h+24)!=layer_) {error="invalid bridge shutdown"; return false;}
     return true;
 } catch (...) {
     usable_=false;

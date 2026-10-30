@@ -1,0 +1,7 @@
+# R393 — bind native Strata sessions to their layer
+
+The C++ adapter now uses VFB2/VFR2: each request carries its configured layer, and each response reports the coordinator's layer. The coordinator refuses a mismatch before batch reservation or dispatch. The C++ client rejects a mismatched response and the pool hook checks its context agrees with the client's layer. VFB1 remains available to legacy callers and does not have this protection. The layer check is not authentication of run, model, plan or epoch; the caller must bind the socket to the trusted Init.
+
+In the synthetic SC117 CPU integration, a request for layer 7 sent to a layer 0 coordinator was refused and batch 90 was subsequently accepted by a fresh correctly bound session, demonstrating that the refused request did not consume the batch. The C++ adversarial test rejects a wrong response layer without altering the destination. Debug and release C++ tests pass. The Rust integration passes with real local coordinator and resident rank-session children, including C++ client and pool-hook paths, and separately with the complete patched donor dispatch compiled against aborting stubs. Rust clippy passes. No GPU, inter-PC, real checkpoint or full generation was exercised.
+
+Next: build and validate explicit per-layer session ownership and lifecycle for a full model, then connect a qualified model execution path. Remain within the resource and hardware admissions; never replay UNKNOWN outcomes.
