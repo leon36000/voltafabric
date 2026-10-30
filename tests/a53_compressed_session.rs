@@ -4851,6 +4851,62 @@ fn cli_runs_a_compressed_series_end_to_end() {
 }
 
 #[test]
+fn admitted_strata_style_batch_reaches_real_local_sessions_and_dense_oracle() {
+    let dir = temp_dir();
+    let mut input = series("r367-strata-ingress-cpu", &dir, 1);
+    let ids: Vec<i32> = input
+        .routing
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.expert as i32)
+        .collect();
+    let weights: Vec<f32> = input
+        .routing
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.weight as f32)
+        .collect();
+    let activations: Vec<f32> = input.inputs.iter().flatten().map(|&x| x as f32).collect();
+    let original_inputs = input.inputs.clone();
+    let admitted = voltafabric::strata_ingress::admit_pool_batch(
+        &input.routing,
+        &input.routing.stamp,
+        LAYER,
+        input.inputs.len(),
+        2,
+        &activations,
+        &ids,
+        &weights,
+    )
+    .unwrap();
+    input.routing = admitted.routing;
+    input.inputs.clear();
+    input.inputs_fp16_bits = Some(admitted.inputs_fp16_bits);
+    input.record = vec![0];
+    let report = session::run_compressed_series(&input).unwrap();
+    assert!(report.series.ok, "{:?}", report.series.error);
+    assert_eq!(
+        (report.series.batches_ok, report.series.exact_batches),
+        (1, 1)
+    );
+    assert_eq!(report.series.traffic.len(), 2);
+    assert!(report
+        .series
+        .traffic
+        .iter()
+        .all(|rank| rank.traffic.loads_transferred == 1 && rank.traffic.execs == 1));
+    let artifacts: Vec<_> = [2, 9].map(artifact).into();
+    let oracle = session::DenseOracle::new(&artifacts).unwrap();
+    let expected = oracle.output(&input.routing, &original_inputs).unwrap();
+    assert_eq!(
+        bits(&report.series.recorded[0].output.concat()),
+        bits(&expected.concat())
+    );
+}
+
+#[test]
 fn exports_of_one_stack_in_separate_processes_are_one_byte_string() {
     // Until A53 the SafeTensors header listed vf_schema and vf_info in HashMap order,
     // random per process: the same expert exported to two byte strings and SHA-256s.

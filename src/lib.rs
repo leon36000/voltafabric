@@ -40,6 +40,7 @@ pub(crate) mod work;
 
 pub mod qpn2;
 pub mod routing;
+pub mod strata_ingress;
 
 pub mod base64;
 pub mod process;
