@@ -375,6 +375,17 @@ fn owners(
 }
 
 const BUDGET: u64 = 4 * 1024 * 1024 * 1024;
+fn valid_close(
+    receipt: &voltafabric::session::CloseReceipt,
+    expected: u64,
+    positions: u64,
+) -> bool {
+    !receipt.killed
+        && receipt.exit_code == Some(0)
+        && receipt.error.is_none()
+        && receipt.bye_execs == Some(expected)
+        && expected <= positions
+}
 fn run() -> Result<(), E> {
     let a: Vec<_> = std::env::args().collect();
     if !(11..=12).contains(&a.len()) {
@@ -444,7 +455,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r478-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r481-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -531,7 +542,7 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r478-cpu-rank-headroom".into(),
+        "r481-cpu-rank-headroom".into(),
         ledger,
         Duration::from_secs(30),
     )?;
@@ -539,7 +550,7 @@ fn run() -> Result<(), E> {
         identity: voltafabric::sc117_expert_source::Identity {
             run_id: run_id.clone(),
             model_revision: "sc117-local-observation".into(),
-            plan_id: "r478-cpu-rank-headroom".into(),
+            plan_id: "r481-cpu-rank-headroom".into(),
             epoch: 1,
         },
         ranks: vec![2, 3],
@@ -621,20 +632,17 @@ fn run() -> Result<(), E> {
             break;
         }
     }
-    let receipts = segment.close();
+    let receipts = segment.close_with_counts();
     if receipts.len() != layer_count * 2
-        || receipts.iter().any(|r| {
-            r.killed
-                || r.exit_code != Some(0)
-                || r.error.is_some()
-                || r.bye_execs != Some(input_tokens.len() as u64)
-        })
+        || receipts
+            .iter()
+            .any(|(r, expected)| !valid_close(r, *expected, input_tokens.len() as u64))
     {
         return Err("worker shutdown receipt".into());
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }
@@ -642,5 +650,35 @@ fn main() {
     if let Err(e) = run() {
         eprintln!("prefill-greedy qualification refused: {e}");
         std::process::exit(1)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn close_requires_actual_dispatched_count_not_every_position() {
+        let mut r = voltafabric::session::CloseReceipt {
+            rank: 2,
+            pid: 1,
+            bye_execs: Some(3),
+            peak_rss_kib: None,
+            exit_code: Some(0),
+            killed: false,
+            stderr: String::new(),
+            stderr_bytes: 0,
+            error: None,
+        };
+        assert!(valid_close(&r, 3, 9));
+        assert!(!valid_close(&r, 4, 9));
+        assert!(!valid_close(&r, 3, 2));
+        r.killed = true;
+        assert!(!valid_close(&r, 3, 9));
+        r.killed = false;
+        r.bye_execs = None;
+        assert!(!valid_close(&r, 3, 9));
+        r.bye_execs = Some(3);
+        r.exit_code = Some(1);
+        assert!(!valid_close(&r, 3, 9));
     }
 }

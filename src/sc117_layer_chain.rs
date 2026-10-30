@@ -887,6 +887,18 @@ impl Segment {
             .map(|session| session.close(self.timeout))
             .collect()
     }
+    /// Pair each worker's shutdown receipt with that session's successful
+    /// coordinator-side execution count. Idle ranks can have fewer executions.
+    pub fn close_with_counts(self) -> Vec<(crate::session::CloseReceipt, u64)> {
+        self.layers
+            .into_iter()
+            .flat_map(|layer| layer.owners.sessions)
+            .map(|session| {
+                let expected = session.traffic.execs;
+                (session.close(self.timeout), expected)
+            })
+            .collect()
+    }
     pub fn advance(&mut self, attempt: u64, input: &[f32]) -> Result<Vec<f32>> {
         self.advance_inner(attempt, input, None, &mut None)
     }

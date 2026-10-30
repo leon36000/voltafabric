@@ -590,6 +590,10 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     .unwrap();
     assert_eq!(collected.stamp(), &reserved.stamp);
     assert_eq!(collected.attempt(), ticket_attempt);
+    assert_eq!(
+        sessions.iter().map(|s| s.traffic.execs).collect::<Vec<_>>(),
+        vec![2, 2]
+    );
     for (actual, value) in collected.rows()[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
     }

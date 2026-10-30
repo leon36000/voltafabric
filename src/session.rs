@@ -3807,7 +3807,13 @@ impl Session {
                 inputs,
             }
         };
+        let next_execs = self
+            .traffic
+            .execs
+            .checked_add(1)
+            .ok_or_else(|| invalid("native GGML execution count overflow"))?;
         self.send(&request)?;
+        self.traffic.execs = next_execs;
         let started = self.reply_until(deadline)?;
         if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } } if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
         {
