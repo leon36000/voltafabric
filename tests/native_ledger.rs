@@ -104,3 +104,32 @@ fn incomplete_claim_is_consumed_and_replaced_directory_is_refused() {
     std::fs::create_dir(&path).unwrap();
     assert!(ledger.reserve(&stamp(), 9).is_err());
 }
+
+#[test]
+fn ticket_is_bound_to_ledger_stamp_and_stays_consumed() {
+    let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(".runs")
+        .join(format!(
+            "r421-ticket-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+    let other = root.with_extension("other");
+    std::fs::create_dir(&root).unwrap();
+    std::fs::create_dir(&other).unwrap();
+    let ledger = NativeBatchLedger::open(&root).unwrap();
+    let second = NativeBatchLedger::open(&other).unwrap();
+    let ticket = ledger.reserve_ticket(&stamp(), 19).unwrap();
+    assert_eq!(ticket.stamp(), &stamp());
+    assert_eq!(ticket.attempt(), 19);
+    assert!(ledger.validate_ticket(&ticket, &stamp()).is_ok());
+    assert!(second.validate_ticket(&ticket, &stamp()).is_err());
+    let mut wrong = stamp();
+    wrong.batch += 1;
+    assert!(ledger.validate_ticket(&ticket, &wrong).is_err());
+    drop(ticket);
+    assert!(ledger.reserve_ticket(&stamp(), 20).is_err());
+}

@@ -47,6 +47,7 @@ pub struct Proposal {
     stage_id: u64,
     stamp: crate::moe::Stamp,
     attempt: u64,
+    ledger_id: Option<(u64, u64)>,
     token: u64,
     candidate: GdnState,
     output: Output,
@@ -198,6 +199,19 @@ impl Stage {
     pub fn next_token(&self) -> u64 {
         self.next_token
     }
+    /// Bind a candidate to an existing local durable claim before dispatch.
+    pub fn prepare_reserved(
+        &mut self,
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        ticket: &crate::native_ledger::Reservation,
+        token: u64,
+        residual: &[f32],
+    ) -> Result<Proposal> {
+        ledger.validate_ticket(ticket, ticket.stamp())?;
+        let mut proposal = self.prepare(ticket.stamp(), ticket.attempt(), token, residual)?;
+        proposal.ledger_id = Some(ticket.directory_id());
+        Ok(proposal)
+    }
     /// Prepare without advancing the resident GDN state. Durable admission remains caller-owned.
     pub fn prepare(
         &mut self,
@@ -238,6 +252,7 @@ impl Stage {
             stage_id: self.stage_id,
             stamp: stamp.clone(),
             attempt,
+            ledger_id: None,
             token,
             candidate,
             output: Output {
@@ -250,8 +265,9 @@ impl Stage {
             },
         })
     }
-    /// Validate all routed slots with the Collector, combine shared output and write the residual,
-    /// then commit the candidate. Caller must establish durable admission and producer provenance.
+    /// Experimental unreserved CPU path: validate slots and write the residual, then commit.
+    /// Caller must establish durable admission and producer provenance. For a reserved local
+    /// native session use `prepare_reserved` and `commit_native` instead.
     pub fn commit_collected(
         &mut self,
         proposal: Proposal,
@@ -267,6 +283,34 @@ impl Stage {
         let stamp = inputs.problem.stamp.clone();
         let attempt = inputs.attempt;
         let residual = crate::sc117_layer_completion::finish(inputs)?;
+        self.commit_validated(proposal, &stamp, attempt, residual)
+    }
+    /// Commit an opaque, completed local CPU session result. Shared and residual producers
+    /// must still be bound by the caller; this is not a hardware lease or crash-safe checkpoint.
+    pub fn commit_native(
+        &mut self,
+        proposal: Proposal,
+        collected: crate::session::NativeCollected,
+        shared: crate::sc117_layer_completion::StampedValues,
+        attention_residual: crate::sc117_layer_completion::StampedValues,
+        injection: crate::sc117_layer_completion::StampedValues,
+    ) -> Result<Committed> {
+        if proposal.stage_id != self.stage_id
+            || &proposal.stamp != collected.stamp()
+            || proposal.attempt != collected.attempt()
+            || proposal.ledger_id != Some(collected.ledger_id())
+            || proposal.token != self.next_token
+        {
+            return Err(invalid("SC117 native candidate identity mismatch"));
+        }
+        let stamp = collected.stamp().clone();
+        let attempt = collected.attempt();
+        let residual = crate::sc117_layer_completion::finish_native(
+            &collected,
+            shared,
+            attention_residual,
+            injection,
+        )?;
         self.commit_validated(proposal, &stamp, attempt, residual)
     }
     /// Called only after the layer collector and residual calculation succeeded.

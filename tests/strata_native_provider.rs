@@ -567,6 +567,60 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     for (actual, value) in output[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
     }
+    let mut reserved = p.clone();
+    reserved.stamp.batch = 101;
+    let ticket_attempt = u64::try_from(
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos(),
+    )
+    .unwrap();
+    let ticket = ledger
+        .reserve_ticket(&reserved.stamp, ticket_attempt)
+        .unwrap();
+    let collected = Session::exec_native_ggml_reserved(
+        &mut sessions,
+        &reserved,
+        std::slice::from_ref(&x),
+        &ledger,
+        ticket,
+        timeout,
+    )
+    .unwrap();
+    assert_eq!(collected.stamp(), &reserved.stamp);
+    assert_eq!(collected.attempt(), ticket_attempt);
+    for (actual, value) in collected.rows()[0].iter().zip(&expected) {
+        assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
+    }
+    assert!(ledger
+        .reserve_ticket(&reserved.stamp, ticket_attempt + 1)
+        .is_err());
+    let other_path = ledger_path.with_extension("other");
+    std::fs::create_dir(&other_path).unwrap();
+    let other = voltafabric::native_ledger::NativeBatchLedger::open(&other_path).unwrap();
+    let mut wrong_ledger = p.clone();
+    wrong_ledger.stamp.batch = 102;
+    let ticket = other
+        .reserve_ticket(&wrong_ledger.stamp, ticket_attempt + 2)
+        .unwrap();
+    let sent: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+    assert!(Session::exec_native_ggml_reserved(
+        &mut sessions,
+        &wrong_ledger,
+        std::slice::from_ref(&x),
+        &ledger,
+        ticket,
+        timeout
+    )
+    .is_err());
+    assert_eq!(
+        sent,
+        sessions
+            .iter()
+            .map(|s| s.traffic.bytes_sent)
+            .collect::<Vec<_>>()
+    );
     assert!(Session::exec_native_ggml_batch(
         &mut sessions,
         &p,

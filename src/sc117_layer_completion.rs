@@ -20,6 +20,31 @@ pub struct LayerInputs {
     pub attention_residual: StampedValues,
     pub injection: StampedValues,
 }
+
+/// Combine a session-validated result; this does not validate shared/attention producer provenance.
+#[cfg(feature = "native-ggml-cpu")]
+pub(crate) fn finish_native(
+    collected: &crate::session::NativeCollected,
+    shared: StampedValues,
+    attention_residual: StampedValues,
+    injection: StampedValues,
+) -> Result<Vec<f32>> {
+    let stamp = collected.stamp();
+    let attempt = collected.attempt();
+    if [&shared, &attention_residual, &injection]
+        .iter()
+        .any(|x| &x.stamp != stamp || x.attempt != attempt)
+        || shared.values.len() != 2560
+        || attention_residual.values.len() != 10240
+        || injection.values.len() != 4
+        || collected.rows().len() != 1
+        || collected.rows()[0].len() != 2560
+    {
+        return Err(invalid("SC117 native completed identity or shape"));
+    }
+    let combined = shared_expert_cpu::combine(&collected.rows()[0], &shared.values)?;
+    hyperconnection_cpu::write(&attention_residual.values, &combined, &injection.values)
+}
 /// Collect all unweighted FP16 rows in canonical slot order; add the already scaled shared row once,
 /// cast f64 to f32 and write the four residual streams. Caller verifies producer provenance and admission.
 pub fn finish(inputs: LayerInputs) -> Result<Vec<f32>> {

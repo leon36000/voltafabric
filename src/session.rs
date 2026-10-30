@@ -3385,6 +3385,30 @@ impl Write for SessionInput {
     }
 }
 
+/// CPU FP16/f64 result created only after an admitted local rank wave finishes.
+#[cfg(feature = "native-ggml-cpu")]
+pub struct NativeCollected {
+    stamp: moe::Stamp,
+    attempt: u64,
+    rows: Vec<Vec<f64>>,
+    ledger_id: (u64, u64),
+}
+#[cfg(feature = "native-ggml-cpu")]
+impl NativeCollected {
+    pub fn stamp(&self) -> &moe::Stamp {
+        &self.stamp
+    }
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+    pub fn rows(&self) -> &[Vec<f64>] {
+        &self.rows
+    }
+    pub(crate) fn ledger_id(&self) -> (u64, u64) {
+        self.ledger_id
+    }
+}
+
 /// One rank session: a live worker process and its framed stream.
 pub struct Session {
     pub rank: u32,
@@ -3657,8 +3681,9 @@ impl Session {
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
     ) -> Result<Vec<Vec<f64>>> {
-        let collector =
-            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, false)?;
+        let (collector, _) = Self::collect_native_ggml_batch(
+            sessions, problem, inputs, ledger, timeout, false, None,
+        )?;
         match collector.finish() {
             Ok(output) => Ok(output),
             Err(error) => {
@@ -3680,8 +3705,9 @@ impl Session {
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
     ) -> Result<Vec<Vec<Vec<f64>>>> {
-        let collector =
-            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, false)?;
+        let (collector, _) = Self::collect_native_ggml_batch(
+            sessions, problem, inputs, ledger, timeout, false, None,
+        )?;
         match collector.finish_unweighted_slots() {
             Ok(output) => Ok(output),
             Err(error) => {
@@ -3702,10 +3728,47 @@ impl Session {
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
     ) -> Result<Vec<Vec<Vec<f64>>>> {
-        let collector =
-            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, true)?;
+        let (collector, _) = Self::collect_native_ggml_batch(
+            sessions, problem, inputs, ledger, timeout, true, None,
+        )?;
         match collector.finish_unweighted_slots() {
             Ok(output) => Ok(output),
+            Err(error) => {
+                for session in sessions {
+                    session.usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
+
+    /// Consume an already-durable local reservation. An error consumes it and must never be replayed.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_native_ggml_reserved(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        ticket: crate::native_ledger::Reservation,
+        timeout: Duration,
+    ) -> Result<NativeCollected> {
+        let ledger_id = ticket.directory_id();
+        let (collector, attempt) = Self::collect_native_ggml_batch(
+            sessions,
+            problem,
+            inputs,
+            ledger,
+            timeout,
+            false,
+            Some(ticket),
+        )?;
+        match collector.finish() {
+            Ok(rows) => Ok(NativeCollected {
+                stamp: problem.stamp.clone(),
+                attempt,
+                rows,
+                ledger_id,
+            }),
             Err(error) => {
                 for session in sessions {
                     session.usable = false;
@@ -3723,7 +3786,8 @@ impl Session {
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
         unweighted_f32: bool,
-    ) -> Result<moe::Collector> {
+        ticket: Option<crate::native_ledger::Reservation>,
+    ) -> Result<(moe::Collector, u64)> {
         if timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || inputs.len() != problem.routes.len()
@@ -3772,9 +3836,18 @@ impl Session {
             selected.push((matches[0].0, rank, rows));
         }
         let mut collector = moe::Collector::from_routing(problem)?;
-        let attempt = next_attempt()?;
         claim_identity(&problem.stamp, false)?;
-        ledger.reserve(&problem.stamp, attempt)?;
+        let attempt = match ticket {
+            Some(ticket) => {
+                ledger.validate_ticket(&ticket, &problem.stamp)?;
+                ticket.attempt()
+            }
+            None => {
+                let attempt = next_attempt()?;
+                ledger.reserve(&problem.stamp, attempt)?;
+                attempt
+            }
+        };
         let deadline = Instant::now() + timeout;
         for (index, dispatch, rows) in &selected {
             if let Err(error) = sessions[*index].exec_native_ggml(
@@ -3791,7 +3864,7 @@ impl Session {
                 return Err(error);
             }
         }
-        Ok(collector)
+        Ok((collector, attempt))
     }
     /// Fetch only unique cache misses, then reconstruct caller order and duplicates. Cache
     /// additions occur only after all owner frames pass identity and coverage validation.

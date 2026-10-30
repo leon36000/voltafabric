@@ -10,6 +10,24 @@ pub struct NativeBatchLedger {
     handle: File,
 }
 
+/// One local reservation, intentionally non-cloneable. This is not an R53 lease.
+pub struct Reservation {
+    stamp: moe::Stamp,
+    attempt: u64,
+    directory_id: (u64, u64),
+}
+impl Reservation {
+    pub fn stamp(&self) -> &moe::Stamp {
+        &self.stamp
+    }
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+    pub(crate) fn directory_id(&self) -> (u64, u64) {
+        self.directory_id
+    }
+}
+
 impl NativeBatchLedger {
     /// The caller supplies one stable, shared, pre-existing directory on a local
     /// filesystem supporting exclusive create and directory fsync. No paths are
@@ -98,5 +116,52 @@ impl NativeBatchLedger {
             .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
         self.check_identity()?;
         Ok(())
+    }
+
+    /// Create the claim first; a failed or abandoned reservation is never reusable.
+    pub fn reserve_ticket(&self, stamp: &moe::Stamp, attempt: u64) -> Result<Reservation> {
+        self.reserve(stamp, attempt)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let meta = self
+                .handle
+                .metadata()
+                .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+            Ok(Reservation {
+                stamp: stamp.clone(),
+                attempt,
+                directory_id: (meta.dev(), meta.ino()),
+            })
+        }
+        #[cfg(not(unix))]
+        {
+            Err(invalid("native durable ledger requires Unix"))
+        }
+    }
+
+    /// Verify that a ticket belongs to this still-pinned directory.
+    pub fn validate_ticket(&self, ticket: &Reservation, stamp: &moe::Stamp) -> Result<()> {
+        self.check_identity()?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let meta = self
+                .handle
+                .metadata()
+                .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+            if ticket.stamp != *stamp
+                || ticket.attempt == 0
+                || ticket.directory_id != (meta.dev(), meta.ino())
+            {
+                return Err(invalid("native reservation identity mismatch"));
+            }
+            Ok(())
+        }
+        #[cfg(not(unix))]
+        {
+            let _ = (ticket, stamp);
+            Err(invalid("native durable ledger requires Unix"))
+        }
     }
 }
