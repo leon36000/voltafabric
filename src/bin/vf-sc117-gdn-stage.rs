@@ -1,0 +1,92 @@
+//! Explicit one-step local diagnostic for the reusable SC117 resident stage.
+use std::io::{Read, Write};
+use voltafabric::{
+    gdn_cpu::Identity,
+    sc117_gdn_stage::{Manifest, Stage},
+    sha256,
+};
+fn open(p: &str) -> Result<std::fs::File, Box<dyn std::error::Error>> {
+    let mut o = std::fs::OpenOptions::new();
+    o.read(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        o.custom_flags(libc::O_NOFOLLOW | libc::O_NONBLOCK);
+    }
+    let f = o.open(p)?;
+    if !f.metadata()?.is_file() {
+        return Err("not regular".into());
+    }
+    Ok(f)
+}
+fn exact(p: &str, n: usize, h: &str) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
+    let mut f = open(p)?;
+    if f.metadata()?.len() != n as u64 || !sha256::is_hex_digest(h) {
+        return Err("input size or digest syntax".into());
+    }
+    let mut b = vec![0; n];
+    f.read_exact(&mut b)?;
+    if sha256::hex(&b) != h {
+        return Err("input digest mismatch".into());
+    }
+    Ok(b)
+}
+fn run() -> Result<(), Box<dyn std::error::Error>> {
+    let a: Vec<_> = std::env::args().collect();
+    if a.len() != 7 {
+        return Err(
+            "usage: vf-sc117-gdn-stage MANIFEST MANIFEST_SHA DENSE SHARD RESIDUAL RESIDUAL_SHA"
+                .into(),
+        );
+    }
+    let mf = open(&a[1])?;
+    let n = mf.metadata()?.len();
+    if n == 0 || n > 16384 {
+        return Err("manifest size".into());
+    }
+    let m: Manifest = serde_json::from_slice(&exact(&a[1], n as usize, &a[2])?)?;
+    let input = exact(&a[5], 40960, &a[6])?;
+    let residual: Vec<f32> = input
+        .chunks_exact(4)
+        .map(|v| f32::from_le_bytes(v.try_into().unwrap()))
+        .collect();
+    let id = Identity {
+        run_id: "r418-local-zero-state".into(),
+        model_revision: m.model_revision.clone(),
+        layer: m.layer,
+        epoch: 0,
+    };
+    let mut d = open(&a[3])?;
+    let mut s = open(&a[4])?;
+    let mut stage = Stage::load(m, id.clone(), &mut d, &mut s)?;
+    let result = stage.step(&id, 0, &residual)?;
+    // Diagnostic-only guards: an old token and invalid activation cannot advance state.
+    if stage.step(&id, 0, &residual).is_ok() || stage.next_token() != 1 {
+        return Err("duplicate token was not refused".into());
+    }
+    let mut invalid = residual.clone();
+    invalid[0] = f32::NAN;
+    if stage.step(&id, 1, &invalid).is_ok() || stage.next_token() != 1 {
+        return Err("invalid activation advanced token".into());
+    }
+    let mut w = std::io::BufWriter::new(std::io::stdout().lock());
+    for v in result
+        .mixed
+        .iter()
+        .chain(&result.inject)
+        .chain(&result.qkv)
+        .chain(&result.recurrent)
+        .chain(&result.gate)
+        .chain(&result.beta)
+    {
+        w.write_all(&v.to_le_bytes())?;
+    }
+    w.flush()?;
+    Ok(())
+}
+fn main() {
+    if let Err(e) = run() {
+        eprintln!("SC117 stage refused: {e}");
+        std::process::exit(1);
+    }
+}

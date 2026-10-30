@@ -80,3 +80,7 @@ target_compile_options(vf_check_sc117_layer1_route PRIVATE -Wall -Wextra -Werror
 add_executable(vf_check_sc117_layer1_shared check_sc117_layer1_shared.cpp)
 target_link_libraries(vf_check_sc117_layer1_shared PRIVATE ggml-cpu ggml-base)
 target_compile_options(vf_check_sc117_layer1_shared PRIVATE -Wall -Wextra -Werror)
+# Explicit layer-2 Q6_K QKV sampled diagnostic; not a CTest.
+add_executable(vf_check_sc117_layer2_qkv check_sc117_layer2_qkv.cpp)
+target_link_libraries(vf_check_sc117_layer2_qkv PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_check_sc117_layer2_qkv PRIVATE -Wall -Wextra -Werror)
