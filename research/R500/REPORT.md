@@ -1,0 +1,9 @@
+# R500 — independent source checks for completed R498 answer
+
+Parent GitLab R498 d95a0ede2098a612fc13891cec02f5e212eac81d. The R498 complete local CPU answer used 3302 distinct admitted experts. R495/R496 supplied independent source-slice observations for 2311; this batch selected exactly the remaining 991, without rerunning generation or replaying any claim.
+
+On PC1, the existing independent Python observer `tools/observe_sc117_experts.py` read the pinned native index, each selected pack span and its corresponding three IQ3 source-shard slices, compared their SHA256 hashes and checked stable pack/source file identities within every bounded batch and across batches. All 991 matched the R498 admission digests. This demonstrates local pack/source consistency, not publisher authentication, model quality, GPU or inter-machine validation. The scope was limited to 512 MiB RAM, zero swap, 16 tasks, 50% CPU and best-effort low I/O priority; it exited successfully with empty stderr.
+
+The independent verifier reconstructs the exact selection and observation bytes from compressed parts, reruns the R498 and R496 proofs, and checks the selection is exactly the previously unobserved subset, with expert IDs, lengths, pack offsets, source-match flags and digests. All 3302 distinct R498 experts now have independent local source-slice comparisons. Selection SHA256 85a888a7b862e173d0570871f272635c1c8fbc9d150f540216d3fe4434385c3f; observation SHA256 8236ebe15cd3469cd4d2f0e6187c5a8e0ba3ca9ef9c0d95f2547d53fa6900596; wrapper SHA256 4d2e4bcf4bff94720c1ae11319de118917ef557d49a0be12f2ba3caac828be4d; observer SHA256 0a1bda87ff0f6bbedce2451418cc9c9f27d6017215a94efaf84620987a87bba9.
+
+No GPU, worker, network transfer of model payload or generation ran. All R498 UNKNOWN claims remain non-replayable. Next: advance useful conversation and the real cross-host path, subject to current resource, lease, host identity and hardware protections.
