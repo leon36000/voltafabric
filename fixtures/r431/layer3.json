@@ -1,0 +1,30 @@
+{
+  "model_revision": "sc117-local-observation",
+  "layer": 3,
+  "dense_bytes": 1538035200,
+  "norm": {
+    "offset": 190612096,
+    "bytes": 40960,
+    "sha256": "e27ebddb8093f00deb3c450b705697d27abcd697d91be39646aa26e92971a37f"
+  },
+  "down": {
+    "offset": 183976576,
+    "bytes": 6553600,
+    "sha256": "2f3d00b1e3e15f7dbac7059bb0867410c36a37d6a83705b7f1cf812e39b44674"
+  },
+  "up": {
+    "offset": 190653056,
+    "bytes": 6553600,
+    "sha256": "6f3e854147eb1a6b3d9d2037e6d2e1812f1445948622b300196eebe5ac49615d"
+  },
+  "inject": {
+    "offset": 190530176,
+    "bytes": 81920,
+    "sha256": "4326d2930151a805441ef7f4c79bbf59f16c63647cf29865794d51a3fb1f36a0"
+  },
+  "router": {
+    "offset": 168119936,
+    "bytes": 2621440,
+    "sha256": "b3f123bb49874bade319d7e32a769fd1c32acadce05b07410257b895e327c1a0"
+  }
+}

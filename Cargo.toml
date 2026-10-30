@@ -148,3 +148,18 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-qsa-prefix"
 path = "src/bin/vf-sc117-qsa-prefix.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-ffn-route"
+path = "src/bin/vf-sc117-ffn-route.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-bound-live"
+path = "src/bin/vf-sc117-qsa-bound-live.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-bound-reject"
+path = "src/bin/vf-sc117-qsa-bound-reject.rs"
+required-features = ["native-ggml-cpu"]
