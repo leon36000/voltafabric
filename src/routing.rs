@@ -219,6 +219,53 @@ pub fn dispatch(p: &RoutingProblem) -> Result<Dispatch> {
     })
 }
 
+/// Rank candidates for a future residency plan without changing the registry.
+///
+/// Existing copies on `rank` always precede nonresident candidates; within
+/// each group higher observed counts win, followed by prior order and expert ID.
+/// This is metadata only: it does not load, evict or select a routing owner.
+pub fn rank_resident_candidates(
+    p: &RoutingProblem,
+    rank: u32,
+    heat: &BTreeMap<u32, u64>,
+    prior: &[u32],
+) -> Result<Vec<u32>> {
+    validate(p)?;
+    if !p.resident_order.contains_key(&rank)
+        || heat.len() > p.experts.len()
+        || prior.len() > p.experts.len()
+    {
+        return Err(invalid("invalid rank or candidate profile size"));
+    }
+    let experts: BTreeSet<_> = p.experts.iter().copied().collect();
+    if heat.keys().any(|expert| !experts.contains(expert)) {
+        return Err(invalid("profile references unknown expert"));
+    }
+    let mut prior_rank = BTreeMap::new();
+    for (position, &expert) in prior.iter().enumerate() {
+        if !experts.contains(&expert) || prior_rank.insert(expert, position).is_some() {
+            return Err(invalid("invalid or duplicated prior expert"));
+        }
+    }
+    let resident: BTreeSet<_> = p
+        .registry
+        .copies
+        .iter()
+        .filter(|replica| replica.rank == rank)
+        .map(|replica| replica.expert)
+        .collect();
+    let mut ranked = p.experts.clone();
+    ranked.sort_by_key(|expert| {
+        (
+            !resident.contains(expert),
+            std::cmp::Reverse(heat.get(expert).copied().unwrap_or(0)),
+            prior_rank.get(expert).copied().unwrap_or(usize::MAX),
+            *expert,
+        )
+    });
+    Ok(ranked)
+}
+
 /// Oracle adapter only. Copies routes and metadata, never model/input matrices.
 /// Dense fixtures have no physical-order declaration: use ascending declared local
 /// IDs. Call dispatch/validate on the result; malformed metadata is not repaired.
