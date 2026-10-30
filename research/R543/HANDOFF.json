@@ -1,0 +1,11 @@
+{
+  "round": "R543",
+  "parent_gitlab_commit": "36fed48ac1d5fe33d9a21b00eaa6a0d28a673004",
+  "active_operations": [],
+  "status": "PASS_REAL_QSA_ACTIVATION_PACKING_92_POSITIONS",
+  "q8k_blocks": 920,
+  "q8_0_blocks": 17664,
+  "negative_controls": "BOTH_REJECTED",
+  "limitations": ["One observed x86 CPU path, not all architectures or edge inputs", "Layer inputs observed, not independently derived", "R428 expert-255 strict failure remains open", "Original R53 ledger missing; no GPU or inter-PC execution", "Raw trace and quantized bytes remain on PC1 only"],
+  "next_action": "Independently derive live upstream hyperconnection or validate other model boundaries; reconcile R53 and satisfy fresh identity, lease, resource and hardware gates before distributed/GPU work."
+}
