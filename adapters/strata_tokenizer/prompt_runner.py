@@ -132,7 +132,7 @@ def _chat_prompt_ids(prompt, tokenizer, eos):
     return result
 
 
-def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, runner=_run_bounded) -> dict:
+def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, prepare_plan: bool = False, runner=_run_bounded) -> dict:
     """Run once; strict mode requires a current plan and prompt digest, not attestation.
 
     Legacy receipt compatibility requires an explicit opt-out. A caller still
@@ -142,6 +142,8 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("invalid prompt mode")
     if type(require_bound_plan) is not bool:
         raise ValueError("invalid bound-plan mode")
+    if type(prepare_plan) is not bool:
+        raise ValueError("invalid prepare-plan mode")
     if chat:
         _chat_messages(prompt)
     elif not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
@@ -163,7 +165,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if expected_plan is not None and (not expected_plan.startswith("r512-") or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
-    command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
+    command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     command.extend((str(max_new_tokens), str(eos)))
     if chat:
         command.append("chat")
@@ -174,7 +176,22 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if (getattr(completed, "stdout_truncated", False) or getattr(completed, "stderr_truncated", False)
             or len(completed.stdout) > MAX_RECEIPT_BYTES or len(completed.stderr) > MAX_STDERR_BYTES):
         raise ValueError("engine response exceeds limit")
+    if prepare_plan and len(completed.stdout) > 1024:
+        raise ValueError("invalid prepared plan receipt")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
+    if prepare_plan:
+        if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
+            raise ValueError("invalid prepared plan receipt")
+        plan = receipt["plan_id"]
+        if (not isinstance(plan, str) or not plan.startswith("r512-") or len(plan) != 69
+                or any(c not in "0123456789abcdef" for c in plan[5:])):
+            raise ValueError("current bound plan identity required")
+        prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
+        if receipt["prompt_tokens_sha256"] != prompt_hash:
+            raise ValueError("engine receipt differs from prompt digest")
+        if expected_plan is not None and plan != expected_plan:
+            raise ValueError("engine receipt differs from expected plan")
+        return {"plan_id": plan, "prompt_tokens_sha256": prompt_hash, "prompt_token_ids": prompt_ids}
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
@@ -206,6 +223,7 @@ def main() -> int:
     p.add_argument("--binary", required=True)
     p.add_argument("--binary-sha256", required=True)
     p.add_argument("--max-new-tokens", type=int, default=2)
+    p.add_argument("--prepare-plan", action="store_true", help="prepare a plan without starting workers or generating text")
     modes = p.add_mutually_exclusive_group()
     modes.add_argument("--chat", action="store_true", help="format one text-only user turn")
     modes.add_argument("--messages-json", action="store_true", help="read a bounded text-only chat history as JSON")
@@ -225,7 +243,7 @@ def main() -> int:
     tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
     paths = [args.dense, args.shard, args.pack, args.index, args.session,
              args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True)
+    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True, prepare_plan=args.prepare_plan)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

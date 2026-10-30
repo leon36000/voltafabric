@@ -28,6 +28,35 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_prepare_plan_uses_tokenizer_and_rejects_bad_plan_receipts(self):
+        prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
+        good = {"plan_id": "r512-" + "a" * 64, "prompt_tokens_sha256": prompt_hash}
+        state = {"body": json.dumps(good).encode()}
+        calls = []
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, state["body"], b"")
+        def prepare():
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8,
+                               prepare_plan=True, runner=runner)
+        with patch.dict("os.environ", {}, clear=True):
+            self.assertEqual(prepare(), dict(good, prompt_token_ids=[0]))
+            self.assertEqual(calls[-1][1], "--plan-only")
+            for bad in ({"plan_id": good["plan_id"]},
+                        dict(good, prompt_tokens_sha256="0" * 64),
+                        dict(good, plan_id="r512-" + "A" * 64),
+                        dict(good, extra=1)):
+                state["body"] = json.dumps(bad).encode()
+                with self.assertRaises(ValueError):
+                    prepare()
+            state["body"] = b'{' + b' ' * 1100 + b'}'
+            with self.assertRaisesRegex(ValueError, "prepared plan"):
+                prepare()
+            state["body"] = json.dumps(good).encode()
+        with patch.dict("os.environ", {"VF_EXPECTED_PLAN_ID": "r512-" + "b" * 64}):
+            with self.assertRaisesRegex(ValueError, "differs from expected plan"):
+                prepare()
+
     def test_expected_plan_is_checked_before_and_after_engine(self):
         value = dict(receipt(), plan_id="r512-" + "a" * 64,
                      prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
