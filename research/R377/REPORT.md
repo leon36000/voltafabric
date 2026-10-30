@@ -1,0 +1,11 @@
+# R377 — SC117 native expert pack metadata admission
+
+Parent: f750b231b3bd2dcc3d27ae7a8217d09c31fd783b. Fresh read-only observation on PC1: `/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/experts.bin` has 50,292,326,400 bytes; `native_experts.txt` is 3,316 bytes with SHA-256 `adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24`. The copied metadata fixture contains no model payload. This observation establishes neither a stable file identity across future use nor payload integrity.
+
+The actual 48-layer index lists gate/up type IDs 18, 21, 22 and 23 and down type IDs 20 and 42, in seven pairings. In the pinned donor fb58e0dbc8399662c0e47c76578c6e878b14f6cf, `include/strata/artifact/gguf_reader.hpp` maps these to IQ3_XXS, IQ3_S, IQ2_S, IQ4_XS, IQ4_NL and Q2_0 respectively. The pack name alone is not a format specification and none of these is MXFP4 or QPN2.
+
+`strata_native_layout::NativeLayout::parse_sc117_v3` admits this specific v3 geometry (48 layers, 512 experts, hidden 2560 and intermediate 640), checks supported type pairs, per-blob byte geometry, contiguous ordered layer offsets, bounds and exact declared pack length, and produces bounded expert spans. This derives from the layout and row geometry in the donor's `expert_layout.cpp`, `native_expert.cpp` and `gguf_reader.hpp`; no donor code is copied. It does not validate GGUF source shard offsets or file identities and cannot read, decode or execute any weights. The caller must bind the index and real pack identity and verify payloads before use.
+
+Tests passed in debug and release against the 48-layer captured metadata and rejection cases for unsupported formats/version, changed size, duplicate/missing layers, bad offset and blob size. A separate Python calculation checked all 48 layer offsets and block geometry against total bytes. Strict offline all-target Clippy, formatting and `git diff --check` passed. No model payload, GPU, inter-PC workload or consumed UNKNOWN was read or replayed.
+
+Next: add a safe, identity-bound native expert reader/provider and compare actual IQ-format expert computation to an independent oracle before connecting it to Sessions. Preserve the distinct formats, service isolation and hardware gates. Full model generation remains unqualified.
