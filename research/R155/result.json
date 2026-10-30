@@ -1,0 +1,17 @@
+{
+  "collector_exit": 0,
+  "collector_input_sha256": "9f4fdd256f0c34ae41bd2a75a945a955b89b8586f73916ac5f0cf9bf8a1dd133",
+  "collector_stdout_sha256": "dbc377ecb3f3cb19b84291762580ff1efc59fed78ebed97a7714ee9ed4265bb9",
+  "exact_matches": 2048,
+  "gpu": false,
+  "limits": "CPU Torch dense matmul decodes R132 source bytes, not passed packed QPN2 buffers; FP16 staging and f64 dots, synthetic duplicate expert, no native CUDA/full shard/model.",
+  "max_abs_error": 0.0,
+  "nonzero": 2048,
+  "oracle_atol": 6.103515625e-05,
+  "oracle_rtol": 0.001953125,
+  "plan_sha256": "3ae0b565e11e3411b0c3dd7f9ea180ddd70befacb2171920285b4ae936759405",
+  "remote_stdout_sha256": "1b5895991b616512c057c26caf23d95ffdaeaa100cc228e78d751bdfd28e14b9",
+  "row_sha256": "75f0fd09694381ff06ca9d65b71023eddd5af6def70dd5e0afc0d18027971906",
+  "status": "CPU_REAL_ADAPTER_DONOR_PREPACK_SAMPLE_MATMUL_AND_RUST_COLLECTOR",
+  "values": 2048
+}

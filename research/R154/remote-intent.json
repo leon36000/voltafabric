@@ -1,0 +1,7 @@
+{
+  "script_sha256": "92d80c6c0e5da758f08e4d6489fef47845ef2f22d3045b1f6d49ad663c2ff160",
+  "payload_sha256": "b3f16ddc8508a36223183f1769ef9da9d8e90259e9c45d91f7c1ee7fdf985553",
+  "payload_bytes": 66723,
+  "gpu": false,
+  "no_retry": true
+}

@@ -1,0 +1,9 @@
+# R156 — consommation CPU des buffers QPN2 prépackés
+
+Le vrai adaptateur Skinny a préparé l'échantillon R132 avec `_qpn_prepack` du donneur, puis exécuté deux RankDispatch synthétiques. À chaque projection, un fournisseur de test CPU reçoit réellement les buffers QPN2 et facteurs transmis par l'adaptateur : il inverse la permutation lane/k, décode les codes et échelles FP16, reconstruit la matrice dense et calcule le produit Torch binaire64, arrondi FP16. L'adaptateur effectue ensuite SiLU et le produit FP16. Deux experts de test sont des copies d'un seul expert échantillonné.
+
+Les 2 048 sorties FP16 non nulles concordent exactement avec l'oracle scalaire indépendant sur les octets d'origine R153/R139 et les arrondis pré-déclarés (écart 0 ; limites abs 2^-14, rel 2^-9). Le collecteur Rust applique les coefficients 0,25 et 0,5 une fois, avec réception en ordre inverse, et retourne exactement la somme attendue. Deux refus d'epoch précèdent le fournisseur. Deux mutations distinctes, effectuées dans des copies de buffers down après admission, mettent respectivement tous les codes ou toutes les échelles à zéro : chacune produit une sortie entièrement nulle alors que la nominale est non nulle. Cela vérifie que les deux buffers influencent ce fournisseur CPU. Toutes les étapes sortent 0.
+
+Le fournisseur inverse la permutation déduite du donneur ; l'oracle lit les octets d'origine, mais les deux partagent l'interprétation numérique du format. Cette preuve ne qualifie ni le kernel CUDA ni son ordre d'accumulation, ne prouve pas le SHA complet du shard, ni l'intégration d'un modèle complet ou un gain de performance. Aucun GPU, réseau de production ou ancien runner matériel n'a été utilisé.
+
+Suite : compléter les contrôles ciblés d'identités/mutations sur les frontières résidentes, puis préparer une admission matérielle distincte avec environnement 1Cat et lease réelle, sans déduire de résultat GPU des calculs CPU.

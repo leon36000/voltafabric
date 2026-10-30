@@ -1,0 +1,24 @@
+{
+  "argv": [
+    "ssh",
+    "-o",
+    "BatchMode=yes",
+    "-o",
+    "StrictHostKeyChecking=yes",
+    "-o",
+    "ConnectTimeout=8",
+    "pc1-lan",
+    "env",
+    "PYTHONPATH=<R150/site-r2>",
+    "TRANSFORMERS_OFFLINE=1",
+    "HF_HUB_OFFLINE=1",
+    "<adapter-cpu/python>",
+    "-B",
+    "-"
+  ],
+  "exit": 0,
+  "gpu": false,
+  "probe_sha256": "e1b33a8f2013b000490de1568274463c3a8e17ad8a9e1fe76ddf07f586f39776",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "bfc6e614dba49c706749bb87cf10a2fbbe11df564ce4dd781cc3a7af50098000"
+}

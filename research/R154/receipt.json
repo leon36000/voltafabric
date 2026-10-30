@@ -1,0 +1,9 @@
+{
+  "collect_exit": 0,
+  "collect_script_sha256": "feb212cb3a5700637e8cd8573b742c3ea579f6d3165831aa86e7510752be8ba8",
+  "raw_row_sha256": "35e0f3e5399cec229cb9671201413a5d011dafd11ad738146c2c7d5b9ca176a4",
+  "remote_exit": 0,
+  "remote_script_sha256": "92d80c6c0e5da758f08e4d6489fef47845ef2f22d3045b1f6d49ad663c2ff160",
+  "routing_exit": 0,
+  "row_nonzero": 2048
+}

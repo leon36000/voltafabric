@@ -1,0 +1,10 @@
+{
+  "bytes": 58110,
+  "model_type": "qwen3_5_moe",
+  "root_dtype": "bfloat16",
+  "root_torch_dtype": null,
+  "sha256": "58aefa1c9eff7989f431d748f2ddec39446cb1fd2a69acc46e285c6a37b0cecc",
+  "status": "VERIFIED",
+  "text_dtype": "bfloat16",
+  "text_torch_dtype": null
+}

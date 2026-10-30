@@ -1,0 +1,7 @@
+# R147 — sélecteur GDN réel, simulations CPU
+
+Trois fonctions ont été extraites par AST du source GDN 1Cat dont le SHA est vérifié (preuve R145), puis exécutées en Python CPU avec plateforme, type Torch et module FlashQLA explicitement simulés. Aucun import ni calcul de l'implémentation GPU n'a eu lieu. Sept tests passent : SM70/FP16/module présent choisit `flashqla_sm70` ; SM70/BF16, module absent, dimension de tête 64 et plateforme non CUDA choisissent `triton`. La branche TileLang originale est activée quand ses variables sont absentes et désactivée pour la valeur 0 de la variable principale. La commande `python3 -B test_selector.py` retourne 0 ; journal conservé.
+
+La configuration R129 du candidat Qwen indique une dimension de clé linéaire 128 et `dtype=bfloat16`. Si le runtime conserve effectivement ce dtype et si les autres conditions correspondent à la simulation, ce sélecteur source choisit le repli Triton pour SM70 ; une conversion explicite vers FP16 changerait la branche. La configuration seule ne prouve pas le dtype opérationnel, la disponibilité réelle de FlashQLA, ni la compatibilité ou les performances du repli. Le test n'est pas une exécution du moteur ou du GPU ; les doubles ne qualifient aucun backend.
+
+Prochaine étape : caractériser le dtype réellement sélectionné par la configuration d'exécution du donneur puis tester sur CPU le chemin de préparation d'experts, avant une admission GPU séparée. Le conflit des dépendances 1Cat et 0.1.10 reste ouvert.

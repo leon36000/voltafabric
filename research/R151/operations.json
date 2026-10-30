@@ -1,0 +1,9 @@
+{
+  "1cat_config_module_exit": 0,
+  "first_probe_sha256": "c540c6e85ca34fa3d3e6fe1ca6ff34b510abebaf3e969b09a1c58e1cb6e8d033",
+  "gpu": false,
+  "network": false,
+  "second_probe_sha256": "7cdbd687b9cd0c5526203731d07cee7789de7ada94bde27b569a9a7f49b55fda",
+  "standard_autoconfig_exit": 1,
+  "standard_autoconfig_status": "unsupported qwen3_5_moe"
+}

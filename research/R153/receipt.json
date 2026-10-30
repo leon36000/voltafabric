@@ -1,0 +1,11 @@
+{
+  "argv": [
+    "python3",
+    "-B",
+    "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r153-real-sample-cpu-collector/run.py"
+  ],
+  "exit": 0,
+  "script_sha256": "83031c4eb1d20255c27784bdfffcc98cd426b18145dd7b2ab5279a661051dda1",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "stdout_sha256": "7c1b6ad550e49960df494f5a283f57aa0edfabc0524587dc0f9b5d541b58d33c"
+}

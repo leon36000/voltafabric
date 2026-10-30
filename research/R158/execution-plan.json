@@ -1,0 +1,16 @@
+{
+  "file_sha256": {
+    "adapter": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd",
+    "artifact2": "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+    "artifact9": "1d3eafe7c7e37f96a03b5bfa1cbce04619adcb50f061c91648a2643555611c6d",
+    "artifact_reader": "ca6695eca9d28c0ea1f9b1c1a9fd6e55e37aeaec316308ceb35f808e1c158879",
+    "owner": "e12945ae9167843f7f056bcc12734ee222af5f361def1f108138960168d823f3",
+    "provider": "30c1daadc271ee737a5b5cccc9f77462dc8999298c3fd687a6c7dafc959bf685"
+  },
+  "gpu": false,
+  "no_retry": true,
+  "problem_sha256": "2c1447983d9c649615c49e6bd33a0e87c2f587be87314febaf2113ac814a7ad7",
+  "remote_script_sha256": "5e5c88f4b444228c1596892aa20fd1c8cd6bbc71772beab1c6bb51450280ba84",
+  "routing_sha256": "bfe30775be53c6bc44221ed7dc9dd9f0ba21ea0d51ebf9292da8870d1b77b5ce",
+  "scenario": "real load/2 CPU EXEC each; duplicate attempt rejection; rank2 synthetic after-admission UNKNOWN, no replay"
+}

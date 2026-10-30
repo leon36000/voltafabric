@@ -1,0 +1,14 @@
+{
+  "adapter_provider_calls": 4,
+  "collector_exit": 0,
+  "collector_input_sha256": "4028ac512489c6777f28fde8de35bd13da8ac266b430e4cf95094e7136bf40be",
+  "collector_output_sha256": "d4fe9a8dceb361e27f69ae29d0709b199d5ed6c6d5a771f24e7a1521d9b4e51c",
+  "collector_values": 2048,
+  "gpu": false,
+  "limits": "Real adapter, CPU fake provider supplies precomputed real-sample proxy and ignores synthetic packed planes; no expert arithmetic is performed by adapter, no GPU/model.",
+  "nonzero": 2048,
+  "plan_sha256": "3e789bbf66669a1c7b1d1b9fd3b7a187855445d6d874d4aaee2481e463f3c627",
+  "remote_stdout_sha256": "a3bd02b90948f84a0c1705a1e2faa63f9073c1a1b17fbab512f6ce9b0a4d6f9c",
+  "stale_refusals": 2,
+  "status": "REAL_ADAPTER_CPU_PRECOMPUTED_PROXY_TO_RUST_COLLECTOR"
+}

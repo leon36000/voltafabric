@@ -1,0 +1,59 @@
+{
+  "collector_values": 2048,
+  "completion_order": "reverse",
+  "limits": "CPU f64 scalar forward proxy with FP16 dequant and output, two synthetic copies of one sampled expert; no Skinny adapter, native kernel, GPU, full shard hash or model.",
+  "negative_cases": [
+    "missing",
+    "duplicate",
+    "stale"
+  ],
+  "output_fp16_sha256": "35e0f3e5399cec229cb9671201413a5d011dafd11ad738146c2c7d5b9ca176a4",
+  "plan_sha256": "4795a472e6f5847ed8e9cb0d3db1943069bb15f21e9adddab041288e2bbe1521",
+  "real_sample_expert_count": 1,
+  "records": [
+    {
+      "command": "routing",
+      "exit": 0,
+      "input_sha256": "f983e0ff96437feb9ec846f34bc4a24a4ed91334838ee400983af50ebda682dd",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "3bf7136afc19cbca654393535b7d9c12ee924908581c1b975bb03deaa91a188c"
+    },
+    {
+      "command": "collect-routing",
+      "exit": 0,
+      "input_sha256": "eec01cb13c27af986a85e12f75ee083110194f7d7c16e83c837edb6250bace92",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "d4fe9a8dceb361e27f69ae29d0709b199d5ed6c6d5a771f24e7a1521d9b4e51c"
+    },
+    {
+      "command": "collect-routing",
+      "exit": 2,
+      "input_sha256": "108fb85c46374e697b3f6d9e36e26b18ee9ce8376b40262ed1b9188b1c895e32",
+      "negative_case": "missing",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f463ca2dc378668afb62669b93cf6a92c6be3b4f9de0fa9d82d5ba5ffd57c7c5"
+    },
+    {
+      "command": "collect-routing",
+      "exit": 2,
+      "input_sha256": "0414782dc33e9a3912620a7308a62fc83aef1a1d1113704959d8ed1081cf2386",
+      "negative_case": "duplicate",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "98bf6a47602c4df3adf01078ff93461d55132370aba0d5f04ef0e104e83c724b"
+    },
+    {
+      "command": "collect-routing",
+      "exit": 2,
+      "input_sha256": "7ff8394d39fed7369d15f0cd83e773bee68bd2c4da71ea243bcca71b53e3da5c",
+      "negative_case": "stale",
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "98bf6a47602c4df3adf01078ff93461d55132370aba0d5f04ef0e104e83c724b"
+    }
+  ],
+  "status": "REAL_SAMPLE_CPU_PROXY_TO_RUST_COLLECTOR_VERIFIED",
+  "synthetic_identical_experts": 2,
+  "weights": [
+    0.25,
+    0.5
+  ]
+}

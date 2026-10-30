@@ -1,0 +1,17 @@
+{
+  "collector_exit": 0,
+  "collector_input_sha256": "6b660564dd6d58236e1a4252f51229529815bdca63d8720703c8fcb07bbc48b7",
+  "collector_stdout_sha256": "dbc377ecb3f3cb19b84291762580ff1efc59fed78ebed97a7714ee9ed4265bb9",
+  "exact_matches": 2048,
+  "gpu": false,
+  "limits": "CPU inverse-decodes passed QPN2 buffers, FP16 staging and f64 dots; two synthetic copies of one expert, no native CUDA/full shard/model.",
+  "max_abs_error": 0.0,
+  "nonzero": 2048,
+  "oracle_atol": 6.103515625e-05,
+  "oracle_rtol": 0.001953125,
+  "plan_sha256": "8f63f01d69ef19dff924a580fdf37765fc2d820da91b538683e3098fad3191af",
+  "remote_stdout_sha256": "4bb8e4216e976eeb54736d9591a493d1909349f246f6ad3eda151ac5150328e9",
+  "row_sha256": "75f0fd09694381ff06ca9d65b71023eddd5af6def70dd5e0afc0d18027971906",
+  "status": "CPU_QPN2_LOCAL_ROW_MUTATIONS_VERIFIED",
+  "values": 2048
+}

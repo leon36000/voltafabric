@@ -1,0 +1,8 @@
+{
+  "adapter_sha256": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd",
+  "gpu": false,
+  "problem_sha256": "9f210e3ef194852eea36747ab9218518d89d175df204de57308d70d55971b650",
+  "provider": "CPU double returns zeros for gate/up and precomputed R153 proxy row for down; ignores fake packed planes; no arithmetic qualification",
+  "routing_sha256": "740e75d6ce75b15bd12690afc868947b5f42c23a6db4c34e6520c75cab525e15",
+  "row_fp16_sha256": "35e0f3e5399cec229cb9671201413a5d011dafd11ad738146c2c7d5b9ca176a4"
+}

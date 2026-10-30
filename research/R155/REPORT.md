@@ -1,0 +1,11 @@
+# R155 — expert échantillonné calculé sur CPU, adaptateur et collecteur
+
+Les octets des trois projections de l'expert R132, l'adaptateur Skinny et le source du donneur ont été vérifiés par SHA. Sur PC1, le vrai `prepack_experts` de l'adaptateur a utilisé la vraie fonction Python `_qpn_prepack` extraite du donneur épinglé pour construire les plans résidents. Deux RankDispatch Rust portent deux identités synthétiques, chacune associée à une copie du même expert échantillonné.
+
+Le vrai `moe_apply_dispatch_local` a invoqué un fournisseur CPU de test à deux projections par rank. Ce fournisseur reconstruit des matrices FP16 denses depuis les octets R132 originaux, utilise des produits Torch CPU en binaire64, arrondit chaque projection FP16, et laisse l'adaptateur effectuer SiLU et le produit intermédiaire FP16. **Il ne décode pas les buffers QPN2 passés à son ABI** : le prépacking est réellement exécuté mais sa consommation par le kernel n'est pas vérifiée ici. Deux erreurs d'epoch sont refusées avant fournisseur.
+
+Un oracle scalaire Python distinct, basé sur les formules R139/R153 avec les mêmes étapes FP16 déclarées avant exécution, concorde exactement sur les 2 048 valeurs FP16, toutes non nulles (tolérances pré-déclarées abs 2^-14 et rel 2^-9 ; écart observé 0). Les deux rangs retournent les mêmes valeurs. Le vrai collecteur Rust reçoit les lignes non pondérées en ordre inverse et retourne exactement `0,75 × ligne` avec coefficients 0,25 et 0,5. Commandes de routage, exécution CPU distante et vérification/collecteur : exit 0. Plans, scripts, identités et empreintes figurent dans les reçus.
+
+Les deux oracles partagent l'interprétation du format et les poids échantillonnés ; ils ne sont pas une preuve du calcul CUDA, de son ordre d'accumulation, de la consommation des plans prépackés, du SHA complet du shard, d'un modèle entier ou de la performance. Les experts du test sont des copies synthétiques. Aucun GPU ou transport de production n'a été utilisé.
+
+Suite : créer un fournisseur CPU qui décode les **buffers prépackés réellement reçus**, comparer au témoin indépendant et vérifier les mutations de codes et d'échelles ; puis qualifier matériellement sous un contrat distinct.

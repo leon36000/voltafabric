@@ -1,0 +1,8 @@
+{
+  "expected_sha256": "58aefa1c9eff7989f431d748f2ddec39446cb1fd2a69acc46e285c6a37b0cecc",
+  "limit_bytes": 2000000,
+  "purpose": "recover root dtype omitted from R129 extracted fields",
+  "requests": 1,
+  "retry": false,
+  "url": "https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4/resolve/1355db6a052410cfd62085d94b58866fd0f2c3c5/config.json"
+}

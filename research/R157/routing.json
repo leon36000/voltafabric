@@ -1,0 +1,94 @@
+{
+  "ok": true,
+  "result": {
+    "hidden": 2048,
+    "ranks": [
+      {
+        "hidden": 2048,
+        "rank": 2,
+        "resident_order": [
+          0
+        ],
+        "slots": [
+          {
+            "physical_expert": 0,
+            "slot": {
+              "expert": 0,
+              "local": 0,
+              "rank": 2,
+              "slot": 0,
+              "token": 0,
+              "weight": 0.25
+            }
+          }
+        ],
+        "stamp": {
+          "batch": 0,
+          "epoch": 1,
+          "layer": 0,
+          "model_revision": "qwen-r132-test-copy",
+          "plan_id": "packed-row-mutations",
+          "run_id": "r157-cpu"
+        },
+        "tokens": 1
+      },
+      {
+        "hidden": 2048,
+        "rank": 9,
+        "resident_order": [
+          0
+        ],
+        "slots": [
+          {
+            "physical_expert": 0,
+            "slot": {
+              "expert": 1,
+              "local": 0,
+              "rank": 9,
+              "slot": 1,
+              "token": 0,
+              "weight": 0.5
+            }
+          }
+        ],
+        "stamp": {
+          "batch": 0,
+          "epoch": 1,
+          "layer": 0,
+          "model_revision": "qwen-r132-test-copy",
+          "plan_id": "packed-row-mutations",
+          "run_id": "r157-cpu"
+        },
+        "tokens": 1
+      }
+    ],
+    "slots": [
+      {
+        "expert": 0,
+        "local": 0,
+        "rank": 2,
+        "slot": 0,
+        "token": 0,
+        "weight": 0.25
+      },
+      {
+        "expert": 1,
+        "local": 0,
+        "rank": 9,
+        "slot": 1,
+        "token": 0,
+        "weight": 0.5
+      }
+    ],
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "qwen-r132-test-copy",
+      "plan_id": "packed-row-mutations",
+      "run_id": "r157-cpu"
+    },
+    "tokens": 1
+  },
+  "schema_version": 1
+}

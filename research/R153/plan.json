@@ -1,0 +1,23 @@
+{
+  "cli_sha256": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+  "gpu": false,
+  "input": "((i%31)-15)/16",
+  "no_model": true,
+  "output": "unweighted scalar f64 proxy rounded once to fp16 before Rust f64 Collector",
+  "routes": [
+    {
+      "expert": 0,
+      "weight": 0.25
+    },
+    {
+      "expert": 1,
+      "weight": 0.5
+    }
+  ],
+  "sample": "R132 three projections expert 0; two test-only identical resident copies",
+  "sample_sha256": {
+    "codes": "c1bbdf2d6c0c15d7da34352689d65530b4daf981aa6392bfb17d17010dd7e993",
+    "scalars": "bcf1e13241cb2960c903be775ca03e1a2776d3cc560b394e92137a7fb7b715b2",
+    "scales": "98aa1d1823f373ff28fc078a0443c1de7fa45594a9cfee1751e6d3f4cacc85aa"
+  }
+}
