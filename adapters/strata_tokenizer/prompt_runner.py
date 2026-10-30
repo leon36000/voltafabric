@@ -132,10 +132,16 @@ def _chat_prompt_ids(prompt, tokenizer, eos):
     return result
 
 
-def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, runner=_run_bounded) -> dict:
-    """Run once, and publish decoded text only after the full receipt validates."""
+def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, runner=_run_bounded) -> dict:
+    """Run once; strict mode requires a current plan and prompt digest, not attestation.
+
+    Legacy receipt compatibility requires an explicit opt-out. A caller still
+    authenticates the engine and plan inputs.
+    """
     if type(chat) is not bool:
         raise ValueError("invalid prompt mode")
+    if type(require_bound_plan) is not bool:
+        raise ValueError("invalid bound-plan mode")
     if chat:
         _chat_messages(prompt)
     elif not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
@@ -169,7 +175,11 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
     plan_id = receipt.get("plan_id")
-    if "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-"))):
+    if require_bound_plan:
+        if (not isinstance(plan_id, str) or not plan_id.startswith("r512-") or len(plan_id) != 69
+                or any(c not in "0123456789abcdef" for c in plan_id[5:])):
+            raise ValueError("current bound plan identity required")
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")
@@ -209,7 +219,7 @@ def main() -> int:
     tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
     paths = [args.dense, args.shard, args.pack, args.index, args.session,
              args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json)
+    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

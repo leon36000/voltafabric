@@ -7,7 +7,13 @@ import subprocess
 import unittest
 
 from adapters.strata_tokenizer.adapter import load_sc117
-from adapters.strata_tokenizer.prompt_runner import _chat_messages, _chat_prompt_ids, run_prompt
+from adapters.strata_tokenizer.prompt_runner import _chat_messages, _chat_prompt_ids, run_prompt as _run_prompt
+
+
+def run_prompt(*args, **kwargs):
+    # These historical synthetic receipts have no plan identifier.
+    kwargs.setdefault('require_bound_plan', False)
+    return _run_prompt(*args, **kwargs)
 
 
 @unittest.skipUnless(os.environ.get('VF_SC117_TOKENIZER_DIR'), 'observed tokenizer pack not configured')

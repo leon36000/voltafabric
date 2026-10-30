@@ -5,8 +5,14 @@ import subprocess
 import sys
 import unittest
 
-from adapters.strata_tokenizer.prompt_runner import _run_bounded, run_prompt
+from adapters.strata_tokenizer.prompt_runner import _run_bounded, run_prompt as _run_prompt
 from adapters.strata_tokenizer.test_adapter import FakeTokenizer
+
+
+def run_prompt(*args, **kwargs):
+    # The old synthetic fixtures deliberately exercise legacy compatibility.
+    kwargs.setdefault("require_bound_plan", False)
+    return _run_prompt(*args, **kwargs)
 
 
 class Tokenizer(FakeTokenizer):
@@ -21,6 +27,31 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_strict_plan_rejects_missing_unknown_malformed_and_missing_digest(self):
+        value = dict(receipt(), plan_id="r512-" + "a" * 64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        def run():
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertEqual(run()["output"]["text"], "😀")
+        for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
+                    "r512-" + "a" * 63, 123):
+            value["plan_id"] = bad
+            with self.assertRaisesRegex(ValueError, "bound plan identity"):
+                run()
+        del value["plan_id"]
+        with self.assertRaisesRegex(ValueError, "bound plan identity"):
+            run()
+        value["plan_id"] = "r512-" + "a" * 64
+        for bad in (None, "0" * 64):
+            value["prompt_tokens_sha256"] = bad
+            with self.assertRaisesRegex(ValueError, "prompt digest"):
+                run()
+        del value["prompt_tokens_sha256"]
+        with self.assertRaisesRegex(ValueError, "prompt digest"):
+            run()
+
     def test_prompt_digest_is_checked_when_present_or_required_by_plan(self):
         value = dict(receipt(), plan_id="r506-" + "a"*64,
                      prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
