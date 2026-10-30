@@ -130,6 +130,7 @@ pub struct Layer {
     shared: sc117_shared_stage::Stage,
     owners: Owners,
     ple: Option<Ple>,
+    last_selected: Vec<u32>,
 }
 
 struct Ple {
@@ -212,6 +213,7 @@ impl Layer {
             shared,
             owners,
             ple: None,
+            last_selected: Vec::new(),
         })
     }
     pub fn qsa(
@@ -230,6 +232,7 @@ impl Layer {
             shared,
             owners,
             ple: None,
+            last_selected: Vec::new(),
         })
     }
     /// Attach authenticated PLE inputs before constructing a segment. The caller must
@@ -281,11 +284,13 @@ impl Layer {
             None
         };
         let input = candidate.as_ref().map_or(input, |p| p.residual.as_slice());
+        let mut selected = Vec::new();
         let output = match &mut self.attention {
             Attention::Gdn(gdn, post) => {
                 let proposal = gdn.prepare_reserved(ledger, &ticket, position, input)?;
                 let routed =
                     sc117_bound_layer::Routed::prepare(post, ledger, &ticket, proposal, input)?;
+                selected.extend(routed.choices().iter().map(|choice| choice.expert));
                 self.owners
                     .ensure(&stamp, attempt, routed.choices(), source, timeout)?;
                 let shared = routed.shared(&mut self.shared)?;
@@ -305,6 +310,7 @@ impl Layer {
                     usize::try_from(position).map_err(|_| invalid("QSA position overflow"))?;
                 let routed =
                     sc117_qsa_bound_layer::Routed::prepare(qsa, ffn, ledger, &ticket, pos, input)?;
+                selected.extend(routed.choices().iter().map(|choice| choice.expert));
                 self.owners
                     .ensure(&stamp, attempt, routed.choices(), source, timeout)?;
                 let shared = routed.shared(&mut self.shared)?;
@@ -320,13 +326,15 @@ impl Layer {
                 Ok(routed.commit(qsa, shared, collected)?.residual)
             }
         };
-        if let (Some(ple), Some(candidate)) = (&mut self.ple, candidate) {
+        let output = if let (Some(ple), Some(candidate)) = (&mut self.ple, candidate) {
             // Only after all attention, shared and routed expert work committed.
             ple.state
                 .finish(token.expect("PLE token was validated"), candidate, output)
         } else {
             output
-        }
+        }?;
+        self.last_selected = selected;
+        Ok(output)
     }
 }
 
@@ -397,6 +405,57 @@ pub struct Segment {
     timeout: Duration,
     cursor: Cursor,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct EvictionCandidate {
+    layer: u32,
+    expert: u32,
+    rank: u32,
+    bytes: u64,
+}
+
+// Plan entirely before sending anything. Input order is deterministic; each
+// rank must retain at least one resident and arithmetic is checked.
+fn select_evictions(
+    used: u64,
+    target: u64,
+    max_evictions: usize,
+    candidates: &[EvictionCandidate],
+    counts: &BTreeMap<(u32, u32), usize>,
+) -> Result<Vec<EvictionCandidate>> {
+    if used <= target {
+        return Ok(Vec::new());
+    }
+    if max_evictions == 0 || max_evictions > 64 {
+        return Err(invalid("eviction limit"));
+    }
+    let mut counts = counts.clone();
+    let mut remaining = used;
+    let mut selected = Vec::new();
+    for &candidate in candidates {
+        let count = counts
+            .get_mut(&(candidate.layer, candidate.rank))
+            .ok_or_else(|| invalid("eviction candidate rank"))?;
+        if *count <= 1 {
+            continue;
+        }
+        if candidate.bytes == 0 {
+            return Err(invalid("empty expert payload"));
+        }
+        remaining = remaining
+            .checked_sub(candidate.bytes)
+            .ok_or_else(|| invalid("eviction plan underflow"))?;
+        *count -= 1;
+        selected.push(candidate);
+        if remaining <= target {
+            return Ok(selected);
+        }
+        if selected.len() == max_evictions {
+            break;
+        }
+    }
+    Err(invalid("eviction target cannot be met safely"))
+}
+
 /// Receipt is proof of the local acknowledgement, not a distributed lease.
 #[derive(Debug, serde::Serialize)]
 pub struct EvictionReceipt {
@@ -619,6 +678,85 @@ impl Segment {
             released_payload_bytes: bytes,
         })
     }
+    /// Explicitly trim accounted payload between committed positions. Protects
+    /// each layer's last committed gate choices; this does not predict the next
+    /// gate, measure RSS, or retry any uncertain operation. If a later eviction
+    /// fails, earlier acknowledged evictions remain applied and the segment is
+    /// poisoned by the failing operation.
+    pub fn evict_to_target(
+        &mut self,
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        target_bytes: u64,
+        max_evictions: usize,
+    ) -> Result<Vec<EvictionReceipt>> {
+        if self.cursor.poisoned || self.cursor.position == 0 || self.cursor.last_attempt == 0 {
+            return Err(invalid("eviction policy requires committed position"));
+        }
+        let mut candidates = Vec::new();
+        let mut counts = BTreeMap::new();
+        for layer in &self.layers {
+            if layer.last_selected.is_empty() {
+                return Err(invalid("missing committed route"));
+            }
+            let mut copies = layer.owners.registry.copies.clone();
+            copies.sort_by_key(|r| (r.expert, r.rank, r.local));
+            for copy in &copies {
+                *counts
+                    .entry((layer.identity.layer, copy.rank))
+                    .or_insert(0usize) += 1;
+                if !layer.last_selected.contains(&copy.expert) {
+                    candidates.push(EvictionCandidate {
+                        layer: layer.identity.layer,
+                        expert: copy.expert,
+                        rank: copy.rank,
+                        bytes: source.resident_bytes(layer.identity.layer, copy.expert)?,
+                    });
+                }
+            }
+        }
+        let plan = select_evictions(
+            source.used_bytes(),
+            target_bytes,
+            max_evictions,
+            &candidates,
+            &counts,
+        )?;
+        let mut bindings = Vec::with_capacity(plan.len());
+        for item in &plan {
+            let binding = source.resident_binding(item.layer, item.expert)?;
+            if binding.rank != item.rank {
+                return Err(invalid("eviction plan binding rank"));
+            }
+            let layer = self
+                .layers
+                .iter()
+                .find(|l| l.identity.layer == item.layer)
+                .ok_or_else(|| invalid("eviction plan layer"))?;
+            let mut stamp = self.base.clone();
+            stamp.layer = item.layer;
+            stamp.batch = self.cursor.position - 1;
+            let bytes = source.validate_eviction(
+                &stamp,
+                &binding,
+                &layer.owners.registry,
+                &layer.owners.order,
+            )?;
+            if bytes != item.bytes {
+                return Err(invalid("eviction plan payload size"));
+            }
+            bindings.push(binding);
+        }
+        let mut receipts = Vec::with_capacity(bindings.len());
+        for binding in &bindings {
+            receipts.push(self.evict_owner_after_commit(source, binding)?);
+        }
+        if source.used_bytes() > target_bytes {
+            self.cursor.poisoned = true;
+            return Err(invalid("eviction target accounting"));
+        }
+        Ok(receipts)
+    }
+
     /// Append a verified expert to an existing rank between positions. The caller
     /// chooses placement and supplies a trusted digest; no eviction is performed.
     /// Any failure after transmission poisons the segment, including a lost reply.
@@ -717,6 +855,46 @@ impl Segment {
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn eviction_plan_is_bounded_and_preserves_last_resident_per_rank() {
+        let c = [
+            EvictionCandidate {
+                layer: 0,
+                expert: 1,
+                rank: 2,
+                bytes: 4,
+            },
+            EvictionCandidate {
+                layer: 0,
+                expert: 2,
+                rank: 2,
+                bytes: 4,
+            },
+            EvictionCandidate {
+                layer: 0,
+                expert: 3,
+                rank: 3,
+                bytes: 4,
+            },
+            EvictionCandidate {
+                layer: 1,
+                expert: 4,
+                rank: 2,
+                bytes: 4,
+            },
+        ];
+        let counts = BTreeMap::from([((0, 2), 2), ((0, 3), 1), ((1, 2), 2)]);
+        assert_eq!(
+            select_evictions(16, 8, 2, &c, &counts).unwrap(),
+            vec![c[0], c[3]]
+        );
+        assert!(select_evictions(16, 4, 2, &c, &counts).is_err());
+        assert!(select_evictions(16, 8, 1, &c, &counts).is_err());
+        assert!(select_evictions(16, 8, 65, &c, &counts).is_err());
+        assert!(select_evictions(3, 0, 2, &c, &counts).is_err());
+        assert!(select_evictions(16, 16, 0, &c, &counts).unwrap().is_empty());
+    }
 
     #[test]
     fn model_chain_refuses_to_skip_required_layer_one_ple() {

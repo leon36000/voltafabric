@@ -214,6 +214,12 @@ impl<'a> Source<'a> {
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
     }
+    pub(crate) fn resident_bytes(&self, layer: u32, expert: u32) -> Result<u64> {
+        if !self.known.contains_key(&(layer, expert)) {
+            return Err(invalid("expert not accounted"));
+        }
+        Ok(self.layout.expert(layer as usize, expert.into())?.bytes)
+    }
 
     /// Reconstruct a locally observed exact binding. This does not authenticate
     /// the publisher, and it does not imply permission to evict the expert.
