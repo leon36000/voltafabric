@@ -69,6 +69,8 @@ pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
 #[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GGML_EXTEND: &str = "cpu_strata_sc117_append_resident_v1";
+#[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32: &str = "cpu_strata_sc117_ggml_unweighted_f32_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
@@ -126,6 +128,13 @@ pub enum Request {
     },
     #[cfg(feature = "native-ggml-cpu")]
     LoadNativeGgmlRaw {
+        binding: crate::native_ggml_cpu::Binding,
+        index: String,
+        pack_bytes: u64,
+        artifact_bytes: u64,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    ExtendNativeGgmlRaw {
         binding: crate::native_ggml_cpu::Binding,
         index: String,
         pack_bytes: u64,
@@ -2567,6 +2576,9 @@ fn serve_impl(
                         hello.capabilities.push(CAPABILITY_NATIVE_GGML_CPU.into());
                         hello
                             .capabilities
+                            .push(CAPABILITY_NATIVE_GGML_EXTEND.into());
+                        hello
+                            .capabilities
                             .push(CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32.into());
                     }
                     if let Some(provider) = executor.as_ref() {
@@ -2597,6 +2609,7 @@ fn serve_impl(
             && !matches!(
                 request,
                 Request::LoadNativeGgmlRaw { .. }
+                    | Request::ExtendNativeGgmlRaw { .. }
                     | Request::SealNativeGgml
                     | Request::ExecNativeGgml { .. }
                     | Request::ExecNativeGgmlUnweightedF32 { .. }
@@ -2612,6 +2625,8 @@ fn serve_impl(
             )?;
             return Err(error);
         }
+        #[cfg(feature = "native-ggml-cpu")]
+        let native_extending = matches!(&request, Request::ExtendNativeGgmlRaw { .. });
         match request {
             #[cfg(feature = "native-ggml-cpu")]
             Request::LoadNativeGgmlRaw {
@@ -2619,13 +2634,22 @@ fn serve_impl(
                 index,
                 pack_bytes,
                 artifact_bytes,
+            }
+            | Request::ExtendNativeGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
             } => {
                 use crate::strata_native_layout::{NativeLayout, VerifiedNativeExpert};
+                let owner_count = native_worker
+                    .as_ref()
+                    .map_or(native_owners.len(), |w| w.owner_count());
                 if resident.is_some()
                     || engram_resident.is_some()
-                    || native_worker.is_some()
+                    || native_worker.is_some() != native_extending
                     || binding.rank != rank
-                    || native_owners.len() >= crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
+                    || owner_count >= crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
                     || artifact_bytes > 4 * 1024 * 1024
                     || native_payload_bytes
                         .checked_add(artifact_bytes)
@@ -2670,9 +2694,22 @@ fn serve_impl(
                 })();
                 match loaded {
                     Ok(owner) => {
-                        native_payload_bytes += artifact_bytes;
-                        native_owners.push(owner);
-                        send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
+                        let result = if native_extending {
+                            native_worker
+                                .as_mut()
+                                .expect("validated worker")
+                                .add_owner(owner)
+                        } else {
+                            native_owners.push(owner);
+                            Ok(())
+                        };
+                        match result {
+                            Ok(()) => {
+                                native_payload_bytes += artifact_bytes;
+                                send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
+                            }
+                            Err(error) => send_reply(output, &Reply::Refused { error })?,
+                        }
                     }
                     Err(error) => send_reply(output, &Reply::Refused { error })?,
                 }
@@ -3533,6 +3570,56 @@ impl Session {
         }
     }
 
+    /// Opt-in append to a sealed CPU worker between requests. Lost acknowledgements
+    /// invalidate the session; callers must reconcile the uncertain load, not retry it.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn extend_native_ggml(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        if timeout.is_zero()
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GGML_EXTEND)
+            || binding.rank != self.rank
+            || bytes.len() > 4 * 1024 * 1024
+        {
+            return Err(invalid("native append capability, timeout, rank or size"));
+        }
+        let layout = crate::strata_native_layout::NativeLayout::parse_sc117_v3(index, pack_bytes)?;
+        let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+        if layout.index_sha256() != binding.index_sha256
+            || span.bytes != bytes.len() as u64
+            || sha256::hex(bytes) != binding.blob_sha256
+        {
+            return Err(invalid("native append index or payload digest"));
+        }
+        let request = Request::ExtendNativeGgmlRaw {
+            binding: binding.clone(),
+            index: index.to_owned(),
+            pack_bytes,
+            artifact_bytes: bytes.len() as u64,
+        };
+        self.write_parts(&[&encode(&request)?, bytes], true)?;
+        match self.reply(timeout)? {
+            Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("native append reply identity"))
+            }
+        }
+    }
+
     #[cfg(feature = "native-ggml-cpu")]
     pub fn seal_native_ggml(&mut self, expected_experts: usize, timeout: Duration) -> Result<()> {
         if !self
@@ -4140,6 +4227,10 @@ impl Session {
 
     pub fn pid(&self) -> u32 {
         self.child.id()
+    }
+    /// Rank identity negotiated when this session was opened.
+    pub fn rank(&self) -> u32 {
+        self.rank
     }
     pub fn is_usable(&self) -> bool {
         self.usable

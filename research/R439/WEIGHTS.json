@@ -1,0 +1,216 @@
+{
+  "scope": "local observations; model provenance not authenticated",
+  "result_sha256": "e652bec5becf41da56e969e51cf9c60fe3f82494c58ef0d8333d9b683bcc17fe",
+  "experts": [
+    {
+      "layer": 3,
+      "expert": 16,
+      "sha256": "b4d8811155aee75d7c730468760ae435926f2b7de66d3b6aa787c4b59a2abc77",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 45,
+      "sha256": "ed85880c3cb6535eeccdd20af8be13555b021930c236ed5c1d4379bb52db2d2f",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 122,
+      "sha256": "c3b340d331e5fa4566b8d96d5f37f7bb85cfd985d941b4e751983a56e3052c51",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 155,
+      "sha256": "f6cee0174cfe656eb351c612e832d4426fc2c1e5b17c648aa87b5d36baa59965",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 169,
+      "sha256": "d619d512f428f491dddff53300478eaa2162ead5734ffdd5c1856405f7864277",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 181,
+      "sha256": "1347d8f25fdfae91fdb873644547722636b17b3658a72ff6feaff51794c7f68c",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 192,
+      "sha256": "d9bf24e07b75583cd9d957057b2e5a9c49e5fea4321c81ec6ad353f23947aa4b",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 208,
+      "sha256": "ebb23511e3f453d2c332a741804d1ab7339ad3ebe2e3d2806747691bc3af42ae",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 325,
+      "sha256": "9afb58aa01d39c0c52c404feb2605eb131b756d6ace59c1de0519e95343453c3",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 339,
+      "sha256": "608e143a41c11b3aac5303fe01fe86a4d65f28a5def346c717eda47eab304c19",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 366,
+      "sha256": "f4ea37557500e4805f0605a0c6e0cf0b6eb64ee5b048f4167d6da945fbd3883f",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 412,
+      "sha256": "c7b9300d330c381190ecd296b46e0bba98573c0ad55d2342fbd84b922d67e8cd",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 454,
+      "sha256": "0a11e2bcb636c1fe21ef5a74794eb0996f658c394b3096beddd24475641b2c4b",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 3,
+      "expert": 484,
+      "sha256": "46b8a7aa76f87b22fedfac769a39c14567d9d184a1fff980a45db4985714087e",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 9,
+      "sha256": "f02b477b9c66aec922fc2fb3ae113709ebb078da91ac5fa1332d70d14a0afb86",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 78,
+      "sha256": "5069729f1a2e84f30fbf7246f30db464b704eac84f970008c57dc1cb2a515019",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 91,
+      "sha256": "8afef291df696f6347da3785cd837a7fedf7bd23f014fa23150474386cfdea0e",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 101,
+      "sha256": "1ee1c8c43f2e3d0e8816533f36cc760e9c6adbae4c583e2a4542af14d714b9b5",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 149,
+      "sha256": "9f0a048983b1eb893498eb6438915fc044ba911e5a500c1fa59e8ab617d2232f",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 226,
+      "sha256": "943c97f6695caf378655b84ed2dff7cf69c3d0e5073cac2172858381af765261",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 253,
+      "sha256": "d4bc07406d30f9818cd0b8f4af19bf35e8238d7dd76d0592c94c4d836ce3ee00",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 266,
+      "sha256": "d8b5a786be792de8e2d47de266692bea2bba85344cefc68b616137c44600e532",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 281,
+      "sha256": "f14702988c2cb01ac010e7a1e8100bbf8e941b543c4bae907a4cdfba5a76487b",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 293,
+      "sha256": "24808dd24a59155093c74b425aa5f7e12e70ff5582d7a744a0b4b8494edd296a",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 315,
+      "sha256": "e3bbd2f9a92b65b72da7155fb309b1c719f1716317b61e2ce63420c9a0c795dc",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 338,
+      "sha256": "21a1756e1f467214af6619e892de7a8da7d49df58cb18b85ce1b49fe8d3471dc",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 347,
+      "sha256": "5328daeaf1f9ca566265c7b824fa8cd8060057e8ed0867f0136c5d8f911598c3",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 366,
+      "sha256": "9545cc73f98f0a7fe8429e6992463ab62d2d249aa129ab58029dfc87c59054c7",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 415,
+      "sha256": "1223127d12324b95987e1d889f20086d59aaf053b86928e6aabecf805b378ffc",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 456,
+      "sha256": "c8ed2083bd181ba9f3fe378627b0d0e7173c73d88e70d10d2b5f21f2f352611d",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    }
+  ]
+}

@@ -117,6 +117,34 @@ impl RankWorker {
         })
     }
 
+    /// Append a verified resident between executions without resetting attempt or scope history.
+    /// This does not evict existing weights or change their physical indices.
+    pub fn add_owner(&mut self, owner: Resident) -> Result<()> {
+        let base = self.owners[0].binding();
+        let b = owner.binding();
+        if self.terminal
+            || self.owners.len() >= MAX_NATIVE_EXPERTS
+            || b.rank != base.rank
+            || b.model_revision != base.model_revision
+            || b.layer != base.layer
+            || b.epoch != base.epoch
+            || b.index_sha256 != base.index_sha256
+            || self.owners.iter().any(|existing| {
+                existing.binding().local == b.local || existing.binding().expert == b.expert
+            })
+        {
+            return Err(invalid(
+                "native appended owner identity, duplicate or limit",
+            ));
+        }
+        self.owners.push(owner);
+        Ok(())
+    }
+
+    pub fn owner_count(&self) -> usize {
+        self.owners.len()
+    }
+
     /// Returns compact, unweighted FP16 rows only after all rank slots succeed.
     /// The coordinator must validate and collect them against its routing plan.
     pub fn execute(

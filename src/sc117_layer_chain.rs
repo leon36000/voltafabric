@@ -225,6 +225,63 @@ impl Segment {
     pub fn is_poisoned(&self) -> bool {
         self.cursor.poisoned
     }
+    /// Append a verified expert to an existing rank between positions. The caller
+    /// chooses placement and supplies a trusted digest; no eviction is performed.
+    /// Any failure after transmission poisons the segment, including a lost reply.
+    pub fn append_owner(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+    ) -> Result<()> {
+        if self.cursor.poisoned
+            || binding.model_revision != self.base.model_revision
+            || binding.epoch != self.base.epoch
+        {
+            return Err(invalid("segment append state or identity"));
+        }
+        let layer = self
+            .layers
+            .iter_mut()
+            .find(|l| l.identity.layer == binding.layer)
+            .ok_or_else(|| invalid("segment append layer"))?;
+        let order = layer
+            .owners
+            .order
+            .get_mut(&binding.rank)
+            .ok_or_else(|| invalid("segment append rank order"))?;
+        if order.contains(&binding.local)
+            || layer.owners.registry.copies.iter().any(|r| {
+                r.rank == binding.rank && (r.local == binding.local || r.expert == binding.expert)
+            })
+        {
+            return Err(invalid("segment append duplicate expert or local"));
+        }
+        let mut matches = layer
+            .owners
+            .sessions
+            .iter_mut()
+            .filter(|s| s.rank() == binding.rank);
+        let session = matches
+            .next()
+            .ok_or_else(|| invalid("segment append session missing"))?;
+        if matches.next().is_some() {
+            return Err(invalid("segment append duplicate rank"));
+        }
+        // Fail closed even if an error occurred before transmission. This keeps
+        // the outer state from guessing whether a worker installed the weight.
+        self.cursor.poisoned = true;
+        session.extend_native_ggml(binding, index, pack_bytes, bytes, self.timeout)?;
+        layer.owners.registry.copies.push(crate::moe::Replica {
+            expert: binding.expert,
+            rank: binding.rank,
+            local: binding.local,
+        });
+        order.push(binding.local);
+        self.cursor.poisoned = false;
+        Ok(())
+    }
     /// Close each resident worker and return its actual shutdown receipt.
     pub fn close(self) -> Vec<crate::session::CloseReceipt> {
         self.layers

@@ -168,3 +168,43 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-layer4-live"
 path = "src/bin/vf-sc117-layer4-live.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-chain-cpu-check"
+path = "src/bin/vf-sc117-chain-cpu-check.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-chain-qsa-check"
+path = "src/bin/vf-sc117-chain-qsa-check.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-chain-two-token"
+path = "src/bin/vf-sc117-chain-two-token.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-ffn-route-r435"
+path = "src/bin/vf-sc117-ffn-route-r435.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-generic-check"
+path = "src/bin/vf-sc117-qsa-generic-check.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-two-position"
+path = "src/bin/vf-sc117-qsa-two-position.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-all-layer-prefix-check"
+path = "src/bin/vf-sc117-all-layer-prefix-check.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-chain-append-check"
+path = "src/bin/vf-sc117-chain-append-check.rs"
+required-features = ["native-ggml-cpu"]
