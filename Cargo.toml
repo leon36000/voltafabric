@@ -319,3 +319,8 @@ required-features = ["ple-cpu-qualification"]
 name = "vf-sc117-prefill-eviction-fault"
 path = "src/bin/vf-sc117-prefill-eviction-fault.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-prefill-readmission"
+path = "src/bin/vf-sc117-prefill-readmission.rs"
+required-features = ["ple-cpu-qualification"]

@@ -1,0 +1,12 @@
+--- a/src/sc117_layer_chain.rs
++++ b/src/sc117_layer_chain.rs
+@@ -89,6 +89,9 @@
+         let Some(source) = source.as_deref_mut() else {
+             return Ok(());
+         };
++        if stamp.layer == 0 && std::env::var_os("VF_R466_TRACE").is_some() {
++            eprintln!("VF_R466_ROUTE {} {:?}", stamp.batch, choices.iter().map(|c| c.expert).collect::<Vec<_>>());
++        }
+         for choice in choices {
+             if self
+                 .registry
