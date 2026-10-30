@@ -130,11 +130,14 @@ def decode_greedy_receipt(tokenizer: Tokenizer, eos: int, receipt: dict) -> dict
     if not isinstance(receipt, dict) or receipt.get("layer_count") != 48:
         raise ValueError("full layer receipt required")
     inputs, generated = receipt.get("input_tokens"), receipt.get("generated_token_ids")
-    if not isinstance(inputs, list) or not inputs or not isinstance(generated, list) or not 1 <= len(generated) <= 2:
+    requested = receipt.get("requested_max_new_tokens", 2)
+    if (type(requested) is not int or not 1 <= requested <= 4
+            or not isinstance(inputs, list) or not inputs or not isinstance(generated, list)
+            or not 1 <= len(generated) <= requested):
         raise ValueError("invalid autoregressive receipt")
     prompt = receipt.get("prompt_tokens", inputs[:1])
     if (not isinstance(prompt, list) or not 1 <= len(prompt) <= 2
-            or inputs != prompt + generated[:-1] or len(inputs) > 3
+            or inputs != prompt + generated[:-1] or len(inputs) > 5
             or any(type(token) is not int or not 0 <= token < len(tokenizer.tokens) for token in inputs)
             or not isinstance(receipt.get("run_id"), str) or not receipt["run_id"].strip()
             or receipt.get("workers_closed") != 96):
@@ -154,6 +157,8 @@ def decode_greedy_receipt(tokenizer: Tokenizer, eos: int, receipt: dict) -> dict
             raise ValueError("tokens supplied after EOS")
     reason = "eos" if decoder.stopped else "token_limit"
     if not decoder.stopped:
+        if len(generated) != requested:
+            raise ValueError("incomplete generation receipt")
         chunks.append(decoder.finish())
     return {"run_id": receipt["run_id"], "text": "".join(chunks),
             "token_ids": list(generated), "stop_reason": reason}

@@ -377,9 +377,9 @@ fn owners(
 const BUDGET: u64 = 4 * 1024 * 1024 * 1024;
 fn run() -> Result<(), E> {
     let a: Vec<_> = std::env::args().collect();
-    if a.len() != 11 {
+    if !(11..=12).contains(&a.len()) {
         return Err(
-            "usage: check DENSE SHARD PACK INDEX SESSION LEDGER PLE_SHARD PLE_MANIFEST LAYERS PROMPT_TOKEN_IDS"
+            "usage: check DENSE SHARD PACK INDEX SESSION LEDGER PLE_SHARD PLE_MANIFEST LAYERS PROMPT_TOKEN_IDS [MAX_NEW_TOKENS]"
                 .into(),
         );
     }
@@ -388,6 +388,10 @@ fn run() -> Result<(), E> {
         return Err("full greedy qualification requires 48 layers".into());
     }
     let prompt_tokens: Vec<u32> = a[10].split(',').map(str::parse).collect::<Result<_, _>>()?;
+    let max_new_tokens: usize = if a.len() == 12 { a[11].parse()? } else { 2 };
+    if !(1..=4).contains(&max_new_tokens) {
+        return Err("invalid generation limit".into());
+    }
     if !(1..=2).contains(&prompt_tokens.len())
         || prompt_tokens.iter().any(|&t| t >= 248_320 || t == 248_046)
     {
@@ -410,7 +414,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r462-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r470-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -467,7 +471,7 @@ fn run() -> Result<(), E> {
                 id.clone(),
                 &mut dense,
                 &mut shard,
-                3,
+                prompt_tokens.len() + max_new_tokens - 1,
             )?;
             let ffn = sc117_ffn_stage::Stage::load(
                 serde_json::from_str(qsa_manifests(id.layer).1)?,
@@ -497,7 +501,7 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r462-cpu-only".into(),
+        "r470-cpu-only".into(),
         ledger,
         Duration::from_secs(30),
     )?;
@@ -510,7 +514,7 @@ fn run() -> Result<(), E> {
             identity: voltafabric::sc117_expert_source::Identity {
                 run_id: run_id.clone(),
                 model_revision: "sc117-local-observation".into(),
-                plan_id: "r462-cpu-only".into(),
+                plan_id: "r470-cpu-only".into(),
                 epoch: 1,
             },
             ranks: vec![2, 3],
@@ -527,7 +531,7 @@ fn run() -> Result<(), E> {
     let mut logits_hashes = Vec::new();
     let mut generated = Vec::new();
     let mut current_token = prompt_tokens[0];
-    for pos in 0..(prompt_tokens.len() + 1) {
+    for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
         if pos < prompt_tokens.len() {
             current_token = prompt_tokens[pos];
         }
@@ -569,7 +573,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to two supplied prompt tokens and two greedy predictions through 48 local CPU layers", "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":BUDGET,"resident_payload_bytes":source.used_bytes(),"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to two supplied prompt tokens and four greedy predictions through 48 local CPU layers", "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":BUDGET,"resident_payload_bytes":source.used_bytes(),"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }

@@ -38,18 +38,22 @@ def _binary_sha(path: str) -> str:
         os.close(fd)
 
 
-def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, runner=subprocess.run) -> dict:
+def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, runner=subprocess.run) -> dict:
     """Run once, and publish decoded text only after the full receipt validates."""
     if not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
         raise ValueError("prompt must be nonempty and bounded UTF-8")
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
+    if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= 4:
+        raise ValueError("generation limit must be between one and four")
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
     if (not 1 <= len(prompt_ids) <= 2 or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
         raise ValueError("this qualification accepts one or two ordinary prompt tokens")
-    completed = runner([binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)],
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
+    if max_new_tokens != 2:
+        command.append(str(max_new_tokens))
+    completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
         raise RuntimeError("engine failed; reconcile its ledger and do not replay UNKNOWN claims")
     if len(completed.stdout) > MAX_RECEIPT_BYTES or len(completed.stderr) > MAX_RECEIPT_BYTES:
@@ -58,6 +62,8 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
+    if receipt.get("requested_max_new_tokens", 2) != max_new_tokens:
+        raise ValueError("engine receipt differs from generation limit")
     decoded = decode_greedy_receipt(tokenizer, eos, receipt)
     return {"prompt_token_ids": prompt_ids, "output": decoded, "receipt": receipt}
 
@@ -68,6 +74,7 @@ def main() -> int:
     p.add_argument("--tokenizer-manifest", required=True)
     p.add_argument("--binary", required=True)
     p.add_argument("--binary-sha256", required=True)
+    p.add_argument("--max-new-tokens", type=int, default=2)
     for name in ("dense", "shard", "pack", "index", "session", "ledger", "ple-shard", "ple-manifest"):
         p.add_argument("--" + name, required=True)
     args = p.parse_args()
@@ -82,7 +89,7 @@ def main() -> int:
     tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
     paths = [args.dense, args.shard, args.pack, args.index, args.session,
              args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths)
+    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

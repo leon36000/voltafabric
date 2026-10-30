@@ -43,6 +43,25 @@ class RunnerTests(unittest.TestCase):
             run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(bad).encode(), b""))
 
+    def test_four_tokens_and_incomplete_receipt_are_checked(self):
+        calls = []
+        value = dict(receipt(), prompt_tokens=[0, 1], input_tokens=[0, 1, 0, 0, 0],
+                     requested_max_new_tokens=4, generated_token_ids=[0, 0, 0, 0],
+                     output_sha256=["a" * 64] * 5, logits_sha256=["b" * 64] * 4)
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        out = run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4, runner=runner)
+        self.assertEqual(out["output"]["text"], "AAAA")
+        self.assertEqual(calls[0][-3:], ["48", "0,1", "4"])
+        short = dict(value, input_tokens=[0, 1], generated_token_ids=[0],
+                     output_sha256=["a" * 64] * 2, logits_sha256=["b" * 64])
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4,
+                       runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(short).encode(), b""))
+        with self.assertRaises(ValueError):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=5, runner=runner)
+
     def test_refuses_prompt_before_spawning_and_never_retries_failure(self):
         calls = []
         def runner(args, **kwargs):

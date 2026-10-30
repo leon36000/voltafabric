@@ -104,3 +104,33 @@ fn third_position_uses_all_three_causal_cells() {
         .prepare(&id, 3, &[1.0], &[0.0], &[0.0], &[0.0])
         .is_err());
 }
+
+#[test]
+fn fifth_position_uses_all_causal_cells_and_rejects_overflow() {
+    let id = identity();
+    let mut state = State::new(id.clone(), 1, 1, 1, 5).unwrap();
+    let keys = [-2.0_f64, -1.0, 0.0, 1.0, 2.0];
+    let values = [1.0_f64, 2.0, 4.0, 8.0, 16.0];
+    for position in 0..5 {
+        let candidate = state
+            .prepare(
+                &id,
+                position,
+                &[1.0],
+                &[keys[position] as f32],
+                &[values[position] as f32],
+                &[0.0],
+            )
+            .unwrap();
+        let numerator: f64 = (0..=position).map(|i| keys[i].exp() * values[i]).sum();
+        let denominator: f64 = (0..=position).map(|i| keys[i].exp()).sum();
+        assert!((f64::from(candidate.output()[0]) - numerator / denominator / 2.0).abs() < 1e-6);
+        assert_eq!(state.len(), position);
+        state.commit(candidate).unwrap();
+    }
+    assert_eq!(state.len(), 5);
+    assert!(state
+        .prepare(&id, 5, &[1.0], &[0.0], &[0.0], &[0.0])
+        .is_err());
+    assert_eq!(state.len(), 5);
+}
