@@ -269,3 +269,8 @@ required-features = ["ple-cpu-qualification"]
 name = "vf-sc117-four-layer-two-token"
 path = "src/bin/vf-sc117-four-layer-two-token.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-eight-layer-dynamic"
+path = "src/bin/vf-sc117-eight-layer-dynamic.rs"
+required-features = ["ple-cpu-qualification"]
