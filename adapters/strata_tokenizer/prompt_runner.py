@@ -159,6 +159,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("invalid prompt tokens or token bound")
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 39 input positions")
+    expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
+    if expected_plan is not None and (not expected_plan.startswith("r512-") or len(expected_plan) != 69
+                                      or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
+        raise ValueError("invalid expected plan identity")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     command.extend((str(max_new_tokens), str(eos)))
     if chat:
@@ -175,6 +179,8 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
     plan_id = receipt.get("plan_id")
+    if expected_plan is not None and plan_id != expected_plan:
+        raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
         if (not isinstance(plan_id, str) or not plan_id.startswith("r512-") or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):

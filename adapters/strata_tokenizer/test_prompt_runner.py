@@ -4,6 +4,7 @@ import struct
 import subprocess
 import sys
 import unittest
+from unittest.mock import patch
 
 from adapters.strata_tokenizer.prompt_runner import _run_bounded, run_prompt as _run_prompt
 from adapters.strata_tokenizer.test_adapter import FakeTokenizer
@@ -27,6 +28,26 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_expected_plan_is_checked_before_and_after_engine(self):
+        value = dict(receipt(), plan_id="r512-" + "a" * 64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
+        calls = []
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        def run():
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        with patch.dict("os.environ", {"VF_EXPECTED_PLAN_ID": value["plan_id"]}):
+            self.assertEqual(run()["output"]["text"], "😀")
+        with patch.dict("os.environ", {"VF_EXPECTED_PLAN_ID": "r512-" + "b" * 64}):
+            with self.assertRaisesRegex(ValueError, "differs from expected plan"):
+                run()
+        count = len(calls)
+        with patch.dict("os.environ", {"VF_EXPECTED_PLAN_ID": "malformed"}):
+            with self.assertRaisesRegex(ValueError, "invalid expected plan"):
+                run()
+        self.assertEqual(len(calls), count)
+
     def test_strict_plan_rejects_missing_unknown_malformed_and_missing_digest(self):
         value = dict(receipt(), plan_id="r512-" + "a" * 64,
                      prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())

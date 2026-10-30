@@ -362,6 +362,16 @@ fn optional_env(name: &str) -> Result<Option<String>, E> {
     }
 }
 
+// An external controller supplies the admitted plan. This comparison is not
+// itself a lease, attestation, or resource reservation.
+fn verify_expected_plan(plan: &str, expected: Option<&str>, remote: bool) -> Result<(), E> {
+    match expected {
+        Some(value) if value == plan => Ok(()),
+        None if !remote => Ok(()),
+        _ => Err("expected worker plan missing or mismatched".into()),
+    }
+}
+
 #[derive(serde::Serialize)]
 struct WorkerPlan<'a> {
     version: &'static str,
@@ -524,7 +534,11 @@ fn valid_close(
         && expected <= positions
 }
 fn run() -> Result<(), E> {
-    let a: Vec<_> = std::env::args().collect();
+    let mut a: Vec<_> = std::env::args().collect();
+    let plan_only = a.get(1).is_some_and(|arg| arg == "--plan-only");
+    if plan_only {
+        a.remove(1);
+    }
     if !(11..=14).contains(&a.len()) {
         return Err(
             "usage: check DENSE SHARD PACK INDEX SESSION LEDGER PLE_SHARD PLE_MANIFEST LAYERS PROMPT_TOKEN_IDS [MAX_NEW_TOKENS [EOS_TOKEN_ID [chat]]]"
@@ -626,6 +640,19 @@ fn run() -> Result<(), E> {
         max_new_tokens,
         eos_token_id,
         prompt_mode,
+    )?;
+    if plan_only {
+        println!(
+            "{}",
+            serde_json::json!({"plan_id":plan_id, "prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens)})
+        );
+        return Ok(());
+    }
+    let expected = optional_env("VF_EXPECTED_PLAN_ID")?;
+    verify_expected_plan(
+        &plan_id,
+        expected.as_deref(),
+        endpoints.values().any(|v| v.argv.len() > 1),
     )?;
     let m: voltafabric::sc117_ple_weights::Manifest =
         serde_json::from_reader(std::fs::File::open(&a[8])?)?;
@@ -838,6 +865,15 @@ fn main() {
 mod tests {
     use super::*;
     const DIGEST: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+    #[test]
+    fn expected_plan_is_checked_before_remote_work() {
+        let plan = "r512-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+        assert!(verify_expected_plan(plan, Some(plan), true).is_ok());
+        assert!(verify_expected_plan(plan, None, true).is_err());
+        assert!(verify_expected_plan(plan, Some("r512-wrong"), true).is_err());
+        assert!(verify_expected_plan(plan, None, false).is_ok());
+        assert!(verify_expected_plan(plan, Some("r512-wrong"), false).is_err());
+    }
     #[test]
     fn worker_plan_binds_rank_endpoints_and_capacities() {
         let rank2 = rank_endpoint(2, "/worker", None, None, None).unwrap();
