@@ -12,7 +12,11 @@ use crate::{
     session::{NativeCollected, Session},
     Result,
 };
-use std::{collections::BTreeMap, sync::Arc, time::Duration};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    sync::Arc,
+    time::Duration,
+};
 
 pub struct Routed {
     proposal: Proposal,
@@ -106,7 +110,16 @@ impl Routed {
         if ticket.attempt() != self.attempt || ticket.directory_id() != self.ledger_id {
             return Err(invalid("bound attempt mismatch"));
         }
-        let experts: Vec<_> = self.route.choices.iter().map(|c| c.expert).collect();
+        // A rank worker keeps its entire stack resident across requests. The
+        // registry must describe that stack, including experts not selected by
+        // this token, so physical indices remain stable when routes change.
+        let experts: Vec<_> = registry
+            .copies
+            .iter()
+            .map(|r| r.expert)
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
         let choices = self
             .route
             .choices

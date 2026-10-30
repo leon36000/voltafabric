@@ -128,3 +128,13 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-bound-fault"
 path = "src/bin/vf-sc117-bound-fault.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-two-token-preview"
+path = "src/bin/vf-sc117-two-token-preview.rs"
+required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-two-token-live"
+path = "src/bin/vf-sc117-two-token-live.rs"
+required-features = ["native-ggml-cpu"]

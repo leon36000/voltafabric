@@ -1,0 +1,26 @@
+[
+  {
+    "attempt": 1793367235972616465,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r428-two-distinct-residuals",
+      "run_id": "r428-local-2470186-1793367235972616464"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793367235972616464,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r428-two-distinct-residuals",
+      "run_id": "r428-local-2470186-1793367235972616464"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]
