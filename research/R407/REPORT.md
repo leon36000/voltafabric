@@ -1,0 +1,7 @@
+# R407 — CPU GDN recurrent state
+
+Derived an independent Rust CPU implementation from the equations and state layout in Strata commit fb58e0dbc8399662c0e47c76578c6e878b14f6cf, src/kernels/cuda/gdn.cu. This is an adaptation of the algorithm, not a CUDA kernel or a claim of numerical parity. Q/K are unscaled L2-normalized input, the output applies 1/sqrt(head dimension) once. Value head h uses Q/K head h modulo k_heads. Decay precedes the rank-one update; output uses the updated state. State identity contains run, model revision, layer and epoch. Invalid geometry, identity, nonfinite inputs, beta outside [0,1], and nonfinite state/output are rejected without committing recurrence state. Bounds cap state to 1,048,576 f32 values.
+
+`cargo test --offline --test gdn_cpu` passed three tests, including independently calculated scalar expected output for two steps with multiple heads and nonzero prior state, and checks for failure atomicity. `cargo clippy --offline --test gdn_cpu -- -D warnings` passed. The oracle uses synthetic inputs, not SC117 weights. This does not prove numerical CUDA parity or complete generation.
+
+Next: connect real alpha/beta projections and gate to the R406 QKV inputs, compare recurrence with an independent oracle, and coordinate convolution plus recurrent state as one atomic token transaction. The caller currently owns batch/attempt identities, durable state and no-replay admission; neither the independent recurrence nor preprocessing alone provides that transaction. No GPU or inter-PC workload was run.

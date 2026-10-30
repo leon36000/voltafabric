@@ -21,6 +21,105 @@ pub struct ConvHistory {
     history: Vec<f32>,
 }
 
+/// CPU recurrence with state indexed by key dimension, value head, value dimension.
+/// The caller must coordinate this state with convolution history and durable attempts.
+pub struct RecurrentState {
+    identity: Identity,
+    k_heads: usize,
+    v_heads: usize,
+    dim: usize,
+    state: Vec<f32>,
+}
+
+impl RecurrentState {
+    pub fn new(identity: Identity, k_heads: usize, v_heads: usize, dim: usize) -> Result<Self> {
+        let size = dim.checked_mul(v_heads).and_then(|n| n.checked_mul(dim));
+        if identity.run_id.trim().is_empty()
+            || identity.run_id.len() > 256
+            || identity.model_revision.trim().is_empty()
+            || identity.model_revision.len() > 256
+            || k_heads == 0
+            || v_heads == 0
+            || dim == 0
+            || !v_heads.is_multiple_of(k_heads)
+            || size.is_none_or(|n| n > 1_048_576)
+        {
+            return Err(invalid("invalid GDN recurrence identity or geometry"));
+        }
+        Ok(Self {
+            identity,
+            k_heads,
+            v_heads,
+            dim,
+            state: vec![0.0; size.unwrap()],
+        })
+    }
+    pub fn state(&self) -> &[f32] {
+        &self.state
+    }
+
+    /// q and k are L2 normalized but q is not yet scaled; gate is log decay.
+    pub fn step(
+        &mut self,
+        identity: &Identity,
+        input: &Prepared,
+        gate: &[f32],
+        beta: &[f32],
+    ) -> Result<Vec<f32>> {
+        let qk = self.k_heads * self.dim;
+        let values = self.v_heads * self.dim;
+        if identity != &self.identity
+            || input.q.len() != qk
+            || input.k.len() != qk
+            || input.v.len() != values
+            || gate.len() != self.v_heads
+            || beta.len() != self.v_heads
+            || input
+                .q
+                .iter()
+                .chain(&input.k)
+                .chain(&input.v)
+                .chain(gate)
+                .chain(beta)
+                .any(|x| !x.is_finite())
+            || beta.iter().any(|&x| !(0.0..=1.0).contains(&x))
+        {
+            return Err(invalid("invalid GDN recurrence input"));
+        }
+        let mut next = self.state.clone();
+        let mut output = vec![0.0; values];
+        let scale = (self.dim as f32).sqrt().recip();
+        for h in 0..self.v_heads {
+            let decay = gate[h].exp();
+            if !decay.is_finite() {
+                return Err(invalid("GDN decay overflow"));
+            }
+            let kh = h % self.k_heads;
+            for j in 0..self.dim {
+                let mut sk = 0.0_f32;
+                for i in 0..self.dim {
+                    let idx = (i * self.v_heads + h) * self.dim + j;
+                    next[idx] *= decay;
+                    sk += next[idx] * input.k[kh * self.dim + i];
+                }
+                let delta = (input.v[h * self.dim + j] - sk) * beta[h];
+                let mut y = 0.0_f32;
+                for i in 0..self.dim {
+                    let idx = (i * self.v_heads + h) * self.dim + j;
+                    next[idx] += input.k[kh * self.dim + i] * delta;
+                    y += next[idx] * input.q[kh * self.dim + i];
+                }
+                output[h * self.dim + j] = y * scale;
+            }
+        }
+        if next.iter().chain(&output).any(|x| !x.is_finite()) {
+            return Err(invalid("GDN recurrence overflow"));
+        }
+        self.state = next;
+        Ok(output)
+    }
+}
+
 impl ConvHistory {
     /// History starts at zero, with three older samples per channel.
     pub fn new(identity: Identity, channels: usize) -> Result<Self> {

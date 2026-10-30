@@ -1,10 +1,62 @@
-use voltafabric::gdn_cpu::{ConvHistory, Identity};
+use voltafabric::gdn_cpu::{ConvHistory, Identity, Prepared, RecurrentState};
 fn id() -> Identity {
     Identity {
         run_id: "test".into(),
         model_revision: "model".into(),
         layer: 0,
         epoch: 1,
+    }
+}
+
+#[test]
+fn recurrence_uses_modulo_heads_and_preserves_state_on_failure() {
+    let mut state = RecurrentState::new(id(), 2, 4, 1).unwrap();
+    let input = Prepared {
+        q: vec![1.0, 1.0],
+        k: vec![1.0, 2.0],
+        v: vec![1.0; 4],
+    };
+    assert_eq!(
+        state.step(&id(), &input, &[0.0; 4], &[0.5; 4]).unwrap(),
+        vec![0.5, 1.0, 0.5, 1.0]
+    );
+    assert_eq!(
+        state.step(&id(), &input, &[0.0; 4], &[0.5; 4]).unwrap(),
+        vec![0.75, 0.0, 0.75, 0.0]
+    );
+    let before = state.state().to_vec();
+    let mut wrong = id();
+    wrong.epoch += 1;
+    assert!(state.step(&wrong, &input, &[0.0; 4], &[0.5; 4]).is_err());
+    assert!(state.step(&id(), &input, &[1000.0; 4], &[0.5; 4]).is_err());
+    assert!(state.step(&id(), &input, &[0.0; 4], &[1.1; 4]).is_err());
+    assert_eq!(state.state(), before);
+}
+
+#[test]
+fn recurrence_matches_independent_two_step_scalar_oracle() {
+    let mut state = RecurrentState::new(id(), 2, 4, 2).unwrap();
+    let input = Prepared {
+        q: vec![0.6, 0.8, 0.6, 0.8],
+        k: vec![0.8, 0.6, 0.0, 1.0],
+        v: vec![1., 2., 3., 4., 5., 6., 7., 8.],
+    };
+    let gate = [0.8_f32.ln(), 0.7_f32.ln(), 0.6_f32.ln(), 0.5_f32.ln()];
+    let beta = [0.25, 0.5, 0.75, 1.0];
+    let expected = [
+        [
+            0.16970563, 0.33941126, 0.84852815, 1.1313709, 2.5455844, 3.0547013, 3.959798,
+            4.5254836,
+        ],
+        [
+            0.271529, 0.543058, 1.145513, 1.5273507, 2.927422, 3.5129066, 3.959798, 4.5254836,
+        ],
+    ];
+    for oracle in expected {
+        let actual = state.step(&id(), &input, &gate, &beta).unwrap();
+        for (a, b) in actual.iter().zip(oracle) {
+            assert!((a - b).abs() < 1e-5);
+        }
     }
 }
 #[test]
