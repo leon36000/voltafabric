@@ -105,7 +105,7 @@ int main() {
     x.push_back(0.f);
     x[0]=std::numeric_limits<float>::quiet_NaN();
     if (vf::native_ggml::forward(18,20,empty,x,output,error) || output!=std::vector<float>(5,7.f)) return 1;
-    for(int kind : {8,12,14}) if(!matrix_check(kind)) {std::fprintf(stderr,"matrix %d failed\n",kind);return 1;}
+    for(int kind : {8,12,14,23}) if(!matrix_check(kind)) {std::fprintf(stderr,"matrix %d failed\n",kind);return 1;}
     const int pairs[][2]={{18,20},{18,42},{21,20},{21,42},{22,20},{22,42},{23,20}};
     for (auto& pair:pairs) if (!check(pair[0],pair[1])) { std::fprintf(stderr,"failed pair %d/%d\n",pair[0],pair[1]);return 1; }
     std::puts("all seven native format pairs passed"); return 0;

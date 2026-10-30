@@ -63,3 +63,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-gdn-output"
 path = "src/bin/vf-sc117-gdn-output.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-shared-output"
+path = "src/bin/vf-sc117-shared-output.rs"
+required-features = ["native-ggml-cpu"]
