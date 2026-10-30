@@ -4851,6 +4851,53 @@ fn cli_runs_a_compressed_series_end_to_end() {
 }
 
 #[test]
+fn strata_f32_exact_f64_reaches_local_sessions_and_oracle() {
+    let p = routing_problem("r368-strata-f64-local");
+    let ids: Vec<i32> = p.routes.iter().flatten().map(|c| c.expert as i32).collect();
+    let weights: Vec<f32> = p.routes.iter().flatten().map(|c| c.weight as f32).collect();
+    let mut values: Vec<f32> = activations(6, HIDDEN as usize, 5)
+        .into_iter()
+        .flatten()
+        .map(|x| x as f32)
+        .collect();
+    values[0] = 1.0001_f32;
+    values[1] = f32::from_bits(1);
+    values[2] = -0.0;
+    assert!(voltafabric::strata_ingress::admit_pool_batch(
+        &p, &p.stamp, LAYER, 6, 2, &values, &ids, &weights
+    )
+    .is_err());
+    let admitted = voltafabric::strata_ingress::admit_pool_batch_f64(
+        &p, &p.stamp, LAYER, 6, 2, &values, &ids, &weights,
+    )
+    .unwrap();
+    let (mut sessions, artifacts) = bound(&admitted.routing);
+    let report = session::run_compressed_batch(
+        &mut sessions,
+        &artifacts,
+        &admitted.routing,
+        &admitted.inputs,
+        &BTreeMap::new(),
+        false,
+        T,
+    )
+    .unwrap();
+    assert!(report.ok, "{:?}", report.error);
+    let expected = session::DenseOracle::new(&artifacts)
+        .unwrap()
+        .output(&admitted.routing, &admitted.inputs)
+        .unwrap();
+    assert_eq!(
+        bits(&report.output.unwrap().concat()),
+        bits(&expected.concat())
+    );
+    assert!(sessions.iter().all(|s| s.traffic.execs == 1));
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}
+
+#[test]
 fn admitted_strata_style_batch_reaches_real_local_sessions_and_dense_oracle() {
     let dir = temp_dir();
     let mut input = series("r367-strata-ingress-cpu", &dir, 1);

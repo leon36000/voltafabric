@@ -177,3 +177,77 @@ fn bad_shape_identity_routes_and_coefficients_fail_closed() {
         strata_ingress::admit_pool_batch(&p, &p.stamp, 3, usize::MAX, 2, &[], &[], &[]).is_err()
     );
 }
+
+#[test]
+fn f64_transport_preserves_every_finite_f32_without_fp16_rounding() {
+    let p = template();
+    let values = [1.0001_f32, f32::from_bits(1), f32::MAX, -0.0];
+    let admitted = strata_ingress::admit_pool_batch_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &values,
+        &[10, 20],
+        &[0.1, 0.9],
+    )
+    .unwrap();
+    assert_eq!(admitted.routing.stamp, p.stamp);
+    for (actual, source) in admitted.inputs[0].iter().zip(values) {
+        assert_eq!(actual.to_bits(), f64::from(source).to_bits());
+    }
+    let d = routing::dispatch(&admitted.routing).unwrap();
+    assert_eq!(d.slots[0].weight.to_bits(), f64::from(0.1_f32).to_bits());
+    assert_eq!(d.slots[1].weight.to_bits(), f64::from(0.9_f32).to_bits());
+    assert!(strata_ingress::admit_pool_batch(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &values,
+        &[10, 20],
+        &[0.1, 0.9]
+    )
+    .is_err());
+}
+
+#[test]
+fn f64_transport_refuses_nonfinite_stale_and_invalid_routes() {
+    let p = template();
+    for x in [f32::NAN, f32::INFINITY, f32::NEG_INFINITY] {
+        assert!(strata_ingress::admit_pool_batch_f64(
+            &p,
+            &p.stamp,
+            3,
+            1,
+            1,
+            &[x, 0.0, 0.0, 0.0],
+            &[10],
+            &[1.0]
+        )
+        .is_err());
+    }
+    let mut stale = p.stamp.clone();
+    stale.epoch += 1;
+    assert!(
+        strata_ingress::admit_pool_batch_f64(&p, &stale, 3, 1, 1, &[0.0; 4], &[10], &[1.0])
+            .is_err()
+    );
+    assert!(
+        strata_ingress::admit_pool_batch_f64(&p, &p.stamp, 3, 1, 1, &[0.0; 4], &[-1], &[1.0])
+            .is_err()
+    );
+    assert!(strata_ingress::admit_pool_batch_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[0.0; 4],
+        &[10, 10],
+        &[0.5, 0.5]
+    )
+    .is_err());
+}
