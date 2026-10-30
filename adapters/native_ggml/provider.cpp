@@ -10,6 +10,7 @@
 namespace vf::native_ggml {
 namespace {
 constexpr int H = 2560, F = 640;
+std::once_flag init;
 bool fail(std::string& error, const char* text) { error = text; return false; }
 }
 bool forward(int gu, int down, const std::vector<uint8_t>& blob,
@@ -19,7 +20,6 @@ bool forward(int gu, int down, const std::vector<uint8_t>& blob,
         return fail(error, "unsupported native format");
     if (input.size() != H) return fail(error, "invalid activation shape");
     for (float x : input) if (!std::isfinite(x)) return fail(error, "non-finite activation");
-    static std::once_flag init;
     std::call_once(init, [] { ggml_cpu_init(); });
     auto gt = static_cast<ggml_type>(gu), dt = static_cast<ggml_type>(down);
     const auto* g = ggml_get_type_traits_cpu(gt);
@@ -53,4 +53,31 @@ bool forward(int gu, int down, const std::vector<uint8_t>& blob,
     output.swap(staged);
     return true;
 }
+bool matrix_shape(int type,size_t rows,size_t columns,size_t length) {
+    if((type!=8 && type!=12 && type!=14) || rows==0 || rows>10240 || columns==0 || columns>6144 || length>32*1024*1024) return false;
+    auto t=static_cast<ggml_type>(type);
+    if(columns % size_t(ggml_blck_size(t))!=0) return false;
+    const size_t row=ggml_row_size(t,columns);
+    return row>0 && rows<=length/row && rows*row==length;
+}
+bool matrix_forward(int type,size_t rows,size_t columns,const std::vector<uint8_t>& weights,
+                    const std::vector<float>& input,std::vector<float>& output,std::string& error) {
+    error.clear();
+    if(!matrix_shape(type,rows,columns,weights.size()) || input.size()!=columns) return fail(error,"invalid native matrix geometry");
+    for(float x:input) if(!std::isfinite(x)) return fail(error,"non-finite matrix input");
+    std::call_once(init, [] { ggml_cpu_init(); });
+    auto t=static_cast<ggml_type>(type); const auto* traits=ggml_get_type_traits_cpu(t);
+    if(!traits || !traits->vec_dot) return fail(error,"missing matrix dot trait");
+    const auto* activation=ggml_get_type_traits_cpu(traits->vec_dot_type);
+    if(!activation || !activation->from_float || columns%size_t(ggml_blck_size(traits->vec_dot_type))) return fail(error,"missing matrix activation quantizer");
+    std::vector<uint8_t> quantized(ggml_row_size(traits->vec_dot_type,columns));
+    std::vector<float> staged(rows); activation->from_float(input.data(),quantized.data(),columns);
+    const size_t stride=ggml_row_size(t,columns);
+    for(size_t i=0;i<rows;++i) {
+        traits->vec_dot(int(columns),&staged[i],0,weights.data()+i*stride,0,quantized.data(),0,1);
+        if(!std::isfinite(staged[i])) return fail(error,"non-finite matrix output");
+    }
+    output.swap(staged); return true;
+}
+
 }

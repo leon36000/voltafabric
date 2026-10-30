@@ -422,3 +422,49 @@ impl Fleet {
         }
     }
 }
+
+/// Explicit identity for a bounded GGML CPU projection, distinct from expert formats.
+/// The caller must bind this digest to an independently trusted model manifest.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MatrixBinding {
+    pub model_revision: String,
+    pub layer: u32,
+    pub tensor: String,
+    pub ggml_type: i32,
+    pub rows: usize,
+    pub columns: usize,
+    pub sha256: String,
+}
+
+pub struct QuantizedMatrix {
+    binding: MatrixBinding,
+    inner: vf_ggml_native_ffi::NativeMatrix,
+}
+impl QuantizedMatrix {
+    pub fn load(binding: MatrixBinding, bytes: &[u8]) -> Result<Self> {
+        if binding.model_revision.trim().is_empty()
+            || binding.model_revision.len() > 256
+            || binding.tensor.trim().is_empty()
+            || binding.tensor.len() > 256
+            || !sha256::is_hex_digest(&binding.sha256)
+            || sha256::hex(bytes) != binding.sha256
+        {
+            return Err(invalid("native matrix binding or digest mismatch"));
+        }
+        let inner = vf_ggml_native_ffi::NativeMatrix::load(
+            binding.ggml_type,
+            binding.rows,
+            binding.columns,
+            bytes,
+        )
+        .map_err(invalid)?;
+        Ok(Self { binding, inner })
+    }
+    pub fn binding(&self) -> &MatrixBinding {
+        &self.binding
+    }
+    pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>> {
+        self.inner.forward(input).map_err(invalid)
+    }
+}

@@ -53,3 +53,8 @@ members = ["crates/qpn2-ffi", "crates/ggml-native-ffi"]
 exclude = ["gpu-worker"]
 default-members = ["."]
 resolver = "2"
+
+[[bin]]
+name = "vf-sc117-qkv"
+path = "src/bin/vf-sc117-qkv.rs"
+required-features = ["native-ggml-cpu"]

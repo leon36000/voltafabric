@@ -56,3 +56,7 @@ target_compile_options(vf_real_expert_oracle PRIVATE -Wall -Wextra -Werror)
 add_executable(vf_sc117_embedding sc117_embedding.cpp)
 target_link_libraries(vf_sc117_embedding PRIVATE ggml-base)
 target_compile_options(vf_sc117_embedding PRIVATE -Wall -Wextra -Werror)
+# Explicit sampled CPU scalar check for a previously produced SC117 QKV vector.
+add_executable(vf_check_sc117_qkv check_sc117_qkv.cpp)
+target_link_libraries(vf_check_sc117_qkv PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_check_sc117_qkv PRIVATE -Wall -Wextra -Werror)

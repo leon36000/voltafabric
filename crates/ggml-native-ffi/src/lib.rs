@@ -11,6 +11,21 @@ unsafe extern "C" {
         output_len: usize,
     ) -> i32;
     fn vf_native_destroy(instance: *mut c_void);
+    fn vf_native_matrix_create(
+        kind: i32,
+        rows: usize,
+        columns: usize,
+        bytes: *const u8,
+        len: usize,
+    ) -> *mut c_void;
+    fn vf_native_matrix_forward(
+        instance: *mut c_void,
+        input: *const f32,
+        input_len: usize,
+        output: *mut f32,
+        output_len: usize,
+    ) -> i32;
+    fn vf_native_matrix_destroy(instance: *mut c_void);
 }
 
 /// An opaque CPU resident; the native library copies the blob once on load.
@@ -52,5 +67,55 @@ impl Drop for NativeResident {
     fn drop(&mut self) {
         // SAFETY: pointer is owned uniquely and destroyed exactly once.
         unsafe { vf_native_destroy(self.ptr.as_ptr()) }
+    }
+}
+
+/// One bounded resident GGML matrix; caller authenticates the source and format.
+pub struct NativeMatrix {
+    ptr: NonNull<c_void>,
+    rows: usize,
+    columns: usize,
+}
+impl NativeMatrix {
+    pub fn load(
+        kind: i32,
+        rows: usize,
+        columns: usize,
+        bytes: &[u8],
+    ) -> Result<Self, &'static str> {
+        // SAFETY: immutable bytes remain valid during the call and native code copies them.
+        let raw =
+            unsafe { vf_native_matrix_create(kind, rows, columns, bytes.as_ptr(), bytes.len()) };
+        Ok(Self {
+            ptr: NonNull::new(raw).ok_or("native matrix refused")?,
+            rows,
+            columns,
+        })
+    }
+    pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>, &'static str> {
+        if input.len() != self.columns || input.iter().any(|v| !v.is_finite()) {
+            return Err("invalid matrix input");
+        }
+        let mut output = vec![0.0; self.rows];
+        // SAFETY: uniquely owned instance and disjoint bounded input/output slices.
+        let status = unsafe {
+            vf_native_matrix_forward(
+                self.ptr.as_ptr(),
+                input.as_ptr(),
+                input.len(),
+                output.as_mut_ptr(),
+                output.len(),
+            )
+        };
+        if status != 0 || output.iter().any(|v| !v.is_finite()) {
+            return Err("native matrix execution failed");
+        }
+        Ok(output)
+    }
+}
+impl Drop for NativeMatrix {
+    fn drop(&mut self) {
+        // SAFETY: instance is uniquely owned and destroyed exactly once.
+        unsafe { vf_native_matrix_destroy(self.ptr.as_ptr()) }
     }
 }
