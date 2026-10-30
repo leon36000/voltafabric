@@ -1,0 +1,4 @@
+{"projection":0,"rows":12288,"positions":92,"comparisons":1130496,"max_abs":1.0513414814283806e-06,"max_tolerance_fraction":0.0086041617136436398}
+{"projection":1,"rows":512,"positions":92,"comparisons":47104,"max_abs":4.7230281408072727e-07,"max_tolerance_fraction":0.020734454744683328}
+{"projection":2,"rows":512,"positions":92,"comparisons":47104,"max_abs":7.6891210232243878e-07,"max_tolerance_fraction":0.025094175314881048}
+{"projection":3,"rows":2560,"positions":92,"comparisons":235520,"max_abs":2.9564273518190021e-07,"max_tolerance_fraction":0.011943644655858263}

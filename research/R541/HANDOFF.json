@@ -1,0 +1,10 @@
+{
+  "round": "R541",
+  "parent_gitlab_commit": "df02db9463af8d0bc691fe0049a3b2b2dd2df6a6",
+  "active_operations": [],
+  "status": "PASS_ALL_QSA_PROJECTION_ROWS_LIVE_92_POSITIONS",
+  "comparisons": 1460224,
+  "trace_sha256": "8787cdb8133d0962c23e273507ea471dc4d45014ac7c4f2d323705764da2c54e",
+  "limitations": ["Shared GGML quantizers and decoders; observed projection inputs", "Only layer-3 QSA projections, not independent full-model parity", "Raw trace retained on PC1 but absent from GitLab", "R428 expert-255 strict failure remains open", "Original shared R53 ledger missing; no GPU or inter-PC execution"],
+  "next_action": "Validate upstream and other actual model boundaries, broaden expert numerical evidence, and reconcile R53 plus fresh lease, identity, resource and hardware gates before inter-PC execution."
+}
