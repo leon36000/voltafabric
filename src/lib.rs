@@ -44,6 +44,7 @@ pub mod native_ggml_cpu;
 pub mod native_ledger;
 pub mod qpn2;
 pub mod routing;
+pub mod sc117_router_cpu;
 pub mod strata_ingress;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod strata_native_bridge;

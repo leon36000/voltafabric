@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <charconv>
 #include <cstring>
 #include <fstream>
 #include <string>
@@ -25,11 +26,13 @@ static double dot(const std::vector<float>& a,const std::vector<float>& b) {
     double sum=0; for(size_t i=0;i<a.size();++i) sum+=double(a[i])*b[i]; return sum;
 }
 int main(int argc,char** argv) {
-    if(argc!=3 && argc!=4) { std::fprintf(stderr,"usage: real_expert_oracle PACK EXPERT_0_OR_1 [REFERENCE_FILE]\n"); return 1; }
-    std::string id=argv[2]; if(id!="0" && id!="1") return 2;
+    if(argc!=3 && argc!=4) { std::fprintf(stderr,"usage: real_expert_oracle PACK EXPERT_0_TO_511 [REFERENCE_FILE]\n"); return 1; }
+    std::string id=argv[2]; int expert=-1;
+    auto parsed=std::from_chars(id.data(),id.data()+id.size(),expert);
+    if(parsed.ec!=std::errc{} || parsed.ptr!=id.data()+id.size() || expert<0 || expert>=512) return 2;
     constexpr int H=2560,F=640; constexpr size_t BLOB=2176000;
     std::ifstream file(argv[1],std::ios::binary); std::vector<uint8_t> blob(BLOB);
-    if(!file || !file.seekg(id=="0"?0:BLOB) || !file.read(reinterpret_cast<char*>(blob.data()),BLOB)) return 3;
+    if(!file || !file.seekg(std::streamoff(expert)*BLOB) || !file.read(reinterpret_cast<char*>(blob.data()),BLOB)) return 3;
     ggml_cpu_init();
     auto g=ggml_get_type_traits_cpu(GGML_TYPE_IQ3_XXS), d=ggml_get_type_traits_cpu(GGML_TYPE_IQ4_NL);
     auto gc=ggml_get_type_traits(GGML_TYPE_IQ3_XXS), dc=ggml_get_type_traits(GGML_TYPE_IQ4_NL);
