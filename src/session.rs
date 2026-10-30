@@ -3552,6 +3552,50 @@ impl Session {
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
     ) -> Result<Vec<Vec<f64>>> {
+        let collector =
+            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout)?;
+        match collector.finish() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for session in sessions {
+                    session.usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
+
+    /// Return unweighted token/slot rows, with the caller responsible for gate
+    /// coefficients. Unlike a unit-weight reduction, this preserves signed zero.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_native_ggml_unweighted(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<Vec<Vec<Vec<f64>>>> {
+        let collector =
+            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout)?;
+        match collector.finish_unweighted_slots() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for session in sessions {
+                    session.usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn collect_native_ggml_batch(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<moe::Collector> {
         if timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || inputs.len() != problem.routes.len()
@@ -3611,15 +3655,7 @@ impl Session {
                 return Err(error);
             }
         }
-        match collector.finish() {
-            Ok(output) => Ok(output),
-            Err(error) => {
-                for (i, _, _) in &selected {
-                    sessions[*i].usable = false;
-                }
-                Err(error)
-            }
-        }
+        Ok(collector)
     }
     /// Fetch only unique cache misses, then reconstruct caller order and duplicates. Cache
     /// additions occur only after all owner frames pass identity and coverage validation.

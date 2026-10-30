@@ -307,6 +307,44 @@ impl StrataUnweightedBatch {
         self.0.positions.len()
     }
 
+    /// Resolve CPU-owned rows through native GGML sessions without applying
+    /// gate weights. External rows remain the caller's responsibility.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn execute_native(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<()> {
+        if output.len() != self.0.output_values {
+            return Err(invalid("mixed pool output shape mismatch"));
+        }
+        let Some(misses) = self.0.misses.as_ref() else {
+            return Ok(());
+        };
+        let mut inputs = Vec::with_capacity(misses.inputs.len());
+        for row in &misses.inputs {
+            let mut values = Vec::with_capacity(row.len());
+            for &v in row {
+                let x = v as f32;
+                if !v.is_finite() || !x.is_finite() || f64::from(x).to_bits() != v.to_bits() {
+                    return Err(invalid("native input is not exact finite FP32"));
+                }
+                values.push(x);
+            }
+            inputs.push(values);
+        }
+        let rows = session::Session::exec_native_ggml_unweighted(
+            sessions,
+            &misses.routing,
+            &inputs,
+            ledger,
+            timeout,
+        )?;
+        self.0.write_misses(&rows, output)
+    }
+
     pub fn execute(
         self,
         sessions: &mut [session::Session],

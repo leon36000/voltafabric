@@ -565,7 +565,7 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         timeout,
     )
     .unwrap();
-    for (actual, value) in output[0].iter().zip(expected) {
+    for (actual, value) in output[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
     }
     assert!(Session::exec_native_ggml_batch(
@@ -576,30 +576,62 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         timeout
     )
     .is_err());
+    let mut routed = p.clone();
+    routed.stamp.batch = 3;
+    let make_plan = || {
+        voltafabric::strata_ingress::admit_strata_unweighted_f64(
+            &routed,
+            &routed.stamp,
+            0,
+            1,
+            3,
+            &x,
+            &[0, 2, 1],
+            &[-1, 0, -1],
+            &[0, 1, 2],
+        )
+        .unwrap()
+    };
+    let mut short = vec![9.0; 1];
+    assert!(make_plan()
+        .execute_native(&mut sessions, &ledger, timeout, &mut short)
+        .is_err());
+    let mut destination = vec![9.0; 3 * 2560];
+    make_plan()
+        .execute_native(&mut sessions, &ledger, timeout, &mut destination)
+        .unwrap();
+    for i in 0..2560 {
+        assert_eq!(destination[i].to_bits(), (expected[i] as f32).to_bits());
+        assert_eq!(destination[2560 + i], 9.0);
+        assert_eq!(
+            destination[5120 + i].to_bits(),
+            (expected[i] as f32).to_bits()
+        );
+    }
     let mut overflow = p.clone();
     overflow.stamp.batch = 1;
-    overflow.routes = vec![
-        vec![Choice {
-            expert: 0,
-            weight: 1.0,
-        }],
-        vec![Choice {
-            expert: 1,
-            weight: 1.0,
-        }],
-    ];
+    let mut values = x.clone();
+    values.extend(vec![0.125; 2560]);
+    let plan = voltafabric::strata_ingress::admit_strata_unweighted_f64(
+        &overflow,
+        &overflow.stamp,
+        0,
+        2,
+        1,
+        &values,
+        &[0, 1],
+        &[-1, -1],
+        &[0, 1],
+    )
+    .unwrap();
+    let mut unchanged = vec![9.0; 2 * 2560];
     assert_eq!(
-        Session::exec_native_ggml_batch(
-            &mut sessions,
-            &overflow,
-            &[x.clone(), vec![0.125; 2560]],
-            &ledger,
-            timeout
-        )
-        .unwrap_err()
-        .code,
+        plan.execute_native(&mut sessions, &ledger, timeout, &mut unchanged)
+            .unwrap_err()
+            .code,
         "FP16_OVERFLOW"
     );
+    assert!(unchanged.iter().all(|v| *v == 9.0));
     assert!(sessions.iter().all(|s| !s.is_usable()));
     let mut after = p.clone();
     after.stamp.batch = 2;
