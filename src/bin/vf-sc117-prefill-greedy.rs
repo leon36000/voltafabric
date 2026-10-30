@@ -377,6 +377,7 @@ struct WorkerPlan<'a> {
     version: &'static str,
     wire_policy: &'static str,
     eviction_policy: &'static str,
+    origin_policy: &'static str,
     model_revision: &'static str,
     index_sha256: &'static str,
     epoch: u64,
@@ -437,9 +438,10 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v9",
+        version: "vf-sc117-worker-plan-v10",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
+        origin_policy: "stable-source-digest-cache-v1",
         model_revision: "sc117-local-observation",
         index_sha256: INDEX_HASH,
         epoch: 1,
@@ -453,7 +455,7 @@ fn worker_plan_id(
         rank_limits,
         endpoints,
     };
-    Ok(format!("r518-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r520-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -848,9 +850,10 @@ fn run() -> Result<(), E> {
     {
         return Err("worker shutdown receipt".into());
     }
+    let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
     println!(
         "{}",
-        serde_json::json!({"scope":"up to 64 prompt tokens and 64 predictions within 64 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to 64 prompt tokens and 64 predictions within 64 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}})
     );
     Ok(())
 }
@@ -885,7 +888,7 @@ mod tests {
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r518-950fc831317ff0d1e1c29029587b5ef3a9467ce67f11352e43c76e8a38f41185"
+            "r520-a7dd5a61211985b8cca9753209422805e3adb0e0aa3afb14052a50b731c83f06"
         );
         let p12 = worker_plan_id(&endpoints, 300, &limits, &[1, 2], 16, 248_046, "plain").unwrap();
         let p21 = worker_plan_id(&endpoints, 300, &limits, &[2, 1], 16, 248_046, "plain").unwrap();

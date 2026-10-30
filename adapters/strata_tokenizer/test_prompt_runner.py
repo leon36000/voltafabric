@@ -42,6 +42,8 @@ class RunnerTests(unittest.TestCase):
         with patch.dict("os.environ", {}, clear=True):
             self.assertEqual(prepare(), dict(good, prompt_token_ids=[0]))
             self.assertEqual(calls[-1][1], "--plan-only")
+            state["body"] = json.dumps(dict(good, plan_id="r520-" + "a" * 64)).encode()
+            self.assertEqual(prepare()["plan_id"], "r520-" + "a" * 64)
             for bad in ({"plan_id": good["plan_id"]},
                         dict(good, prompt_tokens_sha256="0" * 64),
                         dict(good, plan_id="r512-" + "A" * 64),
@@ -86,6 +88,8 @@ class RunnerTests(unittest.TestCase):
             return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
         self.assertEqual(run()["output"]["text"], "😀")
         value["plan_id"] = "r518-" + "a" * 64
+        self.assertEqual(run()["output"]["text"], "😀")
+        value["plan_id"] = "r520-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
         for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
                     "r512-" + "a" * 63, 123):

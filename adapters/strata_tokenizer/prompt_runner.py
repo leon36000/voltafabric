@@ -162,7 +162,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 64 input positions")
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
-    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-")) or len(expected_plan) != 69
+    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
     command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
@@ -183,7 +183,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
             raise ValueError("invalid prepared plan receipt")
         plan = receipt["plan_id"]
-        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-")) or len(plan) != 69
+        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-")) or len(plan) != 69
                 or any(c not in "0123456789abcdef" for c in plan[5:])):
             raise ValueError("current bound plan identity required")
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
@@ -199,10 +199,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
-        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-")) or len(plan_id) != 69
+        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-")) or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):
             raise ValueError("current bound plan identity required")
-    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-"))):
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")

@@ -2,6 +2,7 @@
 //! This establishes local consistency, not model publisher authentication.
 use crate::{invalid, sha256, strata_native_layout::NativeLayout, Result};
 use std::{
+    collections::BTreeMap,
     fs::File,
     io::{Read, Seek, SeekFrom},
 };
@@ -88,6 +89,9 @@ fn slices<R: Read + Seek>(
 pub struct Origin {
     file: File,
     identity: Identity,
+    digests: BTreeMap<(usize, u64), String>,
+    hits: u64,
+    misses: u64,
 }
 #[cfg(unix)]
 impl Origin {
@@ -96,7 +100,17 @@ impl Origin {
         if id.2 != SOURCE_BYTES || layout.index_sha256() != INDEX_SHA {
             return Err(invalid("origin identity or index"));
         }
-        Ok(Self { file, identity: id })
+        Ok(Self {
+            file,
+            identity: id,
+            digests: BTreeMap::new(),
+            hits: 0,
+            misses: 0,
+        })
+    }
+    /// Successful lookups only; these counters are not a performance measurement.
+    pub fn digest_cache_stats(&self) -> (u64, u64, usize) {
+        (self.hits, self.misses, self.digests.len())
     }
     pub fn expert_digest(
         &mut self,
@@ -106,6 +120,13 @@ impl Origin {
     ) -> Result<String> {
         if layout.index_sha256() != INDEX_SHA || identity(&self.file)? != self.identity {
             return Err(invalid("origin descriptor or index changed"));
+        }
+        if let Some(digest) = self.digests.get(&(layer, expert)) {
+            self.hits = self
+                .hits
+                .checked_add(1)
+                .ok_or_else(|| invalid("origin cache hit count overflow"))?;
+            return Ok(digest.clone());
         }
         let entry = layout
             .layers()
@@ -124,6 +145,11 @@ impl Origin {
         if identity(&self.file)? != self.identity {
             return Err(invalid("origin descriptor changed during read"));
         }
+        self.misses = self
+            .misses
+            .checked_add(1)
+            .ok_or_else(|| invalid("origin cache miss count overflow"))?;
+        self.digests.insert((layer, expert), digest.clone());
         Ok(digest)
     }
 }
@@ -152,5 +178,44 @@ mod tests {
     fn observed_format_geometry() {
         assert_eq!(lengths(18, 20).unwrap(), (627_200, 921_600));
         assert_eq!(lengths(22, 42).unwrap(), (524_800, 460_800));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn cached_origin_digest_skips_reads_and_refuses_changed_source() {
+        use std::os::unix::fs::FileExt;
+        use std::time::{SystemTime, UNIX_EPOCH};
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(".runs")
+            .join(format!("origin-cache-test-{}-{now}", std::process::id()));
+        let file = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        // A sparse file provides the required offsets; it is unlinked before
+        // use so the test cannot leave a large apparent file behind.
+        file.set_len(SOURCE_BYTES).unwrap();
+        std::fs::remove_file(&path).unwrap();
+        let writer = file.try_clone().unwrap();
+        let mut origin = Origin::open(file, &layout).unwrap();
+        let expected = "50eff9144c635807dfdc0cafd1c3bb978d0202d537ae892ec8ebed90dc13e172";
+        assert_eq!(origin.expert_digest(&layout, 0, 0).unwrap(), expected);
+        assert_eq!(origin.digest_cache_stats(), (0, 1, 1));
+        origin.file.seek(SeekFrom::Start(0)).unwrap();
+        assert_eq!(origin.expert_digest(&layout, 0, 0).unwrap(), expected);
+        assert_eq!(origin.file.stream_position().unwrap(), 0);
+        assert_eq!(origin.digest_cache_stats(), (1, 1, 1));
+        assert!(origin.expert_digest(&layout, 48, 0).is_err());
+        writer.write_all_at(&[1], 0).unwrap();
+        assert!(origin.expert_digest(&layout, 0, 0).is_err());
+        assert_eq!(origin.digest_cache_stats(), (1, 1, 1));
     }
 }

@@ -303,6 +303,9 @@ impl<'a> Source<'a> {
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
     }
+    pub fn origin_digest_cache_stats(&self) -> (u64, u64, usize) {
+        self.origin.digest_cache_stats()
+    }
     pub(crate) fn resident_bytes(&self, layer: u32, expert: u32) -> Result<u64> {
         if !self.known.contains_key(&(layer, expert)) {
             return Err(invalid("expert not accounted"));
