@@ -4851,6 +4851,93 @@ fn cli_runs_a_compressed_series_end_to_end() {
 }
 
 #[test]
+fn mixed_pool_misses_reach_sessions_without_overwriting_external_rows() {
+    let template = routing_problem("r372-mixed-pool-cpu");
+    let ids: Vec<i32> = template
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.expert as i32)
+        .collect();
+    let weights: Vec<f32> = template
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.weight as f32)
+        .collect();
+    let x: Vec<f32> = activations(6, HIDDEN as usize, 9)
+        .into_iter()
+        .flatten()
+        .map(|v| v as f32)
+        .collect();
+    let mask: Vec<bool> = (0..12).map(|i| i % 3 == 0).collect();
+    let plan = voltafabric::strata_ingress::admit_mixed_pool_f64(
+        &template,
+        &template.stamp,
+        LAYER,
+        6,
+        2,
+        &x,
+        &ids,
+        &weights,
+        &mask,
+    )
+    .unwrap();
+    let misses = plan.misses().unwrap();
+    let (mut sessions, artifacts) = bound(&misses.routing);
+    let report = session::run_compressed_batch_unweighted(
+        &mut sessions,
+        &artifacts,
+        &misses.routing,
+        &misses.inputs,
+        &BTreeMap::new(),
+        T,
+    )
+    .unwrap();
+    assert!(report.ok, "{:?}", report.error);
+    let mut output = vec![123.0_f32; 12 * HIDDEN as usize];
+    plan.write_misses(&report.output.unwrap(), &mut output)
+        .unwrap();
+    let dims = moe::Model {
+        hidden: HIDDEN as usize,
+        intermediate: INTER as usize,
+        experts: vec![],
+    };
+    let slots = routing::dispatch(&misses.routing).unwrap().slots;
+    for (original, external) in mask.iter().enumerate() {
+        let row = &output[original * HIDDEN as usize..(original + 1) * HIDDEN as usize];
+        if *external {
+            assert!(row.iter().all(|v| *v == 123.0));
+            continue;
+        }
+        let compact = mask[..original].iter().filter(|&&v| !v).count();
+        let slot = &slots[compact];
+        let stack = artifacts
+            .iter()
+            .find(|a| a.stack().rank() == slot.rank)
+            .unwrap()
+            .stack();
+        let physical = stack
+            .physical_experts()
+            .iter()
+            .position(|e| e.id() == slot.expert)
+            .unwrap();
+        let expected = moe::expert_value(
+            &dims,
+            &stack.dense_expert(physical).unwrap(),
+            &misses.inputs[compact],
+        )
+        .unwrap();
+        for (actual, reference) in row.iter().zip(expected) {
+            assert_eq!(actual.to_bits(), (reference as f32).to_bits());
+        }
+    }
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}
+
+#[test]
 fn unweighted_batch_orchestration_is_atomic_and_never_replays() {
     let template = routing_problem("r370-slot-session-success");
     let ids: Vec<i32> = template

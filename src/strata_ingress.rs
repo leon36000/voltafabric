@@ -19,6 +19,124 @@ pub struct AdmittedF64PoolBatch {
     pub inputs: Vec<Vec<f64>>,
 }
 
+/// A caller-supplied ownership decision; the caller must bind it to the actual
+/// donor plan and must not concurrently write the same destination rows.
+pub struct MixedPoolBatch {
+    misses: Option<AdmittedF64PoolBatch>,
+    positions: Vec<usize>,
+    output_values: usize,
+    hidden: usize,
+}
+
+impl MixedPoolBatch {
+    pub fn misses(&self) -> Option<&AdmittedF64PoolBatch> {
+        self.misses.as_ref()
+    }
+
+    /// Only miss rows are written; externally owned rows are left untouched.
+    /// All converted values are staged before any destination row is written.
+    pub fn write_misses(&self, rows: &[Vec<Vec<f64>>], output: &mut [f32]) -> Result<()> {
+        if output.len() != self.output_values
+            || rows.len() != self.positions.len()
+            || rows
+                .iter()
+                .any(|token| token.len() != 1 || token[0].len() != self.hidden)
+        {
+            return Err(invalid("mixed pool result shape mismatch"));
+        }
+        let mut values = Vec::with_capacity(self.positions.len() * self.hidden);
+        for &value in rows.iter().flatten().flatten() {
+            let rounded = value as f32;
+            if !value.is_finite() || !rounded.is_finite() {
+                return Err(invalid("mixed pool result is non-finite or overflows FP32"));
+            }
+            values.push(rounded);
+        }
+        for (i, &position) in self.positions.iter().enumerate() {
+            output[position * self.hidden..(position + 1) * self.hidden]
+                .copy_from_slice(&values[i * self.hidden..(i + 1) * self.hidden]);
+        }
+        Ok(())
+    }
+}
+
+/// Flatten non-external routes into one-slot tokens. The ownership mask is not
+/// evidence of a real GPU plan: that must be verified by the integrating caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_mixed_pool_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    externally_owned: &[bool],
+) -> Result<MixedPoolBatch> {
+    let full = validate_pool(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    if externally_owned.len() != ids.len() || inputs.iter().any(|x| !x.is_finite()) {
+        return Err(invalid("mixed pool mask or activation invalid"));
+    }
+    let output_values = ids
+        .len()
+        .checked_mul(template.hidden)
+        .filter(|&n| n <= 16_777_216)
+        .ok_or_else(|| invalid("mixed pool output exceeds bound"))?;
+    let positions: Vec<usize> = externally_owned
+        .iter()
+        .enumerate()
+        .filter_map(|(i, &external)| (!external).then_some(i))
+        .collect();
+    if positions.len() > 4096
+        || positions
+            .len()
+            .checked_mul(template.hidden)
+            .is_none_or(|n| n > 16_777_216)
+    {
+        return Err(invalid("mixed pool misses exceed bounded session capacity"));
+    }
+    let misses = if positions.is_empty() {
+        None
+    } else {
+        let mut compact = full.clone();
+        compact.routes = positions
+            .iter()
+            .map(|&i| vec![full.routes[i / top_k][i % top_k].clone()])
+            .collect();
+        routing::validate(&compact)?;
+        let rows = positions
+            .iter()
+            .map(|&i| {
+                let start = (i / top_k) * template.hidden;
+                inputs[start..start + template.hidden]
+                    .iter()
+                    .map(|&v| f64::from(v))
+                    .collect()
+            })
+            .collect();
+        Some(AdmittedF64PoolBatch {
+            routing: compact,
+            inputs: rows,
+        })
+    };
+    Ok(MixedPoolBatch {
+        misses,
+        positions,
+        output_values,
+        hidden: template.hidden,
+    })
+}
+
 /// Convert complete, unweighted Session results to a token/slot-major FP32
 /// buffer. Conversion rounds to nearest FP32, rejects non-finite or overflowing
 /// values, and commits only after every shape and value has been checked. The

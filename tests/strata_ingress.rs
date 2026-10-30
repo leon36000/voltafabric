@@ -367,3 +367,76 @@ fn slot_output_conversion_is_ordered_rounded_and_atomic() {
     );
     assert_eq!(target, vec![99.0; 8]);
 }
+
+#[test]
+fn mixed_pool_plan_preserves_slots_and_excludes_externally_owned_experts() {
+    let p = template();
+    let inputs = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+    let plan = strata_ingress::admit_mixed_pool_f64(
+        &p,
+        &p.stamp,
+        3,
+        2,
+        2,
+        &inputs,
+        &[10, 20, 20, 10],
+        &[0.25, 0.75, 0.125, 0.875],
+        &[true, false, false, true],
+    )
+    .unwrap();
+    let misses = plan.misses().unwrap();
+    assert_eq!(
+        misses.inputs,
+        vec![vec![1.0, 2.0, 3.0, 4.0], vec![5.0, 6.0, 7.0, 8.0]]
+    );
+    let d = routing::dispatch(&misses.routing).unwrap();
+    assert_eq!(
+        d.slots
+            .iter()
+            .map(|s| (s.token, s.slot, s.expert))
+            .collect::<Vec<_>>(),
+        vec![(0, 0, 20), (1, 0, 20)]
+    );
+    let mut out = vec![77.0_f32; 16];
+    plan.write_misses(&[vec![vec![2.0; 4]], vec![vec![3.0; 4]]], &mut out)
+        .unwrap();
+    assert_eq!(
+        out,
+        [vec![77.0; 4], vec![2.0; 4], vec![3.0; 4], vec![77.0; 4]].concat()
+    );
+    let before = out.clone();
+    assert!(plan
+        .write_misses(&[vec![vec![2.0; 4]], vec![vec![f64::MAX; 4]]], &mut out)
+        .is_err());
+    assert_eq!(out, before);
+    let all = strata_ingress::admit_mixed_pool_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &inputs[..4],
+        &[10, 20],
+        &[0.25, 0.75],
+        &[true, true],
+    )
+    .unwrap();
+    assert!(all.misses().is_none());
+    let mut untouched = vec![77.0; 8];
+    all.write_misses(&[], &mut untouched).unwrap();
+    assert_eq!(untouched, vec![77.0; 8]);
+}
+
+#[test]
+fn mixed_pool_rejects_bad_mask_identity_and_invalid_routes() {
+    let p = template();
+    let invoke = |stamp: &moe::Stamp, ids: &[i32], mask: &[bool]| {
+        strata_ingress::admit_mixed_pool_f64(&p, stamp, 3, 1, 2, &[1.0; 4], ids, &[0.2, 0.8], mask)
+    };
+    assert!(invoke(&p.stamp, &[10, 20], &[false]).is_err());
+    assert!(invoke(&p.stamp, &[-1, 20], &[true, false]).is_err());
+    assert!(invoke(&p.stamp, &[10, 10], &[true, false]).is_err());
+    let mut stale = p.stamp.clone();
+    stale.epoch += 1;
+    assert!(invoke(&stale, &[10, 20], &[true, false]).is_err());
+}
