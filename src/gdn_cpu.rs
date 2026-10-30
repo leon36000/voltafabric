@@ -129,6 +129,7 @@ pub struct ConvHistory {
 }
 
 /// One CPU token transaction. Durable admission and the enclosing layer remain the caller's responsibility.
+#[derive(Clone)]
 pub struct GdnState {
     convolution: ConvHistory,
     recurrence: RecurrentState,
@@ -183,6 +184,7 @@ impl GdnState {
 
 /// CPU recurrence with state indexed by key dimension, value head, value dimension.
 /// The caller must coordinate this state with convolution history and durable attempts.
+#[derive(Clone)]
 pub struct RecurrentState {
     identity: Identity,
     k_heads: usize,

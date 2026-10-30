@@ -2,6 +2,7 @@
 use std::io::{Read, Write};
 use voltafabric::{
     gdn_cpu::Identity,
+    moe::Stamp,
     sc117_gdn_stage::{Manifest, Stage},
     sha256,
 };
@@ -59,14 +60,59 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut d = open(&a[3])?;
     let mut s = open(&a[4])?;
     let mut stage = Stage::load(m, id.clone(), &mut d, &mut s)?;
-    let result = stage.step(&id, 0, &residual)?;
-    // Diagnostic-only guards: an old token and invalid activation cannot advance state.
-    if stage.step(&id, 0, &residual).is_ok() || stage.next_token() != 1 {
+    let stamp = Stamp {
+        run_id: id.run_id.clone(),
+        model_revision: id.model_revision.clone(),
+        plan_id: "diagnostic-only".into(),
+        layer: id.layer,
+        batch: 0,
+        epoch: id.epoch,
+    };
+    let rejected = stage.prepare(&stamp, 1, 0, &residual)?;
+    if stage
+        .commit_validated(rejected, &stamp, 99, residual.clone())
+        .is_ok()
+        || stage.next_token() != 0
+    {
+        return Err("wrong attempt advanced token".into());
+    }
+    let wrong_stamp = stage.prepare(&stamp, 1, 0, &residual)?;
+    let mut changed = stamp.clone();
+    changed.batch += 1;
+    if stage
+        .commit_validated(wrong_stamp, &changed, 1, residual.clone())
+        .is_ok()
+        || stage.next_token() != 0
+    {
+        return Err("wrong batch advanced token".into());
+    }
+    let incomplete = stage.prepare(&stamp, 1, 0, &residual)?;
+    if stage
+        .commit_validated(incomplete, &stamp, 1, vec![0.0])
+        .is_ok()
+        || stage.next_token() != 0
+    {
+        return Err("incomplete residual advanced token".into());
+    }
+    let candidate = stage.prepare(&stamp, 2, 0, &residual)?;
+    let stale = stage.prepare(&stamp, 2, 0, &residual)?;
+    // This synthetic completion exercises state mechanics, not a completed model layer.
+    let result = stage
+        .commit_validated(candidate, &stamp, 2, residual.clone())?
+        .output;
+    if stage
+        .commit_validated(stale, &stamp, 2, residual.clone())
+        .is_ok()
+        || stage.next_token() != 1
+    {
+        return Err("stale candidate advanced token".into());
+    }
+    if stage.prepare(&stamp, 3, 0, &residual).is_ok() || stage.next_token() != 1 {
         return Err("duplicate token was not refused".into());
     }
     let mut invalid = residual.clone();
     invalid[0] = f32::NAN;
-    if stage.step(&id, 1, &invalid).is_ok() || stage.next_token() != 1 {
+    if stage.prepare(&stamp, 3, 1, &invalid).is_ok() || stage.next_token() != 1 {
         return Err("invalid activation advanced token".into());
     }
     let mut w = std::io::BufWriter::new(std::io::stdout().lock());

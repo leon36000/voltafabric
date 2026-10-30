@@ -6,6 +6,8 @@ use crate::{
     sha256, Result,
 };
 use std::io::{Read, Seek, SeekFrom};
+use std::sync::atomic::{AtomicU64, Ordering};
+static NEXT_STAGE_ID: AtomicU64 = AtomicU64::new(1);
 #[derive(Clone, Debug, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Span {
@@ -40,7 +42,26 @@ pub struct Output {
     pub gate: Vec<f32>,
     pub beta: Vec<f32>,
 }
+/// A private candidate state; dropping it leaves the resident state unchanged.
+pub struct Proposal {
+    stage_id: u64,
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    token: u64,
+    candidate: GdnState,
+    output: Output,
+}
+impl Proposal {
+    pub fn output(&self) -> &Output {
+        &self.output
+    }
+}
+pub struct Committed {
+    pub output: Output,
+    pub residual: Vec<f32>,
+}
 pub struct Stage {
+    stage_id: u64,
     identity: Identity,
     norm: Vec<f32>,
     down: Vec<u8>,
@@ -154,7 +175,11 @@ impl Stage {
         };
         let qkv = QuantizedMatrix::load(binding, &w)?;
         let state = GdnState::new(identity.clone(), 16, 48, 128)?;
+        let stage_id = NEXT_STAGE_ID
+            .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |x| x.checked_add(1))
+            .map_err(|_| invalid("SC117 stage instance id exhausted"))?;
         Ok(Self {
+            stage_id,
             identity,
             norm,
             down,
@@ -173,9 +198,24 @@ impl Stage {
     pub fn next_token(&self) -> u64 {
         self.next_token
     }
-    /// Commits GDN state only when this prefix succeeds. Enclosing-layer commit remains caller-owned.
-    pub fn step(&mut self, identity: &Identity, token: u64, residual: &[f32]) -> Result<Output> {
-        if identity != &self.identity || token != self.next_token || token == u64::MAX {
+    /// Prepare without advancing the resident GDN state. Durable admission remains caller-owned.
+    pub fn prepare(
+        &mut self,
+        stamp: &crate::moe::Stamp,
+        attempt: u64,
+        token: u64,
+        residual: &[f32],
+    ) -> Result<Proposal> {
+        if stamp.run_id != self.identity.run_id
+            || stamp.model_revision != self.identity.model_revision
+            || stamp.layer != self.identity.layer
+            || stamp.epoch != self.identity.epoch
+            || stamp.plan_id.trim().is_empty()
+            || stamp.plan_id.len() > 256
+            || attempt == 0
+            || token != self.next_token
+            || token == u64::MAX
+        {
             return Err(invalid("SC117 stage identity or token ordering mismatch"));
         }
         let hc = hyperconnection_cpu::read(
@@ -192,17 +232,49 @@ impl Stage {
         let qkv = self.qkv.forward(&hc.mixed)?;
         let (gate, beta) =
             gdn_cpu::project_gates(&hc.mixed, &self.alpha, &self.beta, &self.dt, &self.a)?;
-        let recurrent = self
-            .state
-            .step(identity, &qkv, &self.conv, 1e-6, &gate, &beta)?;
+        let mut candidate = self.state.clone();
+        let recurrent = candidate.step(&self.identity, &qkv, &self.conv, 1e-6, &gate, &beta)?;
+        Ok(Proposal {
+            stage_id: self.stage_id,
+            stamp: stamp.clone(),
+            attempt,
+            token,
+            candidate,
+            output: Output {
+                mixed: hc.mixed,
+                inject: hc.inject,
+                qkv,
+                recurrent,
+                gate,
+                beta,
+            },
+        })
+    }
+    /// Caller must first validate complete expert results and durable reservation; this does not do either.
+    /// Rejecting or dropping a proposal does not change the current in-memory state.
+    pub fn commit_validated(
+        &mut self,
+        proposal: Proposal,
+        stamp: &crate::moe::Stamp,
+        attempt: u64,
+        residual: Vec<f32>,
+    ) -> Result<Committed> {
+        if proposal.stage_id != self.stage_id
+            || proposal.stamp != *stamp
+            || proposal.attempt != attempt
+            || proposal.token != self.next_token
+            || residual.len() != 10240
+            || residual.iter().any(|x| !x.is_finite())
+        {
+            return Err(invalid(
+                "SC117 candidate, completion identity or residual mismatch",
+            ));
+        }
+        self.state = proposal.candidate;
         self.next_token += 1;
-        Ok(Output {
-            mixed: hc.mixed,
-            inject: hc.inject,
-            qkv,
-            recurrent,
-            gate,
-            beta,
+        Ok(Committed {
+            output: proposal.output,
+            residual,
         })
     }
 }
