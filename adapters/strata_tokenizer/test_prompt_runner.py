@@ -1,5 +1,6 @@
 import json
 import subprocess
+import sys
 import unittest
 
 from adapters.strata_tokenizer.prompt_runner import run_prompt
@@ -96,6 +97,37 @@ class RunnerTests(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0, json.dumps(bad).encode(), b"")
         with self.assertRaises(ValueError):
             run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+
+    def test_failure_diagnostic_is_allowlisted_and_never_returns_partial_output(self):
+        cases = [
+            (b"prefill-greedy qualification refused: no rank has expert payload capacity\n", "rank_payload_capacity"),
+            (b"prefill-greedy qualification refused: expert payload budget exceeded\n", "global_payload_capacity"),
+            (b"prefill-greedy qualification refused: eviction target cannot be met safely\n", "eviction_target"),
+            (b"prefill-greedy qualification refused: eviction limit\n", "eviction_limit"),
+            (b"prefill-greedy qualification refused: no rank has expert payload capacity SECRET\n", "unclassified"),
+            (b"private path or secret", "unclassified"),
+        ]
+        for stderr, category in cases:
+            calls = []
+            def runner(args, **kwargs):
+                calls.append(args)
+                return subprocess.CompletedProcess(args, 1, b"partial secret", stderr)
+            with self.subTest(category=category), self.assertRaises(RuntimeError) as caught:
+                run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+            self.assertIn(category, str(caught.exception))
+            self.assertNotIn("secret", str(caught.exception).lower())
+            self.assertEqual(len(calls), 1)
+
+    def test_real_subprocess_reports_known_failure_without_stdout(self):
+        def runner(args, **kwargs):
+            program = ('import sys; print("private partial output"); '
+                       'print("prefill-greedy qualification refused: no rank has expert payload capacity", file=sys.stderr); '
+                       'sys.exit(1)')
+            return subprocess.run([sys.executable, "-c", program], **kwargs)
+        with self.assertRaises(RuntimeError) as caught:
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertIn("rank_payload_capacity", str(caught.exception))
+        self.assertNotIn("private", str(caught.exception))
 
 
 if __name__ == "__main__":

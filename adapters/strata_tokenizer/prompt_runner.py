@@ -19,6 +19,12 @@ from .adapter import _unique_object, decode_greedy_receipt, load_sc117
 
 MAX_PROMPT_BYTES = 4096
 MAX_RECEIPT_BYTES = 4 * 1024 * 1024
+_ENGINE_FAILURES = {
+    b"prefill-greedy qualification refused: no rank has expert payload capacity\n": "rank_payload_capacity",
+    b"prefill-greedy qualification refused: expert payload budget exceeded\n": "global_payload_capacity",
+    b"prefill-greedy qualification refused: eviction target cannot be met safely\n": "eviction_target",
+    b"prefill-greedy qualification refused: eviction limit\n": "eviction_limit",
+}
 
 
 def _binary_sha(path: str) -> str:
@@ -55,7 +61,8 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         command.append(str(max_new_tokens))
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
-        raise RuntimeError("engine failed; reconcile its ledger and do not replay UNKNOWN claims")
+        category = _ENGINE_FAILURES.get(completed.stderr, "unclassified")
+        raise RuntimeError(f"engine failed ({category}); reconcile its ledger and do not replay UNKNOWN claims")
     if len(completed.stdout) > MAX_RECEIPT_BYTES or len(completed.stderr) > MAX_RECEIPT_BYTES:
         raise ValueError("engine response exceeds limit")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
