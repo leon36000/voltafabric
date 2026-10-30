@@ -440,6 +440,7 @@ fn sort_eviction_candidates(candidates: &mut [EvictionCandidate]) {
 
 // Plan entirely before sending anything. Input order is deterministic; each
 // rank must retain at least one resident and arithmetic is checked.
+#[cfg(test)]
 fn select_evictions(
     used: u64,
     target: u64,
@@ -447,7 +448,27 @@ fn select_evictions(
     candidates: &[EvictionCandidate],
     counts: &BTreeMap<(u32, u32), usize>,
 ) -> Result<Vec<EvictionCandidate>> {
-    if used <= target {
+    select_evictions_with_rank(used, target, max_evictions, candidates, counts, None)
+}
+
+// Rank headroom is planned first, then global pressure, before any eviction is sent.
+fn select_evictions_with_rank(
+    used: u64,
+    target: u64,
+    max_evictions: usize,
+    candidates: &[EvictionCandidate],
+    counts: &BTreeMap<(u32, u32), usize>,
+    rank_target: Option<(u32, u64, u64)>,
+) -> Result<Vec<EvictionCandidate>> {
+    if rank_target.is_some_and(|(_, rank_used, _)| rank_used > used) {
+        return Err(invalid("rank eviction accounting"));
+    }
+    let mut rank_remaining = rank_target.map(|(_, used, _)| used);
+    let rank_satisfied = |v: Option<u64>| match (rank_target, v) {
+        (Some((_, _, target)), Some(remaining)) => remaining <= target,
+        _ => true,
+    };
+    if used <= target && rank_satisfied(rank_remaining) {
         return Ok(Vec::new());
     }
     if max_evictions == 0 || max_evictions > 768 {
@@ -456,23 +477,45 @@ fn select_evictions(
     let mut counts = counts.clone();
     let mut remaining = used;
     let mut selected = Vec::new();
-    for &candidate in candidates {
-        let count = counts
-            .get_mut(&(candidate.layer, candidate.rank))
-            .ok_or_else(|| invalid("eviction candidate rank"))?;
-        if *count <= 1 {
-            continue;
-        }
-        if candidate.bytes == 0 {
-            return Err(invalid("empty expert payload"));
-        }
-        remaining = remaining
-            .checked_sub(candidate.bytes)
-            .ok_or_else(|| invalid("eviction plan underflow"))?;
-        *count -= 1;
-        selected.push(candidate);
-        if remaining <= target {
-            return Ok(selected);
+    let mut done = vec![false; candidates.len()];
+    for phase in 0..2 {
+        for (index, &candidate) in candidates.iter().enumerate() {
+            if done[index]
+                || (phase == 0
+                    && (rank_satisfied(rank_remaining)
+                        || rank_target.is_none_or(|(rank, _, _)| candidate.rank != rank)))
+            {
+                continue;
+            }
+            let count = counts
+                .get_mut(&(candidate.layer, candidate.rank))
+                .ok_or_else(|| invalid("eviction candidate rank"))?;
+            if *count <= 1 {
+                continue;
+            }
+            if candidate.bytes == 0 {
+                return Err(invalid("empty expert payload"));
+            }
+            remaining = remaining
+                .checked_sub(candidate.bytes)
+                .ok_or_else(|| invalid("eviction plan underflow"))?;
+            if rank_target.is_some_and(|(rank, _, _)| candidate.rank == rank) {
+                rank_remaining = Some(
+                    rank_remaining
+                        .unwrap()
+                        .checked_sub(candidate.bytes)
+                        .ok_or_else(|| invalid("rank eviction plan underflow"))?,
+                );
+            }
+            *count -= 1;
+            done[index] = true;
+            selected.push(candidate);
+            if remaining <= target && rank_satisfied(rank_remaining) {
+                return Ok(selected);
+            }
+            if selected.len() == max_evictions {
+                break;
+            }
         }
         if selected.len() == max_evictions {
             break;
@@ -719,6 +762,15 @@ impl Segment {
         target_bytes: u64,
         max_evictions: usize,
     ) -> Result<Vec<EvictionReceipt>> {
+        self.evict_to_targets(source, target_bytes, max_evictions, None)
+    }
+    fn evict_to_targets(
+        &mut self,
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        target_bytes: u64,
+        max_evictions: usize,
+        rank_target: Option<(u32, u64, u64)>,
+    ) -> Result<Vec<EvictionReceipt>> {
         if self.cursor.poisoned || self.cursor.position == 0 || self.cursor.last_attempt == 0 {
             return Err(invalid("eviction policy requires committed position"));
         }
@@ -746,12 +798,13 @@ impl Segment {
             }
         }
         sort_eviction_candidates(&mut candidates);
-        let plan = select_evictions(
+        let plan = select_evictions_with_rank(
             source.used_bytes(),
             target_bytes,
             max_evictions,
             &candidates,
             &counts,
+            rank_target,
         )?;
         let mut bindings = Vec::with_capacity(plan.len());
         for item in &plan {
@@ -782,7 +835,14 @@ impl Segment {
         for binding in &bindings {
             receipts.push(self.evict_owner_after_commit(source, binding)?);
         }
-        if source.used_bytes() > target_bytes {
+        if source.used_bytes() > target_bytes
+            || rank_target.is_some_and(|(rank, _, target)| {
+                source
+                    .rank_used_bytes()
+                    .get(&rank)
+                    .is_none_or(|&used| used > target)
+            })
+        {
             self.cursor.poisoned = true;
             return Err(invalid("eviction target accounting"));
         }
@@ -872,10 +932,30 @@ impl Segment {
         {
             return Err(invalid("segment PLE token required or invalid"));
         }
-        let receipts = if let Some(target) =
-            headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?
-        {
-            self.evict_to_target(source, target, max_evictions)?
+        let global_target =
+            headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?;
+        let rank_target = if let Some(limits) = source.rank_limits() {
+            let (&rank, &limit) = limits
+                .iter()
+                .filter(|(_, limit)| **limit >= headroom_bytes)
+                .max_by_key(|(rank, limit)| (**limit, std::cmp::Reverse(**rank)))
+                .ok_or_else(|| invalid("no rank can reserve expert headroom"))?;
+            let used = *source
+                .rank_used_bytes()
+                .get(&rank)
+                .ok_or_else(|| invalid("rank headroom accounting"))?;
+            let target = headroom_target(used, limit, headroom_bytes)?;
+            target.map(|target| (rank, used, target))
+        } else {
+            None
+        };
+        let receipts = if global_target.is_some() || rank_target.is_some() {
+            self.evict_to_targets(
+                source,
+                global_target.unwrap_or(source.used_bytes()),
+                max_evictions,
+                rank_target,
+            )?
         } else {
             Vec::new()
         };
@@ -972,6 +1052,42 @@ mod tests {
         assert!(select_evictions(16, 8, 769, &c, &counts).is_err());
         assert!(select_evictions(3, 0, 2, &c, &counts).is_err());
         assert!(select_evictions(16, 16, 0, &c, &counts).unwrap().is_empty());
+    }
+
+    #[test]
+    fn rank_headroom_is_planned_before_global_evictions() {
+        let c = [
+            EvictionCandidate {
+                layer: 0,
+                expert: 1,
+                rank: 2,
+                bytes: 4,
+                last_used: 0,
+            },
+            EvictionCandidate {
+                layer: 0,
+                expert: 2,
+                rank: 3,
+                bytes: 4,
+                last_used: 1,
+            },
+            EvictionCandidate {
+                layer: 1,
+                expert: 3,
+                rank: 3,
+                bytes: 4,
+                last_used: 2,
+            },
+        ];
+        let counts = BTreeMap::from([((0, 2), 2), ((0, 3), 2), ((1, 3), 2)]);
+        let plan = select_evictions_with_rank(20, 16, 3, &c, &counts, Some((3, 12, 8))).unwrap();
+        assert_eq!(plan, vec![c[1]]);
+        let both = select_evictions_with_rank(20, 12, 3, &c, &counts, Some((3, 12, 8))).unwrap();
+        assert_eq!(both, vec![c[1], c[0]]);
+        assert!(select_evictions_with_rank(20, 12, 1, &c, &counts, Some((3, 12, 8))).is_err());
+        assert!(select_evictions_with_rank(20, 20, 3, &c, &counts, Some((3, 21, 8))).is_err());
+        let protected = BTreeMap::from([((0, 2), 2), ((0, 3), 1), ((1, 3), 1)]);
+        assert!(select_evictions_with_rank(20, 20, 3, &c, &protected, Some((3, 12, 8))).is_err());
     }
 
     #[test]

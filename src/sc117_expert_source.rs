@@ -297,6 +297,9 @@ impl<'a> Source<'a> {
     pub fn rank_used_bytes(&self) -> &BTreeMap<u32, u64> {
         &self.rank_used
     }
+    pub fn rank_limits(&self) -> Option<&BTreeMap<u32, u64>> {
+        self.rank_limits.as_ref()
+    }
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
     }
