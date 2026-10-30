@@ -1,5 +1,6 @@
 //! Authenticated SC117 PLE CPU reference weights. Manifest provenance is the caller's responsibility.
-//! BF16 weights with FP32 input and f64 accumulation; not a CUDA parity claim.
+//! BF16 weights and round-to-nearest-even BF16 inputs, with scalar f64 accumulation.
+//! This follows the GGML CPU activation type, not its exact reduction order.
 use crate::{
     completion::decode_fp16,
     invalid,
@@ -143,7 +144,7 @@ impl Weights {
         })
     }
 }
-/// Row-major BF16 matrix; input remains FP32 in this CPU reference.
+/// Row-major BF16 matrix; finite FP32 inputs are rounded to BF16 nearest-even.
 pub fn project(weights: &[u8], input: &[f32], rows: usize) -> Result<Vec<f32>> {
     if input.len() != WIDTH
         || rows == 0
@@ -153,10 +154,20 @@ pub fn project(weights: &[u8], input: &[f32], rows: usize) -> Result<Vec<f32>> {
     {
         return Err(invalid("PLE projection shape"));
     }
+    let mut activations = Vec::with_capacity(WIDTH);
+    for &x in input {
+        let bits = x.to_bits();
+        let rounded = bits.wrapping_add(0x7fff + ((bits >> 16) & 1)) & 0xffff_0000;
+        let value = f32::from_bits(rounded);
+        if !value.is_finite() {
+            return Err(invalid("PLE activation BF16 overflow"));
+        }
+        activations.push(value);
+    }
     let mut out = Vec::with_capacity(rows);
     for row in weights.chunks_exact(WIDTH * 2) {
         let mut sum = 0.0f64;
-        for (b, &x) in row.chunks_exact(2).zip(input) {
+        for (b, &x) in row.chunks_exact(2).zip(&activations) {
             let w = f32::from_bits(u32::from(u16::from_le_bytes([b[0], b[1]])) << 16);
             if !w.is_finite() {
                 return Err(invalid("PLE nonfinite BF16"));
