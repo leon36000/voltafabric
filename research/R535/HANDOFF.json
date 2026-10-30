@@ -1,0 +1,10 @@
+{
+  "round": "R535",
+  "parent_gitlab_commit": "d83743abe99f0d527c40ff46f636977fd9780bf1",
+  "active_operations": [],
+  "status": "PASS_STANDALONE_QSA_92_SYNTHETIC_INPUTS",
+  "oracle": "research/R535/oracle.py",
+  "result_sha256": "85d525c4dc5de1c1ee045906ec8fe61ad803753dff1a6044eca19c87e8eb399b",
+  "limitations": ["Observed projection inputs and synthetic residuals, not R534 live tensors", "Not an independent full-model oracle", "R428 expert-255 scalar discrepancy remains open", "Original shared R53 ledger missing; frozen snapshots incomplete", "No GPU or inter-PC execution"],
+  "next_action": "Design bounded trace of committed live QSA data for an independent oracle without weakening the transaction or identity contracts; investigate R428 and reconcile the real R53 ledger before hardware admission."
+}
