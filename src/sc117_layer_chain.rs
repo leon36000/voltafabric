@@ -1198,6 +1198,219 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires VF_TEST_RANK_SESSION and creates fresh non-replayable CPU claims"]
+    fn alternate_rank_plan_drives_real_local_workers() {
+        use crate::{
+            moe::{Choice, Registry, Replica, Stamp},
+            native_ggml_cpu::Binding,
+            routing::RoutingProblem,
+            session::{Endpoint, NativeEviction, Session},
+        };
+        use std::time::{Duration, SystemTime, UNIX_EPOCH};
+        const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        const INDEX_SHA: &str = "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24";
+        const BLOB_SHA: &str = "50eff9144c635807dfdc0cafd1c3bb978d0202d537ae892ec8ebed90dc13e172";
+        const PACK_SIZE: u64 = 50_292_326_400;
+        const BYTES: u64 = 2_176_000;
+        let worker = std::env::var("VF_TEST_RANK_SESSION").expect("explicit local worker path");
+        assert!(std::path::Path::new(&worker).is_absolute());
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let attempt = u64::try_from(now).unwrap();
+        let name = format!("r510-alt-workers-{}-{now}", std::process::id());
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(".runs")
+            .join(&name);
+        std::fs::create_dir(&path).unwrap();
+        let ledger = NativeBatchLedger::open(&path).unwrap();
+        let stamp = Stamp {
+            run_id: name,
+            model_revision: "model-test".into(),
+            plan_id: "r510-plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        };
+        let binding = |rank, expert, local| Binding {
+            model_revision: stamp.model_revision.clone(),
+            rank,
+            layer: 0,
+            expert,
+            local,
+            epoch: 3,
+            index_sha256: INDEX_SHA.into(),
+            blob_sha256: BLOB_SHA.into(),
+        };
+        let mut sessions = Vec::new();
+        let blob = vec![0u8; BYTES as usize];
+        let timeout = Duration::from_secs(30);
+        for (rank, experts) in [(2, vec![0, 1]), (3, vec![2, 3, 4])] {
+            let mut session = Session::connect(
+                &Endpoint {
+                    rank,
+                    argv: vec![worker.clone()],
+                },
+                timeout,
+            )
+            .unwrap();
+            for (local, expert) in experts.iter().enumerate() {
+                session
+                    .load_native_ggml(
+                        &binding(rank, *expert, local as u32),
+                        INDEX,
+                        PACK_SIZE,
+                        &blob,
+                        timeout,
+                    )
+                    .unwrap();
+            }
+            session.seal_native_ggml(experts.len(), timeout).unwrap();
+            sessions.push(session);
+        }
+        let mut problem = RoutingProblem {
+            hidden: 2560,
+            experts: vec![0, 1, 2, 3, 4],
+            routes: vec![vec![
+                Choice {
+                    expert: 0,
+                    weight: 0.25,
+                },
+                Choice {
+                    expert: 2,
+                    weight: 0.25,
+                },
+                Choice {
+                    expert: 3,
+                    weight: 0.25,
+                },
+                Choice {
+                    expert: 4,
+                    weight: 0.25,
+                },
+            ]],
+            registry: Registry {
+                epoch: 3,
+                copies: vec![
+                    Replica {
+                        expert: 0,
+                        rank: 2,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 1,
+                        rank: 2,
+                        local: 1,
+                    },
+                    Replica {
+                        expert: 2,
+                        rank: 3,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 3,
+                        rank: 3,
+                        local: 1,
+                    },
+                    Replica {
+                        expert: 4,
+                        rank: 3,
+                        local: 2,
+                    },
+                ],
+            },
+            stamp: stamp.clone(),
+            preferred_owners: BTreeMap::new(),
+            resident_order: BTreeMap::from([(2, vec![0, 1]), (3, vec![0, 1, 2])]),
+        };
+        let input = vec![0.0_f32; 2560];
+        let ticket = ledger.reserve_ticket(&stamp, attempt).unwrap();
+        let first = Session::exec_native_ggml_reserved(
+            &mut sessions,
+            &problem,
+            std::slice::from_ref(&input),
+            &ledger,
+            ticket,
+            timeout,
+        )
+        .unwrap();
+        assert!(first.rows()[0].iter().all(|&x| x == 0.0));
+        let candidate = EvictionCandidate {
+            layer: 0,
+            expert: 1,
+            rank: 2,
+            bytes: BYTES,
+            last_used: 0,
+        };
+        let options = rank_headroom_options(
+            &BTreeMap::from([(2, 4 * BYTES), (3, 5 * BYTES)]),
+            &BTreeMap::from([(2, 2 * BYTES), (3, 3 * BYTES)]),
+            3 * BYTES,
+        )
+        .unwrap();
+        let traffic: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+        let (plan, selected) = select_eviction_alternatives(
+            5 * BYTES,
+            5 * BYTES,
+            1,
+            &[candidate],
+            &BTreeMap::from([((0, 2), 2), ((0, 3), 3)]),
+            &options,
+        )
+        .unwrap();
+        assert_eq!(selected, Some((2, 2 * BYTES, BYTES)));
+        assert_eq!(plan, vec![candidate]);
+        assert_eq!(
+            traffic,
+            sessions
+                .iter()
+                .map(|s| s.traffic.bytes_sent)
+                .collect::<Vec<_>>()
+        );
+        let evicted = binding(2, 1, 1);
+        let op = ledger.reserve_eviction(&stamp, attempt, &evicted).unwrap();
+        sessions[0]
+            .evict_native_ggml(
+                &NativeEviction {
+                    stamp: &stamp,
+                    attempt,
+                    operation_id: &op,
+                    binding: &evicted,
+                    expected_bytes: BYTES,
+                    expected_remaining: 1,
+                },
+                timeout,
+            )
+            .unwrap();
+        assert_eq!(sessions[1].traffic.bytes_sent, traffic[1]);
+        assert!(ledger.reserve_eviction(&stamp, attempt, &evicted).is_err());
+        problem.stamp.batch = 1;
+        problem
+            .registry
+            .copies
+            .retain(|copy| !(copy.rank == 2 && copy.expert == 1));
+        problem.experts.retain(|&expert| expert != 1);
+        problem.resident_order.insert(2, vec![0]);
+        let ticket = ledger.reserve_ticket(&problem.stamp, attempt + 1).unwrap();
+        let second = Session::exec_native_ggml_reserved(
+            &mut sessions,
+            &problem,
+            &[input],
+            &ledger,
+            ticket,
+            timeout,
+        )
+        .unwrap();
+        assert!(second.rows()[0].iter().all(|&x| x == 0.0));
+        for session in sessions {
+            let receipt = session.close(timeout);
+            assert!(!receipt.killed && receipt.exit_code == Some(0) && receipt.error.is_none());
+            assert_eq!(receipt.bye_execs, Some(2));
+        }
+    }
+
+    #[test]
     fn least_recent_order_is_deterministic_and_prefers_unused() {
         let mut c = [
             EvictionCandidate {
