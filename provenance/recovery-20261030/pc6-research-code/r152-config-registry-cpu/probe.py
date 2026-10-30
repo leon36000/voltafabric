@@ -1,0 +1,16 @@
+import ast,hashlib,json,pathlib,sys,types,zipfile
+root=pathlib.Path('/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs');wheel=root/'r125-isolated-1cat-20261028/1cat_vllm-1.2.2-cp312-cp312-linux_x86_64.whl';conf=root/'r150-transformers-config-cpu-20261028/config.json';h=hashlib.sha256()
+with wheel.open('rb') as f:
+ for b in iter(lambda:f.read(1048576),b''):h.update(b)
+assert h.hexdigest()=='8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6';assert hashlib.sha256(conf.read_bytes()).hexdigest()=='58aefa1c9eff7989f431d748f2ddec39446cb1fd2a69acc46e285c6a37b0cecc'
+with zipfile.ZipFile(wheel) as z: source=z.read('vllm/transformers_utils/configs/qwen3_5_moe.py');registry_source=z.read('vllm/transformers_utils/config.py'); configs_source=z.read('vllm/transformers_utils/configs/__init__.py')
+import torch,transformers
+from transformers import AutoConfig
+q=types.ModuleType('vf_r152_qwen_config');sys.modules[q.__name__]=q;exec(compile(source,'<1cat-wheel-qwen-config>','exec'),q.__dict__)
+t=ast.parse(registry_source);cls=next(n for n in t.body if isinstance(n,ast.ClassDef) and n.name=='LazyConfigDict');reg=next(n for n in t.body if isinstance(n,ast.AnnAssign) and isinstance(n.target,ast.Name) and n.target.id=='_CONFIG_REGISTRY');assert isinstance(reg.value,ast.Call) and any(a.arg=='qwen3_5_moe' and isinstance(a.value,ast.Constant) and a.value.value=='Qwen3_5MoeConfig' for a in reg.value.keywords)
+assert b'"Qwen3_5MoeConfig": "vllm.transformers_utils.configs.qwen3_5_moe"' in configs_source
+module=ast.Module(body=[ast.ImportFrom(module='__future__',names=[ast.alias(name='annotations')],level=0),cls,reg],type_ignores=[]);ast.fix_missing_locations(module);g={};exec(compile(module,'<wheel-registry-ast>','exec'),g)
+v=types.ModuleType('vllm');v.__path__=[];u=types.ModuleType('vllm.transformers_utils');u.__path__=[];cs=types.ModuleType('vllm.transformers_utils.configs');cs.Qwen3_5MoeConfig=q.Qwen3_5MoeConfig;v.transformers_utils=u;u.configs=cs;sys.modules.update({'vllm':v,'vllm.transformers_utils':u,'vllm.transformers_utils.configs':cs})
+config_class=g['_CONFIG_REGISTRY']['qwen3_5_moe'];assert config_class is q.Qwen3_5MoeConfig;AutoConfig.register('qwen3_5_moe',config_class,exist_ok=True);c=AutoConfig.from_pretrained(str(conf.parent),local_files_only=True,trust_remote_code=False)
+assert type(c) is config_class and c.dtype is torch.bfloat16 and c.text_config.linear_key_head_dim==128 and len(c.text_config.layer_types)==40
+print(json.dumps({'status':'CPU_AUTOCONFIG_REGISTERED_WITH_REAL_WHEEL_REGISTRY_AND_CLASS','wheel_sha256':h.hexdigest(),'config_sha256':hashlib.sha256(conf.read_bytes()).hexdigest(),'registry_source_sha256':hashlib.sha256(registry_source).hexdigest(),'class_source_sha256':hashlib.sha256(source).hexdigest(),'configs_index_sha256':hashlib.sha256(configs_source).hexdigest(),'config_class':type(c).__name__,'text_class':type(c.text_config).__name__,'dtype':str(c.dtype),'linear_layers':c.text_config.layer_types.count('linear_attention'),'transformers':transformers.__version__,'torch':torch.__version__,'torch_cuda_build':torch.version.cuda,'scope':'Real wheel registry AST and real class with simulated vllm module hierarchy; AutoConfig registered manually, full vllm runtime not imported or qualified.'},sort_keys=True))
