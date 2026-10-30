@@ -1257,6 +1257,16 @@ mod tests {
     #[test]
     #[ignore = "requires VF_TEST_RANK_SESSION and creates fresh non-replayable CPU claims"]
     fn alternate_rank_plan_drives_real_local_workers() {
+        exercise_local_workers(false);
+    }
+
+    #[test]
+    #[ignore = "requires VF_TEST_RANK_SESSION and creates fresh non-replayable CPU claims"]
+    fn alternate_rank_preserves_nonzero_local_results() {
+        exercise_local_workers(true);
+    }
+
+    fn exercise_local_workers(nonzero: bool) {
         use crate::{
             moe::{Choice, Registry, Replica, Stamp},
             native_ggml_cpu::Binding,
@@ -1266,9 +1276,40 @@ mod tests {
         use std::time::{Duration, SystemTime, UNIX_EPOCH};
         const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
         const INDEX_SHA: &str = "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24";
-        const BLOB_SHA: &str = "50eff9144c635807dfdc0cafd1c3bb978d0202d537ae892ec8ebed90dc13e172";
+        let blob_sha = if nonzero {
+            "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0"
+        } else {
+            "50eff9144c635807dfdc0cafd1c3bb978d0202d537ae892ec8ebed90dc13e172"
+        };
         const PACK_SIZE: u64 = 50_292_326_400;
         const BYTES: u64 = 2_176_000;
+        struct VirtualPack<'a> {
+            pos: u64,
+            bytes: &'a [u8],
+        }
+        impl std::io::Seek for VirtualPack<'_> {
+            fn seek(&mut self, from: std::io::SeekFrom) -> std::io::Result<u64> {
+                let pos = match from {
+                    std::io::SeekFrom::Start(n) => i128::from(n),
+                    std::io::SeekFrom::End(n) => i128::from(PACK_SIZE) + i128::from(n),
+                    std::io::SeekFrom::Current(n) => i128::from(self.pos) + i128::from(n),
+                };
+                self.pos = u64::try_from(pos).map_err(|_| std::io::Error::other("invalid seek"))?;
+                Ok(self.pos)
+            }
+        }
+        impl std::io::Read for VirtualPack<'_> {
+            fn read(&mut self, out: &mut [u8]) -> std::io::Result<usize> {
+                let start = usize::try_from(self.pos).unwrap_or(usize::MAX);
+                if start >= self.bytes.len() {
+                    return Ok(0);
+                }
+                let n = out.len().min(self.bytes.len() - start);
+                out[..n].copy_from_slice(&self.bytes[start..start + n]);
+                self.pos += n as u64;
+                Ok(n)
+            }
+        }
         let worker = std::env::var("VF_TEST_RANK_SESSION").expect("explicit local worker path");
         assert!(std::path::Path::new(&worker).is_absolute());
         let now = SystemTime::now()
@@ -1276,7 +1317,7 @@ mod tests {
             .unwrap()
             .as_nanos();
         let attempt = u64::try_from(now).unwrap();
-        let name = format!("r510-alt-workers-{}-{now}", std::process::id());
+        let name = format!("r513-alt-workers-{}-{now}", std::process::id());
         let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join(".runs")
             .join(&name);
@@ -1285,7 +1326,7 @@ mod tests {
         let stamp = Stamp {
             run_id: name,
             model_revision: "model-test".into(),
-            plan_id: "r510-plan".into(),
+            plan_id: if nonzero { "r513-nonzero" } else { "r510-plan" }.into(),
             layer: 0,
             batch: 0,
             epoch: 3,
@@ -1298,10 +1339,50 @@ mod tests {
             local,
             epoch: 3,
             index_sha256: INDEX_SHA.into(),
-            blob_sha256: BLOB_SHA.into(),
+            blob_sha256: blob_sha.into(),
         };
         let mut sessions = Vec::new();
-        let blob = vec![0u8; BYTES as usize];
+        let mut blob = vec![0u8; BYTES as usize];
+        if nonzero {
+            for i in (0..1_254_400).step_by(98) {
+                blob[i + 1] = 0x28;
+            }
+            for i in (1_254_400..2_176_000).step_by(18) {
+                blob[i + 1] = 0x28;
+            }
+        }
+        assert_eq!(crate::sha256::hex(&blob), blob_sha);
+        let input = vec![if nonzero { 0.001_f32 } else { 0.0 }; 2560];
+        let layout =
+            crate::strata_native_layout::NativeLayout::parse_sc117_v3(INDEX, PACK_SIZE).unwrap();
+        let verified = layout
+            .read_verified_expert(
+                &mut VirtualPack {
+                    pos: 0,
+                    bytes: &blob,
+                },
+                0,
+                0,
+                INDEX_SHA,
+                blob_sha,
+            )
+            .unwrap();
+        let mut reference =
+            crate::native_ggml_cpu::Resident::load(&layout, verified, binding(2, 0, 0)).unwrap();
+        let expected: Vec<_> = reference
+            .forward(&input)
+            .unwrap()
+            .iter()
+            .map(|&v| {
+                crate::completion::decode_fp16(
+                    crate::completion::encode_fp16(f64::from(v)).unwrap(),
+                )
+                .unwrap()
+            })
+            .collect();
+        if nonzero {
+            assert!(expected.iter().any(|v| *v != 0.0));
+        }
         let timeout = Duration::from_secs(30);
         for (rank, experts) in [(2, vec![0, 1]), (3, vec![2, 3, 4])] {
             let mut session = Session::connect(
@@ -1381,7 +1462,6 @@ mod tests {
             preferred_owners: BTreeMap::new(),
             resident_order: BTreeMap::from([(2, vec![0, 1]), (3, vec![0, 1, 2])]),
         };
-        let input = vec![0.0_f32; 2560];
         let ticket = ledger.reserve_ticket(&stamp, attempt).unwrap();
         let first = Session::exec_native_ggml_reserved(
             &mut sessions,
@@ -1392,7 +1472,7 @@ mod tests {
             timeout,
         )
         .unwrap();
-        assert!(first.rows()[0].iter().all(|&x| x == 0.0));
+        assert_eq!(first.rows()[0], expected);
         let candidate = EvictionCandidate {
             layer: 0,
             expert: 1,
@@ -1459,7 +1539,7 @@ mod tests {
             timeout,
         )
         .unwrap();
-        assert!(second.rows()[0].iter().all(|&x| x == 0.0));
+        assert_eq!(second.rows()[0], expected);
         for session in sessions {
             let receipt = session.close(timeout);
             assert!(!receipt.killed && receipt.exit_code == Some(0) && receipt.error.is_none());
