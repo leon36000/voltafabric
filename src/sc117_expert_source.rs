@@ -1,0 +1,298 @@
+//! Bounded local SC117 admission source. It does not authenticate the publisher,
+//! measure process RSS, evict residents, or provide a hardware lease.
+use crate::{
+    invalid,
+    moe::{Registry, Stamp},
+    native_ggml_cpu::Binding,
+    sc117_expert_origin::Origin,
+    sc117_layer_chain::{ExpertAdmission, MissingExpertSource},
+    strata_native_layout::NativeLayout,
+    Result,
+};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    fs::File,
+};
+
+/// Every already-loaded resident must be supplied exactly once. The caller is
+/// responsible for reserving the initial budget before loading those residents.
+#[derive(Clone, Copy, Debug)]
+pub struct Seed {
+    pub layer: u32,
+    pub expert: u32,
+    pub rank: u32,
+    pub local: u32,
+}
+#[derive(Clone, Debug)]
+pub struct Identity {
+    pub run_id: String,
+    pub model_revision: String,
+    pub plan_id: String,
+    pub epoch: u64,
+}
+
+/// Accounting and identity for a single segment source.
+pub struct Config<'a> {
+    pub identity: Identity,
+    pub ranks: Vec<u32>,
+    pub seeds: &'a [Seed],
+    pub limit: u64,
+}
+
+fn charge(used: u64, bytes: u64, limit: u64) -> Result<u64> {
+    let next = used
+        .checked_add(bytes)
+        .ok_or_else(|| invalid("expert payload budget overflow"))?;
+    if next > limit {
+        return Err(invalid("expert payload budget exceeded"));
+    }
+    Ok(next)
+}
+fn placement(
+    registry: &Registry,
+    order: &BTreeMap<u32, Vec<u32>>,
+    ranks: &[u32],
+    epoch: u64,
+    expert: u32,
+) -> Result<(u32, u32)> {
+    if registry.epoch != epoch || order.len() != ranks.len() || ranks.is_empty() {
+        return Err(invalid("expert placement epoch or rank set"));
+    }
+    let mut pairs = BTreeSet::new();
+    let mut experts = BTreeSet::new();
+    for copy in &registry.copies {
+        if !ranks.contains(&copy.rank)
+            || !pairs.insert((copy.rank, copy.local))
+            || !experts.insert((copy.rank, copy.expert))
+            || copy.expert == expert
+        {
+            return Err(invalid("expert placement duplicate or unknown rank"));
+        }
+    }
+    for &rank in ranks {
+        let locals = order
+            .get(&rank)
+            .ok_or_else(|| invalid("expert rank absent"))?;
+        let actual: BTreeSet<_> = locals.iter().copied().collect();
+        let expected: BTreeSet<_> = registry
+            .copies
+            .iter()
+            .filter(|c| c.rank == rank)
+            .map(|c| c.local)
+            .collect();
+        if actual.len() != locals.len() || actual != expected || locals.is_empty() {
+            return Err(invalid("expert resident order differs from registry"));
+        }
+    }
+    let rank = *ranks
+        .iter()
+        .min_by_key(|&&r| (order[&r].len(), r))
+        .ok_or_else(|| invalid("expert rank"))?;
+    let local = order[&rank]
+        .iter()
+        .copied()
+        .max()
+        .and_then(|x| x.checked_add(1))
+        .ok_or_else(|| invalid("expert local overflow"))?;
+    Ok((rank, local))
+}
+
+fn matches_accounted(
+    layer: u32,
+    registry: &Registry,
+    known: &BTreeMap<(u32, u32), (u32, u32)>,
+) -> bool {
+    let expected: BTreeMap<_, _> = known
+        .iter()
+        .filter(|((l, _), _)| *l == layer)
+        .map(|((_, e), p)| (*e, *p))
+        .collect();
+    let actual: BTreeMap<_, _> = registry
+        .copies
+        .iter()
+        .map(|r| (r.expert, (r.rank, r.local)))
+        .collect();
+    actual.len() == registry.copies.len() && actual == expected
+}
+
+/// One instance accounts for all seeds and later admissions in its segment.
+/// It assumes exclusive control of the described sessions. Accounting is
+/// conservative: a returned payload is charged even if its append is uncertain.
+pub struct Source<'a> {
+    pack: &'a mut File,
+    layout: &'a NativeLayout,
+    index: &'a str,
+    origin: Origin,
+    identity: Identity,
+    ranks: Vec<u32>,
+    limit: u64,
+    used: u64,
+    known: BTreeMap<(u32, u32), (u32, u32)>,
+    admissions: Vec<(u32, u32, u32, u32, String)>,
+}
+impl<'a> Source<'a> {
+    pub fn new(
+        pack: &'a mut File,
+        layout: &'a NativeLayout,
+        index: &'a str,
+        origin: Origin,
+        config: Config<'_>,
+    ) -> Result<Self> {
+        let Config {
+            identity,
+            mut ranks,
+            seeds,
+            limit,
+        } = config;
+        if identity.run_id.is_empty()
+            || identity.model_revision.is_empty()
+            || identity.plan_id.is_empty()
+            || identity.epoch == 0
+            || limit == 0
+            || crate::sha256::hex(index.as_bytes()) != layout.index_sha256()
+        {
+            return Err(invalid("expert source identity, index or budget"));
+        }
+        ranks.sort_unstable();
+        if ranks.is_empty() || ranks.windows(2).any(|p| p[0] == p[1]) {
+            return Err(invalid("expert source ranks"));
+        }
+        let mut used = 0;
+        let mut known = BTreeMap::new();
+        let mut slots = BTreeSet::new();
+        for s in seeds {
+            if !ranks.contains(&s.rank)
+                || known
+                    .insert((s.layer, s.expert), (s.rank, s.local))
+                    .is_some()
+                || !slots.insert((s.layer, s.rank, s.local))
+            {
+                return Err(invalid("expert seed duplicate or rank"));
+            }
+            used = charge(
+                used,
+                layout.expert(s.layer as usize, s.expert.into())?.bytes,
+                limit,
+            )?;
+        }
+        Ok(Self {
+            pack,
+            layout,
+            index,
+            origin,
+            identity,
+            ranks,
+            limit,
+            used,
+            known,
+            admissions: Vec::new(),
+        })
+    }
+    pub fn used_bytes(&self) -> u64 {
+        self.used
+    }
+    pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
+        &self.admissions
+    }
+}
+impl MissingExpertSource for Source<'_> {
+    fn load(
+        &mut self,
+        stamp: &Stamp,
+        attempt: u64,
+        expert: u32,
+        registry: &Registry,
+        order: &BTreeMap<u32, Vec<u32>>,
+    ) -> Result<ExpertAdmission> {
+        if attempt == 0
+            || stamp.run_id != self.identity.run_id
+            || stamp.model_revision != self.identity.model_revision
+            || stamp.plan_id != self.identity.plan_id
+            || stamp.epoch != self.identity.epoch
+            || self.known.contains_key(&(stamp.layer, expert))
+        {
+            return Err(invalid("expert source identity or duplicate"));
+        }
+        if !matches_accounted(stamp.layer, registry, &self.known) {
+            return Err(invalid("expert registry differs from accounted residents"));
+        }
+        let (rank, local) = placement(registry, order, &self.ranks, stamp.epoch, expert)?;
+        let span = self.layout.expert(stamp.layer as usize, expert.into())?;
+        let next = charge(self.used, span.bytes, self.limit)?;
+        let digest = self
+            .origin
+            .expert_digest(self.layout, stamp.layer as usize, expert.into())?;
+        let blob = self.layout.read_verified_expert(
+            self.pack,
+            stamp.layer as usize,
+            expert.into(),
+            self.layout.index_sha256(),
+            &digest,
+        )?;
+        let pack_bytes = self
+            .pack
+            .metadata()
+            .map_err(|e| invalid(e.to_string()))?
+            .len();
+        let binding = Binding {
+            model_revision: stamp.model_revision.clone(),
+            rank,
+            layer: stamp.layer,
+            expert,
+            local,
+            epoch: stamp.epoch,
+            index_sha256: self.layout.index_sha256().into(),
+            blob_sha256: digest.clone(),
+        };
+        self.known.insert((stamp.layer, expert), (rank, local));
+        self.used = next;
+        self.admissions
+            .push((stamp.layer, expert, rank, local, digest));
+        Ok(ExpertAdmission {
+            binding,
+            index: self.index.into(),
+            pack_bytes,
+            bytes: blob.bytes,
+        })
+    }
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::moe::Replica;
+    #[test]
+    fn budget_is_bounded_and_overflow_safe() {
+        assert_eq!(charge(8, 2, 10).unwrap(), 10);
+        assert!(charge(9, 2, 10).is_err());
+        assert!(charge(u64::MAX, 1, u64::MAX).is_err());
+    }
+    #[test]
+    fn placement_rejects_registry_mismatch_and_balances_deterministically() {
+        let r = Registry {
+            epoch: 1,
+            copies: vec![
+                Replica {
+                    rank: 2,
+                    expert: 0,
+                    local: 0,
+                },
+                Replica {
+                    rank: 3,
+                    expert: 1,
+                    local: 3,
+                },
+            ],
+        };
+        let o = BTreeMap::from([(2, vec![0]), (3, vec![3])]);
+        assert_eq!(placement(&r, &o, &[2, 3], 1, 9).unwrap(), (2, 1));
+        let known = BTreeMap::from([((4, 0), (2, 0)), ((4, 1), (3, 3)), ((5, 8), (2, 0))]);
+        assert!(matches_accounted(4, &r, &known));
+        assert!(!matches_accounted(5, &r, &known));
+        assert!(!matches_accounted(4, &r, &BTreeMap::new()));
+        assert!(placement(&r, &o, &[2, 3], 2, 9).is_err());
+        assert!(placement(&r, &o, &[2, 3], 1, 0).is_err());
+        let bad = BTreeMap::from([(2, vec![0, 0]), (3, vec![3])]);
+        assert!(placement(&r, &bad, &[2, 3], 1, 9).is_err());
+        assert!(placement(&r, &o, &[2, 4], 1, 9).is_err());
+    }
+}

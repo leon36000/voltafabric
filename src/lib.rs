@@ -52,6 +52,8 @@ pub mod sc117_bound_layer;
 pub mod sc117_embedding;
 pub mod sc117_expert_origin;
 #[cfg(feature = "native-ggml-cpu")]
+pub mod sc117_expert_source;
+#[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_ffn_stage;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_gdn_stage;
