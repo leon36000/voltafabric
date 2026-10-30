@@ -46,6 +46,8 @@ pub const CAPABILITY: &str = "cpu_f64_dense_moe_v1";
 pub const CAPABILITY_QPN2: &str = "cpu_qpn2_resident_v1";
 /// Raw artifact body follows a bounded JSON LOAD header (A54); older workers use base64.
 pub const CAPABILITY_QPN2_RAW: &str = "cpu_qpn2_resident_raw_v1";
+/// Explicitly negotiated multipart resident loading; legacy raw LOAD is unchanged.
+pub const CAPABILITY_QPN2_MULTIPART: &str = "cpu_qpn2_multipart_v1";
 /// Little-endian f64 activation body follows a bounded JSON EXEC header (A55).
 pub const CAPABILITY_EXEC_F64_RAW: &str = "cpu_exec_f64_raw_v1";
 /// Little-endian binary16 activation body follows a bounded JSON EXEC header.
@@ -266,6 +268,12 @@ pub enum Request {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "reply", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Reply {
+    MultipartReady {
+        offset: u64,
+    },
+    ChunkAccepted {
+        offset: u64,
+    },
     Hello {
         hello: ServerHello,
     },
@@ -3587,6 +3595,103 @@ impl Session {
         self.reply_until(Instant::now() + timeout)
     }
 
+    /// Research multipart LOAD with an explicit identity and capability negotiation.
+    /// Any failure after transmission invalidates this session; caller reconciles UNKNOWN.
+    pub fn load_compressed_multipart(
+        &mut self,
+        artifact: &CompressedArtifact,
+        stamp: &moe::Stamp,
+        attempt: u64,
+        timeout: Duration,
+    ) -> Result<LoadReceipt> {
+        const CHUNK: usize = 4 * 1024 * 1024;
+        let stack = &artifact.stack;
+        if !self
+            .hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_QPN2_MULTIPART)
+        {
+            return Err(Error::new(
+                "CAPABILITY_MISSING",
+                "multipart not negotiated; nothing sent",
+            ));
+        }
+        if timeout.is_zero()
+            || self.preweighted_inflight
+            || self.artifact.is_some()
+            || stamp.run_id.is_empty()
+            || stamp.plan_id.is_empty()
+            || attempt == 0
+            || stamp.model_revision != stack.model_revision()
+            || stamp.layer != stack.layer()
+            || stamp.epoch != stack.epoch()
+            || self.rank != stack.rank()
+            || artifact.bytes.is_empty()
+            || artifact.bytes.len() > 128 * 1024 * 1024 + 8 * 1024 * 1024 + 8
+        {
+            return Err(invalid(
+                "multipart identity, size or state mismatch; nothing sent",
+            ));
+        }
+        #[cfg(unix)]
+        if let Some(SessionInput::Socket(socket)) = self.stdin.as_ref() {
+            socket
+                .set_write_timeout(Some(timeout))
+                .map_err(|e| Error::new("WORKER_IO", e.to_string()))?;
+        }
+        let before = self.traffic.bytes_sent;
+        let digest = artifact.sha256.clone();
+        let result = (|| -> Result<LoadReceipt> {
+            let begin = serde_json::json!({"op":"begin_multipart", "identity": {
+                "run_id":stamp.run_id,"model_revision":stamp.model_revision,
+                "plan_id":stamp.plan_id,"layer":stamp.layer,"epoch":stamp.epoch,
+                "rank":self.rank,"attempt":attempt}, "artifact_bytes":artifact.bytes.len(),
+                "artifact_sha256":digest});
+            self.write(&encode(&begin)?)?;
+            match self.reply(timeout)? {
+                Reply::MultipartReady { offset: 0 } => {}
+                _ => return Err(invalid("invalid multipart ready")),
+            }
+            for (index, chunk) in artifact.bytes.chunks(CHUNK).enumerate() {
+                let offset = index * CHUNK;
+                let header =
+                    serde_json::json!({"op":"multipart_chunk","offset":offset,"bytes":chunk.len()});
+                self.write_parts(&[&encode(&header)?, chunk], true)?;
+                match self.reply(timeout)? {
+                    Reply::ChunkAccepted { offset: accepted }
+                        if accepted == (offset + chunk.len()) as u64 => {}
+                    _ => return Err(invalid("invalid multipart acknowledgement")),
+                }
+            }
+            self.write(&encode(&serde_json::json!({"op":"multipart_finish"}))?)?;
+            match self.reply(timeout)? {
+                Reply::Loaded {
+                    artifact_sha256,
+                    epoch,
+                    transferred,
+                    ..
+                } if artifact_sha256 == digest && epoch == stamp.epoch && transferred => {}
+                _ => return Err(invalid("invalid multipart loaded reply")),
+            }
+            let request_bytes = self.traffic.bytes_sent - before;
+            self.traffic.loads_transferred += 1;
+            self.traffic.weight_bytes_sent += request_bytes;
+            self.artifact = Some((digest.clone(), stamp.epoch));
+            Ok(LoadReceipt {
+                rank: self.rank,
+                artifact_sha256: digest,
+                epoch: stamp.epoch,
+                transferred: true,
+                request_bytes,
+            })
+        })();
+        if result.is_err() {
+            self.usable = false;
+        }
+        result
+    }
+
     /// Send the resident experts once; if this exact artifact is already loaded, rebind
     /// it to a newer epoch without resending a single weight.
     pub fn load(
@@ -3659,7 +3764,13 @@ impl Session {
                 timeout,
             );
         }
-        if artifact.bytes.is_empty() || artifact.bytes.len() > MAX_RAW_ARTIFACT_BYTES {
+        if artifact.bytes.is_empty() {
+            return Err(Error::new(
+                "ARTIFACT_BYTES_RELEASED",
+                "artifact transfer bytes were discarded; a fresh artifact is required",
+            ));
+        }
+        if artifact.bytes.len() > MAX_RAW_ARTIFACT_BYTES {
             return Err(Error::new(
                 "MESSAGE_TOO_LARGE",
                 "artifact exceeds the raw LOAD_ARTIFACT body limit",
@@ -5795,6 +5906,8 @@ pub fn run_series(input: &SeriesInput) -> Result<SeriesReport> {
 /// it sends once, their SHA-256, and the validated stack they decode to. Built only by
 /// [`CompressedArtifact::from_bytes`], so the three always agree: the coordinator checks
 /// the stack (identity, replicas, oracle) while the worker computes with the bytes.
+/// The caller may explicitly discard the transfer bytes once loading succeeds;
+/// the retained digest and validated stack are then still used for batch checks.
 ///
 /// ```
 /// use voltafabric::{resident::ResidentStack, session::CompressedArtifact};
@@ -5835,6 +5948,13 @@ impl CompressedArtifact {
     }
     pub fn bytes(&self) -> &[u8] {
         &self.bytes
+    }
+    /// Irreversibly discard the serialized transfer copy after all owners have
+    /// acknowledged it. The validated stack and digest remain available for
+    /// routing and batch checks. A fresh transfer needs a fresh artifact; this
+    /// operation never reconstructs bytes or replays an unknown request.
+    pub fn discard_transfer_bytes(&mut self) {
+        self.bytes = Vec::new();
     }
     pub fn stack(&self) -> &ResidentStack {
         &self.stack
@@ -5929,6 +6049,24 @@ pub fn bind_compressed(
             "worker does not advertise cpu_qpn2_resident_v1; nothing was sent",
         ));
     }
+    // Preflight every rank before eviction or LOAD so a missing transfer copy
+    // cannot leave an otherwise valid fleet partially rebound.
+    for session in sessions.iter() {
+        let artifact = ranks
+            .get(&session.rank)
+            .map(|&i| &artifacts[i])
+            .ok_or_else(|| invalid("endpoint rank has no artifact"))?;
+        let already_loaded = session
+            .artifact
+            .as_ref()
+            .is_some_and(|(digest, _)| *digest == artifact.sha256);
+        if !already_loaded && artifact.bytes.is_empty() {
+            return Err(Error::new(
+                "ARTIFACT_BYTES_RELEASED",
+                "artifact transfer bytes were discarded; a fresh artifact is required",
+            ));
+        }
+    }
     for session in sessions.iter_mut() {
         let artifact = ranks
             .get(&session.rank)
@@ -5967,6 +6105,61 @@ pub fn prepare_compressed(
         sessions.push(Session::connect(endpoint, timeout)?);
     }
     bind_compressed(&mut sessions, artifacts, p, timeout)?;
+    Ok(sessions)
+}
+
+/// Prepare a fresh multipart-only fleet. All rank/artifact identities and capabilities
+/// are checked before the first byte of weights is sent. Any error invalidates every
+/// session and the caller must reconcile the attempt, never replay it.
+pub fn prepare_compressed_multipart(
+    endpoints: &[Endpoint],
+    artifacts: &[CompressedArtifact],
+    p: &routing::RoutingProblem,
+    attempt: u64,
+    timeout: Duration,
+) -> Result<Vec<Session>> {
+    let ranks = by_rank(p, artifacts)?;
+    if attempt == 0
+        || timeout.is_zero()
+        || endpoints.len() != ranks.len()
+        || endpoints.iter().map(|e| e.rank).collect::<BTreeSet<_>>()
+            != ranks.keys().copied().collect()
+        || artifacts
+            .iter()
+            .any(|a| a.stack.epoch() != p.stamp.epoch || a.bytes.is_empty())
+    {
+        return Err(invalid(
+            "multipart fleet identity, coverage or bounds mismatch",
+        ));
+    }
+    let mut sessions = Vec::new();
+    for endpoint in endpoints {
+        sessions.push(Session::connect(endpoint, timeout)?);
+    }
+    if sessions.iter().any(|s| {
+        !s.hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_QPN2_MULTIPART)
+    }) {
+        return Err(Error::new(
+            "CAPABILITY_MISSING",
+            "multipart fleet preflight failed; nothing sent",
+        ));
+    }
+    for index in 0..sessions.len() {
+        let artifact = &artifacts[*ranks
+            .get(&sessions[index].rank)
+            .ok_or_else(|| invalid("missing rank"))?];
+        if let Err(error) =
+            sessions[index].load_compressed_multipart(artifact, &p.stamp, attempt, timeout)
+        {
+            for s in &mut sessions {
+                s.usable = false;
+            }
+            return Err(error);
+        }
+    }
     Ok(sessions)
 }
 
@@ -6121,11 +6314,27 @@ fn run_compressed_batch_with_format(
     options: BatchExecutionOptions,
 ) -> Result<BatchReport> {
     let ranks_of = by_rank(p, artifacts)?;
+    check_work(p, artifacts, &ranks_of)?;
+    let digests = ranks_of
+        .iter()
+        .map(|(&rank, &index)| (rank, artifacts[index].sha256.clone()))
+        .collect();
+    run_prevalidated_batch(sessions, &digests, p, inputs, faults, timeout, options)
+}
+
+fn run_prevalidated_batch(
+    sessions: &mut [Session],
+    digests: &BTreeMap<u32, String>,
+    p: &routing::RoutingProblem,
+    inputs: BatchInputs<'_>,
+    faults: &BTreeMap<u32, Fault>,
+    timeout: Duration,
+    options: BatchExecutionOptions,
+) -> Result<BatchReport> {
     match inputs {
         BatchInputs::F64(rows) => check_rows(p, rows)?,
         BatchInputs::Fp16(rows) => check_fp16_rows(p, rows)?,
     }
-    check_work(p, artifacts, &ranks_of)?;
     let collector = moe::Collector::from_routing(p)?;
     let ranks: Vec<_> = routing::dispatch(p)?
         .ranks
@@ -6156,8 +6365,10 @@ fn run_compressed_batch_with_format(
                 "session must be reopened after a failure",
             ));
         }
-        let artifact = &artifacts[ranks_of[&rank.rank]];
-        if session.artifact.as_ref() != Some(&(artifact.sha256.clone(), p.stamp.epoch)) {
+        let digest = digests
+            .get(&rank.rank)
+            .ok_or_else(|| invalid("missing rank digest"))?;
+        if session.artifact.as_ref() != Some(&(digest.clone(), p.stamp.epoch)) {
             return Err(Error::new(
                 "STALE_EXECUTION",
                 "session does not hold this batch's resident artifact and epoch; bind first",
@@ -6214,6 +6425,103 @@ fn run_compressed_batch_with_format(
         timeout,
         options.completion_fp16,
     )
+}
+
+/// Immutable admission evidence for an already-loaded, fixed-epoch fleet.
+/// It retains routing metadata and hashes, not expert weight planes. Construct it
+/// only after successful multipart loading; it cannot load, rebind or recover.
+pub struct CompactCompressedFleet {
+    baseline: routing::RoutingProblem,
+    digests: BTreeMap<u32, String>,
+    per_slot_work: BTreeMap<u32, u64>,
+}
+impl CompactCompressedFleet {
+    pub fn from_loaded(
+        sessions: &[Session],
+        artifacts: &[CompressedArtifact],
+        p: &routing::RoutingProblem,
+    ) -> Result<Self> {
+        let ranks = by_rank(p, artifacts)?;
+        if sessions.len() != ranks.len()
+            || sessions.iter().map(|s| s.rank).collect::<BTreeSet<_>>()
+                != ranks.keys().copied().collect()
+        {
+            return Err(invalid("compact fleet endpoint coverage mismatch"));
+        }
+        let mut digests = BTreeMap::new();
+        let mut per_slot_work = BTreeMap::new();
+        for s in sessions {
+            let a = &artifacts[ranks[&s.rank]];
+            if !s.usable || s.artifact.as_ref() != Some(&(a.sha256.clone(), p.stamp.epoch)) {
+                return Err(Error::new(
+                    "STALE_EXECUTION",
+                    "compact fleet requires every resident acknowledged at the current epoch",
+                ));
+            }
+            let (_, n13, k13, _, _) = a.stack.shape();
+            let cost = (n13 / 2)
+                .checked_mul(k13)
+                .and_then(|v| v.checked_mul(3))
+                .ok_or_else(over_budget)?;
+            digests.insert(s.rank, a.sha256.clone());
+            per_slot_work.insert(s.rank, cost);
+        }
+        let mut baseline = p.clone();
+        baseline.routes.clear();
+        Ok(Self {
+            baseline,
+            digests,
+            per_slot_work,
+        })
+    }
+    /// Execute one typed-FP16 batch without retaining coordinator weight copies.
+    /// Static identity, registry and owner preference are frozen; only routes,
+    /// activations and batch number may change. Unknown work is never replayed.
+    pub fn run_fp16(
+        &self,
+        sessions: &mut [Session],
+        p: &routing::RoutingProblem,
+        inputs_fp16: &[Vec<u16>],
+        timeout: Duration,
+    ) -> Result<BatchReport> {
+        routing::validate(p)?;
+        let mut stamp = p.stamp.clone();
+        stamp.batch = self.baseline.stamp.batch;
+        if stamp != self.baseline.stamp
+            || p.hidden != self.baseline.hidden
+            || p.experts != self.baseline.experts
+            || p.registry.epoch != self.baseline.registry.epoch
+            || p.registry.copies != self.baseline.registry.copies
+            || p.resident_order != self.baseline.resident_order
+            || p.preferred_owners != self.baseline.preferred_owners
+        {
+            return Err(invalid("compact fleet identity or registry changed"));
+        }
+        for rank in routing::dispatch(p)?.ranks {
+            let cost = *self
+                .per_slot_work
+                .get(&rank.rank)
+                .ok_or_else(|| invalid("missing compact rank"))?;
+            if (rank.slots.len() as u64)
+                .checked_mul(cost)
+                .is_none_or(|n| n > 100_000_000)
+            {
+                return Err(over_budget());
+            }
+        }
+        run_prevalidated_batch(
+            sessions,
+            &self.digests,
+            p,
+            BatchInputs::Fp16(inputs_fp16),
+            &BTreeMap::new(),
+            timeout,
+            BatchExecutionOptions {
+                recovery: false,
+                completion_fp16: true,
+            },
+        )
+    }
 }
 
 /// The dense f64 oracle of compressed batches: held experts decoded once by the

@@ -7656,3 +7656,141 @@ fn a78_crossnode_large_engram_request_uses_peer_compatible_wire_format() {
         })
     );
 }
+
+#[test]
+fn released_transfer_bytes_preserve_bound_batch_and_refuse_fresh_load() {
+    let p = routing_problem("r293-release-transfer");
+    let (mut sessions, mut artifacts) = bound(&p);
+    let x = activations(6, HIDDEN as usize, 4);
+    let before = session::run_compressed_batch(
+        &mut sessions,
+        &artifacts,
+        &p,
+        &x,
+        &BTreeMap::new(),
+        false,
+        T,
+    )
+    .unwrap();
+    assert!(before.ok);
+    let hashes: Vec<_> = artifacts.iter().map(|a| a.sha256().to_owned()).collect();
+    for a in &mut artifacts {
+        assert!(!a.bytes().is_empty());
+        a.discard_transfer_bytes();
+        assert!(a.bytes().is_empty());
+    }
+    assert_eq!(
+        hashes,
+        artifacts
+            .iter()
+            .map(|a| a.sha256().to_owned())
+            .collect::<Vec<_>>()
+    );
+    let mut next = p.clone();
+    next.stamp.batch += 1;
+    let after = session::run_compressed_batch(
+        &mut sessions,
+        &artifacts,
+        &next,
+        &x,
+        &BTreeMap::new(),
+        false,
+        T,
+    )
+    .unwrap();
+    assert!(after.ok);
+    assert_eq!(before.output, after.output);
+    let mut fresh = Session::connect(&endpoint(artifacts[0].stack().rank()), T).unwrap();
+    let sent = fresh.traffic.bytes_sent;
+    let error = fresh.load_compressed(&artifacts[0], EPOCH, T).unwrap_err();
+    assert_eq!(error.code, "ARTIFACT_BYTES_RELEASED");
+    assert_eq!(fresh.traffic.bytes_sent, sent);
+    assert_eq!(fresh.close(T).exit_code, Some(0));
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}
+
+#[test]
+fn released_bytes_refuse_mixed_fleet_before_any_rebind() {
+    let p = routing_problem("r293-mixed-preflight");
+    let (mut sessions, mut artifacts) = bound(&p);
+    let old = sessions.pop().unwrap();
+    assert_eq!(old.close(T).exit_code, Some(0));
+    sessions.push(Session::connect(&endpoint(9), T).unwrap());
+    for a in &mut artifacts {
+        a.discard_transfer_bytes();
+    }
+    let mut next = p.clone();
+    next.stamp.epoch += 1;
+    next.registry.epoch += 1;
+    let sent: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+    let error = session::bind_compressed(&mut sessions, &artifacts, &next, T).unwrap_err();
+    assert_eq!(error.code, "ARTIFACT_BYTES_RELEASED");
+    assert_eq!(
+        sent,
+        sessions
+            .iter()
+            .map(|s| s.traffic.bytes_sent)
+            .collect::<Vec<_>>()
+    );
+    let error =
+        session::prepare_compressed_multipart(&[endpoint(2), endpoint(9)], &artifacts, &p, 1, T)
+            .err()
+            .unwrap();
+    assert_eq!(error.code, "INVALID_INPUT");
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}
+
+#[test]
+fn compact_fleet_executes_after_drop_and_rejects_changed_identity_without_sending() {
+    let p = routing_problem("r296-compact");
+    let (mut sessions, artifacts) = bound(&p);
+    let inputs = vec![vec![0x3c00_u16; HIDDEN as usize]; p.routes.len()];
+    let mut routed = p.clone();
+    routed.routes[0][0].weight = 0.125;
+    let reference = session::run_compressed_batch_with_fp16_inputs(
+        &mut sessions,
+        &artifacts,
+        &routed,
+        &inputs,
+        &BTreeMap::new(),
+        session::CompletionFormat::Fp16,
+        T,
+    )
+    .unwrap();
+    assert!(reference.ok);
+    let compact = session::CompactCompressedFleet::from_loaded(&sessions, &artifacts, &p).unwrap();
+    drop(artifacts);
+    let mut next = routed.clone();
+    next.stamp.batch += 1;
+    let result = compact.run_fp16(&mut sessions, &next, &inputs, T).unwrap();
+    assert!(result.ok);
+    assert_eq!(result.output, reference.output);
+    let before: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+    let mut bad = next.clone();
+    bad.stamp.batch += 1;
+    bad.stamp.plan_id.push('x');
+    assert!(compact.run_fp16(&mut sessions, &bad, &inputs, T).is_err());
+    let mut bad = next.clone();
+    bad.stamp.batch += 1;
+    bad.registry.copies.swap(0, 1);
+    assert!(compact.run_fp16(&mut sessions, &bad, &inputs, T).is_err());
+    let mut bad = next.clone();
+    bad.stamp.batch += 1;
+    bad.stamp.epoch += 1;
+    bad.registry.epoch += 1;
+    assert!(compact.run_fp16(&mut sessions, &bad, &inputs, T).is_err());
+    assert_eq!(
+        before,
+        sessions
+            .iter()
+            .map(|s| s.traffic.bytes_sent)
+            .collect::<Vec<_>>()
+    );
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}

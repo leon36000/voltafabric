@@ -357,8 +357,9 @@ def load_resident_artifact(
 
     The Rust-produced Safetensors file is validated on CPU, including its complete
     identity, plane layout, and SM70 scale domain, before any device allocation.
-    The six compressed planes are then copied once and published through a single
-    private owner reference. This does not decode or retain dense weights.
+    Validated owned CPU planes transfer to the CPU owner without another copy.
+    Non-CPU targets receive separate device buffers before atomic publication.
+    This does not decode or retain dense weights.
     """
     if getattr(layer, "_skinny_moe_resident", None) is not None:
         raise ValueError("layer already owns resident weights; use a fresh layer")
@@ -432,8 +433,11 @@ def load_resident_artifact(
         device=torch.device("cpu"),
     )
 
+    # load_stack already cloned private, contiguous CPU tensors. The artifact
+    # remains local to this call, so on CPU ownership can move to the resident
+    # rather than duplicating every compressed plane a second time.
     device_planes = {
-        name: tensor.to(device=target, copy=True).contiguous()
+        name: tensor.to(device=target, copy=target.type != "cpu").contiguous()
         for name, tensor in planes.items()
     }
     resident = _ResidentWeights(

@@ -3,7 +3,7 @@ use crate::{
     resident::{self, ResidentStack},
     Error, Result,
 };
-use safetensors::tensor::{serialize, Dtype, SafeTensors, TensorView};
+use safetensors::tensor::{serialize, Dtype, Metadata, SafeTensors, TensorInfo, TensorView, View};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -366,6 +366,65 @@ fn f32_tensor(file: &SafeTensors<'_>, name: &str, experts: usize) -> Result<Vec<
         .collect())
 }
 
+// Compare the canonical serialization in bounded pieces. Re-serializing the whole
+// payload here used to allocate another artifact-sized Vec during admission.
+fn canonical_encoding_matches(stack: &ResidentStack, bytes: &[u8]) -> Result<bool> {
+    let global13 = f32_le_bytes(stack.gscales13())?;
+    let global2 = f32_le_bytes(stack.gscales2())?;
+    let (mut views, metadata) = build_tensors(stack, &global13, &global2)?;
+    // Must match safetensors 0.8's prepare ordering exactly.
+    views.sort_by(|(left_name, left), (right_name, right)| {
+        right
+            .dtype()
+            .cmp(&left.dtype())
+            .then(left_name.cmp(right_name))
+    });
+    let mut offset = 0usize;
+    let mut infos = Vec::with_capacity(views.len());
+    for (name, view) in &views {
+        let end = offset
+            .checked_add(view.data_len())
+            .ok_or_else(|| invalid_artifact("tensor offsets overflow"))?;
+        infos.push((
+            name.clone(),
+            TensorInfo {
+                dtype: view.dtype(),
+                shape: view.shape().to_vec(),
+                data_offsets: (offset, end),
+            },
+        ));
+        offset = end;
+    }
+    let header = Metadata::new(Some(metadata), infos)
+        .map_err(|err| io_error("ARTIFACT_SERIALIZE", "tensor metadata invalid", err))?;
+    let value = serde_json::to_value(header)
+        .map_err(|err| io_error("ARTIFACT_SERIALIZE", "header serialization failed", err))?;
+    let mut text = serde_json::to_vec(&value)
+        .map_err(|err| io_error("ARTIFACT_SERIALIZE", "header serialization failed", err))?;
+    text.resize(text.len().div_ceil(8) * 8, b' ');
+    let Some(header_end) = 8usize.checked_add(text.len()) else {
+        return Ok(false);
+    };
+    if bytes.get(..8) != Some(&(text.len() as u64).to_le_bytes())
+        || bytes.get(8..header_end) != Some(text.as_slice())
+        || bytes.len().checked_sub(header_end) != Some(offset)
+    {
+        return Ok(false);
+    }
+    let mut cursor = header_end;
+    for (_, view) in &views {
+        let data = view.data();
+        let end = cursor
+            .checked_add(data.len())
+            .ok_or_else(|| invalid_artifact("tensor offsets overflow"))?;
+        if bytes.get(cursor..end) != Some(data) {
+            return Ok(false);
+        }
+        cursor = end;
+    }
+    Ok(cursor == bytes.len())
+}
+
 /// Rebuild a resident stack from the bytes of a `QPN2_RESIDENT_V1` artifact. The stack
 /// passes the same validation `pack` gives its output, and the bytes must be exactly the
 /// ones `encode` writes for it, so an artifact's SHA-256 names one stack and one only.
@@ -406,7 +465,7 @@ pub fn import(bytes: &[u8]) -> Result<ResidentStack> {
         shape: info.shape,
         payload_bytes: info.payload_bytes,
     })?;
-    if encode(&stack)? != bytes {
+    if !canonical_encoding_matches(&stack, bytes)? {
         return Err(Error::new(
             "ARTIFACT_NOT_CANONICAL",
             "artifact bytes differ from the canonical encoding of their content",
@@ -540,6 +599,31 @@ pub fn merge(artifacts: &[&[u8]]) -> Result<ResidentStack> {
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn streamed_canonical_check_matches_full_encoding_for_mutations() {
+        let path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("fixtures/resident_import_qwen_expert0.json");
+        let request: crate::checkpoint::Request =
+            serde_json::from_slice(&fs::read(path).unwrap()).unwrap();
+        let stack = crate::checkpoint::load(&request).unwrap().stack;
+        let original = encode(&stack).unwrap();
+        assert!(canonical_encoding_matches(&stack, &original).unwrap());
+        let header = u64::from_le_bytes(original[..8].try_into().unwrap()) as usize;
+        for index in (0..8 + header).chain((8 + header..original.len()).step_by(137)) {
+            let mut altered = original.clone();
+            altered[index] ^= 1;
+            assert_eq!(
+                canonical_encoding_matches(&stack, &altered).unwrap(),
+                encode(&stack).unwrap() == altered,
+                "byte {index}"
+            );
+        }
+        assert!(!canonical_encoding_matches(&stack, &original[..original.len() - 1]).unwrap());
+        let mut appended = original.clone();
+        appended.push(0);
+        assert!(!canonical_encoding_matches(&stack, &appended).unwrap());
+    }
 
     #[test]
     fn failed_partial_staging_never_publishes_final_file() {
