@@ -1,0 +1,9 @@
+# R383 — GGML native experts through local persistent rank sessions
+
+The CPU session advertises `cpu_strata_sc117_ggml_fp16_v1` only when compiled with `native-ggml-cpu`. Its separate native path transfers a bounded raw expert blob once, binds caller-supplied model/rank/layer/expert/local/epoch and the expected index/blob digests, rechecks the SC117 index and blob at the worker, then seals up to four resident experts. Native sessions refuse mixing this contract with other resident formats. No IQ format is reclassified as QPN2 or MXFP4.
+
+The coordinator dispatches native FP32 inputs to persistent workers, checks started/result identities, and gives the unweighted compact FP16 results to the existing ordered f64 collector, which applies route coefficients once. A process-local identity guard rejects a second batch attempt. Failure at any rank discards the whole batch, invalidates participating sessions, and returns no result. This guard is not a durable or distributed journal: after a restart an external ledger must prevent replay of an UNKNOWN.
+
+A real two-child local pipe test loads nonzero synthetic native experts, collects their results against separately computed resident outputs, refuses replay, and checks that second-rank FP16 overflow after the first rank completes returns no partial result and invalidates both sessions. The SC117 index is real metadata but the blobs are synthetic. Existing QPN2 session regressions remain separate. Derived native GGML implementation and licenses are documented in R379–R381; this adds integration code, not another upstream extraction.
+
+No real checkpoint weights, inter-PC transport, RDMA, GPU, model-wide execution or text generation is qualified. Trusted per-expert manifests and durable UNKNOWN records remain prerequisites before deployment. Cross-machine work must also pass the applicable fresh hardware/resource admissions.

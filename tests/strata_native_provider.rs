@@ -423,3 +423,143 @@ fn native_rank_workers_produce_atomic_compact_rows_for_existing_collector() {
     other.stamp.plan_id = "other".into();
     assert!(workers[0].execute(&other, &inputs, 2).is_err());
 }
+
+#[test]
+fn native_ggml_sessions_execute_two_actual_child_processes() {
+    use std::{collections::BTreeMap, time::Duration};
+    use voltafabric::{
+        completion,
+        moe::{Choice, Registry, Replica, Stamp},
+        routing,
+        session::{Endpoint, Session},
+    };
+    let timeout = Duration::from_secs(30);
+    let mut data = vec![0u8; 2_176_000];
+    for i in (0..1_254_400).step_by(98) {
+        data[i + 1] = 0x28;
+    }
+    for i in (1_254_400..2_176_000).step_by(18) {
+        data[i + 1] = 0x28;
+    }
+    let digest = "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0";
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let mut b = binding();
+    b.blob_sha256 = digest.into();
+    let blob = layout
+        .read_verified_expert(
+            &mut Pattern {
+                pos: 0,
+                data: data.clone(),
+            },
+            0,
+            0,
+            INDEX_SHA,
+            digest,
+        )
+        .unwrap();
+    let mut reference = Resident::load(&layout, blob, b.clone()).unwrap();
+    let x = vec![0.001_f32; 2560];
+    let expected = reference
+        .forward(&x)
+        .unwrap()
+        .into_iter()
+        .map(|v| completion::decode_fp16(completion::encode_fp16(f64::from(v)).unwrap()).unwrap())
+        .collect::<Vec<_>>();
+    let mut sessions = Vec::new();
+    for expert in 0..2 {
+        let rank = 2 + expert;
+        let endpoint = Endpoint {
+            rank,
+            argv: vec![env!("CARGO_BIN_EXE_vf-rank-session").to_owned()],
+        };
+        let mut session = Session::connect(&endpoint, timeout).unwrap();
+        let mut binding = b.clone();
+        binding.rank = rank;
+        binding.expert = expert;
+        session
+            .load_native_ggml(&binding, INDEX, SIZE, &data, timeout)
+            .unwrap();
+        session.seal_native_ggml(1, timeout).unwrap();
+        sessions.push(session);
+    }
+    assert_ne!(sessions[0].pid(), sessions[1].pid());
+    let p = routing::RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![vec![
+            Choice {
+                expert: 0,
+                weight: 0.25,
+            },
+            Choice {
+                expert: 1,
+                weight: 0.75,
+            },
+        ]],
+        registry: Registry {
+            epoch: 3,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r383-two-processes".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+    };
+    let output =
+        Session::exec_native_ggml_batch(&mut sessions, &p, std::slice::from_ref(&x), timeout)
+            .unwrap();
+    for (actual, value) in output[0].iter().zip(expected) {
+        assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
+    }
+    assert!(
+        Session::exec_native_ggml_batch(&mut sessions, &p, std::slice::from_ref(&x), timeout)
+            .is_err()
+    );
+    let mut overflow = p.clone();
+    overflow.stamp.batch = 1;
+    overflow.routes = vec![
+        vec![Choice {
+            expert: 0,
+            weight: 1.0,
+        }],
+        vec![Choice {
+            expert: 1,
+            weight: 1.0,
+        }],
+    ];
+    assert_eq!(
+        Session::exec_native_ggml_batch(
+            &mut sessions,
+            &overflow,
+            &[x.clone(), vec![0.125; 2560]],
+            timeout
+        )
+        .unwrap_err()
+        .code,
+        "FP16_OVERFLOW"
+    );
+    assert!(sessions.iter().all(|s| !s.is_usable()));
+    let mut after = p.clone();
+    after.stamp.batch = 2;
+    assert!(Session::exec_native_ggml_batch(&mut sessions, &after, &[x], timeout).is_err());
+    for session in sessions {
+        let _ = session.close(timeout);
+    }
+}

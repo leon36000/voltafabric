@@ -66,6 +66,8 @@ pub const CAPABILITY_COMPLETION_BATCH_FP16_RAW: &str = "cpu_completion_batch_fp1
 pub const CAPABILITY_ENGRAM_ROWS_RAW: &str = "cpu_engram_owner_rows_raw_v1";
 /// Owner row-ID requests may append a canonical unsigned-LEB128 body (A78).
 pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1";
+#[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
 /// How long close() still waits for the output of a worker it has just killed.
@@ -119,6 +121,21 @@ pub enum Request {
     Hello {
         protocol: u32,
         rank: u32,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    LoadNativeGgmlRaw {
+        binding: crate::native_ggml_cpu::Binding,
+        index: String,
+        pack_bytes: u64,
+        artifact_bytes: u64,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    SealNativeGgml,
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGgml {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<(usize, Vec<f32>)>,
     },
     Load {
         artifact_sha256: String,
@@ -268,6 +285,18 @@ pub enum Request {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "reply", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Reply {
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGgmlLoaded {
+        binding: crate::native_ggml_cpu::Binding,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGgmlReady {
+        experts: usize,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGgmlResult {
+        output: crate::completion::RoutedRawOutput,
+    },
     MultipartReady {
         offset: u64,
     },
@@ -2264,6 +2293,10 @@ fn serve_impl(
     let mut last_engram_attempt = 0_u64;
     let mut execs = 0_u64;
     let mut raw_completion_batch_latched = false;
+    #[cfg(feature = "native-ggml-cpu")]
+    let mut native_owners: Vec<crate::native_ggml_cpu::Resident> = Vec::new();
+    #[cfg(feature = "native-ggml-cpu")]
+    let mut native_worker: Option<crate::native_ggml_cpu::RankWorker> = None;
     loop {
         let mut raw_completions = false;
         let mut raw_completion_batch = false;
@@ -2515,6 +2548,10 @@ fn serve_impl(
                 Request::Hello { protocol, rank } if protocol == PROTOCOL => {
                     bound = Some(rank);
                     let mut hello = hello(rank);
+                    #[cfg(feature = "native-ggml-cpu")]
+                    if executor.is_none() {
+                        hello.capabilities.push(CAPABILITY_NATIVE_GGML_CPU.into());
+                    }
                     if let Some(provider) = executor.as_ref() {
                         hello.capabilities = vec![
                             mxfp4::GPU_CAPABILITY.into(),
@@ -2538,7 +2575,151 @@ fn serve_impl(
             )?;
             return Err(error);
         };
+        #[cfg(feature = "native-ggml-cpu")]
+        if (!native_owners.is_empty() || native_worker.is_some())
+            && !matches!(
+                request,
+                Request::LoadNativeGgmlRaw { .. }
+                    | Request::SealNativeGgml
+                    | Request::ExecNativeGgml { .. }
+                    | Request::Shutdown
+            )
+        {
+            let error = invalid("native GGML session cannot mix resident contracts");
+            send_reply(
+                output,
+                &Reply::Refused {
+                    error: error.clone(),
+                },
+            )?;
+            return Err(error);
+        }
         match request {
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::LoadNativeGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
+            } => {
+                use crate::strata_native_layout::{NativeLayout, VerifiedNativeExpert};
+                if resident.is_some()
+                    || engram_resident.is_some()
+                    || native_worker.is_some()
+                    || binding.rank != rank
+                    || native_owners.len() >= 4
+                    || artifact_bytes > 4 * 1024 * 1024
+                {
+                    let error = invalid("native load state, rank or size");
+                    send_reply(
+                        output,
+                        &Reply::Refused {
+                            error: error.clone(),
+                        },
+                    )?;
+                    return Err(error); // raw body remains unread
+                }
+                let bytes = match read_raw_body(input, header_bytes, artifact_bytes, false) {
+                    Ok(bytes) => bytes,
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &Reply::Refused {
+                                error: error.clone(),
+                            },
+                        )?;
+                        return Err(error);
+                    }
+                };
+                let loaded = (|| -> Result<crate::native_ggml_cpu::Resident> {
+                    if native_owners.iter().any(|r| {
+                        r.binding().local == binding.local || r.binding().expert == binding.expert
+                    }) {
+                        return Err(invalid("duplicate native rank expert or local"));
+                    }
+                    let layout = NativeLayout::parse_sc117_v3(&index, pack_bytes)?;
+                    let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+                    let blob = VerifiedNativeExpert {
+                        layer: binding.layer as usize,
+                        expert: u64::from(binding.expert),
+                        span,
+                        bytes,
+                    };
+                    crate::native_ggml_cpu::Resident::load(&layout, blob, binding.clone())
+                })();
+                match loaded {
+                    Ok(owner) => {
+                        native_owners.push(owner);
+                        send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
+                    }
+                    Err(error) => send_reply(output, &Reply::Refused { error })?,
+                }
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::SealNativeGgml => {
+                if native_worker.is_some() || native_owners.is_empty() {
+                    send_reply(
+                        output,
+                        &refuse("NATIVE_STATE", "native owners missing or already sealed"),
+                    )?;
+                    continue;
+                }
+                let count = native_owners.len();
+                match crate::native_ggml_cpu::RankWorker::new(std::mem::take(&mut native_owners)) {
+                    Ok(worker) => {
+                        native_worker = Some(worker);
+                        send_reply(output, &Reply::NativeGgmlReady { experts: count })?;
+                    }
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &Reply::Refused {
+                                error: error.clone(),
+                            },
+                        )?;
+                        return Err(error);
+                    }
+                }
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::ExecNativeGgml {
+                dispatch,
+                attempt,
+                inputs,
+            } => {
+                let Some(worker) = native_worker.as_mut() else {
+                    send_reply(
+                        output,
+                        &refuse("NATIVE_STATE", "native owners are not sealed"),
+                    )?;
+                    continue;
+                };
+                let stamp = dispatch.stamp.clone();
+                let event = |event| Reply::Event {
+                    event: WorkerEvent {
+                        stamp: stamp.clone(),
+                        rank,
+                        attempt,
+                        event,
+                    },
+                };
+                send_reply(output, &event(EventKind::Started))?;
+                match worker.execute(&dispatch, &inputs, attempt) {
+                    Ok(result) => {
+                        send_reply(output, &Reply::NativeGgmlResult { output: result })?;
+                        execs += 1;
+                    }
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &event(EventKind::Failed {
+                                error: error.clone(),
+                            }),
+                        )?;
+                        return Err(error); // after Started this session cannot be replayed
+                    }
+                }
+            }
             Request::LoadMxfp4Raw {
                 binding,
                 artifact_bytes,
@@ -3221,6 +3402,223 @@ fn engram_fetched_row_index(sorted_miss_ids: &[u64], row_id: u64) -> Option<usiz
 }
 
 impl Session {
+    /// Transfer one digest-bound SC117 GGML expert. The expected digest must come
+    /// from a trusted manifest; the worker independently verifies the exact bytes.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn load_native_ggml(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        if !self
+            .hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+            || binding.rank != self.rank
+            || bytes.len() > 4 * 1024 * 1024
+        {
+            return Err(invalid("native GGML capability, rank or size"));
+        }
+        let layout = crate::strata_native_layout::NativeLayout::parse_sc117_v3(index, pack_bytes)?;
+        let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+        if layout.index_sha256() != binding.index_sha256
+            || span.bytes != bytes.len() as u64
+            || sha256::hex(bytes) != binding.blob_sha256
+        {
+            return Err(invalid("native GGML index or payload digest"));
+        }
+        let request = Request::LoadNativeGgmlRaw {
+            binding: binding.clone(),
+            index: index.to_owned(),
+            pack_bytes,
+            artifact_bytes: bytes.len() as u64,
+        };
+        self.write_parts(&[&encode(&request)?, bytes], true)?;
+        match self.reply(timeout)? {
+            Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::Refused { error } => Err(error),
+            _ => {
+                self.usable = false;
+                Err(invalid("native GGML load reply identity"))
+            }
+        }
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn seal_native_ggml(&mut self, expected_experts: usize, timeout: Duration) -> Result<()> {
+        if !self
+            .hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+            || !(1..=4).contains(&expected_experts)
+        {
+            return Err(invalid("native GGML capability or expert count"));
+        }
+        self.send(&Request::SealNativeGgml)?;
+        match self.reply(timeout)? {
+            Reply::NativeGgmlReady { experts } if experts == expected_experts => Ok(()),
+            Reply::Refused { error } => Err(error),
+            _ => {
+                self.usable = false;
+                Err(invalid("native GGML seal reply count"))
+            }
+        }
+    }
+
+    /// Execute once and atomically admit this rank's compact unweighted rows.
+    /// On any failure the coordinator must discard the entire batch and never
+    /// replay an uncertain identity; this method is not a durable replay ledger.
+    #[cfg(feature = "native-ggml-cpu")]
+    fn exec_native_ggml(
+        &mut self,
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<(usize, Vec<f32>)>,
+        collector: &mut moe::Collector,
+        timeout: Duration,
+    ) -> Result<usize> {
+        if !self
+            .hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+            || dispatch.rank != self.rank
+            || attempt == 0
+        {
+            return Err(invalid("native GGML capability, rank or attempt"));
+        }
+        let deadline = Instant::now() + timeout;
+        self.send(&Request::ExecNativeGgml {
+            dispatch: dispatch.clone(),
+            attempt,
+            inputs,
+        })?;
+        let started = self.reply_until(deadline)?;
+        if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } } if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
+        {
+            self.usable = false;
+            return Err(invalid("native GGML start reply identity"));
+        }
+        match self.reply_until(deadline)? {
+            Reply::NativeGgmlResult { output }
+                if output.stamp == dispatch.stamp
+                    && output.rank == self.rank
+                    && output.attempt == attempt =>
+            {
+                match crate::completion::accept_routed_output(attempt, output, collector) {
+                    Ok(count) if count == dispatch.slots.len() => Ok(count),
+                    Ok(_) => {
+                        self.usable = false;
+                        Err(invalid("native GGML result slot count"))
+                    }
+                    Err(error) => {
+                        self.usable = false;
+                        Err(error)
+                    }
+                }
+            }
+            Reply::Event {
+                event:
+                    WorkerEvent {
+                        stamp,
+                        rank,
+                        attempt: n,
+                        event: EventKind::Failed { error },
+                    },
+            } if stamp == dispatch.stamp && rank == self.rank && n == attempt => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("native GGML result reply identity"))
+            }
+        }
+    }
+
+    /// One native rank wave. On any error no output is returned and every
+    /// participating session is invalidated. The replay guard is process-local;
+    /// callers must maintain the durable ledger across coordinator restarts.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_native_ggml_batch(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        timeout: Duration,
+    ) -> Result<Vec<Vec<f64>>> {
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || inputs.len() != problem.routes.len()
+            || inputs
+                .iter()
+                .any(|r| r.len() != 2560 || r.iter().any(|v| !v.is_finite()))
+        {
+            return Err(invalid("native batch input or timeout"));
+        }
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.hidden != 2560 || dispatch.slots.is_empty() {
+            return Err(invalid("native batch dimensions"));
+        }
+        let mut selected = Vec::new();
+        for rank in dispatch.ranks.into_iter().filter(|r| !r.slots.is_empty()) {
+            let matches: Vec<_> = sessions
+                .iter()
+                .enumerate()
+                .filter(|(_, s)| s.rank == rank.rank)
+                .collect();
+            if matches.len() != 1
+                || !matches[0].1.usable
+                || !matches[0]
+                    .1
+                    .hello
+                    .capabilities
+                    .iter()
+                    .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+            {
+                return Err(invalid(
+                    "native participating session missing, duplicate or unusable",
+                ));
+            }
+            let tokens: BTreeSet<_> = rank.slots.iter().map(|r| r.slot.token).collect();
+            let rows = tokens
+                .into_iter()
+                .map(|t| (t, inputs[t].clone()))
+                .collect::<Vec<_>>();
+            selected.push((matches[0].0, rank, rows));
+        }
+        let mut collector = moe::Collector::from_routing(problem)?;
+        let attempt = next_attempt()?;
+        claim_identity(&problem.stamp, false)?;
+        let deadline = Instant::now() + timeout;
+        for (index, dispatch, rows) in &selected {
+            if let Err(error) = sessions[*index].exec_native_ggml(
+                dispatch.clone(),
+                attempt,
+                rows.clone(),
+                &mut collector,
+                deadline.saturating_duration_since(Instant::now()),
+            ) {
+                for (i, _, _) in &selected {
+                    sessions[*i].usable = false;
+                }
+                return Err(error);
+            }
+        }
+        match collector.finish() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for (i, _, _) in &selected {
+                    sessions[*i].usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
     /// Fetch only unique cache misses, then reconstruct caller order and duplicates. Cache
     /// additions occur only after all owner frames pass identity and coverage validation.
     pub fn fetch_engram_batch_cached(

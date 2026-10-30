@@ -1,12 +1,13 @@
-//! Experimental single-process native GGML owner, separate from MXFP4/QPN2.
-//! Bindings are caller-provided evidence, not a distributed lease or Session.
+//! Experimental native GGML CPU owner, separate from MXFP4/QPN2.
+//! Bindings are caller-provided evidence, not a distributed lease.
 use crate::{
     invalid, sha256,
     strata_native_layout::{NativeLayout, VerifiedNativeExpert},
     Result,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Binding {
     pub model_revision: String,
     pub rank: u32,
