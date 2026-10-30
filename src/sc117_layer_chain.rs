@@ -269,6 +269,8 @@ impl Layer {
         token: Option<i32>,
         timeout: Duration,
         source: &mut Option<&mut dyn MissingExpertSource>,
+        capture_qsa: bool,
+        qsa_trace: &mut Option<sc117_qsa_stage::Output>,
     ) -> Result<Vec<f32>> {
         let stamp = ticket.stamp().clone();
         let attempt = ticket.attempt();
@@ -326,7 +328,11 @@ impl Layer {
                     ticket,
                     timeout,
                 )?;
-                Ok(routed.commit(qsa, shared, collected)?.residual)
+                let committed = routed.commit(qsa, shared, collected)?;
+                if capture_qsa {
+                    *qsa_trace = Some(committed.attention);
+                }
+                Ok(committed.residual)
             }
         };
         let output = if let (Some(ple), Some(candidate)) = (&mut self.ple, candidate) {
@@ -439,6 +445,34 @@ where
     Ok(residual)
 }
 
+// Keep diagnostics private until the entire segment has committed. A failed
+// later layer drops the observation along with the partial residual.
+#[allow(clippy::too_many_arguments)]
+fn advance_with_observation<F, T>(
+    cursor: &mut Cursor,
+    ledger: &NativeBatchLedger,
+    base: &Stamp,
+    count: usize,
+    attempt: u64,
+    input: &[f32],
+    mut step: F,
+) -> Result<(Vec<f32>, Option<T>)>
+where
+    F: FnMut(usize, Reservation, &[f32], &mut Option<T>) -> Result<Vec<f32>>,
+{
+    let mut observation = None;
+    let output = advance(
+        cursor,
+        ledger,
+        base,
+        count,
+        attempt,
+        input,
+        |i, ticket, values| step(i, ticket, values, &mut observation),
+    )?;
+    Ok((output, observation))
+}
+
 #[cfg(feature = "ple-cpu-qualification")]
 #[derive(Debug, serde::Serialize)]
 pub struct PleQualificationSnapshot {
@@ -454,6 +488,13 @@ pub struct Segment {
     ledger: NativeBatchLedger,
     timeout: Duration,
     cursor: Cursor,
+}
+/// A bounded diagnostic observation, released only after every layer commits.
+#[cfg(feature = "ple-cpu-qualification")]
+pub struct QsaQualificationTrace {
+    pub stamp: Stamp,
+    pub attempt: u64,
+    pub output: sc117_qsa_stage::Output,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 struct EvictionCandidate {
@@ -1027,7 +1068,81 @@ impl Segment {
         headroom_bytes: u64,
         max_evictions: usize,
     ) -> Result<(Vec<f32>, Vec<EvictionReceipt>)> {
+        let (output, receipts, _) = self.advance_token_with_headroom_inner(
+            attempt,
+            token,
+            input,
+            source,
+            headroom_bytes,
+            max_evictions,
+            None,
+        )?;
+        Ok((output, receipts))
+    }
+
+    /// CPU qualification only. No trace escapes if any layer fails.
+    #[cfg(feature = "ple-cpu-qualification")]
+    #[allow(clippy::too_many_arguments)]
+    pub fn advance_token_with_headroom_qsa_trace(
+        &mut self,
+        attempt: u64,
+        token: i32,
+        input: &[f32],
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        headroom_bytes: u64,
+        max_evictions: usize,
+        layer: u32,
+    ) -> Result<(Vec<f32>, Vec<EvictionReceipt>, QsaQualificationTrace)> {
+        let mut stamp = self.base.clone();
+        stamp.layer = layer;
+        stamp.batch = self.cursor.position;
+        let (output, receipts, trace) = self.advance_token_with_headroom_inner(
+            attempt,
+            token,
+            input,
+            source,
+            headroom_bytes,
+            max_evictions,
+            Some(layer),
+        )?;
+        let Some(output_trace) = trace else {
+            self.cursor.poisoned = true;
+            return Err(invalid("committed QSA trace missing"));
+        };
+        Ok((
+            output,
+            receipts,
+            QsaQualificationTrace {
+                stamp,
+                attempt,
+                output: output_trace,
+            },
+        ))
+    }
+
+    #[allow(clippy::too_many_arguments, clippy::type_complexity)]
+    fn advance_token_with_headroom_inner(
+        &mut self,
+        attempt: u64,
+        token: i32,
+        input: &[f32],
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        headroom_bytes: u64,
+        max_evictions: usize,
+        capture_layer: Option<u32>,
+    ) -> Result<(
+        Vec<f32>,
+        Vec<EvictionReceipt>,
+        Option<sc117_qsa_stage::Output>,
+    )> {
         validate_advance(&self.cursor, self.layers.len(), attempt, input)?;
+        if capture_layer.is_some_and(|wanted| {
+            !self.layers.iter().any(|layer| {
+                layer.identity.layer == wanted && matches!(layer.attention, Attention::Qsa(..))
+            })
+        }) {
+            return Err(invalid("QSA trace layer missing"));
+        }
         if self.layers.iter().any(|layer| layer.ple.is_some())
             && !(0..sc117_ple::VOCAB).contains(&token)
         {
@@ -1050,8 +1165,14 @@ impl Segment {
         } else {
             Vec::new()
         };
-        let output = self.advance_token_with_source(attempt, token, input, source)?;
-        Ok((output, receipts))
+        let (output, trace) = self.advance_inner_capture(
+            attempt,
+            input,
+            Some(token),
+            &mut Some(source),
+            capture_layer,
+        )?;
+        Ok((output, receipts, trace))
     }
 
     fn advance_inner(
@@ -1061,6 +1182,18 @@ impl Segment {
         token: Option<i32>,
         source: &mut Option<&mut dyn MissingExpertSource>,
     ) -> Result<Vec<f32>> {
+        self.advance_inner_capture(attempt, input, token, source, None)
+            .map(|(output, _)| output)
+    }
+
+    fn advance_inner_capture(
+        &mut self,
+        attempt: u64,
+        input: &[f32],
+        token: Option<i32>,
+        source: &mut Option<&mut dyn MissingExpertSource>,
+        capture_layer: Option<u32>,
+    ) -> Result<(Vec<f32>, Option<sc117_qsa_stage::Output>)> {
         if self.layers.iter().any(|layer| layer.ple.is_some())
             && token.is_none_or(|t| !(0..sc117_ple::VOCAB).contains(&t))
         {
@@ -1070,15 +1203,18 @@ impl Segment {
         let ledger = &self.ledger;
         let timeout = self.timeout;
         let layers = &mut self.layers;
-        advance(
+        advance_with_observation(
             &mut self.cursor,
             ledger,
             &self.base,
             layers.len(),
             attempt,
             input,
-            |i, ticket, values| {
-                layers[i].run(ledger, ticket, position, values, token, timeout, source)
+            |i, ticket, values, trace| {
+                let capture = capture_layer == Some(layers[i].identity.layer);
+                layers[i].run(
+                    ledger, ticket, position, values, token, timeout, source, capture, trace,
+                )
             },
         )
     }
@@ -1833,6 +1969,69 @@ mod tests {
                 12
             )
             .is_ok());
+    }
+
+    #[test]
+    fn observation_is_released_only_after_every_layer_commits() {
+        use std::sync::{
+            atomic::{AtomicUsize, Ordering},
+            Arc,
+        };
+        struct Witness(Arc<AtomicUsize>);
+        impl Drop for Witness {
+            fn drop(&mut self) {
+                self.0.fetch_add(1, Ordering::SeqCst);
+            }
+        }
+        let dropped = Arc::new(AtomicUsize::new(0));
+        let ledger1 = ledger();
+        let mut state = cursor();
+        let result = advance_with_observation(
+            &mut state,
+            &ledger1,
+            &base(),
+            3,
+            11,
+            &vec![1.0; 10240],
+            |i, _, values, trace| {
+                if i == 0 {
+                    *trace = Some(Witness(dropped.clone()));
+                }
+                if i == 1 {
+                    return Err(invalid("later layer failed"));
+                }
+                Ok(values.to_vec())
+            },
+        );
+        assert!(result.is_err());
+        assert!(state.poisoned);
+        assert_eq!(state.position, 0);
+        assert_eq!(dropped.load(Ordering::SeqCst), 1);
+
+        let ledger2 = ledger();
+        let mut state2 = cursor();
+        let (output, trace) = advance_with_observation(
+            &mut state2,
+            &ledger2,
+            &base(),
+            3,
+            12,
+            &vec![1.0; 10240],
+            |i, _, values, trace| {
+                if i == 0 {
+                    *trace = Some(Witness(dropped.clone()));
+                }
+                Ok(values.to_vec())
+            },
+        )
+        .unwrap();
+        assert_eq!(output.len(), 10240);
+        assert_eq!(state2.position, 1);
+        assert!(!state2.poisoned);
+        assert!(trace.is_some());
+        assert_eq!(dropped.load(Ordering::SeqCst), 1);
+        drop(trace);
+        assert_eq!(dropped.load(Ordering::SeqCst), 2);
     }
 
     #[test]
