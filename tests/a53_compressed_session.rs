@@ -8234,9 +8234,9 @@ fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
         .flatten()
         .map(|v| v as f32)
         .collect();
-    let mut mask = vec![false; 12];
-    mask[0] = true;
-    let plan = voltafabric::strata_ingress::admit_mixed_pool_with_model_experts_f64(
+    let mut kinds = vec![-1; 12];
+    kinds[0] = 0;
+    let plan = voltafabric::strata_ingress::admit_strata_kind_f64(
         &p,
         &p.stamp,
         LAYER,
@@ -8245,7 +8245,7 @@ fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
         &inputs,
         &ids,
         &weights,
-        &mask,
+        &kinds,
         &all_experts,
     )
     .unwrap();

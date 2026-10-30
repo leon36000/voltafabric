@@ -255,6 +255,48 @@ pub fn admit_mixed_pool_with_model_experts_f64(
     })
 }
 
+/// Admit the final per-entry `kind` decisions of the pinned Strata donor:
+/// -1 is CPU, 0 is VRAM, 1 is PCIe, and 2 is a peer/helper. The caller must
+/// capture this only after all peer/helper decisions, bind it to the batch,
+/// and coordinate externally owned rows. This does not verify that provenance.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_strata_kind_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    kinds: &[i32],
+    model_experts: &[u32],
+) -> Result<MixedPoolBatch> {
+    if kinds.len() > 262_144 {
+        return Err(invalid("Strata kind count exceeds bound"));
+    }
+    let external: Vec<bool> = kinds
+        .iter()
+        .map(|&kind| match kind {
+            -1 => Ok(false),
+            0..=2 => Ok(true),
+            _ => Err(invalid("unsupported Strata ownership kind")),
+        })
+        .collect::<Result<_>>()?;
+    admit_mixed_pool_with_model_experts_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+        &external,
+        model_experts,
+    )
+}
+
 /// Convert complete, unweighted Session results to a token/slot-major FP32
 /// buffer. Conversion rounds to nearest FP32, rejects non-finite or overflowing
 /// values, and commits only after every shape and value has been checked. The

@@ -538,3 +538,42 @@ fn external_experts_need_no_voltafabric_owner_but_misses_do() {
     )
     .is_err());
 }
+
+#[test]
+fn strata_kind_decision_maps_only_known_owner_codes() {
+    let p = template();
+    let plan = strata_ingress::admit_strata_kind_f64(
+        &p,
+        &p.stamp,
+        3,
+        2,
+        2,
+        &[1.0; 8],
+        &[10, 20, 20, 10],
+        &[0.2, 0.8, 0.3, 0.7],
+        &[0, -1, 2, 1],
+        &[10, 20],
+    )
+    .unwrap();
+    let misses = plan.misses().unwrap();
+    assert_eq!(misses.routing.routes.len(), 1);
+    assert_eq!(misses.routing.routes[0][0].expert, 20);
+    let mut dst = vec![99.0; 16];
+    plan.write_misses(&[vec![vec![5.0; 4]]], &mut dst).unwrap();
+    assert_eq!(dst, [vec![99.0; 4], vec![5.0; 4], vec![99.0; 8]].concat());
+    for invalid in [-2, 3, i32::MAX] {
+        assert!(strata_ingress::admit_strata_kind_f64(
+            &p,
+            &p.stamp,
+            3,
+            1,
+            2,
+            &[1.0; 4],
+            &[10, 20],
+            &[0.2, 0.8],
+            &[invalid, -1],
+            &[10, 20],
+        )
+        .is_err());
+    }
+}
