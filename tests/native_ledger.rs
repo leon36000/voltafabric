@@ -133,3 +133,54 @@ fn ticket_is_bound_to_ledger_stamp_and_stays_consumed() {
     drop(ticket);
     assert!(ledger.reserve_ticket(&stamp(), 20).is_err());
 }
+
+#[test]
+fn eviction_reservation_remains_consumed_across_restart_and_changed_binding() {
+    use voltafabric::native_ggml_cpu::Binding;
+    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(".runs")
+        .join(format!(
+            "r464-eviction-ledger-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+    std::fs::create_dir(&path).unwrap();
+    let ledger = NativeBatchLedger::open(&path).unwrap();
+    let binding = Binding {
+        model_revision: "model".into(),
+        rank: 2,
+        layer: 4,
+        expert: 12,
+        local: 7,
+        epoch: 3,
+        index_sha256: "1".repeat(64),
+        blob_sha256: "2".repeat(64),
+    };
+    let id = ledger.reserve_eviction(&stamp(), 7, &binding).unwrap();
+    let file = path.join(format!("native-evict-{id}.claim.json"));
+    let record: serde_json::Value = serde_json::from_slice(&std::fs::read(file).unwrap()).unwrap();
+    assert_eq!(record["status"], "RESERVED_UNKNOWN_NO_REPLAY");
+    assert_eq!(record["operation_id"], id);
+    drop(ledger);
+    let reopened = NativeBatchLedger::open(&path).unwrap();
+    let mut changed = binding.clone();
+    changed.rank = 9;
+    changed.local = 22;
+    changed.blob_sha256 = "3".repeat(64);
+    assert_eq!(
+        reopened
+            .reserve_eviction(&stamp(), 99, &changed)
+            .unwrap_err()
+            .code,
+        "LEDGER_RESERVATION"
+    );
+    let mut wrong = binding.clone();
+    wrong.epoch = 4;
+    assert!(reopened.reserve_eviction(&stamp(), 7, &wrong).is_err());
+    let mut other = binding;
+    other.expert = 13;
+    assert_ne!(reopened.reserve_eviction(&stamp(), 7, &other).unwrap(), id);
+}

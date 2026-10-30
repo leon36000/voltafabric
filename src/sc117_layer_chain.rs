@@ -397,6 +397,15 @@ pub struct Segment {
     timeout: Duration,
     cursor: Cursor,
 }
+/// Receipt is proof of the local acknowledgement, not a distributed lease.
+#[derive(Debug, serde::Serialize)]
+pub struct EvictionReceipt {
+    pub stamp: Stamp,
+    pub attempt: u64,
+    pub operation_id: String,
+    pub binding: crate::native_ggml_cpu::Binding,
+    pub released_payload_bytes: u64,
+}
 fn require_supported_layer(layer: u32, has_ple: bool, qualifying: bool) -> Result<()> {
     if layer == 1 && !(qualifying && has_ple) {
         return Err(invalid(
@@ -517,6 +526,98 @@ impl Segment {
     }
     pub fn is_poisoned(&self) -> bool {
         self.cursor.poisoned
+    }
+
+    /// Evict between fully committed positions. The rank must have participated
+    /// in the last position. A reserved or transmitted failure poisons the whole
+    /// segment; neither the request nor its UNKNOWN claim may be replayed.
+    pub fn evict_owner_after_commit(
+        &mut self,
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        binding: &crate::native_ggml_cpu::Binding,
+    ) -> Result<EvictionReceipt> {
+        if self.cursor.poisoned || self.cursor.position == 0 || self.cursor.last_attempt == 0 {
+            return Err(invalid("segment eviction requires committed position"));
+        }
+        let mut stamp = self.base.clone();
+        stamp.batch = self.cursor.position - 1;
+        stamp.layer = binding.layer;
+        let layer = self
+            .layers
+            .iter_mut()
+            .find(|l| l.identity.layer == binding.layer)
+            .ok_or_else(|| invalid("segment eviction layer"))?;
+        let bytes = source.validate_eviction(
+            &stamp,
+            binding,
+            &layer.owners.registry,
+            &layer.owners.order,
+        )?;
+        let mut new_order = layer.owners.order.clone();
+        let locals = new_order
+            .get_mut(&binding.rank)
+            .ok_or_else(|| invalid("segment eviction rank"))?;
+        let remaining = locals
+            .len()
+            .checked_sub(1)
+            .filter(|n| *n > 0)
+            .ok_or_else(|| invalid("segment eviction last owner"))?;
+        locals.retain(|&local| local != binding.local);
+        if locals.len() != remaining {
+            return Err(invalid("segment eviction local identity"));
+        }
+        let mut new_registry = layer.owners.registry.clone();
+        let old_count = new_registry.copies.len();
+        new_registry.copies.retain(|r| {
+            !(r.rank == binding.rank && r.local == binding.local && r.expert == binding.expert)
+        });
+        if new_registry.copies.len().checked_add(1) != Some(old_count) {
+            return Err(invalid("segment eviction registry identity"));
+        }
+        let mut sessions = layer
+            .owners
+            .sessions
+            .iter_mut()
+            .filter(|s| s.rank() == binding.rank);
+        let session = sessions
+            .next()
+            .ok_or_else(|| invalid("segment eviction session"))?;
+        if sessions.next().is_some()
+            || !session.is_usable()
+            || !session
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == crate::session::CAPABILITY_NATIVE_GGML_EVICT)
+        {
+            return Err(invalid("segment eviction session capability"));
+        }
+        self.cursor.poisoned = true;
+        let attempt = self.cursor.last_attempt;
+        let operation_id = self.ledger.reserve_eviction(&stamp, attempt, binding)?;
+        session.evict_native_ggml(
+            &crate::session::NativeEviction {
+                stamp: &stamp,
+                attempt,
+                operation_id: &operation_id,
+                binding,
+                expected_bytes: bytes,
+                expected_remaining: remaining,
+            },
+            self.timeout,
+        )?;
+        source.commit_eviction(binding, bytes)?;
+        layer.owners.order = new_order;
+        layer.owners.registry = new_registry;
+        layer.owners.preferred.remove(&binding.expert);
+        self.cursor.poisoned = false;
+        Ok(EvictionReceipt {
+            stamp,
+            attempt,
+            operation_id,
+            binding: binding.clone(),
+            released_payload_bytes: bytes,
+        })
     }
     /// Append a verified expert to an existing rank between positions. The caller
     /// chooses placement and supplies a trusted digest; no eviction is performed.

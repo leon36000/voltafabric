@@ -118,6 +118,65 @@ impl NativeBatchLedger {
         Ok(())
     }
 
+    /// Reserve a local eviction before transmission. The key excludes `attempt`
+    /// and payload digest so a changed attempt or binding cannot replay the same
+    /// expert after an uncertain outcome. This is not an R53 lease.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn reserve_eviction(
+        &self,
+        stamp: &moe::Stamp,
+        attempt: u64,
+        binding: &crate::native_ggml_cpu::Binding,
+    ) -> Result<String> {
+        if attempt == 0
+            || [&stamp.run_id, &stamp.model_revision, &stamp.plan_id]
+                .iter()
+                .any(|s| s.trim().is_empty() || s.len() > 256)
+            || stamp.model_revision != binding.model_revision
+            || stamp.layer != binding.layer
+            || stamp.epoch != binding.epoch
+            || !sha256::is_hex_digest(&binding.index_sha256)
+            || !sha256::is_hex_digest(&binding.blob_sha256)
+        {
+            return Err(invalid("invalid native eviction reservation"));
+        }
+        self.check_identity()?;
+        let mut key = b"VF_NATIVE_EVICTION_V1\0".to_vec();
+        for value in [&stamp.run_id, &stamp.model_revision, &stamp.plan_id] {
+            key.extend_from_slice(&(value.len() as u64).to_le_bytes());
+            key.extend_from_slice(value.as_bytes());
+        }
+        for v in [stamp.layer, binding.expert] {
+            key.extend_from_slice(&v.to_le_bytes());
+        }
+        key.extend_from_slice(&stamp.batch.to_le_bytes());
+        key.extend_from_slice(&stamp.epoch.to_le_bytes());
+        let operation_id = sha256::hex(&key);
+        let mut file = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(
+                self.directory
+                    .join(format!("native-evict-{operation_id}.claim.json")),
+            )
+            .map_err(|e| Error::new("LEDGER_RESERVATION", e.to_string()))?;
+        self.handle
+            .sync_all()
+            .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+        self.check_identity()?;
+        serde_json::to_writer(&mut file, &serde_json::json!({"status":"RESERVED_UNKNOWN_NO_REPLAY", "operation_id":operation_id,"stamp":stamp,"attempt":attempt,"binding":binding}))
+            .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+        file.write_all(b"\n")
+            .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+        file.sync_all()
+            .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+        self.handle
+            .sync_all()
+            .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
+        self.check_identity()?;
+        Ok(operation_id)
+    }
+
     /// Create the claim first; a failed or abandoned reservation is never reusable.
     pub fn reserve_ticket(&self, stamp: &moe::Stamp, attempt: u64) -> Result<Reservation> {
         self.reserve(stamp, attempt)?;

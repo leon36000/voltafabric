@@ -115,6 +115,26 @@ fn matches_accounted(
     actual.len() == registry.copies.len() && actual == expected
 }
 
+fn release_accounted(
+    known: &mut BTreeMap<(u32, u32), (u32, u32)>,
+    used: &mut u64,
+    binding: &Binding,
+    bytes: u64,
+    expected: u64,
+) -> Result<()> {
+    if known.get(&(binding.layer, binding.expert)) != Some(&(binding.rank, binding.local))
+        || bytes != expected
+    {
+        return Err(invalid("eviction accounting changed"));
+    }
+    let next = used
+        .checked_sub(bytes)
+        .ok_or_else(|| invalid("eviction accounting underflow"))?;
+    known.remove(&(binding.layer, binding.expert));
+    *used = next;
+    Ok(())
+}
+
 /// One instance accounts for all seeds and later admissions in its segment.
 /// It assumes exclusive control of the described sessions. Accounting is
 /// conservative: a returned payload is charged even if its append is uncertain.
@@ -194,6 +214,84 @@ impl<'a> Source<'a> {
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
     }
+
+    /// Reconstruct a locally observed exact binding. This does not authenticate
+    /// the publisher, and it does not imply permission to evict the expert.
+    pub fn resident_binding(&mut self, layer: u32, expert: u32) -> Result<Binding> {
+        let &(rank, local) = self
+            .known
+            .get(&(layer, expert))
+            .ok_or_else(|| invalid("expert not accounted"))?;
+        let digest = self
+            .origin
+            .expert_digest(self.layout, layer as usize, expert.into())?;
+        Ok(Binding {
+            model_revision: self.identity.model_revision.clone(),
+            rank,
+            layer,
+            expert,
+            local,
+            epoch: self.identity.epoch,
+            index_sha256: self.layout.index_sha256().into(),
+            blob_sha256: digest,
+        })
+    }
+
+    pub(crate) fn validate_eviction(
+        &mut self,
+        stamp: &Stamp,
+        binding: &Binding,
+        registry: &Registry,
+        order: &BTreeMap<u32, Vec<u32>>,
+    ) -> Result<u64> {
+        if stamp.run_id != self.identity.run_id
+            || stamp.model_revision != self.identity.model_revision
+            || stamp.plan_id != self.identity.plan_id
+            || stamp.epoch != self.identity.epoch
+            || binding.layer != stamp.layer
+            || registry.epoch != stamp.epoch
+            || !matches_accounted(stamp.layer, registry, &self.known)
+            || order.len() != self.ranks.len()
+        {
+            return Err(invalid("eviction source identity or accounting"));
+        }
+        for &rank in &self.ranks {
+            let locals = order
+                .get(&rank)
+                .ok_or_else(|| invalid("eviction rank absent"))?;
+            let actual: BTreeSet<_> = locals.iter().copied().collect();
+            let expected: BTreeSet<_> = registry
+                .copies
+                .iter()
+                .filter(|c| c.rank == rank)
+                .map(|c| c.local)
+                .collect();
+            if actual.len() != locals.len() || actual != expected || locals.is_empty() {
+                return Err(invalid("eviction order differs"));
+            }
+        }
+        if order.get(&binding.rank).is_none_or(|r| r.len() <= 1)
+            || self.resident_binding(binding.layer, binding.expert)? != *binding
+        {
+            return Err(invalid("eviction binding or last owner"));
+        }
+        let bytes = self
+            .layout
+            .expert(binding.layer as usize, binding.expert.into())?
+            .bytes;
+        self.used
+            .checked_sub(bytes)
+            .ok_or_else(|| invalid("eviction accounting underflow"))?;
+        Ok(bytes)
+    }
+
+    pub(crate) fn commit_eviction(&mut self, binding: &Binding, bytes: u64) -> Result<()> {
+        let expected = self
+            .layout
+            .expert(binding.layer as usize, binding.expert.into())?
+            .bytes;
+        release_accounted(&mut self.known, &mut self.used, binding, bytes, expected)
+    }
 }
 impl MissingExpertSource for Source<'_> {
     fn load(
@@ -265,6 +363,28 @@ mod tests {
         assert_eq!(charge(8, 2, 10).unwrap(), 10);
         assert!(charge(9, 2, 10).is_err());
         assert!(charge(u64::MAX, 1, u64::MAX).is_err());
+    }
+    #[test]
+    fn acknowledged_release_changes_accounting_once_only() {
+        let binding = Binding {
+            model_revision: "m".into(),
+            rank: 2,
+            layer: 4,
+            expert: 5,
+            local: 3,
+            epoch: 1,
+            index_sha256: "1".repeat(64),
+            blob_sha256: "2".repeat(64),
+        };
+        let mut known = BTreeMap::from([((4, 5), (2, 3))]);
+        let mut used = 10;
+        assert!(release_accounted(&mut known, &mut used, &binding, 11, 11).is_err());
+        assert!(release_accounted(&mut known, &mut used, &binding, 3, 4).is_err());
+        assert_eq!((used, known.len()), (10, 1));
+        release_accounted(&mut known, &mut used, &binding, 4, 4).unwrap();
+        assert_eq!((used, known.len()), (6, 0));
+        assert!(release_accounted(&mut known, &mut used, &binding, 4, 4).is_err());
+        assert_eq!(used, 6);
     }
     #[test]
     fn placement_rejects_registry_mismatch_and_balances_deterministically() {
