@@ -1,4 +1,5 @@
 import json
+import os
 import hashlib
 import struct
 import subprocess
@@ -50,6 +51,8 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(prepare()["plan_id"], "r525-" + "a" * 64)
             state["body"] = json.dumps(dict(good, plan_id="r527-" + "a" * 64)).encode()
             self.assertEqual(prepare()["plan_id"], "r527-" + "a" * 64)
+            state["body"] = json.dumps(dict(good, plan_id="r528-" + "a" * 64)).encode()
+            self.assertEqual(prepare()["plan_id"], "r528-" + "a" * 64)
             for bad in ({"plan_id": good["plan_id"]},
                         dict(good, prompt_tokens_sha256="0" * 64),
                         dict(good, plan_id="r512-" + "A" * 64),
@@ -118,6 +121,8 @@ class RunnerTests(unittest.TestCase):
         value["plan_id"] = "r525-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
         value["plan_id"] = "r527-" + "a" * 64
+        self.assertEqual(run()["output"]["text"], "😀")
+        value["plan_id"] = "r528-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
         for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
                     "r512-" + "a" * 63, 123):
@@ -192,6 +197,38 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_prompt("long64", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=2, runner=runner)
         self.assertEqual(len(calls), 1)
+    def test_remote_runner_passes_lease_descriptor_or_refuses_before_spawn(self):
+        value = dict(receipt(), prompt_tokens=[0], plan_id="r528-" + "a"*64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
+        calls=[]
+        def runner(args, **kwargs):
+            calls.append(kwargs)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        read_fd, write_fd = os.pipe()
+        try:
+            with patch.dict("os.environ", {"VF_RANK3_SSH_HOST":"example", "VF_SHARED_LEASE_FD":str(read_fd)}, clear=True):
+                self.assertEqual(_run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)["output"]["text"], "😀")
+                self.assertEqual(calls[-1]["pass_fds"], (read_fd,))
+            with patch.dict("os.environ", {"VF_RANK3_SSH_HOST":"example"}, clear=True):
+                with self.assertRaisesRegex(ValueError, "shared lease fd"):
+                    _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+            self.assertEqual(len(calls), 1)
+        finally:
+            os.close(read_fd)
+            os.close(write_fd)
+
+    def test_bounded_capture_passes_only_requested_descriptor(self):
+        read_fd, write_fd = os.pipe()
+        try:
+            program = 'import os,sys; os.fstat(int(sys.argv[1])); print("inherited")'
+            good = _run_bounded([sys.executable, "-c", program, str(read_fd)], pass_fds=(read_fd,))
+            self.assertEqual((good.returncode, good.stdout), (0, b"inherited\n"))
+            absent = _run_bounded([sys.executable, "-c", program, str(read_fd)])
+            self.assertNotEqual(absent.returncode, 0)
+        finally:
+            os.close(read_fd)
+            os.close(write_fd)
+
     def test_bounded_capture_drains_both_pipes_and_marks_overflow(self):
         program = ('import sys; sys.stdout.buffer.write(b"x"*200000); sys.stdout.flush(); '
                    'sys.stderr.buffer.write(b"y"*200000); sys.stderr.flush()')

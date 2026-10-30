@@ -32,14 +32,14 @@ _ENGINE_FAILURES = {
 }
 
 def _run_bounded(command, *, stdout_limit=MAX_RECEIPT_BYTES, stderr_limit=MAX_STDERR_BYTES,
-                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False):
+                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, pass_fds=()):
     """Drain both child pipes, retaining only bounded prefixes; never retry or kill."""
     if stdout != subprocess.PIPE or stderr != subprocess.PIPE or check or stdout_limit < 0 or stderr_limit < 0:
         raise ValueError("invalid bounded capture configuration")
     output = [bytearray(), bytearray()]
     truncated = [False, False]
     limits = (stdout_limit, stderr_limit)
-    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE) as child:
+    with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, pass_fds=pass_fds) as child:
         with selectors.DefaultSelector() as selector:
             selector.register(child.stdout, selectors.EVENT_READ, 0)
             selector.register(child.stderr, selectors.EVENT_READ, 1)
@@ -162,14 +162,24 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 64 input positions")
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
-    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-")) or len(expected_plan) != 69
+    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
     command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     command.extend((str(max_new_tokens), str(eos)))
     if chat:
         command.append("chat")
-    completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
+    # The coordinator must inherit the same open file description holding the
+    # externally selected shared lease; it validates the identity and lock.
+    options = {}
+    if not prepare_plan and any(os.environ.get(f"VF_RANK{rank}_SSH_HOST") for rank in (2, 3)):
+        raw_fd = os.environ.get("VF_SHARED_LEASE_FD", "")
+        if not raw_fd.isascii() or not raw_fd.isdecimal() or int(raw_fd) < 3:
+            raise ValueError("inherited shared lease fd required")
+        fd = int(raw_fd)
+        os.fstat(fd)
+        options["pass_fds"] = (fd,)
+    completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, **options)
     if completed.returncode != 0:
         category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
         raise RuntimeError(f"engine failed ({category}, exit={completed.returncode}); reconcile its ledger and do not replay UNKNOWN claims")
@@ -183,7 +193,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
             raise ValueError("invalid prepared plan receipt")
         plan = receipt["plan_id"]
-        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-")) or len(plan) != 69
+        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-")) or len(plan) != 69
                 or any(c not in "0123456789abcdef" for c in plan[5:])):
             raise ValueError("current bound plan identity required")
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
@@ -202,10 +212,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
-        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-")) or len(plan_id) != 69
+        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-")) or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):
             raise ValueError("current bound plan identity required")
-    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-"))):
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")

@@ -460,6 +460,77 @@ fn pin_known_hosts(_: &mut Endpoint, _: &str, _: &str, _: &str) -> Result<std::f
     Err("sealed SSH host key snapshot requires Linux".into())
 }
 
+/// Cooperative lease identity. The operator must pin the actual shared lease;
+/// this check cannot establish that other services cooperate with that lock.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct SharedLease {
+    path: String,
+    dev: u64,
+    ino: u64,
+    uid: u32,
+}
+#[cfg(target_os = "linux")]
+fn lease_path_matches(spec: &SharedLease) -> Result<(), E> {
+    use std::os::unix::fs::MetadataExt;
+    if !std::path::Path::new(&spec.path).is_absolute()
+        || spec.path.len() > 4096
+        || spec.uid != rustix::process::geteuid().as_raw()
+    {
+        return Err("invalid shared lease identity".into());
+    }
+    let m = std::fs::symlink_metadata(&spec.path)?;
+    if !m.is_file() || (m.dev(), m.ino(), m.uid()) != (spec.dev, spec.ino, spec.uid) {
+        return Err("shared lease path changed".into());
+    }
+    Ok(())
+}
+#[cfg(target_os = "linux")]
+fn verify_shared_lease(spec: &SharedLease, fd: i32) -> Result<(), E> {
+    use std::os::unix::fs::MetadataExt;
+    if fd < 3 {
+        return Err("invalid shared lease descriptor".into());
+    }
+    lease_path_matches(spec)?;
+    let m = std::fs::metadata(format!("/proc/self/fd/{fd}"))?;
+    if !m.is_file() || (m.dev(), m.ino(), m.uid()) != (spec.dev, spec.ino, spec.uid) {
+        return Err("shared lease descriptor changed".into());
+    }
+    let info = std::fs::read_to_string(format!("/proc/self/fdinfo/{fd}"))?;
+    let locks: Vec<Vec<_>> = info
+        .lines()
+        .filter(|line| line.starts_with("lock:"))
+        .map(|line| line.split_whitespace().collect())
+        .collect();
+    if locks.len() != 1
+        || locks[0].len() != 9
+        || locks[0][2..5] != ["FLOCK", "ADVISORY", "WRITE"]
+        || locks[0][7..9] != ["0", "EOF"]
+    {
+        return Err("exclusive shared lease flock required".into());
+    }
+    let mut parts = locks[0][6].split(':');
+    let major = u32::from_str_radix(parts.next().ok_or("lease lock device")?, 16)?;
+    let minor = u32::from_str_radix(parts.next().ok_or("lease lock device")?, 16)?;
+    let ino = parts.next().ok_or("lease lock inode")?.parse::<u64>()?;
+    if parts.next().is_some()
+        || major != rustix::fs::major(spec.dev)
+        || minor != rustix::fs::minor(spec.dev)
+        || ino != spec.ino
+    {
+        return Err("shared lease lock identity mismatch".into());
+    }
+    Ok(())
+}
+#[cfg(not(target_os = "linux"))]
+fn lease_path_matches(_: &SharedLease) -> Result<(), E> {
+    Err("shared lease requires Linux".into())
+}
+#[cfg(not(target_os = "linux"))]
+fn verify_shared_lease(_: &SharedLease, _: i32) -> Result<(), E> {
+    Err("shared lease requires Linux".into())
+}
+
 fn optional_env(name: &str) -> Result<Option<String>, E> {
     match std::env::var(name) {
         Ok(value) => Ok(Some(value)),
@@ -498,6 +569,7 @@ struct WorkerPlan<'a> {
     rank_limits: &'a Option<BTreeMap<u32, u64>>,
     endpoints: &'a BTreeMap<u32, Endpoint>,
     known_hosts_sha256: &'a BTreeMap<u32, String>,
+    shared_lease: &'a Option<SharedLease>,
 }
 
 fn prompt_tokens_hash(tokens: &[u32]) -> String {
@@ -518,6 +590,7 @@ fn worker_plan_id(
     prompt_mode: &'static str,
     ple_manifest_sha256: &str,
     known_hosts_sha256: &BTreeMap<u32, String>,
+    shared_lease: &Option<SharedLease>,
 ) -> Result<String, E> {
     let prompt_length = prompt_tokens.len();
     if !sha256::is_hex_digest(ple_manifest_sha256)
@@ -531,6 +604,7 @@ fn worker_plan_id(
         || !(1..=64).contains(&max_new_tokens)
         || prompt_length + max_new_tokens - 1 > 64
         || endpoints.len() != 2
+        || (shared_lease.is_some() != !known_hosts_sha256.is_empty())
         || known_hosts_sha256
             .iter()
             .any(|(rank, hash)| !endpoints.contains_key(rank) || !sha256::is_hex_digest(hash))
@@ -559,7 +633,7 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v13",
+        version: "vf-sc117-worker-plan-v14",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
         origin_policy: "stable-source-digest-cache-v1",
@@ -577,8 +651,9 @@ fn worker_plan_id(
         rank_limits,
         endpoints,
         known_hosts_sha256,
+        shared_lease,
     };
-    Ok(format!("r527-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r528-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -729,6 +804,18 @@ fn run() -> Result<(), E> {
         }
         endpoints.insert(rank, endpoint);
     }
+    let shared_lease: Option<SharedLease> = match (
+        host_digests.is_empty(),
+        optional_env("VF_SHARED_LEASE_SPEC")?,
+    ) {
+        (true, None) => None,
+        (false, Some(json)) if json.len() <= 8192 => {
+            let spec: SharedLease = serde_json::from_str(&json)?;
+            lease_path_matches(&spec)?;
+            Some(spec)
+        }
+        _ => return Err("explicit shared lease identity required for SSH".into()),
+    };
     let mut dense = std::fs::File::open(&a[1])?;
     let mut shard = std::fs::File::open(&a[2])?;
     let mut pack = std::fs::File::open(&a[3])?;
@@ -792,6 +879,7 @@ fn run() -> Result<(), E> {
         prompt_mode,
         &manifest_hash,
         &host_digests,
+        &shared_lease,
     )?;
     if plan_only {
         println!(
@@ -808,6 +896,15 @@ fn run() -> Result<(), E> {
             .values()
             .any(|v| v.argv.get(1).is_none_or(|arg| arg != "--guarded-local")),
     )?;
+    let lease_fd = if let Some(spec) = &shared_lease {
+        let fd = optional_env("VF_SHARED_LEASE_FD")?
+            .ok_or("shared lease fd required")?
+            .parse::<i32>()?;
+        verify_shared_lease(spec, fd)?;
+        Some(fd)
+    } else {
+        None
+    };
     // The sealed memfd stays alive for all SSH children. Keep the canonical
     // path in the plan; only replace the runtime option with our immutable fd.
     #[cfg(target_os = "linux")]
@@ -884,6 +981,9 @@ fn run() -> Result<(), E> {
             layer: layer as u32,
             epoch: 1,
         };
+        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
+            verify_shared_lease(spec, fd)?;
+        }
         let owners = owners(layer as u32, &seed, &endpoints, &index, &mut pack, &layout)?;
         if layer % 4 == 3 {
             let qsa = sc117_qsa_stage::Stage::load(
@@ -966,6 +1066,9 @@ fn run() -> Result<(), E> {
     let mut rank_history = Vec::new();
     let mut current_token = prompt_tokens[0];
     for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
+        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
+            verify_shared_lease(spec, fd)?;
+        }
         if pos < prompt_tokens.len() {
             current_token = prompt_tokens[pos];
         }
@@ -981,6 +1084,9 @@ fn run() -> Result<(), E> {
             worst_case_headroom,
             768,
         )?;
+        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
+            verify_shared_lease(spec, fd)?;
+        }
         evictions.extend(removed);
         if segment.position() != pos as u64 + 1 || segment.is_poisoned() {
             return Err("segment did not commit complete position".into());
@@ -1049,6 +1155,12 @@ mod tests {
     }
     #[test]
     fn worker_plan_binds_rank_endpoints_and_capacities() {
+        let lease = Some(SharedLease {
+            path: "/lease".into(),
+            dev: 1,
+            ino: 2,
+            uid: 3,
+        });
         let known_hosts = BTreeMap::from([(3u32, DIGEST.to_owned())]);
         let rank2 = rank_endpoint(2, "/worker", None, None, Some(DIGEST)).unwrap();
         let rank3 =
@@ -1065,14 +1177,20 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
+            &lease,
         )
         .unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r527-f818f4a248ddcafb83f78b4ec7825c263e5475522341cad61ae4a434697a4f53"
+            "r528-5f2bf588175b17fdb53e5f4ee9e0dc956e9114af797f7ce5d21d4750bb26538f"
         );
-        let changed_host_key = BTreeMap::from([(3u32, "b".repeat(64))]);
+        let changed_lease = Some(SharedLease {
+            path: "/lease".into(),
+            dev: 1,
+            ino: 9,
+            uid: 3,
+        });
         assert_ne!(
             id,
             worker_plan_id(
@@ -1084,7 +1202,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &changed_host_key
+                &known_hosts,
+                &changed_lease
             )
             .unwrap()
         );
@@ -1097,7 +1216,38 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &BTreeMap::new()
+            &known_hosts,
+            &None
+        )
+        .is_err());
+        let changed_host_key = BTreeMap::from([(3u32, "b".repeat(64))]);
+        assert_ne!(
+            id,
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST,
+                &changed_host_key,
+                &lease
+            )
+            .unwrap()
+        );
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+            &BTreeMap::new(),
+            &lease
         )
         .is_err());
         assert_ne!(
@@ -1111,7 +1261,8 @@ mod tests {
                 248_046,
                 "plain",
                 &"b".repeat(64),
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1124,7 +1275,8 @@ mod tests {
             248_046,
             "plain",
             "BAD",
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         let p12 = worker_plan_id(
@@ -1137,6 +1289,7 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
+            &lease,
         )
         .unwrap();
         let p21 = worker_plan_id(
@@ -1149,6 +1302,7 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
+            &lease,
         )
         .unwrap();
         assert_ne!(id, p12);
@@ -1162,7 +1316,8 @@ mod tests {
             248_046,
             "chat",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1174,7 +1329,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1186,7 +1342,8 @@ mod tests {
             248_046,
             "chat",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_ok());
         assert_ne!(
@@ -1200,7 +1357,8 @@ mod tests {
                 248_046,
                 "chat",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1213,7 +1371,8 @@ mod tests {
             248_046,
             "invalid",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert_eq!(
@@ -1227,7 +1386,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1249,7 +1409,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1272,7 +1433,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1294,7 +1456,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1323,7 +1486,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1338,7 +1502,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1353,7 +1518,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1368,7 +1534,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1383,7 +1550,8 @@ mod tests {
                 248_046,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1398,7 +1566,8 @@ mod tests {
                 248_047,
                 "plain",
                 DIGEST,
-                &known_hosts
+                &known_hosts,
+                &lease
             )
             .unwrap()
         );
@@ -1411,7 +1580,8 @@ mod tests {
             248_320,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1423,7 +1593,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1435,7 +1606,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1447,7 +1619,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1459,7 +1632,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1471,7 +1645,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1483,7 +1658,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1495,7 +1671,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1507,7 +1684,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1519,7 +1697,8 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1531,9 +1710,61 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
-            &known_hosts
+            &known_hosts,
+            &lease
         )
         .is_err());
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn shared_lease_requires_exact_descriptor_and_exclusive_lock() {
+        use std::os::fd::AsRawFd;
+        use std::os::unix::fs::MetadataExt;
+        let name = format!(
+            "vf-test-lease-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
+        let path = std::env::temp_dir().join(name);
+        let file = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        let m = file.metadata().unwrap();
+        let spec = SharedLease {
+            path: path.to_str().unwrap().into(),
+            dev: m.dev(),
+            ino: m.ino(),
+            uid: m.uid(),
+        };
+        assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_err());
+        rustix::fs::flock(&file, rustix::fs::FlockOperation::NonBlockingLockExclusive).unwrap();
+        assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_ok());
+        let other = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&path)
+            .unwrap();
+        assert!(verify_shared_lease(&spec, other.as_raw_fd()).is_err());
+        let wrong = SharedLease {
+            ino: spec.ino + 1,
+            ..spec.clone()
+        };
+        assert!(verify_shared_lease(&wrong, file.as_raw_fd()).is_err());
+        let wrong_uid = SharedLease {
+            uid: spec.uid.wrapping_add(1),
+            ..spec.clone()
+        };
+        assert!(verify_shared_lease(&wrong_uid, file.as_raw_fd()).is_err());
+        assert!(verify_shared_lease(&spec, -1).is_err());
+        rustix::fs::flock(&file, rustix::fs::FlockOperation::Unlock).unwrap();
+        assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_err());
+        // The zero-byte test file remains in the isolated TMPDIR for inspection.
     }
     #[cfg(target_os = "linux")]
     #[test]
