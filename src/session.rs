@@ -68,6 +68,8 @@ pub const CAPABILITY_ENGRAM_ROWS_RAW: &str = "cpu_engram_owner_rows_raw_v1";
 pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
+#[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32: &str = "cpu_strata_sc117_ggml_unweighted_f32_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
 /// How long close() still waits for the output of a worker it has just killed.
@@ -133,6 +135,12 @@ pub enum Request {
     SealNativeGgml,
     #[cfg(feature = "native-ggml-cpu")]
     ExecNativeGgml {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<(usize, Vec<f32>)>,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGgmlUnweightedF32 {
         dispatch: routing::RankDispatch,
         attempt: u64,
         inputs: Vec<(usize, Vec<f32>)>,
@@ -296,6 +304,10 @@ pub enum Reply {
     #[cfg(feature = "native-ggml-cpu")]
     NativeGgmlResult {
         output: crate::completion::RoutedRawOutput,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGgmlUnweightedF32 {
+        output: crate::native_ggml_cpu::UnweightedF32Output,
     },
     MultipartReady {
         offset: u64,
@@ -2551,6 +2563,9 @@ fn serve_impl(
                     #[cfg(feature = "native-ggml-cpu")]
                     if executor.is_none() {
                         hello.capabilities.push(CAPABILITY_NATIVE_GGML_CPU.into());
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32.into());
                     }
                     if let Some(provider) = executor.as_ref() {
                         hello.capabilities = vec![
@@ -2582,6 +2597,7 @@ fn serve_impl(
                 Request::LoadNativeGgmlRaw { .. }
                     | Request::SealNativeGgml
                     | Request::ExecNativeGgml { .. }
+                    | Request::ExecNativeGgmlUnweightedF32 { .. }
                     | Request::Shutdown
             )
         {
@@ -2717,6 +2733,45 @@ fn serve_impl(
                             }),
                         )?;
                         return Err(error); // after Started this session cannot be replayed
+                    }
+                }
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::ExecNativeGgmlUnweightedF32 {
+                dispatch,
+                attempt,
+                inputs,
+            } => {
+                let Some(worker) = native_worker.as_mut() else {
+                    send_reply(
+                        output,
+                        &refuse("NATIVE_STATE", "native owners are not sealed"),
+                    )?;
+                    continue;
+                };
+                let stamp = dispatch.stamp.clone();
+                let event = |event| Reply::Event {
+                    event: WorkerEvent {
+                        stamp: stamp.clone(),
+                        rank,
+                        attempt,
+                        event,
+                    },
+                };
+                send_reply(output, &event(EventKind::Started))?;
+                match worker.execute_f32(&dispatch, &inputs, attempt) {
+                    Ok(result) => {
+                        send_reply(output, &Reply::NativeGgmlUnweightedF32 { output: result })?;
+                        execs += 1;
+                    }
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &event(EventKind::Failed {
+                                error: error.clone(),
+                            }),
+                        )?;
+                        return Err(error);
                     }
                 }
             }
@@ -3481,6 +3536,7 @@ impl Session {
         inputs: Vec<(usize, Vec<f32>)>,
         collector: &mut moe::Collector,
         timeout: Duration,
+        unweighted_f32: bool,
     ) -> Result<usize> {
         if !self
             .hello
@@ -3493,11 +3549,20 @@ impl Session {
             return Err(invalid("native GGML capability, rank or attempt"));
         }
         let deadline = Instant::now() + timeout;
-        self.send(&Request::ExecNativeGgml {
-            dispatch: dispatch.clone(),
-            attempt,
-            inputs,
-        })?;
+        let request = if unweighted_f32 {
+            Request::ExecNativeGgmlUnweightedF32 {
+                dispatch: dispatch.clone(),
+                attempt,
+                inputs,
+            }
+        } else {
+            Request::ExecNativeGgml {
+                dispatch: dispatch.clone(),
+                attempt,
+                inputs,
+            }
+        };
+        self.send(&request)?;
         let started = self.reply_until(deadline)?;
         if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } } if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
         {
@@ -3506,7 +3571,8 @@ impl Session {
         }
         match self.reply_until(deadline)? {
             Reply::NativeGgmlResult { output }
-                if output.stamp == dispatch.stamp
+                if !unweighted_f32
+                    && output.stamp == dispatch.stamp
                     && output.rank == self.rank
                     && output.attempt == attempt =>
             {
@@ -3521,6 +3587,39 @@ impl Session {
                         Err(error)
                     }
                 }
+            }
+            Reply::NativeGgmlUnweightedF32 { output }
+                if unweighted_f32
+                    && output.stamp == dispatch.stamp
+                    && output.rank == self.rank
+                    && output.attempt == attempt =>
+            {
+                let admitted = (|| -> Result<usize> {
+                    if output.slots.len() != dispatch.slots.len()
+                        || output.rows.len() != output.slots.len()
+                        || output.rows.iter().any(|row| {
+                            row.len() != dispatch.hidden || row.iter().any(|v| !v.is_finite())
+                        })
+                    {
+                        return Err(invalid("native unweighted FP32 shape or value"));
+                    }
+                    for (slot, row) in output.slots.into_iter().zip(output.rows) {
+                        collector.accept(moe::Completion {
+                            stamp: dispatch.stamp.clone(),
+                            token: slot.token,
+                            slot: slot.slot,
+                            expert: slot.expert,
+                            rank: self.rank,
+                            local: slot.local,
+                            value: row.into_iter().map(f64::from).collect(),
+                        })?;
+                    }
+                    Ok(dispatch.slots.len())
+                })();
+                if admitted.is_err() {
+                    self.usable = false;
+                }
+                admitted
             }
             Reply::Event {
                 event:
@@ -3553,7 +3652,7 @@ impl Session {
         timeout: Duration,
     ) -> Result<Vec<Vec<f64>>> {
         let collector =
-            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout)?;
+            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, false)?;
         match collector.finish() {
             Ok(output) => Ok(output),
             Err(error) => {
@@ -3576,7 +3675,29 @@ impl Session {
         timeout: Duration,
     ) -> Result<Vec<Vec<Vec<f64>>>> {
         let collector =
-            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout)?;
+            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, false)?;
+        match collector.finish_unweighted_slots() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for session in sessions {
+                    session.usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
+
+    /// Explicit FP32 slot transport only; no reduction or preweighting is performed.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_native_ggml_unweighted_f32(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<Vec<Vec<Vec<f64>>>> {
+        let collector =
+            Self::collect_native_ggml_batch(sessions, problem, inputs, ledger, timeout, true)?;
         match collector.finish_unweighted_slots() {
             Ok(output) => Ok(output),
             Err(error) => {
@@ -3595,6 +3716,7 @@ impl Session {
         inputs: &[Vec<f32>],
         ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
+        unweighted_f32: bool,
     ) -> Result<moe::Collector> {
         if timeout.is_zero()
             || timeout > Duration::from_secs(60)
@@ -3624,6 +3746,13 @@ impl Session {
                     .capabilities
                     .iter()
                     .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+                || (unweighted_f32
+                    && !matches[0]
+                        .1
+                        .hello
+                        .capabilities
+                        .iter()
+                        .any(|c| c == CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32))
             {
                 return Err(invalid(
                     "native participating session missing, duplicate or unusable",
@@ -3648,6 +3777,7 @@ impl Session {
                 rows.clone(),
                 &mut collector,
                 deadline.saturating_duration_since(Instant::now()),
+                unweighted_f32,
             ) {
                 for (i, _, _) in &selected {
                     sessions[*i].usable = false;

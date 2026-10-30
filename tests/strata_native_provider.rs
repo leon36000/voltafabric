@@ -471,11 +471,10 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         .unwrap();
     let mut reference = Resident::load(&layout, blob, b.clone()).unwrap();
     let x = vec![0.001_f32; 2560];
-    let expected = reference
-        .forward(&x)
-        .unwrap()
-        .into_iter()
-        .map(|v| completion::decode_fp16(completion::encode_fp16(f64::from(v)).unwrap()).unwrap())
+    let raw_reference = reference.forward(&x).unwrap();
+    let expected = raw_reference
+        .iter()
+        .map(|&v| completion::decode_fp16(completion::encode_fp16(f64::from(v)).unwrap()).unwrap())
         .collect::<Vec<_>>();
     let mut sessions = Vec::new();
     for expert in 0..2 {
@@ -606,6 +605,90 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         assert_eq!(
             destination[5120 + i].to_bits(),
             (expected[i] as f32).to_bits()
+        );
+    }
+    let mut f32_plan = p.clone();
+    f32_plan.stamp.batch = 4;
+    let admitted = voltafabric::strata_ingress::admit_strata_unweighted_f64(
+        &f32_plan,
+        &f32_plan.stamp,
+        0,
+        1,
+        3,
+        &x,
+        &[0, 2, 1],
+        &[-1, 0, -1],
+        &[0, 1, 2],
+    )
+    .unwrap();
+    let capability = voltafabric::session::CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32.to_owned();
+    sessions[1].hello.capabilities.retain(|x| x != &capability);
+    let before: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+    let mut refused = vec![9.0; 3 * 2560];
+    assert!(admitted
+        .execute_native_fp32(&mut sessions, &ledger, timeout, &mut refused)
+        .is_err());
+    assert!(refused.iter().all(|v| *v == 9.0));
+    assert_eq!(
+        before,
+        sessions
+            .iter()
+            .map(|s| s.traffic.bytes_sent)
+            .collect::<Vec<_>>()
+    );
+    sessions[1].hello.capabilities.push(capability);
+    let admitted = voltafabric::strata_ingress::admit_strata_unweighted_f64(
+        &f32_plan,
+        &f32_plan.stamp,
+        0,
+        1,
+        3,
+        &x,
+        &[0, 2, 1],
+        &[-1, 0, -1],
+        &[0, 1, 2],
+    )
+    .unwrap();
+    let mut exact = vec![9.0_f32; 3 * 2560];
+    admitted
+        .execute_native_fp32(&mut sessions, &ledger, timeout, &mut exact)
+        .unwrap();
+    let mut fp16_difference = false;
+    for i in 0..2560 {
+        assert_eq!(exact[i].to_bits(), raw_reference[i].to_bits());
+        assert_eq!(exact[2560 + i], 9.0);
+        assert_eq!(exact[5120 + i].to_bits(), raw_reference[i].to_bits());
+        fp16_difference |= exact[i].to_bits() != (expected[i] as f32).to_bits();
+    }
+    assert!(
+        fp16_difference,
+        "test must distinguish FP32 from lossy FP16"
+    );
+    let large = vec![0.125_f32; 2560];
+    let large_reference = reference.forward(&large).unwrap();
+    let mut f32_large = p.clone();
+    f32_large.stamp.batch = 5;
+    let plan = voltafabric::strata_ingress::admit_strata_unweighted_f64(
+        &f32_large,
+        &f32_large.stamp,
+        0,
+        1,
+        2,
+        &large,
+        &[0, 1],
+        &[-1, -1],
+        &[0, 1],
+    )
+    .unwrap();
+    let mut large_output = vec![0.0; 2 * 2560];
+    plan.execute_native_fp32(&mut sessions, &ledger, timeout, &mut large_output)
+        .unwrap();
+    assert!(large_reference.iter().any(|v| v.abs() > 65504.0));
+    for i in 0..2560 {
+        assert_eq!(large_output[i].to_bits(), large_reference[i].to_bits());
+        assert_eq!(
+            large_output[2560 + i].to_bits(),
+            large_reference[i].to_bits()
         );
     }
     let mut overflow = p.clone();

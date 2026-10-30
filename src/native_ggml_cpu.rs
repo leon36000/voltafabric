@@ -70,6 +70,17 @@ pub struct RankWorker {
     terminal: bool,
 }
 
+/// Unweighted finite FP32 rows; this is not the preweighted FP32 reduction contract.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct UnweightedF32Output {
+    pub stamp: crate::moe::Stamp,
+    pub rank: u32,
+    pub attempt: u64,
+    pub slots: Vec<crate::completion::OutputSlot>,
+    pub rows: Vec<Vec<f32>>,
+}
+
 impl RankWorker {
     pub fn new(owners: Vec<Resident>) -> Result<Self> {
         use std::collections::BTreeSet;
@@ -109,7 +120,39 @@ impl RankWorker {
         inputs: &[(usize, Vec<f32>)],
         attempt: u64,
     ) -> Result<crate::completion::RoutedRawOutput> {
-        use crate::completion::{self, OutputSlot, RoutedRawOutput};
+        use crate::completion::{self, RoutedRawOutput};
+        let result = self.execute_f32(dispatch, inputs, attempt)?;
+        let converted = result
+            .rows
+            .iter()
+            .flatten()
+            .map(|&v| completion::encode_fp16(f64::from(v)))
+            .collect::<Result<Vec<_>>>();
+        match converted {
+            Ok(bits) => Ok(RoutedRawOutput {
+                stamp: result.stamp,
+                rank: result.rank,
+                attempt,
+                rows: result.slots.len(),
+                columns: 2560,
+                slots: result.slots,
+                fp16_bits: bits,
+            }),
+            Err(error) => {
+                self.terminal = true;
+                Err(error)
+            }
+        }
+    }
+
+    /// Stage all unweighted FP32 outputs atomically for a slot-oriented consumer.
+    pub fn execute_f32(
+        &mut self,
+        dispatch: &crate::routing::RankDispatch,
+        inputs: &[(usize, Vec<f32>)],
+        attempt: u64,
+    ) -> Result<UnweightedF32Output> {
+        use crate::completion::OutputSlot;
         use std::collections::{BTreeMap, BTreeSet};
         if self.terminal
             || attempt <= self.last_attempt
@@ -191,14 +234,12 @@ impl RankWorker {
         if self.scope.is_none() {
             self.scope = Some((stamp.run_id.clone(), stamp.plan_id.clone()));
         }
-        let work = (|| -> Result<RoutedRawOutput> {
-            let mut bits = Vec::with_capacity(dispatch.slots.len() * 2560);
+        let work = (|| -> Result<UnweightedF32Output> {
+            let mut rows = Vec::with_capacity(dispatch.slots.len());
             let mut slots = Vec::with_capacity(dispatch.slots.len());
             for (entry, &owner) in dispatch.slots.iter().zip(&plan) {
                 let s = &entry.slot;
-                for value in self.owners[owner].forward(tokens[&s.token])? {
-                    bits.push(completion::encode_fp16(f64::from(value))?);
-                }
+                rows.push(self.owners[owner].forward(tokens[&s.token])?);
                 slots.push(OutputSlot {
                     token: s.token,
                     slot: s.slot,
@@ -206,14 +247,12 @@ impl RankWorker {
                     local: s.local,
                 });
             }
-            Ok(RoutedRawOutput {
+            Ok(UnweightedF32Output {
                 stamp: stamp.clone(),
                 rank: dispatch.rank,
                 attempt,
-                rows: slots.len(),
-                columns: 2560,
                 slots,
-                fp16_bits: bits,
+                rows,
             })
         })();
         if work.is_err() {

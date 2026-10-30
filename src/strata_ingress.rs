@@ -317,6 +317,30 @@ impl StrataUnweightedBatch {
         timeout: Duration,
         output: &mut [f32],
     ) -> Result<()> {
+        self.execute_native_contract(sessions, ledger, timeout, output, false)
+    }
+
+    /// Preserve unweighted provider FP32 rows; no Collector reduction is selected.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn execute_native_fp32(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<()> {
+        self.execute_native_contract(sessions, ledger, timeout, output, true)
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn execute_native_contract(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+        unweighted_f32: bool,
+    ) -> Result<()> {
         if output.len() != self.0.output_values {
             return Err(invalid("mixed pool output shape mismatch"));
         }
@@ -335,13 +359,23 @@ impl StrataUnweightedBatch {
             }
             inputs.push(values);
         }
-        let rows = session::Session::exec_native_ggml_unweighted(
-            sessions,
-            &misses.routing,
-            &inputs,
-            ledger,
-            timeout,
-        )?;
+        let rows = if unweighted_f32 {
+            session::Session::exec_native_ggml_unweighted_f32(
+                sessions,
+                &misses.routing,
+                &inputs,
+                ledger,
+                timeout,
+            )?
+        } else {
+            session::Session::exec_native_ggml_unweighted(
+                sessions,
+                &misses.routing,
+                &inputs,
+                ledger,
+                timeout,
+            )?
+        };
         self.0.write_misses(&rows, output)
     }
 
