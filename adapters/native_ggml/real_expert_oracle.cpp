@@ -26,24 +26,31 @@ static double dot(const std::vector<float>& a,const std::vector<float>& b) {
     double sum=0; for(size_t i=0;i<a.size();++i) sum+=double(a[i])*b[i]; return sum;
 }
 int main(int argc,char** argv) {
-    if(argc<3 || argc>5) { std::fprintf(stderr,"usage: real_expert_oracle PACK EXPERT_0_TO_511 [REFERENCE_FILE [INPUT_F32]]\n"); return 1; }
+    if(argc<3 || argc>6) { std::fprintf(stderr,"usage: real_expert_oracle PACK EXPERT_0_TO_511 [REFERENCE_FILE [INPUT_F32 [LAYER]]]\n"); return 1; }
     std::string id=argv[2]; int expert=-1;
     auto parsed=std::from_chars(id.data(),id.data()+id.size(),expert);
     if(parsed.ec!=std::errc{} || parsed.ptr!=id.data()+id.size() || expert<0 || expert>=512) return 2;
-    constexpr int H=2560,F=640; constexpr size_t BLOB=2176000;
+    constexpr int H=2560,F=640;
+    int layer=0;
+    if(argc==6) { std::string s=argv[5]; auto p=std::from_chars(s.data(),s.data()+s.size(),layer); if(p.ec!=std::errc{} || p.ptr!=s.data()+s.size() || layer!=1) return 14; }
+    const size_t BLOB=layer==0?2176000:1510400;
+    const std::streamoff base=layer==0?0:1114112000LL;
+    const int gu=layer==0?18:22, down_type=layer==0?20:42;
     std::ifstream file(argv[1],std::ios::binary); std::vector<uint8_t> blob(BLOB);
-    if(!file || !file.seekg(std::streamoff(expert)*BLOB) || !file.read(reinterpret_cast<char*>(blob.data()),BLOB)) return 3;
+    if(!file || !file.seekg(base+std::streamoff(expert)*BLOB) || !file.read(reinterpret_cast<char*>(blob.data()),BLOB)) return 3;
     ggml_cpu_init();
-    auto g=ggml_get_type_traits_cpu(GGML_TYPE_IQ3_XXS), d=ggml_get_type_traits_cpu(GGML_TYPE_IQ4_NL);
-    auto gc=ggml_get_type_traits(GGML_TYPE_IQ3_XXS), dc=ggml_get_type_traits(GGML_TYPE_IQ4_NL);
+    auto gt=static_cast<ggml_type>(gu), dt=static_cast<ggml_type>(down_type);
+    auto g=ggml_get_type_traits_cpu(gt), d=ggml_get_type_traits_cpu(dt);
+    auto gc=ggml_get_type_traits(gt), dc=ggml_get_type_traits(dt);
+    if(!g || !d || !gc || !dc) return 4;
     auto ga=ggml_get_type_traits_cpu(g->vec_dot_type), da=ggml_get_type_traits_cpu(d->vec_dot_type);
     auto dac=ggml_get_type_traits(d->vec_dot_type);
     if(!gc->to_float || !dc->to_float || !ga->from_float || !da->from_float || !dac->to_float || g->vec_dot_type!=GGML_TYPE_Q8_K) return 4;
-    const size_t gr=ggml_row_size(GGML_TYPE_IQ3_XXS,H), dr=ggml_row_size(GGML_TYPE_IQ4_NL,F), up=gr*F, down=2*up;
+    const size_t gr=ggml_row_size(gt,H), dr=ggml_row_size(dt,F), up=gr*F, down=2*up;
     if(down+dr*H!=BLOB) return 5;
     std::vector<float> x(H), output, ax(H), row(H), mid(F), dw(F), am(F);
     std::vector<double> reference(H);
-    if(argc==5) {
+    if(argc>=5) {
         std::ifstream input(argv[4],std::ios::binary);
         if(!input || !input.read(reinterpret_cast<char*>(x.data()),x.size()*sizeof(float))) return 12;
         for(float v:x) if(!std::isfinite(v)) return 13;
@@ -51,7 +58,7 @@ int main(int argc,char** argv) {
         for(int i=0;i<H;++i) x[i]=std::sin(float(i)*0.17f)/32.f;
     }
     std::string error;
-    if(!vf::native_ggml::forward(18,20,blob,x,output,error)) {std::fprintf(stderr,"provider: %s\n",error.c_str());return 6;}
+    if(!vf::native_ggml::forward(gu,down_type,blob,x,output,error)) {std::fprintf(stderr,"provider: %s\n",error.c_str());return 6;}
     std::vector<uint8_t> qx(ggml_row_size(g->vec_dot_type,H)), qmid(ggml_row_size(d->vec_dot_type,F));
     ga->from_float(x.data(),qx.data(),H); decode_q8k(qx,ax);
     for(int i=0;i<F;++i) {

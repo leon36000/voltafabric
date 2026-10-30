@@ -7,6 +7,7 @@ import math
 import os
 from pathlib import Path
 import signal
+import stat
 import struct
 import subprocess
 import sys
@@ -21,7 +22,13 @@ def main():
         ap.add_argument("--" + name, required=True)
     ap.add_argument("--collector", help="optional local vf executable for explicit FP16/f64 collection")
     ap.add_argument("--model-input-sha256", help="expected SHA-256 of bounded model-derived input file")
+    ap.add_argument("--layer", type=int, choices=(0,1), default=0)
+    ap.add_argument("--route-json", help="explicit observed route JSON; required for layer 1")
+    ap.add_argument("--route-sha256", help="SHA-256 of the explicit route JSON")
     a = ap.parse_args()
+    if a.layer == 1 and (not a.model_input_sha256 or not a.route_json or not a.route_sha256):
+        ap.error("layer 1 requires model input and route digests")
+    if bool(a.route_json) != bool(a.route_sha256): ap.error("explicit route requires its digest")
     for path in (a.pack,a.index,a.dense,a.input,a.observation,a.bridge,a.worker,a.oracle,a.router,a.work_root):
         if not os.path.isabs(path): ap.error("all paths must be absolute")
     work = Path(tempfile.mkdtemp(prefix="routed-session-", dir=a.work_root)); ledger = work / "ledger"; ledger.mkdir()
@@ -30,7 +37,6 @@ def main():
         fd = os.open(a.input, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
         try:
             st = os.fstat(fd)
-            import stat
             if not stat.S_ISREG(st.st_mode) or not 10240 <= st.st_size <= 1048576: raise ValueError("invalid model input file")
             raw = os.read(fd, st.st_size + 1)
             after = os.fstat(fd)
@@ -39,22 +45,36 @@ def main():
         finally: os.close(fd)
         input_path = str(work / "activation.f32")
         with open(input_path,"xb") as f: f.write(raw[:10240])
-    route = json.loads(subprocess.run([a.router,a.dense,input_path,a.router_digest], check=True, timeout=30, capture_output=True, text=True).stdout)
+    if a.route_json:
+        if not os.path.isabs(a.route_json): ap.error("route path must be absolute")
+        fd = os.open(a.route_json, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK)
+        try:
+            st=os.fstat(fd)
+            if not stat.S_ISREG(st.st_mode) or not 1<=st.st_size<=16384: raise ValueError("invalid route file")
+            route_data=os.read(fd,st.st_size+1); after=os.fstat(fd)
+            if len(route_data)!=st.st_size or (st.st_ino,st.st_size,st.st_mtime_ns,st.st_ctime_ns)!=(after.st_ino,after.st_size,after.st_mtime_ns,after.st_ctime_ns): raise ValueError("route changed")
+        finally: os.close(fd)
+        if hashlib.sha256(route_data).hexdigest()!=a.route_sha256: raise ValueError("explicit route digest mismatch")
+        route = json.loads(route_data)
+    else:
+        route = json.loads(subprocess.run([a.router,a.dense,input_path,a.router_digest], check=True, timeout=30, capture_output=True, text=True).stdout)
     # JSON decimal text must round-trip to the original binary32 coefficients.
     for entry in route:
         entry["weight"]=struct.unpack("<f",struct.pack("<f",entry["weight"]))[0]
     ids = [x["expert"] for x in route]
     if len(ids)!=10 or len(set(ids))!=10 or any(not 0<=i<512 for i in ids): raise ValueError("invalid CPU route")
+    if any(not math.isfinite(x["weight"]) or x["weight"]<0 for x in route): raise ValueError("invalid route weights")
     observations = json.loads(Path(a.observation).read_text())
     if observations.get("index_sha256")!=INDEX_SHA or observations.get("kind")!="sc117-observation-not-authentication": raise ValueError("invalid observation")
     records=observations.get("experts",[])
-    if [r.get("expert") for r in records]!=ids or any(r.get("layer")!=0 or r.get("matches_source_shard_slices") is not True for r in records):
+    if [r.get("expert") for r in records]!=ids or any(r.get("layer")!=a.layer or r.get("matches_source_shard_slices") is not True for r in records):
         raise ValueError("observation does not cover route in slot order")
     refs=[]
     for expert in ids:
         path=work / f"reference-{expert}.bin"
         command=[a.oracle,a.pack,str(expert),str(path)]
         if a.model_input_sha256: command.append(input_path)
+        if a.layer == 1: command.append("1")
         subprocess.run(command,check=True,timeout=30,stdout=subprocess.DEVNULL)
         raw=path.read_bytes()
         if len(raw)!=2560*12: raise ValueError("invalid oracle output")
@@ -63,18 +83,18 @@ def main():
     if len(input_bytes)!=10240 or struct.unpack("<2560f",input_bytes)!=refs[0][0] or any(r[0]!=refs[0][0] for r in refs):
         raise ValueError("route and oracle inputs differ")
     run_id="sc117-gate-cpu-"+uuid.uuid4().hex
-    stamp={"run_id":run_id,"model_revision":"sc117-local-observation-r399","plan_id":"cpu-gate-10-local","layer":0,"batch":0,"epoch":1}
+    stamp={"run_id":run_id,"model_revision":"sc117-local-observation-r399","plan_id":"cpu-gate-10-local","layer":a.layer,"batch":0,"epoch":1}
     copies=[]; bindings=[]; orders={"2":[],"3":[]}
     for slot,(expert,record) in enumerate(zip(ids,records)):
         rank=2+slot%2; local=slot//2; orders[str(rank)].append(local)
         copies.append({"expert":expert,"rank":rank,"local":local})
-        bindings.append({"model_revision":stamp["model_revision"],"rank":rank,"layer":0,"expert":expert,"local":local,"epoch":1,
+        bindings.append({"model_revision":stamp["model_revision"],"rank":rank,"layer":a.layer,"expert":expert,"local":local,"epoch":1,
                          "index_sha256":INDEX_SHA,"blob_sha256":record["sha256"]})
     init={"template":{"hidden":2560,"experts":ids,"routes":[[{"expert":e,"weight":float(r["weight"])} for e,r in zip(ids,route)]],
                       "registry":{"epoch":1,"copies":copies},"stamp":stamp,"preferred_owners":{},"resident_order":orders},
           "model_experts":list(range(512)),"index":Path(a.index).read_text(),"pack_path":a.pack,"ledger_path":str(ledger),
           "endpoints":[{"rank":rank,"argv":[a.worker]} for rank in (2,3)],"bindings":bindings,
-          "resident_payload_limit":10*2_176_000,"timeout_ms":30_000}
+          "resident_payload_limit":10*(2_176_000 if a.layer==0 else 1_510_400),"timeout_ms":30_000}
     batch={"op":"batch","batch":1,"tokens":1,"top_k":10,"inputs":refs[0][0],"ids":ids,"kinds":[-1]*10}
     payload="".join(json.dumps(x,allow_nan=False)+"\n" for x in (init,batch,{"op":"shutdown"}))
     child=subprocess.Popen([a.bridge],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,start_new_session=True)
