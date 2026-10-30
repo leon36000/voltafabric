@@ -725,3 +725,229 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         let _ = session.close(timeout);
     }
 }
+
+#[test]
+fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
+    use std::{
+        collections::BTreeMap,
+        io::{BufRead, BufReader, Seek, SeekFrom, Write},
+        process::{Child, ChildStdin, Command, Stdio},
+        time::{SystemTime, UNIX_EPOCH},
+    };
+    use voltafabric::{
+        moe::{Choice, Registry, Replica, Stamp},
+        routing,
+        session::Endpoint,
+        strata_native_bridge::{Init, Reply, Request},
+    };
+    let base = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(".runs")
+        .join(format!(
+            "r388-bridge-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+    std::fs::create_dir(&base).unwrap();
+    let ledger = base.join("ledger");
+    std::fs::create_dir(&ledger).unwrap();
+    let pack_path = base.join("synthetic-sparse-pack.bin");
+    let mut pack = std::fs::File::create(&pack_path).unwrap();
+    pack.set_len(SIZE).unwrap();
+    let mut data = vec![0u8; 2_176_000];
+    for i in (0..1_254_400).step_by(98) {
+        data[i + 1] = 0x28;
+    }
+    for i in (1_254_400..2_176_000).step_by(18) {
+        data[i + 1] = 0x28;
+    }
+    pack.seek(SeekFrom::Start(0)).unwrap();
+    pack.write_all(&data).unwrap();
+    pack.write_all(&data).unwrap();
+    pack.sync_all().unwrap();
+    let digest = "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0";
+    let mut b = binding();
+    b.blob_sha256 = digest.into();
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let blob = layout
+        .read_verified_expert(
+            &mut Pattern {
+                pos: 0,
+                data: data.clone(),
+            },
+            0,
+            0,
+            INDEX_SHA,
+            digest,
+        )
+        .unwrap();
+    let mut reference = Resident::load(&layout, blob, b.clone()).unwrap();
+    let x = vec![0.001_f32; 2560];
+    let expected = reference.forward(&x).unwrap();
+    let mut bindings = Vec::new();
+    let mut endpoints = Vec::new();
+    for expert in 0..2 {
+        let mut item = b.clone();
+        item.expert = expert;
+        item.rank = 2 + expert;
+        bindings.push(item);
+        endpoints.push(Endpoint {
+            rank: 2 + expert,
+            argv: vec![env!("CARGO_BIN_EXE_vf-rank-session").to_owned()],
+        });
+    }
+    let template = routing::RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![vec![
+            Choice {
+                expert: 0,
+                weight: 0.25,
+            },
+            Choice {
+                expert: 1,
+                weight: 0.75,
+            },
+        ]],
+        registry: Registry {
+            epoch: 3,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r388-local-bridge".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+    };
+    let init = Init {
+        template,
+        model_experts: vec![0, 1, 2],
+        index: INDEX.into(),
+        pack_path: pack_path.to_str().unwrap().into(),
+        ledger_path: ledger.to_str().unwrap().into(),
+        endpoints,
+        bindings,
+        timeout_ms: 30_000,
+    };
+    fn send(w: &mut ChildStdin, value: &impl serde::Serialize) {
+        serde_json::to_writer(&mut *w, value).unwrap();
+        w.write_all(b"\n").unwrap();
+        w.flush().unwrap();
+    }
+    fn recv(r: &mut BufReader<std::process::ChildStdout>) -> Reply {
+        let mut line = String::new();
+        assert!(r.read_line(&mut line).unwrap() > 0);
+        serde_json::from_str(&line).unwrap()
+    }
+    fn start(init: &Init) -> (Child, ChildStdin, BufReader<std::process::ChildStdout>) {
+        let mut p = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        let mut input = p.stdin.take().unwrap();
+        let mut output = BufReader::new(p.stdout.take().unwrap());
+        send(&mut input, init);
+        assert!(matches!(recv(&mut output),Reply::Ready {ranks} if ranks==vec![2,3]));
+        (p, input, output)
+    }
+    let request = |batch| Request::Batch {
+        batch,
+        tokens: 1,
+        top_k: 3,
+        inputs: x.clone(),
+        ids: vec![0, 2, 1],
+        kinds: vec![-1, 0, -1],
+    };
+    let (mut child, mut input, mut output) = start(&init);
+    for batch in [12, 13] {
+        send(&mut input, &request(batch));
+        match recv(&mut output) {
+            Reply::Completed {
+                batch: got,
+                cpu_rows,
+            } => {
+                assert_eq!(got, batch);
+                assert_eq!(cpu_rows.len(), 2);
+                assert_eq!(cpu_rows[0].position, 0);
+                assert_eq!(cpu_rows[1].position, 2);
+                for row in cpu_rows {
+                    assert_eq!(
+                        row.value.iter().map(|v| v.to_bits()).collect::<Vec<_>>(),
+                        expected.iter().map(|v| v.to_bits()).collect::<Vec<_>>()
+                    );
+                }
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+    }
+    send(&mut input, &request(12));
+    assert!(matches!(recv(&mut output), Reply::Failed { .. }));
+    drop(input);
+    assert!(!child.wait().unwrap().success());
+    let (mut child, mut input, mut output) = start(&init);
+    send(&mut input, &request(12));
+    assert!(
+        matches!(recv(&mut output),Reply::Failed { error } if error.code=="LEDGER_RESERVATION")
+    );
+    drop(input);
+    assert!(!child.wait().unwrap().success());
+    let (mut child, mut input, mut output) = start(&init);
+    send(&mut input, &Request::Shutdown);
+    assert!(matches!(recv(&mut output), Reply::Closed));
+    drop(input);
+    assert!(child.wait().unwrap().success());
+    let mut bad: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
+    bad.bindings[0].blob_sha256 = "0".repeat(64);
+    let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut input = child.stdin.take().unwrap();
+    let mut output = BufReader::new(child.stdout.take().unwrap());
+    send(&mut input, &bad);
+    assert!(matches!(recv(&mut output), Reply::Failed { .. }));
+    drop(input);
+    assert!(!child.wait().unwrap().success());
+    let fifo = base.join("not-a-pack-fifo");
+    assert!(Command::new("mkfifo")
+        .arg(&fifo)
+        .status()
+        .unwrap()
+        .success());
+    let mut bad_fifo: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
+    bad_fifo.pack_path = fifo.to_str().unwrap().into();
+    let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut input = child.stdin.take().unwrap();
+    let mut output = BufReader::new(child.stdout.take().unwrap());
+    send(&mut input, &bad_fifo);
+    assert!(matches!(recv(&mut output), Reply::Failed { .. }));
+    drop(input);
+    assert!(!child.wait().unwrap().success());
+}

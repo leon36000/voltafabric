@@ -45,6 +45,8 @@ pub mod native_ledger;
 pub mod qpn2;
 pub mod routing;
 pub mod strata_ingress;
+#[cfg(feature = "native-ggml-cpu")]
+pub mod strata_native_bridge;
 pub mod strata_native_layout;
 
 pub mod base64;

@@ -40,6 +40,11 @@ path = "src/bin/vf-rank-worker.rs"
 name = "vf-rank-session"
 path = "src/bin/vf-rank-session.rs"
 
+[[bin]]
+name = "vf-strata-native-bridge"
+path = "src/bin/vf-strata-native-bridge.rs"
+required-features = ["native-ggml-cpu"]
+
 [target.'cfg(unix)'.dependencies]
 libc = "=0.2.190"
 
