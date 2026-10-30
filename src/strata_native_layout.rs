@@ -1,7 +1,8 @@
 //! Bounded metadata admission for the observed SC117 native-expert pack.
-//! This parses offsets and format geometry only: it does not read, verify, decode,
-//! or execute model payloads, and does not establish a checkpoint identity.
-use crate::{invalid, Result};
+//! Index admission and bounded digest-verified reads for the observed pack.
+//! It does not decode or execute model payloads, or establish checkpoint identity.
+use crate::{invalid, sha256, Result};
+use std::io::{Read, Seek, SeekFrom};
 
 const LAYERS: usize = 48;
 const EXPERTS: u64 = 512;
@@ -27,6 +28,23 @@ pub struct ExpertSpan {
 #[derive(Debug)]
 pub struct NativeLayout {
     layers: Vec<NativeLayer>,
+    index_sha256: String,
+}
+
+/// An exact blob verified against a caller-supplied digest. Its format remains
+/// the native GGML format named in `span`; it is not QPN2 or MXFP4.
+pub struct VerifiedNativeExpert {
+    pub layer: usize,
+    pub expert: u64,
+    pub span: ExpertSpan,
+    pub bytes: Vec<u8>,
+}
+
+fn valid_sha(value: &str) -> bool {
+    value.len() == 64
+        && value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
 }
 
 fn block(kind: u32) -> Result<(u64, u64)> {
@@ -117,7 +135,10 @@ impl NativeLayout {
         if layers.len() != LAYERS || next_offset != file_len {
             return Err(invalid("incomplete native index"));
         }
-        Ok(Self { layers })
+        Ok(Self {
+            layers,
+            index_sha256: sha256::hex(index.as_bytes()),
+        })
     }
     pub fn layers(&self) -> &[NativeLayer] {
         &self.layers
@@ -139,6 +160,59 @@ impl NativeLayout {
             bytes: entry.bytes,
             gate_up_type: entry.gate_up_type,
             down_type: entry.down_type,
+        })
+    }
+
+    /// Read a single bounded expert only when both expected hashes are supplied
+    /// by a trusted manifest. The descriptor must refer to the intended pack;
+    /// per-blob SHA binds the returned bytes, not the rest of the pack or model.
+    pub fn read_verified_expert<R: Read + Seek>(
+        &self,
+        reader: &mut R,
+        layer: usize,
+        expert: u64,
+        expected_index_sha256: &str,
+        expected_blob_sha256: &str,
+    ) -> Result<VerifiedNativeExpert> {
+        if !valid_sha(expected_index_sha256)
+            || !valid_sha(expected_blob_sha256)
+            || expected_index_sha256 != self.index_sha256
+        {
+            return Err(invalid("native index or blob digest not pinned"));
+        }
+        let span = self.expert(layer, expert)?;
+        if span.bytes > 4 * 1024 * 1024 {
+            return Err(invalid("native blob exceeds read bound"));
+        }
+        let len = reader
+            .seek(SeekFrom::End(0))
+            .map_err(|_| invalid("native pack size unavailable"))?;
+        if len != TOTAL {
+            return Err(invalid("native pack size changed"));
+        }
+        let pos = reader
+            .seek(SeekFrom::Start(span.offset))
+            .map_err(|_| invalid("native expert seek failed"))?;
+        if pos != span.offset {
+            return Err(invalid("native expert seek mismatch"));
+        }
+        let n = usize::try_from(span.bytes).map_err(|_| invalid("native blob size overflow"))?;
+        let mut bytes = Vec::new();
+        bytes
+            .try_reserve_exact(n)
+            .map_err(|_| invalid("native blob allocation failed"))?;
+        bytes.resize(n, 0);
+        reader
+            .read_exact(&mut bytes)
+            .map_err(|_| invalid("native blob read incomplete"))?;
+        if sha256::hex(&bytes) != expected_blob_sha256 {
+            return Err(invalid("native blob digest mismatch"));
+        }
+        Ok(VerifiedNativeExpert {
+            layer,
+            expert,
+            span,
+            bytes,
         })
     }
 }

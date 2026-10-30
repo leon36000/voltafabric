@@ -1,0 +1,9 @@
+# R378 — Bounded digest-verified native expert read
+
+Parent: 9557ac61acf5a3a17701f85fb37806c1d7e019a4. `NativeLayout::read_verified_expert` validates a caller-pinned lowercase SHA-256 for the exact admitted index and for the selected expert blob, checks layer/expert range and current pack length, seeks to the computed offset, limits the allocation to 4 MiB, reads the whole blob and returns it only after its digest matches. The result retains its native gate/up and down type IDs and layer/expert identity. Short reads, changed length, invalid digest and mismatches fail without a partial result.
+
+The digest inputs must come from a separately trusted manifest. The returned blob hash verifies those bytes, not the rest of the 50 GB pack, the model, execution, or the trustworthiness of a caller-provided hash. The file descriptor must refer to the intended pack. This code does not decode or execute the native IQ formats, and never relabels them as QPN2 or MXFP4.
+
+CPU tests: `cargo test --offline --locked --test strata_native_layout` passed all three tests in debug and release. A synthetic seekable zero stream of 50,292,326,400 logical bytes supplies only one 2,176,000-byte read; its expected SHA-256 was independently generated with Python hashlib. Tests cover wrong index digest before payload read, complete blob, wrong payload digest, short read and changed logical size. No real weights were read. Strict offline all-target Clippy, formatting and `git diff --check` passed. No GPU/inter-PC run or UNKNOWN replay.
+
+Next: establish trusted per-expert digests and a safe source/manifest binding for an actual checkpoint, then adapt a native IQ CPU provider with source/license traceability and an independent numerical oracle. Runtime Session integration and full generation remain unqualified.
