@@ -1078,6 +1078,46 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     assert!(matches!(recv(&mut output), Reply::Failed { .. }));
     drop(input);
     assert!(!child.wait().unwrap().success());
+    // A late digest failure happens after a worker has loaded earlier experts.
+    // The coordinator must fail admission and reap that worker before replying.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let wrapper = base.join("record-worker.sh");
+        let pid_file = base.join("record-worker.pid");
+        std::fs::write(
+            &wrapper,
+            "#!/bin/sh\nprintf '%s\\n' \"$$\" > \"$VF_TEST_PID_FILE\"\nexec \"$VF_TEST_WORKER\"\n",
+        )
+        .unwrap();
+        std::fs::set_permissions(&wrapper, std::fs::Permissions::from_mode(0o700)).unwrap();
+        expanded.resident_payload_limit = Some(5 * 2_176_000);
+        expanded.bindings[4].blob_sha256 = "0".repeat(64);
+        expanded.endpoints[0].argv = vec![wrapper.to_str().unwrap().into()];
+        let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+            .env("VF_TEST_PID_FILE", &pid_file)
+            .env("VF_TEST_WORKER", env!("CARGO_BIN_EXE_vf-rank-session"))
+            .stdin(Stdio::piped())
+            .stdout(Stdio::piped())
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        let mut input = child.stdin.take().unwrap();
+        let mut output = BufReader::new(child.stdout.take().unwrap());
+        send(&mut input, &expanded);
+        assert!(matches!(recv(&mut output), Reply::Failed { .. }));
+        let pid: u32 = std::fs::read_to_string(pid_file)
+            .unwrap()
+            .trim()
+            .parse()
+            .unwrap();
+        assert!(
+            !std::path::Path::new(&format!("/proc/{pid}")).exists(),
+            "worker survived failed admission"
+        );
+        drop(input);
+        assert!(!child.wait().unwrap().success());
+    }
     #[cfg(unix)]
     for client_path in [
         std::env::var_os("VF_STRATA_CPP_CLIENT"),

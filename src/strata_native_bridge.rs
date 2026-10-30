@@ -136,7 +136,7 @@ impl Coordinator {
         if total > limit {
             return Err(invalid("native bridge payload budget exceeded"));
         }
-        let mut loads = BTreeMap::<u32, Vec<(Binding, Vec<u8>)>>::new();
+        let mut loads = BTreeMap::<u32, Vec<&Binding>>::new();
         for (&rank, order) in &init.template.resident_order {
             if !endpoints.contains_key(&rank)
                 || order.is_empty()
@@ -167,19 +167,38 @@ impl Coordinator {
                 {
                     return Err(invalid("native bridge binding identity"));
                 }
-                let verified = layout.read_verified_expert(
-                    &mut file,
-                    b.layer as usize,
-                    u64::from(b.expert),
-                    &b.index_sha256,
-                    &b.blob_sha256,
-                )?;
-                owners.push((b.clone(), verified.bytes));
+                owners.push(b);
             }
             loads.insert(rank, owners);
         }
         if loads.values().map(Vec::len).sum::<usize>() != init.bindings.len() {
             return Err(invalid("native bridge extra binding"));
+        }
+        // Validate the complete binding map first, then keep only one verified
+        // payload in this process while resident workers receive their weights.
+        // Sessions are owned until Ready; errors drop, kill and reap them.
+        let timeout = Duration::from_millis(init.timeout_ms);
+        let mut sessions = Vec::new();
+        for (rank, owners) in loads {
+            let mut session = Session::connect(endpoints[&rank], timeout)?;
+            for binding in &owners {
+                let verified = layout.read_verified_expert(
+                    &mut file,
+                    binding.layer as usize,
+                    u64::from(binding.expert),
+                    &binding.index_sha256,
+                    &binding.blob_sha256,
+                )?;
+                session.load_native_ggml(
+                    binding,
+                    &init.index,
+                    metadata.len(),
+                    &verified.bytes,
+                    timeout,
+                )?;
+            }
+            session.seal_native_ggml(owners.len(), timeout)?;
+            sessions.push(session);
         }
         #[cfg(unix)]
         {
@@ -206,16 +225,6 @@ impl Coordinator {
             ) {
                 return Err(invalid("native pack changed during admission"));
             }
-        }
-        let timeout = Duration::from_millis(init.timeout_ms);
-        let mut sessions = Vec::new();
-        for (rank, owners) in loads {
-            let mut session = Session::connect(endpoints[&rank], timeout)?;
-            for (binding, bytes) in &owners {
-                session.load_native_ggml(binding, &init.index, metadata.len(), bytes, timeout)?;
-            }
-            session.seal_native_ggml(owners.len(), timeout)?;
-            sessions.push(session);
         }
         Ok(Self {
             template: init.template,
