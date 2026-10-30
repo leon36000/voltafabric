@@ -1,4 +1,4 @@
-"""Bounded SC117 one- or two-token prompt runner, with no automatic retry.
+"""Bounded SC117 prompt runner, with no automatic retry.
 
 Run under an externally admitted resource scope. The caller authenticates the
 model, tokenizer manifest, worker, engine binary, paths and ledger. A failure
@@ -15,10 +15,11 @@ import stat
 import subprocess
 import sys
 
-from .adapter import _unique_object, decode_greedy_receipt, load_sc117
+from .adapter import (MAX_GENERATED_TOKENS, MAX_PROMPT_TOKENS, _unique_object,
+                      decode_greedy_receipt, load_sc117)
 
 MAX_PROMPT_BYTES = 4096
-MAX_RECEIPT_BYTES = 4 * 1024 * 1024
+MAX_RECEIPT_BYTES = 32 * 1024 * 1024
 _ENGINE_FAILURES = {
     b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity\n": "rank_payload_capacity",
     b"prefill-greedy qualification refused: INVALID_INPUT: expert payload budget exceeded\n": "global_payload_capacity",
@@ -51,10 +52,10 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("prompt must be nonempty and bounded UTF-8")
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
-    if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= 8:
-        raise ValueError("generation limit must be between one and eight")
+    if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= MAX_GENERATED_TOKENS:
+        raise ValueError("generation limit must be between one and 32")
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
-    if (not 1 <= len(prompt_ids) <= 8 or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
+    if (not 1 <= len(prompt_ids) <= MAX_PROMPT_TOKENS or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
         raise ValueError("this qualification accepts one to eight ordinary prompt tokens")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]

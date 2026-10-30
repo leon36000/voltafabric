@@ -365,6 +365,8 @@ struct WorkerPlan<'a> {
     index_sha256: &'static str,
     epoch: u64,
     layers: usize,
+    prompt_length: usize,
+    max_new_tokens: usize,
     payload_budget: u64,
     rank_limits: &'a Option<BTreeMap<u32, u64>>,
     endpoints: &'a BTreeMap<u32, Endpoint>,
@@ -374,8 +376,12 @@ fn worker_plan_id(
     endpoints: &BTreeMap<u32, Endpoint>,
     payload_budget: u64,
     rank_limits: &Option<BTreeMap<u32, u64>>,
+    prompt_length: usize,
+    max_new_tokens: usize,
 ) -> Result<String, E> {
     if payload_budget == 0
+        || !(1..=8).contains(&prompt_length)
+        || !(1..=32).contains(&max_new_tokens)
         || endpoints.len() != 2
         || [2, 3].iter().any(|rank| {
             endpoints
@@ -394,16 +400,18 @@ fn worker_plan_id(
         return Err("invalid worker plan".into());
     }
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v1",
+        version: "vf-sc117-worker-plan-v2",
         model_revision: "sc117-local-observation",
         index_sha256: INDEX_HASH,
         epoch: 1,
         layers: 48,
+        prompt_length,
+        max_new_tokens,
         payload_budget,
         rank_limits,
         endpoints,
     };
-    Ok(format!("r484-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r486-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -497,7 +505,7 @@ fn run() -> Result<(), E> {
     }
     let prompt_tokens: Vec<u32> = a[10].split(',').map(str::parse).collect::<Result<_, _>>()?;
     let max_new_tokens: usize = if a.len() == 12 { a[11].parse()? } else { 2 };
-    if !(1..=8).contains(&max_new_tokens) {
+    if !(1..=32).contains(&max_new_tokens) {
         return Err("invalid generation limit".into());
     }
     if !(1..=8).contains(&prompt_tokens.len())
@@ -552,7 +560,13 @@ fn run() -> Result<(), E> {
         }
         _ => return Err("both rank budgets must be supplied".into()),
     };
-    let plan_id = worker_plan_id(&endpoints, budget, &rank_limits)?;
+    let plan_id = worker_plan_id(
+        &endpoints,
+        budget,
+        &rank_limits,
+        prompt_tokens.len(),
+        max_new_tokens,
+    )?;
     let m: voltafabric::sc117_ple_weights::Manifest =
         serde_json::from_reader(std::fs::File::open(&a[8])?)?;
     let weights =
@@ -562,7 +576,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r484-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r486-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -749,7 +763,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to eight supplied prompt tokens and 32 greedy predictions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }
@@ -769,13 +783,13 @@ mod tests {
         let rank3 = rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker")).unwrap();
         let endpoints = BTreeMap::from([(2, rank2.clone()), (3, rank3.clone())]);
         let limits = Some(BTreeMap::from([(2, 100), (3, 200)]));
-        let id = worker_plan_id(&endpoints, 300, &limits).unwrap();
+        let id = worker_plan_id(&endpoints, 300, &limits, 2, 16).unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r484-077e885b41da741d94ad4d21c8325f06d462670eb0a299572392434a39ec7054"
+            "r486-d10a0397d45343a51bf3ff2a7c77f39de8b286d9ba46e81875ffde9e53473aa1"
         );
-        assert_eq!(id, worker_plan_id(&endpoints, 300, &limits).unwrap());
+        assert_eq!(id, worker_plan_id(&endpoints, 300, &limits, 2, 16).unwrap());
         let changed_host = BTreeMap::from([
             (2, rank2.clone()),
             (
@@ -783,7 +797,10 @@ mod tests {
                 rank_endpoint(3, "/worker", Some("pc2-lan"), Some("/worker")).unwrap(),
             ),
         ]);
-        assert_ne!(id, worker_plan_id(&changed_host, 300, &limits).unwrap());
+        assert_ne!(
+            id,
+            worker_plan_id(&changed_host, 300, &limits, 2, 16).unwrap()
+        );
         let changed_path = BTreeMap::from([
             (2, rank2.clone()),
             (
@@ -791,16 +808,25 @@ mod tests {
                 rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/other")).unwrap(),
             ),
         ]);
-        assert_ne!(id, worker_plan_id(&changed_path, 300, &limits).unwrap());
-        assert_ne!(id, worker_plan_id(&endpoints, 301, &limits).unwrap());
-        assert_ne!(id, worker_plan_id(&endpoints, 300, &None).unwrap());
+        assert_ne!(
+            id,
+            worker_plan_id(&changed_path, 300, &limits, 2, 16).unwrap()
+        );
+        assert_ne!(id, worker_plan_id(&endpoints, 301, &limits, 2, 16).unwrap());
+        assert_ne!(id, worker_plan_id(&endpoints, 300, &None, 2, 16).unwrap());
+        assert_ne!(id, worker_plan_id(&endpoints, 300, &limits, 3, 16).unwrap());
+        assert_ne!(id, worker_plan_id(&endpoints, 300, &limits, 2, 32).unwrap());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 2, 33).is_err());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 0, 16).is_err());
         assert!(worker_plan_id(
             &BTreeMap::from([(2, rank2), (3, rank3.clone()), (4, rank3)]),
             300,
-            &limits
+            &limits,
+            2,
+            16
         )
         .is_err());
-        assert!(worker_plan_id(&endpoints, 300, &Some(BTreeMap::from([(2, 100)]))).is_err());
+        assert!(worker_plan_id(&endpoints, 300, &Some(BTreeMap::from([(2, 100)])), 2, 16).is_err());
     }
     #[test]
     fn rank_endpoints_are_explicit_and_reject_shell_metacharacters() {

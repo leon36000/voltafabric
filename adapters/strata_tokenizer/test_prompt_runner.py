@@ -61,7 +61,21 @@ class RunnerTests(unittest.TestCase):
             run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(short).encode(), b""))
         with self.assertRaises(ValueError):
-            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=9, runner=runner)
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=33, runner=runner)
+
+    def test_32_outputs_and_39_positions_are_bounded_and_atomic(self):
+        value = dict(receipt(), prompt_tokens=[0]*8, input_tokens=[0]*39,
+                     requested_max_new_tokens=32, generated_token_ids=[0]*32,
+                     output_sha256=["a" * 64]*39, logits_sha256=["b" * 64]*32)
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        out = run_prompt("eight", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=32, runner=runner)
+        self.assertEqual(out["output"]["text"], "A"*32)
+        incomplete = dict(value, generated_token_ids=[0]*31, input_tokens=[0]*38,
+                          output_sha256=["a"*64]*38, logits_sha256=["b"*64]*31)
+        with self.assertRaisesRegex(ValueError, "incomplete"):
+            run_prompt("eight", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=32,
+                       runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(incomplete).encode(), b""))
 
     def test_eight_token_bound_and_prompt_bound(self):
         value = dict(receipt(), prompt_tokens=[0, 1], input_tokens=[0, 1] + [0]*7,
