@@ -76,3 +76,7 @@ target_compile_options(vf_check_sc117_layer1_qkv PRIVATE -Wall -Wextra -Werror)
 add_executable(vf_check_sc117_layer1_route check_sc117_layer1_route.cpp)
 target_link_libraries(vf_check_sc117_layer1_route PRIVATE ggml-cpu ggml-base)
 target_compile_options(vf_check_sc117_layer1_route PRIVATE -Wall -Wextra -Werror)
+# Explicit layer-1 shared-expert sampled diagnostic; not a CTest.
+add_executable(vf_check_sc117_layer1_shared check_sc117_layer1_shared.cpp)
+target_link_libraries(vf_check_sc117_layer1_shared PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_check_sc117_layer1_shared PRIVATE -Wall -Wextra -Werror)
