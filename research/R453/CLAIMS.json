@@ -1,0 +1,98 @@
+[
+  {
+    "attempt": 1793373753877318852,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3166699-1793373753877318852"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373753877318853,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3166699-1793373753877318852"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373753877318852,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3166699-1793373753877318852"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373753877318853,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3166699-1793373753877318852"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373776062325731,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3169053-1793373776062325731"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373776062325731,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3169053-1793373776062325731"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373776062325732,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3169053-1793373776062325731"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373776062325732,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r453-cpu-only",
+      "run_id": "r453-two-tokens-3169053-1793373776062325731"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]
