@@ -730,7 +730,7 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
 fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     use std::{
         collections::BTreeMap,
-        io::{BufRead, BufReader, Seek, SeekFrom, Write},
+        io::{BufRead, BufReader, Read, Seek, SeekFrom, Write},
         process::{Child, ChildStdin, Command, Stdio},
         time::{SystemTime, UNIX_EPOCH},
     };
@@ -916,6 +916,103 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     assert!(matches!(recv(&mut output), Reply::Closed));
     drop(input);
     assert!(child.wait().unwrap().success());
+    let (mut child, mut input, mut output) = start(&init);
+    send(&mut input, &Request::EnterBinary);
+    assert!(matches!(recv(&mut output), Reply::BinaryReady));
+    let mut request = Vec::new();
+    request.extend_from_slice(b"VFB1");
+    request.extend_from_slice(&1_u32.to_le_bytes());
+    request.extend_from_slice(&14_u64.to_le_bytes());
+    request.extend_from_slice(&1_u32.to_le_bytes());
+    request.extend_from_slice(&3_u32.to_le_bytes());
+    for &v in &x {
+        request.extend_from_slice(&v.to_bits().to_le_bytes());
+    }
+    for v in [0_i32, 2, 1, -1, 0, -1] {
+        request.extend_from_slice(&v.to_le_bytes());
+    }
+    input.write_all(&request).unwrap();
+    input.flush().unwrap();
+    let mut header = [0_u8; 24];
+    output.read_exact(&mut header).unwrap();
+    assert_eq!(&header[..4], b"VFR1");
+    assert_eq!(u32::from_le_bytes(header[4..8].try_into().unwrap()), 0);
+    assert_eq!(u64::from_le_bytes(header[8..16].try_into().unwrap()), 14);
+    assert_eq!(u32::from_le_bytes(header[16..20].try_into().unwrap()), 2);
+    for pos in [0_u32, 2] {
+        let mut b = [0u8; 4];
+        output.read_exact(&mut b).unwrap();
+        assert_eq!(u32::from_le_bytes(b), pos);
+        for v in &expected {
+            output.read_exact(&mut b).unwrap();
+            assert_eq!(u32::from_le_bytes(b), v.to_bits());
+        }
+    }
+    let mut shutdown = Vec::from(&b"VFB1"[..]);
+    shutdown.extend_from_slice(&2_u32.to_le_bytes());
+    shutdown.extend_from_slice(&[0; 16]);
+    input.write_all(&shutdown).unwrap();
+    input.flush().unwrap();
+    output.read_exact(&mut header).unwrap();
+    assert_eq!(u32::from_le_bytes(header[4..8].try_into().unwrap()), 2);
+    drop(input);
+    assert!(child.wait().unwrap().success());
+    #[cfg(unix)]
+    if let Some(client_path) = std::env::var_os("VF_STRATA_CPP_CLIENT") {
+        use std::os::{fd::OwnedFd, unix::net::UnixStream};
+        let expected_path = base.join("expected-f32.bin");
+        let mut expected_file = std::fs::File::create(&expected_path).unwrap();
+        for v in &expected {
+            expected_file.write_all(&v.to_le_bytes()).unwrap();
+        }
+        drop(expected_file);
+        let (mut parent, remote) = UnixStream::pair().unwrap();
+        let remote_out = remote.try_clone().unwrap();
+        let mut bridge = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+            .stdin(Stdio::from(OwnedFd::from(remote)))
+            .stdout(Stdio::from(OwnedFd::from(remote_out)))
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        fn line(socket: &mut UnixStream) -> String {
+            let mut bytes = Vec::new();
+            loop {
+                let mut b = [0_u8; 1];
+                socket.read_exact(&mut b).unwrap();
+                if b[0] == b'\n' {
+                    break;
+                }
+                bytes.push(b[0]);
+                assert!(bytes.len() < 65536);
+            }
+            String::from_utf8(bytes).unwrap()
+        }
+        serde_json::to_writer(&mut parent, &init).unwrap();
+        parent.write_all(b"\n").unwrap();
+        assert!(matches!(
+            serde_json::from_str::<Reply>(&line(&mut parent)).unwrap(),
+            Reply::Ready { .. }
+        ));
+        serde_json::to_writer(&mut parent, &Request::EnterBinary).unwrap();
+        parent.write_all(b"\n").unwrap();
+        assert!(matches!(
+            serde_json::from_str::<Reply>(&line(&mut parent)).unwrap(),
+            Reply::BinaryReady
+        ));
+        let parent_out = parent.try_clone().unwrap();
+        let mut client = Command::new(client_path)
+            .arg(&expected_path)
+            .stdin(Stdio::from(OwnedFd::from(parent)))
+            .stdout(Stdio::from(OwnedFd::from(parent_out)))
+            .stderr(Stdio::null())
+            .spawn()
+            .unwrap();
+        assert!(client.wait().unwrap().success(), "C++ binary client failed");
+        assert!(
+            bridge.wait().unwrap().success(),
+            "binary coordinator failed"
+        );
+    }
     let mut bad: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
     bad.bindings[0].blob_sha256 = "0".repeat(64);
     let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))

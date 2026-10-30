@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.16)
+project(vf_strata_pipe_client LANGUAGES CXX)
+if(NOT UNIX)
+  message(FATAL_ERROR "Unix sockets are required")
+endif()
+add_library(vf_strata_pipe_client STATIC pipe_client.cpp)
+target_compile_features(vf_strata_pipe_client PUBLIC cxx_std_17)
+target_compile_options(vf_strata_pipe_client PRIVATE -Wall -Wextra -Werror)
+add_executable(vf_strata_pipe_client_test pipe_client_test.cpp)
+target_link_libraries(vf_strata_pipe_client_test PRIVATE vf_strata_pipe_client)
+target_compile_options(vf_strata_pipe_client_test PRIVATE -Wall -Wextra -Werror)
+enable_testing()
+add_test(NAME strata_pipe_client COMMAND vf_strata_pipe_client_test)
+# The integration executable is driven by the Rust synthetic-fixture test after
+# the JSON init/binary handshake; no model or CUDA dependency is included here.
+add_executable(vf_strata_pipe_client_live_test pipe_client_live_test.cpp)
+target_link_libraries(vf_strata_pipe_client_live_test PRIVATE vf_strata_pipe_client)
+target_compile_options(vf_strata_pipe_client_live_test PRIVATE -Wall -Wextra -Werror)

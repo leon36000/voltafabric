@@ -33,6 +33,7 @@ pub struct Init {
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Request {
+    EnterBinary,
     Batch {
         batch: u64,
         tokens: usize,
@@ -53,6 +54,7 @@ pub struct SlotRow {
 #[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Reply {
     Ready { ranks: Vec<u32> },
+    BinaryReady,
     Completed { batch: u64, cpu_rows: Vec<SlotRow> },
     Closed,
     Failed { error: Error },
@@ -256,6 +258,86 @@ impl Coordinator {
 fn send(output: &mut impl Write, reply: &Reply) -> Result<()> {
     process::write_frame(output, &process::encode(reply)?, "native bridge reply")
 }
+
+/// VFB1/VFR1 is a bounded little-endian private-pipe protocol. A receiver must
+/// stage the entire response and validate coverage before publishing any rows.
+fn binary_loop(
+    mut coordinator: Coordinator,
+    input: &mut impl BufRead,
+    output: &mut impl Write,
+) -> Result<()> {
+    fn u32_at(b: &[u8], offset: usize) -> u32 {
+        u32::from_le_bytes(b[offset..offset + 4].try_into().unwrap())
+    }
+    fn u64_at(b: &[u8], offset: usize) -> u64 {
+        u64::from_le_bytes(b[offset..offset + 8].try_into().unwrap())
+    }
+    fn reply(batch: u64, status: u32, rows: &[SlotRow]) -> Vec<u8> {
+        let mut out = Vec::with_capacity(24 + rows.len() * (4 + 2560 * 4));
+        out.extend_from_slice(b"VFR1");
+        out.extend_from_slice(&status.to_le_bytes());
+        out.extend_from_slice(&batch.to_le_bytes());
+        out.extend_from_slice(&(rows.len() as u32).to_le_bytes());
+        out.extend_from_slice(&(2560_u32).to_le_bytes());
+        for row in rows {
+            out.extend_from_slice(&(row.position as u32).to_le_bytes());
+            for value in &row.value {
+                out.extend_from_slice(&value.to_bits().to_le_bytes());
+            }
+        }
+        out
+    }
+    loop {
+        let mut header = [0_u8; 24];
+        input
+            .read_exact(&mut header)
+            .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+        if &header[..4] != b"VFB1" {
+            return Err(invalid("native bridge binary magic"));
+        }
+        let op = u32_at(&header, 4);
+        let batch = u64_at(&header, 8);
+        let tokens = u32_at(&header, 16) as usize;
+        let top_k = u32_at(&header, 20) as usize;
+        if op == 2 && batch == 0 && tokens == 0 && top_k == 0 {
+            coordinator.close()?;
+            process::write_frame(output, &reply(0, 2, &[]), "binary bridge shutdown")?;
+            return Ok(());
+        }
+        if op != 1
+            || !(1..=8).contains(&tokens)
+            || !(1..=64).contains(&top_k)
+            || tokens * top_k > 128
+        {
+            process::write_frame(output, &reply(batch, 1, &[]), "binary bridge rejection")?;
+            return Err(invalid("native bridge binary dimensions or operation"));
+        }
+        let slots = tokens * top_k;
+        let input_count = tokens * 2560;
+        let mut body = vec![0_u8; (input_count + 2 * slots) * 4];
+        input
+            .read_exact(&mut body)
+            .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+        let floats = (0..input_count)
+            .map(|i| f32::from_bits(u32_at(&body, i * 4)))
+            .collect::<Vec<_>>();
+        let ids = (0..slots)
+            .map(|i| u32_at(&body, (input_count + i) * 4) as i32)
+            .collect::<Vec<_>>();
+        let kinds = (0..slots)
+            .map(|i| u32_at(&body, (input_count + slots + i) * 4) as i32)
+            .collect::<Vec<_>>();
+        match coordinator.batch(batch, tokens, top_k, &floats, &ids, &kinds) {
+            Ok(rows) => {
+                process::write_frame(output, &reply(batch, 0, &rows), "binary bridge reply")?
+            }
+            Err(error) => {
+                process::write_frame(output, &reply(batch, 1, &[]), "binary bridge failure")?;
+                return Err(error);
+            }
+        }
+    }
+}
 /// Serve one bounded line-framed conversation. Any error closes the coordinator;
 /// the durable claim remains consumed and no partial batch reply is emitted.
 pub fn serve(input: &mut impl BufRead, output: &mut impl Write) -> Result<()> {
@@ -303,6 +385,10 @@ pub fn serve(input: &mut impl BufRead, output: &mut impl Write) -> Result<()> {
             Some(Request::Shutdown) => {
                 coordinator.close()?;
                 return send(output, &Reply::Closed);
+            }
+            Some(Request::EnterBinary) => {
+                send(output, &Reply::BinaryReady)?;
+                return binary_loop(coordinator, input, output);
             }
             _ => return Err(invalid("native bridge unexpected request or EOF")),
         }
