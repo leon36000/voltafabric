@@ -1,0 +1,26 @@
+[
+  {
+    "attempt": 1793373426426563870,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r451-cpu-only",
+      "run_id": "r451-real-input-3145401-1793373426426563870"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373426426563870,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r451-cpu-only",
+      "run_id": "r451-real-input-3145401-1793373426426563870"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]
