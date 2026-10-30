@@ -49,12 +49,35 @@ pub struct Proposal {
     attempt: u64,
     ledger_id: Option<(u64, u64)>,
     token: u64,
+    residual_sha256: String,
     candidate: GdnState,
     output: Output,
 }
 impl Proposal {
     pub fn output(&self) -> &Output {
         &self.output
+    }
+    pub(crate) fn check_reservation(
+        &self,
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        ticket: &crate::native_ledger::Reservation,
+        residual: &[f32],
+    ) -> Result<()> {
+        ledger.validate_ticket(ticket, &self.stamp)?;
+        if residual.len() != 10240 {
+            return Err(invalid("proposal residual dimensions"));
+        }
+        let mut bytes = Vec::with_capacity(residual.len() * 4);
+        for value in residual {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
+        if self.attempt != ticket.attempt()
+            || self.ledger_id != Some(ticket.directory_id())
+            || sha256::hex(&bytes) != self.residual_sha256
+        {
+            return Err(invalid("proposal reservation or residual mismatch"));
+        }
+        Ok(())
     }
 }
 pub struct Committed {
@@ -254,6 +277,13 @@ impl Stage {
             attempt,
             ledger_id: None,
             token,
+            residual_sha256: {
+                let mut bytes = Vec::with_capacity(residual.len() * 4);
+                for value in residual {
+                    bytes.extend_from_slice(&value.to_le_bytes());
+                }
+                sha256::hex(&bytes)
+            },
             candidate,
             output: Output {
                 mixed: hc.mixed,
