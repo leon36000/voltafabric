@@ -1,0 +1,27 @@
+{
+  "model_revision": "sc117-local-observation",
+  "layer": 31,
+  "shard_bytes": 55063448064,
+  "scalar": {
+    "offset": 35706844160,
+    "bytes": 5120,
+    "sha256": "705f4fca67049fd0d1203045eda1daa199d2c1f4b6b1f19c1941d903a576322f"
+  },
+  "gate": {
+    "offset": 35706849280,
+    "bytes": 870400,
+    "sha256": "f90c1d4b8a437e5b4484fbd0860730688990a28f1399eca12ccb95d0b6df8d4c"
+  },
+  "gate_type": 23,
+  "up": {
+    "offset": 36028846080,
+    "bytes": 1126400,
+    "sha256": "905f5eb2c8af4770fb79446580ffa5fe73ffb64773d8b76762700574ded19e11"
+  },
+  "up_type": 13,
+  "down": {
+    "offset": 35381355520,
+    "bytes": 1740800,
+    "sha256": "a2782a4a7b0bfb99ce8b2d8cd95e6afef6b8b889547980d011da868d726adc56"
+  }
+}
