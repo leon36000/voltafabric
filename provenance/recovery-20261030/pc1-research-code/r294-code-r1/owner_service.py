@@ -1,0 +1,78 @@
+"""Private CPU multipart load endpoint using the real persistent QPN2 owner.
+
+Research protocol: it is not yet the Rust Session protocol or production transport.
+"""
+import ast,hashlib,os,pathlib,sys
+R=pathlib.Path(__file__).resolve().parent
+sys.path.insert(0,str(R))
+import torch,wire
+from adapters.resident_multipart import MAX_CHUNK_BYTES
+from local_reuse import LocalReuse
+import json
+from adapters.persistent_gpu_owner import PersistentQPN2Owner
+from adapters.qpn2_cpu_reference import unpack_exact
+from scripts.resident_artifact import load_stack
+assert os.environ.get('CUDA_VISIBLE_DEVICES')=='-1' and not torch.cuda.is_initialized();torch.set_num_threads(1)
+class Provider:
+ def __init__(self, fail=False):self.device=torch.device('cpu');self.admissions=self.launches=self.synchronized_launches=0;self.fail=fail;self.ptrs=[]
+ def gemm_qpn2_moe(self,x,codes,scales,gs,blocks,slots,ntpp,s,n,k,in_div,splitk,nacc):
+  self.admissions+=1;self.ptrs.append((codes.data_ptr(),scales.data_ptr(),gs.data_ptr()))
+  if self.fail: raise RuntimeError('synthetic CPU failure after admission')
+  count=codes.numel()//(n*k//2);out=torch.empty((s,n),dtype=torch.float16);cc=codes.reshape(count,-1);ss=scales.reshape(count,-1);gg=gs.reshape(count,-1);matrices={};covered=set()
+  assert int(ntpp)==len(blocks)*8 and slots.numel()==len(blocks)*8
+  for block,expert in enumerate(blocks.tolist()):
+   assert 0<=expert<count
+   if expert not in matrices:matrices[expert]=unpack_exact(cc[expert],ss[expert],gg[expert:expert+1],n,k).double()
+   for value in slots[block*8:block*8+8].tolist():
+    if value>=s:continue
+    assert value>=0 and value not in covered;covered.add(value);out[value]=torch.mv(matrices[expert],x[value].to(torch.float64)).to(torch.float16)
+  assert covered==set(range(s));self.launches+=1;return out
+ def synchronize(self):self.synchronized_launches=self.launches
+ def close(self):pass
+def align(ids,block,e):
+ assert block==8 and ids.ndim==2 and ids.shape[1]==1
+ values=ids.flatten().tolist();s=len(values);permuted=[];blocks=[]
+ for expert in range(e):
+  rows=[index for index,x in enumerate(values) if x==expert]
+  for base in range(0,len(rows),block):
+   chunk=rows[base:base+block];permuted.extend(chunk+[s]*(block-len(chunk)));blocks.append(expert)
+ assert all(0<=x<e for x in values)
+ return torch.tensor(permuted),torch.tensor(blocks),torch.tensor(len(permuted))
+def serve(stream,writer,receiver_root):
+ hello=wire.read_header(stream)
+ if set(hello)!={'op','protocol','rank'} or hello['op']!='hello' or hello['protocol']!=1 or type(hello['rank']) is not int:raise ValueError('invalid hello')
+ rank=hello['rank'];wire.write_frame(writer,{'reply':'hello','hello':{'protocol':1,'rank':rank,'arch':'x86_64','os':'linux','endian':'little','build':'r281-x86-exact-cpu','capabilities':['cpu_f64_dense_moe_v1','cpu_qpn2_multipart_v1','cpu_qpn2_resident_v1','cpu_exec_fp16_raw_v1','cpu_completion_batch_fp16_raw_v1'],'max_message_bytes':16777216,'pid':os.getpid()}})
+ begin=wire.read_header(stream)
+ if set(begin)!={'op','identity','artifact_bytes','artifact_sha256'} or begin['op']!='begin_multipart':raise ValueError('invalid begin')
+ id=begin['identity']
+ if type(id)!=dict or id.get('rank')!=rank:raise ValueError('rank mismatch')
+ approved=json.loads((pathlib.Path(receiver_root).parent/'reuse-map.json').read_text())[f"{id['layer']}:{rank}"];receiver=LocalReuse(pathlib.Path(receiver_root),id,begin['artifact_bytes'],begin['artifact_sha256'],approved);wire.write_frame(writer,{'reply':'multipart_ready','offset':0})
+ offset=0
+ while offset<begin['artifact_bytes']:
+  h=wire.read_header(stream)
+  if set(h)!={'op','offset','bytes'} or h['op']!='multipart_chunk' or type(h['bytes']) is not int or not 0<h['bytes']<=MAX_CHUNK_BYTES:raise ValueError('invalid chunk header')
+  data=wire.read_exact(stream,h['bytes']);receiver.append(h['offset'],data);offset+=len(data);wire.write_frame(writer,{'reply':'chunk_accepted','offset':offset})
+ finish=wire.read_header(stream)
+ if finish!={'op':'multipart_finish'}:raise ValueError('invalid finish')
+ info_holder={}
+ def validate(path,bound):
+  artifact=load_stack(path,expected_sha256=begin['artifact_sha256']);info=artifact.metadata
+  if any(info[k]!=bound[k] for k in ('model_revision','layer','epoch','rank')):raise ValueError('resident binding mismatch')
+  info_holder.update(info)
+ path=receiver.finish(validate);mapping=torch.full((256,),-1,dtype=torch.int64)
+ for physical,expert in enumerate(info_holder['physical_experts']):
+  if expert['id']>=len(mapping):raise ValueError('expert outside model domain')
+  mapping[expert['id']]=physical
+ provider=Provider();owner=PersistentQPN2Owner.load(artifact_path=str(path),expected_info=info_holder,expected_sha256=begin['artifact_sha256'],provider=provider,expert_map=mapping,device='cpu')
+ assert owner.state=='READY';wire.write_frame(writer,{'reply':'loaded','artifact_sha256':begin['artifact_sha256'],'epoch':id['epoch'],'experts':len(info_holder['physical_experts']),'transferred':True})
+ execs=0; previous_attempt=0
+ while True:
+  req=wire.read_header(stream)
+  if req['op']=='shutdown':
+   assert execs >= 0
+   owner.close();assert owner.state=='CLOSED' and provider.admissions==provider.launches==provider.synchronized_launches==2*execs
+   wire.write_frame(writer,{'reply':'bye','execs':execs});break
+  assert req['op']=='exec_raw_fp16' and req['artifact_sha256']==begin['artifact_sha256'] and req['raw_completion_fp16_batch']
+  body=wire.read_exact(stream,req['activation_bytes']);tokens,values=wire.decode_fp16_inputs(req,body);d=req['dispatch'];assert d['rank']==rank and d['stamp']['run_id']==id['run_id'] and len(d['slots'])>0;slots=[entry['slot'] for entry in d['slots']];identities=tuple(tuple(slot[k] for k in ('token','slot','expert','rank','local')) for slot in slots);stamp=d['stamp'];attempt=req['attempt'];assert attempt>previous_attempt;previous_attempt=attempt
+  def event(kind,**extra):wire.write_frame(writer,{'reply':'event','event':{'stamp':stamp,'rank':rank,'attempt':attempt,'event':{'kind':kind,**extra}}})
+  event('started');result=owner.execute(d,token_ids=tokens,activations=torch.tensor(values,dtype=torch.float16),attempt=attempt,align=align);packed=result.as_raw_output_bytes(identities);wire.write_frame(writer,{'reply':'completion_batch_fp16_raw','stamp':stamp,'completion_stamp':packed['stamp'],'rank':rank,'attempt':attempt,'hidden':packed['columns'],'values':packed['rows']*packed['columns'],'completions':[{k:slot[k] for k in ('token','slot','expert','local')} for slot in slots]},packed['fp16_le_bytes']);event('finished',slots=len(slots));execs+=1
