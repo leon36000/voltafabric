@@ -116,6 +116,65 @@ fn native_owner_processes_nonzero_verified_synthetic_expert() {
     assert!(out.iter().all(|x| x.is_finite()));
     assert!(out.iter().any(|x| x.abs() > 1e-8));
     assert_eq!(out, owner.forward(&vec![0.125; 2560]).unwrap());
+    use voltafabric::{
+        completion,
+        moe::{Slot, Stamp},
+        native_ggml_cpu::RankWorker,
+        routing::{RankDispatch, RankSlot},
+    };
+    let reference = owner.forward(&vec![0.001; 2560]).unwrap();
+    let mut worker = RankWorker::new(vec![owner]).unwrap();
+    let mut dispatch = RankDispatch {
+        stamp: Stamp {
+            run_id: "r382-overflow".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        rank: 2,
+        hidden: 2560,
+        tokens: 1,
+        resident_order: vec![0],
+        slots: vec![RankSlot {
+            slot: Slot {
+                token: 0,
+                slot: 0,
+                expert: 0,
+                rank: 2,
+                local: 0,
+                weight: 0.5,
+            },
+            physical_expert: 0,
+        }],
+    };
+    let safe = vec![0.001_f32; 2560];
+    let raw = worker.execute(&dispatch, &[(0, safe)], 1).unwrap();
+    assert!(raw.fp16_bits.iter().any(|&v| v != 0));
+    assert_eq!(
+        raw.fp16_bits,
+        reference
+            .into_iter()
+            .map(|v| completion::encode_fp16(f64::from(v)).unwrap())
+            .collect::<Vec<_>>()
+    );
+    assert!(raw
+        .fp16_bits
+        .iter()
+        .all(|&v| completion::decode_fp16(v).is_ok()));
+    dispatch.stamp.batch = 1;
+    assert_eq!(
+        worker
+            .execute(&dispatch, &[(0, vec![0.125; 2560])], 2)
+            .unwrap_err()
+            .code,
+        "FP16_OVERFLOW"
+    );
+    dispatch.stamp.batch = 2;
+    assert!(worker
+        .execute(&dispatch, &[(0, vec![0.001; 2560])], 3)
+        .is_err());
 }
 
 #[test]
@@ -285,4 +344,82 @@ fn native_fleet_routes_two_residents_into_fp16_collector_without_replay() {
     assert!(overflow
         .run_fp16_collected(&p2, &[vec![0.001; 2560]], 2)
         .is_err());
+}
+
+#[test]
+fn native_rank_workers_produce_atomic_compact_rows_for_existing_collector() {
+    use std::collections::BTreeMap;
+    use voltafabric::{
+        completion,
+        moe::{self, Choice, Registry, Replica, Stamp},
+        native_ggml_cpu::RankWorker,
+        routing,
+    };
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let mut workers = Vec::new();
+    for expert in 0..2 {
+        let blob = layout
+            .read_verified_expert(&mut Zeros(0), 0, expert, INDEX_SHA, BLOB_SHA)
+            .unwrap();
+        let mut b = binding();
+        b.expert = expert as u32;
+        b.rank = 2 + expert as u32;
+        workers.push(RankWorker::new(vec![Resident::load(&layout, blob, b).unwrap()]).unwrap());
+    }
+    let p = routing::RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![vec![
+            Choice {
+                expert: 0,
+                weight: 0.25,
+            },
+            Choice {
+                expert: 1,
+                weight: 0.75,
+            },
+        ]],
+        registry: Registry {
+            epoch: 3,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r382-rank".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+    };
+    let dispatch = routing::dispatch(&p).unwrap();
+    let inputs = vec![(0, vec![0.001; 2560])];
+    let mut wrong = dispatch.ranks[0].clone();
+    wrong.slots[0].physical_expert = 1;
+    assert!(workers[0].execute(&wrong, &inputs, 1).is_err());
+    let mut collector = moe::Collector::from_routing(&p).unwrap();
+    let first = workers[0].execute(&dispatch.ranks[0], &inputs, 1).unwrap();
+    assert!(completion::accept_routed_output(2, first.clone(), &mut collector).is_err());
+    completion::accept_routed_output(1, first, &mut collector).unwrap();
+    assert!(workers[0].execute(&dispatch.ranks[0], &inputs, 2).is_err());
+    let second = workers[1].execute(&dispatch.ranks[1], &inputs, 1).unwrap();
+    completion::accept_routed_output(1, second, &mut collector).unwrap();
+    assert_eq!(collector.finish().unwrap(), vec![vec![0.0; 2560]]);
+    let mut other = dispatch.ranks[0].clone();
+    other.stamp.batch += 1;
+    other.stamp.plan_id = "other".into();
+    assert!(workers[0].execute(&other, &inputs, 2).is_err());
 }

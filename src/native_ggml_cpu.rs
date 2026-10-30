@@ -59,6 +59,169 @@ impl Resident {
     }
 }
 
+/// Rank-local CPU owner boundary. A transport must supply trusted bindings and
+/// provide its own durable UNKNOWN/lease handling; this guard is process-local.
+pub struct RankWorker {
+    owners: Vec<Resident>,
+    attempted: std::collections::BTreeSet<String>,
+    scope: Option<(String, String)>,
+    last_attempt: u64,
+    terminal: bool,
+}
+
+impl RankWorker {
+    pub fn new(owners: Vec<Resident>) -> Result<Self> {
+        use std::collections::BTreeSet;
+        if owners.is_empty() || owners.len() > 1024 {
+            return Err(invalid("native rank owner count"));
+        }
+        let base = owners[0].binding();
+        let mut locals = BTreeSet::new();
+        let mut experts = BTreeSet::new();
+        for owner in &owners {
+            let b = owner.binding();
+            if b.rank != base.rank
+                || b.model_revision != base.model_revision
+                || b.layer != base.layer
+                || b.epoch != base.epoch
+                || b.index_sha256 != base.index_sha256
+                || !locals.insert(b.local)
+                || !experts.insert(b.expert)
+            {
+                return Err(invalid("native rank binding mismatch or duplicate"));
+            }
+        }
+        Ok(Self {
+            owners,
+            attempted: BTreeSet::new(),
+            scope: None,
+            last_attempt: 0,
+            terminal: false,
+        })
+    }
+
+    /// Returns compact, unweighted FP16 rows only after all rank slots succeed.
+    /// The coordinator must validate and collect them against its routing plan.
+    pub fn execute(
+        &mut self,
+        dispatch: &crate::routing::RankDispatch,
+        inputs: &[(usize, Vec<f32>)],
+        attempt: u64,
+    ) -> Result<crate::completion::RoutedRawOutput> {
+        use crate::completion::{self, OutputSlot, RoutedRawOutput};
+        use std::collections::{BTreeMap, BTreeSet};
+        if self.terminal
+            || attempt <= self.last_attempt
+            || dispatch.hidden != 2560
+            || dispatch.tokens == 0
+            || dispatch.tokens > 4096
+            || dispatch.slots.is_empty()
+            || (dispatch.slots.len() as u64)
+                .checked_mul(3 * 2560 * 640)
+                .is_none_or(|n| n > 100_000_000)
+        {
+            return Err(invalid("native rank state, dimensions or work budget"));
+        }
+        let b = self.owners[0].binding();
+        let stamp = &dispatch.stamp;
+        if dispatch.rank != b.rank
+            || stamp.model_revision != b.model_revision
+            || stamp.layer != b.layer
+            || stamp.epoch != b.epoch
+            || [&stamp.run_id, &stamp.plan_id]
+                .iter()
+                .any(|x| x.trim().is_empty() || x.len() > 256)
+            || self
+                .scope
+                .as_ref()
+                .is_some_and(|s| s.0 != stamp.run_id || s.1 != stamp.plan_id)
+        {
+            return Err(invalid("native rank execution identity differs"));
+        }
+        let order: Vec<_> = self.owners.iter().map(|o| o.binding().local).collect();
+        if dispatch.resident_order != order {
+            return Err(invalid("native rank resident order differs"));
+        }
+        let mut tokens = BTreeMap::new();
+        for (token, row) in inputs {
+            if *token >= dispatch.tokens
+                || row.len() != 2560
+                || row.iter().any(|x| !x.is_finite())
+                || tokens.insert(*token, row).is_some()
+            {
+                return Err(invalid("invalid native rank token input"));
+            }
+        }
+        let mut used = BTreeSet::new();
+        let mut seen = BTreeSet::new();
+        let mut plan = Vec::with_capacity(dispatch.slots.len());
+        for entry in &dispatch.slots {
+            let s = &entry.slot;
+            let owner = self
+                .owners
+                .get(entry.physical_expert)
+                .ok_or_else(|| invalid("native physical expert missing"))?;
+            if s.rank != dispatch.rank
+                || s.token >= dispatch.tokens
+                || s.slot >= 64
+                || !s.weight.is_finite()
+                || s.weight < 0.0
+                || owner.binding().expert != s.expert
+                || owner.binding().local != s.local
+                || !seen.insert((s.token, s.slot))
+                || !tokens.contains_key(&s.token)
+            {
+                return Err(invalid("invalid native rank slot"));
+            }
+            used.insert(s.token);
+            plan.push(entry.physical_expert);
+        }
+        if used.len() != tokens.len() {
+            return Err(invalid("unused native token input"));
+        }
+        let key = serde_json::to_string(stamp).map_err(|_| invalid("native identity encoding"))?;
+        if self.attempted.len() >= 4096 || self.attempted.contains(&key) {
+            return Err(invalid(
+                "native identity already attempted or limit reached",
+            ));
+        }
+        self.attempted.insert(key);
+        self.last_attempt = attempt;
+        if self.scope.is_none() {
+            self.scope = Some((stamp.run_id.clone(), stamp.plan_id.clone()));
+        }
+        let work = (|| -> Result<RoutedRawOutput> {
+            let mut bits = Vec::with_capacity(dispatch.slots.len() * 2560);
+            let mut slots = Vec::with_capacity(dispatch.slots.len());
+            for (entry, &owner) in dispatch.slots.iter().zip(&plan) {
+                let s = &entry.slot;
+                for value in self.owners[owner].forward(tokens[&s.token])? {
+                    bits.push(completion::encode_fp16(f64::from(value))?);
+                }
+                slots.push(OutputSlot {
+                    token: s.token,
+                    slot: s.slot,
+                    expert: s.expert,
+                    local: s.local,
+                });
+            }
+            Ok(RoutedRawOutput {
+                stamp: stamp.clone(),
+                rank: dispatch.rank,
+                attempt,
+                rows: slots.len(),
+                columns: 2560,
+                slots,
+                fp16_bits: bits,
+            })
+        })();
+        if work.is_err() {
+            self.terminal = true;
+        }
+        work
+    }
+}
+
 /// In-process experimental fleet. This is not a Session transport or durable
 /// lease; attempts are remembered only for this fleet's lifetime.
 pub struct Fleet {

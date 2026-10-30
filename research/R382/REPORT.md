@@ -1,0 +1,7 @@
+# R382 — rank-local native GGML CPU boundary
+
+Based on R381, add `RankWorker`, owning explicitly bound native GGML CPU experts for one rank. It validates resident order, rank, model, layer, epoch, run/plan scope, physical indices, tokens, slots, finite values and a bounded CPU budget before computing. It returns existing `RoutedRawOutput` rows as unweighted binary16, with the complete stamp and attempt. The existing Rust collector admits rows against its original routing plan and applies each coefficient once. Any compute or FP16 conversion failure returns no rows and terminalizes that worker; this attempt guard is local to its lifetime.
+
+Tests use synthetic blobs, including nonzero quantized weights, compare binary16 output with independently requested resident output, exercise two logical ranks through the existing collector, and refuse bad owner, attempt, replay and overflow. The weights are synthetic; the index is actual SC117 metadata. This is not a new extraction of upstream code; it uses the pinned MIT GGML provider and Strata metadata documented in R379–R381.
+
+No Session transport, separate worker process, real model weights, durable distributed UNKNOWN ledger, GPU or model generation is established here. Next: connect the rank boundary to an explicitly negotiated native format in the existing Session protocol, then qualify the actual network and model only when the applicable gates and trusted manifest are available.
