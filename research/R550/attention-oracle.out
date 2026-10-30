@@ -1,0 +1,8 @@
+{"errors": {"attention": 2.8790207773354837e-08, "key": 0.0, "query": 0.0}, "position": 0}
+{"errors": {"attention": 4.99303185463873e-08, "key": 1.4901161193847656e-08, "query": 4.76837158203125e-07}, "position": 1}
+{"errors": {"attention": 6.8080742154919e-08, "key": 2.384185791015625e-07, "query": 9.5367431640625e-07}, "position": 63}
+{"errors": {"attention": 4.7173229933417105e-08, "key": 2.384185791015625e-07, "query": 9.5367431640625e-07}, "position": 64}
+{"errors": {"attention": 3.023450895200952e-08, "key": 2.384185791015625e-07, "query": 9.5367431640625e-07}, "position": 73}
+{"errors": {"attention": 2.3961585937648522e-08, "key": 2.384185791015625e-07, "query": 9.5367431640625e-07}, "position": 87}
+{"errors": {"attention": 1.9515579485762657e-08, "key": 2.384185791015625e-07, "query": 9.5367431640625e-07}, "position": 91}
+{"maxima": {"attention": 1.5078360127152024e-07, "key": 4.76837158203125e-07, "query": 9.5367431640625e-07}, "positions": 92, "status": "PASS", "worst_positions": {"attention": 81, "key": 29, "query": 4}}

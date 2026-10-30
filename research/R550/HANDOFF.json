@@ -1,0 +1,12 @@
+{
+  "round":"R550",
+  "parent_gitlab_commit":"0aa4e030eb62c9b268680ec75a489a071746873b",
+  "status":"PASS_LOCAL_GENERATION_SEALED_ENGINE_PINNED_LEDGER",
+  "active_operations":[],
+  "positions":92,
+  "generated_tokens":20,
+  "claims":20709,
+  "claims_status":"RESERVED_UNKNOWN_NO_REPLAY",
+  "limitations":["Local CPU only; no multi-machine or GPU qualification", "Full model numerical parity not established; R428 expert-255 strict failure remains", "Raw trace and full result local only", "Real R53 and shared lease unverified; PC6 swap below admission floor"],
+  "next_action":"Advance distributed generation by reconciling authoritative R53 and remote receipts, identifying the actual cooperative lease and satisfying fresh host/resource/hardware gates; resolve expert numerical boundary without replaying UNKNOWN."
+}
