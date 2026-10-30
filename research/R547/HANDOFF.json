@@ -1,0 +1,11 @@
+{
+  "round":"R547",
+  "parent_gitlab_commit":"d83a0a5ec3a85e919d2df3b7555aa47de1072c4a",
+  "status":"DIAGNOSTIC_24_EXPERT_INPUT_PAIRS",
+  "active_operations":[],
+  "strict_pass":23,
+  "strict_fail":1,
+  "strict_failure":"activation 0, expert 255, 1169 violations",
+  "limits":["Four combinations are not routed", "GGML quantizers and decoders shared", "No production acceptance rule or whole-model numerical parity", "PC6 swap below inter-PC floor; shared R53 ledger and real lease unverified"],
+  "next_action":"Resolve the expert quantization-boundary contract using stronger evidence, advance the model chain, and reconcile the original R53 ledger and real cooperative lease before any GPU or inter-PC execution; never replay UNKNOWN."
+}
