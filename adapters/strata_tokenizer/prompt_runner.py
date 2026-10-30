@@ -16,7 +16,7 @@ import stat
 import subprocess
 import sys
 
-from .adapter import (MAX_GENERATED_TOKENS, MAX_PROMPT_TOKENS, _unique_object,
+from .adapter import (MAX_GENERATED_TOKENS, MAX_INPUT_POSITIONS, MAX_PROMPT_TOKENS, _unique_object,
                       decode_greedy_receipt, load_sc117)
 
 MAX_PROMPT_BYTES = 4096
@@ -88,7 +88,9 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
     if (not 1 <= len(prompt_ids) <= MAX_PROMPT_TOKENS or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
-        raise ValueError("this qualification accepts one to eight ordinary prompt tokens")
+        raise ValueError("this qualification accepts one to 32 ordinary prompt tokens")
+    if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
+        raise ValueError("prompt and generation exceed 39 input positions")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     if max_new_tokens != 2:
         command.append(str(max_new_tokens))

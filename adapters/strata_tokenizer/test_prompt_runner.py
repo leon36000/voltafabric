@@ -9,7 +9,7 @@ from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 class Tokenizer(FakeTokenizer):
     def encode(self, text, parse_special=False):
-        return {"A": [0], "multi": [0, 1], "eight": [0] * 8, "special": [3], "too many": [0] * 9}.get(text, [])
+        return {"A": [0], "multi": [0, 1], "eight": [0] * 8, "long32": [0] * 32, "special": [3], "too many": [0] * 33}.get(text, [])
 
 
 def receipt():
@@ -19,6 +19,19 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_long_prompt_and_combined_position_bound(self):
+        value = dict(receipt(), prompt_tokens=[0]*32, input_tokens=[0]*39,
+                     requested_max_new_tokens=8, generated_token_ids=[0]*8,
+                     output_sha256=["a"*64]*39, logits_sha256=["b"*64]*8)
+        calls = []
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        result = run_prompt("long32", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=8, runner=runner)
+        self.assertEqual(result["output"]["text"], "A"*8)
+        with self.assertRaises(ValueError):
+            run_prompt("long32", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=9, runner=runner)
+        self.assertEqual(len(calls), 1)
     def test_bounded_capture_drains_both_pipes_and_marks_overflow(self):
         program = ('import sys; sys.stdout.buffer.write(b"x"*200000); sys.stdout.flush(); '
                    'sys.stderr.buffer.write(b"y"*200000); sys.stderr.flush()')

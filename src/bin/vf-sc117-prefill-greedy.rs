@@ -380,8 +380,9 @@ fn worker_plan_id(
     max_new_tokens: usize,
 ) -> Result<String, E> {
     if payload_budget == 0
-        || !(1..=8).contains(&prompt_length)
+        || !(1..=32).contains(&prompt_length)
         || !(1..=32).contains(&max_new_tokens)
+        || prompt_length + max_new_tokens - 1 > 39
         || endpoints.len() != 2
         || [2, 3].iter().any(|rank| {
             endpoints
@@ -508,7 +509,8 @@ fn run() -> Result<(), E> {
     if !(1..=32).contains(&max_new_tokens) {
         return Err("invalid generation limit".into());
     }
-    if !(1..=8).contains(&prompt_tokens.len())
+    if !(1..=32).contains(&prompt_tokens.len())
+        || prompt_tokens.len() + max_new_tokens - 1 > 39
         || prompt_tokens.iter().any(|&t| t >= 248_320 || t == 248_046)
     {
         return Err("invalid prompt tokens".into());
@@ -576,7 +578,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r486-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r488-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -763,7 +765,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to eight supplied prompt tokens and 32 greedy predictions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to 32 prompt tokens and 32 predictions within 39 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }
@@ -818,6 +820,10 @@ mod tests {
         assert_ne!(id, worker_plan_id(&endpoints, 300, &limits, 2, 32).unwrap());
         assert!(worker_plan_id(&endpoints, 300, &limits, 2, 33).is_err());
         assert!(worker_plan_id(&endpoints, 300, &limits, 0, 16).is_err());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 32, 8).is_ok());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 32, 9).is_err());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 8, 32).is_ok());
+        assert!(worker_plan_id(&endpoints, 300, &limits, 33, 1).is_err());
         assert!(worker_plan_id(
             &BTreeMap::from([(2, rank2), (3, rank3.clone()), (4, rank3)]),
             300,

@@ -16,8 +16,9 @@ from .vendor.strata_tokenizer import Tokenizer
 
 _LIMITS = {"vocab.json": 16_000_000, "merges.txt": 16_000_000,
            "token_type.json": 4_000_000, "tokenizer.json": 16_384}
-MAX_PROMPT_TOKENS = 8
+MAX_PROMPT_TOKENS = 32
 MAX_GENERATED_TOKENS = 32
+MAX_INPUT_POSITIONS = 39
 
 
 def _identity(st):
@@ -139,7 +140,8 @@ def decode_greedy_receipt(tokenizer: Tokenizer, eos: int, receipt: dict) -> dict
         raise ValueError("invalid autoregressive receipt")
     prompt = receipt.get("prompt_tokens", inputs[:1])
     if (not isinstance(prompt, list) or not 1 <= len(prompt) <= MAX_PROMPT_TOKENS
-            or inputs != prompt + generated[:-1] or len(inputs) > MAX_PROMPT_TOKENS + MAX_GENERATED_TOKENS - 1
+            or len(prompt) + requested - 1 > MAX_INPUT_POSITIONS
+            or inputs != prompt + generated[:-1] or len(inputs) > MAX_INPUT_POSITIONS
             or any(type(token) is not int or not 0 <= token < len(tokenizer.tokens) for token in inputs)
             or not isinstance(receipt.get("run_id"), str) or not receipt["run_id"].strip()
             or receipt.get("workers_closed") != 96):
