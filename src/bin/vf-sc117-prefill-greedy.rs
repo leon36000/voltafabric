@@ -343,6 +343,7 @@ fn rank_endpoint(
                 "ConnectTimeout=10".into(),
                 host.into(),
                 remote.into(),
+                "--guarded-remote".into(),
             ]
         }
         _ => return Err("SSH worker host and path must be supplied together".into()),
@@ -578,7 +579,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r488-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r489-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -789,7 +790,7 @@ mod tests {
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r486-d10a0397d45343a51bf3ff2a7c77f39de8b286d9ba46e81875ffde9e53473aa1"
+            "r486-59960e8e33e1476a193ccca15e2935cef10d999706de66fb25db2607e326b859"
         );
         assert_eq!(id, worker_plan_id(&endpoints, 300, &limits, 2, 16).unwrap());
         let changed_host = BTreeMap::from([
@@ -859,7 +860,8 @@ mod tests {
                 "-o",
                 "ConnectTimeout=10",
                 "pc1-lan",
-                "/opt/vf-rank-session"
+                "/opt/vf-rank-session",
+                "--guarded-remote"
             ]
         );
         assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), None).is_err());
