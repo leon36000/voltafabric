@@ -429,7 +429,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r474-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r475-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -516,7 +516,7 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r474-cpu-only".into(),
+        "r475-cpu-lru".into(),
         ledger,
         Duration::from_secs(30),
     )?;
@@ -529,7 +529,7 @@ fn run() -> Result<(), E> {
             identity: voltafabric::sc117_expert_source::Identity {
                 run_id: run_id.clone(),
                 model_revision: "sc117-local-observation".into(),
-                plan_id: "r474-cpu-only".into(),
+                plan_id: "r475-cpu-lru".into(),
                 epoch: 1,
             },
             ranks: vec![2, 3],

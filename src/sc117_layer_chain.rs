@@ -131,6 +131,7 @@ pub struct Layer {
     owners: Owners,
     ple: Option<Ple>,
     last_selected: Vec<u32>,
+    last_used: BTreeMap<u32, u64>,
 }
 
 struct Ple {
@@ -214,6 +215,7 @@ impl Layer {
             owners,
             ple: None,
             last_selected: Vec::new(),
+            last_used: BTreeMap::new(),
         })
     }
     pub fn qsa(
@@ -233,6 +235,7 @@ impl Layer {
             owners,
             ple: None,
             last_selected: Vec::new(),
+            last_used: BTreeMap::new(),
         })
     }
     /// Attach authenticated PLE inputs before constructing a segment. The caller must
@@ -333,6 +336,9 @@ impl Layer {
         } else {
             output
         }?;
+        for &expert in &selected {
+            self.last_used.insert(expert, position + 1);
+        }
         self.last_selected = selected;
         Ok(output)
     }
@@ -424,6 +430,12 @@ struct EvictionCandidate {
     expert: u32,
     rank: u32,
     bytes: u64,
+    // Zero means never selected; otherwise this is the last committed position + 1.
+    last_used: u64,
+}
+
+fn sort_eviction_candidates(candidates: &mut [EvictionCandidate]) {
+    candidates.sort_by_key(|c| (c.last_used, c.layer, c.expert, c.rank));
 }
 
 // Plan entirely before sending anything. Input order is deterministic; each
@@ -477,6 +489,8 @@ pub struct EvictionReceipt {
     pub operation_id: String,
     pub binding: crate::native_ggml_cpu::Binding,
     pub released_payload_bytes: u64,
+    /// Most recent completed position selecting this expert, if any.
+    pub last_used_position: Option<u64>,
 }
 fn require_supported_layer(layer: u32, has_ple: bool, qualifying: bool) -> Result<()> {
     if layer == 1 && !(qualifying && has_ple) {
@@ -682,6 +696,7 @@ impl Segment {
         layer.owners.order = new_order;
         layer.owners.registry = new_registry;
         layer.owners.preferred.remove(&binding.expert);
+        let last_used_position = layer.last_used.remove(&binding.expert).map(|p| p - 1);
         self.cursor.poisoned = false;
         Ok(EvictionReceipt {
             stamp,
@@ -689,10 +704,12 @@ impl Segment {
             operation_id,
             binding: binding.clone(),
             released_payload_bytes: bytes,
+            last_used_position,
         })
     }
     /// Explicitly trim accounted payload between committed positions. Protects
-    /// each layer's last committed gate choices; this does not predict the next
+    /// each layer's last committed gate choices and evicts least-recently used
+    /// candidates first; this does not predict the next
     /// gate, measure RSS, or retry any uncertain operation. If a later eviction
     /// fails, earlier acknowledged evictions remain applied and the segment is
     /// poisoned by the failing operation.
@@ -723,10 +740,12 @@ impl Segment {
                         expert: copy.expert,
                         rank: copy.rank,
                         bytes: source.resident_bytes(layer.identity.layer, copy.expert)?,
+                        last_used: layer.last_used.get(&copy.expert).copied().unwrap_or(0),
                     });
                 }
             }
         }
+        sort_eviction_candidates(&mut candidates);
         let plan = select_evictions(
             source.used_bytes(),
             target_bytes,
@@ -919,24 +938,28 @@ mod tests {
                 expert: 1,
                 rank: 2,
                 bytes: 4,
+                last_used: 0,
             },
             EvictionCandidate {
                 layer: 0,
                 expert: 2,
                 rank: 2,
                 bytes: 4,
+                last_used: 0,
             },
             EvictionCandidate {
                 layer: 0,
                 expert: 3,
                 rank: 3,
                 bytes: 4,
+                last_used: 0,
             },
             EvictionCandidate {
                 layer: 1,
                 expert: 4,
                 rank: 2,
                 bytes: 4,
+                last_used: 0,
             },
         ];
         let counts = BTreeMap::from([((0, 2), 2), ((0, 3), 1), ((1, 2), 2)]);
@@ -949,6 +972,45 @@ mod tests {
         assert!(select_evictions(16, 8, 769, &c, &counts).is_err());
         assert!(select_evictions(3, 0, 2, &c, &counts).is_err());
         assert!(select_evictions(16, 16, 0, &c, &counts).unwrap().is_empty());
+    }
+
+    #[test]
+    fn least_recent_order_is_deterministic_and_prefers_unused() {
+        let mut c = [
+            EvictionCandidate {
+                layer: 0,
+                expert: 1,
+                rank: 2,
+                bytes: 1,
+                last_used: 3,
+            },
+            EvictionCandidate {
+                layer: 1,
+                expert: 8,
+                rank: 3,
+                bytes: 1,
+                last_used: 0,
+            },
+            EvictionCandidate {
+                layer: 1,
+                expert: 7,
+                rank: 2,
+                bytes: 1,
+                last_used: 1,
+            },
+            EvictionCandidate {
+                layer: 0,
+                expert: 9,
+                rank: 3,
+                bytes: 1,
+                last_used: 1,
+            },
+        ];
+        sort_eviction_candidates(&mut c);
+        assert_eq!(
+            c.map(|x| (x.layer, x.expert)),
+            [(1, 8), (0, 9), (1, 7), (0, 1)]
+        );
     }
 
     #[test]
