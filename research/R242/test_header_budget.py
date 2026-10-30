@@ -1,0 +1,5 @@
+import json,pathlib,struct,subprocess,sys
+script=pathlib.Path(__file__).with_name('checkpoint_header_budget.py');root=pathlib.Path(sys.argv[1]);root.mkdir(exist_ok=False)
+def case(name,headers,mapping,expected):
+ d=root/name;d.mkdir();h=json.dumps(headers,separators=(',',':')).encode();payload=b'abcdefgh';(d/'model-1.safetensors').write_bytes(struct.pack('<Q',len(h))+h+payload);(d/'model.safetensors.index.json').write_text(json.dumps({'weight_map':mapping}));p=subprocess.run([sys.executable,'-B',str(script),str(d)],capture_output=True,text=True);assert (p.returncode==0)==expected,(name,p.stderr);return p.stdout
+entry={'dtype':'U8','shape':[4],'data_offsets':[0,4]};case('valid',{'x':entry},{'x':'model-1.safetensors'},True);case('wrong_index',{'x':entry},{'x':'other.safetensors'},False);case('overlap',{'x':entry,'y':entry},{'x':'model-1.safetensors','y':'model-1.safetensors'},False);case('out_of_bounds',{'x':{'dtype':'U8','shape':[4],'data_offsets':[7,11]}},{'x':'model-1.safetensors'},False);print('PASS: valid, wrong index, overlap, out-of-bounds')
