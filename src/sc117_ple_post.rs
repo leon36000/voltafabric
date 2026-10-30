@@ -63,7 +63,7 @@ pub fn evaluate(input: Inputs<'_>) -> Result<Output> {
     for s in 0..STREAMS {
         let begin = s * WIDTH;
         let dot: f64 = (begin..begin + WIDTH)
-            .map(|i| f64::from(key[i]) * f64::from(query[i]))
+            .map(|i| f64::from(key[i] * query[i]))
             .sum();
         let score = dot as f32 / (WIDTH as f32).sqrt();
         let sign = if score > 0.0 {
@@ -93,7 +93,7 @@ pub fn evaluate(input: Inputs<'_>) -> Result<Output> {
             };
             acc += input.kernel[c * 4 + k] * v;
         }
-        residual[c] = input.hidden[c] + gated[c] + acc / (1.0 + (-acc).exp());
+        residual[c] = input.hidden[c] + (gated[c] + acc / (1.0 + (-acc).exp()));
         next_history[c * HISTORY..c * HISTORY + HISTORY - 1]
             .copy_from_slice(&input.history[c * HISTORY + 1..c * HISTORY + HISTORY]);
         next_history[c * HISTORY + HISTORY - 1] = normalized[c];

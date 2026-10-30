@@ -5,8 +5,9 @@ use crate::{
     invalid,
     moe::{Registry, Stamp},
     native_ledger::{NativeBatchLedger, Reservation},
-    sc117_bound_layer, sc117_ffn_stage, sc117_gdn_stage, sc117_post_attention,
-    sc117_qsa_bound_layer, sc117_qsa_stage, sc117_shared_stage,
+    sc117_bound_layer, sc117_ffn_stage, sc117_gdn_stage, sc117_ple, sc117_ple_post,
+    sc117_ple_weights, sc117_post_attention, sc117_qsa_bound_layer, sc117_qsa_stage,
+    sc117_shared_stage,
     session::Session,
     Result,
 };
@@ -128,6 +129,71 @@ pub struct Layer {
     attention: Attention,
     shared: sc117_shared_stage::Stage,
     owners: Owners,
+    ple: Option<Ple>,
+}
+
+struct Ple {
+    table: sc117_ple::Table,
+    weights: sc117_ple_weights::Weights,
+    state: PleState,
+}
+struct PleState {
+    history: Vec<f32>,
+    previous: [i32; 2],
+    position: u64,
+}
+impl PleState {
+    fn new() -> Self {
+        Self {
+            history: vec![0.0; sc117_ple_post::CHANNELS * sc117_ple_post::HISTORY],
+            previous: [sc117_ple::NULL_TOKEN; 2],
+            position: 0,
+        }
+    }
+    fn prepare<F>(
+        &self,
+        position: u64,
+        token: i32,
+        input: &[f32],
+        produce: F,
+    ) -> Result<sc117_ple_post::Output>
+    where
+        F: FnOnce(i32, [i32; 2], &[f32], &[f32]) -> Result<sc117_ple_post::Output>,
+    {
+        if position != self.position
+            || position == u64::MAX
+            || !(0..sc117_ple::VOCAB).contains(&token)
+        {
+            return Err(invalid("PLE position or token"));
+        }
+        let candidate = produce(token, self.previous, input, &self.history)?;
+        if candidate.residual.len() != sc117_ple_post::CHANNELS
+            || candidate.next_history.len() != sc117_ple_post::CHANNELS * sc117_ple_post::HISTORY
+            || candidate
+                .residual
+                .iter()
+                .chain(candidate.next_history.iter())
+                .any(|x| !x.is_finite())
+        {
+            return Err(invalid("invalid PLE candidate"));
+        }
+        Ok(candidate)
+    }
+    fn commit(&mut self, token: i32, candidate: sc117_ple_post::Output) {
+        self.history = candidate.next_history;
+        self.previous = [self.previous[1], token];
+        self.position += 1;
+    }
+    fn finish(
+        &mut self,
+        token: i32,
+        candidate: sc117_ple_post::Output,
+        layer_result: Result<Vec<f32>>,
+    ) -> Result<Vec<f32>> {
+        let output = layer_result?;
+        self.commit(token, candidate);
+        Ok(output)
+    }
 }
 impl Layer {
     pub fn gdn(
@@ -145,6 +211,7 @@ impl Layer {
             attention: Attention::Gdn(gdn, post),
             shared,
             owners,
+            ple: None,
         })
     }
     pub fn qsa(
@@ -162,20 +229,59 @@ impl Layer {
             attention: Attention::Qsa(qsa, ffn),
             shared,
             owners,
+            ple: None,
         })
     }
+    /// Attach authenticated PLE inputs before constructing a segment. The caller must
+    /// authenticate the table and manifest and bind them to this model revision.
+    pub fn attach_ple(
+        mut self,
+        table: sc117_ple::Table,
+        weights: sc117_ple_weights::Weights,
+    ) -> Result<Self> {
+        if self.identity.layer != 1
+            || !matches!(self.attention, Attention::Gdn(..))
+            || self.ple.is_some()
+            || weights.model_revision() != self.identity.model_revision
+        {
+            return Err(invalid("PLE layer or model identity"));
+        }
+        self.ple = Some(Ple {
+            table,
+            weights,
+            state: PleState::new(),
+        });
+        Ok(self)
+    }
+    #[allow(clippy::too_many_arguments)]
     fn run(
         &mut self,
         ledger: &NativeBatchLedger,
         ticket: Reservation,
         position: u64,
         input: &[f32],
+        token: Option<i32>,
         timeout: Duration,
         source: &mut Option<&mut dyn MissingExpertSource>,
     ) -> Result<Vec<f32>> {
         let stamp = ticket.stamp().clone();
         let attempt = ticket.attempt();
-        match &mut self.attention {
+        let candidate = if let Some(ple) = &self.ple {
+            let token = token.ok_or_else(|| invalid("PLE requires token"))?;
+            Some(ple.state.prepare(
+                position,
+                token,
+                input,
+                |token, previous, residual, history| {
+                    let (_, emb) = ple.table.gather(token, previous)?;
+                    ple.weights.evaluate(&emb, residual, history)
+                },
+            )?)
+        } else {
+            None
+        };
+        let input = candidate.as_ref().map_or(input, |p| p.residual.as_slice());
+        let output = match &mut self.attention {
             Attention::Gdn(gdn, post) => {
                 let proposal = gdn.prepare_reserved(ledger, &ticket, position, input)?;
                 let routed =
@@ -213,6 +319,13 @@ impl Layer {
                 )?;
                 Ok(routed.commit(qsa, shared, collected)?.residual)
             }
+        };
+        if let (Some(ple), Some(candidate)) = (&mut self.ple, candidate) {
+            // Only after all attention, shared and routed expert work committed.
+            ple.state
+                .finish(token.expect("PLE token was validated"), candidate, output)
+        } else {
+            output
         }
     }
 }
@@ -275,11 +388,14 @@ pub struct Segment {
     timeout: Duration,
     cursor: Cursor,
 }
-fn require_supported_layer(layer: u32) -> Result<()> {
+fn require_supported_layer(layer: u32, has_ple: bool) -> Result<()> {
     if layer == 1 {
         return Err(invalid(
-            "SC117 layer 1 requires PLE; segment integration is not yet implemented",
+            "SC117 layer 1 PLE transaction requires real-layer qualification",
         ));
+    }
+    if has_ple {
+        return Err(invalid("PLE is only valid for layer 1"));
     }
     Ok(())
 }
@@ -303,7 +419,7 @@ impl Segment {
             return Err(invalid("segment identity or timeout"));
         }
         for (i, layer) in layers.iter().enumerate() {
-            require_supported_layer(layer.identity.layer)?;
+            require_supported_layer(layer.identity.layer, layer.ple.is_some())?;
             if first.identity.layer.checked_add(i as u32) != Some(layer.identity.layer)
                 || layer.identity.run_id != first.identity.run_id
                 || layer.identity.model_revision != first.identity.model_revision
@@ -380,7 +496,7 @@ impl Segment {
             .collect()
     }
     pub fn advance(&mut self, attempt: u64, input: &[f32]) -> Result<Vec<f32>> {
-        self.advance_inner(attempt, input, &mut None)
+        self.advance_inner(attempt, input, None, &mut None)
     }
     /// After routing, load absent experts through an explicitly supplied source
     /// before dispatch. Any failure leaves this segment terminal and the claim consumed.
@@ -390,14 +506,33 @@ impl Segment {
         input: &[f32],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<f32>> {
-        self.advance_inner(attempt, input, &mut Some(source))
+        self.advance_inner(attempt, input, None, &mut Some(source))
+    }
+    /// Advance one real token; token history and PLE convolution state commit with the layer.
+    pub fn advance_token(&mut self, attempt: u64, token: i32, input: &[f32]) -> Result<Vec<f32>> {
+        self.advance_inner(attempt, input, Some(token), &mut None)
+    }
+    pub fn advance_token_with_source(
+        &mut self,
+        attempt: u64,
+        token: i32,
+        input: &[f32],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<f32>> {
+        self.advance_inner(attempt, input, Some(token), &mut Some(source))
     }
     fn advance_inner(
         &mut self,
         attempt: u64,
         input: &[f32],
+        token: Option<i32>,
         source: &mut Option<&mut dyn MissingExpertSource>,
     ) -> Result<Vec<f32>> {
+        if self.layers.iter().any(|layer| layer.ple.is_some())
+            && token.is_none_or(|t| !(0..sc117_ple::VOCAB).contains(&t))
+        {
+            return Err(invalid("segment PLE token required or invalid"));
+        }
         let position = self.cursor.position;
         let ledger = &self.ledger;
         let timeout = self.timeout;
@@ -409,7 +544,9 @@ impl Segment {
             layers.len(),
             attempt,
             input,
-            |i, ticket, values| layers[i].run(ledger, ticket, position, values, timeout, source),
+            |i, ticket, values| {
+                layers[i].run(ledger, ticket, position, values, token, timeout, source)
+            },
         )
     }
 }
@@ -421,9 +558,57 @@ mod tests {
 
     #[test]
     fn model_chain_refuses_to_skip_required_layer_one_ple() {
-        assert!(require_supported_layer(1).is_err());
-        assert!(require_supported_layer(0).is_ok());
-        assert!(require_supported_layer(2).is_ok());
+        assert!(require_supported_layer(1, false).is_err());
+        assert!(require_supported_layer(1, true).is_err());
+        assert!(require_supported_layer(0, true).is_err());
+        assert!(require_supported_layer(0, false).is_ok());
+        assert!(require_supported_layer(2, false).is_ok());
+    }
+
+    #[test]
+    fn ple_history_commits_only_after_success_and_uses_previous_tokens() {
+        let mut state = PleState::new();
+        let make = |token, prev, _input: &[f32], history: &[f32]| {
+            assert_eq!(token, 42);
+            assert_eq!(prev, [sc117_ple::NULL_TOKEN; 2]);
+            assert_eq!(history[0], 0.0);
+            Ok(sc117_ple_post::Output {
+                residual: vec![2.0; 10240],
+                normalized: vec![],
+                next_history: vec![3.0; 10240 * 9],
+            })
+        };
+        let candidate = state.prepare(0, 42, &vec![0.0; 10240], make).unwrap();
+        assert!(state
+            .finish(42, candidate, Err(invalid("worker failure")))
+            .is_err());
+        assert_eq!(state.position, 0);
+        assert_eq!(state.history[0], 0.0);
+        assert_eq!(state.previous, [-1, -1]);
+        let candidate = state.prepare(0, 42, &vec![0.0; 10240], make).unwrap();
+        assert_eq!(
+            state.finish(42, candidate, Ok(vec![5.0; 10240])).unwrap()[0],
+            5.0
+        );
+        let next = state
+            .prepare(1, 73, &vec![0.0; 10240], |token, prev, _, hist| {
+                assert_eq!((token, prev, hist[0]), (73, [-1, 42], 3.0));
+                Ok(sc117_ple_post::Output {
+                    residual: vec![4.0; 10240],
+                    normalized: vec![],
+                    next_history: vec![6.0; 10240 * 9],
+                })
+            })
+            .unwrap();
+        state.finish(73, next, Ok(vec![7.0; 10240])).unwrap();
+        assert_eq!(state.previous, [42, 73]);
+        assert_eq!(state.position, 2);
+        assert!(state
+            .prepare(1, 10, &[], |_, _, _, _| unreachable!())
+            .is_err());
+        assert!(state
+            .prepare(2, sc117_ple::VOCAB, &[], |_, _, _, _| unreachable!())
+            .is_err());
     }
 
     fn ledger() -> NativeBatchLedger {

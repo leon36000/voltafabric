@@ -32,6 +32,7 @@ pub struct Manifest {
     pub kernel: Span,
 }
 pub struct Weights {
+    model_revision: String,
     key: Vec<u8>,
     value: Vec<u8>,
     nk: Vec<f32>,
@@ -114,6 +115,7 @@ impl Weights {
             return Err(invalid("PLE source changed"));
         }
         Ok(Self {
+            model_revision: m.model_revision.clone(),
             key,
             value,
             nk,
@@ -121,6 +123,9 @@ impl Weights {
             nc,
             kernel,
         })
+    }
+    pub fn model_revision(&self) -> &str {
+        &self.model_revision
     }
     /// The returned candidate is not committed; the caller owns transaction state.
     pub fn evaluate(&self, emb: &[f32], hidden: &[f32], history: &[f32]) -> Result<Output> {
