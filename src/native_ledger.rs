@@ -1,7 +1,7 @@
 //! Local durable, fail-closed CPU batch reservations for the native GGML path.
 //! This is not the shared R53 hardware namespace, a lease, or a distributed lock.
 use crate::{invalid, moe, sha256, Error, Result};
-use std::fs::{self, File, OpenOptions};
+use std::fs::{self, File};
 use std::io::Write;
 use std::path::{Path, PathBuf};
 
@@ -73,6 +73,31 @@ impl NativeBatchLedger {
         ))
     }
 
+    // Resolve only against the pinned directory descriptor. Re-resolving the
+    // path after an identity check permits a transient directory substitution.
+    #[cfg(target_os = "linux")]
+    fn create_claim(&self, name: &str) -> Result<File> {
+        let fd = rustix::fs::openat(
+            &self.handle,
+            name,
+            rustix::fs::OFlags::WRONLY
+                | rustix::fs::OFlags::CREATE
+                | rustix::fs::OFlags::EXCL
+                | rustix::fs::OFlags::NOFOLLOW
+                | rustix::fs::OFlags::CLOEXEC,
+            rustix::fs::Mode::from_bits_truncate(0o666),
+        )
+        .map_err(|e| Error::new("LEDGER_RESERVATION", e.to_string()))?;
+        Ok(File::from(fd))
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    fn create_claim(&self, _name: &str) -> Result<File> {
+        Err(invalid(
+            "native durable ledger requires Linux pinned directory creation",
+        ))
+    }
+
     /// Reserve the full stamp before any request is transmitted. Once the file
     /// exists, even an incomplete reservation stays consumed and is never reused.
     pub fn reserve(&self, stamp: &moe::Stamp, attempt: u64) -> Result<()> {
@@ -94,11 +119,7 @@ impl NativeBatchLedger {
         stamp_bytes.extend_from_slice(&stamp.batch.to_le_bytes());
         stamp_bytes.extend_from_slice(&stamp.epoch.to_le_bytes());
         let name = format!("native-{}.claim.json", sha256::hex(&stamp_bytes));
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(self.directory.join(name))
-            .map_err(|e| Error::new("LEDGER_RESERVATION", e.to_string()))?;
+        let mut file = self.create_claim(&name)?;
         // Persist the directory entry before writing; any error leaves it consumed.
         self.handle
             .sync_all()
@@ -152,14 +173,7 @@ impl NativeBatchLedger {
         key.extend_from_slice(&stamp.batch.to_le_bytes());
         key.extend_from_slice(&stamp.epoch.to_le_bytes());
         let operation_id = sha256::hex(&key);
-        let mut file = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(
-                self.directory
-                    .join(format!("native-evict-{operation_id}.claim.json")),
-            )
-            .map_err(|e| Error::new("LEDGER_RESERVATION", e.to_string()))?;
+        let mut file = self.create_claim(&format!("native-evict-{operation_id}.claim.json"))?;
         self.handle
             .sync_all()
             .map_err(|e| Error::new("LEDGER_IO", e.to_string()))?;
@@ -222,5 +236,41 @@ impl NativeBatchLedger {
             let _ = (ticket, stamp);
             Err(invalid("native durable ledger requires Unix"))
         }
+    }
+}
+
+#[cfg(all(test, target_os = "linux"))]
+mod pinned_directory_tests {
+    use super::*;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn claim_is_created_in_pinned_directory_if_path_is_replaced() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join(".runs")
+            .join(format!(
+                "r545-ledger-pinned-{}-{}",
+                std::process::id(),
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ));
+        let moved = root.with_extension("pinned");
+        fs::create_dir(&root).unwrap();
+        let ledger = NativeBatchLedger::open(&root).unwrap();
+        ledger.check_identity().unwrap();
+        fs::rename(&root, &moved).unwrap();
+        fs::create_dir(&root).unwrap();
+        drop(ledger.create_claim("synthetic.claim.json").unwrap());
+        let replacement = root.with_extension("replacement");
+        fs::rename(&root, &replacement).unwrap();
+        fs::rename(&moved, &root).unwrap();
+        ledger.check_identity().unwrap();
+        assert!(
+            root.join("synthetic.claim.json").is_file(),
+            "claim escaped pinned directory"
+        );
+        assert!(!replacement.join("synthetic.claim.json").exists());
     }
 }
