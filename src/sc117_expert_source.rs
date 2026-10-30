@@ -48,12 +48,29 @@ fn charge(used: u64, bytes: u64, limit: u64) -> Result<u64> {
     }
     Ok(next)
 }
+fn validate_rank_limits(ranks: &[u32], limit: u64, caps: &BTreeMap<u32, u64>) -> Result<()> {
+    if caps.len() != ranks.len()
+        || ranks
+            .iter()
+            .any(|r| caps.get(r).is_none_or(|&v| v == 0 || v > limit))
+    {
+        return Err(invalid("rank payload budget identities"));
+    }
+    Ok(())
+}
+
+struct RankCapacity<'a> {
+    limits: &'a BTreeMap<u32, u64>,
+    used: &'a BTreeMap<u32, u64>,
+    bytes: u64,
+}
 fn placement(
     registry: &Registry,
     order: &BTreeMap<u32, Vec<u32>>,
     ranks: &[u32],
     epoch: u64,
     expert: u32,
+    capacity: Option<RankCapacity<'_>>,
 ) -> Result<(u32, u32)> {
     if registry.epoch != epoch || order.len() != ranks.len() || ranks.is_empty() {
         return Err(invalid("expert placement epoch or rank set"));
@@ -84,10 +101,36 @@ fn placement(
             return Err(invalid("expert resident order differs from registry"));
         }
     }
-    let rank = *ranks
-        .iter()
-        .min_by_key(|&&r| (order[&r].len(), r))
-        .ok_or_else(|| invalid("expert rank"))?;
+    let rank = if let Some(RankCapacity {
+        limits,
+        used,
+        bytes,
+    }) = capacity
+    {
+        *ranks
+            .iter()
+            .filter(|&&r| {
+                limits
+                    .get(&r)
+                    .zip(used.get(&r))
+                    .is_some_and(|(&limit, &amount)| {
+                        limit > 0 && amount.checked_add(bytes).is_some_and(|next| next <= limit)
+                    })
+            })
+            .min_by_key(|&&r| {
+                (
+                    u128::from(used[&r]) * 1_000_000 / u128::from(limits[&r]),
+                    order[&r].len(),
+                    r,
+                )
+            })
+            .ok_or_else(|| invalid("no rank has expert payload capacity"))?
+    } else {
+        *ranks
+            .iter()
+            .min_by_key(|&&r| (order[&r].len(), r))
+            .ok_or_else(|| invalid("expert rank"))?
+    };
     let local = order[&rank]
         .iter()
         .copied()
@@ -118,6 +161,7 @@ fn matches_accounted(
 fn release_accounted(
     known: &mut BTreeMap<(u32, u32), (u32, u32)>,
     used: &mut u64,
+    rank_used: &mut BTreeMap<u32, u64>,
     binding: &Binding,
     bytes: u64,
     expected: u64,
@@ -130,8 +174,13 @@ fn release_accounted(
     let next = used
         .checked_sub(bytes)
         .ok_or_else(|| invalid("eviction accounting underflow"))?;
+    let next_rank = rank_used
+        .get(&binding.rank)
+        .and_then(|v| v.checked_sub(bytes))
+        .ok_or_else(|| invalid("rank eviction accounting underflow"))?;
     known.remove(&(binding.layer, binding.expert));
     *used = next;
+    rank_used.insert(binding.rank, next_rank);
     Ok(())
 }
 
@@ -147,6 +196,8 @@ pub struct Source<'a> {
     ranks: Vec<u32>,
     limit: u64,
     used: u64,
+    rank_used: BTreeMap<u32, u64>,
+    rank_limits: Option<BTreeMap<u32, u64>>,
     known: BTreeMap<(u32, u32), (u32, u32)>,
     admissions: Vec<(u32, u32, u32, u32, String)>,
 }
@@ -157,6 +208,30 @@ impl<'a> Source<'a> {
         index: &'a str,
         origin: Origin,
         config: Config<'_>,
+    ) -> Result<Self> {
+        Self::build(pack, layout, index, origin, config, None)
+    }
+
+    /// Apply independently admitted expert-payload caps for each rank. These
+    /// caps are not host-memory measurements, topology proof or hardware leases.
+    pub fn new_with_rank_limits(
+        pack: &'a mut File,
+        layout: &'a NativeLayout,
+        index: &'a str,
+        origin: Origin,
+        config: Config<'_>,
+        rank_limits: BTreeMap<u32, u64>,
+    ) -> Result<Self> {
+        Self::build(pack, layout, index, origin, config, Some(rank_limits))
+    }
+
+    fn build(
+        pack: &'a mut File,
+        layout: &'a NativeLayout,
+        index: &'a str,
+        origin: Origin,
+        config: Config<'_>,
+        rank_limits: Option<BTreeMap<u32, u64>>,
     ) -> Result<Self> {
         let Config {
             identity,
@@ -177,7 +252,11 @@ impl<'a> Source<'a> {
         if ranks.is_empty() || ranks.windows(2).any(|p| p[0] == p[1]) {
             return Err(invalid("expert source ranks"));
         }
+        if let Some(caps) = &rank_limits {
+            validate_rank_limits(&ranks, limit, caps)?;
+        }
         let mut used = 0;
+        let mut rank_used: BTreeMap<u32, u64> = ranks.iter().map(|&r| (r, 0)).collect();
         let mut known = BTreeMap::new();
         let mut slots = BTreeSet::new();
         for s in seeds {
@@ -189,11 +268,10 @@ impl<'a> Source<'a> {
             {
                 return Err(invalid("expert seed duplicate or rank"));
             }
-            used = charge(
-                used,
-                layout.expert(s.layer as usize, s.expert.into())?.bytes,
-                limit,
-            )?;
+            let bytes = layout.expert(s.layer as usize, s.expert.into())?.bytes;
+            used = charge(used, bytes, limit)?;
+            let rank_limit = rank_limits.as_ref().map_or(limit, |caps| caps[&s.rank]);
+            rank_used.insert(s.rank, charge(rank_used[&s.rank], bytes, rank_limit)?);
         }
         Ok(Self {
             pack,
@@ -204,6 +282,8 @@ impl<'a> Source<'a> {
             ranks,
             limit,
             used,
+            rank_used,
+            rank_limits,
             known,
             admissions: Vec::new(),
         })
@@ -213,6 +293,9 @@ impl<'a> Source<'a> {
     }
     pub fn limit_bytes(&self) -> u64 {
         self.limit
+    }
+    pub fn rank_used_bytes(&self) -> &BTreeMap<u32, u64> {
+        &self.rank_used
     }
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
@@ -291,6 +374,10 @@ impl<'a> Source<'a> {
         self.used
             .checked_sub(bytes)
             .ok_or_else(|| invalid("eviction accounting underflow"))?;
+        self.rank_used
+            .get(&binding.rank)
+            .and_then(|n| n.checked_sub(bytes))
+            .ok_or_else(|| invalid("rank eviction accounting underflow"))?;
         Ok(bytes)
     }
 
@@ -299,7 +386,14 @@ impl<'a> Source<'a> {
             .layout
             .expert(binding.layer as usize, binding.expert.into())?
             .bytes;
-        release_accounted(&mut self.known, &mut self.used, binding, bytes, expected)
+        release_accounted(
+            &mut self.known,
+            &mut self.used,
+            &mut self.rank_used,
+            binding,
+            bytes,
+            expected,
+        )
     }
 }
 impl MissingExpertSource for Source<'_> {
@@ -323,9 +417,19 @@ impl MissingExpertSource for Source<'_> {
         if !matches_accounted(stamp.layer, registry, &self.known) {
             return Err(invalid("expert registry differs from accounted residents"));
         }
-        let (rank, local) = placement(registry, order, &self.ranks, stamp.epoch, expert)?;
         let span = self.layout.expert(stamp.layer as usize, expert.into())?;
         let next = charge(self.used, span.bytes, self.limit)?;
+        let capacity = self.rank_limits.as_ref().map(|caps| RankCapacity {
+            limits: caps,
+            used: &self.rank_used,
+            bytes: span.bytes,
+        });
+        let (rank, local) = placement(registry, order, &self.ranks, stamp.epoch, expert, capacity)?;
+        let rank_limit = self
+            .rank_limits
+            .as_ref()
+            .map_or(self.limit, |caps| caps[&rank]);
+        let next_rank = charge(self.rank_used[&rank], span.bytes, rank_limit)?;
         let digest = self
             .origin
             .expert_digest(self.layout, stamp.layer as usize, expert.into())?;
@@ -353,6 +457,7 @@ impl MissingExpertSource for Source<'_> {
         };
         self.known.insert((stamp.layer, expert), (rank, local));
         self.used = next;
+        self.rank_used.insert(rank, next_rank);
         self.admissions
             .push((stamp.layer, expert, rank, local, digest));
         Ok(ExpertAdmission {
@@ -387,14 +492,30 @@ mod tests {
         };
         let mut known = BTreeMap::from([((4, 5), (2, 3))]);
         let mut used = 10;
-        assert!(release_accounted(&mut known, &mut used, &binding, 11, 11).is_err());
-        assert!(release_accounted(&mut known, &mut used, &binding, 3, 4).is_err());
+        let mut rank_used = BTreeMap::from([(2, 10)]);
+        assert!(
+            release_accounted(&mut known, &mut used, &mut rank_used, &binding, 11, 11).is_err()
+        );
+        assert!(release_accounted(&mut known, &mut used, &mut rank_used, &binding, 3, 4).is_err());
         assert_eq!((used, known.len()), (10, 1));
-        release_accounted(&mut known, &mut used, &binding, 4, 4).unwrap();
-        assert_eq!((used, known.len()), (6, 0));
-        assert!(release_accounted(&mut known, &mut used, &binding, 4, 4).is_err());
+        rank_used.insert(2, 3);
+        assert!(release_accounted(&mut known, &mut used, &mut rank_used, &binding, 4, 4).is_err());
+        assert_eq!((used, known.len(), rank_used[&2]), (10, 1, 3));
+        rank_used.insert(2, 10);
+        release_accounted(&mut known, &mut used, &mut rank_used, &binding, 4, 4).unwrap();
+        assert_eq!((used, known.len(), rank_used[&2]), (6, 0, 6));
+        assert!(release_accounted(&mut known, &mut used, &mut rank_used, &binding, 4, 4).is_err());
         assert_eq!(used, 6);
     }
+    #[test]
+    fn rank_capabilities_must_match_the_configured_rank_set() {
+        assert!(validate_rank_limits(&[2, 3], 100, &BTreeMap::from([(2, 40), (3, 60)])).is_ok());
+        assert!(validate_rank_limits(&[2, 3], 100, &BTreeMap::from([(2, 40)])).is_err());
+        assert!(validate_rank_limits(&[2, 3], 100, &BTreeMap::from([(2, 40), (3, 0)])).is_err());
+        assert!(validate_rank_limits(&[2, 3], 100, &BTreeMap::from([(2, 40), (3, 101)])).is_err());
+        assert!(validate_rank_limits(&[2, 3], 100, &BTreeMap::from([(2, 40), (4, 60)])).is_err());
+    }
+
     #[test]
     fn placement_rejects_registry_mismatch_and_balances_deterministically() {
         let r = Registry {
@@ -413,15 +534,64 @@ mod tests {
             ],
         };
         let o = BTreeMap::from([(2, vec![0]), (3, vec![3])]);
-        assert_eq!(placement(&r, &o, &[2, 3], 1, 9).unwrap(), (2, 1));
+        assert_eq!(placement(&r, &o, &[2, 3], 1, 9, None).unwrap(), (2, 1));
+        let caps = BTreeMap::from([(2, 10), (3, 30)]);
+        let used = BTreeMap::from([(2, 9), (3, 10)]);
+        assert_eq!(
+            placement(
+                &r,
+                &o,
+                &[2, 3],
+                1,
+                9,
+                Some(RankCapacity {
+                    limits: &caps,
+                    used: &used,
+                    bytes: 2
+                })
+            )
+            .unwrap(),
+            (3, 4)
+        );
+        let full = BTreeMap::from([(2, 10), (3, 30)]);
+        assert!(placement(
+            &r,
+            &o,
+            &[2, 3],
+            1,
+            9,
+            Some(RankCapacity {
+                limits: &caps,
+                used: &full,
+                bytes: 1
+            })
+        )
+        .is_err());
+        let fraction = BTreeMap::from([(2, 5), (3, 10)]);
+        assert_eq!(
+            placement(
+                &r,
+                &o,
+                &[2, 3],
+                1,
+                9,
+                Some(RankCapacity {
+                    limits: &caps,
+                    used: &fraction,
+                    bytes: 1
+                })
+            )
+            .unwrap(),
+            (3, 4)
+        );
         let known = BTreeMap::from([((4, 0), (2, 0)), ((4, 1), (3, 3)), ((5, 8), (2, 0))]);
         assert!(matches_accounted(4, &r, &known));
         assert!(!matches_accounted(5, &r, &known));
         assert!(!matches_accounted(4, &r, &BTreeMap::new()));
-        assert!(placement(&r, &o, &[2, 3], 2, 9).is_err());
-        assert!(placement(&r, &o, &[2, 3], 1, 0).is_err());
+        assert!(placement(&r, &o, &[2, 3], 2, 9, None).is_err());
+        assert!(placement(&r, &o, &[2, 3], 1, 0, None).is_err());
         let bad = BTreeMap::from([(2, vec![0, 0]), (3, vec![3])]);
-        assert!(placement(&r, &bad, &[2, 3], 1, 9).is_err());
-        assert!(placement(&r, &o, &[2, 4], 1, 9).is_err());
+        assert!(placement(&r, &bad, &[2, 3], 1, 9, None).is_err());
+        assert!(placement(&r, &o, &[2, 4], 1, 9, None).is_err());
     }
 }

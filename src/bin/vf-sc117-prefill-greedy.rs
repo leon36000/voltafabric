@@ -420,6 +420,21 @@ fn run() -> Result<(), E> {
     {
         return Err("expert budget cannot cover seeds and worst-case headroom".into());
     }
+    let rank_limits = match (
+        std::env::var("VF_RANK2_BUDGET"),
+        std::env::var("VF_RANK3_BUDGET"),
+    ) {
+        (Err(std::env::VarError::NotPresent), Err(std::env::VarError::NotPresent)) => None,
+        (Ok(a), Ok(b)) => {
+            let limits = BTreeMap::from([(2, a.parse::<u64>()?), (3, b.parse::<u64>()?)]);
+            let seed_per_rank = layout.worst_case_admission_bytes(1)?;
+            if limits.values().any(|&v| v < seed_per_rank || v > budget) {
+                return Err("rank budget cannot cover seeds or exceeds global budget".into());
+            }
+            Some(limits)
+        }
+        _ => return Err("both rank budgets must be supplied".into()),
+    };
     let m: voltafabric::sc117_ple_weights::Manifest =
         serde_json::from_reader(std::fs::File::open(&a[8])?)?;
     let weights =
@@ -429,7 +444,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r475-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r476-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -516,27 +531,39 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r475-cpu-lru".into(),
+        "r476-cpu-rank-budget".into(),
         ledger,
         Duration::from_secs(30),
     )?;
-    let mut source = voltafabric::sc117_expert_source::Source::new(
-        &mut pack,
-        &layout,
-        &index,
-        origin,
-        voltafabric::sc117_expert_source::Config {
-            identity: voltafabric::sc117_expert_source::Identity {
-                run_id: run_id.clone(),
-                model_revision: "sc117-local-observation".into(),
-                plan_id: "r475-cpu-lru".into(),
-                epoch: 1,
-            },
-            ranks: vec![2, 3],
-            seeds: &seed_records,
-            limit: budget,
+    let source_config = voltafabric::sc117_expert_source::Config {
+        identity: voltafabric::sc117_expert_source::Identity {
+            run_id: run_id.clone(),
+            model_revision: "sc117-local-observation".into(),
+            plan_id: "r476-cpu-rank-budget".into(),
+            epoch: 1,
         },
-    )?;
+        ranks: vec![2, 3],
+        seeds: &seed_records,
+        limit: budget,
+    };
+    let mut source = if let Some(limits) = rank_limits.clone() {
+        voltafabric::sc117_expert_source::Source::new_with_rank_limits(
+            &mut pack,
+            &layout,
+            &index,
+            origin,
+            source_config,
+            limits,
+        )?
+    } else {
+        voltafabric::sc117_expert_source::Source::new(
+            &mut pack,
+            &layout,
+            &index,
+            origin,
+            source_config,
+        )?
+    };
     if source.used_bytes() != used {
         return Err("seed budget mismatch".into());
     }
@@ -546,6 +573,7 @@ fn run() -> Result<(), E> {
     let mut logits_hashes = Vec::new();
     let mut generated = Vec::new();
     let mut evictions = Vec::new();
+    let mut rank_history = Vec::new();
     let mut current_token = prompt_tokens[0];
     for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
         if pos < prompt_tokens.len() {
@@ -567,6 +595,20 @@ fn run() -> Result<(), E> {
         if segment.position() != pos as u64 + 1 || segment.is_poisoned() {
             return Err("segment did not commit complete position".into());
         }
+        let rank_used = source.rank_used_bytes();
+        let accounted = rank_used
+            .values()
+            .try_fold(0u64, |total, value| total.checked_add(*value));
+        if accounted != Some(source.used_bytes())
+            || rank_limits.as_ref().is_some_and(|limits| {
+                rank_used
+                    .iter()
+                    .any(|(rank, used)| limits.get(rank).is_none_or(|limit| used > limit))
+            })
+        {
+            return Err("rank payload accounting mismatch".into());
+        }
+        rank_history.push(rank_used.clone());
         output_hashes.push(bytes_hash(&output));
         if pos + 1 < prompt_tokens.len() {
             continue;
@@ -592,7 +634,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }
