@@ -6,6 +6,14 @@ use crate::{
     Result,
 };
 
+// Group computation by physical owner while retaining each original slot index.
+// This does not reorder the externally returned rows or the Collector reduction.
+fn expert_execution_order(owners: &[usize]) -> Vec<usize> {
+    let mut indices: Vec<_> = (0..owners.len()).collect();
+    indices.sort_unstable_by_key(|&i| (owners[i], i));
+    indices
+}
+
 /// Per coordinator and per rank: bounds only resident payload bytes, not total RSS.
 pub const MAX_NATIVE_EXPERTS: usize = 512;
 pub const MAX_NATIVE_PAYLOAD_BYTES: u64 = 1_250_000_000;
@@ -320,26 +328,36 @@ impl RankWorker {
             self.scope = Some((stamp.run_id.clone(), stamp.plan_id.clone()));
         }
         let work = (|| -> Result<UnweightedF32Output> {
-            let mut rows = Vec::with_capacity(dispatch.slots.len());
-            let mut slots = Vec::with_capacity(dispatch.slots.len());
+            let mut rows = vec![None; dispatch.slots.len()];
             // Scoped to this batch. Never reuse an activation across tokens or
-            // gate/up formats, and retain the original slot/collector order.
+            // gate/up formats. Compute by physical owner, then restore slot order.
             let mut prepared = BTreeMap::new();
-            for (entry, &owner) in dispatch.slots.iter().zip(&plan) {
-                let s = &entry.slot;
-                let resident = &mut self.owners[owner];
+            for index in expert_execution_order(&plan) {
+                let s = &dispatch.slots[index].slot;
+                let resident = &mut self.owners[plan[index]];
                 let key = (s.token, resident.gate_up_type());
                 if let std::collections::btree_map::Entry::Vacant(entry) = prepared.entry(key) {
                     entry.insert(resident.prepare(tokens[&s.token])?);
                 }
-                rows.push(resident.forward_prepared(&prepared[&key])?);
-                slots.push(OutputSlot {
-                    token: s.token,
-                    slot: s.slot,
-                    expert: s.expert,
-                    local: s.local,
-                });
+                rows[index] = Some(resident.forward_prepared(&prepared[&key])?);
             }
+            let rows = rows
+                .into_iter()
+                .collect::<Option<Vec<_>>>()
+                .ok_or_else(|| invalid("native grouped output incomplete"))?;
+            let slots = dispatch
+                .slots
+                .iter()
+                .map(|entry| {
+                    let s = &entry.slot;
+                    OutputSlot {
+                        token: s.token,
+                        slot: s.slot,
+                        expert: s.expert,
+                        local: s.local,
+                    }
+                })
+                .collect();
             Ok(UnweightedF32Output {
                 stamp: stamp.clone(),
                 rank: dispatch.rank,
@@ -556,5 +574,42 @@ impl QuantizedMatrix {
     }
     pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>> {
         self.inner.forward(input).map_err(invalid)
+    }
+}
+
+#[cfg(test)]
+mod grouped_execution_tests {
+    use super::expert_execution_order;
+
+    #[test]
+    fn grouping_is_stable_and_preserves_every_original_index() {
+        assert_eq!(expert_execution_order(&[]), Vec::<usize>::new());
+        assert_eq!(
+            expert_execution_order(&[2, 0, 2, 1, 0]),
+            vec![1, 4, 3, 0, 2]
+        );
+        assert_eq!(expert_execution_order(&[3, 3, 3]), vec![0, 1, 2]);
+    }
+
+    #[test]
+    fn grouping_matches_independent_bucket_oracle_for_all_small_plans() {
+        for len in 0..=7_u32 {
+            for mut code in 0..3_usize.pow(len) {
+                let mut owners = Vec::new();
+                for _ in 0..len {
+                    owners.push(code % 3);
+                    code /= 3;
+                }
+                let mut expected = Vec::new();
+                for owner in 0..3 {
+                    for (index, actual) in owners.iter().enumerate() {
+                        if *actual == owner {
+                            expected.push(index);
+                        }
+                    }
+                }
+                assert_eq!(expert_execution_order(&owners), expected);
+            }
+        }
     }
 }

@@ -1442,7 +1442,7 @@ fn native_rank_batch_reuses_preparation_without_crossing_token_or_slot_order() {
             expert,
             rank: 2,
             local: expert,
-            weight: 0.25,
+            weight: if slot == 0 { 0.25 } else { 0.75 },
         },
         physical_expert: expert as usize,
     };
@@ -1467,7 +1467,10 @@ fn native_rank_batch_reuses_preparation_without_crossing_token_or_slot_order() {
         ],
     };
     let out = worker.execute_f32(&dispatch, &[(0, a), (1, b)], 1).unwrap();
-    assert_eq!(out.rows, vec![ra.clone(), rb.clone(), ra, rb]);
+    assert_eq!(
+        out.rows,
+        vec![ra.clone(), rb.clone(), ra.clone(), rb.clone()]
+    );
     assert_eq!(
         out.slots
             .iter()
@@ -1475,4 +1478,135 @@ fn native_rank_batch_reuses_preparation_without_crossing_token_or_slot_order() {
             .collect::<Vec<_>>(),
         vec![(0, 0, 0), (1, 0, 1), (0, 1, 1), (1, 1, 0)]
     );
+    // Feed the restored order to the real FP16-decoding/f64 Collector.
+    use std::collections::BTreeMap;
+    use voltafabric::{
+        completion,
+        moe::{Choice, Collector, Completion, Registry, Replica},
+        routing::RoutingProblem,
+    };
+    let choice = |expert, weight| Choice { expert, weight };
+    let p = RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![
+            vec![choice(0, 0.25), choice(1, 0.75)],
+            vec![choice(1, 0.25), choice(0, 0.75)],
+        ],
+        registry: Registry {
+            epoch: 3,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 2,
+                    local: 1,
+                },
+            ],
+        },
+        stamp: dispatch.stamp.clone(),
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0, 1])]),
+    };
+    let mut collector = Collector::from_routing(&p).unwrap();
+    for (slot, row) in out.slots.iter().zip(out.rows.iter()) {
+        let values = row
+            .iter()
+            .map(|x| {
+                completion::decode_fp16(completion::encode_fp16(f64::from(*x)).unwrap()).unwrap()
+            })
+            .collect();
+        collector
+            .accept(Completion {
+                stamp: p.stamp.clone(),
+                token: slot.token,
+                slot: slot.slot,
+                expert: slot.expert,
+                rank: 2,
+                local: slot.local,
+                value: values,
+            })
+            .unwrap();
+    }
+    let result = collector.finish().unwrap();
+    for (actual, expected) in result.iter().zip([ra, rb]) {
+        for (value, raw) in actual.iter().zip(expected) {
+            let decoded =
+                completion::decode_fp16(completion::encode_fp16(f64::from(raw)).unwrap()).unwrap();
+            assert_eq!(value.to_bits(), (0.25 * decoded + 0.75 * decoded).to_bits());
+        }
+    }
+}
+
+#[test]
+fn grouped_batch_rejects_late_owner_failure_without_partial_output_or_retry() {
+    use voltafabric::{
+        moe::{Slot, Stamp},
+        native_ggml_cpu::RankWorker,
+        routing::{RankDispatch, RankSlot},
+        sha256,
+        strata_native_layout::VerifiedNativeExpert,
+    };
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let good = vec![0u8; 2_176_000];
+    let mut bad = good.clone();
+    // Deliberately non-finite gate scale for a valid-length synthetic blob.
+    bad[0] = 0;
+    bad[1] = 0x7c;
+    let make = |expert: u32, bytes: Vec<u8>| {
+        let mut id = binding();
+        id.expert = expert;
+        id.local = expert;
+        id.blob_sha256 = sha256::hex(&bytes);
+        Resident::load(
+            &layout,
+            VerifiedNativeExpert {
+                layer: 0,
+                expert: expert.into(),
+                span: layout.expert(0, expert.into()).unwrap(),
+                bytes,
+            },
+            id,
+        )
+        .unwrap()
+    };
+    let mut worker = RankWorker::new(vec![make(0, good), make(1, bad)]).unwrap();
+    let slot = |slot, expert| RankSlot {
+        slot: Slot {
+            token: 0,
+            slot,
+            expert,
+            rank: 2,
+            local: expert,
+            weight: 0.5,
+        },
+        physical_expert: expert as usize,
+    };
+    // In dispatch order the broken expert is first; grouping executes owner 0 first.
+    let mut dispatch = RankDispatch {
+        stamp: Stamp {
+            run_id: "r552-failure".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        rank: 2,
+        hidden: 2560,
+        tokens: 1,
+        resident_order: vec![0, 1],
+        slots: vec![slot(0, 1), slot(1, 0)],
+    };
+    assert!(worker
+        .execute_f32(&dispatch, &[(0, vec![0.125; 2560])], 1)
+        .is_err());
+    dispatch.stamp.batch = 1;
+    assert!(worker
+        .execute_f32(&dispatch, &[(0, vec![0.125; 2560])], 2)
+        .is_err());
 }

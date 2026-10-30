@@ -1,0 +1,12 @@
+{
+  "round":"R552",
+  "parent_gitlab_commit":"5c1dda59a2706374343fbb72a4f5df1b7601d1f4",
+  "status":"PASS_STABLE_OWNER_GROUPED_LOCAL_CPU_GENERATION",
+  "active_operations":[],
+  "positions":92,
+  "generated_tokens":20,
+  "claims":20709,
+  "claims_status":"RESERVED_UNKNOWN_NO_REPLAY",
+  "limits":["Sequential CPU expert calls, not grouped GEMM", "Multi-token grouping tested only on synthetic local inputs", "No performance measurements", "R428 expert-255 strict failure remains", "No GPU or inter-PC qualification; real R53 and lease missing, PC6 swap below floor", "Raw result and trace local only"],
+  "next_action":"Continue toward real distributed generation: establish authoritative shared R53 and cooperative lease, fresh identities/resources/hardware gates, and resolve the expert numeric boundary; never replay UNKNOWN."
+}
