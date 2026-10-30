@@ -1394,3 +1394,85 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     drop(input);
     assert!(!child.wait().unwrap().success());
 }
+
+#[test]
+fn native_rank_batch_reuses_preparation_without_crossing_token_or_slot_order() {
+    use voltafabric::{
+        moe::{Slot, Stamp},
+        native_ggml_cpu::RankWorker,
+        routing::{RankDispatch, RankSlot},
+        strata_native_layout::VerifiedNativeExpert,
+    };
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let mut bytes = vec![0u8; 2_176_000];
+    for i in (0..1_254_400).step_by(98) {
+        bytes[i + 1] = 0x28;
+    }
+    for i in (1_254_400..2_176_000).step_by(18) {
+        bytes[i + 1] = 0x28;
+    }
+    let make = |expert: u32| {
+        let mut id = binding();
+        id.expert = expert;
+        id.local = expert;
+        id.blob_sha256 = "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0".into();
+        Resident::load(
+            &layout,
+            VerifiedNativeExpert {
+                layer: 0,
+                expert: expert.into(),
+                span: layout.expert(0, expert.into()).unwrap(),
+                bytes: bytes.clone(),
+            },
+            id,
+        )
+        .unwrap()
+    };
+    let a = vec![0.001_f32; 2560];
+    let b = vec![-0.002_f32; 2560];
+    let mut reference = make(0);
+    let ra = reference.forward(&a).unwrap();
+    let rb = reference.forward(&b).unwrap();
+    assert_ne!(ra, rb);
+    let mut worker = RankWorker::new(vec![make(0), make(1)]).unwrap();
+    let make_slot = |token, slot, expert| RankSlot {
+        slot: Slot {
+            token,
+            slot,
+            expert,
+            rank: 2,
+            local: expert,
+            weight: 0.25,
+        },
+        physical_expert: expert as usize,
+    };
+    let dispatch = RankDispatch {
+        stamp: Stamp {
+            run_id: "r551-batch".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        rank: 2,
+        hidden: 2560,
+        tokens: 2,
+        resident_order: vec![0, 1],
+        slots: vec![
+            make_slot(0, 0, 0),
+            make_slot(1, 0, 1),
+            make_slot(0, 1, 1),
+            make_slot(1, 1, 0),
+        ],
+    };
+    let out = worker.execute_f32(&dispatch, &[(0, a), (1, b)], 1).unwrap();
+    assert_eq!(out.rows, vec![ra.clone(), rb.clone(), ra, rb]);
+    assert_eq!(
+        out.slots
+            .iter()
+            .map(|s| (s.token, s.slot, s.expert))
+            .collect::<Vec<_>>(),
+        vec![(0, 0, 0), (1, 0, 1), (0, 1, 1), (1, 1, 0)]
+    );
+}

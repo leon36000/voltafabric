@@ -64,6 +64,18 @@ impl Resident {
     pub fn binding(&self) -> &Binding {
         &self.binding
     }
+    fn gate_up_type(&self) -> i32 {
+        self.owner.gate_up_type()
+    }
+    fn prepare(&self, input: &[f32]) -> Result<vf_ggml_native_ffi::NativePrepared> {
+        self.owner.prepare(input).map_err(invalid)
+    }
+    fn forward_prepared(
+        &mut self,
+        prepared: &vf_ggml_native_ffi::NativePrepared,
+    ) -> Result<Vec<f32>> {
+        self.owner.forward_prepared(prepared).map_err(invalid)
+    }
     /// Returns one unweighted FP32 expert row; no gate is applied here.
     pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>> {
         self.owner.forward(input).map_err(invalid)
@@ -310,9 +322,17 @@ impl RankWorker {
         let work = (|| -> Result<UnweightedF32Output> {
             let mut rows = Vec::with_capacity(dispatch.slots.len());
             let mut slots = Vec::with_capacity(dispatch.slots.len());
+            // Scoped to this batch. Never reuse an activation across tokens or
+            // gate/up formats, and retain the original slot/collector order.
+            let mut prepared = BTreeMap::new();
             for (entry, &owner) in dispatch.slots.iter().zip(&plan) {
                 let s = &entry.slot;
-                rows.push(self.owners[owner].forward(tokens[&s.token])?);
+                let resident = &mut self.owners[owner];
+                let key = (s.token, resident.gate_up_type());
+                if let std::collections::btree_map::Entry::Vacant(entry) = prepared.entry(key) {
+                    entry.insert(resident.prepare(tokens[&s.token])?);
+                }
+                rows.push(resident.forward_prepared(&prepared[&key])?);
                 slots.push(OutputSlot {
                     token: s.token,
                     slot: s.slot,

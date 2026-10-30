@@ -1,0 +1,9 @@
+{
+  "claims_parts": 79,
+  "claims_sha256": "fe00aee1d5f8e15fcf82b122617f490d70ff8b5faf5a1c4c7bf138644796c64c",
+  "full_result_sha256": "0666ab9e80e1c82ecad5ec0ef9d7fb33b06a2edf0f5d9783a4c9246017865a77",
+  "summary_parts": 95,
+  "summary_sha256": "19c356f51b7e81f1f567e242ed0a0f2a8a655100a1158b9439b37f41ed5ae1aa",
+  "trace_bytes": 17524160,
+  "trace_sha256": "a22a989c0b7b27a88f2f63ba558091cd510115be2295014c401c7c2c293346f2"
+}

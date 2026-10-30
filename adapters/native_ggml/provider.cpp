@@ -13,35 +13,51 @@ constexpr int H = 2560, F = 640;
 std::once_flag init;
 bool fail(std::string& error, const char* text) { error = text; return false; }
 }
-bool forward(int gu, int down, const std::vector<uint8_t>& blob,
-             const std::vector<float>& input, std::vector<float>& output, std::string& error) {
+bool prepare_input(int gu, const std::vector<float>& input,
+                   PreparedInput& prepared, std::string& error) {
+    error.clear();
+    if (gu != 18 && gu != 21 && gu != 22 && gu != 23) return fail(error, "unsupported native format");
+    if (input.size() != H) return fail(error, "invalid activation shape");
+    for (float x : input) if (!std::isfinite(x)) return fail(error, "non-finite activation");
+    std::call_once(init, [] { ggml_cpu_init(); });
+    auto gt=static_cast<ggml_type>(gu);
+    const auto* g=ggml_get_type_traits_cpu(gt);
+    if (!g || !g->vec_dot) return fail(error, "missing ggml dot trait");
+    const auto* ga=ggml_get_type_traits_cpu(g->vec_dot_type);
+    if (!ga || !ga->from_float || H % ggml_blck_size(gt) || H % ggml_blck_size(g->vec_dot_type))
+        return fail(error, "missing ggml activation quantizer or geometry");
+    PreparedInput staged;
+    staged.gate_up_type=gu;
+    staged.quantized.resize(ggml_row_size(g->vec_dot_type,H));
+    ga->from_float(input.data(),staged.quantized.data(),H);
+    prepared=std::move(staged);
+    return true;
+}
+bool forward_prepared(int gu, int down, const std::vector<uint8_t>& blob,
+                      const PreparedInput& prepared, std::vector<float>& output, std::string& error) {
     error.clear();
     if ((gu != 18 && gu != 21 && gu != 22 && gu != 23) || (down != 20 && down != 42))
         return fail(error, "unsupported native format");
-    if (input.size() != H) return fail(error, "invalid activation shape");
-    for (float x : input) if (!std::isfinite(x)) return fail(error, "non-finite activation");
     std::call_once(init, [] { ggml_cpu_init(); });
     auto gt = static_cast<ggml_type>(gu), dt = static_cast<ggml_type>(down);
     const auto* g = ggml_get_type_traits_cpu(gt);
     const auto* d = ggml_get_type_traits_cpu(dt);
     if (!g || !d || !g->vec_dot || !d->vec_dot) return fail(error, "missing ggml dot trait");
-    const auto* ga = ggml_get_type_traits_cpu(g->vec_dot_type);
     const auto* da = ggml_get_type_traits_cpu(d->vec_dot_type);
-    if (!ga || !da || !ga->from_float || !da->from_float) return fail(error, "missing ggml quantizer");
-    if (H % ggml_blck_size(gt) || F % ggml_blck_size(dt) ||
+    if (!da || !da->from_float) return fail(error, "missing ggml quantizer");
+    if (prepared.gate_up_type != gu || prepared.quantized.size() != ggml_row_size(g->vec_dot_type,H) ||
+        H % ggml_blck_size(gt) || F % ggml_blck_size(dt) ||
         H % ggml_blck_size(g->vec_dot_type) || F % ggml_blck_size(d->vec_dot_type))
-        return fail(error, "invalid ggml geometry");
+        return fail(error, "invalid prepared input or ggml geometry");
     const size_t grow = ggml_row_size(gt, H), drow = ggml_row_size(dt, F);
     const size_t up = grow * F, dn = 2 * up, size = dn + drow * H;
     if (blob.size() != size) return fail(error, "invalid native blob length");
-    std::vector<uint8_t> qx(ggml_row_size(g->vec_dot_type, H));
     std::vector<uint8_t> qmid(ggml_row_size(d->vec_dot_type, F));
     std::vector<float> mid(F), staged(H);
-    ga->from_float(input.data(), qx.data(), H);
     for (int i = 0; i < F; ++i) {
         float gate = 0.f, v = 0.f;
-        g->vec_dot(H, &gate, 0, blob.data() + i * grow, 0, qx.data(), 0, 1);
-        g->vec_dot(H, &v, 0, blob.data() + up + i * grow, 0, qx.data(), 0, 1);
+        g->vec_dot(H, &gate, 0, blob.data() + i * grow, 0, prepared.quantized.data(), 0, 1);
+        g->vec_dot(H, &v, 0, blob.data() + up + i * grow, 0, prepared.quantized.data(), 0, 1);
         mid[i] = (gate / (1.f + std::exp(-gate))) * v;
         if (!std::isfinite(mid[i])) return fail(error, "non-finite intermediate");
     }
@@ -52,6 +68,11 @@ bool forward(int gu, int down, const std::vector<uint8_t>& blob,
     }
     output.swap(staged);
     return true;
+}
+bool forward(int gu, int down, const std::vector<uint8_t>& blob,
+             const std::vector<float>& input, std::vector<float>& output, std::string& error) {
+    PreparedInput prepared;
+    return prepare_input(gu,input,prepared,error) && forward_prepared(gu,down,blob,prepared,output,error);
 }
 bool matrix_shape(int type,size_t rows,size_t columns,size_t length) {
     if((type!=8 && type!=12 && type!=13 && type!=14 && type!=23) || rows==0 || rows>10240 || columns==0 || columns>6144 || length>32*1024*1024) return false;

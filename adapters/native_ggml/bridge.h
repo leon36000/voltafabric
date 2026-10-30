@@ -10,6 +10,10 @@ extern "C" {
 void* vf_native_create(int gu, int down, const uint8_t* bytes, size_t len);
 int vf_native_forward(void* instance, const float* input, size_t input_len, float* output, size_t output_len);
 void vf_native_destroy(void* instance);
+// Opaque, batch-local prepared activation. Input and format are bound at creation.
+void* vf_native_prepare(int gu, const float* input, size_t input_len);
+int vf_native_forward_prepared(void* instance, const void* prepared, float* output, size_t output_len);
+void vf_native_prepared_destroy(void* prepared);
 // Owns one bounded GGML matrix; authentication and identity remain caller responsibilities.
 void* vf_native_matrix_create(int type, size_t rows, size_t columns, const uint8_t* bytes, size_t len);
 int vf_native_matrix_forward(void* instance, const float* input, size_t input_len, float* output, size_t output_len);

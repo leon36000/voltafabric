@@ -39,6 +39,15 @@ static bool check(int gu, int down) {
     for (int i=0;i<H;++i) x[i]=std::sin(i*0.17f)/16.f;
     std::string err;
     if (!vf::native_ggml::forward(gu,down,blob,x,out,err)) { std::fprintf(stderr,"forward: %s\n",err.c_str());return false; }
+    vf::native_ggml::PreparedInput prepared;
+    if (!vf::native_ggml::prepare_input(gu,x,prepared,err)) return false;
+    std::vector<float> reused;
+    if (!vf::native_ggml::forward_prepared(gu,down,blob,prepared,reused,err) || reused != out) return false;
+    const auto saved = reused;
+    if (vf::native_ggml::forward_prepared(gu == 18 ? 21 : 18,down,blob,prepared,reused,err) || reused != saved) return false;
+    auto invalid_input=x; invalid_input[0]=std::numeric_limits<float>::quiet_NaN();
+    if (vf::native_ggml::prepare_input(gu,invalid_input,prepared,err)) return false;
+    if (!vf::native_ggml::forward_prepared(gu,down,blob,prepared,reused,err) || reused != saved) return false;
     std::vector<uint8_t> qx(ggml_row_size(g->vec_dot_type,H)); ga->from_float(x.data(),qx.data(),H);
     std::vector<float> gw(H), ax(H); gconv->to_float(blob.data(),gw.data(),H);
     if (g->vec_dot_type == GGML_TYPE_Q8_K) decode_q8k(qx,ax); else gac->to_float(qx.data(),ax.data(),H);
@@ -56,6 +65,21 @@ static bool check(int gu, int down) {
     std::fill(blob.begin(),blob.end(),0);
     std::fill(bridged.begin(),bridged.end(),99.f);
     if (vf_native_forward(resident,x.data(),x.size(),bridged.data(),bridged.size()) || bridged != out) { vf_native_destroy(resident); return false; }
+    void* prepared_bridge=vf_native_prepare(gu,x.data(),x.size());
+    if (!prepared_bridge) {vf_native_destroy(resident); return false;}
+    std::fill(bridged.begin(),bridged.end(),99.f);
+    if (vf_native_forward_prepared(resident,prepared_bridge,bridged.data(),bridged.size()) || bridged != out) {vf_native_prepared_destroy(prepared_bridge);vf_native_destroy(resident);return false;}
+    const int other_gu = gu == 18 ? 21 : 18;
+    const size_t other_size = 2 * ggml_row_size(static_cast<ggml_type>(other_gu),H) * F + dr * H;
+    std::vector<uint8_t> other_blob(other_size,0);
+    void* other=vf_native_create(other_gu,down,other_blob.data(),other_blob.size());
+    if(!other) {vf_native_prepared_destroy(prepared_bridge);vf_native_destroy(resident);return false;}
+    auto untouched=bridged;
+    if(vf_native_forward_prepared(other,prepared_bridge,bridged.data(),bridged.size())==0 || bridged!=untouched) {vf_native_destroy(other);vf_native_prepared_destroy(prepared_bridge);vf_native_destroy(resident);return false;}
+    vf_native_destroy(other);
+    auto bad_x=x; bad_x[0]=std::numeric_limits<float>::quiet_NaN();
+    if(vf_native_prepare(gu,bad_x.data(),bad_x.size()) != nullptr || vf_native_prepare(gu,x.data(),x.size()-1) != nullptr) {vf_native_prepared_destroy(prepared_bridge);vf_native_destroy(resident);return false;}
+    vf_native_prepared_destroy(prepared_bridge);
     vf_native_destroy(resident);
     auto original=out; blob.pop_back();
     if (vf::native_ggml::forward(gu,down,blob,x,out,err) || out!=original) return false;

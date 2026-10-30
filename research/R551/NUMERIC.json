@@ -1,0 +1,10 @@
+{
+  "scope":"one prepared activation reused for 12 local layer-2 experts; two retained synthetic perturbation inputs",
+  "experts":[12,64,75,159,181,209,255,257,272,302,480,492],
+  "old_native_library_sha256":"716952c8bccc9e45da321777443cc90307eeb54ee9d70947a965610b1aa8b0bf",
+  "new_native_library_sha256":"166146dda3f238795f13c163d08c5b1b963c800a29233d063d67dfcbfbf8108d",
+  "activation_sha256":["c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a","9cdd44775e6d5afd50f61662745765e1b1a5701c3f31a85c766f82efed8a3403"],
+  "old_output_sha256":["a988a43e1182724453111498f3dceef54d442354e4c486be6ea0c53131fc974b","9e7d39ebb18c3838593f302d35e12f42192c9e9fbb6f3abb81cb64b93ae"],
+  "new_output_sha256":["a988a43e1182724453111498f3dceef54d442354e4c486be6ea0c53131fc974b","9e7d39ebb18c3838593f302d35e12f42192c9e9fbb6f3abb81cb64b93ae"],
+  "bytes_per_output":122880
+}

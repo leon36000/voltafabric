@@ -1,0 +1,13 @@
+{
+  "round":"R551",
+  "parent_gitlab_commit":"b940435a06b5b5bbd9fc39f8bd3a7f8303ba8635",
+  "status":"PASS_BATCH_LOCAL_PREPARED_ACTIVATION_REAL_CPU_GENERATION",
+  "active_operations":[],
+  "positions":92,
+  "generated_tokens":20,
+  "raw_worker_executions":6589,
+  "claims":20709,
+  "claims_status":"RESERVED_UNKNOWN_NO_REPLAY",
+  "limitations":["No performance measurement", "Only local CPU generation; no inter-PC or GPU qualification", "R428 expert-255 strict numeric failure remains", "Raw result/trace and native GGML archives local only", "Real R53, cooperative lease and PC6 swap gate unresolved"],
+  "next_action":"Continue code toward real distributed generation and measured model compatibility; reconcile authoritative R53 and receipts, verify a real cooperative lease and fresh identities/resources/hardware gates before remote or GPU work. Never replay UNKNOWN."
+}

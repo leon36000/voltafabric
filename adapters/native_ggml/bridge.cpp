@@ -28,6 +28,27 @@ extern "C" int vf_native_forward(void* instance, const float* input, size_t inpu
     } catch (...) { return -1; }
 }
 extern "C" void vf_native_destroy(void* instance) { delete static_cast<Resident*>(instance); }
+extern "C" void* vf_native_prepare(int gu, const float* input, size_t input_len) {
+    try {
+        if (!input || input_len != 2560) return nullptr;
+        auto prepared=std::make_unique<vf::native_ggml::PreparedInput>();
+        std::vector<float> x(input,input+input_len); std::string error;
+        if (!vf::native_ggml::prepare_input(gu,x,*prepared,error)) return nullptr;
+        return prepared.release();
+    } catch (...) { return nullptr; }
+}
+extern "C" int vf_native_forward_prepared(void* instance, const void* prepared, float* output, size_t output_len) {
+    try {
+        if (!instance || !prepared || !output || output_len != 2560) return -1;
+        auto* r=static_cast<Resident*>(instance);
+        const auto* x=static_cast<const vf::native_ggml::PreparedInput*>(prepared);
+        std::vector<float> staged; std::string error;
+        if (!vf::native_ggml::forward_prepared(r->gu,r->down,r->weights,*x,staged,error)) return -1;
+        std::copy(staged.begin(),staged.end(),output); return 0;
+    } catch (...) { return -1; }
+}
+extern "C" void vf_native_prepared_destroy(void* prepared) { delete static_cast<vf::native_ggml::PreparedInput*>(prepared); }
+
 
 extern "C" void* vf_native_matrix_create(int type,size_t rows,size_t columns,const uint8_t* bytes,size_t len) {
     try {
