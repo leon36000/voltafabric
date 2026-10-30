@@ -143,3 +143,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-head-check"
 path = "src/bin/vf-sc117-head-check.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-prefix"
+path = "src/bin/vf-sc117-qsa-prefix.rs"
+required-features = ["native-ggml-cpu"]

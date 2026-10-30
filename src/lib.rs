@@ -45,6 +45,7 @@ pub mod native_ggml_cpu;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod native_ledger;
 pub mod qpn2;
+pub mod qsa_cpu;
 pub mod routing;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_bound_layer;
@@ -55,6 +56,8 @@ pub mod sc117_head_cpu;
 pub mod sc117_layer_completion;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_post_attention;
+#[cfg(feature = "native-ggml-cpu")]
+pub mod sc117_qsa_stage;
 pub mod sc117_router_cpu;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_shared_stage;
