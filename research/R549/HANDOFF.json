@@ -1,0 +1,9 @@
+{
+  "round":"R549",
+  "parent_gitlab_commit":"606864ba747f093b37f76cf185b7ec6fbad0a285",
+  "status":"SEALED_ENGINE_EXECUTABLE_AND_PLAN_ONLY_PASS",
+  "active_operations":[],
+  "adapter_tests_passed":46,
+  "limitations":["Linux ELF memfd execution required; snapshot requires additional memory", "Plan-only does not qualify generation on new coordinator binary", "R428 expert-255 strict numeric failure remains", "Shared R53 and real lease unverified and PC6 swap below inter-PC floor"],
+  "next_action":"Qualify the changed execution path with a fresh admitted local full generation if resources permit; continue the expert numeric investigation and reconcile the real shared R53, lease, identities and hardware gates before any distributed or GPU execution. Never replay UNKNOWN."
+}

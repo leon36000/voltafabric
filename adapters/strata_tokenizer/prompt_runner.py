@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import argparse
 import base64
+import contextlib
+import fcntl
 import hashlib
 import json
 import os
@@ -113,6 +115,60 @@ def _binary_sha(path: str) -> str:
         os.close(fd)
 
 
+@contextlib.contextmanager
+def _pinned_executable(path: str, expected: str):
+    """Execute only a sealed Linux snapshot of a bounded authenticated ELF."""
+    if (sys.platform != "linux" or not hasattr(os, "memfd_create")
+            or not isinstance(expected, str) or len(expected) != 64
+            or any(c not in "0123456789abcdef" for c in expected)):
+        raise ValueError("invalid engine executable identity or platform")
+    source = os.open(path, os.O_RDONLY | os.O_NOFOLLOW | os.O_CLOEXEC)
+    snapshot = None
+    try:
+        before = os.fstat(source)
+        if (not stat.S_ISREG(before.st_mode) or not 0 < before.st_size <= 128 * 1024 * 1024
+                or not os.access(f"/proc/self/fd/{source}", os.X_OK, effective_ids=True)):
+            raise ValueError("invalid engine binary")
+        snapshot = os.memfd_create("vf-engine", os.MFD_CLOEXEC | os.MFD_ALLOW_SEALING)
+        digest = hashlib.sha256()
+        total = 0
+        first = True
+        while True:
+            block = os.read(source, 65536)
+            if not block:
+                break
+            if first and not block.startswith(b"\x7fELF"):
+                raise ValueError("engine binary must be ELF")
+            first = False
+            total += len(block)
+            if total > before.st_size:
+                raise ValueError("engine binary changed while copying")
+            digest.update(block)
+            remaining = memoryview(block)
+            while remaining:
+                count = os.write(snapshot, remaining)
+                if count <= 0:
+                    raise OSError("short executable snapshot write")
+                remaining = remaining[count:]
+        after = os.fstat(source)
+        fields = lambda st: (st.st_dev, st.st_ino, st.st_mode, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+        if fields(before) != fields(after) or total != before.st_size or digest.hexdigest() != expected:
+            raise ValueError("engine binary changed or digest mismatch")
+        seals = fcntl.F_SEAL_WRITE | fcntl.F_SEAL_GROW | fcntl.F_SEAL_SHRINK | fcntl.F_SEAL_SEAL
+        fcntl.fcntl(snapshot, fcntl.F_ADD_SEALS, seals)
+        if fcntl.fcntl(snapshot, fcntl.F_GET_SEALS) & seals != seals:
+            raise ValueError("engine snapshot sealing failed")
+        os.lseek(snapshot, 0, os.SEEK_SET)
+        with os.fdopen(os.dup(snapshot), "rb") as f:
+            if hashlib.file_digest(f, "sha256").hexdigest() != expected:
+                raise ValueError("engine snapshot digest mismatch")
+        yield f"/proc/self/fd/{snapshot}", (snapshot,)
+    finally:
+        if snapshot is not None:
+            os.close(snapshot)
+        os.close(source)
+
+
 def _chat_messages(prompt):
     """Accept a bounded alternating text history, optionally starting with system."""
     messages = [{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt
@@ -167,7 +223,7 @@ def _chat_prompt_ids(prompt, tokenizer, eos):
     return result
 
 
-def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, prepare_plan: bool = False, runner=_run_bounded) -> dict:
+def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, prepare_plan: bool = False, runner=_run_bounded, binary_fd: int | None = None) -> dict:
     """Run once; strict mode requires a current plan and prompt digest, not attestation.
 
     Legacy receipt compatibility requires an explicit opt-out. A caller still
@@ -207,13 +263,27 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     # The coordinator must inherit the same open file description holding the
     # externally selected shared lease; it validates the identity and lock.
     options = {}
+    if binary_fd is not None:
+        if sys.platform != "linux" or type(binary_fd) is not int or binary_fd < 3 or binary != f"/proc/self/fd/{binary_fd}":
+            raise ValueError("invalid executable snapshot descriptor")
+        os.fstat(binary_fd)
+        seals = fcntl.F_SEAL_WRITE | fcntl.F_SEAL_GROW | fcntl.F_SEAL_SHRINK | fcntl.F_SEAL_SEAL
+        try:
+            actual_seals = fcntl.fcntl(binary_fd, fcntl.F_GET_SEALS)
+        except OSError as error:
+            raise ValueError("executable descriptor is not sealed") from error
+        if actual_seals & seals != seals:
+            raise ValueError("executable descriptor is not sealed")
+        options["pass_fds"] = (binary_fd,)
     if not prepare_plan and any(os.environ.get(f"VF_RANK{rank}_SSH_HOST") for rank in (2, 3)):
         raw_fd = os.environ.get("VF_SHARED_LEASE_FD", "")
         if not raw_fd.isascii() or not raw_fd.isdecimal() or int(raw_fd) < 3:
             raise ValueError("inherited shared lease fd required")
         fd = int(raw_fd)
         os.fstat(fd)
-        options["pass_fds"] = (fd,)
+        if fd == binary_fd:
+            raise ValueError("lease and executable descriptors must differ")
+        options["pass_fds"] = options.get("pass_fds", ()) + (fd,)
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, **options)
     if completed.returncode != 0:
         category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
@@ -288,14 +358,13 @@ def main() -> int:
     prompt = raw.decode("utf-8", errors="strict")
     if args.messages_json:
         prompt = json.loads(prompt, object_pairs_hook=_unique_object)
-    if _binary_sha(args.binary) != args.binary_sha256:
-        raise ValueError("engine binary digest mismatch")
-    manifest = json.loads(pathlib.Path(args.tokenizer_manifest).read_text(encoding="utf-8"))
-    hashes = {k: manifest[k] for k in ("vocab.json", "merges.txt", "token_type.json", "tokenizer.json")}
-    tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
-    paths = [args.dense, args.shard, args.pack, args.index, args.session,
-             args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True, prepare_plan=args.prepare_plan)
+    with _pinned_executable(args.binary, args.binary_sha256) as (executable, fds):
+        manifest = json.loads(pathlib.Path(args.tokenizer_manifest).read_text(encoding="utf-8"))
+        hashes = {k: manifest[k] for k in ("vocab.json", "merges.txt", "token_type.json", "tokenizer.json")}
+        tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
+        paths = [args.dense, args.shard, args.pack, args.index, args.session,
+                 args.ledger, args.ple_shard, args.ple_manifest]
+        result = run_prompt(prompt, tokenizer, eos, executable, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True, prepare_plan=args.prepare_plan, binary_fd=fds[0])
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

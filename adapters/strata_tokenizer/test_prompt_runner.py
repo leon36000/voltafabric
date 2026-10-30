@@ -4,11 +4,13 @@ import os
 import hashlib
 import struct
 import subprocess
+import shutil
+import tempfile
 import sys
 import unittest
 from unittest.mock import patch
 
-from adapters.strata_tokenizer.prompt_runner import _run_bounded, _verify_qsa_trace, run_prompt as _run_prompt
+from adapters.strata_tokenizer.prompt_runner import _pinned_executable, _run_bounded, _verify_qsa_trace, run_prompt as _run_prompt
 from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 
@@ -296,6 +298,90 @@ class RunnerTests(unittest.TestCase):
         with patch("adapters.strata_tokenizer.prompt_runner.EXIT_PIPE_GRACE_SECONDS", 0.1, create=True):
             with self.assertRaisesRegex(RuntimeError, "output pipes remain open"):
                 _run_bounded([sys.executable, "-c", program])
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux executable descriptor required")
+    def test_executable_snapshot_survives_path_replacement(self):
+        directory = tempfile.mkdtemp(prefix="vf-r549-exec-")
+        path = os.path.join(directory, "engine")
+        replacement = os.path.join(directory, "replacement")
+        shutil.copyfile("/usr/bin/true", path)
+        shutil.copyfile("/usr/bin/false", replacement)
+        os.chmod(path, 0o700)
+        os.chmod(replacement, 0o700)
+        with open(path, "rb") as f:
+            expected = hashlib.file_digest(f, "sha256").hexdigest()
+        with _pinned_executable(path, expected) as (executable, fds):
+            os.replace(replacement, path)
+            run = subprocess.run([executable], pass_fds=fds, capture_output=True)
+        self.assertEqual(run.returncode, 0, "executed replacement instead of verified binary")
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux executable descriptor required")
+    def test_executable_snapshot_survives_in_place_change_and_is_sealed(self):
+        directory = tempfile.mkdtemp(prefix="vf-r549-inplace-")
+        path = os.path.join(directory, "engine")
+        shutil.copyfile("/usr/bin/true", path)
+        os.chmod(path, 0o700)
+        with open(path, "rb") as f:
+            expected = hashlib.file_digest(f, "sha256").hexdigest()
+        with _pinned_executable(path, expected) as (executable, fds):
+            with open("/usr/bin/false", "rb") as src, open(path, "wb") as dst:
+                shutil.copyfileobj(src, dst)
+            with self.assertRaises(OSError):
+                os.write(fds[0], b"tamper")
+            self.assertEqual(subprocess.run([executable], pass_fds=fds).returncode, 0)
+        with self.assertRaisesRegex(ValueError, "digest mismatch"):
+            with _pinned_executable(path, expected):
+                pass
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux executable descriptor required")
+    def test_snapshot_descriptor_coexists_with_lease_and_unsealed_is_refused(self):
+        directory = tempfile.mkdtemp(prefix="vf-r549-lease-")
+        path = os.path.join(directory, "engine")
+        shutil.copyfile("/usr/bin/true", path)
+        os.chmod(path, 0o700)
+        with open(path, "rb") as f:
+            expected = hashlib.file_digest(f, "sha256").hexdigest()
+        lease = os.open(path, os.O_RDONLY)
+        try:
+            calls = []
+            def runner(args, **kwargs):
+                calls.append(kwargs.get("pass_fds"))
+                return subprocess.CompletedProcess(args, 0, json.dumps(receipt()).encode(), b"")
+            with _pinned_executable(path, expected) as (executable, fds):
+                with patch.dict("os.environ", {"VF_RANK2_SSH_HOST":"host", "VF_SHARED_LEASE_FD":str(lease)}, clear=True):
+                    run_prompt("A", Tokenizer(), 3, executable, ["/input"] * 8, runner=runner, binary_fd=fds[0])
+                self.assertEqual(calls, [(fds[0], lease)])
+            with self.assertRaisesRegex(ValueError, "not sealed"):
+                run_prompt("A", Tokenizer(), 3, f"/proc/self/fd/{lease}", ["/input"] * 8, runner=runner, binary_fd=lease)
+        finally:
+            os.close(lease)
+
+    @unittest.skipUnless(sys.platform.startswith("linux"), "Linux executable descriptor required")
+    def test_executable_snapshot_rejects_script_symlink_and_missing_execute_permission(self):
+        directory = tempfile.mkdtemp(prefix="vf-r549-refuse-")
+        script = os.path.join(directory, "script")
+        with open(script, "wb") as f:
+            f.write(b"#!/bin/sh\nexit 0\n")
+        os.chmod(script, 0o700)
+        with open(script, "rb") as f:
+            digest = hashlib.file_digest(f, "sha256").hexdigest()
+        with self.assertRaisesRegex(ValueError, "must be ELF"):
+            with _pinned_executable(script, digest):
+                pass
+        target = os.path.join(directory, "engine")
+        shutil.copyfile("/usr/bin/true", target)
+        os.chmod(target, 0o600)
+        with open(target, "rb") as f:
+            digest = hashlib.file_digest(f, "sha256").hexdigest()
+        with self.assertRaisesRegex(ValueError, "invalid engine binary"):
+            with _pinned_executable(target, digest):
+                pass
+        os.chmod(target, 0o700)
+        link = os.path.join(directory, "link")
+        os.symlink(target, link)
+        with self.assertRaises(OSError):
+            with _pinned_executable(link, digest):
+                pass
 
     def test_bounded_capture_does_not_timeout_active_engine(self):
         program = "import time; time.sleep(0.35); print('done',end='')"
