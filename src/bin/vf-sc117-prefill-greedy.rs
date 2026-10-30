@@ -1,6 +1,7 @@
 //! Bounded SC117 CPU generation qualification with pre-position expert headroom.
 use std::{
     collections::BTreeMap,
+    io::Read,
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use voltafabric::{
@@ -380,6 +381,7 @@ struct WorkerPlan<'a> {
     origin_policy: &'static str,
     model_revision: &'static str,
     index_sha256: &'static str,
+    ple_manifest_sha256: &'a str,
     epoch: u64,
     layers: usize,
     prompt_length: usize,
@@ -408,9 +410,11 @@ fn worker_plan_id(
     max_new_tokens: usize,
     eos_token_id: u32,
     prompt_mode: &'static str,
+    ple_manifest_sha256: &str,
 ) -> Result<String, E> {
     let prompt_length = prompt_tokens.len();
-    if !["plain", "chat"].contains(&prompt_mode)
+    if !sha256::is_hex_digest(ple_manifest_sha256)
+        || !["plain", "chat"].contains(&prompt_mode)
         || eos_token_id >= 248_320
         || prompt_tokens
             .iter()
@@ -438,12 +442,13 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v10",
+        version: "vf-sc117-worker-plan-v11",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
         origin_policy: "stable-source-digest-cache-v1",
         model_revision: "sc117-local-observation",
         index_sha256: INDEX_HASH,
+        ple_manifest_sha256,
         epoch: 1,
         layers: 48,
         prompt_length,
@@ -455,7 +460,7 @@ fn worker_plan_id(
         rank_limits,
         endpoints,
     };
-    Ok(format!("r520-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r523-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -634,6 +639,21 @@ fn run() -> Result<(), E> {
         }
         _ => return Err("both rank budgets must be supplied".into()),
     };
+    // Read once: the plan and weight loader must refer to the same bounded bytes.
+    let manifest_file = std::fs::File::open(&a[8])?;
+    if !manifest_file.metadata()?.is_file() {
+        return Err("PLE manifest not regular".into());
+    }
+    let mut manifest_bytes = Vec::new();
+    manifest_file
+        .take(65_537)
+        .read_to_end(&mut manifest_bytes)?;
+    if manifest_bytes.is_empty() || manifest_bytes.len() > 65_536 {
+        return Err("PLE manifest size".into());
+    }
+    let manifest: voltafabric::sc117_ple_weights::Manifest =
+        serde_json::from_slice(&manifest_bytes)?;
+    let manifest_hash = sha256::hex(&manifest_bytes);
     let plan_id = worker_plan_id(
         &endpoints,
         budget,
@@ -642,6 +662,7 @@ fn run() -> Result<(), E> {
         max_new_tokens,
         eos_token_id,
         prompt_mode,
+        &manifest_hash,
     )?;
     if plan_only {
         println!(
@@ -656,10 +677,11 @@ fn run() -> Result<(), E> {
         expected.as_deref(),
         endpoints.values().any(|v| v.argv.len() > 1),
     )?;
-    let m: voltafabric::sc117_ple_weights::Manifest =
-        serde_json::from_reader(std::fs::File::open(&a[8])?)?;
-    let weights =
-        voltafabric::sc117_ple_weights::Weights::load(&mut shard, &m, "sc117-local-observation")?;
+    let weights = voltafabric::sc117_ple_weights::Weights::load(
+        &mut shard,
+        &manifest,
+        "sc117-local-observation",
+    )?;
     let ple =
         voltafabric::sc117_ple::Table::open(std::fs::File::open(&a[7])?, 28_800_138_432, 192)?;
     let token_table =
@@ -884,27 +906,101 @@ mod tests {
             rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), Some(DIGEST)).unwrap();
         let endpoints = BTreeMap::from([(2, rank2.clone()), (3, rank3.clone())]);
         let limits = Some(BTreeMap::from([(2, 100), (3, 200)]));
-        let id = worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap();
+        let id = worker_plan_id(
+            &endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", DIGEST,
+        )
+        .unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r520-a7dd5a61211985b8cca9753209422805e3adb0e0aa3afb14052a50b731c83f06"
+            "r523-5c91562600ffebec43a8d0dd5e9d73e1d058540cba8a12752725cd9ad47f8116"
         );
-        let p12 = worker_plan_id(&endpoints, 300, &limits, &[1, 2], 16, 248_046, "plain").unwrap();
-        let p21 = worker_plan_id(&endpoints, 300, &limits, &[2, 1], 16, 248_046, "plain").unwrap();
-        assert_ne!(id, p12);
-        assert_ne!(p12, p21);
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[248_320], 1, 248_046, "chat").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[248_046], 1, 248_046, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[248_046], 1, 248_046, "chat").is_ok());
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "chat").unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                &"b".repeat(64)
+            )
+            .unwrap()
         );
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "invalid").is_err());
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", "BAD").is_err()
+        );
+        let p12 = worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[1, 2],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+        )
+        .unwrap();
+        let p21 = worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[2, 1],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+        )
+        .unwrap();
+        assert_ne!(id, p12);
+        assert_ne!(p12, p21);
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[248_320],
+            1,
+            248_046,
+            "chat",
+            DIGEST
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[248_046],
+            1,
+            248_046,
+            "plain",
+            DIGEST
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[248_046],
+            1,
+            248_046,
+            "chat",
+            DIGEST
+        )
+        .is_ok());
+        assert_ne!(
+            id,
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "chat", DIGEST).unwrap()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "invalid", DIGEST)
+                .is_err()
+        );
         assert_eq!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", DIGEST)
+                .unwrap()
         );
         let changed_host = BTreeMap::from([
             (2, rank2.clone()),
@@ -916,7 +1012,17 @@ mod tests {
         ]);
         assert_ne!(
             id,
-            worker_plan_id(&changed_host, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(
+                &changed_host,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST
+            )
+            .unwrap()
         );
         let changed_path = BTreeMap::from([
             (2, rank2.clone()),
@@ -927,7 +1033,17 @@ mod tests {
         ]);
         assert_ne!(
             id,
-            worker_plan_id(&changed_path, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(
+                &changed_path,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST
+            )
+            .unwrap()
         );
         let changed_digest = BTreeMap::from([
             (2, rank2.clone()),
@@ -945,37 +1061,74 @@ mod tests {
         ]);
         assert_ne!(
             id,
-            worker_plan_id(&changed_digest, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(
+                &changed_digest,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST
+            )
+            .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 301, &limits, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(&endpoints, 301, &limits, &[7; 2], 16, 248_046, "plain", DIGEST)
+                .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &None, &[7; 2], 16, 248_046, "plain").unwrap()
+            worker_plan_id(&endpoints, 300, &None, &[7; 2], 16, 248_046, "plain", DIGEST).unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 3], 16, 248_046, "plain").unwrap()
+            worker_plan_id(&endpoints, 300, &limits, &[7; 3], 16, 248_046, "plain", DIGEST)
+                .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 32, 248_046, "plain").unwrap()
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 32, 248_046, "plain", DIGEST)
+                .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_047, "plain").unwrap()
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_047, "plain", DIGEST)
+                .unwrap()
         );
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_320, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 2], 65, 248_046, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 0], 16, 248_046, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 32], 8, 248_046, "plain").is_ok());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 64], 2, 248_046, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 8], 32, 248_046, "plain").is_ok());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 65], 1, 248_046, "plain").is_err());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 1], 64, 248_046, "plain").is_ok());
-        assert!(worker_plan_id(&endpoints, 300, &limits, &[7; 64], 1, 248_046, "plain").is_ok());
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_320, "plain", DIGEST)
+                .is_err()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 65, 248_046, "plain", DIGEST)
+                .is_err()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 0], 16, 248_046, "plain", DIGEST)
+                .is_err()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 32], 8, 248_046, "plain", DIGEST).is_ok()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 64], 2, 248_046, "plain", DIGEST)
+                .is_err()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 8], 32, 248_046, "plain", DIGEST).is_ok()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 65], 1, 248_046, "plain", DIGEST)
+                .is_err()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 1], 64, 248_046, "plain", DIGEST).is_ok()
+        );
+        assert!(
+            worker_plan_id(&endpoints, 300, &limits, &[7; 64], 1, 248_046, "plain", DIGEST).is_ok()
+        );
         assert!(worker_plan_id(
             &BTreeMap::from([(2, rank2), (3, rank3.clone()), (4, rank3)]),
             300,
@@ -983,7 +1136,8 @@ mod tests {
             &[7; 2],
             16,
             248_046,
-            "plain"
+            "plain",
+            DIGEST
         )
         .is_err());
         assert!(worker_plan_id(
@@ -993,7 +1147,8 @@ mod tests {
             &[7; 2],
             16,
             248_046,
-            "plain"
+            "plain",
+            DIGEST
         )
         .is_err());
     }
