@@ -304,10 +304,64 @@ struct Seeds {
     hashes: Vec<String>,
 }
 
+// Remote execution remains subject to external resource admission. Construct
+// a fixed SSH invocation; never interpolate arbitrary text into a shell command.
+fn rank_endpoint(
+    rank: u32,
+    local: &str,
+    host: Option<&str>,
+    remote: Option<&str>,
+) -> Result<Endpoint, E> {
+    if !(2..=3).contains(&rank) || local.is_empty() {
+        return Err("invalid worker endpoint".into());
+    }
+    let argv = match (host, remote) {
+        (None, None) => vec![local.into()],
+        (Some(host), Some(remote)) => {
+            let valid_host = !host.is_empty()
+                && host.len() <= 253
+                && host.as_bytes()[0].is_ascii_alphanumeric()
+                && host
+                    .bytes()
+                    .all(|c| c.is_ascii_alphanumeric() || b"._-".contains(&c));
+            let valid_path = remote.starts_with('/')
+                && remote.len() <= 4096
+                && remote
+                    .bytes()
+                    .all(|c| c.is_ascii_alphanumeric() || b"/._-".contains(&c));
+            if !valid_host || !valid_path || remote == "/" {
+                return Err("invalid SSH worker host or path".into());
+            }
+            vec![
+                "/usr/bin/ssh".into(),
+                "-T".into(),
+                "-o".into(),
+                "BatchMode=yes".into(),
+                "-o".into(),
+                "StrictHostKeyChecking=yes".into(),
+                "-o".into(),
+                "ConnectTimeout=10".into(),
+                host.into(),
+                remote.into(),
+            ]
+        }
+        _ => return Err("SSH worker host and path must be supplied together".into()),
+    };
+    Ok(Endpoint { rank, argv })
+}
+
+fn optional_env(name: &str) -> Result<Option<String>, E> {
+    match std::env::var(name) {
+        Ok(value) => Ok(Some(value)),
+        Err(std::env::VarError::NotPresent) => Ok(None),
+        Err(error) => Err(error.into()),
+    }
+}
+
 fn owners(
     layer: u32,
     preview: &Seeds,
-    worker: &str,
+    endpoints: &BTreeMap<u32, Endpoint>,
     index: &str,
     pack: &mut std::fs::File,
     layout: &NativeLayout,
@@ -316,13 +370,8 @@ fn owners(
     let mut copies = Vec::new();
     let mut order = BTreeMap::new();
     for rank in 2..=3 {
-        let mut session = Session::connect(
-            &Endpoint {
-                rank,
-                argv: vec![worker.into()],
-            },
-            Duration::from_secs(30),
-        )?;
+        let endpoint = endpoints.get(&rank).ok_or("worker endpoint missing")?;
+        let mut session = Session::connect(endpoint, Duration::from_secs(30))?;
         let mut locals = Vec::new();
         for (slot, &expert) in preview
             .ids
@@ -408,6 +457,15 @@ fn run() -> Result<(), E> {
     {
         return Err("invalid prompt tokens".into());
     }
+    let mut endpoints = BTreeMap::new();
+    for rank in 2..=3 {
+        let host = optional_env(&format!("VF_RANK{rank}_SSH_HOST"))?;
+        let remote = optional_env(&format!("VF_RANK{rank}_SSH_WORKER"))?;
+        endpoints.insert(
+            rank,
+            rank_endpoint(rank, &a[5], host.as_deref(), remote.as_deref())?,
+        );
+    }
     let mut dense = std::fs::File::open(&a[1])?;
     let mut shard = std::fs::File::open(&a[2])?;
     let mut pack = std::fs::File::open(&a[3])?;
@@ -455,7 +513,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r481-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r483-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -505,7 +563,7 @@ fn run() -> Result<(), E> {
             layer: layer as u32,
             epoch: 1,
         };
-        let owners = owners(layer as u32, &seed, &a[5], &index, &mut pack, &layout)?;
+        let owners = owners(layer as u32, &seed, &endpoints, &index, &mut pack, &layout)?;
         if layer % 4 == 3 {
             let qsa = sc117_qsa_stage::Stage::load(
                 serde_json::from_str(qsa_manifests(id.layer).0)?,
@@ -542,7 +600,7 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r481-cpu-rank-headroom".into(),
+        "r483-cpu-rank-headroom".into(),
         ledger,
         Duration::from_secs(30),
     )?;
@@ -550,7 +608,7 @@ fn run() -> Result<(), E> {
         identity: voltafabric::sc117_expert_source::Identity {
             run_id: run_id.clone(),
             model_revision: "sc117-local-observation".into(),
-            plan_id: "r481-cpu-rank-headroom".into(),
+            plan_id: "r483-cpu-rank-headroom".into(),
             epoch: 1,
         },
         ranks: vec![2, 3],
@@ -642,7 +700,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }
@@ -656,6 +714,44 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn rank_endpoints_are_explicit_and_reject_shell_metacharacters() {
+        let local = rank_endpoint(2, "/opt/vf-rank-session", None, None).unwrap();
+        assert_eq!(local.rank, 2);
+        assert_eq!(local.argv, vec!["/opt/vf-rank-session"]);
+        let remote = rank_endpoint(
+            3,
+            "/opt/vf-rank-session",
+            Some("pc1-lan"),
+            Some("/opt/vf-rank-session"),
+        )
+        .unwrap();
+        assert_eq!(remote.rank, 3);
+        assert_eq!(
+            remote.argv,
+            vec![
+                "/usr/bin/ssh",
+                "-T",
+                "-o",
+                "BatchMode=yes",
+                "-o",
+                "StrictHostKeyChecking=yes",
+                "-o",
+                "ConnectTimeout=10",
+                "pc1-lan",
+                "/opt/vf-rank-session"
+            ]
+        );
+        assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), None).is_err());
+        assert!(rank_endpoint(3, "/worker", None, Some("/worker")).is_err());
+        for host in ["", "-oProxyCommand", "pc1;id", "user@host", "pc1\n"] {
+            assert!(rank_endpoint(3, "/worker", Some(host), Some("/worker")).is_err());
+        }
+        for path in ["worker", "/", "/worker;id", "/worker$(id)", "/worker name"] {
+            assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), Some(path)).is_err());
+        }
+        assert!(rank_endpoint(4, "/worker", None, None).is_err());
+    }
     #[test]
     fn close_requires_actual_dispatched_count_not_every_position() {
         let mut r = voltafabric::session::CloseReceipt {
