@@ -134,3 +134,28 @@ fn fifth_position_uses_all_causal_cells_and_rejects_overflow() {
         .is_err());
     assert_eq!(state.len(), 5);
 }
+
+#[test]
+fn causal_cache_crosses_64_and_stops_at_128() {
+    let id = identity();
+    let mut state = State::new(id.clone(), 2, 1, 1, 128).unwrap();
+    let mut sum = 0.0_f64;
+    for position in 0..128 {
+        let value = (position % 8) as f32;
+        sum += f64::from(value);
+        let candidate = state
+            .prepare(&id, position, &[0., 0.], &[0.], &[value], &[0., 0.])
+            .unwrap();
+        let expected = sum / (position + 1) as f64 / 2.0;
+        assert!(candidate
+            .output()
+            .iter()
+            .all(|v| (f64::from(*v) - expected).abs() < 1e-6));
+        assert_eq!(state.len(), position);
+        state.commit(candidate).unwrap();
+    }
+    assert_eq!(state.len(), 128);
+    assert!(state
+        .prepare(&id, 128, &[0., 0.], &[0.], &[0.], &[0., 0.])
+        .is_err());
+}

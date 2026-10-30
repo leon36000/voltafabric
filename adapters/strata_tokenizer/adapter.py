@@ -16,9 +16,9 @@ from .vendor.strata_tokenizer import Tokenizer
 
 _LIMITS = {"vocab.json": 16_000_000, "merges.txt": 16_000_000,
            "token_type.json": 4_000_000, "tokenizer.json": 16_384}
-MAX_PROMPT_TOKENS = 64
-MAX_GENERATED_TOKENS = 64
-MAX_INPUT_POSITIONS = 64
+MAX_PROMPT_TOKENS = 128
+MAX_GENERATED_TOKENS = 128
+MAX_INPUT_POSITIONS = 128
 
 
 def _identity(st):

@@ -17,6 +17,7 @@ use voltafabric::{
     strata_native_layout::NativeLayout,
 };
 type E = Box<dyn std::error::Error>;
+const MAX_POSITIONS: usize = 128;
 const INDEX_HASH: &str = "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24";
 
 struct Manifests {
@@ -750,9 +751,9 @@ fn worker_plan_id(
             .iter()
             .any(|&t| t >= 248_320 || (prompt_mode == "plain" && t == eos_token_id))
         || payload_budget == 0
-        || !(1..=64).contains(&prompt_length)
-        || !(1..=64).contains(&max_new_tokens)
-        || prompt_length + max_new_tokens - 1 > 64
+        || !(1..=MAX_POSITIONS).contains(&prompt_length)
+        || !(1..=MAX_POSITIONS).contains(&max_new_tokens)
+        || prompt_length + max_new_tokens - 1 > MAX_POSITIONS
         || endpoints.len() != 2
         || (shared_lease.is_some() != !known_hosts_sha256.is_empty())
         || (r53_namespace.is_some() != !known_hosts_sha256.is_empty())
@@ -784,7 +785,7 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v15",
+        version: "vf-sc117-worker-plan-v16",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
         origin_policy: "stable-source-digest-cache-v1",
@@ -805,7 +806,7 @@ fn worker_plan_id(
         shared_lease,
         r53_namespace,
     };
-    Ok(format!("r529-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r531-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -919,11 +920,11 @@ fn run() -> Result<(), E> {
     if eos_token_id >= 248_320 {
         return Err("invalid EOS token".into());
     }
-    if !(1..=64).contains(&max_new_tokens) {
+    if !(1..=MAX_POSITIONS).contains(&max_new_tokens) {
         return Err("invalid generation limit".into());
     }
-    if !(1..=64).contains(&prompt_tokens.len())
-        || prompt_tokens.len() + max_new_tokens - 1 > 64
+    if !(1..=MAX_POSITIONS).contains(&prompt_tokens.len())
+        || prompt_tokens.len() + max_new_tokens - 1 > MAX_POSITIONS
         || prompt_tokens
             .iter()
             .any(|&t| t >= 248_320 || (prompt_mode == "plain" && t == eos_token_id))
@@ -1296,7 +1297,7 @@ fn run() -> Result<(), E> {
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
     println!(
         "{}",
-        serde_json::json!({"scope":"up to 64 prompt tokens and 64 predictions within 64 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}})
+        serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}})
     );
     drop(host_pins);
     Ok(())
@@ -1359,7 +1360,7 @@ mod tests {
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r529-13574f1a3e24e5aa1424a1e1350ffc384d27a7f5ee61b2241eb6464dfbb71da2"
+            "r531-f353bd74941ccb5dda477a988229569c1b014dd4e9624268d0b964c29e90cc0f"
         );
         let changed_lease = Some(SharedLease {
             path: "/lease".into(),
@@ -1789,7 +1790,7 @@ mod tests {
             300,
             &limits,
             &[7; 2],
-            65,
+            129,
             248_046,
             "plain",
             DIGEST,
@@ -1830,7 +1831,7 @@ mod tests {
             &endpoints,
             300,
             &limits,
-            &[7; 64],
+            &[7; 128],
             2,
             248_046,
             "plain",
@@ -1858,7 +1859,7 @@ mod tests {
             &endpoints,
             300,
             &limits,
-            &[7; 65],
+            &[7; 129],
             1,
             248_046,
             "plain",
@@ -1873,7 +1874,7 @@ mod tests {
             300,
             &limits,
             &[7; 1],
-            64,
+            128,
             248_046,
             "plain",
             DIGEST,
@@ -1886,7 +1887,7 @@ mod tests {
             &endpoints,
             300,
             &limits,
-            &[7; 64],
+            &[7; 128],
             1,
             248_046,
             "plain",

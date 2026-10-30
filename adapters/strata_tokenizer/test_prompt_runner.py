@@ -19,7 +19,7 @@ def run_prompt(*args, **kwargs):
 
 class Tokenizer(FakeTokenizer):
     def encode(self, text, parse_special=False):
-        return {"A": [0], "multi": [0, 1], "eight": [0] * 8, "long32": [0] * 32, "long64": [0] * 64, "special": [3], "too many": [0] * 65}.get(text, [])
+        return {"A": [0], "multi": [0, 1], "eight": [0] * 8, "long32": [0] * 32, "long64": [0] * 64, "long128": [0] * 128, "special": [3], "too many": [0] * 129}.get(text, [])
 
 
 def receipt():
@@ -55,6 +55,8 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(prepare()["plan_id"], "r528-" + "a" * 64)
             state["body"] = json.dumps(dict(good, plan_id="r529-" + "a" * 64)).encode()
             self.assertEqual(prepare()["plan_id"], "r529-" + "a" * 64)
+            state["body"] = json.dumps(dict(good, plan_id="r531-" + "a" * 64)).encode()
+            self.assertEqual(prepare()["plan_id"], "r531-" + "a" * 64)
             for bad in ({"plan_id": good["plan_id"]},
                         dict(good, prompt_tokens_sha256="0" * 64),
                         dict(good, plan_id="r512-" + "A" * 64),
@@ -128,6 +130,8 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(run()["output"]["text"], "😀")
         value["plan_id"] = "r529-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
+        value["plan_id"] = "r531-" + "a" * 64
+        self.assertEqual(run()["output"]["text"], "😀")
         for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
                     "r512-" + "a" * 63, 123):
             value["plan_id"] = bad
@@ -189,17 +193,17 @@ class RunnerTests(unittest.TestCase):
             run_prompt("A", Tokenizer(), 0, "/engine", ["/input"]*8, runner=runner)
 
     def test_long_prompt_and_combined_position_bound(self):
-        value = dict(receipt(), prompt_tokens=[0]*64, input_tokens=[0]*64,
+        value = dict(receipt(), prompt_tokens=[0]*128, input_tokens=[0]*128,
                      requested_max_new_tokens=1, generated_token_ids=[0],
-                     output_sha256=["a"*64]*64, logits_sha256=["b"*64])
+                     output_sha256=["a"*64]*128, logits_sha256=["b"*64])
         calls = []
         def runner(args, **kwargs):
             calls.append(args)
             return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
-        result = run_prompt("long64", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=1, runner=runner)
+        result = run_prompt("long128", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=1, runner=runner)
         self.assertEqual(result["output"]["text"], "A")
         with self.assertRaises(ValueError):
-            run_prompt("long64", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=2, runner=runner)
+            run_prompt("long128", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=2, runner=runner)
         self.assertEqual(len(calls), 1)
     def test_remote_runner_passes_lease_descriptor_or_refuses_before_spawn(self):
         value = dict(receipt(), prompt_tokens=[0], plan_id="r528-" + "a"*64,
@@ -316,7 +320,7 @@ class RunnerTests(unittest.TestCase):
             run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(short).encode(), b""))
         with self.assertRaises(ValueError):
-            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=65, runner=runner)
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=129, runner=runner)
 
     def test_32_outputs_and_39_positions_are_bounded_and_atomic(self):
         value = dict(receipt(), prompt_tokens=[0]*8, input_tokens=[0]*39,
@@ -332,18 +336,18 @@ class RunnerTests(unittest.TestCase):
             run_prompt("eight", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=32,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(incomplete).encode(), b""))
 
-    def test_64_outputs_and_positions_are_bounded_and_atomic(self):
-        value = dict(receipt(), prompt_tokens=[0], input_tokens=[0]*64,
-                     requested_max_new_tokens=64, generated_token_ids=[0]*64,
-                     output_sha256=["a"*64]*64, logits_sha256=["b"*64]*64)
+    def test_128_outputs_and_positions_are_bounded_and_atomic(self):
+        value = dict(receipt(), prompt_tokens=[0], input_tokens=[0]*128,
+                     requested_max_new_tokens=128, generated_token_ids=[0]*128,
+                     output_sha256=["a"*64]*128, logits_sha256=["b"*64]*128)
         def runner(args, **kwargs):
             return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
-        out = run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=64, runner=runner)
-        self.assertEqual(out["output"]["text"], "A"*64)
-        incomplete = dict(value, generated_token_ids=[0]*63, input_tokens=[0]*63,
-                          output_sha256=["a"*64]*63, logits_sha256=["b"*64]*63)
+        out = run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=128, runner=runner)
+        self.assertEqual(out["output"]["text"], "A"*128)
+        incomplete = dict(value, generated_token_ids=[0]*127, input_tokens=[0]*127,
+                          output_sha256=["a"*64]*127, logits_sha256=["b"*64]*127)
         with self.assertRaisesRegex(ValueError, "incomplete"):
-            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=64,
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, max_new_tokens=128,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(incomplete).encode(), b""))
 
     def test_eight_token_bound_and_prompt_bound(self):
