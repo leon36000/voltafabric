@@ -54,7 +54,7 @@ bool forward(int gu, int down, const std::vector<uint8_t>& blob,
     return true;
 }
 bool matrix_shape(int type,size_t rows,size_t columns,size_t length) {
-    if((type!=8 && type!=12 && type!=14 && type!=23) || rows==0 || rows>10240 || columns==0 || columns>6144 || length>32*1024*1024) return false;
+    if((type!=8 && type!=12 && type!=13 && type!=14 && type!=23) || rows==0 || rows>10240 || columns==0 || columns>6144 || length>32*1024*1024) return false;
     auto t=static_cast<ggml_type>(type);
     if(columns % size_t(ggml_blck_size(t))!=0) return false;
     const size_t row=ggml_row_size(t,columns);
