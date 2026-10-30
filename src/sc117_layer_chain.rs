@@ -124,6 +124,10 @@ enum Attention {
     Gdn(sc117_gdn_stage::Stage, sc117_post_attention::Stage),
     Qsa(sc117_qsa_stage::Stage, sc117_ffn_stage::Stage),
 }
+struct CapturedQsa {
+    input: Vec<f32>,
+    output: sc117_qsa_stage::Output,
+}
 pub struct Layer {
     identity: Identity,
     attention: Attention,
@@ -270,7 +274,7 @@ impl Layer {
         timeout: Duration,
         source: &mut Option<&mut dyn MissingExpertSource>,
         capture_qsa: bool,
-        qsa_trace: &mut Option<sc117_qsa_stage::Output>,
+        qsa_trace: &mut Option<CapturedQsa>,
     ) -> Result<Vec<f32>> {
         let stamp = ticket.stamp().clone();
         let attempt = ticket.attempt();
@@ -330,7 +334,10 @@ impl Layer {
                 )?;
                 let committed = routed.commit(qsa, shared, collected)?;
                 if capture_qsa {
-                    *qsa_trace = Some(committed.attention);
+                    *qsa_trace = Some(CapturedQsa {
+                        input: input.to_vec(),
+                        output: committed.attention,
+                    });
                 }
                 Ok(committed.residual)
             }
@@ -494,6 +501,7 @@ pub struct Segment {
 pub struct QsaQualificationTrace {
     pub stamp: Stamp,
     pub attempt: u64,
+    pub input: Vec<f32>,
     pub output: sc117_qsa_stage::Output,
 }
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -1115,7 +1123,8 @@ impl Segment {
             QsaQualificationTrace {
                 stamp,
                 attempt,
-                output: output_trace,
+                input: output_trace.input,
+                output: output_trace.output,
             },
         ))
     }
@@ -1130,11 +1139,7 @@ impl Segment {
         headroom_bytes: u64,
         max_evictions: usize,
         capture_layer: Option<u32>,
-    ) -> Result<(
-        Vec<f32>,
-        Vec<EvictionReceipt>,
-        Option<sc117_qsa_stage::Output>,
-    )> {
+    ) -> Result<(Vec<f32>, Vec<EvictionReceipt>, Option<CapturedQsa>)> {
         validate_advance(&self.cursor, self.layers.len(), attempt, input)?;
         if capture_layer.is_some_and(|wanted| {
             !self.layers.iter().any(|layer| {
@@ -1193,7 +1198,7 @@ impl Segment {
         token: Option<i32>,
         source: &mut Option<&mut dyn MissingExpertSource>,
         capture_layer: Option<u32>,
-    ) -> Result<(Vec<f32>, Option<sc117_qsa_stage::Output>)> {
+    ) -> Result<(Vec<f32>, Option<CapturedQsa>)> {
         if self.layers.iter().any(|layer| layer.ple.is_some())
             && token.is_none_or(|t| !(0..sc117_ple::VOCAB).contains(&t))
         {

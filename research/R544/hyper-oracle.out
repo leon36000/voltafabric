@@ -1,0 +1,1 @@
+{"dense_spans": ["norm", "down", "up", "inject"], "max_abs": {"inject": 0.0, "mixed": 2.384185791015625e-07}, "negative_control": "rejected", "positions": 92, "status": "PASS", "values": 235888, "worst_position": {"mixed": 11}}

@@ -1,0 +1,10 @@
+{
+  "round": "R544",
+  "parent_gitlab_commit": "432ea6a4e60aef3385eb62be607f291bbc49b1b2",
+  "status": "PASS_REAL_QSA_HYPERCONNECTION_92_POSITIONS",
+  "active_operations": [],
+  "claims": 20709,
+  "claims_status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "limitations": ["Upstream residual observed rather than independently derived", "R428 expert-255 strict discrepancy remains open", "No GPU or inter-PC qualification; original R53 ledger unavailable", "Raw trace and full result local only; must regenerate after PC1 format"],
+  "next_action": "Extend independent checks to an upstream layer boundary or resolve the R428 quantization discrepancy; reconcile the shared R53 ledger and satisfy fresh lease, identities, resource and hardware gates before any GPU or inter-PC work."
+}

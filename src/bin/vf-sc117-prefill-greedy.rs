@@ -21,6 +21,23 @@ const MAX_POSITIONS: usize = 128;
 const TRACE_MAX_POSITIONS: usize = 96;
 const TRACE_WORDS: usize = 37_380;
 const TRACE_DOMAIN: &[u8] = b"vf-qsa-trace-v1-layer3-96-f32le\0";
+const INPUT_TRACE_WORDS: usize = TRACE_WORDS + 10_240;
+const INPUT_TRACE_DOMAIN: &[u8] = b"vf-qsa-trace-v2-layer3-input-96-f32le\0";
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum TraceMode {
+    Off,
+    Attention,
+    WithInput,
+}
+impl TraceMode {
+    fn words(self) -> usize {
+        if self == Self::WithInput {
+            INPUT_TRACE_WORDS
+        } else {
+            TRACE_WORDS
+        }
+    }
+}
 const INDEX_HASH: &str = "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24";
 
 struct Manifests {
@@ -733,13 +750,15 @@ fn prompt_tokens_hash(tokens: &[u32]) -> String {
     sha256::hex(&bytes)
 }
 
-fn trace_plan(base: &str, enabled: bool) -> String {
-    if !enabled {
-        return base.to_owned();
-    }
-    let mut bytes = TRACE_DOMAIN.to_vec();
+fn trace_plan(base: &str, mode: TraceMode) -> String {
+    let (prefix, domain) = match mode {
+        TraceMode::Off => return base.to_owned(),
+        TraceMode::Attention => ("r537-", TRACE_DOMAIN),
+        TraceMode::WithInput => ("r544-", INPUT_TRACE_DOMAIN),
+    };
+    let mut bytes = domain.to_vec();
     bytes.extend_from_slice(base.as_bytes());
-    format!("r537-{}", sha256::hex(&bytes))
+    format!("{prefix}{}", sha256::hex(&bytes))
 }
 
 fn append_qsa_trace(
@@ -749,10 +768,12 @@ fn append_qsa_trace(
     plan_id: &str,
     position: usize,
     attempt: u64,
+    mode: TraceMode,
 ) -> Result<(), E> {
     let stamp = &trace.stamp;
     if position >= TRACE_MAX_POSITIONS
-        || bytes.len() != position * TRACE_WORDS * 4
+        || mode == TraceMode::Off
+        || bytes.len() != position * mode.words() * 4
         || stamp.run_id != run_id
         || stamp.model_revision != "sc117-local-observation"
         || stamp.plan_id != plan_id
@@ -764,6 +785,11 @@ fn append_qsa_trace(
         return Err("QSA trace identity or position".into());
     }
     let o = trace.output;
+    if mode == TraceMode::WithInput
+        && (trace.input.len() != 10_240 || trace.input.iter().any(|v| !v.is_finite()))
+    {
+        return Err("QSA trace input shape or value".into());
+    }
     let slices: [(&[f32], usize); 10] = [
         (&o.mixed, 2560),
         (&o.inject, 4),
@@ -781,6 +807,11 @@ fn append_qsa_trace(
         .any(|(s, n)| s.len() != *n || s.iter().any(|v| !v.is_finite()))
     {
         return Err("QSA trace shape or value".into());
+    }
+    if mode == TraceMode::WithInput {
+        for value in &trace.input {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
     }
     for (slice, _) in slices {
         for value in slice {
@@ -992,11 +1023,13 @@ fn run() -> Result<(), E> {
     {
         return Err("invalid prompt tokens".into());
     }
-    let trace_qsa = match optional_env("VF_QSA_TRACE_LAYER")?.as_deref() {
-        None => false,
-        Some("3") => true,
-        _ => return Err("QSA trace layer must be 3".into()),
+    let trace_mode = match optional_env("VF_QSA_TRACE_LAYER")?.as_deref() {
+        None => TraceMode::Off,
+        Some("3") => TraceMode::Attention,
+        Some("3:input") => TraceMode::WithInput,
+        _ => return Err("unsupported QSA trace mode".into()),
     };
+    let trace_qsa = trace_mode != TraceMode::Off;
     if trace_qsa && prompt_tokens.len() + max_new_tokens - 1 > TRACE_MAX_POSITIONS {
         return Err("QSA trace position limit".into());
     }
@@ -1119,7 +1152,7 @@ fn run() -> Result<(), E> {
         &shared_lease,
         &r53_namespace,
     )?;
-    let plan_id = trace_plan(&base_plan_id, trace_qsa);
+    let plan_id = trace_plan(&base_plan_id, trace_mode);
     if plan_only {
         println!(
             "{}",
@@ -1337,6 +1370,7 @@ fn run() -> Result<(), E> {
                 &plan_id,
                 pos,
                 position_attempt,
+                trace_mode,
             )?;
             (output, removed)
         } else {
@@ -1393,10 +1427,15 @@ fn run() -> Result<(), E> {
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
     let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
     if trace_qsa {
-        if trace_bytes.len() != input_tokens.len() * TRACE_WORDS * 4 {
+        if trace_bytes.len() != input_tokens.len() * trace_mode.words() * 4 {
             return Err("QSA trace incomplete".into());
         }
-        receipt["qsa_trace"] = serde_json::json!({"version":"vf-qsa-trace-v1-layer3-f32le", "layer":3, "positions":input_tokens.len(), "words_per_position":TRACE_WORDS, "sha256":sha256::hex(&trace_bytes), "base64":voltafabric::base64::encode(&trace_bytes)});
+        let version = if trace_mode == TraceMode::WithInput {
+            "vf-qsa-trace-v2-layer3-input-f32le"
+        } else {
+            "vf-qsa-trace-v1-layer3-f32le"
+        };
+        receipt["qsa_trace"] = serde_json::json!({"version":version, "layer":3, "positions":input_tokens.len(), "words_per_position":trace_mode.words(), "sha256":sha256::hex(&trace_bytes), "base64":voltafabric::base64::encode(&trace_bytes)});
     }
     println!("{receipt}");
     drop(host_pins);
@@ -1416,10 +1455,16 @@ mod tests {
     #[test]
     fn trace_plan_and_records_are_bound_and_reject_partial_data() {
         let base = format!("r531-{}", "a".repeat(64));
-        let plan = trace_plan(&base, true);
-        assert_eq!(trace_plan(&base, false), base);
+        let plan = trace_plan(&base, TraceMode::Attention);
+        let input_plan = trace_plan(&base, TraceMode::WithInput);
+        assert_eq!(trace_plan(&base, TraceMode::Off), base);
         assert!(plan.starts_with("r537-"));
-        assert_ne!(plan, trace_plan(&format!("r531-{}", "b".repeat(64)), true));
+        assert!(input_plan.starts_with("r544-"));
+        assert_ne!(plan, input_plan);
+        assert_ne!(
+            plan,
+            trace_plan(&format!("r531-{}", "b".repeat(64)), TraceMode::Attention)
+        );
         let trace = || QsaQualificationTrace {
             stamp: voltafabric::moe::Stamp {
                 run_id: "run".into(),
@@ -1430,6 +1475,7 @@ mod tests {
                 epoch: 1,
             },
             attempt: 17,
+            input: vec![2.0; 10240],
             output: sc117_qsa_stage::Output {
                 mixed: vec![1.0; 2560],
                 inject: vec![0.0; 4],
@@ -1444,17 +1490,83 @@ mod tests {
             },
         };
         let mut bytes = Vec::new();
-        assert!(append_qsa_trace(&mut bytes, trace(), "wrong", &plan, 0, 17).is_err());
+        assert!(append_qsa_trace(
+            &mut bytes,
+            trace(),
+            "wrong",
+            &plan,
+            0,
+            17,
+            TraceMode::Attention
+        )
+        .is_err());
         assert!(bytes.is_empty());
         let mut malformed = trace();
         malformed.output.gate.pop();
-        assert!(append_qsa_trace(&mut bytes, malformed, "run", &plan, 0, 17).is_err());
+        assert!(append_qsa_trace(
+            &mut bytes,
+            malformed,
+            "run",
+            &plan,
+            0,
+            17,
+            TraceMode::Attention
+        )
+        .is_err());
         assert!(bytes.is_empty());
-        append_qsa_trace(&mut bytes, trace(), "run", &plan, 0, 17).unwrap();
+        append_qsa_trace(
+            &mut bytes,
+            trace(),
+            "run",
+            &plan,
+            0,
+            17,
+            TraceMode::Attention,
+        )
+        .unwrap();
         assert_eq!(bytes.len(), TRACE_WORDS * 4);
         assert_eq!(&bytes[..4], &1.0f32.to_le_bytes());
-        assert!(append_qsa_trace(&mut bytes, trace(), "run", &plan, 1, 18).is_err());
+        assert!(append_qsa_trace(
+            &mut bytes,
+            trace(),
+            "run",
+            &plan,
+            1,
+            18,
+            TraceMode::Attention
+        )
+        .is_err());
         assert_eq!(bytes.len(), TRACE_WORDS * 4);
+        let mut input_trace = trace();
+        input_trace.stamp.plan_id = input_plan.clone();
+        let mut v2 = Vec::new();
+        let mut invalid = trace();
+        invalid.stamp.plan_id = input_plan.clone();
+        invalid.input.pop();
+        assert!(append_qsa_trace(
+            &mut v2,
+            invalid,
+            "run",
+            &input_plan,
+            0,
+            17,
+            TraceMode::WithInput
+        )
+        .is_err());
+        assert!(v2.is_empty());
+        append_qsa_trace(
+            &mut v2,
+            input_trace,
+            "run",
+            &input_plan,
+            0,
+            17,
+            TraceMode::WithInput,
+        )
+        .unwrap();
+        assert_eq!(v2.len(), INPUT_TRACE_WORDS * 4);
+        assert_eq!(&v2[..4], &2.0f32.to_le_bytes());
+        assert_eq!(&v2[10240 * 4..10240 * 4 + 4], &1.0f32.to_le_bytes());
     }
     const DIGEST: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     #[test]

@@ -67,6 +67,18 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "trace-bound plan"):
                 run()
 
+    def test_input_trace_layout_is_bound_to_new_plan(self):
+        raw = b"\0" * (47620 * 4)
+        trace = {"version": "vf-qsa-trace-v2-layer3-input-f32le", "layer": 3,
+                 "positions": 1, "words_per_position": 47620,
+                 "sha256": hashlib.sha256(raw).hexdigest(),
+                 "base64": base64.b64encode(raw).decode("ascii")}
+        record = {"input_tokens": [0], "qsa_trace": trace, "plan_id": "r544-" + "a" * 64}
+        _verify_qsa_trace(record)
+        record["plan_id"] = "r537-" + "a" * 64
+        with self.assertRaisesRegex(ValueError, "trace metadata"):
+            _verify_qsa_trace(record)
+
     def test_prepare_plan_uses_tokenizer_and_rejects_bad_plan_receipts(self):
         prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
         good = {"plan_id": "r512-" + "a" * 64, "prompt_tokens_sha256": prompt_hash}
