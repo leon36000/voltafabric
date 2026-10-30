@@ -234,3 +234,8 @@ required-features = ["ple-cpu-qualification"]
 name = "vf-sc117-ple-fault-check"
 path = "src/bin/vf-sc117-ple-fault-check.rs"
 required-features = ["ple-cpu-qualification"]
+
+[[bin]]
+name = "vf-sc117-ple-lost-check"
+path = "src/bin/vf-sc117-ple-lost-check.rs"
+required-features = ["ple-cpu-qualification"]

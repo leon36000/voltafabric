@@ -1,0 +1,1 @@
+{"attempt": 1793373109149160774, "rank": 3, "response_sha256": "3e6374edafd51c21a6b1233db5b957064e7b7a8dd338956d72ad91b7af2a2069", "rows": 5, "slots": 5, "stamp": {"batch": 0, "epoch": 1, "layer": 1, "model_revision": "sc117-local-observation", "plan_id": "r449-lost-cpu", "run_id": "r449-ple-lost-3129796-1793373109149160774"}}
