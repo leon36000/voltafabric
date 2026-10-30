@@ -13,12 +13,35 @@ class Tokenizer(FakeTokenizer):
 
 
 def receipt():
-    return {"layer_count": 48, "run_id": "fresh", "workers_closed": 96,
+    return {"layer_count": 48, "run_id": "fresh", "workers_closed": 96, "eos_token_id": 3,
             "input_tokens": [0, 1], "generated_token_ids": [1, 2],
             "output_sha256": ["a" * 64] * 2, "logits_sha256": ["b" * 64] * 2}
 
 
 class RunnerTests(unittest.TestCase):
+    def test_eos_binding_is_passed_and_checked_before_returning_text(self):
+        calls = []
+        value = dict(receipt(), input_tokens=[0], generated_token_ids=[3],
+                     output_sha256=["a" * 64], logits_sha256=["b" * 64])
+        def runner(args, **kwargs):
+            calls.append(args)
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        result = run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+        self.assertEqual(result["output"]["stop_reason"], "eos")
+        self.assertEqual(calls[0][-2:], ["2", "3"])
+        for invalid in (None, 2, True):
+            altered = dict(value, eos_token_id=invalid)
+            with self.assertRaisesRegex(ValueError, "tokenizer EOS"):
+                run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8,
+                           runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(altered).encode(), b""))
+        missing = dict(value)
+        del missing["eos_token_id"]
+        with self.assertRaisesRegex(ValueError, "tokenizer EOS"):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8,
+                       runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(missing).encode(), b""))
+        with self.assertRaisesRegex(ValueError, "invalid tokenizer EOS"):
+            run_prompt("A", Tokenizer(), 0, "/engine", ["/input"]*8, runner=runner)
+
     def test_long_prompt_and_combined_position_bound(self):
         value = dict(receipt(), prompt_tokens=[0]*32, input_tokens=[0]*39,
                      requested_max_new_tokens=8, generated_token_ids=[0]*8,
@@ -48,7 +71,7 @@ class RunnerTests(unittest.TestCase):
     def test_large_complete_receipt_crosses_real_pipe(self):
         program = ('import json; r={"layer_count":48,"run_id":"fresh","workers_closed":96,'
                    '"prompt_tokens":[0]*8,"input_tokens":[0]*39,"generated_token_ids":[0]*32,'
-                   '"requested_max_new_tokens":32,"output_sha256":["a"*64]*39,'
+                   '"requested_max_new_tokens":32,"eos_token_id":3,"output_sha256":["a"*64]*39,'
                    '"logits_sha256":["b"*64]*32,"padding":"x"*2000000}; print(json.dumps(r))')
         def runner(args, **kwargs):
             return _run_bounded([sys.executable, "-c", program], **kwargs)
@@ -81,7 +104,7 @@ class RunnerTests(unittest.TestCase):
         out = run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
         self.assertEqual(out["output"]["text"], "😀")
         self.assertEqual(len(calls), 1)
-        self.assertEqual(calls[0][-2:], ["48", "0"])
+        self.assertEqual(calls[0][-4:], ["48", "0", "2", "3"])
 
     def test_two_token_prompt_is_prefilled_before_generation(self):
         calls = []
@@ -91,7 +114,7 @@ class RunnerTests(unittest.TestCase):
             calls.append(args)
             return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
         out = run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
-        self.assertEqual(calls[0][-1], "0,1")
+        self.assertEqual(calls[0][-3:], ["0,1", "2", "3"])
         self.assertEqual(out["output"]["text"], "AA")
         bad = dict(value, input_tokens=[0, 0, 0])
         with self.assertRaises(ValueError):
@@ -108,7 +131,7 @@ class RunnerTests(unittest.TestCase):
             return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
         out = run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4, runner=runner)
         self.assertEqual(out["output"]["text"], "AAAA")
-        self.assertEqual(calls[0][-3:], ["48", "0,1", "4"])
+        self.assertEqual(calls[0][-4:], ["48", "0,1", "4", "3"])
         short = dict(value, input_tokens=[0, 1], generated_token_ids=[0],
                      output_sha256=["a" * 64] * 2, logits_sha256=["b" * 64])
         with self.assertRaisesRegex(ValueError, "incomplete"):

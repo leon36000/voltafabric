@@ -85,6 +85,9 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("absolute engine and eight input paths required")
     if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= MAX_GENERATED_TOKENS:
         raise ValueError("generation limit must be between one and 32")
+    if (type(eos) is not int or not 0 <= eos < len(tokenizer.tokens)
+            or tokenizer.token_types[eos] != 3):
+        raise ValueError("invalid tokenizer EOS token")
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
     if (not 1 <= len(prompt_ids) <= MAX_PROMPT_TOKENS or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
@@ -92,8 +95,7 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 39 input positions")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
-    if max_new_tokens != 2:
-        command.append(str(max_new_tokens))
+    command.extend((str(max_new_tokens), str(eos)))
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
         category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
@@ -107,6 +109,8 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("engine receipt differs from prompt token")
     if receipt.get("requested_max_new_tokens", 2) != max_new_tokens:
         raise ValueError("engine receipt differs from generation limit")
+    if type(receipt.get("eos_token_id")) is not int or receipt["eos_token_id"] != eos:
+        raise ValueError("engine receipt differs from tokenizer EOS")
     decoded = decode_greedy_receipt(tokenizer, eos, receipt)
     return {"prompt_token_ids": prompt_ids, "output": decoded, "receipt": receipt}
 
