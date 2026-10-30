@@ -35,4 +35,20 @@ int main() { strata::core::ExpertDispatch d; d.vf_cpu_pool = &vf::strata_bridge:
 includes = ['-I',str(overlay/'include'), '-I',str(root/'include'), '-I',str(script_dir), '-I',str(cuda), '-I',str(ggml/'ggml/include')]
 for source in ['check.cpp', 'src/core/expert_source.cpp', 'src/core/verify.cpp', 'src/program/generate.cpp']:
     subprocess.run(['c++','-std=c++20','-DSTRATA_VERSION="syntax-test"','-fsyntax-only',*includes,str(overlay/source)], check=True)
+if len(sys.argv) > 5:
+    # Build only the actual, patched function prefix containing the opt-in path.
+    # The unmodified donor CPU/GPU fallback is intentionally excluded, so this
+    # executable cannot claim to test a complete donor or its CUDA verifier.
+    source = (overlay / 'src/core/expert_source.cpp').read_text()
+    start = source.index('void expert_pool_dispatch_multi(')
+    end = source.index('    if (d.lookahead != nullptr)', start)
+    branch = source[start:end]
+    if branch.count('if (d.vf_cpu_pool != nullptr)') != 1:
+        raise SystemExit('unexpected opt-in branch')
+    extracted = overlay / 'donor_cpu_branch.cpp'
+    extracted.write_text('#include "strata/core/expert_source.hpp"\nnamespace strata::core {\nnamespace { constexpr int64_t kMaxWindowEntries = 128; }\n' + branch + '\n    d.failed = true; d.fail = "test-only ordinary path unavailable";\n}\n}\n')
+    optimization = sys.argv[6] if len(sys.argv) > 6 else '2'
+    if optimization not in ('0', '2'):
+        raise SystemExit('optimization must be 0 or 2')
+    subprocess.run(['c++','-std=c++20','-O'+optimization,'-pthread',*includes, str(extracted), str(script_dir/'pipe_client.cpp'), str(script_dir/'pool_hook.cpp'), str(script_dir/'donor_branch_live_test.cpp'), '-o',str(pathlib.Path(sys.argv[5]).resolve())], check=True)
 print('candidate applies and four translation units pass syntax checking:', overlay)

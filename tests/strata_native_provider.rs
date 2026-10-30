@@ -961,6 +961,7 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     for client_path in [
         std::env::var_os("VF_STRATA_CPP_CLIENT"),
         std::env::var_os("VF_STRATA_CPP_POOL"),
+        std::env::var_os("VF_STRATA_CPP_DONOR_BRANCH"),
     ]
     .into_iter()
     .flatten()
