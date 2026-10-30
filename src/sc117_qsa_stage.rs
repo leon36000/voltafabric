@@ -23,8 +23,15 @@ pub struct Manifest {
     pub knorm: Span,
     pub q0: Span,
     pub q1: Span,
+    /// Explicit GGML kinds for this layer. Omitted only by the legacy layer-3 manifest.
+    #[serde(default)]
+    pub q_type: Option<i32>,
     pub k: Span,
+    #[serde(default)]
+    pub k_type: Option<i32>,
     pub v: Span,
+    #[serde(default)]
+    pub v_type: Option<i32>,
     pub out: Span,
 }
 pub struct Stage {
@@ -95,6 +102,17 @@ fn norm_rope(values: &mut [f32], gamma: &[f32], position: usize) -> Result<()> {
     }
     Ok(())
 }
+fn projection_bytes(kind: i32, rows: usize) -> Result<usize> {
+    let row: usize = match kind {
+        12 => 1440,
+        13 => 1760,
+        14 => 2100,
+        23 => 1360,
+        _ => return Err(invalid("unsupported QSA projection type")),
+    };
+    row.checked_mul(rows)
+        .ok_or_else(|| invalid("QSA size overflow"))
+}
 impl Stage {
     pub fn load(
         m: Manifest,
@@ -110,6 +128,21 @@ impl Stage {
         {
             return Err(invalid("QSA stage identity"));
         }
+        let legacy = m.layer == 3;
+        let type_or_legacy = |v: Option<i32>, default| match (v, legacy) {
+            (Some(value), _) => Ok(value),
+            (None, true) => Ok(default),
+            (None, false) => Err(invalid("QSA projection type missing")),
+        };
+        let qt = type_or_legacy(m.q_type, 23)?;
+        let kt = type_or_legacy(m.k_type, 14)?;
+        let vt = type_or_legacy(m.v_type, 14)?;
+        let qbytes = projection_bytes(qt, 6144)?;
+        let kbytes = projection_bytes(kt, 512)?;
+        let vbytes = projection_bytes(vt, 512)?;
+        if m.q0.offset.checked_add(qbytes as u64) != Some(m.q1.offset) {
+            return Err(invalid("QSA query halves are not contiguous"));
+        }
         let dm = dense.metadata().map_err(|e| invalid(e.to_string()))?;
         let sm = shard.metadata().map_err(|e| invalid(e.to_string()))?;
         if !dm.is_file() || !sm.is_file() || dm.len() != m.dense_bytes || sm.len() != m.shard_bytes
@@ -122,10 +155,10 @@ impl Stage {
         let inject = sc117_gdn_stage::read(dense, &m.inject, 81920)?;
         let qnorm = sc117_gdn_stage::floats(&sc117_gdn_stage::read(dense, &m.qnorm, 1024)?);
         let knorm = sc117_gdn_stage::floats(&sc117_gdn_stage::read(dense, &m.knorm, 1024)?);
-        let q0b = sc117_gdn_stage::read(shard, &m.q0, 8355840)?;
-        let q1b = sc117_gdn_stage::read(shard, &m.q1, 8355840)?;
-        let kb = sc117_gdn_stage::read(shard, &m.k, 1075200)?;
-        let vb = sc117_gdn_stage::read(shard, &m.v, 1075200)?;
+        let q0b = sc117_gdn_stage::read(shard, &m.q0, qbytes)?;
+        let q1b = sc117_gdn_stage::read(shard, &m.q1, qbytes)?;
+        let kb = sc117_gdn_stage::read(shard, &m.k, kbytes)?;
+        let vb = sc117_gdn_stage::read(shard, &m.v, vbytes)?;
         let ob = sc117_gdn_stage::read(shard, &m.out, 16711680)?;
         #[cfg(unix)]
         if !sc117_gdn_stage::same(&dm, &dense.metadata().map_err(|e| invalid(e.to_string()))?)
@@ -142,10 +175,10 @@ impl Stage {
             columns,
             sha256,
         };
-        let q0 = QuantizedMatrix::load(bind("attn_q.part0", 23, 6144, 2560, m.q0.sha256), &q0b)?;
-        let q1 = QuantizedMatrix::load(bind("attn_q.part1", 23, 6144, 2560, m.q1.sha256), &q1b)?;
-        let k = QuantizedMatrix::load(bind("attn_k", 14, 512, 2560, m.k.sha256), &kb)?;
-        let v = QuantizedMatrix::load(bind("attn_v", 14, 512, 2560, m.v.sha256), &vb)?;
+        let q0 = QuantizedMatrix::load(bind("attn_q.part0", qt, 6144, 2560, m.q0.sha256), &q0b)?;
+        let q1 = QuantizedMatrix::load(bind("attn_q.part1", qt, 6144, 2560, m.q1.sha256), &q1b)?;
+        let k = QuantizedMatrix::load(bind("attn_k", kt, 512, 2560, m.k.sha256), &kb)?;
+        let v = QuantizedMatrix::load(bind("attn_v", vt, 512, 2560, m.v.sha256), &vb)?;
         let out = QuantizedMatrix::load(bind("attn_output", 8, 2560, 6144, m.out.sha256), &ob)?;
         let cache = qsa_cpu::State::new(identity.clone(), 24, 2, 256, capacity)?;
         Ok(Self {

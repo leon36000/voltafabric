@@ -23,3 +23,40 @@ fn reject_wrong_layer_model_and_sources() {
     assert!(Stage::load(manifest(), bad, &mut d, &mut s, 2).is_err());
     assert!(Stage::load(manifest(), id, &mut d, &mut s, 2).is_err());
 }
+
+#[test]
+fn projection_kinds_and_query_halves_fail_before_source_admission() {
+    let mut m: Manifest =
+        serde_json::from_str(include_str!("../fixtures/r430/layer3.json")).unwrap();
+    let mut d = std::fs::File::open("Cargo.toml").unwrap();
+    let mut s = std::fs::File::open("Cargo.lock").unwrap();
+    let mut id = Identity {
+        run_id: "run".into(),
+        model_revision: "sc117-local-observation".into(),
+        layer: 7,
+        epoch: 1,
+    };
+    m.layer = 7;
+    assert!(Stage::load(m, id.clone(), &mut d, &mut s, 2)
+        .err()
+        .unwrap()
+        .message
+        .contains("type missing"));
+    let mut m: Manifest =
+        serde_json::from_str(include_str!("../fixtures/r430/layer3.json")).unwrap();
+    m.q_type = Some(42);
+    id.layer = 3;
+    assert!(Stage::load(m, id.clone(), &mut d, &mut s, 2)
+        .err()
+        .unwrap()
+        .message
+        .contains("unsupported QSA"));
+    let mut m: Manifest =
+        serde_json::from_str(include_str!("../fixtures/r430/layer3.json")).unwrap();
+    m.q1.offset += 1;
+    assert!(Stage::load(m, id, &mut d, &mut s, 2)
+        .err()
+        .unwrap()
+        .message
+        .contains("not contiguous"));
+}

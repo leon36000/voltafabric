@@ -1,0 +1,210 @@
+{
+  "scope": "local standalone QSA prefixes, no workers",
+  "input_sha256": "e703b8f3d7d98e6acd5db420334b3a5e4e826b482e261258e877b266171bc24c",
+  "layers": [
+    {
+      "layer": 3,
+      "manifest_sha256": "66395794d8c065144e29e4d875b2c0b6a430a1ffdce54d0cbb5e0fe63ad7edcb",
+      "types": [
+        23,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "1e30677aba4d7db6e5fa8422b0b86114ddc6db931c516d38cf71977281cd9859",
+      "sampled_scalar_rows": [
+        "projection=0 type=23 sampled=11 max_abs=1.60093732e-08",
+        "projection=1 type=14 sampled=5 max_abs=1.16945547e-07",
+        "projection=2 type=14 sampled=5 max_abs=1.23603765e-07",
+        "projection=3 type=8 sampled=7 max_abs=7.78076128e-08"
+      ]
+    },
+    {
+      "layer": 7,
+      "manifest_sha256": "1172a91452d927cd986c122a60a276811a8e34caefb72e00a45dafb912c464d5",
+      "types": [
+        23,
+        23,
+        14,
+        8
+      ],
+      "output_sha256": "a89a0a9f06bcff967c989295fdd360f231f004de6a09f0916f9f0bc933ba772a",
+      "sampled_scalar_rows": [
+        "projection=0 type=23 sampled=11 max_abs=1.57394571e-08",
+        "projection=1 type=23 sampled=5 max_abs=2.56532991e-08",
+        "projection=2 type=14 sampled=5 max_abs=1.40023895e-07",
+        "projection=3 type=8 sampled=7 max_abs=4.55777354e-08"
+      ]
+    },
+    {
+      "layer": 11,
+      "manifest_sha256": "020c421abf03588169f059b018b53be1149507b9e143338cf8db25bacfe245b4",
+      "types": [
+        12,
+        14,
+        13,
+        8
+      ],
+      "output_sha256": "f58ba3199adca641b167ae3baef70f88e2ecd9d08dfc523f023f9ff919a33252",
+      "sampled_scalar_rows": [
+        "projection=0 type=12 sampled=11 max_abs=9.69523361e-08",
+        "projection=1 type=14 sampled=5 max_abs=1.4374111e-07",
+        "projection=2 type=13 sampled=5 max_abs=9.68373002e-08",
+        "projection=3 type=8 sampled=7 max_abs=2.44510829e-08"
+      ]
+    },
+    {
+      "layer": 15,
+      "manifest_sha256": "5e498f6330090b789d4086766b54a731a275d65c66cc992b662ffa340ae87d75",
+      "types": [
+        23,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "0d70cdf5ee06de528c7fcd31767af4f6c3d5fd90714520b74ee3a693f4166baa",
+      "sampled_scalar_rows": [
+        "projection=0 type=23 sampled=11 max_abs=4.05311714e-08",
+        "projection=1 type=14 sampled=5 max_abs=1.47577589e-07",
+        "projection=2 type=14 sampled=5 max_abs=8.3927114e-08",
+        "projection=3 type=8 sampled=7 max_abs=2.13145768e-08"
+      ]
+    },
+    {
+      "layer": 19,
+      "manifest_sha256": "1ad60a7b23db4099358f09fa4c606ad0c53bc40954a6432de9c3b9dc7b8a1823",
+      "types": [
+        13,
+        14,
+        13,
+        8
+      ],
+      "output_sha256": "e6cd1f14abf6f05e2215036330ef2e92997cc2df052d77743878879666664bd1",
+      "sampled_scalar_rows": [
+        "projection=0 type=13 sampled=11 max_abs=4.03934278e-08",
+        "projection=1 type=14 sampled=5 max_abs=6.55931845e-08",
+        "projection=2 type=13 sampled=5 max_abs=6.0436207e-08",
+        "projection=3 type=8 sampled=7 max_abs=3.60632839e-08"
+      ]
+    },
+    {
+      "layer": 23,
+      "manifest_sha256": "c0b4cd8f786a220ef105c28869a24af3dacf909d13895041c9ba0cf405a1912e",
+      "types": [
+        13,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "c436770363d4939dd288fa7f3572d3cda1a8e004e92caa9fd9c78bfffa4c6501",
+      "sampled_scalar_rows": [
+        "projection=0 type=13 sampled=11 max_abs=1.08099427e-07",
+        "projection=1 type=14 sampled=5 max_abs=2.25816983e-07",
+        "projection=2 type=14 sampled=5 max_abs=2.04612117e-07",
+        "projection=3 type=8 sampled=7 max_abs=2.76311312e-08"
+      ]
+    },
+    {
+      "layer": 27,
+      "manifest_sha256": "31d3c2a7f2b72973f68f951ff9241443f6068246c6e48584b786f955b447129b",
+      "types": [
+        13,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "a2be06927721ecae424cc99b2311acfa496bc2844f9ce5c95f127c153344b441",
+      "sampled_scalar_rows": [
+        "projection=0 type=13 sampled=11 max_abs=6.46131695e-08",
+        "projection=1 type=14 sampled=5 max_abs=1.2061539e-07",
+        "projection=2 type=14 sampled=5 max_abs=6.77355771e-08",
+        "projection=3 type=8 sampled=7 max_abs=2.60482693e-08"
+      ]
+    },
+    {
+      "layer": 31,
+      "manifest_sha256": "da76e66a2af25e9b0c44abe612930f2d62c66441f8e9ebd9e2de19559d6a9324",
+      "types": [
+        14,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "f253ee7a6457536fd5a565d5a1a91b19feeec6f93753943fa97f743b5a957d0c",
+      "sampled_scalar_rows": [
+        "projection=0 type=14 sampled=11 max_abs=3.27885873e-07",
+        "projection=1 type=14 sampled=5 max_abs=8.95419951e-08",
+        "projection=2 type=14 sampled=5 max_abs=1.18552129e-07",
+        "projection=3 type=8 sampled=7 max_abs=6.97408495e-08"
+      ]
+    },
+    {
+      "layer": 35,
+      "manifest_sha256": "99daea393dc011b0b6218a3d09a98225f1ff8bbbdf4397196cd9f7136c19318c",
+      "types": [
+        14,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "0f7d59f0bc904e6e182248b79e8f4b5928038bca3472e2897973d30a3d4f8cbe",
+      "sampled_scalar_rows": [
+        "projection=0 type=14 sampled=11 max_abs=1.33219519e-07",
+        "projection=1 type=14 sampled=5 max_abs=1.26230132e-07",
+        "projection=2 type=14 sampled=5 max_abs=2.50231055e-07",
+        "projection=3 type=8 sampled=7 max_abs=5.59792852e-08"
+      ]
+    },
+    {
+      "layer": 39,
+      "manifest_sha256": "b70bc8d5fc422fb28d5ff1ca2e7879ece542bd9381e39a7867c05896f70342ec",
+      "types": [
+        14,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "cbb06bfae5bb08786e51903cf2fbf5b5453c104e1b1580eb3ba3c19b8754fe56",
+      "sampled_scalar_rows": [
+        "projection=0 type=14 sampled=11 max_abs=1.24209544e-07",
+        "projection=1 type=14 sampled=5 max_abs=1.25075212e-07",
+        "projection=2 type=14 sampled=5 max_abs=1.85555325e-07",
+        "projection=3 type=8 sampled=7 max_abs=1.01527576e-07"
+      ]
+    },
+    {
+      "layer": 43,
+      "manifest_sha256": "91401bbae73600cde801106d921ed4acc22de41b4e95d1d7e6e31d938f1ac213",
+      "types": [
+        14,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "c89d7062822427f8b0eff56db7f7fd68d20dc3beda1ed2c48a45a6fa4e06e7ed",
+      "sampled_scalar_rows": [
+        "projection=0 type=14 sampled=11 max_abs=1.55458845e-07",
+        "projection=1 type=14 sampled=5 max_abs=1.23580452e-07",
+        "projection=2 type=14 sampled=5 max_abs=9.95500788e-08",
+        "projection=3 type=8 sampled=7 max_abs=2.78720336e-08"
+      ]
+    },
+    {
+      "layer": 47,
+      "manifest_sha256": "dda59cfcb6de839cff0dac72fb54497f101a09b83fcc9d4b13ddbe42385318b6",
+      "types": [
+        14,
+        14,
+        14,
+        8
+      ],
+      "output_sha256": "bb2061d5e82544d8abbfa2fff702daa8d01b228335efab77416805bb3d2ac863",
+      "sampled_scalar_rows": [
+        "projection=0 type=14 sampled=11 max_abs=7.23949268e-08",
+        "projection=1 type=14 sampled=5 max_abs=9.19264749e-08",
+        "projection=2 type=14 sampled=5 max_abs=7.95086713e-08",
+        "projection=3 type=8 sampled=7 max_abs=5.0484914e-08"
+      ]
+    }
+  ]
+}

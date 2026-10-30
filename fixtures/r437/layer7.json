@@ -1,0 +1,64 @@
+{
+  "model_revision": "sc117-local-observation",
+  "layer": 7,
+  "dense_bytes": 1538035200,
+  "shard_bytes": 55063448064,
+  "norm": {
+    "offset": 298977536,
+    "bytes": 40960,
+    "sha256": "a1f48f4bef6c37dddf666541fcb40bb209dfa2a9e9ba9c0d542ec8765c79a083"
+  },
+  "down": {
+    "offset": 292342016,
+    "bytes": 6553600,
+    "sha256": "b2a529d78b8cae9f7418b7b3983fe242fdb479ce5796718103d5a6cd0c3a5bf4"
+  },
+  "up": {
+    "offset": 299018496,
+    "bytes": 6553600,
+    "sha256": "2898f422ca966e681b52416a0418d53226cf315481811f7137a574cdc4cb18e6"
+  },
+  "inject": {
+    "offset": 298895616,
+    "bytes": 81920,
+    "sha256": "cf64ba75f5da53211d5ad857fb380900e8693bef24da07329aa1ea81b86fbc92"
+  },
+  "qnorm": {
+    "offset": 289714432,
+    "bytes": 1024,
+    "sha256": "4118980eef430eaf78df966606dda951687d23ae1eef964db2f0120121bfbd6e"
+  },
+  "knorm": {
+    "offset": 289713408,
+    "bytes": 1024,
+    "sha256": "c89bf75775d799d0bc10a2e4a94be3b9d7dbf720be75508a573ef008cf6e857e"
+  },
+  "q_type": 23,
+  "q0": {
+    "offset": 8459417856,
+    "bytes": 8355840,
+    "sha256": "3be99d7ce1e4df54d9456d568d1365453ed63277408b5a435c595f87e4303401"
+  },
+  "q1": {
+    "offset": 8467773696,
+    "bytes": 8355840,
+    "sha256": "8293b8d1678c0fdce865ed1a06e1b858871765f1fbf3ac47235b723790291cb5"
+  },
+  "k": {
+    "offset": 8442008832,
+    "bytes": 696320,
+    "sha256": "fdc5bc8e6b6524e12e978905dff0e1260208f7d494446d9b3e52ae0dcf907624"
+  },
+  "k_type": 23,
+  "v": {
+    "offset": 8476130560,
+    "bytes": 1075200,
+    "sha256": "f6321807a39d3451d47ef42cc0eee0adfab1eb8a23e8a2b1d8fe1fb8b7dccfd1"
+  },
+  "v_type": 14,
+  "out": {
+    "offset": 8442706176,
+    "bytes": 16711680,
+    "sha256": "4293778ca87576eabe12c144b379a220db62c1932e04432184533042cc617590"
+  }
+}
