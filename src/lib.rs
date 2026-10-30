@@ -48,6 +48,7 @@ pub mod qpn2;
 pub mod routing;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_gdn_stage;
+pub mod sc117_layer_completion;
 pub mod sc117_router_cpu;
 pub mod shared_expert_cpu;
 pub mod strata_ingress;

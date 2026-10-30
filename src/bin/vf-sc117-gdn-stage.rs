@@ -1,11 +1,65 @@
 //! Explicit one-step local diagnostic for the reusable SC117 resident stage.
-use std::io::{Read, Write};
+use std::{
+    collections::BTreeMap,
+    io::{Read, Write},
+};
 use voltafabric::{
+    completion::{OutputSlot, RoutedRawOutput},
     gdn_cpu::Identity,
-    moe::Stamp,
+    moe::{Choice, Registry, Replica, Stamp},
+    routing::RoutingProblem,
     sc117_gdn_stage::{Manifest, Stage},
+    sc117_layer_completion::{LayerInputs, StampedValues},
     sha256,
 };
+fn synthetic(stamp: &Stamp, attempt: u64, residual: &[f32]) -> LayerInputs {
+    let problem = RoutingProblem {
+        hidden: 2560,
+        experts: vec![0],
+        routes: vec![vec![Choice {
+            expert: 0,
+            weight: 1.0,
+        }]],
+        registry: Registry {
+            epoch: stamp.epoch,
+            copies: vec![Replica {
+                expert: 0,
+                rank: 0,
+                local: 0,
+            }],
+        },
+        stamp: stamp.clone(),
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(0, vec![0])]),
+    };
+    let values = |v| StampedValues {
+        stamp: stamp.clone(),
+        attempt,
+        values: v,
+    };
+    let output = RoutedRawOutput {
+        stamp: stamp.clone(),
+        rank: 0,
+        attempt,
+        rows: 1,
+        columns: 2560,
+        slots: vec![OutputSlot {
+            token: 0,
+            slot: 0,
+            expert: 0,
+            local: 0,
+        }],
+        fp16_bits: vec![0; 2560],
+    };
+    LayerInputs {
+        problem,
+        attempt,
+        outputs: vec![output],
+        shared: values(vec![0.0; 2560]),
+        attention_residual: values(residual.to_vec()),
+        injection: values(vec![0.0; 4]),
+    }
+}
 fn open(p: &str) -> Result<std::fs::File, Box<dyn std::error::Error>> {
     let mut o = std::fs::OpenOptions::new();
     o.read(true);
@@ -70,7 +124,7 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     };
     let rejected = stage.prepare(&stamp, 1, 0, &residual)?;
     if stage
-        .commit_validated(rejected, &stamp, 99, residual.clone())
+        .commit_collected(rejected, synthetic(&stamp, 99, &residual))
         .is_ok()
         || stage.next_token() != 0
     {
@@ -80,28 +134,26 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut changed = stamp.clone();
     changed.batch += 1;
     if stage
-        .commit_validated(wrong_stamp, &changed, 1, residual.clone())
+        .commit_collected(wrong_stamp, synthetic(&changed, 1, &residual))
         .is_ok()
         || stage.next_token() != 0
     {
         return Err("wrong batch advanced token".into());
     }
     let incomplete = stage.prepare(&stamp, 1, 0, &residual)?;
-    if stage
-        .commit_validated(incomplete, &stamp, 1, vec![0.0])
-        .is_ok()
-        || stage.next_token() != 0
-    {
+    let mut missing = synthetic(&stamp, 1, &residual);
+    missing.outputs.clear();
+    if stage.commit_collected(incomplete, missing).is_ok() || stage.next_token() != 0 {
         return Err("incomplete residual advanced token".into());
     }
     let candidate = stage.prepare(&stamp, 2, 0, &residual)?;
     let stale = stage.prepare(&stamp, 2, 0, &residual)?;
     // This synthetic completion exercises state mechanics, not a completed model layer.
     let result = stage
-        .commit_validated(candidate, &stamp, 2, residual.clone())?
+        .commit_collected(candidate, synthetic(&stamp, 2, &residual))?
         .output;
     if stage
-        .commit_validated(stale, &stamp, 2, residual.clone())
+        .commit_collected(stale, synthetic(&stamp, 2, &residual))
         .is_ok()
         || stage.next_token() != 1
     {

@@ -250,9 +250,27 @@ impl Stage {
             },
         })
     }
-    /// Caller must first validate complete expert results and durable reservation; this does not do either.
-    /// Rejecting or dropping a proposal does not change the current in-memory state.
-    pub fn commit_validated(
+    /// Validate all routed slots with the Collector, combine shared output and write the residual,
+    /// then commit the candidate. Caller must establish durable admission and producer provenance.
+    pub fn commit_collected(
+        &mut self,
+        proposal: Proposal,
+        inputs: crate::sc117_layer_completion::LayerInputs,
+    ) -> Result<Committed> {
+        if proposal.stage_id != self.stage_id
+            || proposal.stamp != inputs.problem.stamp
+            || proposal.attempt != inputs.attempt
+            || proposal.token != self.next_token
+        {
+            return Err(invalid("SC117 candidate or collection identity mismatch"));
+        }
+        let stamp = inputs.problem.stamp.clone();
+        let attempt = inputs.attempt;
+        let residual = crate::sc117_layer_completion::finish(inputs)?;
+        self.commit_validated(proposal, &stamp, attempt, residual)
+    }
+    /// Called only after the layer collector and residual calculation succeeded.
+    fn commit_validated(
         &mut self,
         proposal: Proposal,
         stamp: &crate::moe::Stamp,
