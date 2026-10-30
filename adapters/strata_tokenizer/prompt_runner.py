@@ -169,7 +169,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
     plan_id = receipt.get("plan_id")
-    if "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith("r506-")):
+    if "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")

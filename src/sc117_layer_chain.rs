@@ -372,6 +372,37 @@ fn headroom_target(used: u64, limit: u64, reserve: u64) -> Result<Option<u64>> {
     Ok((used > target).then_some(target))
 }
 
+// Prefer an already-satisfied rank. Otherwise enumerate eligible ranks in a
+// stable order; all alternatives are planned before any eviction is submitted.
+fn rank_headroom_options(
+    limits: &BTreeMap<u32, u64>,
+    used: &BTreeMap<u32, u64>,
+    reserve: u64,
+) -> Result<Vec<Option<(u32, u64, u64)>>> {
+    if limits.is_empty()
+        || limits.len() != used.len()
+        || limits
+            .iter()
+            .any(|(rank, &cap)| cap == 0 || used.get(rank).is_none_or(|&n| n > cap))
+    {
+        return Err(invalid("rank headroom accounting"));
+    }
+    let mut ranks: Vec<_> = limits.iter().filter(|(_, cap)| **cap >= reserve).collect();
+    ranks.sort_by_key(|(rank, cap)| (std::cmp::Reverse(**cap), **rank));
+    if ranks.is_empty() {
+        return Err(invalid("no rank can reserve expert headroom"));
+    }
+    let mut options = Vec::with_capacity(ranks.len());
+    for (&rank, &cap) in ranks {
+        let rank_used = used[&rank];
+        match headroom_target(rank_used, cap, reserve)? {
+            None => return Ok(vec![None]),
+            Some(target) => options.push(Some((rank, rank_used, target))),
+        }
+    }
+    Ok(options)
+}
+
 // All intermediate outputs remain private. If a later layer fails, earlier
 // resident states may have advanced: the entire segment becomes unusable.
 fn advance<F>(
@@ -519,6 +550,38 @@ fn select_evictions_with_rank(
         }
         if selected.len() == max_evictions {
             break;
+        }
+    }
+    Err(invalid("eviction target cannot be met safely"))
+}
+
+type PlannedEvictions = (Vec<EvictionCandidate>, Option<(u32, u64, u64)>);
+
+fn select_eviction_alternatives(
+    used: u64,
+    target: u64,
+    max_evictions: usize,
+    candidates: &[EvictionCandidate],
+    counts: &BTreeMap<(u32, u32), usize>,
+    options: &[Option<(u32, u64, u64)>],
+) -> Result<PlannedEvictions> {
+    if options.is_empty() {
+        return Err(invalid("no rank headroom option"));
+    }
+    for &rank_target in options {
+        match select_evictions_with_rank(
+            used,
+            target,
+            max_evictions,
+            candidates,
+            counts,
+            rank_target,
+        ) {
+            Ok(plan) => return Ok((plan, rank_target)),
+            Err(error)
+                if error.code == "INVALID_INPUT"
+                    && error.message == "eviction target cannot be met safely" => {}
+            Err(error) => return Err(error),
         }
     }
     Err(invalid("eviction target cannot be met safely"))
@@ -762,14 +825,14 @@ impl Segment {
         target_bytes: u64,
         max_evictions: usize,
     ) -> Result<Vec<EvictionReceipt>> {
-        self.evict_to_targets(source, target_bytes, max_evictions, None)
+        self.evict_to_targets(source, target_bytes, max_evictions, &[None])
     }
     fn evict_to_targets(
         &mut self,
         source: &mut crate::sc117_expert_source::Source<'_>,
         target_bytes: u64,
         max_evictions: usize,
-        rank_target: Option<(u32, u64, u64)>,
+        rank_options: &[Option<(u32, u64, u64)>],
     ) -> Result<Vec<EvictionReceipt>> {
         if self.cursor.poisoned || self.cursor.position == 0 || self.cursor.last_attempt == 0 {
             return Err(invalid("eviction policy requires committed position"));
@@ -798,13 +861,13 @@ impl Segment {
             }
         }
         sort_eviction_candidates(&mut candidates);
-        let plan = select_evictions_with_rank(
+        let (plan, rank_target) = select_eviction_alternatives(
             source.used_bytes(),
             target_bytes,
             max_evictions,
             &candidates,
             &counts,
-            rank_target,
+            rank_options,
         )?;
         let mut bindings = Vec::with_capacity(plan.len());
         for item in &plan {
@@ -947,27 +1010,17 @@ impl Segment {
         }
         let global_target =
             headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?;
-        let rank_target = if let Some(limits) = source.rank_limits() {
-            let (&rank, &limit) = limits
-                .iter()
-                .filter(|(_, limit)| **limit >= headroom_bytes)
-                .max_by_key(|(rank, limit)| (**limit, std::cmp::Reverse(**rank)))
-                .ok_or_else(|| invalid("no rank can reserve expert headroom"))?;
-            let used = *source
-                .rank_used_bytes()
-                .get(&rank)
-                .ok_or_else(|| invalid("rank headroom accounting"))?;
-            let target = headroom_target(used, limit, headroom_bytes)?;
-            target.map(|target| (rank, used, target))
+        let rank_options = if let Some(limits) = source.rank_limits() {
+            rank_headroom_options(limits, source.rank_used_bytes(), headroom_bytes)?
         } else {
-            None
+            vec![None]
         };
-        let receipts = if global_target.is_some() || rank_target.is_some() {
+        let receipts = if global_target.is_some() || rank_options.iter().all(Option::is_some) {
             self.evict_to_targets(
                 source,
                 global_target.unwrap_or(source.used_bytes()),
                 max_evictions,
-                rank_target,
+                &rank_options,
             )?
         } else {
             Vec::new()
@@ -1101,6 +1154,47 @@ mod tests {
         assert!(select_evictions_with_rank(20, 20, 3, &c, &counts, Some((3, 21, 8))).is_err());
         let protected = BTreeMap::from([((0, 2), 2), ((0, 3), 1), ((1, 3), 1)]);
         assert!(select_evictions_with_rank(20, 20, 3, &c, &protected, Some((3, 12, 8))).is_err());
+    }
+
+    #[test]
+    fn headroom_uses_existing_capacity_or_a_feasible_alternate_without_sending_evictions() {
+        let limits = BTreeMap::from([(2, 10), (3, 12)]);
+        let candidate = EvictionCandidate {
+            layer: 0,
+            expert: 4,
+            rank: 2,
+            bytes: 4,
+            last_used: 0,
+        };
+        let counts = BTreeMap::from([((0, 2), 2), ((0, 3), 1)]);
+        // Rank 3 has the biggest limit but cannot evict its last resident.
+        // Rank 2 already has six bytes free; global pressure can be relieved there.
+        let options =
+            rank_headroom_options(&limits, &BTreeMap::from([(2, 4), (3, 12)]), 6).unwrap();
+        assert_eq!(options, vec![None]);
+        let (plan, target) =
+            select_eviction_alternatives(16, 12, 1, &[candidate], &counts, &options).unwrap();
+        assert_eq!(plan, vec![candidate]);
+        assert_eq!(target, None);
+
+        // Neither rank already satisfies the reservation. The first is blocked,
+        // but the second can meet it by evicting one non-protected resident.
+        let options =
+            rank_headroom_options(&limits, &BTreeMap::from([(2, 8), (3, 10)]), 6).unwrap();
+        assert_eq!(options, vec![Some((3, 10, 6)), Some((2, 8, 4))]);
+        let (plan, target) =
+            select_eviction_alternatives(18, 18, 1, &[candidate], &counts, &options).unwrap();
+        assert_eq!(plan, vec![candidate]);
+        assert_eq!(target, Some((2, 8, 4)));
+        assert!(select_eviction_alternatives(18, 18, 1, &[], &counts, &options).is_err());
+        assert!(rank_headroom_options(&limits, &BTreeMap::from([(2, 8)]), 6).is_err());
+        assert!(rank_headroom_options(&limits, &BTreeMap::from([(2, 11), (3, 0)]), 6).is_err());
+        assert!(rank_headroom_options(&limits, &BTreeMap::from([(2, 8), (3, 10)]), 13).is_err());
+        // Malformed plans must fail closed rather than trying another rank.
+        assert!(
+            select_eviction_alternatives(18, 18, 1, &[candidate], &BTreeMap::new(), &options)
+                .is_err()
+        );
     }
 
     #[test]

@@ -366,6 +366,7 @@ fn optional_env(name: &str) -> Result<Option<String>, E> {
 struct WorkerPlan<'a> {
     version: &'static str,
     wire_policy: &'static str,
+    eviction_policy: &'static str,
     model_revision: &'static str,
     index_sha256: &'static str,
     epoch: u64,
@@ -426,8 +427,9 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v6",
+        version: "vf-sc117-worker-plan-v7",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
+        eviction_policy: "rank-first-feasible-v1",
         model_revision: "sc117-local-observation",
         index_sha256: INDEX_HASH,
         epoch: 1,
@@ -441,7 +443,7 @@ fn worker_plan_id(
         rank_limits,
         endpoints,
     };
-    Ok(format!("r506-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r508-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -845,10 +847,7 @@ mod tests {
         let limits = Some(BTreeMap::from([(2, 100), (3, 200)]));
         let id = worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain").unwrap();
         assert_eq!(id.len(), 69);
-        assert_eq!(
-            id,
-            "r506-a1fb0bb04b749b942ffc8bded961b45600ee8600ba0005c1e1f1b7c7a3ac3fdb"
-        );
+        assert_eq!(id, "r508-7d60879e37737483fe8aa68cce5a1bba13afe76a9de2f4edf06de79402cb0e3f");
         let p12 = worker_plan_id(&endpoints, 300, &limits, &[1, 2], 16, 248_046, "plain").unwrap();
         let p21 = worker_plan_id(&endpoints, 300, &limits, &[2, 1], 16, 248_046, "plain").unwrap();
         assert_ne!(id, p12);
