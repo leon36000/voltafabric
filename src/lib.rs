@@ -52,6 +52,8 @@ pub mod sc117_layer_completion;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_post_attention;
 pub mod sc117_router_cpu;
+#[cfg(feature = "native-ggml-cpu")]
+pub mod sc117_shared_stage;
 pub mod shared_expert_cpu;
 pub mod strata_ingress;
 #[cfg(feature = "native-ggml-cpu")]

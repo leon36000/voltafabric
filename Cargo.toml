@@ -103,3 +103,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-layer2-reserved"
 path = "src/bin/vf-sc117-layer2-reserved.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-shared-stage"
+path = "src/bin/vf-sc117-shared-stage.rs"
+required-features = ["native-ggml-cpu"]
