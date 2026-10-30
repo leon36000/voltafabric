@@ -15,6 +15,69 @@ pub struct Prepared {
     pub k: Vec<f32>,
     pub v: Vec<f32>,
 }
+
+/// BF16 row-major projections and GDN gates, with full f32 activations and f64 CPU dots.
+/// This models the native F32-input projection path, not bitwise CUDA arithmetic.
+pub fn project_gates(
+    input: &[f32],
+    alpha: &[u8],
+    beta: &[u8],
+    dt: &[f32],
+    a: &[f32],
+) -> Result<(Vec<f32>, Vec<f32>)> {
+    let rows = dt.len();
+    let bytes = input.len().checked_mul(rows).and_then(|n| n.checked_mul(2));
+    if input.is_empty()
+        || input.len() > 16384
+        || rows == 0
+        || rows > 1024
+        || bytes != Some(alpha.len())
+        || bytes != Some(beta.len())
+        || a.len() != rows
+        || input.iter().chain(dt).chain(a).any(|v| !v.is_finite())
+    {
+        return Err(invalid("invalid GDN gate projection dimensions or input"));
+    }
+    let mut gates = Vec::with_capacity(rows);
+    let mut betas = Vec::with_capacity(rows);
+    for h in 0..rows {
+        let mut sums = [0.0_f64; 2];
+        for (j, &x) in input.iter().enumerate() {
+            let offset = (h * input.len() + j) * 2;
+            for (index, weights) in [alpha, beta].iter().enumerate() {
+                let value = f32::from_bits(
+                    u32::from(u16::from_le_bytes([weights[offset], weights[offset + 1]])) << 16,
+                );
+                if !value.is_finite() {
+                    return Err(invalid("nonfinite GDN BF16 weight"));
+                }
+                sums[index] += f64::from(value) * f64::from(x);
+            }
+        }
+        let raw_alpha = sums[0] as f32;
+        let raw_beta = sums[1] as f32;
+        let x = raw_alpha + dt[h];
+        let softplus = if x > 20.0 { x } else { x.exp().ln_1p() };
+        let sigmoid = if raw_beta >= 0.0 {
+            1.0 / (1.0 + (-raw_beta).exp())
+        } else {
+            let e = raw_beta.exp();
+            e / (1.0 + e)
+        };
+        let gate = softplus * a[h];
+        if !raw_alpha.is_finite()
+            || !raw_beta.is_finite()
+            || !x.is_finite()
+            || !gate.is_finite()
+            || !sigmoid.is_finite()
+        {
+            return Err(invalid("GDN gate projection overflow"));
+        }
+        gates.push(gate);
+        betas.push(sigmoid);
+    }
+    Ok((gates, betas))
+}
 #[derive(Clone)]
 pub struct ConvHistory {
     identity: Identity,

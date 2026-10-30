@@ -1,4 +1,6 @@
-use voltafabric::gdn_cpu::{ConvHistory, GdnState, Identity, Prepared, RecurrentState};
+use voltafabric::gdn_cpu::{
+    project_gates, ConvHistory, GdnState, Identity, Prepared, RecurrentState,
+};
 fn id() -> Identity {
     Identity {
         run_id: "test".into(),
@@ -6,6 +8,21 @@ fn id() -> Identity {
         layer: 0,
         epoch: 1,
     }
+}
+
+#[test]
+fn gate_projection_checks_bf16_layout_and_invalid_data() {
+    let alpha = [0x80, 0x3f, 0x00, 0x40, 0x80, 0xbf, 0x80, 0x3f];
+    let beta = [0x00, 0x00, 0x00, 0x00, 0x80, 0x3f, 0x00, 0x00];
+    let (gate, b) = project_gates(&[1.0, 2.0], &alpha, &beta, &[0.0, 0.0], &[-1.0, -2.0]).unwrap();
+    assert!((gate[0] + 5.0_f32.exp().ln_1p()).abs() < 1e-6);
+    assert!((gate[1] + 2.0 * 1.0_f32.exp().ln_1p()).abs() < 1e-6);
+    assert!((b[0] - 0.5).abs() < 1e-6 && (b[1] - 0.7310586).abs() < 1e-6);
+    assert!(project_gates(&[1.0], &alpha, &beta, &[0.0, 0.0], &[-1.0, -2.0]).is_err());
+    let mut bad = alpha;
+    bad[0] = 0x80;
+    bad[1] = 0x7f;
+    assert!(project_gates(&[1.0, 2.0], &bad, &beta, &[0.0, 0.0], &[-1.0, -2.0]).is_err());
 }
 
 #[test]
