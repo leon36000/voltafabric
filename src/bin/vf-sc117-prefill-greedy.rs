@@ -311,13 +311,14 @@ fn rank_endpoint(
     local: &str,
     host: Option<&str>,
     remote: Option<&str>,
+    digest: Option<&str>,
 ) -> Result<Endpoint, E> {
     if !(2..=3).contains(&rank) || local.is_empty() {
         return Err("invalid worker endpoint".into());
     }
-    let argv = match (host, remote) {
-        (None, None) => vec![local.into()],
-        (Some(host), Some(remote)) => {
+    let argv = match (host, remote, digest) {
+        (None, None, None) => vec![local.into()],
+        (Some(host), Some(remote), Some(digest)) => {
             let valid_host = !host.is_empty()
                 && host.len() <= 253
                 && host.as_bytes()[0].is_ascii_alphanumeric()
@@ -329,7 +330,7 @@ fn rank_endpoint(
                 && remote
                     .bytes()
                     .all(|c| c.is_ascii_alphanumeric() || b"/._-".contains(&c));
-            if !valid_host || !valid_path || remote == "/" {
+            if !valid_host || !valid_path || remote == "/" || !sha256::is_hex_digest(digest) {
                 return Err("invalid SSH worker host or path".into());
             }
             vec![
@@ -344,9 +345,11 @@ fn rank_endpoint(
                 host.into(),
                 remote.into(),
                 "--guarded-remote".into(),
+                "--expected-exe-sha256".into(),
+                digest.into(),
             ]
         }
-        _ => return Err("SSH worker host and path must be supplied together".into()),
+        _ => return Err("SSH worker host, path and digest must be supplied together".into()),
     };
     Ok(Endpoint { rank, argv })
 }
@@ -362,6 +365,7 @@ fn optional_env(name: &str) -> Result<Option<String>, E> {
 #[derive(serde::Serialize)]
 struct WorkerPlan<'a> {
     version: &'static str,
+    wire_policy: &'static str,
     model_revision: &'static str,
     index_sha256: &'static str,
     epoch: u64,
@@ -402,7 +406,8 @@ fn worker_plan_id(
         return Err("invalid worker plan".into());
     }
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v2",
+        version: "vf-sc117-worker-plan-v3",
+        wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         model_revision: "sc117-local-observation",
         index_sha256: INDEX_HASH,
         epoch: 1,
@@ -413,7 +418,7 @@ fn worker_plan_id(
         rank_limits,
         endpoints,
     };
-    Ok(format!("r486-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r491-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -520,9 +525,16 @@ fn run() -> Result<(), E> {
     for rank in 2..=3 {
         let host = optional_env(&format!("VF_RANK{rank}_SSH_HOST"))?;
         let remote = optional_env(&format!("VF_RANK{rank}_SSH_WORKER"))?;
+        let digest = optional_env(&format!("VF_RANK{rank}_SSH_WORKER_SHA256"))?;
         endpoints.insert(
             rank,
-            rank_endpoint(rank, &a[5], host.as_deref(), remote.as_deref())?,
+            rank_endpoint(
+                rank,
+                &a[5],
+                host.as_deref(),
+                remote.as_deref(),
+                digest.as_deref(),
+            )?,
         );
     }
     let mut dense = std::fs::File::open(&a[1])?;
@@ -780,24 +792,27 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    const DIGEST: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
     #[test]
     fn worker_plan_binds_rank_endpoints_and_capacities() {
-        let rank2 = rank_endpoint(2, "/worker", None, None).unwrap();
-        let rank3 = rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker")).unwrap();
+        let rank2 = rank_endpoint(2, "/worker", None, None, None).unwrap();
+        let rank3 =
+            rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), Some(DIGEST)).unwrap();
         let endpoints = BTreeMap::from([(2, rank2.clone()), (3, rank3.clone())]);
         let limits = Some(BTreeMap::from([(2, 100), (3, 200)]));
         let id = worker_plan_id(&endpoints, 300, &limits, 2, 16).unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r486-59960e8e33e1476a193ccca15e2935cef10d999706de66fb25db2607e326b859"
+            "r491-0e6ef92e19e5b47c7fa82fbe3ce52f03f279ebee5b8480572f1d2c3f9bb04c73"
         );
         assert_eq!(id, worker_plan_id(&endpoints, 300, &limits, 2, 16).unwrap());
         let changed_host = BTreeMap::from([
             (2, rank2.clone()),
             (
                 3,
-                rank_endpoint(3, "/worker", Some("pc2-lan"), Some("/worker")).unwrap(),
+                rank_endpoint(3, "/worker", Some("pc2-lan"), Some("/worker"), Some(DIGEST))
+                    .unwrap(),
             ),
         ]);
         assert_ne!(
@@ -808,12 +823,30 @@ mod tests {
             (2, rank2.clone()),
             (
                 3,
-                rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/other")).unwrap(),
+                rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/other"), Some(DIGEST)).unwrap(),
             ),
         ]);
         assert_ne!(
             id,
             worker_plan_id(&changed_path, 300, &limits, 2, 16).unwrap()
+        );
+        let changed_digest = BTreeMap::from([
+            (2, rank2.clone()),
+            (
+                3,
+                rank_endpoint(
+                    3,
+                    "/worker",
+                    Some("pc1-lan"),
+                    Some("/worker"),
+                    Some(&"b".repeat(64)),
+                )
+                .unwrap(),
+            ),
+        ]);
+        assert_ne!(
+            id,
+            worker_plan_id(&changed_digest, 300, &limits, 2, 16).unwrap()
         );
         assert_ne!(id, worker_plan_id(&endpoints, 301, &limits, 2, 16).unwrap());
         assert_ne!(id, worker_plan_id(&endpoints, 300, &None, 2, 16).unwrap());
@@ -837,7 +870,7 @@ mod tests {
     }
     #[test]
     fn rank_endpoints_are_explicit_and_reject_shell_metacharacters() {
-        let local = rank_endpoint(2, "/opt/vf-rank-session", None, None).unwrap();
+        let local = rank_endpoint(2, "/opt/vf-rank-session", None, None, None).unwrap();
         assert_eq!(local.rank, 2);
         assert_eq!(local.argv, vec!["/opt/vf-rank-session"]);
         let remote = rank_endpoint(
@@ -845,6 +878,7 @@ mod tests {
             "/opt/vf-rank-session",
             Some("pc1-lan"),
             Some("/opt/vf-rank-session"),
+            Some(DIGEST),
         )
         .unwrap();
         assert_eq!(remote.rank, 3);
@@ -861,18 +895,34 @@ mod tests {
                 "ConnectTimeout=10",
                 "pc1-lan",
                 "/opt/vf-rank-session",
-                "--guarded-remote"
+                "--guarded-remote",
+                "--expected-exe-sha256",
+                DIGEST
             ]
         );
-        assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), None).is_err());
-        assert!(rank_endpoint(3, "/worker", None, Some("/worker")).is_err());
+        assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), None, None).is_err());
+        assert!(rank_endpoint(3, "/worker", None, Some("/worker"), None).is_err());
+        assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), None).is_err());
+        for bad in [
+            "",
+            "ABC",
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaA",
+        ] {
+            assert!(
+                rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), Some(bad)).is_err()
+            );
+        }
         for host in ["", "-oProxyCommand", "pc1;id", "user@host", "pc1\n"] {
-            assert!(rank_endpoint(3, "/worker", Some(host), Some("/worker")).is_err());
+            assert!(
+                rank_endpoint(3, "/worker", Some(host), Some("/worker"), Some(DIGEST)).is_err()
+            );
         }
         for path in ["worker", "/", "/worker;id", "/worker$(id)", "/worker name"] {
-            assert!(rank_endpoint(3, "/worker", Some("pc1-lan"), Some(path)).is_err());
+            assert!(
+                rank_endpoint(3, "/worker", Some("pc1-lan"), Some(path), Some(DIGEST)).is_err()
+            );
         }
-        assert!(rank_endpoint(4, "/worker", None, None).is_err());
+        assert!(rank_endpoint(4, "/worker", None, None, None).is_err());
     }
     #[test]
     fn close_requires_actual_dispatched_count_not_every_position() {
