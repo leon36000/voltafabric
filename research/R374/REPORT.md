@@ -1,0 +1,9 @@
+# R374 — External model experts without VoltaFabric copies
+
+Parent: 01e446d0248700961a9ccddf18e18afac5b7cfa0. R372/373 required every expert in the input routes to be present in the VoltaFabric routing registry, including externally owned rows. That prevents a realistic mixed placement where an expert resides only in an external executor.
+
+`admit_mixed_pool_with_model_experts_f64` distinguishes the full caller-provided model expert set from the resident VoltaFabric subset. It validates all IDs, per-token uniqueness, coefficients, dimensions and identity against the full model set, and then validates every locally routed miss against the resident registry. Unknown IDs, duplicate experts and misses with no VoltaFabric owner fail closed. The prior API retains its existing behavior by supplying the registry expert set as the model set.
+
+Tests: 12 ingress tests passed in debug and release; `external_expert_without_registry_copy_can_coexist_with_real_sessions` passed in debug and release with a synthetic external expert absent from the VoltaFabric registry, two local QPN2 Session processes for the other slots, and the external row unchanged. The preceding R373 preflight/failure integration test also passed. Strict offline all-target Clippy, formatting and `git diff --check` passed. No GPU/inter-PC workload or UNKNOWN replay.
+
+The model set and external mask are caller-supplied and not yet authenticated against a checkpoint or a live immutable Strata GPU/PCIe/peer/helper plan. External completion, output initialization, wait draining and error propagation remain unqualified. This does not prove real Strata integration, numerical parity, production distribution or full generation. Next: bind those inputs to a verified donor plan and identity and integrate failure handling in isolation.

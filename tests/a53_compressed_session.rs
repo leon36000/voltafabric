@@ -8220,3 +8220,45 @@ fn mixed_pool_execute_preflights_and_never_exposes_partial_failure() {
         s.close(T);
     }
 }
+
+#[test]
+fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
+    let p = routing_problem("r374-external-only");
+    let mut ids: Vec<i32> = p.routes.iter().flatten().map(|c| c.expert as i32).collect();
+    let weights: Vec<f32> = p.routes.iter().flatten().map(|c| c.weight as f32).collect();
+    ids[0] = 777;
+    let mut all_experts = p.experts.clone();
+    all_experts.push(777);
+    let inputs: Vec<f32> = activations(6, HIDDEN as usize, 1)
+        .into_iter()
+        .flatten()
+        .map(|v| v as f32)
+        .collect();
+    let mut mask = vec![false; 12];
+    mask[0] = true;
+    let plan = voltafabric::strata_ingress::admit_mixed_pool_with_model_experts_f64(
+        &p,
+        &p.stamp,
+        LAYER,
+        6,
+        2,
+        &inputs,
+        &ids,
+        &weights,
+        &mask,
+        &all_experts,
+    )
+    .unwrap();
+    let (mut sessions, artifacts) = bound(&plan.misses().unwrap().routing);
+    let mut out = vec![99.0_f32; 12 * HIDDEN as usize];
+    let report = plan
+        .execute(&mut sessions, &artifacts, &BTreeMap::new(), T, &mut out)
+        .unwrap();
+    assert!(report.error.is_none(), "{:?}", report.error);
+    assert_eq!(report.receipts.len(), 2);
+    assert!(out[..HIDDEN as usize].iter().all(|v| *v == 99.0));
+    assert!(out[HIDDEN as usize..].iter().any(|v| *v != 99.0));
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}

@@ -471,3 +471,70 @@ fn all_external_execution_never_touches_sessions_or_output() {
     assert!(result.error.is_none());
     assert_eq!(output, vec![77.0; 8]);
 }
+
+#[test]
+fn external_experts_need_no_voltafabric_owner_but_misses_do() {
+    let mut p = template();
+    p.experts = vec![20];
+    p.registry.copies.retain(|c| c.expert == 20);
+    p.resident_order.remove(&0);
+    let plan = strata_ingress::admit_mixed_pool_with_model_experts_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 20],
+        &[0.25, 0.75],
+        &[true, false],
+        &[10, 20],
+    )
+    .unwrap();
+    assert_eq!(
+        routing::dispatch(&plan.misses().unwrap().routing)
+            .unwrap()
+            .slots[0]
+            .expert,
+        20
+    );
+    assert!(strata_ingress::admit_mixed_pool_with_model_experts_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 20],
+        &[0.25, 0.75],
+        &[false, true],
+        &[10, 20],
+    )
+    .is_err());
+    assert!(strata_ingress::admit_mixed_pool_with_model_experts_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[99, 20],
+        &[0.25, 0.75],
+        &[true, false],
+        &[10, 20],
+    )
+    .is_err());
+    assert!(strata_ingress::admit_mixed_pool_with_model_experts_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 10],
+        &[0.25, 0.75],
+        &[true, true],
+        &[10, 20],
+    )
+    .is_err());
+}

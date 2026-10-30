@@ -6,7 +6,10 @@
 //! attempt. It refuses negative expert IDs. The FP16 path refuses inexact
 //! conversion; the separate FP64 path preserves finite FP32 activations.
 use crate::{completion, invalid, moe, process, routing, session, Error, Result};
-use std::{collections::BTreeMap, time::Duration};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    time::Duration,
+};
 
 #[derive(Debug, Clone)]
 pub struct AdmittedPoolBatch {
@@ -131,7 +134,37 @@ pub fn admit_mixed_pool_f64(
     weights: &[f32],
     externally_owned: &[bool],
 ) -> Result<MixedPoolBatch> {
-    let full = validate_pool(
+    admit_mixed_pool_with_model_experts_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+        externally_owned,
+        &template.experts,
+    )
+}
+
+/// The model expert set includes externally hosted experts; only miss experts
+/// must appear in the VoltaFabric resident registry. The set and ownership mask
+/// must be bound to the actual model and execution plan by the caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_mixed_pool_with_model_experts_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    externally_owned: &[bool],
+    model_experts: &[u32],
+) -> Result<MixedPoolBatch> {
+    validate_pool_shape(
         template,
         expected_stamp,
         layer,
@@ -141,6 +174,29 @@ pub fn admit_mixed_pool_f64(
         ids,
         weights,
     )?;
+    let experts: BTreeSet<_> = model_experts.iter().copied().collect();
+    if experts.is_empty()
+        || experts.len() > 1024
+        || experts.len() != model_experts.len()
+        || template.experts.iter().any(|e| !experts.contains(e))
+    {
+        return Err(invalid("invalid model expert set"));
+    }
+    for (ids_row, weights_row) in ids.chunks_exact(top_k).zip(weights.chunks_exact(top_k)) {
+        let mut used = BTreeSet::new();
+        for (&id, &weight) in ids_row.iter().zip(weights_row) {
+            let expert = u32::try_from(id).map_err(|_| invalid("negative pool expert ID"))?;
+            if !experts.contains(&expert)
+                || !used.insert(expert)
+                || !weight.is_finite()
+                || weight < 0.0
+            {
+                return Err(invalid(
+                    "unknown/duplicate expert or invalid routing weight",
+                ));
+            }
+        }
+    }
     if externally_owned.len() != ids.len() || inputs.iter().any(|x| !x.is_finite()) {
         return Err(invalid("mixed pool mask or activation invalid"));
     }
@@ -165,10 +221,15 @@ pub fn admit_mixed_pool_f64(
     let misses = if positions.is_empty() {
         None
     } else {
-        let mut compact = full.clone();
+        let mut compact = template.clone();
         compact.routes = positions
             .iter()
-            .map(|&i| vec![full.routes[i / top_k][i % top_k].clone()])
+            .map(|&i| {
+                vec![moe::Choice {
+                    expert: ids[i] as u32,
+                    weight: f64::from(weights[i]),
+                }]
+            })
             .collect();
         routing::validate(&compact)?;
         let rows = positions
@@ -320,6 +381,44 @@ fn validate_pool(
     ids: &[i32],
     weights: &[f32],
 ) -> Result<routing::RoutingProblem> {
+    validate_pool_shape(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    let mut routing = template.clone();
+    routing.routes.clear();
+    for (id_row, weight_row) in ids.chunks_exact(top_k).zip(weights.chunks_exact(top_k)) {
+        let mut route = Vec::with_capacity(top_k);
+        for (&id, &weight) in id_row.iter().zip(weight_row) {
+            let expert = u32::try_from(id).map_err(|_| invalid("negative pool expert ID"))?;
+            route.push(moe::Choice {
+                expert,
+                weight: f64::from(weight),
+            });
+        }
+        routing.routes.push(route);
+    }
+    routing::validate(&routing)?;
+    Ok(routing)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_pool_shape(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+) -> Result<()> {
     routing::validate(template)?;
     if template.stamp != *expected_stamp || layer != expected_stamp.layer {
         return Err(invalid("stale pool identity or layer"));
@@ -338,19 +437,5 @@ fn validate_pool(
     if inputs.len() != activations || ids.len() != slots || weights.len() != slots {
         return Err(invalid("pool input shape mismatch"));
     }
-    let mut routing = template.clone();
-    routing.routes.clear();
-    for (id_row, weight_row) in ids.chunks_exact(top_k).zip(weights.chunks_exact(top_k)) {
-        let mut route = Vec::with_capacity(top_k);
-        for (&id, &weight) in id_row.iter().zip(weight_row) {
-            let expert = u32::try_from(id).map_err(|_| invalid("negative pool expert ID"))?;
-            route.push(moe::Choice {
-                expert,
-                weight: f64::from(weight),
-            });
-        }
-        routing.routes.push(route);
-    }
-    routing::validate(&routing)?;
-    Ok(routing)
+    Ok(())
 }
