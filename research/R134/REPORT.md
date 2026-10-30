@@ -1,0 +1,7 @@
+# R134 — oracle analytique CPU d'un expert réel
+
+Deux implémentations CPU ont traité le même échantillon réel R132 : une formule Python scalaire avec `math.fsum`, puis une construction de matrices et des produits PyTorch CPU float64. Elles supposent toutes deux l'ordre d'entrée E2M1 bas nibble en premier, les échelles E4M3 par blocs de 16 et les facteurs `weight_scale_2` comme multiplicateurs. Elles appliquent gate, SiLU, up, down et le coefficient 0,375 une seule fois. L'entrée synthétique et les tolérances (absolue et relative 1e-10) étaient prédéclarées dans `plan.json` SHA `0acf67422fe915ee96cf9ba84d666ceb648fe92830d63c4e69de4df2acb0a315`.
+
+Les 2 048 sorties sont toutes dans la tolérance, avec écart absolu maximal `2.168404344971009e-18`. Les données et les programmes sont liés par SHA dans les reçus ; Python 3.12 et Torch 2.10 CPU, aucun GPU. Le SHA des doubles scalaires est indiqué à titre de témoin pour cette exécution, pas comme promesse de reproductibilité binaire multi-plateforme.
+
+Cette concordance vérifie deux calculs analytiques **sous les mêmes hypothèses de format** ; elle ne prouve pas indépendamment ces hypothèses, ne reproduit pas les arrondis FP16/FP32 du kernel QPN2, ne compare pas à son prépacking natif, ne vérifie pas le SHA LFS du shard entier et ne valide pas un modèle complet. Aucune sortie n'est promue comme réponse de modèle. Les échelles utilisées et les deux sources de code restent privées et identifiées dans R132/R134. Les dépendances 1Cat et le runtime restent à qualifier.

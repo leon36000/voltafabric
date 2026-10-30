@@ -1,0 +1,27 @@
+{
+  "argv": [
+    "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/r125-isolated-1cat-20261028/venv/bin/python",
+    "-m",
+    "pip",
+    "install",
+    "--dry-run",
+    "--ignore-installed",
+    "--only-binary=:all:",
+    "--no-cache-dir",
+    "--timeout",
+    "8",
+    "--retries",
+    "0",
+    "--index-url",
+    "https://pypi.org/simple",
+    "--report",
+    "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/r128-resolver-dry-run-20261028/report.json",
+    "/run/media/pc1/Infrastructure/Naos/60_travaux/VoltaFabric-offline-20261007-cd798a1c/.runs/r125-isolated-1cat-20261028/1cat_vllm-1.2.2-cp312-cp312-linux_x86_64.whl"
+  ],
+  "wheel_sha256": "8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6",
+  "write_limit_per_file_bytes": 134217728,
+  "timeout_seconds": 110,
+  "gpu": false,
+  "install": false,
+  "status": "STARTED"
+}

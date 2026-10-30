@@ -1,0 +1,7 @@
+# R124 — préparation des sept patches du donneur
+
+R123 a identifié sur PC1 un checkout propre du donneur à `b1a2181702e609dc92591343e46c63d1324ade43`. Les sept fichiers déployés par son bootstrap ont été lus et leur SHA-256 vérifié avant copie ; le huitième fichier est l'adaptateur Skinny VoltaFabric épinglé. La présente préparation privée étend R122 : elle vérifie le wheel 1Cat exact, les sept originaux extraits et les huit patches. Elle conserve originaux et candidats séparément, sans toucher au wheel ou à une installation active.
+
+Exécution CPU réelle sur PC4 : `/srv/zone-tempon/r124-complete-overlay-20261028/prepared`, exit 0. `pc4-receipt.json` recoupe le SHA du préparateur, les sept originaux et huit candidats. Neuf tests unitaires CPU synthétiques passent : succès, source ou wheel altéré, SHA original incorrect, jeu de sources incomplet, dossier existant, symlink, module déjà présent et syntaxe invalide. La première exécution des tests a échoué car le module n'existait pas encore.
+
+Ce résultat est un ensemble de fichiers préparés **non installés**. Il n'a pas résolu les dépendances en conflit, chargé les objets natifs, importé 1Cat-vLLM ou lancé un GPU, un modèle ou une couche. Les traitements d'identité/coefficients et le Collector n'ont pas été requalifiés par ces tests. Avant utilisation, créer un environnement véritablement isolé, qualifier ses versions et préserver les licences ; le wheel et les fichiers de Zone Tempon ne sont pas une sauvegarde du projet.

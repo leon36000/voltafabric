@@ -1,0 +1,13 @@
+{
+  "status": "R121_1CAT_WHEEL_VERIFIED_STATIC_SKINNY_HOOK_MISSING",
+  "wheel_path_pc4": "/srv/zone-tempon/r121-1cat-wheel-20261028/1cat_vllm-1.2.2-cp312-cp312-linux_x86_64.whl",
+  "wheel_sha256": "8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6",
+  "wheel_size": 245787536,
+  "wheel_native_objects": 8,
+  "wheel_skinny_moe_present": false,
+  "pinned_modelopt_imports_skinny_moe": true,
+  "donor_bootstrap_installs_skinny_moe": false,
+  "dependency_conflict": "wheel declares tilelang==0.1.9 and apache-tvm-ffi==0.1.9; donor bootstrap intentionally overrides both to 0.1.10, requiring explicit isolated qualification",
+  "limitations": "Static zip and pinned source inspection only; no install, import, model, GPU or claim of runtime failure. No source modified.",
+  "next": "Prepare an isolated package overlay and CPU tests that preserve installed upstream files, verify exact wheel/patch hashes and prove skinny_moe availability before runtime admission."
+}

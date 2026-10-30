@@ -1,0 +1,26 @@
+{
+  "full_shard_sha_verified": false,
+  "header_result_sha256": "880b324cde9f333799b88c8a8a9ff20423fad891a72dfff7470b6ce44559bb7c",
+  "header_sha256": "0489a7e3ccdbfd6fc395a83982c74f7ce0b4ce582b71bf73487114412843963f",
+  "max_response_bytes": 1769496,
+  "no_retry": true,
+  "oracle_contract": "Verify exact offsets, lengths, file digests and finite positive F32 scalar values; independent numerical dequantization and model output remain future work.",
+  "ranges": {
+    "block_scales": [
+      1973147048,
+      1973343655
+    ],
+    "codes": [
+      3320632744,
+      3322205607
+    ],
+    "scalars": [
+      6937632,
+      6937655
+    ]
+  },
+  "revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+  "shard_bytes": 10006877608,
+  "source": "https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4/resolve/1355db6a052410cfd62085d94b58866fd0f2c3c5/model-00001-of-00003.safetensors",
+  "total_bytes": 1769496
+}

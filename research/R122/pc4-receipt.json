@@ -1,0 +1,18 @@
+{
+  "overlay_sha256": "76b48860a54334245d71844c084d0b17732cbb63705dc22d9bce0a011eba6960",
+  "exit": 0,
+  "manifest": {
+    "note": "Two donor patches and VoltaFabric adapter only; remaining bootstrap patches, dependencies and runtime are not admitted.",
+    "originals": {
+      "marlin.py": "6dd9892f215049f24bd6479cca32463a6256baba5957b3ed549e35f210502e06",
+      "modelopt.py": "1c58627e479e13aea2ad26c5da122a3a65a7335c3a06a812d4a7f5a20e94ef11"
+    },
+    "patches": {
+      "marlin.py": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147",
+      "modelopt.py": "7d8288560318c37c340c6aff44c7d2c32ff80d7c22bd9b2eb82cb82e6bd1fb8f",
+      "skinny_moe.py": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd"
+    },
+    "status": "PREPARED_NOT_INSTALLED",
+    "wheel_sha256": "8a628983ad9d675559910372643220c418b307ddc7fd52ac65a7f5fbcb104bc6"
+  }
+}

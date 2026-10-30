@@ -1,0 +1,7 @@
+# R127 — métadonnées des dépendances CUDA de Torch 2.10
+
+Depuis PC1, lecture bornée des métadonnées PyPI uniquement. Pour la roue exacte `torch-2.10.0-cp312-cp312-manylinux_2_28_x86_64.whl`, SHA-256 `787124e7db3b379d4f1ed54dd12ae7c741c16a4d29b49c0226a89bea50923ffb`, les métadonnées PEP 658 ont été lues et leur SHA-256 vérifié contre l'index PyPI. Elles indiquent notamment `nvidia-cuda-runtime-cu12==12.8.90` et `nvidia-cuda-nvrtc-cu12==12.8.93` sur Linux x86-64. Cela décrit ses dépendances déclarées, pas une preuve d'exécution ou de support V100.
+
+Dix-sept dépendances CUDA/Triton/CUDA bindings épinglées dans ces métadonnées ont chacune une roue compatible avec les tags Python/plateforme PC1, identifiée dans `stdout.json` avec nom, version, taille, URL et SHA-256 PyPI. Elles totalisent **3 202 416 353 octets comprimés** ; avec la roue Torch exacte, **4 118 128 305 octets**. Ce n'est ni la taille installée, ni la liste complète des 71 dépendances 1Cat ; fichiers transitoires, autres paquets et environnement nécessiteront plus d'espace. Certaines roues peuvent avoir des dépendances supplémentaires ; la résolution complète reste ouverte.
+
+Cette lecture ne télécharge et n'installe aucune roue. Elle n'importe pas Torch, n'interroge pas CUDA ou un GPU et ne qualifie ni la VM V100 ni l'override TileLang/TVM FFI. Les tags ont été évalués sur PC1 seulement. Les paquets effectivement choisis devront être récupérés avec limites et empreintes, puis testés dans l'environnement isolé avant admission.

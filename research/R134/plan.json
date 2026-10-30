@@ -1,0 +1,12 @@
+{
+  "coeff": 0.375,
+  "gpu": false,
+  "input": "x[i]=((i%31)-15)/16 for i in 0..2047",
+  "mathematics": "row-major E2M1 low nibble first, E4M3 block scales group16, weight_scale_2, gate silu * up, down, coefficient once; high precision float64",
+  "model_revision": "1355db6a052410cfd62085d94b58866fd0f2c3c5",
+  "scope": "single expert CPU analytical comparison only, no QPN2 FP16 intermediate model and no complete shard hash",
+  "tolerance": {
+    "abs": 1e-10,
+    "rel": 1e-10
+  }
+}

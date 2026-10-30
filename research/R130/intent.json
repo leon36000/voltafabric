@@ -1,0 +1,1 @@
+{"argv": ["ssh", "-o", "BatchMode=yes", "-o", "StrictHostKeyChecking=yes", "-o", "ConnectTimeout=8", "pc1-lan", "python3", "-B", "-"], "source_sha256": "f3edfa706a5eff58f0d3e3d25caf5a091c33f2d4ac9e1e69dda1522f48965dbe", "no_weight_bytes": true}

@@ -1,0 +1,1 @@
+{"argv_kind": "ssh pc1-lan Python3.12 CPU stdin; code pinned", "source_sha256": "7f4e6e0e0f9d2a187fe5cd87750cb62f50b6a796b169922426ae9a16962f7238", "plan_sha256": "0acf67422fe915ee96cf9ba84d666ceb648fe92830d63c4e69de4df2acb0a315", "payload_bytes": 2359370, "gpu": false, "no_retry": true}

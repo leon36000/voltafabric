@@ -1,0 +1,9 @@
+# R130 — métadonnées partielles d'un checkpoint MoE
+
+Pour le modèle `nvidia/Qwen3.6-35B-A3B-NVFP4` à la révision `1355db6a052410cfd62085d94b58866fd0f2c3c5`, un premier essai de lecture complète de l'index a refusé avant parsing parce que celui-ci dépassait la borne de 12 000 000 octets. L'API indique ensuite une taille de 13 726 227 octets pour cet index. L'erreur initiale est conservée (`stderr.log`, reçu exit 1) ; elle ne prouve pas un défaut du modèle.
+
+Une approche différente, par requête HTTP Range, a lu seulement les 262 144 premiers octets de l'index après contrôle du code 206 et de Content-Range. Ce fragment contient des noms de tenseurs de la couche 0, expert 0 : `gate_proj`, `up_proj` et `down_proj`, chacun avec entrées `input_scale`, `weight`, `weight_scale` et `weight_scale_2`, référencées vers le premier shard. Le fragment a son propre SHA dans `range.json` ; il ne vérifie pas l'index complet.
+
+Une autre requête a lu les huit octets de longueur de l'en-tête du premier safetensors : 6 937 600 octets. Une lecture distincte des 262 144 premiers octets de cet en-tête a identifié les champs `input_scale` et `weight_scale_2` de l'expert 0 comme des scalaires F32. Les formes et codes des tenseurs `weight` et `weight_scale` ne sont pas dans cette portion observée ; on ne doit pas les inventer. Ces lectures portent seulement sur des métadonnées ; aucun octet de données de tenseur, modèle chargé ou GPU exécuté. Les empreintes des portions ne sont pas le SHA LFS du shard complet.
+
+Suite : confirmer par une lecture bornée de métadonnées la forme et le type de chaque poids/échelle nécessaires, puis bâtir un export ou oracle d'une couche avec un contrat explicite. Cela ne remplace pas la résolution du runtime ou la qualification numérique. Source : [checkpoint épinglé](https://huggingface.co/nvidia/Qwen3.6-35B-A3B-NVFP4/tree/1355db6a052410cfd62085d94b58866fd0f2c3c5).

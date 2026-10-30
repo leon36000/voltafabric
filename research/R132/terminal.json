@@ -1,0 +1,41 @@
+{
+  "full_shard_sha_verified": false,
+  "gpu": false,
+  "plan_sha256": "4ac81d87fbc14853e5dea524ae77bcd0d1e05f97bd03c38edc13741b21b05c78",
+  "samples": {
+    "block_scales": {
+      "bytes": 196608,
+      "range": [
+        1973147048,
+        1973343655
+      ],
+      "sha256": "98aa1d1823f373ff28fc078a0443c1de7fa45594a9cfee1751e6d3f4cacc85aa"
+    },
+    "codes": {
+      "bytes": 1572864,
+      "range": [
+        3320632744,
+        3322205607
+      ],
+      "sha256": "c1bbdf2d6c0c15d7da34352689d65530b4daf981aa6392bfb17d17010dd7e993"
+    },
+    "scalars": {
+      "bytes": 24,
+      "range": [
+        6937632,
+        6937655
+      ],
+      "sha256": "bcf1e13241cb2960c903be775ca03e1a2776d3cc560b394e92137a7fb7b715b2"
+    }
+  },
+  "scalar_values": [
+    0.0368303582072258,
+    3.233410097891465e-05,
+    0.0076729911379516125,
+    3.2152449421118945e-05,
+    0.0076729911379516125,
+    3.2152449421118945e-05
+  ],
+  "scalars_finite_positive": true,
+  "status": "RANGES_FETCHED_NO_NUMERICAL_ORACLE"
+}
