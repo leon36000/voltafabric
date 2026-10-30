@@ -1,0 +1,32 @@
+{
+  "limits": [
+    {
+      "name": "max_requests",
+      "value": 12
+    },
+    {
+      "name": "max_output_tokens",
+      "value": 18432
+    }
+  ],
+  "requests": [
+    {
+      "created_utc": "2026-10-28T00:48:21.692286+00:00",
+      "fingerprint": "1094e7685f0568c048aad9d22959e1f6296a093df66465190e1f76153bc0c286",
+      "request_id": "ac45b1cd-b47e-43a1-becc-1bd430a18cf6",
+      "reserved_output_tokens": 1536,
+      "state": "unknown",
+      "task_id": "P01",
+      "usage_json": null
+    },
+    {
+      "created_utc": "2026-10-28T00:48:21.695842+00:00",
+      "fingerprint": "7008449cc875bb0c9b1389217e97c3e0562c7d1fa5f801d375e5be3aa895f974",
+      "request_id": "65ef2ec6-fcbc-4563-b01e-14336484488a",
+      "reserved_output_tokens": 1536,
+      "state": "completed",
+      "task_id": "P02",
+      "usage_json": "{\"completion_tokens\": 811, \"prompt_tokens\": 4723, \"total_tokens\": 5534, \"completion_tokens_details\": {\"audio_tokens\": 0, \"reasoning_tokens\": 0, \"image_tokens\": 0}, \"prompt_tokens_details\": {\"audio_tokens\": 0, \"cached_tokens\": 0, \"video_tokens\": 0, \"cache_write_tokens\": 0, \"cache_creation_tokens\": 0}, \"cost\": 0.0014655377, \"is_byok\": false, \"cost_details\": {\"upstream_inference_cost\": 0.0014655377, \"upstream_inference_prompt_cost\": 0.0003301377, \"upstream_inference_completions_cost\": 0.0011354}}"
+    }
+  ]
+}
