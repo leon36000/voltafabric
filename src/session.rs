@@ -71,6 +71,8 @@ pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_EXTEND: &str = "cpu_strata_sc117_append_resident_v1";
 #[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GGML_EVICT: &str = "cpu_strata_sc117_evict_resident_v1";
+#[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32: &str = "cpu_strata_sc117_ggml_unweighted_f32_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
@@ -139,6 +141,13 @@ pub enum Request {
         index: String,
         pack_bytes: u64,
         artifact_bytes: u64,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    EvictNativeGgml {
+        stamp: moe::Stamp,
+        attempt: u64,
+        operation_id: String,
+        binding: crate::native_ggml_cpu::Binding,
     },
     #[cfg(feature = "native-ggml-cpu")]
     SealNativeGgml,
@@ -308,6 +317,15 @@ pub enum Reply {
     },
     #[cfg(feature = "native-ggml-cpu")]
     NativeGgmlReady {
+        experts: usize,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGgmlEvicted {
+        stamp: moe::Stamp,
+        attempt: u64,
+        operation_id: String,
+        binding: crate::native_ggml_cpu::Binding,
+        bytes: u64,
         experts: usize,
     },
     #[cfg(feature = "native-ggml-cpu")]
@@ -2577,6 +2595,7 @@ fn serve_impl(
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_EXTEND.into());
+                        hello.capabilities.push(CAPABILITY_NATIVE_GGML_EVICT.into());
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32.into());
@@ -2610,6 +2629,7 @@ fn serve_impl(
                 request,
                 Request::LoadNativeGgmlRaw { .. }
                     | Request::ExtendNativeGgmlRaw { .. }
+                    | Request::EvictNativeGgml { .. }
                     | Request::SealNativeGgml
                     | Request::ExecNativeGgml { .. }
                     | Request::ExecNativeGgmlUnweightedF32 { .. }
@@ -2710,6 +2730,39 @@ fn serve_impl(
                             }
                             Err(error) => send_reply(output, &Reply::Refused { error })?,
                         }
+                    }
+                    Err(error) => send_reply(output, &Reply::Refused { error })?,
+                }
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::EvictNativeGgml {
+                stamp,
+                attempt,
+                operation_id,
+                binding,
+            } => {
+                let result = native_worker
+                    .as_mut()
+                    .ok_or_else(|| invalid("native eviction worker not sealed"))
+                    .and_then(|worker| {
+                        worker.evict_owner(&stamp, attempt, &operation_id, &binding)
+                    });
+                match result {
+                    Ok((bytes, experts)) => {
+                        native_payload_bytes = native_payload_bytes
+                            .checked_sub(bytes)
+                            .ok_or_else(|| invalid("native eviction accounting underflow"))?;
+                        send_reply(
+                            output,
+                            &Reply::NativeGgmlEvicted {
+                                stamp,
+                                attempt,
+                                operation_id,
+                                binding,
+                                bytes,
+                                experts,
+                            },
+                        )?;
                     }
                     Err(error) => send_reply(output, &Reply::Refused { error })?,
                 }
@@ -3489,6 +3542,18 @@ pub struct Session {
     reaped: bool,
 }
 
+/// Exact local eviction request; the caller supplies durable operation identity
+/// and reconciles uncertain acknowledgements outside this CPU session.
+#[cfg(feature = "native-ggml-cpu")]
+pub struct NativeEviction<'a> {
+    pub stamp: &'a moe::Stamp,
+    pub attempt: u64,
+    pub operation_id: &'a str,
+    pub binding: &'a crate::native_ggml_cpu::Binding,
+    pub expected_bytes: u64,
+    pub expected_remaining: usize,
+}
+
 impl std::fmt::Debug for Session {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Session")
@@ -3616,6 +3681,69 @@ impl Session {
             _ => {
                 self.usable = false;
                 Err(invalid("native append reply identity"))
+            }
+        }
+    }
+
+    /// Evict only after the caller has committed the last batch globally. A lost,
+    /// refused or mismatched acknowledgement makes the session unusable; never replay.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn evict_native_ggml(&mut self, e: &NativeEviction<'_>, timeout: Duration) -> Result<()> {
+        if timeout.is_zero()
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GGML_EVICT)
+            || e.binding.rank != self.rank
+            || e.attempt == 0
+            || !sha256::is_hex_digest(e.operation_id)
+            || e.stamp.model_revision != e.binding.model_revision
+            || e.stamp.layer != e.binding.layer
+            || e.stamp.epoch != e.binding.epoch
+            || !(1..=4 * 1024 * 1024).contains(&e.expected_bytes)
+            || !(1..crate::native_ggml_cpu::MAX_NATIVE_EXPERTS).contains(&e.expected_remaining)
+        {
+            return Err(invalid("native eviction request"));
+        }
+        let request = Request::EvictNativeGgml {
+            stamp: e.stamp.clone(),
+            attempt: e.attempt,
+            operation_id: e.operation_id.into(),
+            binding: e.binding.clone(),
+        };
+        if let Err(error) = self.send(&request) {
+            self.usable = false;
+            return Err(error);
+        }
+        match self.reply(timeout) {
+            Ok(Reply::NativeGgmlEvicted {
+                stamp,
+                attempt,
+                operation_id,
+                binding,
+                bytes,
+                experts,
+            }) if stamp == *e.stamp
+                && attempt == e.attempt
+                && operation_id == e.operation_id
+                && binding == *e.binding
+                && bytes == e.expected_bytes
+                && experts == e.expected_remaining =>
+            {
+                Ok(())
+            }
+            Ok(Reply::Refused { error }) => {
+                self.usable = false;
+                Err(error)
+            }
+            Ok(_) => {
+                self.usable = false;
+                Err(invalid("native eviction acknowledgement differs"))
+            }
+            Err(error) => {
+                self.usable = false;
+                Err(error)
             }
         }
     }

@@ -27,6 +27,7 @@ pub struct Binding {
 pub struct Resident {
     binding: Binding,
     owner: vf_ggml_native_ffi::NativeResident,
+    payload_bytes: u64,
 }
 impl Resident {
     /// Recheck the complete local binding and payload hash before native load.
@@ -54,7 +55,11 @@ impl Resident {
             &expert.bytes,
         )
         .map_err(invalid)?;
-        Ok(Self { binding, owner })
+        Ok(Self {
+            binding,
+            owner,
+            payload_bytes: expected.bytes,
+        })
     }
     pub fn binding(&self) -> &Binding {
         &self.binding
@@ -73,6 +78,8 @@ pub struct RankWorker {
     scope: Option<(String, String)>,
     last_attempt: u64,
     terminal: bool,
+    last_completed: Option<(crate::moe::Stamp, u64)>,
+    evictions: std::collections::BTreeSet<String>,
 }
 
 /// Unweighted finite FP32 rows; this is not the preweighted FP32 reduction contract.
@@ -114,6 +121,8 @@ impl RankWorker {
             scope: None,
             last_attempt: 0,
             terminal: false,
+            last_completed: None,
+            evictions: std::collections::BTreeSet::new(),
         })
     }
 
@@ -143,6 +152,37 @@ impl RankWorker {
 
     pub fn owner_count(&self) -> usize {
         self.owners.len()
+    }
+
+    /// Remove a fully identified owner only after a completed local execution.
+    /// The caller must establish that the enclosing batch committed globally;
+    /// this in-memory operation set is not a durable replay ledger.
+    pub fn evict_owner(
+        &mut self,
+        stamp: &crate::moe::Stamp,
+        attempt: u64,
+        operation_id: &str,
+        binding: &Binding,
+    ) -> Result<(u64, usize)> {
+        if self.terminal
+            || self.owners.len() <= 1
+            || !sha256::is_hex_digest(operation_id)
+            || self.evictions.len() >= 4096
+            || self.evictions.contains(operation_id)
+            || self.last_completed.as_ref() != Some(&(stamp.clone(), attempt))
+        {
+            return Err(invalid("native eviction state or identity"));
+        }
+        let index = self
+            .owners
+            .iter()
+            .position(|owner| owner.binding() == binding)
+            .ok_or_else(|| invalid("native eviction binding differs"))?;
+        self.evictions.insert(operation_id.to_owned());
+        let owner = self.owners.remove(index);
+        let bytes = owner.payload_bytes;
+        drop(owner);
+        Ok((bytes, self.owners.len()))
     }
 
     /// Returns compact, unweighted FP16 rows only after all rank slots succeed.
@@ -290,6 +330,8 @@ impl RankWorker {
         })();
         if work.is_err() {
             self.terminal = true;
+        } else {
+            self.last_completed = Some((stamp.clone(), attempt));
         }
         work
     }
