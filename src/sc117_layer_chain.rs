@@ -491,6 +491,31 @@ fn select_evictions_with_rank(
     counts: &BTreeMap<(u32, u32), usize>,
     rank_target: Option<(u32, u64, u64)>,
 ) -> Result<Vec<EvictionCandidate>> {
+    match select_evictions_ordered(used, target, max_evictions, candidates, counts, rank_target) {
+        Ok(plan) => Ok(plan),
+        Err(error)
+            if error.code == "INVALID_INPUT"
+                && error.message == "eviction target cannot be met safely" =>
+        {
+            // Pure preflight fallback: prefer larger payloads, keeping the
+            // original LRU order for ties. This is a heuristic, not an
+            // exhaustive feasibility search.
+            let mut by_size = candidates.to_vec();
+            by_size.sort_by_key(|c| std::cmp::Reverse(c.bytes));
+            select_evictions_ordered(used, target, max_evictions, &by_size, counts, rank_target)
+        }
+        Err(error) => Err(error),
+    }
+}
+
+fn select_evictions_ordered(
+    used: u64,
+    target: u64,
+    max_evictions: usize,
+    candidates: &[EvictionCandidate],
+    counts: &BTreeMap<(u32, u32), usize>,
+    rank_target: Option<(u32, u64, u64)>,
+) -> Result<Vec<EvictionCandidate>> {
     if rank_target.is_some_and(|(_, rank_used, _)| rank_used > used) {
         return Err(invalid("rank eviction accounting"));
     }
@@ -1077,7 +1102,7 @@ mod tests {
     }
 
     #[test]
-    fn lru_eviction_can_refuse_a_feasible_unequal_payload_plan() {
+    fn size_fallback_finds_a_feasible_unequal_payload_plan() {
         let candidates = [
             EvictionCandidate {
                 layer: 0,
@@ -1095,13 +1120,17 @@ mod tests {
             },
         ];
         let counts = BTreeMap::from([((0, 2), 3)]);
-        // LRU consumes the one-operation budget on the smaller candidate.
-        assert!(select_evictions(10, 6, 1, &candidates, &counts).is_err());
-        // The later candidate alone is a valid plan that preserves two residents.
+        // The LRU-only pass fails; the larger candidate is a safe fallback.
+        assert!(select_evictions_ordered(10, 6, 1, &candidates, &counts, None).is_err());
         assert_eq!(
-            select_evictions(10, 6, 1, &candidates[1..], &counts).unwrap(),
+            select_evictions(10, 6, 1, &candidates, &counts).unwrap(),
             vec![candidates[1]]
         );
+        assert_eq!(
+            select_evictions_with_rank(10, 6, 1, &candidates, &counts, Some((2, 10, 6))).unwrap(),
+            vec![candidates[1]]
+        );
+        assert!(select_evictions(10, 6, 1, &candidates, &BTreeMap::new()).is_err());
     }
 
     #[test]

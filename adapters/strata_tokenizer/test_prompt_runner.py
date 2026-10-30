@@ -37,6 +37,9 @@ class RunnerTests(unittest.TestCase):
         value["plan_id"] = "r508-" + "a"*64
         with self.assertRaisesRegex(ValueError, "prompt digest"):
             run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+        value["plan_id"] = "r512-" + "a"*64
+        with self.assertRaisesRegex(ValueError, "prompt digest"):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
 
     def test_eos_binding_is_passed_and_checked_before_returning_text(self):
         calls = []
