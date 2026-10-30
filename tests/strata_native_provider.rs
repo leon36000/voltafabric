@@ -845,6 +845,7 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
         ledger_path: ledger.to_str().unwrap().into(),
         endpoints,
         bindings,
+        resident_payload_limit: None,
         timeout_ms: 30_000,
     };
     fn send(w: &mut ChildStdin, value: &impl serde::Serialize) {
@@ -996,6 +997,87 @@ fn persistent_native_bridge_loads_sparse_pack_and_routes_real_child_sessions() {
     assert!(matches!(recv(&mut output), Reply::Closed));
     drop(input);
     assert!(child.wait().unwrap().success());
+    // Five resident experts in one real worker, with an explicit byte budget.
+    let mut expanded: Init = serde_json::from_str(&serde_json::to_string(&init).unwrap()).unwrap();
+    expanded.model_experts = (0..5).collect();
+    expanded.template.experts = (0..5).collect();
+    expanded.template.registry.copies = (0..5)
+        .map(|expert| Replica {
+            expert,
+            rank: 2,
+            local: expert,
+        })
+        .collect();
+    expanded.template.resident_order = BTreeMap::from([(2, (0..5).collect())]);
+    expanded.endpoints.retain(|endpoint| endpoint.rank == 2);
+    expanded.bindings = (0..5)
+        .map(|expert| {
+            let mut item = b.clone();
+            item.expert = expert;
+            item.local = expert;
+            if expert >= 2 {
+                item.blob_sha256 = BLOB_SHA.into();
+            }
+            item
+        })
+        .collect();
+    expanded.resident_payload_limit = Some(5 * 2_176_000);
+    let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut input = child.stdin.take().unwrap();
+    let mut output = BufReader::new(child.stdout.take().unwrap());
+    send(&mut input, &expanded);
+    assert!(matches!(recv(&mut output), Reply::Ready { ranks } if ranks == vec![2]));
+    send(
+        &mut input,
+        &Request::Batch {
+            batch: 101,
+            tokens: 1,
+            top_k: 2,
+            inputs: x.clone(),
+            ids: vec![0, 4],
+            kinds: vec![-1, -1],
+        },
+    );
+    match recv(&mut output) {
+        Reply::Completed {
+            batch: 101,
+            cpu_rows,
+        } => {
+            assert_eq!(cpu_rows.len(), 2);
+            assert_eq!(
+                cpu_rows[0]
+                    .value
+                    .iter()
+                    .map(|v| v.to_bits())
+                    .collect::<Vec<_>>(),
+                expected.iter().map(|v| v.to_bits()).collect::<Vec<_>>()
+            );
+            assert!(cpu_rows[1].value.iter().all(|v| *v == 0.0));
+        }
+        other => panic!("five-expert batch failed: {other:?}"),
+    }
+    send(&mut input, &Request::Shutdown);
+    assert!(matches!(recv(&mut output), Reply::Closed));
+    drop(input);
+    assert!(child.wait().unwrap().success());
+    expanded.resident_payload_limit = Some(5 * 2_176_000 - 1);
+    let mut child = Command::new(env!("CARGO_BIN_EXE_vf-strata-native-bridge"))
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    let mut input = child.stdin.take().unwrap();
+    let mut output = BufReader::new(child.stdout.take().unwrap());
+    send(&mut input, &expanded);
+    assert!(matches!(recv(&mut output), Reply::Failed { .. }));
+    drop(input);
+    assert!(!child.wait().unwrap().success());
     #[cfg(unix)]
     for client_path in [
         std::env::var_os("VF_STRATA_CPP_CLIENT"),

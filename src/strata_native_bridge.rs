@@ -28,6 +28,9 @@ pub struct Init {
     pub ledger_path: String,
     pub endpoints: Vec<Endpoint>,
     pub bindings: Vec<Binding>,
+    /// Limit on total resident payload bytes; excludes protocol buffers and RSS.
+    #[serde(default)]
+    pub resident_payload_limit: Option<u64>,
     pub timeout_ms: u64,
 }
 #[derive(Debug, Serialize, Deserialize)]
@@ -73,7 +76,7 @@ impl Coordinator {
         if init.template.hidden != 2560
             || !(1..=4).contains(&init.endpoints.len())
             || init.bindings.is_empty()
-            || init.bindings.len() > 4
+            || init.bindings.len() > crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
             || !(1..=60_000).contains(&init.timeout_ms)
             || !Path::new(&init.pack_path).is_absolute()
             || !Path::new(&init.ledger_path).is_absolute()
@@ -119,9 +122,26 @@ impl Coordinator {
             return Err(invalid("native pack must be a regular file"));
         }
         let layout = NativeLayout::parse_sc117_v3(&init.index, metadata.len())?;
+        let limit = init
+            .resident_payload_limit
+            .unwrap_or(crate::native_ggml_cpu::DEFAULT_NATIVE_PAYLOAD_BYTES);
+        if limit == 0 || limit > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES {
+            return Err(invalid("native bridge payload budget"));
+        }
+        let total = init.bindings.iter().try_fold(0_u64, |sum, binding| {
+            let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+            sum.checked_add(span.bytes)
+                .ok_or_else(|| invalid("native bridge payload overflow"))
+        })?;
+        if total > limit {
+            return Err(invalid("native bridge payload budget exceeded"));
+        }
         let mut loads = BTreeMap::<u32, Vec<(Binding, Vec<u8>)>>::new();
         for (&rank, order) in &init.template.resident_order {
-            if !endpoints.contains_key(&rank) || order.is_empty() || order.len() > 4 {
+            if !endpoints.contains_key(&rank)
+                || order.is_empty()
+                || order.len() > crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
+            {
                 return Err(invalid("native bridge resident order"));
             }
             let mut owners = Vec::new();

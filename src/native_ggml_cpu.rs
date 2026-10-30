@@ -6,6 +6,11 @@ use crate::{
     Result,
 };
 
+/// Per coordinator and per rank: bounds only resident payload bytes, not total RSS.
+pub const MAX_NATIVE_EXPERTS: usize = 512;
+pub const MAX_NATIVE_PAYLOAD_BYTES: u64 = 1_250_000_000;
+pub const DEFAULT_NATIVE_PAYLOAD_BYTES: u64 = 16 * 1024 * 1024;
+
 #[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Binding {

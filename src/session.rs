@@ -2308,6 +2308,8 @@ fn serve_impl(
     #[cfg(feature = "native-ggml-cpu")]
     let mut native_owners: Vec<crate::native_ggml_cpu::Resident> = Vec::new();
     #[cfg(feature = "native-ggml-cpu")]
+    let mut native_payload_bytes = 0_u64;
+    #[cfg(feature = "native-ggml-cpu")]
     let mut native_worker: Option<crate::native_ggml_cpu::RankWorker> = None;
     loop {
         let mut raw_completions = false;
@@ -2623,8 +2625,11 @@ fn serve_impl(
                     || engram_resident.is_some()
                     || native_worker.is_some()
                     || binding.rank != rank
-                    || native_owners.len() >= 4
+                    || native_owners.len() >= crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
                     || artifact_bytes > 4 * 1024 * 1024
+                    || native_payload_bytes
+                        .checked_add(artifact_bytes)
+                        .is_none_or(|n| n > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES)
                 {
                     let error = invalid("native load state, rank or size");
                     send_reply(
@@ -2665,6 +2670,7 @@ fn serve_impl(
                 })();
                 match loaded {
                     Ok(owner) => {
+                        native_payload_bytes += artifact_bytes;
                         native_owners.push(owner);
                         send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
                     }
@@ -3510,7 +3516,7 @@ impl Session {
             .capabilities
             .iter()
             .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
-            || !(1..=4).contains(&expected_experts)
+            || !(1..=crate::native_ggml_cpu::MAX_NATIVE_EXPERTS).contains(&expected_experts)
         {
             return Err(invalid("native GGML capability or expert count"));
         }

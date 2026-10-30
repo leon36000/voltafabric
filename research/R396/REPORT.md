@@ -1,0 +1,7 @@
+# R396 — bounded resident capacity beyond four experts
+
+The local native SC117 coordinator previously rejected more than four bindings and the rank-session worker independently rejected more than four owners. Both support up to 512 distinct experts, subject to a payload-byte limit. `Init.resident_payload_limit` defaults to 16 MiB and is bounded above by 1,250,000,000 bytes. Before reading blobs or launching rank sessions, the coordinator sums indexed expert sizes and rejects a limit violation. Each worker independently checks its accumulated payload and expert count. These are limits on expert payload bytes, not on actual RSS or fleet-wide memory; coordinator staging, per-worker copies, native allocations and buffers require separate aggregate admission.
+
+A bounded CPU test loaded five distinct experts into one real rank-session child using a sparse synthetic SC117 pack, executed expert 0 with a nonzero synthetic payload and expert 4 with a zero payload, and checked the output rows. A budget one byte too small was refused at initialization. All seven native-provider and three local-ledger tests passed, including the full patched donor two-layer CPU test with test-only aborting GPU/peer/fallback stubs. Clippy and formatting pass. No 512-expert load, real checkpoint, GPU or inter-PC run was performed.
+
+Next: establish actual checkpoint coverage and trusted per-expert hashes; add model-wide aggregate memory admission and controlled session ownership before attempting full-layer loading. Existing local UNKNOWN and hardware lease rules still apply.
