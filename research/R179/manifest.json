@@ -1,0 +1,9 @@
+{
+  "files": {
+    "hook.py": "f5c395a95c531984160c734bcfdd1fc1053c5c1aa825132650adfb3f14e8d18a",
+    "test_hook.py": "334bba8b2cb35706d76502a46431c791a9887ae053e3be3d2a7152926bd8c932",
+    "REPORT.md": "82c8db16472141c161f5b517a5eed2770fe54323c40d0a0590c52ed4ea7b9a15"
+  },
+  "tests": "4 CPU tests passed, exit 0",
+  "gpu": false
+}

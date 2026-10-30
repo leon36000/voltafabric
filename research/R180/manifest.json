@@ -1,0 +1,12 @@
+{
+  "files": {
+    "session_hook.py": "4f87d8c5bf753085f316f32dc2410c18408cf74613799483bc5e2732c7236aae",
+    "test_session_hook.py": "d665cfaddf662199f04dbb27f6886e0b51ff1a632fc9b76ecca5cb5262cd6c57",
+    "worker.py": "3e2b4660a28662863bceaaa47754a6220892c36e00f757f32f1b62344cb2f9ad",
+    "REPORT.md": "81d872dcf695534c69381c7a5724f928db51e68e5a3ddf552be900436c6c743c",
+    "operations/r180-b0998fa498c2428abb4295db95937608.json": "ae7933cedd6bb9676476d52ed42371dc70fa659bafa6b1d458a3e696c4a344fb",
+    "operations/r180-b0998fa498c2428abb4295db95937608.output.json": "67991066c9e6eea98b84acb0a4739a4d61b0227c8814649d6b3faadcf6194901"
+  },
+  "gpu": false,
+  "test": "3 CPU tests, exit 0"
+}

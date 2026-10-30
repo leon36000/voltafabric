@@ -1,0 +1,13 @@
+{
+  "files": {
+    "examples/r181_persistent_cpu_session.rs": "3ab1d7b2d4fa203bdaaaf03cb58fbbae538784f9aff4f757989d8d7881db8a41",
+    "research/R181/donor_hook.py": "44a628f4a9fe2133803ce12957172252244e4a38b06ffe3e7c13818048ba4601",
+    "research/R181/worker.py": "4f7cf8380e28a6c3f7ae8914cb33e12b1e80058f0b90786b728997c56b17299a",
+    "research/R181/test_persistent.py": "e047705b214b223071a12d7625556e19838b45b0f89ab51193a174ab4837e45c",
+    "research/R181/REPORT.md": "a9d6b724aa91bb614ce6acd8ad9b11c1e3557515757632579045d50426586a03",
+    "research/R181/r181-4da788dd6e35450eaa6c770057f616ca-stdout.jsonl": "47f0793a8810d2ff6e19e47c2d9d0590b593510304ba2e73bc28d02def028b40",
+    "research/R181/r181-c4153c2f0908479485263dd01b5518d1-stdout.jsonl": "c9824545496b1d5114716a7edade749763c2d9ce7347db669204873c91651341"
+  },
+  "tests": "3 passed; targeted clippy exit 0",
+  "gpu": false
+}
