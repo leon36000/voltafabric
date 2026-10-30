@@ -287,6 +287,33 @@ class RunnerTests(unittest.TestCase):
             os.close(read_fd)
             os.close(write_fd)
 
+    @unittest.skipUnless(hasattr(os, "fork"), "requires POSIX fork")
+    def test_bounded_capture_refuses_pipe_inherited_after_engine_exit(self):
+        # The direct child exits successfully after printing plausible output;
+        # its descendant retains the pipes but exits on its own shortly after.
+        program = ("import os,time; p=os.fork(); "
+                   "time.sleep(0.7) if p==0 else os.write(1,b'{}'); os._exit(0)")
+        with patch("adapters.strata_tokenizer.prompt_runner.EXIT_PIPE_GRACE_SECONDS", 0.1, create=True):
+            with self.assertRaisesRegex(RuntimeError, "output pipes remain open"):
+                _run_bounded([sys.executable, "-c", program])
+
+    def test_bounded_capture_does_not_timeout_active_engine(self):
+        program = "import time; time.sleep(0.35); print('done',end='')"
+        with patch("adapters.strata_tokenizer.prompt_runner.EXIT_PIPE_GRACE_SECONDS", 0.1):
+            result = _run_bounded([sys.executable, "-c", program])
+        self.assertEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, b"done")
+        self.assertFalse(result.stdout_truncated)
+        self.assertFalse(result.stderr_truncated)
+
+    @unittest.skipUnless(hasattr(os, "fork"), "requires POSIX fork")
+    def test_bounded_capture_refuses_inherited_stderr_alone(self):
+        program = ("import os,time; p=os.fork(); "
+                   "(os.close(1), time.sleep(0.7)) if p==0 else os.write(1,b'{}'); os._exit(0)")
+        with patch("adapters.strata_tokenizer.prompt_runner.EXIT_PIPE_GRACE_SECONDS", 0.1):
+            with self.assertRaisesRegex(RuntimeError, "output pipes remain open"):
+                _run_bounded([sys.executable, "-c", program])
+
     def test_bounded_capture_drains_both_pipes_and_marks_overflow(self):
         program = ('import sys; sys.stdout.buffer.write(b"x"*200000); sys.stdout.flush(); '
                    'sys.stderr.buffer.write(b"y"*200000); sys.stderr.flush()')

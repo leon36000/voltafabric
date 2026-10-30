@@ -17,6 +17,7 @@ import stat
 import struct
 import subprocess
 import sys
+import time
 
 from .adapter import (MAX_GENERATED_TOKENS, MAX_INPUT_POSITIONS, MAX_PROMPT_TOKENS, _unique_object,
                       decode_greedy_receipt, load_sc117)
@@ -26,6 +27,8 @@ MAX_RECEIPT_BYTES = 128 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024
 TRACE_WORDS = 37380
 TRACE_MAX_POSITIONS = 96
+# Only starts after the direct engine process exits; active engines have no new timeout.
+EXIT_PIPE_GRACE_SECONDS = 2.0
 
 
 def _verify_qsa_trace(receipt: dict) -> None:
@@ -69,8 +72,14 @@ def _run_bounded(command, *, stdout_limit=MAX_RECEIPT_BYTES, stderr_limit=MAX_ST
         with selectors.DefaultSelector() as selector:
             selector.register(child.stdout, selectors.EVENT_READ, 0)
             selector.register(child.stderr, selectors.EVENT_READ, 1)
+            exit_deadline = None
             while selector.get_map():
-                for key, _ in selector.select():
+                if child.poll() is not None:
+                    if exit_deadline is None:
+                        exit_deadline = time.monotonic() + EXIT_PIPE_GRACE_SECONDS
+                    elif time.monotonic() >= exit_deadline:
+                        raise RuntimeError("engine exited but output pipes remain open; reconcile its ledger and do not replay UNKNOWN claims")
+                for key, _ in selector.select(timeout=0.1):
                     chunk = os.read(key.fd, 65536)
                     if not chunk:
                         selector.unregister(key.fileobj)
