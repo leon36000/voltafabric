@@ -77,32 +77,67 @@ def _binary_sha(path: str) -> str:
         os.close(fd)
 
 
+def _chat_messages(prompt):
+    """Accept a bounded alternating text history, optionally starting with system."""
+    messages = [{"role": "user", "content": prompt}] if isinstance(prompt, str) else prompt
+    if not isinstance(messages, list) or not 1 <= len(messages) <= 8:
+        raise ValueError("invalid chat history")
+    offset = 1 if isinstance(messages[0], dict) and messages[0].get("role") == "system" else 0
+    if len(messages) <= offset or (len(messages) - offset) % 2 != 1:
+        raise ValueError("chat history must end with a user message")
+    total = 0
+    for i, message in enumerate(messages):
+        expected = "system" if i < offset else ("user" if (i - offset) % 2 == 0 else "assistant")
+        if (not isinstance(message, dict) or set(message) != {"role", "content"}
+                or message["role"] != expected or not isinstance(message["content"], str)
+                or not message["content"].strip()):
+            raise ValueError("invalid chat message")
+        total += len(message["content"].encode("utf-8"))
+        if total > MAX_PROMPT_BYTES:
+            raise ValueError("chat history exceeds byte limit")
+    return messages
+
+
 def _chat_prompt_ids(prompt, tokenizer, eos):
-    """One text-only user message; template controls are distinct from user text."""
-    text = prompt.strip()
-    if not text:
-        raise ValueError("empty chat message")
+    """Render a text-only history while keeping its content literal."""
+    messages = _chat_messages(prompt)
     names = ("<|im_start|>", "<|im_end|>", "<think>", "</think>")
     ids = [tokenizer.ids.get(name) for name in names]
     if (any(type(i) is not int or not 0 <= i < len(tokenizer.tokens) for i in ids)
             or [tokenizer.token_types[i] for i in ids] != [3, 3, 4, 4]
             or ids[1] != eos):
         raise ValueError("unsupported chat control tokens")
-    prefix = "<|im_start|>user\n"
-    suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
-    rendered = prefix + text + suffix
-    result = tokenizer.encode(rendered, parse_special=True, plain=((len(prefix), len(prefix) + len(text)),))
+    rendered, spans, expected = "", [], []
+    for message in messages:
+        role, text = message["role"], message["content"].strip()
+        rendered += "<|im_start|>" + role + "\n"
+        expected.append(ids[0])
+        if role == "assistant":
+            rendered += "<think>\n\n</think>\n\n"
+            expected.extend(ids[2:])
+        start = len(rendered)
+        rendered += text
+        spans.append((start, len(rendered)))
+        rendered += "<|im_end|>\n"
+        expected.append(ids[1])
+    rendered += "<|im_start|>assistant\n<think>\n\n</think>\n\n"
+    expected.extend((ids[0], ids[2], ids[3]))
+    result = tokenizer.encode(rendered, parse_special=True, plain=spans)
     if any(type(i) is not int or not 0 <= i < len(tokenizer.tokens) for i in result):
         raise ValueError("invalid chat token")
     controls = [i for i in result if tokenizer.token_types[i] != 1]
-    if controls != [ids[0], ids[1], ids[0], ids[2], ids[3]]:
+    if controls != expected:
         raise ValueError("unexpected chat control sequence")
     return result
 
 
-def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, runner=_run_bounded) -> dict:
+def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, runner=_run_bounded) -> dict:
     """Run once, and publish decoded text only after the full receipt validates."""
-    if not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
+    if type(chat) is not bool:
+        raise ValueError("invalid prompt mode")
+    if chat:
+        _chat_messages(prompt)
+    elif not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
         raise ValueError("prompt must be nonempty and bounded UTF-8")
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
@@ -111,8 +146,6 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     if (type(eos) is not int or not 0 <= eos < len(tokenizer.tokens)
             or tokenizer.token_types[eos] != 3):
         raise ValueError("invalid tokenizer EOS token")
-    if type(chat) is not bool:
-        raise ValueError("invalid prompt mode")
     prompt_ids = _chat_prompt_ids(prompt, tokenizer, eos) if chat else tokenizer.encode(prompt, parse_special=False)
     if (not 1 <= len(prompt_ids) <= MAX_PROMPT_TOKENS or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or (not chat and (t == eos or tokenizer.token_types[t] != 1)) for t in prompt_ids)):
@@ -151,7 +184,9 @@ def main() -> int:
     p.add_argument("--binary", required=True)
     p.add_argument("--binary-sha256", required=True)
     p.add_argument("--max-new-tokens", type=int, default=2)
-    p.add_argument("--chat", action="store_true", help="format one text-only user turn with the SC117 template")
+    modes = p.add_mutually_exclusive_group()
+    modes.add_argument("--chat", action="store_true", help="format one text-only user turn")
+    modes.add_argument("--messages-json", action="store_true", help="read a bounded text-only chat history as JSON")
     for name in ("dense", "shard", "pack", "index", "session", "ledger", "ple-shard", "ple-manifest"):
         p.add_argument("--" + name, required=True)
     args = p.parse_args()
@@ -159,6 +194,8 @@ def main() -> int:
     if len(raw) > MAX_PROMPT_BYTES:
         raise ValueError("prompt exceeds byte limit")
     prompt = raw.decode("utf-8", errors="strict")
+    if args.messages_json:
+        prompt = json.loads(prompt, object_pairs_hook=_unique_object)
     if _binary_sha(args.binary) != args.binary_sha256:
         raise ValueError("engine binary digest mismatch")
     manifest = json.loads(pathlib.Path(args.tokenizer_manifest).read_text(encoding="utf-8"))
@@ -166,7 +203,7 @@ def main() -> int:
     tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
     paths = [args.dense, args.shard, args.pack, args.index, args.session,
              args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat)
+    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 
