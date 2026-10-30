@@ -48,3 +48,7 @@ if(STRATA_GENERIC_SOURCE_DIR)
   target_link_libraries(vf_strata_generic_parity PRIVATE vf_native_ggml)
   add_test(NAME strata_generic_parity COMMAND vf_strata_generic_parity)
 endif()
+# Explicitly invoked local CPU diagnostic; never run automatically by CTest.
+add_executable(vf_real_expert_oracle real_expert_oracle.cpp)
+target_link_libraries(vf_real_expert_oracle PRIVATE vf_native_ggml)
+target_compile_options(vf_real_expert_oracle PRIVATE -Wall -Wextra -Werror)
