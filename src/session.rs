@@ -5279,6 +5279,13 @@ impl From<Vec<TokenInput>> for RankInputs {
 /// One planned rank EXEC: session index, rank dispatch, compacted inputs, fault.
 type RankPlan = (usize, routing::RankDispatch, RankInputs, Fault);
 
+struct ExecutedBatch<T> {
+    output: Option<T>,
+    attempt: u64,
+    receipts: Vec<ExecReceipt>,
+    error: Option<Error>,
+}
+
 /// Send every planned EXEC before reading any result, so ranks compute concurrently, then
 /// collect. All results or none; never retried. Every EXEC is encoded before the identity
 /// is claimed or any is sent: a local refusal (a frame over 16 MiB) refuses the batch
@@ -5287,11 +5294,41 @@ fn exec_all(
     sessions: &mut [Session],
     plan: Vec<RankPlan>,
     stamp: &moe::Stamp,
-    mut collector: moe::Collector,
+    collector: moe::Collector,
     recovery: bool,
     timeout: Duration,
     completion_fp16: bool,
 ) -> Result<BatchReport> {
+    let result = exec_all_with_finish(
+        sessions,
+        plan,
+        stamp,
+        collector,
+        recovery,
+        timeout,
+        completion_fp16,
+        moe::Collector::finish,
+    )?;
+    Ok(BatchReport {
+        ok: result.error.is_none(),
+        output: result.output,
+        attempt: result.attempt,
+        receipts: result.receipts,
+        error: result.error,
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn exec_all_with_finish<T>(
+    sessions: &mut [Session],
+    plan: Vec<RankPlan>,
+    stamp: &moe::Stamp,
+    mut collector: moe::Collector,
+    recovery: bool,
+    timeout: Duration,
+    completion_fp16: bool,
+    finish: fn(moe::Collector) -> Result<T>,
+) -> Result<ExecutedBatch<T>> {
     let attempt = next_attempt()?;
     let mut encoded = Vec::new();
     for (index, rank, inputs, fault) in plan {
@@ -5321,7 +5358,7 @@ fn exec_all(
         receipts.push(receipt);
     }
     let output = if error.is_none() {
-        match collector.finish() {
+        match finish(collector) {
             Ok(output) => Some(output),
             Err(e) => {
                 error = Some(e);
@@ -5332,8 +5369,7 @@ fn exec_all(
         collector.expire();
         None
     };
-    Ok(BatchReport {
-        ok: error.is_none(),
+    Ok(ExecutedBatch {
         output,
         attempt,
         receipts,
@@ -6232,6 +6268,54 @@ pub fn run_compressed_batch(
     )
 }
 
+/// Complete unweighted expert rows, ordered by token and routing slot. This
+/// uses the same admission, identity claim and rank draining as normal batches.
+/// The consumer must apply the routing coefficients once; no recovery is attempted.
+#[derive(Debug, Clone)]
+pub struct UnweightedBatchReport {
+    pub ok: bool,
+    pub output: Option<Vec<Vec<Vec<f64>>>>,
+    pub attempt: u64,
+    pub receipts: Vec<ExecReceipt>,
+    pub error: Option<Error>,
+}
+
+pub fn run_compressed_batch_unweighted(
+    sessions: &mut [Session],
+    artifacts: &[CompressedArtifact],
+    p: &routing::RoutingProblem,
+    inputs: &[Vec<f64>],
+    faults: &BTreeMap<u32, Fault>,
+    timeout: Duration,
+) -> Result<UnweightedBatchReport> {
+    let ranks_of = by_rank(p, artifacts)?;
+    check_work(p, artifacts, &ranks_of)?;
+    let digests = ranks_of
+        .iter()
+        .map(|(&rank, &index)| (rank, artifacts[index].sha256.clone()))
+        .collect();
+    let result = run_prevalidated_batch_with_finish(
+        sessions,
+        &digests,
+        p,
+        BatchInputs::F64(inputs),
+        faults,
+        timeout,
+        BatchExecutionOptions {
+            recovery: false,
+            completion_fp16: false,
+        },
+        moe::Collector::finish_unweighted_slots,
+    )?;
+    Ok(UnweightedBatchReport {
+        ok: result.error.is_none(),
+        output: result.output,
+        attempt: result.attempt,
+        receipts: result.receipts,
+        error: result.error,
+    })
+}
+
 /// One compressed-resident batch using the explicitly negotiated FP16 response format.
 /// The worker rounds each unweighted completion to finite IEEE binary16 before transport;
 /// the collector applies the unchanged route coefficients after decode.
@@ -6331,6 +6415,36 @@ fn run_prevalidated_batch(
     timeout: Duration,
     options: BatchExecutionOptions,
 ) -> Result<BatchReport> {
+    let result = run_prevalidated_batch_with_finish(
+        sessions,
+        digests,
+        p,
+        inputs,
+        faults,
+        timeout,
+        options,
+        moe::Collector::finish,
+    )?;
+    Ok(BatchReport {
+        ok: result.error.is_none(),
+        output: result.output,
+        attempt: result.attempt,
+        receipts: result.receipts,
+        error: result.error,
+    })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn run_prevalidated_batch_with_finish<T>(
+    sessions: &mut [Session],
+    digests: &BTreeMap<u32, String>,
+    p: &routing::RoutingProblem,
+    inputs: BatchInputs<'_>,
+    faults: &BTreeMap<u32, Fault>,
+    timeout: Duration,
+    options: BatchExecutionOptions,
+    finish: fn(moe::Collector) -> Result<T>,
+) -> Result<ExecutedBatch<T>> {
     match inputs {
         BatchInputs::F64(rows) => check_rows(p, rows)?,
         BatchInputs::Fp16(rows) => check_fp16_rows(p, rows)?,
@@ -6416,7 +6530,7 @@ fn run_prevalidated_batch(
         let fault = faults.get(&rank.rank).cloned().unwrap_or_default();
         plan.push((index, rank, rank_inputs, fault));
     }
-    exec_all(
+    exec_all_with_finish(
         sessions,
         plan,
         &p.stamp,
@@ -6424,6 +6538,7 @@ fn run_prevalidated_batch(
         options.recovery,
         timeout,
         options.completion_fp16,
+        finish,
     )
 }
 

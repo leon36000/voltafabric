@@ -4851,6 +4851,115 @@ fn cli_runs_a_compressed_series_end_to_end() {
 }
 
 #[test]
+fn unweighted_batch_orchestration_is_atomic_and_never_replays() {
+    let template = routing_problem("r370-slot-session-success");
+    let ids: Vec<i32> = template
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.expert as i32)
+        .collect();
+    let weights: Vec<f32> = template
+        .routes
+        .iter()
+        .flatten()
+        .map(|c| c.weight as f32)
+        .collect();
+    let mut values: Vec<f32> = activations(6, HIDDEN as usize, 7)
+        .into_iter()
+        .flatten()
+        .map(|x| x as f32)
+        .collect();
+    values[0] = 1.0001;
+    let admitted = voltafabric::strata_ingress::admit_pool_batch_f64(
+        &template,
+        &template.stamp,
+        LAYER,
+        6,
+        2,
+        &values,
+        &ids,
+        &weights,
+    )
+    .unwrap();
+    let p = admitted.routing;
+    let x = admitted.inputs;
+    let (mut sessions, artifacts) = bound(&p);
+    let result = session::run_compressed_batch_unweighted(
+        &mut sessions,
+        &artifacts,
+        &p,
+        &x,
+        &BTreeMap::new(),
+        T,
+    )
+    .unwrap();
+    assert!(result.ok, "{:?}", result.error);
+    assert_eq!(result.receipts.len(), 2);
+    let rows = result.output.unwrap();
+    let dims = moe::Model {
+        hidden: HIDDEN as usize,
+        intermediate: INTER as usize,
+        experts: vec![],
+    };
+    for slot in routing::dispatch(&p).unwrap().slots {
+        let stack = artifacts
+            .iter()
+            .find(|a| a.stack().rank() == slot.rank)
+            .unwrap()
+            .stack();
+        let index = stack
+            .physical_experts()
+            .iter()
+            .position(|e| e.id() == slot.expert)
+            .unwrap();
+        let expected =
+            moe::expert_value(&dims, &stack.dense_expert(index).unwrap(), &x[slot.token]).unwrap();
+        assert_eq!(bits(&rows[slot.token][slot.slot]), bits(&expected));
+    }
+    assert!(session::run_compressed_batch_unweighted(
+        &mut sessions,
+        &artifacts,
+        &p,
+        &x,
+        &BTreeMap::new(),
+        T
+    )
+    .is_err());
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+
+    let failed = routing_problem("r370-slot-session-failure");
+    let (mut sessions, artifacts) = bound(&failed);
+    let report = session::run_compressed_batch_unweighted(
+        &mut sessions,
+        &artifacts,
+        &failed,
+        &x,
+        &BTreeMap::from([(9, Fault::Missing)]),
+        T,
+    )
+    .unwrap();
+    assert!(!report.ok);
+    assert!(report.output.is_none());
+    assert!(report.error.is_some());
+    assert_eq!(report.receipts.len(), 2);
+    assert!(session::run_compressed_batch_unweighted(
+        &mut sessions,
+        &artifacts,
+        &failed,
+        &x,
+        &BTreeMap::new(),
+        T
+    )
+    .is_err());
+    for s in sessions {
+        s.close(T);
+    }
+}
+
+#[test]
 fn unweighted_slot_collector_receives_local_experts_in_strata_order() {
     let p = routing_problem("r369-unweighted-slots");
     let x = activations(6, HIDDEN as usize, 7);
