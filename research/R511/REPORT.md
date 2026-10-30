@@ -1,0 +1,9 @@
+# R511 — a bounded LRU eviction can reject a feasible plan
+
+Parent GitLab R510 10d120fd7d2d9d91ed92f23eac71792eb9757ce9. A Rust regression test exercises the actual planner on synthetic unequal payloads: 10 accounted bytes, target 6, three residents, one eviction permitted, and two eligible experts in LRU order of 2 and 4 bytes. The planner safely refuses after choosing the first candidate, although the second candidate alone meets the target and leaves two residents. The independent Python oracle enumerates all subsets within the budget and finds exactly that feasible alternative. This is a conservative false refusal, not an unsafe partial eviction or a numerical error. It is not shown to occur with SC117's observed equal-sized experts; no real-model impact or performance claim follows.
+
+Focused test passed in debug and release with ple-cpu-qualification in the isolated existing build, and targeted Clippy passed. An initial no-feature test selected zero tests; a second invocation failed because VF_GGML_NATIVE_BUILD was unset. Neither counts as a pass. No claim, worker, GPU, network operation or hardware reservation was used.
+
+No production policy was changed. A complete bounded replacement must preserve protection of last-selected experts, at least one resident per layer/rank, global and rank constraints, deterministic identity, preflight atomicity and no replay, and must avoid implying globally optimal selection without proof. Bind any new policy into the plan identity and verify it against an independent oracle and actual Segment/source boundaries before real generation.
+
+Source SHA256 4bfad3d2771b218c50a9b3431e5809e04bb4487e0c02b7cd7611e6948c5e950a; oracle SHA256 1f791ba94b3657de69f7df3c7f5b13b024b1cddef3da13ee38bd8cf1193fa9b4. PC6 SwapFree observed 12 KiB, below the 1 GiB inter-PC admission floor.

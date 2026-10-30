@@ -1077,6 +1077,34 @@ mod tests {
     }
 
     #[test]
+    fn lru_eviction_can_refuse_a_feasible_unequal_payload_plan() {
+        let candidates = [
+            EvictionCandidate {
+                layer: 0,
+                expert: 1,
+                rank: 2,
+                bytes: 2,
+                last_used: 0,
+            },
+            EvictionCandidate {
+                layer: 0,
+                expert: 2,
+                rank: 2,
+                bytes: 4,
+                last_used: 1,
+            },
+        ];
+        let counts = BTreeMap::from([((0, 2), 3)]);
+        // LRU consumes the one-operation budget on the smaller candidate.
+        assert!(select_evictions(10, 6, 1, &candidates, &counts).is_err());
+        // The later candidate alone is a valid plan that preserves two residents.
+        assert_eq!(
+            select_evictions(10, 6, 1, &candidates[1..], &counts).unwrap(),
+            vec![candidates[1]]
+        );
+    }
+
+    #[test]
     fn eviction_plan_is_bounded_and_preserves_last_resident_per_rank() {
         let c = [
             EvictionCandidate {
