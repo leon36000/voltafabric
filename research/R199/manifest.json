@@ -1,0 +1,9 @@
+{
+  "files": {
+    "nvfp4_oracle.py": "939c75880465e9ea901f20c875228ea7dc55307a953d1a0a7c70abb68f0f6e4f",
+    "test_oracle.py": "6bd3dd8487993f834ea2ab97efbb4dda4b7f76d9bd1cc071984ff70893dae3b2",
+    "REPORT.md": "21a9336220f36b31f552bf28a7f21294157ac8f29cd6e03f66858d389fd9a30f"
+  },
+  "tests": 2,
+  "gpu": false
+}

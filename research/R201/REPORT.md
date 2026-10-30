@@ -1,0 +1,5 @@
+# R201 — comparaison d'une session à l'oracle indépendant par route
+
+`verify.py` compare les résultats enregistrés d'une session Rust aux sorties de l'oracle row-major NVFP4 R199 pour chaque expert et chaque token. Il vérifie les SHA du checkpoint, de la requête et de la réponse, exige une session réussie et les batches attendus, puis applique chaque coefficient une seule fois, dans l'ordre logique des slots, en accumulation f64. Une tolérance numérique explicite doit être fournie avant utilisation ; aucun seuil général n'est inventé.
+
+Deux tests synthétiques couvrent des routes permutées à coefficients et sorties distincts, ainsi que le refus des experts dupliqués et des coefficients non finis. Commande `/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source/.work/a92-cpu-venv/bin/python -B research/R201/test_verify.py` : exit 0, deux tests. La fonction de comparaison n'a pas encore été exécutée sur les huit vrais experts : elle attend le premier shard R188 complet et vérifié, son extraction et le résultat d'une session neuve. Les tests ne qualifient ni moteur complet, ni GPU, ni qualité modèle.

@@ -1,0 +1,7 @@
+# R200 — import des experts du checkpoint vers des résidents Rust
+
+`pack_checkpoint.py` relie l'extraction safetensors R192 au vrai `resident-export` Rust, source `checkpoint`. Une liste explicite d'experts distincts est répartie entre rangs avec identités modèle, couche et epoch ; le CLI produit un résident QPN2 par rang, avec intentions, sorties et empreintes conservées. Le SHA du fichier source et celui du CLI sont vérifiés ; les changements ordinaires de taille ou de dates de la source pendant l'export sont refusés, sans prétendre protéger contre un remplacement malveillant de la source. Une destination déjà existante n'est jamais écrasée.
+
+Deux tests passent avec le fixture réel d'un seul expert déjà présent : export réussi, refus d'un SHA erroné, d'un expert dupliqué et d'une destination existante. `python3 -B research/R200/test_pack.py` exit 0. L'export de huit experts distincts attend la fin et le SHA LFS du premier shard R188 ; aucun contenu du fichier partiel n'est utilisé. Si une opération d'écriture échoue après création du dossier, les fichiers partiels restent à réconcilier ; aucun rejeu implicite.
+
+Cette préparation n'exécute ni modèle ni GPU et ne qualifie pas la mémoire, la couche complète ou la génération. Les métadonnées attendues du sous-ensemble sont volontairement vides ; l'identité des octets repose sur le SHA de la source fournie et sur la provenance R192/R188, pas sur les labels internes.

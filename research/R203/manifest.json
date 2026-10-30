@@ -1,0 +1,13 @@
+{
+  "gpu": false,
+  "hashes": {
+    "run_session.py": "277ddbf66f803dc7bc3e2c970e2fb40d2b6d0dfd0eb6751bd44b793c09d1cf31",
+    "test.log": "a730425443cd3f62f64dc6f18370354b3f5f7121e95e6a27eeee3eea28cb144d",
+    "test_pipeline.py": "6896232a2b48d4fd2edf20bbd312f3ef3835c96acf8c60ab781aea59158eb471"
+  },
+  "limits": "Synthetic copies of one actual sample; two local CPU owners, no eight distinct experts, full model, production network, CUDA or generation.",
+  "max_abs_error": 1.239776611328125e-05,
+  "run_id": "r202-7ea4b6859c974f3183aa4303b60621a7",
+  "status": "CPU_PIPELINE_SYNTHETIC_EIGHT_COPIES_PASS",
+  "tests": 1
+}
