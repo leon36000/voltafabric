@@ -13,6 +13,7 @@ import os
 import pathlib
 import selectors
 import stat
+import struct
 import subprocess
 import sys
 
@@ -167,6 +168,11 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
+    plan_id = receipt.get("plan_id")
+    if "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith("r506-")):
+        prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
+        if receipt.get("prompt_tokens_sha256") != prompt_hash:
+            raise ValueError("engine receipt differs from prompt digest")
     if receipt.get("requested_max_new_tokens", 2) != max_new_tokens:
         raise ValueError("engine receipt differs from generation limit")
     if type(receipt.get("eos_token_id")) is not int or receipt["eos_token_id"] != eos:

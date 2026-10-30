@@ -1,4 +1,6 @@
 import json
+import hashlib
+import struct
 import subprocess
 import sys
 import unittest
@@ -19,6 +21,20 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_prompt_digest_is_checked_when_present_or_required_by_plan(self):
+        value = dict(receipt(), plan_id="r506-" + "a"*64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        self.assertEqual(run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)["output"]["text"], "😀")
+        for bad in ("0"*64, None):
+            value["prompt_tokens_sha256"] = bad
+            with self.assertRaisesRegex(ValueError, "prompt digest"):
+                run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+        del value["prompt_tokens_sha256"]
+        with self.assertRaisesRegex(ValueError, "prompt digest"):
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"]*8, runner=runner)
+
     def test_eos_binding_is_passed_and_checked_before_returning_text(self):
         calls = []
         value = dict(receipt(), input_tokens=[0], generated_token_ids=[3],
