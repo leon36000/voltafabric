@@ -19,6 +19,46 @@ pub struct AdmittedF64PoolBatch {
     pub inputs: Vec<Vec<f64>>,
 }
 
+/// Convert complete, unweighted Session results to a token/slot-major FP32
+/// buffer. Conversion rounds to nearest FP32, rejects non-finite or overflowing
+/// values, and commits only after every shape and value has been checked. The
+/// caller is responsible for applying each routing coefficient once.
+pub fn write_unweighted_f32(
+    routing: &routing::RoutingProblem,
+    rows: &[Vec<Vec<f64>>],
+    output: &mut [f32],
+) -> Result<()> {
+    routing::validate(routing)?;
+    let tokens = routing.routes.len();
+    let top_k = routing.routes.first().map_or(0, Vec::len);
+    if tokens == 0 || top_k == 0 {
+        return Err(invalid("empty pool output"));
+    }
+    let count = tokens
+        .checked_mul(top_k)
+        .and_then(|n| n.checked_mul(routing.hidden))
+        .filter(|&n| n <= 16_777_216)
+        .ok_or_else(|| invalid("pool output exceeds bound"))?;
+    if rows.len() != tokens
+        || output.len() != count
+        || rows.iter().any(|token| {
+            token.len() != top_k || token.iter().any(|row| row.len() != routing.hidden)
+        })
+    {
+        return Err(invalid("pool output shape mismatch"));
+    }
+    let mut converted = Vec::with_capacity(count);
+    for &value in rows.iter().flatten().flatten() {
+        let rounded = value as f32;
+        if !value.is_finite() || !rounded.is_finite() {
+            return Err(invalid("pool output is non-finite or overflows FP32"));
+        }
+        converted.push(rounded);
+    }
+    output.copy_from_slice(&converted);
+    Ok(())
+}
+
 /// Validate the complete batch before returning data to a Session caller.
 #[allow(clippy::too_many_arguments)]
 pub fn admit_pool_batch(

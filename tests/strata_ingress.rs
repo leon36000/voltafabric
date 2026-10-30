@@ -308,3 +308,62 @@ fn collector_exposes_only_complete_unweighted_slots_in_original_order() {
     assert!(duplicate.accept(c).is_err());
     assert!(duplicate.finish_unweighted_slots().is_err());
 }
+
+#[test]
+fn slot_output_conversion_is_ordered_rounded_and_atomic() {
+    let p = template();
+    let admitted = strata_ingress::admit_pool_batch_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[0.0; 4],
+        &[10, 20],
+        &[0.25, 0.75],
+    )
+    .unwrap();
+    let half_ulp = f64::from(f32::EPSILON) / 2.0;
+    let rows = vec![vec![
+        vec![
+            1.0 + half_ulp,
+            -0.0,
+            1.0 + 3.0 * half_ulp,
+            f64::from(f32::MAX),
+        ],
+        vec![0.5, -2.0, 0.0, 4.0],
+    ]];
+    let mut out = vec![99.0_f32; 8];
+    strata_ingress::write_unweighted_f32(&admitted.routing, &rows, &mut out).unwrap();
+    assert_eq!(
+        out.iter().map(|x| x.to_bits()).collect::<Vec<_>>(),
+        vec![
+            1.0_f32.to_bits(),
+            (-0.0_f32).to_bits(),
+            (1.0_f32 + 2.0 * f32::EPSILON).to_bits(),
+            f32::MAX.to_bits(),
+            0.5_f32.to_bits(),
+            (-2.0_f32).to_bits(),
+            0.0_f32.to_bits(),
+            4.0_f32.to_bits()
+        ]
+    );
+    for bad in [f64::NAN, f64::INFINITY, f64::MAX] {
+        let mut broken = rows.clone();
+        broken[0][1][3] = bad;
+        let mut target = vec![99.0; 8];
+        assert!(
+            strata_ingress::write_unweighted_f32(&admitted.routing, &broken, &mut target).is_err()
+        );
+        assert_eq!(target, vec![99.0; 8]);
+    }
+    let mut target = vec![99.0; 8];
+    assert!(
+        strata_ingress::write_unweighted_f32(&admitted.routing, &rows[..0], &mut target).is_err()
+    );
+    assert_eq!(target, vec![99.0; 8]);
+    assert!(
+        strata_ingress::write_unweighted_f32(&admitted.routing, &rows, &mut target[..7]).is_err()
+    );
+    assert_eq!(target, vec![99.0; 8]);
+}

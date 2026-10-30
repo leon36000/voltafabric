@@ -4897,6 +4897,8 @@ fn unweighted_batch_orchestration_is_atomic_and_never_replays() {
     assert!(result.ok, "{:?}", result.error);
     assert_eq!(result.receipts.len(), 2);
     let rows = result.output.unwrap();
+    let mut pool_out = vec![0.0_f32; 6 * 2 * HIDDEN as usize];
+    voltafabric::strata_ingress::write_unweighted_f32(&p, &rows, &mut pool_out).unwrap();
     let dims = moe::Model {
         hidden: HIDDEN as usize,
         intermediate: INTER as usize,
@@ -4916,6 +4918,13 @@ fn unweighted_batch_orchestration_is_atomic_and_never_replays() {
         let expected =
             moe::expert_value(&dims, &stack.dense_expert(index).unwrap(), &x[slot.token]).unwrap();
         assert_eq!(bits(&rows[slot.token][slot.slot]), bits(&expected));
+        let offset = (slot.token * 2 + slot.slot) * HIDDEN as usize;
+        for (actual, reference) in pool_out[offset..offset + HIDDEN as usize]
+            .iter()
+            .zip(expected)
+        {
+            assert_eq!(actual.to_bits(), (reference as f32).to_bits());
+        }
     }
     assert!(session::run_compressed_batch_unweighted(
         &mut sessions,
