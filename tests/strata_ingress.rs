@@ -440,3 +440,34 @@ fn mixed_pool_rejects_bad_mask_identity_and_invalid_routes() {
     stale.epoch += 1;
     assert!(invoke(&stale, &[10, 20], &[true, false]).is_err());
 }
+
+#[test]
+fn all_external_execution_never_touches_sessions_or_output() {
+    let p = template();
+    let plan = strata_ingress::admit_mixed_pool_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 20],
+        &[0.25, 0.75],
+        &[true, true],
+    )
+    .unwrap();
+    let mut output = vec![77.0; 8];
+    let result = plan
+        .execute(
+            &mut [],
+            &[],
+            &BTreeMap::new(),
+            std::time::Duration::from_secs(1),
+            &mut output,
+        )
+        .unwrap();
+    assert!(result.attempt.is_none());
+    assert!(result.receipts.is_empty());
+    assert!(result.error.is_none());
+    assert_eq!(output, vec![77.0; 8]);
+}

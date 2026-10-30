@@ -8150,3 +8150,73 @@ fn compact_fleet_executes_after_drop_and_rejects_changed_identity_without_sendin
         assert_eq!(s.close(T).exit_code, Some(0));
     }
 }
+
+#[test]
+fn mixed_pool_execute_preflights_and_never_exposes_partial_failure() {
+    let make_plan = |tag: &str| {
+        let p = routing_problem(tag);
+        let ids: Vec<i32> = p.routes.iter().flatten().map(|c| c.expert as i32).collect();
+        let weights: Vec<f32> = p.routes.iter().flatten().map(|c| c.weight as f32).collect();
+        let x: Vec<f32> = activations(6, HIDDEN as usize, 10)
+            .into_iter()
+            .flatten()
+            .map(|v| v as f32)
+            .collect();
+        voltafabric::strata_ingress::admit_mixed_pool_f64(
+            &p,
+            &p.stamp,
+            LAYER,
+            6,
+            2,
+            &x,
+            &ids,
+            &weights,
+            &[
+                false, true, false, true, false, true, false, true, false, true, false, true,
+            ],
+        )
+        .unwrap()
+    };
+    let plan = make_plan("r373-preflight");
+    let (mut sessions, artifacts) = bound(&plan.misses().unwrap().routing);
+    let mut short = vec![123.0; 5];
+    assert!(plan
+        .execute(&mut sessions, &artifacts, &BTreeMap::new(), T, &mut short)
+        .is_err());
+    assert!(sessions.iter().all(|s| s.traffic.execs == 0));
+    let plan = make_plan("r373-preflight");
+    let mut output = vec![123.0; 12 * HIDDEN as usize];
+    let report = plan
+        .execute(&mut sessions, &artifacts, &BTreeMap::new(), T, &mut output)
+        .unwrap();
+    assert!(report.error.is_none(), "{:?}", report.error);
+    assert!(report.attempt.is_some());
+    assert_eq!(report.receipts.len(), 2);
+    assert!(output
+        .chunks_exact(HIDDEN as usize)
+        .enumerate()
+        .all(|(i, row)| i % 2 == 0 || row.iter().all(|v| *v == 123.0)));
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+
+    let plan = make_plan("r373-failure");
+    let (mut sessions, artifacts) = bound(&plan.misses().unwrap().routing);
+    let mut output = vec![123.0; 12 * HIDDEN as usize];
+    let report = plan
+        .execute(
+            &mut sessions,
+            &artifacts,
+            &BTreeMap::from([(9, Fault::Missing)]),
+            T,
+            &mut output,
+        )
+        .unwrap();
+    assert!(report.error.is_some());
+    assert!(report.attempt.is_some());
+    assert_eq!(report.receipts.len(), 2);
+    assert!(output.iter().all(|v| *v == 123.0));
+    for s in sessions {
+        s.close(T);
+    }
+}

@@ -3,9 +3,10 @@
 //! The multi-token Strata callback does not expose coefficients; a caller must
 //! supply the actual gate weights for the same layer and batch. This module
 //! neither hooks Strata nor reserves a session, starts a worker, or assigns an
-//! attempt. It refuses the -1 hit sentinel. The FP16 path refuses inexact
+//! attempt. It refuses negative expert IDs. The FP16 path refuses inexact
 //! conversion; the separate FP64 path preserves finite FP32 activations.
-use crate::{completion, invalid, moe, routing, Result};
+use crate::{completion, invalid, moe, process, routing, session, Error, Result};
+use std::{collections::BTreeMap, time::Duration};
 
 #[derive(Debug, Clone)]
 pub struct AdmittedPoolBatch {
@@ -28,7 +29,63 @@ pub struct MixedPoolBatch {
     hidden: usize,
 }
 
+/// A completed attempt or a no-work result; errors after dispatch retain receipts.
+#[derive(Debug)]
+pub struct MixedExecutionReport {
+    pub attempt: Option<u64>,
+    pub receipts: Vec<session::ExecReceipt>,
+    pub error: Option<Error>,
+}
+
 impl MixedPoolBatch {
+    /// Consume this plan, validate the destination before dispatch, and write
+    /// only after every worker and every conversion has succeeded. An error after
+    /// dispatch retains the attempt and receipts, and is never retried here.
+    pub fn execute(
+        self,
+        sessions: &mut [session::Session],
+        artifacts: &[session::CompressedArtifact],
+        faults: &BTreeMap<u32, process::Fault>,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<MixedExecutionReport> {
+        if output.len() != self.output_values {
+            return Err(invalid("mixed pool output shape mismatch"));
+        }
+        let Some(misses) = self.misses.as_ref() else {
+            if !faults.is_empty() {
+                return Err(invalid("fault on an all-external pool batch"));
+            }
+            return Ok(MixedExecutionReport {
+                attempt: None,
+                receipts: Vec::new(),
+                error: None,
+            });
+        };
+        let report = session::run_compressed_batch_unweighted(
+            sessions,
+            artifacts,
+            &misses.routing,
+            &misses.inputs,
+            faults,
+            timeout,
+        )?;
+        let mut error = report.error;
+        if error.is_none() {
+            error = match report.output {
+                Some(rows) => self.write_misses(&rows, output).err(),
+                None => Some(Error::new(
+                    "BATCH_INCOMPLETE",
+                    "successful batch lacked output",
+                )),
+            };
+        }
+        Ok(MixedExecutionReport {
+            attempt: Some(report.attempt),
+            receipts: report.receipts,
+            error,
+        })
+    }
     pub fn misses(&self) -> Option<&AdmittedF64PoolBatch> {
         self.misses.as_ref()
     }
