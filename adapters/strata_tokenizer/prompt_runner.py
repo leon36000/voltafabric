@@ -77,7 +77,30 @@ def _binary_sha(path: str) -> str:
         os.close(fd)
 
 
-def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, runner=_run_bounded) -> dict:
+def _chat_prompt_ids(prompt, tokenizer, eos):
+    """One text-only user message; template controls are distinct from user text."""
+    text = prompt.strip()
+    if not text:
+        raise ValueError("empty chat message")
+    names = ("<|im_start|>", "<|im_end|>", "<think>", "</think>")
+    ids = [tokenizer.ids.get(name) for name in names]
+    if (any(type(i) is not int or not 0 <= i < len(tokenizer.tokens) for i in ids)
+            or [tokenizer.token_types[i] for i in ids] != [3, 3, 4, 4]
+            or ids[1] != eos):
+        raise ValueError("unsupported chat control tokens")
+    prefix = "<|im_start|>user\n"
+    suffix = "<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+    rendered = prefix + text + suffix
+    result = tokenizer.encode(rendered, parse_special=True, plain=((len(prefix), len(prefix) + len(text)),))
+    if any(type(i) is not int or not 0 <= i < len(tokenizer.tokens) for i in result):
+        raise ValueError("invalid chat token")
+    controls = [i for i in result if tokenizer.token_types[i] != 1]
+    if controls != [ids[0], ids[1], ids[0], ids[2], ids[3]]:
+        raise ValueError("unexpected chat control sequence")
+    return result
+
+
+def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, runner=_run_bounded) -> dict:
     """Run once, and publish decoded text only after the full receipt validates."""
     if not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
         raise ValueError("prompt must be nonempty and bounded UTF-8")
@@ -88,14 +111,18 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
     if (type(eos) is not int or not 0 <= eos < len(tokenizer.tokens)
             or tokenizer.token_types[eos] != 3):
         raise ValueError("invalid tokenizer EOS token")
-    prompt_ids = tokenizer.encode(prompt, parse_special=False)
+    if type(chat) is not bool:
+        raise ValueError("invalid prompt mode")
+    prompt_ids = _chat_prompt_ids(prompt, tokenizer, eos) if chat else tokenizer.encode(prompt, parse_special=False)
     if (not 1 <= len(prompt_ids) <= MAX_PROMPT_TOKENS or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
-            or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
-        raise ValueError("this qualification accepts one to 32 ordinary prompt tokens")
+            or (not chat and (t == eos or tokenizer.token_types[t] != 1)) for t in prompt_ids)):
+        raise ValueError("invalid prompt tokens or token bound")
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 39 input positions")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     command.extend((str(max_new_tokens), str(eos)))
+    if chat:
+        command.append("chat")
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False)
     if completed.returncode != 0:
         category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
@@ -111,6 +138,8 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("engine receipt differs from generation limit")
     if type(receipt.get("eos_token_id")) is not int or receipt["eos_token_id"] != eos:
         raise ValueError("engine receipt differs from tokenizer EOS")
+    if chat and receipt.get("prompt_mode") != "chat":
+        raise ValueError("engine receipt differs from prompt mode")
     decoded = decode_greedy_receipt(tokenizer, eos, receipt)
     return {"prompt_token_ids": prompt_ids, "output": decoded, "receipt": receipt}
 
@@ -122,6 +151,7 @@ def main() -> int:
     p.add_argument("--binary", required=True)
     p.add_argument("--binary-sha256", required=True)
     p.add_argument("--max-new-tokens", type=int, default=2)
+    p.add_argument("--chat", action="store_true", help="format one text-only user turn with the SC117 template")
     for name in ("dense", "shard", "pack", "index", "session", "ledger", "ple-shard", "ple-manifest"):
         p.add_argument("--" + name, required=True)
     args = p.parse_args()
@@ -136,7 +166,7 @@ def main() -> int:
     tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
     paths = [args.dense, args.shard, args.pack, args.index, args.session,
              args.ledger, args.ple_shard, args.ple_manifest]
-    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens)
+    result = run_prompt(prompt, tokenizer, eos, args.binary, paths, max_new_tokens=args.max_new_tokens, chat=args.chat)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 
