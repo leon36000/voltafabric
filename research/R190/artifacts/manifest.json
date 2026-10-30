@@ -1,0 +1,48 @@
+{
+  "2": {
+    "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/rank2.safetensors",
+    "sha256": "3f841052b0b3e09aabd09876f1fc8a5ef50cca2c18a4b7c17e9f2744afe8bec4",
+    "size": 7080216,
+    "sources": [
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r2-expert0.safetensors",
+        "expected_sha256": "fb89b5d8a3841b16922adf9f8458e466354e7fe53fb51a46a1506b09c7621992"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r2-expert1.safetensors",
+        "expected_sha256": "86cf8bf883068c8dfb2cbad3c46a77f9267b8bb775101c315f7a4fbdea590a3a"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r2-expert2.safetensors",
+        "expected_sha256": "e100bfcdc42091ade3498cb3a8312b9609a8c4cd8ed13fcb61fad69a1a3ca0f8"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r2-expert3.safetensors",
+        "expected_sha256": "e846e717b618d4e09505c4c7231edc47b673c0741540a595c6baaaca55bdca61"
+      }
+    ]
+  },
+  "9": {
+    "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/rank9.safetensors",
+    "sha256": "ebc3cd90c0578ebe130ba52d0281a39a9154e9683b7e241b99591f58cb8ed1f8",
+    "size": 7080216,
+    "sources": [
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r9-expert4.safetensors",
+        "expected_sha256": "ff06510267f60c78703c978b96dd1ca3cfcb8899d40729258e3501ecf5b5077b"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r9-expert5.safetensors",
+        "expected_sha256": "2f5e3cfad93c84449f6977b641c2774980275a4c7dce9ad2c0f46f5a8f13ee9f"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r9-expert6.safetensors",
+        "expected_sha256": "b94eccd508a80e64199e2675279f44062733b8e2f60c2adb320323eb7fbc595f"
+      },
+      {
+        "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028/repository/research/R190/artifacts/r9-expert7.safetensors",
+        "expected_sha256": "9e29b958b25911fb2c2d248e750adb21af843140c2579b10a0b7743c4e66529a"
+      }
+    ]
+  }
+}

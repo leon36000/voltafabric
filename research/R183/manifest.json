@@ -1,0 +1,12 @@
+{
+  "files": {
+    "shared_hook.py": "eea7437ddb0c5e9f1e3b05a897dea10db0999ad76f57b534619395decd156f74",
+    "shared_experts_pinned.py": "e7504952e81b45ee69e4be5edce5f73b06186b6b309e3acd9c27bb6fe8109ee4",
+    "test_shared.py": "0fb904eadacbffa299b481176a468acc976bc64a11169640742d6672fbbed2e1",
+    "REPORT.md": "41e4aedd4808ac19e263162938a9eb957ffbaf6c583bf96ec0ed7ce1dd3c141e",
+    "ledger/4fdaaf3e0ab08e150805a355c7ea33d83ad6e4dea894f93752aeff1bfc44298b/identity.json": "f56fc047208479bd9b4fadc3279a1ec622d2edf09a3059e530262e263c3435bb",
+    "ledger/4fdaaf3e0ab08e150805a355c7ea33d83ad6e4dea894f93752aeff1bfc44298b/closed.json": "e81bc160c0843ee56f31f12997bb3aff50528d596002d4866676cb8a1b19195a"
+  },
+  "tests": "2 CPU tests exit 0",
+  "gpu": false
+}

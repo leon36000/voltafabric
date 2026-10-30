@@ -1,0 +1,98 @@
+{
+  "batch_count": 2,
+  "bindings": [
+    {
+      "artifact_sha256": "3f841052b0b3e09aabd09876f1fc8a5ef50cca2c18a4b7c17e9f2744afe8bec4",
+      "epoch": 1,
+      "expert": 0,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 2,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "3f841052b0b3e09aabd09876f1fc8a5ef50cca2c18a4b7c17e9f2744afe8bec4",
+      "epoch": 1,
+      "expert": 1,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 2,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "3f841052b0b3e09aabd09876f1fc8a5ef50cca2c18a4b7c17e9f2744afe8bec4",
+      "epoch": 1,
+      "expert": 2,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 2,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "3f841052b0b3e09aabd09876f1fc8a5ef50cca2c18a4b7c17e9f2744afe8bec4",
+      "epoch": 1,
+      "expert": 3,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 2,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "ebc3cd90c0578ebe130ba52d0281a39a9154e9683b7e241b99591f58cb8ed1f8",
+      "epoch": 1,
+      "expert": 4,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 9,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "ebc3cd90c0578ebe130ba52d0281a39a9154e9683b7e241b99591f58cb8ed1f8",
+      "epoch": 1,
+      "expert": 5,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 9,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "ebc3cd90c0578ebe130ba52d0281a39a9154e9683b7e241b99591f58cb8ed1f8",
+      "epoch": 1,
+      "expert": 6,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 9,
+      "state": "READY"
+    },
+    {
+      "artifact_sha256": "ebc3cd90c0578ebe130ba52d0281a39a9154e9683b7e241b99591f58cb8ed1f8",
+      "epoch": 1,
+      "expert": 7,
+      "layer": 0,
+      "model_revision": "qwen-r132-eight-copies",
+      "plan_id": "r197-live-ready",
+      "rank": 9,
+      "state": "READY"
+    }
+  ],
+  "remote_result": {
+    "cuda_initialized": false,
+    "keep": [],
+    "names": [
+      "model.layers.0.mlp.experts.0.gate_proj.weight_scale",
+      "model.layers.0.mlp.experts.0.gate_proj.weight_scale_2",
+      "model.layers.0.mlp.experts.gate_up_proj.weight",
+      "model.layers.0.mlp.shared_expert.gate_proj.weight",
+      "model.layers.0.self_attn.q_proj.weight"
+    ]
+  },
+  "run_id": "r190-9b75c7a85f71444592e9def2d138fb11",
+  "ssh_exit": 0
+}

@@ -1,0 +1,10 @@
+{
+  "files": {
+    "examples/r197_readiness_cpu_session.rs": "c7c501e672aa603210037be9eb5971285571c0a43994eeaac612dc394354d470",
+    "research/R197/test_live_admission.py": "00aa7c0dc527d3ee876ffb66fc45520639d4e7d6b9356b49e29b98ae75fa2696",
+    "research/R197/REPORT.md": "e1c88da396b3975ad1a7692eae96541ca15ff434e9a048d4bd80fec23b878439",
+    "research/R197/r190-9b75c7a85f71444592e9def2d138fb11-receipt.json": "0cd3c397953dc3a220fe80753ba5dcad281dfc5039b08af8a6fa8bd32d950896"
+  },
+  "gpu": false,
+  "tests": "1 CPU integration + targeted Clippy"
+}

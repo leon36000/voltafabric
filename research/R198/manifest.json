@@ -1,0 +1,9 @@
+{
+  "files": {
+    "worker.py": "674f971e9fea347ab14cb962d4ac867f433aefda6939e91671d3f1a0d18749c4",
+    "test_general.py": "5ff4ec4cb63ae42f8b9f955fb41a0024d7c94797377933ced5120233fc6161ae",
+    "REPORT.md": "412c8da605ed9238d14d8dd7fc7bea4af4cfe2b42af521eba233b4a397eaa073",
+    "r198-3ebba7ffa90c4e6e998ade1776ef53f3-stdout.json": "924d98a569697565e32695ecbbae43ffee8fc3f77eabed1b2c1012094dabbb0b"
+  },
+  "gpu": false
+}

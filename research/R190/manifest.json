@@ -1,0 +1,12 @@
+{
+  "files": {
+    "REPORT.md": "0244a099ac277646fce6873f18687e7af4008c3406fce723af95a5c87abbf96a",
+    "build_fixture.py": "0e243cfbd015d339a91bae2e63fad4ea1522820f1632b560da5136e38e0e0bbc",
+    "worker.py": "d6f548941a78ab732e6ca912c286874c3e61962a670500517e2774e861fe69ae",
+    "test_eight.py": "15e729ed03a01d035d5d92b684826e25950c0a4ca94197987d38500f7f93092c",
+    "durable8.py": "af67aee0c59df0d71bca198fe515a6ab16ddfe3fa87a2f1ccccd368ce9212a41",
+    "artifacts/manifest.json": "3c82496b9301858ae34b2830a9a9f5d2427b20f44c44deddea92877380adf0f0",
+    "r190-415ad144087043d7966dcd2105c5f139-stdout.json": "393bb48770c6b746b089f29e42ff7172dd4ef8e07743535d9648a0979271c904"
+  },
+  "gpu": false
+}

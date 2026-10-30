@@ -1,0 +1,7 @@
+# R198 — compaction CPU de routes permutées pour plusieurs tokens
+
+Le worker CPU de recherche conserve le vrai `PersistentQPN2Owner` et la vraie Session Rust mais généralise son fournisseur et son alignement de test : il regroupe les slots par expert physique, respecte les indices d'origine et décompacte les résultats dans l'ordre du dispatch. Le même résident R190, à quatre experts par rang, est chargé une seule fois par owner.
+
+Un test réel exécute deux batches comprenant chacun deux tokens et huit routes distinctes par token, dans des ordres permutés et différents entre tokens. Le premier token porte l'activation R158 et des coefficients 1/8 ; le deuxième porte une activation nulle et des coefficients 1/16. Les deux sorties correspondent exactement à l'oracle : la ligne R158 et une ligne nulle, pour chacun des 2 batches ; deux owners, quatre EXEC et un transfert de poids par owner. `test_general.py` : exit 0, 1 test. Run `r198-3ebba7ffa90c4e6e998ade1776ef53f3`, SHA256 sortie `924d98a569697565e32695ecbbae43ffee8fc3f77eabed1b2c1012094dabbb0b`.
+
+Les huit poids sont des copies du même expert ; ce cas ne détecte pas une permutation de poids entre ces copies. Le fournisseur et l'alignement sont des oracles CPU de recherche, non les kernels GPU. Aucun modèle complet, génération, GPU ni performance n'est qualifié. Les espaces temporaires et résultats des tests restent dans ce répertoire.

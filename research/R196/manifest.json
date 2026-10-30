@@ -1,0 +1,9 @@
+{
+  "files": {
+    "admission.py": "f1c484892c287ee462ee541376c478ae40f0da03473a3bbd958e3aed7dee4b72",
+    "test_admission.py": "9482fe81acb95eff4e4f6dff642e0e67cf07e443ae26da25857769c2198a5fc9",
+    "REPORT.md": "3da00fd126048ae658e9e8d433d2fd5f0ddb2decea4475f283f48fc4c2cbdc10"
+  },
+  "unit_tests": 4,
+  "gpu": false
+}

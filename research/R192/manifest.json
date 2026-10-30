@@ -1,0 +1,9 @@
+{
+  "files": {
+    "extract_verified.py": "139b8b193d9836d44966aa71cb21b40797387fc75fe9d75d708a7ca936821173",
+    "test_extract.py": "1b1530e4324116a7ee5528cad6b761742acc841135e6b26aeb47fb889d36d7c4",
+    "REPORT.md": "683c5e6c10c8a2175fdb7062539e3cfe6b38cf617e702321bcf9ad9d92dc0e17"
+  },
+  "tests": 2,
+  "gpu": false
+}
