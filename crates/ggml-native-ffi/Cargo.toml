@@ -1,0 +1,7 @@
+[package]
+name = "vf-ggml-native-ffi"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+build = "build.rs"

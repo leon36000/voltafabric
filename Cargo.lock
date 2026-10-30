@@ -260,6 +260,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
 
 [[package]]
+name = "vf-ggml-native-ffi"
+version = "0.1.0"
+
+[[package]]
 name = "vf-qpn2-ffi"
 version = "0.1.0"
 
@@ -272,6 +276,7 @@ dependencies = [
  "safetensors",
  "serde",
  "serde_json",
+ "vf-ggml-native-ffi",
  "vf-qpn2-ffi",
 ]
 

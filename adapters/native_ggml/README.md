@@ -13,3 +13,9 @@ ctest --test-dir <build-dir> --output-on-failure
 ```
 
 CUDA, Metal, Vulkan, OpenMP and native CPU specialization are disabled by this isolated project. The source revision is checked at configuration; do not point it at a live installation. CPU test vectors are synthetic and homogeneous, exercise seven observed format pairs and selected failure conditions, and compare the GGML dot path to scalar multiplication of independently dequantized rows and activations. The scalar oracle still uses GGML dequantization and quantization, and is not a model-level or cross-device equivalence proof.
+
+The optional Rust feature `native-ggml-cpu` links the three static libraries from an already configured and built isolated CMake directory. Set `VF_GGML_NATIVE_BUILD` to that absolute build directory. The small `vf-ggml-native-ffi` crate owns the C ABI pointer and copies one admitted expert into a native resident; the main crate remains free of unsafe code. `native_ggml_cpu::Resident` checks the supplied layout, expert span, model binding and payload hash again before loading and returns unweighted FP32 values. The supplied model revision and hashes still require trusted provenance; this is not a session, durable identity claim, worker isolation, GPU backend or model parity proof.
+
+```
+VF_GGML_NATIVE_BUILD=<build-dir> cargo test --offline --locked --features native-ggml-cpu --test strata_native_provider
+```

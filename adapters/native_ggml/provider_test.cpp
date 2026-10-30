@@ -1,4 +1,5 @@
 #include "provider.hpp"
+#include "bridge.h"
 #include "ggml.h"
 #include "ggml-cpu.h"
 #include <algorithm>
@@ -48,6 +49,14 @@ static bool check(int gu, int down) {
     double expected=0; for (int i=0;i<F;++i) expected+=(double)dw[i]*am[i];
     if (!std::isfinite(expected) || std::abs(expected) < 1e-9 || out.size()!=H) return false;
     for (float value:out) if (!close(value,expected)) { std::fprintf(stderr,"types %d/%d got %.9g expected %.9g\n",gu,down,value,expected);return false; }
+    void* resident = vf_native_create(gu, down, blob.data(), blob.size());
+    if (!resident) return false;
+    std::vector<float> bridged(H,99.f);
+    if (vf_native_forward(resident,x.data(),x.size(),bridged.data(),bridged.size()) || bridged != out) { vf_native_destroy(resident); return false; }
+    std::fill(blob.begin(),blob.end(),0);
+    std::fill(bridged.begin(),bridged.end(),99.f);
+    if (vf_native_forward(resident,x.data(),x.size(),bridged.data(),bridged.size()) || bridged != out) { vf_native_destroy(resident); return false; }
+    vf_native_destroy(resident);
     auto original=out; blob.pop_back();
     if (vf::native_ggml::forward(gu,down,blob,x,out,err) || out!=original) return false;
     return true;

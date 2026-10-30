@@ -8,12 +8,14 @@ publish = false
 [dependencies]
 num-bigint = "=0.4.6"
 vf-qpn2-ffi = { path = "crates/qpn2-ffi", optional = true }
+vf-ggml-native-ffi = { path = "crates/ggml-native-ffi", optional = true }
 safetensors = { version = "=0.8.0", default-features = false, features = ["alloc", "std"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.145", features = ["float_roundtrip"] }
 
 [features]
 c-abi-validation = ["dep:vf-qpn2-ffi"]
+native-ggml-cpu = ["dep:vf-ggml-native-ffi"]
 
 [lib]
 name = "voltafabric"
@@ -42,7 +44,7 @@ path = "src/bin/vf-rank-session.rs"
 libc = "=0.2.190"
 
 [workspace]
-members = ["crates/qpn2-ffi"]
+members = ["crates/qpn2-ffi", "crates/ggml-native-ffi"]
 exclude = ["gpu-worker"]
 default-members = ["."]
 resolver = "2"

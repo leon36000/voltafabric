@@ -143,6 +143,9 @@ impl NativeLayout {
     pub fn layers(&self) -> &[NativeLayer] {
         &self.layers
     }
+    pub fn index_sha256(&self) -> &str {
+        &self.index_sha256
+    }
     pub fn expert(&self, layer: usize, expert: u64) -> Result<ExpertSpan> {
         let entry = self
             .layers

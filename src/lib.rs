@@ -38,6 +38,8 @@ pub mod traffic;
 pub mod cost;
 pub(crate) mod work;
 
+#[cfg(feature = "native-ggml-cpu")]
+pub mod native_ggml_cpu;
 pub mod qpn2;
 pub mod routing;
 pub mod strata_ingress;
