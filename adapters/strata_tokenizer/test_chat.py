@@ -77,10 +77,10 @@ class ChatTests(unittest.TestCase):
                 _chat_messages(bad)
 
     def test_history_bound_is_checked_before_worker(self):
-        messages=[{'role':'user','content':'Hello! Hello!'}, {'role':'assistant','content':'Hello!'},
+        messages=[{'role':'user','content':'Hello! '*30}, {'role':'assistant','content':'Hello!'},
                   {'role':'user','content':'Hello!'}]
         ids=_chat_prompt_ids(messages,self.tk,self.eos)
-        self.assertGreater(len(ids), 32)
+        self.assertGreater(len(ids), 64)
         calls=[]
         with self.assertRaisesRegex(ValueError, 'token bound'):
             run_prompt(messages,self.tk,self.eos,'/engine',['/input']*8,chat=True,

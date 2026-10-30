@@ -21,7 +21,7 @@ from .adapter import (MAX_GENERATED_TOKENS, MAX_INPUT_POSITIONS, MAX_PROMPT_TOKE
                       decode_greedy_receipt, load_sc117)
 
 MAX_PROMPT_BYTES = 4096
-MAX_RECEIPT_BYTES = 32 * 1024 * 1024
+MAX_RECEIPT_BYTES = 64 * 1024 * 1024
 MAX_STDERR_BYTES = 64 * 1024
 _ENGINE_FAILURES = {
     b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity\n": "rank_payload_capacity",
@@ -151,7 +151,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
     if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= MAX_GENERATED_TOKENS:
-        raise ValueError("generation limit must be between one and 32")
+        raise ValueError("generation limit must be between one and 64")
     if (type(eos) is not int or not 0 <= eos < len(tokenizer.tokens)
             or tokenizer.token_types[eos] != 3):
         raise ValueError("invalid tokenizer EOS token")
@@ -160,9 +160,9 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
             or (not chat and (t == eos or tokenizer.token_types[t] != 1)) for t in prompt_ids)):
         raise ValueError("invalid prompt tokens or token bound")
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
-        raise ValueError("prompt and generation exceed 39 input positions")
+        raise ValueError("prompt and generation exceed 64 input positions")
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
-    if expected_plan is not None and (not expected_plan.startswith("r512-") or len(expected_plan) != 69
+    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
     command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
@@ -183,7 +183,7 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
             raise ValueError("invalid prepared plan receipt")
         plan = receipt["plan_id"]
-        if (not isinstance(plan, str) or not plan.startswith("r512-") or len(plan) != 69
+        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-")) or len(plan) != 69
                 or any(c not in "0123456789abcdef" for c in plan[5:])):
             raise ValueError("current bound plan identity required")
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
@@ -199,10 +199,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
-        if (not isinstance(plan_id, str) or not plan_id.startswith("r512-") or len(plan_id) != 69
+        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-")) or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):
             raise ValueError("current bound plan identity required")
-    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-"))):
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")
