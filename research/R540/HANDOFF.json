@@ -1,0 +1,10 @@
+{
+  "round": "R540",
+  "parent_gitlab_commit": "cfc539c4035b388b1d036ca674b3ea629e28f29d",
+  "active_operations": [],
+  "status": "DIAGNOSTIC_BOUND_EXPLAINS_R428_STRICT_FAILURE",
+  "expert255": {"strict_violations":1169,"strict_result":"FAIL","envelope_violations":0,"classification":"STRICT_FAIL_BOUND_EXPLAINED"},
+  "negative_controls": {"mid_corruption":"REJECTED","output_corruption":"REJECTED"},
+  "limitations": ["Bound is diagnostic, not accepted production correctness", "Only two experts and one observed activation", "GGML quantizers and decoders shared", "Original shared R53 ledger missing; frozen snapshots incomplete", "No GPU or inter-PC execution"],
+  "next_action": "Broaden numerical evidence on actual expert workloads without weakening strict verdicts; reconcile R53 and satisfy all fresh identity, lease, hardware and resource gates before distributed/GPU work."
+}

@@ -1,0 +1,5 @@
+gate_violations=0 up_violations=0 mid_violations=0
+mid_max_abs=1.49011612e-08 quant_bytes_differ=1 dequant_max_abs=0.000468492508
+difference_kind=code block=16 index=541 scalar_mid=-0.056449014693498611 vector_mid=-0.056448999792337418 scalar_max=0.059493966400623322 vector_max=0.059493966400623322 scalar_scaled=-120.50003051757812 vector_scaled=-120.49999237060547 scalar_code=-121 vector_code=-120
+changed_activations=1 changed_index=541 scalar_vs_staged_max_abs=5.4018610171624459e-05 single_delta_linearity_max_error=0 original_scalar_violations=1170
+explainability_envelope_violations=1 max_quantization_bound=5.4018610171624459e-05

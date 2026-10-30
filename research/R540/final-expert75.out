@@ -1,0 +1,7 @@
+gate_violations=0 up_violations=0 mid_violations=0
+mid_max_abs=1.49011612e-08 quant_bytes_differ=0 dequant_max_abs=0
+changed_activations=0 changed_index=-1 scalar_vs_staged_max_abs=0 single_delta_linearity_max_error=0 original_scalar_violations=0
+explainability_envelope_violations=0 max_quantization_bound=0
+down_reference_uses_vector_intermediate
+expert=75 rows=2560 nonzero=2560 max_abs=3.27901262e-09 max_expected=0.0625593397 max_relative=0.000277212934 violations=0 tolerance=1e-7+1e-3*abs(reference)
+classification=STRICT_PASS
