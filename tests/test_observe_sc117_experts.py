@@ -34,6 +34,20 @@ class ObservationTest(unittest.TestCase):
                 failed = invoke(*arguments)
                 self.assertNotEqual(failed.returncode, 0)
                 self.assertEqual(failed.stdout, "")
+            source = Path(directory) / "Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00001-of-00002.gguf"
+            with open(source, "wb") as f:
+                f.truncate(55_063_448_064)
+                f.seek(1_387_311_104)
+                f.write(b"abcdefgh")
+            compared = invoke("--source-shard", str(source), "--expert", "0:0", "--expert", "0:1")
+            self.assertEqual(compared.returncode, 0, compared.stderr)
+            self.assertTrue(all(x["matches_source_shard_slices"] for x in json.loads(compared.stdout)["experts"]))
+            with open(source, "r+b") as f:
+                f.seek(1_387_311_104)
+                f.write(b"z")
+            failed = invoke("--source-shard", str(source), "--expert", "0:0")
+            self.assertNotEqual(failed.returncode, 0)
+            self.assertEqual(failed.stdout, "")
             os.unlink(pack)
             os.mkfifo(pack)
             failed = invoke("--expert", "0:0")
