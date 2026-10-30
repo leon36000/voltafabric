@@ -1,0 +1,47 @@
+{
+  "model_revision": "sc117-local-observation",
+  "layer": 16,
+  "dense_bytes": 1538035200,
+  "shard_bytes": 55063448064,
+  "norm": {
+    "offset": 587763200,
+    "bytes": 40960,
+    "sha256": "8807bc5d2acc94cc798a50f1f871b918873fa91ad1d2dd1b45fd0351af75b9ea"
+  },
+  "down": {
+    "offset": 581127680,
+    "bytes": 6553600,
+    "sha256": "50f76bc5f74efee4e26ececb4bc798ad8dcfeee8804f4c0c92cb550a25fd0bdd"
+  },
+  "up": {
+    "offset": 587804160,
+    "bytes": 6553600,
+    "sha256": "81e03357d3d795d602d0c3c93fa2ac45bac309cd57e1ecde85fa5d9a1b39606d"
+  },
+  "inject": {
+    "offset": 587681280,
+    "bytes": 81920,
+    "sha256": "2b6fe52a1bc6f94fd09f8ff853c47fef83a99eae6a3f10365fcbdbb0f63fb45a"
+  },
+  "router": {
+    "offset": 565271040,
+    "bytes": 2621440,
+    "sha256": "b575959cd3ca396faaf51885ae2e51f78b73222befc8bb7c579057bfa03d9e03"
+  },
+  "gamma": {
+    "offset": 595013504,
+    "bytes": 512,
+    "sha256": "15d88d01fe38f5719db1b91f868ac85cd2d44ec134e33be3d7b4e7934246c40b"
+  },
+  "gate": {
+    "offset": 17586092544,
+    "bytes": 8355840,
+    "sha256": "781e47908b8a3e9fdb76b5d19b3b0390a26f5d6bda6e374a14c9af262b2cdaf7"
+  },
+  "gate_type": 23,
+  "out": {
+    "offset": 18763391360,
+    "bytes": 16711680,
+    "sha256": "082dd6d2fa991d7c5c5d15c6e4edb07a2611f5a746b83a999ba869ccc7b2d0b7"
+  }
+}
