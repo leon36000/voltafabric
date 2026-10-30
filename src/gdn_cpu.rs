@@ -15,10 +15,64 @@ pub struct Prepared {
     pub k: Vec<f32>,
     pub v: Vec<f32>,
 }
+#[derive(Clone)]
 pub struct ConvHistory {
     identity: Identity,
     channels: usize,
     history: Vec<f32>,
+}
+
+/// One CPU token transaction. Durable admission and the enclosing layer remain the caller's responsibility.
+pub struct GdnState {
+    convolution: ConvHistory,
+    recurrence: RecurrentState,
+}
+
+impl GdnState {
+    pub fn new(identity: Identity, k_heads: usize, v_heads: usize, dim: usize) -> Result<Self> {
+        let recurrence = RecurrentState::new(identity.clone(), k_heads, v_heads, dim)?;
+        let channels = k_heads
+            .checked_mul(2)
+            .and_then(|n| n.checked_add(v_heads))
+            .and_then(|n| n.checked_mul(dim))
+            .ok_or_else(|| invalid("GDN geometry overflow"))?;
+        Ok(Self {
+            convolution: ConvHistory::new(identity, channels)?,
+            recurrence,
+        })
+    }
+    pub fn history(&self) -> &[f32] {
+        self.convolution.history()
+    }
+    pub fn state(&self) -> &[f32] {
+        self.recurrence.state()
+    }
+
+    /// Both internal states advance only after preprocessing and recurrence succeed.
+    #[allow(clippy::too_many_arguments)]
+    pub fn step(
+        &mut self,
+        identity: &Identity,
+        qkv: &[f32],
+        kernel: &[f32],
+        epsilon: f32,
+        gate: &[f32],
+        beta: &[f32],
+    ) -> Result<Vec<f32>> {
+        let mut candidate = self.convolution.clone();
+        let prepared = candidate.step(
+            identity,
+            qkv,
+            kernel,
+            self.recurrence.k_heads,
+            self.recurrence.v_heads,
+            self.recurrence.dim,
+            epsilon,
+        )?;
+        let output = self.recurrence.step(identity, &prepared, gate, beta)?;
+        self.convolution = candidate;
+        Ok(output)
+    }
 }
 
 /// CPU recurrence with state indexed by key dimension, value head, value dimension.

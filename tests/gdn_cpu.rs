@@ -1,4 +1,4 @@
-use voltafabric::gdn_cpu::{ConvHistory, Identity, Prepared, RecurrentState};
+use voltafabric::gdn_cpu::{ConvHistory, GdnState, Identity, Prepared, RecurrentState};
 fn id() -> Identity {
     Identity {
         run_id: "test".into(),
@@ -6,6 +6,44 @@ fn id() -> Identity {
         layer: 0,
         epoch: 1,
     }
+}
+
+#[test]
+fn token_transaction_commits_both_states_or_neither() {
+    let mut joined = GdnState::new(id(), 1, 1, 1).unwrap();
+    let weights = vec![1.0; 12];
+    let first = joined
+        .step(&id(), &[1.0, 2.0, 3.0], &weights, 1e-6, &[0.0], &[0.5])
+        .unwrap();
+    assert_eq!(
+        joined.history(),
+        &[0.0, 0.0, 1.0, 0.0, 0.0, 2.0, 0.0, 0.0, 3.0]
+    );
+    assert!(first[0] > 0.0);
+    let h = joined.history().to_vec();
+    let s = joined.state().to_vec();
+    // Convolution succeeds on the candidate, then recurrence rejects invalid beta.
+    assert!(joined
+        .step(&id(), &[2.0, 3.0, 4.0], &weights, 1e-6, &[0.0], &[1.1])
+        .is_err());
+    assert_eq!(joined.history(), h);
+    assert_eq!(joined.state(), s);
+    let mut wrong = id();
+    wrong.epoch += 1;
+    assert!(joined
+        .step(&wrong, &[2.0, 3.0, 4.0], &weights, 1e-6, &[0.0], &[0.5])
+        .is_err());
+    assert_eq!(joined.history(), h);
+    assert_eq!(joined.state(), s);
+    let second = joined
+        .step(&id(), &[2.0, 3.0, 4.0], &weights, 1e-6, &[0.0], &[0.5])
+        .unwrap();
+    assert!(second[0] > first[0]);
+    assert_eq!(
+        joined.history(),
+        &[0.0, 1.0, 2.0, 0.0, 2.0, 3.0, 0.0, 3.0, 4.0]
+    );
+    assert_ne!(joined.state(), s);
 }
 
 #[test]
