@@ -18,11 +18,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     for name in ("pack", "index", "dense", "input", "observation", "bridge", "worker", "oracle", "router", "work-root", "router-digest"):
         ap.add_argument("--" + name, required=True)
+    ap.add_argument("--collector", help="optional local vf executable for explicit FP16/f64 collection")
     a = ap.parse_args()
     for path in (a.pack,a.index,a.dense,a.input,a.observation,a.bridge,a.worker,a.oracle,a.router,a.work_root):
         if not os.path.isabs(path): ap.error("all paths must be absolute")
     work = Path(tempfile.mkdtemp(prefix="routed-session-", dir=a.work_root)); ledger = work / "ledger"; ledger.mkdir()
     route = json.loads(subprocess.run([a.router,a.dense,a.input,a.router_digest], check=True, timeout=30, capture_output=True, text=True).stdout)
+    # JSON decimal text must round-trip to the original binary32 coefficients.
+    for entry in route:
+        entry["weight"]=struct.unpack("<f",struct.pack("<f",entry["weight"]))[0]
     ids = [x["expert"] for x in route]
     if len(ids)!=10 or len(set(ids))!=10 or any(not 0<=i<512 for i in ids): raise ValueError("invalid CPU route")
     observations = json.loads(Path(a.observation).read_text())
@@ -65,6 +69,10 @@ def main():
     result=replies[1]; rows=result.get("cpu_rows",[])
     if result.get("state")!="completed" or result.get("batch")!=1 or [r.get("position") for r in rows]!=list(range(10)):
         raise ValueError("invalid result coverage")
+    # The bridge transmits f32 values as JSON decimals; restore the precise
+    # binary32 values before half conversion or downstream arithmetic.
+    for row in rows:
+        row["value"]=[struct.unpack("<f",struct.pack("<f",v))[0] for v in row["value"]]
     max_error=0.0; max_combined=0.0
     for r,ref in zip(rows,refs):
         if len(r["value"])!=2560: raise ValueError("invalid output width")
@@ -77,9 +85,47 @@ def main():
         expected=sum(float(route[i]["weight"])*refs[i][1][col] for i in range(10))
         max_combined=max(max_combined,abs(observed-expected))
         if abs(observed-expected)>1e-7+1e-3*abs(expected): raise ValueError("weighted output differs")
-    print(json.dumps({"status":"ok","run_id":run_id,"ids":ids,"weights":[r["weight"] for r in route],
-                      "max_row_error":max_error,"max_weighted_error":max_combined,"work_dir":str(work),
-                      "scope":"CPU reference route, local real expert sessions; synthetic activation"},sort_keys=True))
+    result_summary={"status":"ok","run_id":run_id,"ids":ids,"weights":[r["weight"] for r in route],
+                    "max_row_error":max_error,"max_weighted_error":max_combined,"work_dir":str(work),
+                    "scope":"CPU reference route, local real expert sessions; synthetic activation"}
+    if a.collector:
+        if not os.path.isabs(a.collector): raise ValueError("collector path must be absolute")
+        claims=list(ledger.glob("*.claim.json"))
+        if len(claims)!=1: raise ValueError("unexpected durable reservation count")
+        claim=json.loads(claims[0].read_text())
+        if claim.get("status")!="RESERVED_UNKNOWN_NO_REPLAY" or claim.get("stamp",{}).get("run_id")!=run_id:
+            raise ValueError("unexpected durable reservation identity")
+        attempt=claim["attempt"]
+        problem=json.loads(json.dumps(init["template"]))
+        problem["stamp"]["batch"]=1
+        outputs=[]; half_rows=[]
+        for row in rows:
+            bits=[int.from_bytes(struct.pack("<e",v),"little") for v in row["value"]]
+            half_rows.append(bits)
+        for rank in (3,2):  # Deliberately reverse rank arrival; Collector restores slot order.
+            slots=[]; bits=[]
+            for slot,record in enumerate(copies):
+                if record["rank"]==rank:
+                    slots.append({"token":0,"slot":slot,"expert":record["expert"],"local":record["local"]})
+                    bits.extend(half_rows[slot])
+            outputs.append({"stamp":problem["stamp"],"rank":rank,"attempt":attempt,"rows":len(slots),
+                            "columns":2560,"slots":slots,"fp16_bits":bits})
+        request={"problem":problem,"expected_attempt":attempt,"outputs":outputs}
+        proc=subprocess.run([a.collector,"collect-fp16","-"],input=json.dumps(request,allow_nan=False),
+                            capture_output=True,text=True,check=True,timeout=30)
+        collected=json.loads(proc.stdout)
+        if not collected.get("ok") or collected["result"].get("accepted_rows")!=10: raise ValueError("collector refused")
+        vector=collected["result"]["output"]
+        if len(vector)!=1 or len(vector[0])!=2560: raise ValueError("collector output shape")
+        max_collector_diff=0.0; max_fp16_loss=0.0
+        for col,got in enumerate(vector[0]):
+            want=sum(route[slot]["weight"]*struct.unpack("<e",half_rows[slot][col].to_bytes(2,"little"))[0] for slot in range(10))
+            full=sum(route[slot]["weight"]*rows[slot]["value"][col] for slot in range(10))
+            max_collector_diff=max(max_collector_diff,abs(got-want)); max_fp16_loss=max(max_fp16_loss,abs(got-full))
+            if not math.isfinite(got) or abs(got-want)>1e-15: raise ValueError("collector differs from ordered FP16 reference")
+        result_summary.update({"collector":"FP16 decoded, f64 accumulation", "collector_max_diff":max_collector_diff,
+                               "fp16_max_loss_vs_unweighted_fp32":max_fp16_loss,"attempt":attempt})
+    print(json.dumps(result_summary,sort_keys=True))
 
 if __name__=="__main__":
     try: main()
