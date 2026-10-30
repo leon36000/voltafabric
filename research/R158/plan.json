@@ -1,0 +1,31 @@
+{
+  "gpu": false,
+  "hashes": {
+    "adapter": "fa6a5459d3b913594104618076973390c28c8c252cc2edf35998e7b047339abd",
+    "cli": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+    "codes": "c1bbdf2d6c0c15d7da34352689d65530b4daf981aa6392bfb17d17010dd7e993",
+    "donor": "b2e1f7c402d83f133244337fc2352a640e5cb5b67e8279938e2da18f4a7cf147",
+    "scalars": "bcf1e13241cb2960c903be775ca03e1a2776d3cc560b394e92137a7fb7b715b2",
+    "scales": "98aa1d1823f373ff28fc078a0443c1de7fa45594a9cfee1751e6d3f4cacc85aa"
+  },
+  "no_retry": true,
+  "oracle_atol": 6.103515625e-05,
+  "oracle_rtol": 0.001953125,
+  "problem_sha256": "698c22da49068f0a0c9c4ccc527cbbee524d9534ba1b61c492abfa42e9df6842",
+  "provider": "CPU inverse permutation QPN2; zero codes or scales for only down tile0 lane0 across groups",
+  "ranks": [
+    2,
+    9
+  ],
+  "rounding": "fp16 QPN dequant; f64 CPU dot rounded fp16 after each projection; silu fp16 then multiply fp16; raw output unweighted; Rust f64 weighted sum",
+  "routing_sha256": "8e892981448fd4ee08c4f43b595ad1951616da3b67a644f30d272cc097ada082",
+  "run_id": "r158-cpu",
+  "sample_scope": "one R132 expert cloned into two synthetic ranks",
+  "scope": "two Rust-created exclusive resident artifacts from same R132 expert, CPU owner load and two EXEC attempts; no GPU",
+  "test_cases": [
+    "two ranks nominal",
+    "down row0 codes zero",
+    "down row0 scales zero",
+    "stale"
+  ]
+}

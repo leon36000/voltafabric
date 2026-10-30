@@ -1,0 +1,16 @@
+{
+  "cli_sha256": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+  "expected_attempt": 1,
+  "failure_mutants": [
+    "attempt",
+    "slot",
+    "duplicate",
+    "nonfinite",
+    "missing"
+  ],
+  "gpu": false,
+  "no_retry": true,
+  "owner_stdout_sha256": "2667891667f5d05d2b7a9eb28c3f0a8f88c201a6c464a3583038d438687958f6",
+  "routing_problem_sha256": "2c1447983d9c649615c49e6bd33a0e87c2f587be87314febaf2113ac814a7ad7",
+  "scope": "offline captured R158 owner bytes into actual Rust collect-fp16, no execution of old runner"
+}

@@ -1,0 +1,10 @@
+{
+  "capture_exit": 0,
+  "capture_tests": 3,
+  "gpu": false,
+  "green_exit": 0,
+  "red_exit": 1,
+  "red_reason": "module wire absent before implementation",
+  "tests": 5,
+  "wire_sha256": "fe12930345bffd0ffebf3f43d634e8537164cb4dc1f3e28171608572e0230fad"
+}

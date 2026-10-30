@@ -1,0 +1,178 @@
+{
+  "completion_sha256": "45bc432f30c5595c61b02708f468e619ecb1dc7f6766138a6855dc88ccc90506",
+  "completion_values": 2048,
+  "exit": 0,
+  "gpu": false,
+  "limits": "Real Rust CPU worker wire only; no Python owner bridge, CUDA or full model.",
+  "status": "WIRE_CAPTURE_VERIFIED",
+  "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "steps": [
+    {
+      "body_bytes": 0,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "direction": "send",
+      "header_sha256": "c6e5441ccc3fcbe3510cc3d0bbdc532d44100e2df58dadca381193e3c22809a4",
+      "op": "hello"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "hello": {
+          "arch": "aarch64",
+          "build": "0.1.0",
+          "capabilities": [
+            "cpu_f64_dense_moe_v1",
+            "cpu_mxfp4_r9_preweighted_fp32_v1",
+            "mxfp4_exec_bf16_exact_raw_v1",
+            "cpu_qpn2_resident_v1",
+            "cpu_qpn2_resident_raw_v1",
+            "cpu_exec_f64_raw_v1",
+            "cpu_exec_fp16_raw_v1",
+            "cpu_completion_f64_raw_v1",
+            "cpu_completion_batch_f64_raw_v1",
+            "cpu_completion_batch_f64_raw_session_v1",
+            "cpu_completion_batch_fp16_raw_v1",
+            "cpu_engram_owner_rows_raw_v1",
+            "cpu_engram_row_ids_varint_v1"
+          ],
+          "endian": "little",
+          "max_message_bytes": 16777216,
+          "os": "linux",
+          "pid": 1262241,
+          "protocol": 1,
+          "rank": 2
+        },
+        "reply": "hello"
+      },
+      "header_sha256": "695bdbc3422c92828b8cf9342c687563cbe0d3843a168131bf43969ed600f707"
+    },
+    {
+      "body_bytes": 1770568,
+      "body_sha256": "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+      "direction": "send",
+      "header_sha256": "7b8c3df6f15e444a900f949a412c4cce60ed6e4cfb1c15ba72f2d69f4a094585",
+      "op": "load_artifact_raw"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "artifact_sha256": "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+        "epoch": 1,
+        "experts": 1,
+        "reply": "loaded",
+        "transferred": true
+      },
+      "header_sha256": "8e4b69d7431748f16df116f594495a07ffa01da6ea88b91d52e9fcb459bddb79"
+    },
+    {
+      "body_bytes": 4096,
+      "body_sha256": "27e94ad2a07d39e4ceb08990154174babb717f74cb9c8f0a57ddfc64662d2af5",
+      "direction": "send",
+      "header_sha256": "5bdc11efbe1f23aff9d18882b7d94b7eefdb319a57587035e164d72fc0c38eab",
+      "op": "exec_raw_fp16"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "event": {
+          "attempt": 1,
+          "event": {
+            "kind": "started"
+          },
+          "rank": 2,
+          "stamp": {
+            "batch": 0,
+            "epoch": 1,
+            "layer": 0,
+            "model_revision": "qwen-r132-test-copy",
+            "plan_id": "wire-probe-fp16",
+            "run_id": "r160-cpu"
+          }
+        },
+        "reply": "event"
+      },
+      "header_sha256": "a9caecb5bf324851e8134ba6536d35040c926784260721426e393058c4ecca2a"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "attempt": 1,
+        "completion_stamp": {
+          "batch": 0,
+          "epoch": 1,
+          "layer": 0,
+          "model_revision": "qwen-r132-test-copy",
+          "plan_id": "wire-probe-fp16",
+          "run_id": "r160-cpu"
+        },
+        "completions": [
+          {
+            "expert": 0,
+            "local": 0,
+            "slot": 0,
+            "token": 0
+          }
+        ],
+        "hidden": 2048,
+        "rank": 2,
+        "reply": "completion_batch_fp16_raw",
+        "stamp": {
+          "batch": 0,
+          "epoch": 1,
+          "layer": 0,
+          "model_revision": "qwen-r132-test-copy",
+          "plan_id": "wire-probe-fp16",
+          "run_id": "r160-cpu"
+        },
+        "values": 2048
+      },
+      "header_sha256": "f9c68194bca733c97b5c8a03851665803ff765b1e64b6a4a7c539bc46917a932"
+    },
+    {
+      "bytes": 4096,
+      "direction": "recv_body",
+      "sha256": "45bc432f30c5595c61b02708f468e619ecb1dc7f6766138a6855dc88ccc90506"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "event": {
+          "attempt": 1,
+          "event": {
+            "kind": "finished",
+            "slots": 1
+          },
+          "rank": 2,
+          "stamp": {
+            "batch": 0,
+            "epoch": 1,
+            "layer": 0,
+            "model_revision": "qwen-r132-test-copy",
+            "plan_id": "wire-probe-fp16",
+            "run_id": "r160-cpu"
+          }
+        },
+        "reply": "event"
+      },
+      "header_sha256": "0f1a16dbddfe93fa66dd90ff21faa2938c58a3a54db1ddc63bf9de476611104f"
+    },
+    {
+      "body_bytes": 0,
+      "body_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "direction": "send",
+      "header_sha256": "c2025554674f49b1beab1efabf501d0d7cc613e06245cab212a2f3b6e2c46203",
+      "op": "shutdown"
+    },
+    {
+      "direction": "recv",
+      "header": {
+        "execs": 1,
+        "peak_rss_kib": 9028,
+        "reply": "bye"
+      },
+      "header_sha256": "db6aad7e8da17354d94fe64b16537cc02d3d383d37c11f72a669fc59455f6864"
+    }
+  ],
+  "worker_exit": 0,
+  "worker_pid": 1262241
+}

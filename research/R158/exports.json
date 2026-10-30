@@ -1,0 +1,18 @@
+[
+  {
+    "artifact_bytes": 1770568,
+    "artifact_sha256": "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+    "exit": 0,
+    "rank": 2,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "c45277c053590c99ac90dccaf68f0052387149927e22649710625397b72c1a09"
+  },
+  {
+    "artifact_bytes": 1770568,
+    "artifact_sha256": "1d3eafe7c7e37f96a03b5bfa1cbce04619adcb50f061c91648a2643555611c6d",
+    "exit": 0,
+    "rank": 9,
+    "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdout_sha256": "c81769663a02201fa208928d13b5a6811c3873224ac887450be10aa94fad928e"
+  }
+]

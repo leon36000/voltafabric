@@ -1,0 +1,12 @@
+{
+  "export_parent_exit": 0,
+  "rank_export_exits": [
+    0,
+    0
+  ],
+  "remote_exit": 0,
+  "remote_script_sha256": "5e5c88f4b444228c1596892aa20fd1c8cd6bbc71772beab1c6bb51450280ba84",
+  "routing_exit": 0,
+  "verify_exit": 0,
+  "verify_script_sha256": "5ecba628c294e9710f749f0a60b797cc8f573b01c90bb448e0d4580f5f66161c"
+}

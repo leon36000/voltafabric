@@ -1,0 +1,39 @@
+{
+  "activations": "((i%31)-15)/16, little-endian FP16, one token",
+  "artifact": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r158-real-resident-owner-cpu/resident-rank2.safetensors",
+  "artifact_sha256": "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+  "case": "new CPU wire capture; no owner bridge or GPU",
+  "dispatch": {
+    "hidden": 2048,
+    "rank": 2,
+    "resident_order": [
+      0
+    ],
+    "slots": [
+      {
+        "physical_expert": 0,
+        "slot": {
+          "expert": 0,
+          "local": 0,
+          "rank": 2,
+          "slot": 0,
+          "token": 0,
+          "weight": 0.25
+        }
+      }
+    ],
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "qwen-r132-test-copy",
+      "plan_id": "wire-probe-fp16",
+      "run_id": "r160-cpu"
+    },
+    "tokens": 1
+  },
+  "no_retry": true,
+  "wire": "real Rust session worker raw artifact + raw FP16 activation + raw FP16 batch completion",
+  "worker": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-collector-20261024-r11/target/debug/vf-rank-session",
+  "worker_sha256": "57481d50f64b1545acff581bf847d581397dedb6d0624269d0565e4331341f47"
+}

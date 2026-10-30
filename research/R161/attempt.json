@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "STALE_EXECUTION",
+    "message": "FP16 output attempt differs from the admitted attempt"
+  },
+  "ok": false,
+  "schema_version": 1
+}

@@ -1,0 +1,18 @@
+{
+  "argv": [
+    "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-case-contract-r61/assets/bin/aarch64/vf_cli",
+    "session-run-compressed",
+    "-"
+  ],
+  "artifact_sha256": [
+    "8f1563c9a1c9308b2b63ebc58ceef94689393402a878386e2f32bdf3166b2ff7",
+    "1d3eafe7c7e37f96a03b5bfa1cbce04619adcb50f061c91648a2643555611c6d"
+  ],
+  "cli_sha256": "11b8a4a515f582de169ffe9abf35e13811e1ad93d52586e607dafac3687f87c4",
+  "gpu": false,
+  "input_sha256": "4d963e8ba645b4e49dad86555a58c4b619cb97376cea80634c1e7343cb98be5c",
+  "no_retry": true,
+  "timeout_seconds": 60,
+  "worker_sha256": "57481d50f64b1545acff581bf847d581397dedb6d0624269d0565e4331341f47",
+  "worker_timeout_ms": 20000
+}

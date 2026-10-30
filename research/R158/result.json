@@ -1,0 +1,16 @@
+{
+  "collector_exit": 0,
+  "collector_input_sha256": "d7683a1351359814b443def3e2da1d8b485c8c894dc66e1f7e10a072dfa1be8d",
+  "collector_stdout_sha256": "dbc377ecb3f3cb19b84291762580ff1efc59fed78ebed97a7714ee9ed4265bb9",
+  "execution_plan_sha256": "aca74eaa8c9968a35720e12f9687ae3e80569e5bef64f465969fc2b745584e07",
+  "gpu": false,
+  "limits": "Real Rust exported artifact/CPU owner lifecycle and CPU-only QPN2 provider; identical synthetic copies of one R132 expert, no GPU/Session/full shard/model.",
+  "normal_closed_owners": 1,
+  "owners": 2,
+  "remote_stdout_sha256": "2667891667f5d05d2b7a9eb28c3f0a8f88c201a6c464a3583038d438687958f6",
+  "row_sha256": "75f0fd09694381ff06ca9d65b71023eddd5af6def70dd5e0afc0d18027971906",
+  "status": "RUST_ARTIFACT_REAL_CPU_OWNER_TWO_EXEC_COLLECTOR",
+  "successful_execs": 4,
+  "synthetic_poisoned_owners": 1,
+  "values": 2048
+}

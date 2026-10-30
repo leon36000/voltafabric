@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "NON_FINITE_RESULT",
+    "message": "FP16 output contains NaN or infinity"
+  },
+  "ok": false,
+  "schema_version": 1
+}

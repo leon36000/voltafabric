@@ -1,0 +1,26 @@
+{
+  "batches": 2,
+  "bye_execs": [
+    2,
+    2
+  ],
+  "exec_requests": 4,
+  "gpu": false,
+  "limitations": "Rust compressed CPU sessions and Python scalar oracle; no Python PersistentQPN2Owner bridge, no GPU, no full model or full shard hash.",
+  "load_transfers": [
+    1,
+    1
+  ],
+  "owners": 2,
+  "plan_sha256": "57a2b9126c0707044f8dd2bc452e7b417e183dc0ece677727072865ca2ff8515",
+  "recorded_values": 4096,
+  "reference_tolerance_abs": 1e-10,
+  "reference_tolerance_rel": 1e-10,
+  "scalar_reference_max_abs_error": 7.806255641895632e-18,
+  "status": "RUST_COMPRESSED_SESSION_SAMPLED_EXPERT_CPU_VERIFIED",
+  "stdout_sha256": "7b4a8dcc27a0b99a375fdb9971aa38d13cb6ca25abbfed0aeea5e14df1574961",
+  "worker_exits": [
+    0,
+    0
+  ]
+}

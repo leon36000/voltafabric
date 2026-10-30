@@ -1,0 +1,58 @@
+{
+  "accepted_rows": 2,
+  "cases": [
+    {
+      "case": "nominal",
+      "exit": 0,
+      "input_sha256": "f2e5d6c85b107b08451a4ef22777f0d3e1dd6e39fb0d4d9c18309c606e68b924",
+      "ok": true,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "44dc329a813e1c79312d9dc22d340d5f956ecbe30f045d93b5a0366d076128fe"
+    },
+    {
+      "case": "attempt",
+      "exit": 2,
+      "input_sha256": "e373cf2bb2c75ee4dfc87f5f875fa5e3d30542d59ac028feccee68d551450db1",
+      "ok": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "77676a36931e020642ab74166bd2aa632aed2194b5938fbc4a3faa684ff0adf7"
+    },
+    {
+      "case": "slot",
+      "exit": 2,
+      "input_sha256": "7b69af6101af7f8d958c22027c9fa6a75514f28e506fb29444d49473959939d1",
+      "ok": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b13959cf65dfeacd3851abbc2d1329f28ec6943c8d71505b6106188dfb62d11d"
+    },
+    {
+      "case": "duplicate",
+      "exit": 2,
+      "input_sha256": "eea4095ba28dfe8f6da9d3ccfed752218d76a46339cc1e8ed69180664d64ada4",
+      "ok": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "b13959cf65dfeacd3851abbc2d1329f28ec6943c8d71505b6106188dfb62d11d"
+    },
+    {
+      "case": "nonfinite",
+      "exit": 2,
+      "input_sha256": "9eae613a9d01dbe0f55a22ba741833ee18250aa70d4c99e11c13f6224a9ac8ca",
+      "ok": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "cbde000b48507f378ddc64a358d7f26ea51bcd8042334891e3033853a3072c0e"
+    },
+    {
+      "case": "missing",
+      "exit": 2,
+      "input_sha256": "71645eca7ba58327c50276c18ab764eb9acd55259e0aaeefc5a63622a05a9eb9",
+      "ok": false,
+      "stderr_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdout_sha256": "f463ca2dc378668afb62669b93cf6a92c6be3b4f9de0fa9d82d5ba5ffd57c7c5"
+    }
+  ],
+  "gpu": false,
+  "limits": "Offline consumption of R158 captured CPU-owner rows; reconstructed metadata from associated routing; no live Session bridge, GPU, full model or independent tensor producer.",
+  "payload_bytes": 8192,
+  "status": "CAPTURED_REAL_OWNER_FP16_ROWS_TO_RUST_COLLECTOR",
+  "values": 2048
+}

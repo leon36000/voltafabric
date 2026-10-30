@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "BATCH_INCOMPLETE",
+    "message": "aborted or missing results"
+  },
+  "ok": false,
+  "schema_version": 1
+}

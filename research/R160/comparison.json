@@ -1,0 +1,8 @@
+{
+  "equal_values": 479,
+  "max_abs_difference": 1.239776611328125e-05,
+  "owner_cpu_fp16_stages_sha256": "75f0fd09694381ff06ca9d65b71023eddd5af6def70dd5e0afc0d18027971906",
+  "rust_f64_forward_then_fp16_sha256": "45bc432f30c5595c61b02708f468e619ecb1dc7f6766138a6855dc88ccc90506",
+  "scope": "observed differing CPU contracts; not GPU numeric accuracy",
+  "total": 2048
+}

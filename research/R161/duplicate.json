@@ -1,0 +1,8 @@
+{
+  "error": {
+    "code": "INVALID_COMPLETION",
+    "message": "duplicate, stale, unexpected or malformed FP16 slot; entire batch aborted"
+  },
+  "ok": false,
+  "schema_version": 1
+}
