@@ -38,6 +38,7 @@ pub mod traffic;
 pub mod cost;
 pub(crate) mod work;
 
+pub mod hyperconnection_cpu;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod native_ggml_cpu;
 #[cfg(feature = "native-ggml-cpu")]

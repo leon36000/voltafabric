@@ -52,3 +52,7 @@ endif()
 add_executable(vf_real_expert_oracle real_expert_oracle.cpp)
 target_link_libraries(vf_real_expert_oracle PRIVATE vf_native_ggml)
 target_compile_options(vf_real_expert_oracle PRIVATE -Wall -Wextra -Werror)
+# Explicit local model-input diagnostic; does not perform inference.
+add_executable(vf_sc117_embedding sc117_embedding.cpp)
+target_link_libraries(vf_sc117_embedding PRIVATE ggml-base)
+target_compile_options(vf_sc117_embedding PRIVATE -Wall -Wextra -Werror)
