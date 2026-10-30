@@ -1,0 +1,146 @@
+{
+  "scope": "local observations; model provenance not authenticated",
+  "result_sha256": "90a9ba38e1bcd95bdc08b2d6981678f8dcdf7078b1659bfe72df0ccf94e331cf",
+  "experts": [
+    {
+      "layer": 4,
+      "expert": 60,
+      "sha256": "a020222a85999ea97d2733b02c85f197a7a791ad171c1d4a245bc618b219f1bb",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 288,
+      "sha256": "53614d69817498e887de522499f91ed102f69f4bf5bca15b5683d49d97980762",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 173,
+      "sha256": "ec2f89d4c6891fc48e2f87d0b2562d424774274222ebb5289c6357daaa00d6f6",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 509,
+      "sha256": "bb46be49c30eaeaffc2420f15fbdb678ded446a55858930d3630c1438f26805c",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 452,
+      "sha256": "bd0f50c12303053233174b6196df9d7d219aeec3aad1793f98e75f5d209497a5",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 342,
+      "sha256": "90026e98670086ba6afe0ff27f48a0686732ec40e9cd64306c9e790fa1ed4d58",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 247,
+      "sha256": "6f4e0e02bc20926fdea1cc01a614a38449fe42b806b76059c7e323ad071b522a",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 263,
+      "sha256": "fb51ccbb246a703cd817890f66a18b0072d4cb084457d132072842ce56592935",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 155,
+      "sha256": "23f6f23f020ae0e056d88002100a9d69eed8494e5eb6a036d1e53c23a0055300",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 4,
+      "expert": 382,
+      "sha256": "e6666337ea6ee062e951dd3efb217c6c67cc3fbafd8217468167f416f8c84199",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 263,
+      "sha256": "79ed642e140c1a24eb8fca9e5d3bf558f29c6e8058426d113c7bb183335ce444",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 140,
+      "sha256": "7750dbca50eb1e1bd878c27b71cbe4428005cef1710ea06f1af121d754d7fa2d",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 298,
+      "sha256": "58745ece2e90ba4fbf67be706a0fbebef10b1a1f3a391a80bba5e8b757b6a5d4",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 160,
+      "sha256": "06f89ea152c9fcad1b0507f313f41d569f2d16f601c9d3c32d1dd7c2fd5d06c0",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 468,
+      "sha256": "c5b7dca49f54d9cc89ecc22b182b41bce3ed6be06e6d3d0b8d007c553d19beed",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 471,
+      "sha256": "cb0a1549e056231c0237367cd8b4402f5767ec1518d725b2c5fd775c6547e4f7",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 274,
+      "sha256": "1635240dc51c70e2926b947015df86d0727c237d0202ec7b21b3a78b90c3034d",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 486,
+      "sha256": "f3b34a40176e41003401d6577ef62f52d337376828a569579e33d69490203ee6",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 485,
+      "sha256": "9304c43f6d29b9812d154916f3848fdb1e9c84b2466b20913b4782c6feb722dd",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    },
+    {
+      "layer": 5,
+      "expert": 290,
+      "sha256": "6bb812735ee5a5499b6fed1e6ff2dd0ed9db7dbf59bf18a02bd1c04b7f20734d",
+      "bytes": 1971200,
+      "matches_gguf_slices": true
+    }
+  ]
+}

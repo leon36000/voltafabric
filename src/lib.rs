@@ -57,6 +57,8 @@ pub mod sc117_gdn_stage;
 pub mod sc117_head_cpu;
 pub mod sc117_layer_completion;
 #[cfg(feature = "native-ggml-cpu")]
+pub mod sc117_layer_chain;
+#[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_post_attention;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_qsa_bound_layer;
