@@ -19,3 +19,5 @@ The optional Rust feature `native-ggml-cpu` links the three static libraries fro
 ```
 VF_GGML_NATIVE_BUILD=<build-dir> cargo test --offline --locked --features native-ggml-cpu --test strata_native_provider
 ```
+
+The optional Rust `native_ggml_cpu::Fleet` connects verified native residents to Rust routing and the ordinary Collector in one process. Each unweighted FP32 expert output is explicitly rounded to FP16, decoded and accumulated as f64 with each routing coefficient applied once. It validates selected rank/expert/local bindings, limits per-rank CPU work, associates each result with a stamp and attempt, and refuses repeated batch identities within that fleet. After a computation or conversion failure the fleet becomes terminal and returns no output. Its attempt history is memory-only: it is not the durable R53 ledger, not the Session protocol, and not crash-safe or a distributed guarantee.

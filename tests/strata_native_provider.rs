@@ -117,3 +117,172 @@ fn native_owner_processes_nonzero_verified_synthetic_expert() {
     assert!(out.iter().any(|x| x.abs() > 1e-8));
     assert_eq!(out, owner.forward(&vec![0.125; 2560]).unwrap());
 }
+
+#[test]
+fn native_fleet_routes_two_residents_into_fp16_collector_without_replay() {
+    use std::collections::BTreeMap;
+    use voltafabric::{
+        completion,
+        moe::{Choice, Registry, Replica, Stamp},
+        native_ggml_cpu::Fleet,
+        routing,
+    };
+    let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
+    let mut data = vec![0u8; 2_176_000];
+    for i in (0..1_254_400).step_by(98) {
+        data[i + 1] = 0x28;
+    }
+    for i in (1_254_400..2_176_000).step_by(18) {
+        data[i + 1] = 0x28;
+    }
+    let digest = "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0";
+    // Each synthetic span returns the same bytes, while retaining distinct expert identity.
+    struct Repeat {
+        pos: u64,
+        bytes: Vec<u8>,
+    }
+    impl Seek for Repeat {
+        fn seek(&mut self, s: SeekFrom) -> std::io::Result<u64> {
+            self.pos = match s {
+                SeekFrom::Start(n) => n,
+                SeekFrom::End(n) => (SIZE as i64 + n) as u64,
+                SeekFrom::Current(n) => (self.pos as i64 + n) as u64,
+            };
+            Ok(self.pos)
+        }
+    }
+    impl Read for Repeat {
+        fn read(&mut self, b: &mut [u8]) -> std::io::Result<usize> {
+            let offset = (self.pos % 2_176_000) as usize;
+            let n = b.len().min(self.bytes.len() - offset);
+            b[..n].copy_from_slice(&self.bytes[offset..offset + n]);
+            self.pos += n as u64;
+            Ok(n)
+        }
+    }
+    let mut owners = Vec::new();
+    for e in 0..2 {
+        let blob = layout
+            .read_verified_expert(
+                &mut Repeat {
+                    pos: 0,
+                    bytes: data.clone(),
+                },
+                0,
+                e,
+                INDEX_SHA,
+                digest,
+            )
+            .unwrap();
+        let mut b = binding();
+        b.expert = e as u32;
+        b.rank = 2 + e as u32;
+        b.blob_sha256 = digest.into();
+        owners.push(Resident::load(&layout, blob, b).unwrap());
+    }
+    let x = vec![0.001_f32; 2560];
+    let reference = owners[0].forward(&x).unwrap();
+    let p = routing::RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![vec![
+            Choice {
+                expert: 0,
+                weight: 0.25,
+            },
+            Choice {
+                expert: 1,
+                weight: 0.75,
+            },
+        ]],
+        registry: Registry {
+            epoch: 3,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r381-native-fleet".into(),
+            model_revision: "model-test".into(),
+            plan_id: "plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 3,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+    };
+    let mut fleet = Fleet::new(owners).unwrap();
+    let mut stale = p.clone();
+    stale.stamp.epoch += 1;
+    assert!(fleet
+        .run_fp16_collected(&stale, std::slice::from_ref(&x), 1)
+        .is_err());
+    let result = fleet
+        .run_fp16_collected(&p, std::slice::from_ref(&x), 1)
+        .unwrap();
+    assert_eq!(result.attempt, 1);
+    assert_eq!(result.stamp, p.stamp);
+    assert_eq!(result.completed_slots, 2);
+    for (actual, value) in result.output[0].iter().zip(reference) {
+        let decoded =
+            completion::decode_fp16(completion::encode_fp16(f64::from(value)).unwrap()).unwrap();
+        assert_eq!(
+            actual.to_bits(),
+            (0.25 * decoded + 0.75 * decoded).to_bits()
+        );
+    }
+    assert!(fleet
+        .run_fp16_collected(&p, std::slice::from_ref(&x), 2)
+        .is_err());
+    let mut next = p.clone();
+    next.stamp.batch += 1;
+    assert!(fleet
+        .run_fp16_collected(&next, std::slice::from_ref(&x), 1)
+        .is_err());
+    assert!(fleet.run_fp16_collected(&next, &[x], 2).is_ok());
+
+    let mut overflow_owners = Vec::new();
+    for e in 0..2 {
+        let blob = layout
+            .read_verified_expert(
+                &mut Repeat {
+                    pos: 0,
+                    bytes: data.clone(),
+                },
+                0,
+                e,
+                INDEX_SHA,
+                digest,
+            )
+            .unwrap();
+        let mut b = binding();
+        b.expert = e as u32;
+        b.rank = 2 + e as u32;
+        b.blob_sha256 = digest.into();
+        overflow_owners.push(Resident::load(&layout, blob, b).unwrap());
+    }
+    let mut overflow = Fleet::new(overflow_owners).unwrap();
+    let mut p2 = p.clone();
+    p2.stamp.run_id = "r381-native-overflow".into();
+    assert_eq!(
+        overflow
+            .run_fp16_collected(&p2, &[vec![0.125; 2560]], 1)
+            .unwrap_err()
+            .code,
+        "FP16_OVERFLOW"
+    );
+    p2.stamp.batch += 1;
+    assert!(overflow
+        .run_fp16_collected(&p2, &[vec![0.001; 2560]], 2)
+        .is_err());
+}
