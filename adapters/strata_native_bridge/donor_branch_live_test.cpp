@@ -7,6 +7,12 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#ifdef VF_FULL_DONOR_TEST
+#include <csignal>
+#include <sys/resource.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
 int main(int argc,char** argv) {
     if(argc!=2) return 1;
     std::ifstream file(argv[1],std::ios::binary); std::vector<float> expected(2560);
@@ -35,5 +41,17 @@ int main(int argc,char** argv) {
     strata::core::expert_pool_dispatch_multi(fail,x.data(),ids,1,2,out.data());
     if(!fail.failed || !ctx.terminal || fail.layers!=0) return 7;
     for(float v:out) if(v!=9.f) return 8;
+#ifdef VF_FULL_DONOR_TEST
+    // The complete donor's unqualified fallback must hit an aborting test stub,
+    // not an actual CUDA or peer implementation. Avoid leaving core files.
+    pid_t pid=fork(); if(pid<0) return 10;
+    if(pid==0) {
+        rlimit limit{0,0}; setrlimit(RLIMIT_CORE,&limit);
+        strata::core::ExpertDispatch ordinary;
+        strata::core::expert_pool_dispatch_multi(ordinary,x.data(),ids,1,2,out.data());
+        _exit(11);
+    }
+    int status=0; if(waitpid(pid,&status,0)!=pid || !WIFSIGNALED(status) || WTERMSIG(status)!=SIGABRT) return 12;
+#endif
     std::string error; return client.shutdown(error)?0:9;
 }
