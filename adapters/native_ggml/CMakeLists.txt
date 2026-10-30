@@ -60,3 +60,7 @@ target_compile_options(vf_sc117_embedding PRIVATE -Wall -Wextra -Werror)
 add_executable(vf_check_sc117_qkv check_sc117_qkv.cpp)
 target_link_libraries(vf_check_sc117_qkv PRIVATE ggml-cpu ggml-base)
 target_compile_options(vf_check_sc117_qkv PRIVATE -Wall -Wextra -Werror)
+# Explicit SC117 GDN matrix diagnostic, not a CTest.
+add_executable(vf_check_sc117_gdn_output check_sc117_gdn_output.cpp)
+target_link_libraries(vf_check_sc117_gdn_output PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_check_sc117_gdn_output PRIVATE -Wall -Wextra -Werror)

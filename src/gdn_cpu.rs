@@ -16,6 +16,49 @@ pub struct Prepared {
     pub v: Vec<f32>,
 }
 
+/// Per-head RMS normalization followed by gamma and sigmoid(z), CPU reference.
+pub fn output_norm(output: &[f32], z: &[f32], gamma: &[f32], epsilon: f32) -> Result<Vec<f32>> {
+    if gamma.is_empty()
+        || gamma.len() > 4096
+        || output.is_empty()
+        || output.len() > 1_048_576
+        || !output.len().is_multiple_of(gamma.len())
+        || z.len() != output.len()
+        || !epsilon.is_finite()
+        || epsilon <= 0.0
+        || output.iter().chain(z).chain(gamma).any(|v| !v.is_finite())
+    {
+        return Err(invalid("invalid GDN output normalization input"));
+    }
+    let mut result = Vec::with_capacity(output.len());
+    for (head, gates) in output
+        .chunks_exact(gamma.len())
+        .zip(z.chunks_exact(gamma.len()))
+    {
+        let sum = head
+            .iter()
+            .map(|&x| f64::from(x) * f64::from(x))
+            .sum::<f64>();
+        let inv = (sum / gamma.len() as f64 + f64::from(epsilon))
+            .sqrt()
+            .recip() as f32;
+        for ((&x, &g), &w) in head.iter().zip(gates).zip(gamma) {
+            let sigmoid = if g >= 0.0 {
+                1.0 / (1.0 + (-g).exp())
+            } else {
+                let e = g.exp();
+                e / (1.0 + e)
+            };
+            let y = x * inv * w * sigmoid;
+            if !y.is_finite() {
+                return Err(invalid("GDN output normalization overflow"));
+            }
+            result.push(y);
+        }
+    }
+    Ok(result)
+}
+
 /// BF16 row-major projections and GDN gates, with full f32 activations and f64 CPU dots.
 /// This models the native F32-input projection path, not bitwise CUDA arithmetic.
 pub fn project_gates(

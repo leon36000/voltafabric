@@ -1,5 +1,5 @@
 use voltafabric::gdn_cpu::{
-    project_gates, ConvHistory, GdnState, Identity, Prepared, RecurrentState,
+    output_norm, project_gates, ConvHistory, GdnState, Identity, Prepared, RecurrentState,
 };
 fn id() -> Identity {
     Identity {
@@ -8,6 +8,17 @@ fn id() -> Identity {
         layer: 0,
         epoch: 1,
     }
+}
+
+#[test]
+fn output_norm_is_per_head_and_sigmoid_gated() {
+    let y = output_norm(&[3.0, 4.0, 0.0, 5.0], &[0.0; 4], &[1.0, 2.0], 1e-6).unwrap();
+    let inv = (12.5_f64 + 1e-6).sqrt().recip() as f32;
+    for (actual, expected) in y.iter().zip([1.5 * inv, 4.0 * inv, 0.0, 5.0 * inv]) {
+        assert!((actual - expected).abs() < 1e-6);
+    }
+    assert!(output_norm(&[1.0, f32::NAN], &[0.0; 2], &[1.0; 2], 1e-6).is_err());
+    assert!(output_norm(&[1.0], &[0.0], &[1.0, 1.0], 1e-6).is_err());
 }
 
 #[test]
