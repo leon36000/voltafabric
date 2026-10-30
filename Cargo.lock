@@ -273,6 +273,7 @@ version = "0.1.0"
 dependencies = [
  "libc",
  "num-bigint",
+ "rustix",
  "safetensors",
  "serde",
  "serde_json",

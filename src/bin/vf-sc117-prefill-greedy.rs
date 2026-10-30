@@ -1,7 +1,7 @@
 //! Bounded SC117 CPU generation qualification with pre-position expert headroom.
 use std::{
     collections::BTreeMap,
-    io::Read,
+    io::{Read, Write},
     time::{Duration, SystemTime, UNIX_EPOCH},
 };
 use voltafabric::{
@@ -360,6 +360,106 @@ fn rank_endpoint(
     Ok(Endpoint { rank, argv })
 }
 
+// Make the key file an immutable snapshot. The plan names the caller's
+// canonical path and digest; SSH reads only the sealed descriptor at runtime.
+#[cfg(target_os = "linux")]
+fn pin_known_hosts(
+    endpoint: &mut Endpoint,
+    host: &str,
+    path: &str,
+    expected: &str,
+) -> Result<std::fs::File, E> {
+    use std::os::unix::fs::MetadataExt;
+    if !path.starts_with('/')
+        || path.len() > 4096
+        || path == "/"
+        || !path
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || b"/._-".contains(&c))
+        || !sha256::is_hex_digest(expected)
+        || endpoint.argv.first().map(String::as_str) != Some("/usr/bin/ssh")
+    {
+        return Err("invalid SSH known-hosts input".into());
+    }
+    let input = std::fs::File::open(path)?;
+    let before = input.metadata()?;
+    if !before.is_file() || before.len() == 0 || before.len() > 4096 {
+        return Err("invalid SSH known-hosts size".into());
+    }
+    let mut bytes = Vec::new();
+    input.take(4097).read_to_end(&mut bytes)?;
+    let after = std::fs::metadata(path)?;
+    let identity = |m: &std::fs::Metadata| {
+        (
+            m.dev(),
+            m.ino(),
+            m.len(),
+            m.mtime(),
+            m.mtime_nsec(),
+            m.ctime(),
+            m.ctime_nsec(),
+        )
+    };
+    if identity(&before) != identity(&after)
+        || bytes.len() as u64 != before.len()
+        || sha256::hex(&bytes) != expected
+    {
+        return Err("SSH known-hosts changed or digest mismatch".into());
+    }
+    let line = std::str::from_utf8(&bytes)?
+        .strip_suffix('\n')
+        .unwrap_or(std::str::from_utf8(&bytes)?);
+    let parts: Vec<_> = line.split(' ').collect();
+    if parts.len() != 3
+        || parts[0] != host
+        || parts[1] != "ssh-ed25519"
+        || parts[2].is_empty()
+        || !parts[2]
+            .bytes()
+            .all(|b| b.is_ascii_alphanumeric() || b"+/=".contains(&b))
+    {
+        return Err("SSH known-hosts must contain exactly one matching ed25519 key".into());
+    }
+    let fd = rustix::fs::memfd_create(
+        "vf-known-hosts",
+        rustix::fs::MemfdFlags::ALLOW_SEALING | rustix::fs::MemfdFlags::CLOEXEC,
+    )?;
+    let mut sealed = std::fs::File::from(fd);
+    sealed.write_all(&bytes)?;
+    let seals = rustix::fs::SealFlags::WRITE
+        | rustix::fs::SealFlags::GROW
+        | rustix::fs::SealFlags::SHRINK
+        | rustix::fs::SealFlags::SEAL;
+    rustix::fs::fcntl_add_seals(&sealed, seals)?;
+    if !rustix::fs::fcntl_get_seals(&sealed)?.contains(seals) {
+        return Err("cannot seal SSH known-hosts".into());
+    }
+    let options = [
+        format!("UserKnownHostsFile={path}"),
+        "GlobalKnownHostsFile=/dev/null".into(),
+        format!("HostKeyAlias={host}"),
+        "VerifyHostKeyDNS=no".into(),
+        "UpdateHostKeys=no".into(),
+        "KnownHostsCommand=none".into(),
+        "CheckHostIP=no".into(),
+        "ProxyCommand=none".into(),
+        "ProxyJump=none".into(),
+        "PermitLocalCommand=no".into(),
+        "ClearAllForwardings=yes".into(),
+    ];
+    let mut at = 1;
+    for option in options {
+        endpoint.argv.insert(at, "-o".into());
+        endpoint.argv.insert(at + 1, option);
+        at += 2;
+    }
+    Ok(sealed)
+}
+#[cfg(not(target_os = "linux"))]
+fn pin_known_hosts(_: &mut Endpoint, _: &str, _: &str, _: &str) -> Result<std::fs::File, E> {
+    Err("sealed SSH host key snapshot requires Linux".into())
+}
+
 fn optional_env(name: &str) -> Result<Option<String>, E> {
     match std::env::var(name) {
         Ok(value) => Ok(Some(value)),
@@ -397,6 +497,7 @@ struct WorkerPlan<'a> {
     payload_budget: u64,
     rank_limits: &'a Option<BTreeMap<u32, u64>>,
     endpoints: &'a BTreeMap<u32, Endpoint>,
+    known_hosts_sha256: &'a BTreeMap<u32, String>,
 }
 
 fn prompt_tokens_hash(tokens: &[u32]) -> String {
@@ -416,6 +517,7 @@ fn worker_plan_id(
     eos_token_id: u32,
     prompt_mode: &'static str,
     ple_manifest_sha256: &str,
+    known_hosts_sha256: &BTreeMap<u32, String>,
 ) -> Result<String, E> {
     let prompt_length = prompt_tokens.len();
     if !sha256::is_hex_digest(ple_manifest_sha256)
@@ -429,6 +531,16 @@ fn worker_plan_id(
         || !(1..=64).contains(&max_new_tokens)
         || prompt_length + max_new_tokens - 1 > 64
         || endpoints.len() != 2
+        || known_hosts_sha256
+            .iter()
+            .any(|(rank, hash)| !endpoints.contains_key(rank) || !sha256::is_hex_digest(hash))
+        || endpoints.iter().any(|(rank, endpoint)| {
+            let remote = endpoint
+                .argv
+                .get(1)
+                .is_none_or(|arg| arg != "--guarded-local");
+            remote != known_hosts_sha256.contains_key(rank)
+        })
         || [2, 3].iter().any(|rank| {
             endpoints
                 .get(rank)
@@ -447,7 +559,7 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v12",
+        version: "vf-sc117-worker-plan-v13",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
         origin_policy: "stable-source-digest-cache-v1",
@@ -464,8 +576,9 @@ fn worker_plan_id(
         payload_budget,
         rank_limits,
         endpoints,
+        known_hosts_sha256,
     };
-    Ok(format!("r525-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r527-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -591,6 +704,8 @@ fn run() -> Result<(), E> {
         return Err("invalid prompt tokens".into());
     }
     let mut endpoints = BTreeMap::new();
+    let mut host_pins = BTreeMap::new();
+    let mut host_digests = BTreeMap::new();
     for rank in 2..=3 {
         let host = optional_env(&format!("VF_RANK{rank}_SSH_HOST"))?;
         let remote = optional_env(&format!("VF_RANK{rank}_SSH_WORKER"))?;
@@ -601,10 +716,18 @@ fn run() -> Result<(), E> {
         } else {
             remote_digest.as_deref()
         };
-        endpoints.insert(
-            rank,
-            rank_endpoint(rank, &a[5], host.as_deref(), remote.as_deref(), digest)?,
-        );
+        let mut endpoint = rank_endpoint(rank, &a[5], host.as_deref(), remote.as_deref(), digest)?;
+        let path = optional_env(&format!("VF_RANK{rank}_SSH_KNOWN_HOSTS"))?;
+        let host_hash = optional_env(&format!("VF_RANK{rank}_SSH_KNOWN_HOSTS_SHA256"))?;
+        match (host.as_deref(), path.as_deref(), host_hash.as_deref()) {
+            (Some(host), Some(path), Some(hash)) => {
+                host_pins.insert(rank, pin_known_hosts(&mut endpoint, host, path, hash)?);
+                host_digests.insert(rank, hash.to_owned());
+            }
+            (None, None, None) => (),
+            _ => return Err("SSH known-hosts path and digest must be supplied together".into()),
+        }
+        endpoints.insert(rank, endpoint);
     }
     let mut dense = std::fs::File::open(&a[1])?;
     let mut shard = std::fs::File::open(&a[2])?;
@@ -668,6 +791,7 @@ fn run() -> Result<(), E> {
         eos_token_id,
         prompt_mode,
         &manifest_hash,
+        &host_digests,
     )?;
     if plan_only {
         println!(
@@ -684,6 +808,22 @@ fn run() -> Result<(), E> {
             .values()
             .any(|v| v.argv.get(1).is_none_or(|arg| arg != "--guarded-local")),
     )?;
+    // The sealed memfd stays alive for all SSH children. Keep the canonical
+    // path in the plan; only replace the runtime option with our immutable fd.
+    #[cfg(target_os = "linux")]
+    for (rank, file) in &host_pins {
+        use std::os::fd::AsRawFd;
+        let argv = &mut endpoints.get_mut(rank).ok_or("missing SSH endpoint")?.argv;
+        let option = argv
+            .iter_mut()
+            .find(|arg| arg.starts_with("UserKnownHostsFile="))
+            .ok_or("missing SSH known-hosts option")?;
+        *option = format!(
+            "UserKnownHostsFile=/proc/{}/fd/{}",
+            std::process::id(),
+            file.as_raw_fd()
+        );
+    }
     let weights = voltafabric::sc117_ple_weights::Weights::load(
         &mut shard,
         &manifest,
@@ -884,6 +1024,7 @@ fn run() -> Result<(), E> {
         "{}",
         serde_json::json!({"scope":"up to 64 prompt tokens and 64 predictions within 64 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}})
     );
+    drop(host_pins);
     Ok(())
 }
 fn main() {
@@ -908,20 +1049,30 @@ mod tests {
     }
     #[test]
     fn worker_plan_binds_rank_endpoints_and_capacities() {
+        let known_hosts = BTreeMap::from([(3u32, DIGEST.to_owned())]);
         let rank2 = rank_endpoint(2, "/worker", None, None, Some(DIGEST)).unwrap();
         let rank3 =
             rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), Some(DIGEST)).unwrap();
         let endpoints = BTreeMap::from([(2, rank2.clone()), (3, rank3.clone())]);
         let limits = Some(BTreeMap::from([(2, 100), (3, 200)]));
         let id = worker_plan_id(
-            &endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", DIGEST,
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts,
         )
         .unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r525-697c1f26e513e4c0bc3009379ee9f8a388b6ac5d7c16bec2495b6a10c0ae24ff"
+            "r527-f818f4a248ddcafb83f78b4ec7825c263e5475522341cad61ae4a434697a4f53"
         );
+        let changed_host_key = BTreeMap::from([(3u32, "b".repeat(64))]);
         assert_ne!(
             id,
             worker_plan_id(
@@ -932,13 +1083,50 @@ mod tests {
                 16,
                 248_046,
                 "plain",
-                &"b".repeat(64)
+                DIGEST,
+                &changed_host_key
             )
             .unwrap()
         );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", "BAD").is_err()
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+            &BTreeMap::new()
+        )
+        .is_err());
+        assert_ne!(
+            id,
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                &"b".repeat(64),
+                &known_hosts
+            )
+            .unwrap()
         );
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_046,
+            "plain",
+            "BAD",
+            &known_hosts
+        )
+        .is_err());
         let p12 = worker_plan_id(
             &endpoints,
             300,
@@ -948,6 +1136,7 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
+            &known_hosts,
         )
         .unwrap();
         let p21 = worker_plan_id(
@@ -959,6 +1148,7 @@ mod tests {
             248_046,
             "plain",
             DIGEST,
+            &known_hosts,
         )
         .unwrap();
         assert_ne!(id, p12);
@@ -971,7 +1161,8 @@ mod tests {
             1,
             248_046,
             "chat",
-            DIGEST
+            DIGEST,
+            &known_hosts
         )
         .is_err());
         assert!(worker_plan_id(
@@ -982,7 +1173,8 @@ mod tests {
             1,
             248_046,
             "plain",
-            DIGEST
+            DIGEST,
+            &known_hosts
         )
         .is_err());
         assert!(worker_plan_id(
@@ -993,21 +1185,51 @@ mod tests {
             1,
             248_046,
             "chat",
-            DIGEST
+            DIGEST,
+            &known_hosts
         )
         .is_ok());
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "chat", DIGEST).unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "chat",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "invalid", DIGEST)
-                .is_err()
-        );
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_046,
+            "invalid",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
         assert_eq!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_046, "plain", DIGEST)
-                .unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
         let changed_local = BTreeMap::from([
             (
@@ -1026,7 +1248,8 @@ mod tests {
                 16,
                 248_046,
                 "plain",
-                DIGEST
+                DIGEST,
+                &known_hosts
             )
             .unwrap()
         );
@@ -1048,7 +1271,8 @@ mod tests {
                 16,
                 248_046,
                 "plain",
-                DIGEST
+                DIGEST,
+                &known_hosts
             )
             .unwrap()
         );
@@ -1069,7 +1293,8 @@ mod tests {
                 16,
                 248_046,
                 "plain",
-                DIGEST
+                DIGEST,
+                &known_hosts
             )
             .unwrap()
         );
@@ -1097,66 +1322,194 @@ mod tests {
                 16,
                 248_046,
                 "plain",
-                DIGEST
+                DIGEST,
+                &known_hosts
             )
             .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 301, &limits, &[7; 2], 16, 248_046, "plain", DIGEST)
-                .unwrap()
+            worker_plan_id(
+                &endpoints,
+                301,
+                &limits,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &None, &[7; 2], 16, 248_046, "plain", DIGEST).unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &None,
+                &[7; 2],
+                16,
+                248_046,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 3], 16, 248_046, "plain", DIGEST)
-                .unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 3],
+                16,
+                248_046,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 32, 248_046, "plain", DIGEST)
-                .unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                32,
+                248_046,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
         assert_ne!(
             id,
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_047, "plain", DIGEST)
-                .unwrap()
+            worker_plan_id(
+                &endpoints,
+                300,
+                &limits,
+                &[7; 2],
+                16,
+                248_047,
+                "plain",
+                DIGEST,
+                &known_hosts
+            )
+            .unwrap()
         );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 16, 248_320, "plain", DIGEST)
-                .is_err()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 2], 65, 248_046, "plain", DIGEST)
-                .is_err()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 0], 16, 248_046, "plain", DIGEST)
-                .is_err()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 32], 8, 248_046, "plain", DIGEST).is_ok()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 64], 2, 248_046, "plain", DIGEST)
-                .is_err()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 8], 32, 248_046, "plain", DIGEST).is_ok()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 65], 1, 248_046, "plain", DIGEST)
-                .is_err()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 1], 64, 248_046, "plain", DIGEST).is_ok()
-        );
-        assert!(
-            worker_plan_id(&endpoints, 300, &limits, &[7; 64], 1, 248_046, "plain", DIGEST).is_ok()
-        );
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            16,
+            248_320,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 2],
+            65,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 0],
+            16,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 32],
+            8,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_ok());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 64],
+            2,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 8],
+            32,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_ok());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 65],
+            1,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_err());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 1],
+            64,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_ok());
+        assert!(worker_plan_id(
+            &endpoints,
+            300,
+            &limits,
+            &[7; 64],
+            1,
+            248_046,
+            "plain",
+            DIGEST,
+            &known_hosts
+        )
+        .is_ok());
         assert!(worker_plan_id(
             &BTreeMap::from([(2, rank2), (3, rank3.clone()), (4, rank3)]),
             300,
@@ -1165,7 +1518,8 @@ mod tests {
             16,
             248_046,
             "plain",
-            DIGEST
+            DIGEST,
+            &known_hosts
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1176,9 +1530,75 @@ mod tests {
             16,
             248_046,
             "plain",
-            DIGEST
+            DIGEST,
+            &known_hosts
         )
         .is_err());
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn known_hosts_are_single_pinned_and_sealed() {
+        use std::io::{Read, Seek, SeekFrom, Write};
+        use std::os::fd::AsRawFd;
+        let fd =
+            rustix::fs::memfd_create("vf-test-original", rustix::fs::MemfdFlags::CLOEXEC).unwrap();
+        let mut original = std::fs::File::from(fd);
+        let contents = b"pc1-lan ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
+        original.write_all(contents).unwrap();
+        original.flush().unwrap();
+        let hash = sha256::hex(contents);
+        let mut endpoint =
+            rank_endpoint(3, "/worker", Some("pc1-lan"), Some("/worker"), Some(DIGEST)).unwrap();
+        let path = format!("/proc/self/fd/{}", original.as_raw_fd());
+        let path = path.as_str();
+        assert!(pin_known_hosts(&mut endpoint.clone(), "other", path, &hash).is_err());
+        assert!(pin_known_hosts(&mut endpoint.clone(), "pc1-lan", path, &"b".repeat(64)).is_err());
+        let mut pinned = pin_known_hosts(&mut endpoint, "pc1-lan", path, &hash).unwrap();
+        assert!(endpoint
+            .argv
+            .contains(&format!("UserKnownHostsFile={path}")));
+        assert!(endpoint.argv.contains(&"HostKeyAlias=pc1-lan".to_owned()));
+        original.write_all(b"changed").unwrap();
+        assert!(pinned.write_all(b"changed").is_err());
+        pinned.seek(SeekFrom::Start(0)).unwrap();
+        let mut read = Vec::new();
+        pinned.read_to_end(&mut read).unwrap();
+        assert_eq!(read, contents);
+        let path = format!("/proc/{}/fd/{}", std::process::id(), pinned.as_raw_fd());
+        let child = std::process::Command::new("/bin/cat")
+            .arg(path)
+            .output()
+            .unwrap();
+        assert!(child.status.success());
+        assert_eq!(child.stdout, contents);
+        let pinned_path = format!("/proc/{}/fd/{}", std::process::id(), pinned.as_raw_fd());
+        let lookup = std::process::Command::new("/usr/bin/ssh-keygen")
+            .args(["-F", "pc1-lan", "-f", &pinned_path])
+            .output()
+            .unwrap();
+        assert!(lookup.status.success(), "{:?}", lookup.stderr);
+        *endpoint
+            .argv
+            .iter_mut()
+            .find(|a| a.starts_with("UserKnownHostsFile="))
+            .unwrap() = format!("UserKnownHostsFile={pinned_path}");
+        let effective = std::process::Command::new("/usr/bin/ssh")
+            .arg("-G")
+            .args(&endpoint.argv[1..])
+            .output()
+            .unwrap();
+        assert!(effective.status.success(), "{:?}", effective.stderr);
+        let config = String::from_utf8(effective.stdout).unwrap();
+        assert!(config
+            .lines()
+            .any(|l| l == format!("userknownhostsfile {pinned_path}")));
+        assert!(config
+            .lines()
+            .any(|l| l == "globalknownhostsfile /dev/null"));
+        assert!(config.lines().any(|l| l == "hostkeyalias pc1-lan"));
+        let path = format!("/proc/self/fd/{}", original.as_raw_fd());
+        let path = path.as_str();
+        assert!(pin_known_hosts(&mut endpoint, "pc1-lan", path, &hash).is_err());
     }
     #[test]
     fn rank_endpoints_are_explicit_and_reject_shell_metacharacters() {

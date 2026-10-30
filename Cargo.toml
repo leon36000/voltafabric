@@ -49,6 +49,9 @@ required-features = ["native-ggml-cpu"]
 [target.'cfg(unix)'.dependencies]
 libc = "=0.2.190"
 
+[target.'cfg(target_os = "linux")'.dependencies]
+rustix = { version = "=1.1.5", features = ["fs"] }
+
 [workspace]
 members = ["crates/qpn2-ffi", "crates/ggml-native-ffi"]
 exclude = ["gpu-worker"]
