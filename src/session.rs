@@ -74,6 +74,8 @@ pub const CAPABILITY_NATIVE_GGML_EXTEND: &str = "cpu_strata_sc117_append_residen
 pub const CAPABILITY_NATIVE_GGML_EVICT: &str = "cpu_strata_sc117_evict_resident_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32: &str = "cpu_strata_sc117_ggml_unweighted_f32_v1";
+#[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GGML_RAW_F32: &str = "cpu_strata_sc117_ggml_input_raw_f32_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
 /// How long close() still waits for the output of a worker it has just killed.
@@ -162,6 +164,15 @@ pub enum Request {
         dispatch: routing::RankDispatch,
         attempt: u64,
         inputs: Vec<(usize, Vec<f32>)>,
+    },
+    /// Bounded raw little-endian FP32 input follows the identity header.
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGgmlRawF32 {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<RawTokenInputMeta>,
+        activation_bytes: u64,
+        unweighted_f32: bool,
     },
     Load {
         artifact_sha256: String,
@@ -1781,6 +1792,95 @@ fn encode_engram_rows_request(
     Ok((header, None))
 }
 
+#[cfg(feature = "native-ggml-cpu")]
+fn native_raw_f32_frame(
+    dispatch: routing::RankDispatch,
+    attempt: u64,
+    inputs: &[(usize, Vec<f32>)],
+    unweighted_f32: bool,
+) -> Result<(Vec<u8>, Vec<u8>)> {
+    if inputs.len() > 4096
+        || inputs
+            .iter()
+            .any(|(_, row)| row.len() > 65536 || row.iter().any(|v| !v.is_finite()))
+    {
+        return Err(invalid("native raw FP32 input metadata or values"));
+    }
+    let count = inputs
+        .iter()
+        .try_fold(0usize, |n, (_, row)| n.checked_add(row.len()))
+        .and_then(|n| n.checked_mul(4))
+        .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES)
+        .ok_or_else(|| invalid("native raw FP32 input size"))?;
+    let metadata = inputs
+        .iter()
+        .map(|(token, row)| RawTokenInputMeta {
+            token: *token,
+            values: row.len() as u64,
+        })
+        .collect();
+    let header = encode(&Request::ExecNativeGgmlRawF32 {
+        dispatch,
+        attempt,
+        inputs: metadata,
+        activation_bytes: count as u64,
+        unweighted_f32,
+    })?;
+    if header
+        .len()
+        .checked_add(count)
+        .is_none_or(|n| n > MAX_MESSAGE_BYTES)
+    {
+        return Err(invalid("native raw FP32 frame size"));
+    }
+    let mut body = Vec::new();
+    body.try_reserve_exact(count)
+        .map_err(|_| invalid("native raw FP32 allocation"))?;
+    for (_, row) in inputs {
+        for value in row {
+            body.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+    Ok((header, body))
+}
+
+#[cfg(feature = "native-ggml-cpu")]
+fn read_native_raw_f32(
+    input: &mut impl BufRead,
+    header_bytes: usize,
+    declared: u64,
+    metadata: Vec<RawTokenInputMeta>,
+) -> Result<Vec<(usize, Vec<f32>)>> {
+    if metadata.len() > 4096 || metadata.iter().any(|m| m.values > 65536) {
+        return Err(invalid("native raw FP32 metadata"));
+    }
+    let count = metadata
+        .iter()
+        .try_fold(0u64, |n, m| n.checked_add(m.values))
+        .and_then(|n| n.checked_mul(4))
+        .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES as u64)
+        .ok_or_else(|| invalid("native raw FP32 input size"))?;
+    if count != declared {
+        return Err(invalid("native raw FP32 byte count"));
+    }
+    let body = read_raw_body(input, header_bytes, declared, true)?;
+    let mut rows = Vec::with_capacity(metadata.len());
+    let mut offset = 0;
+    for m in metadata {
+        let end = offset + m.values as usize * 4;
+        let values: Vec<f32> = body[offset..end]
+            .chunks_exact(4)
+            .map(|b| f32::from_le_bytes([b[0], b[1], b[2], b[3]]))
+            .collect();
+        if values.iter().any(|v| !v.is_finite()) {
+            return Err(invalid("native raw FP32 nonfinite"));
+        }
+        rows.push((m.token, values));
+        offset = end;
+    }
+    Ok(rows)
+}
+
 fn read_raw_activation_inputs(
     input: &mut impl BufRead,
     header_bytes: usize,
@@ -2470,6 +2570,41 @@ fn serve_impl(
                         attempt,
                     }
                 }
+                #[cfg(feature = "native-ggml-cpu")]
+                Request::ExecNativeGgmlRawF32 {
+                    dispatch,
+                    attempt,
+                    inputs,
+                    activation_bytes,
+                    unweighted_f32,
+                } => {
+                    let inputs =
+                        match read_native_raw_f32(input, header_bytes, activation_bytes, inputs) {
+                            Ok(inputs) => inputs,
+                            Err(error) => {
+                                send_reply(
+                                    output,
+                                    &Reply::Refused {
+                                        error: error.clone(),
+                                    },
+                                )?;
+                                return Err(error); // Unknown body boundary; never reuse this stream.
+                            }
+                        };
+                    if unweighted_f32 {
+                        Request::ExecNativeGgmlUnweightedF32 {
+                            dispatch,
+                            attempt,
+                            inputs,
+                        }
+                    } else {
+                        Request::ExecNativeGgml {
+                            dispatch,
+                            attempt,
+                            inputs,
+                        }
+                    }
+                }
                 Request::ExecRaw {
                     artifact_sha256,
                     dispatch,
@@ -2592,6 +2727,9 @@ fn serve_impl(
                     #[cfg(feature = "native-ggml-cpu")]
                     if executor.is_none() {
                         hello.capabilities.push(CAPABILITY_NATIVE_GGML_CPU.into());
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_GGML_RAW_F32.into());
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_EXTEND.into());
@@ -3177,6 +3315,17 @@ fn serve_impl(
                     )?;
                 }
             }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::ExecNativeGgmlRawF32 { .. } => {
+                let error = Error::new("SESSION_PROTOCOL", "native raw FP32 body was not decoded");
+                send_reply(
+                    output,
+                    &Reply::Refused {
+                        error: error.clone(),
+                    },
+                )?;
+                return Err(error);
+            }
             Request::ExecRaw { .. } => {
                 let error = Error::new(
                     "SESSION_PROTOCOL",
@@ -3361,6 +3510,12 @@ pub struct Traffic {
     pub loads_transferred: u64,
     pub rebinds: u64,
     pub execs: u64,
+    /// Successfully transmitted native GGML requests using raw FP32 input.
+    #[serde(default, skip_serializing_if = "is_zero_u64")]
+    pub native_ggml_raw_execs: u64,
+}
+fn is_zero_u64(value: &u64) -> bool {
+    *value == 0
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -3794,25 +3949,42 @@ impl Session {
             return Err(invalid("native GGML capability, rank or attempt"));
         }
         let deadline = Instant::now() + timeout;
-        let request = if unweighted_f32 {
-            Request::ExecNativeGgmlUnweightedF32 {
-                dispatch: dispatch.clone(),
-                attempt,
-                inputs,
-            }
-        } else {
-            Request::ExecNativeGgml {
-                dispatch: dispatch.clone(),
-                attempt,
-                inputs,
-            }
-        };
         let next_execs = self
             .traffic
             .execs
             .checked_add(1)
             .ok_or_else(|| invalid("native GGML execution count overflow"))?;
-        self.send(&request)?;
+        if self
+            .hello
+            .capabilities
+            .iter()
+            .any(|c| c == CAPABILITY_NATIVE_GGML_RAW_F32)
+        {
+            let next_raw = self
+                .traffic
+                .native_ggml_raw_execs
+                .checked_add(1)
+                .ok_or_else(|| invalid("native GGML raw execution count overflow"))?;
+            let (header, body) =
+                native_raw_f32_frame(dispatch.clone(), attempt, &inputs, unweighted_f32)?;
+            self.write_parts(&[&header, &body], true)?;
+            self.traffic.native_ggml_raw_execs = next_raw;
+        } else {
+            let request = if unweighted_f32 {
+                Request::ExecNativeGgmlUnweightedF32 {
+                    dispatch: dispatch.clone(),
+                    attempt,
+                    inputs,
+                }
+            } else {
+                Request::ExecNativeGgml {
+                    dispatch: dispatch.clone(),
+                    attempt,
+                    inputs,
+                }
+            };
+            self.send(&request)?;
+        }
         self.traffic.execs = next_execs;
         let started = self.reply_until(deadline)?;
         if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } } if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
@@ -7886,6 +8058,113 @@ pub fn run_compressed_series(input: &CompressedSeriesInput) -> Result<Compressed
         oracle_experts,
         series: report,
     })
+}
+
+#[cfg(all(test, feature = "native-ggml-cpu"))]
+mod native_raw_f32_tests {
+    use super::*;
+    #[test]
+    fn traffic_counter_preserves_legacy_json_when_unused() {
+        let old = serde_json::json!({"bytes_sent":0,"bytes_received":0,"frames_sent":0,"frames_received":0,"weight_bytes_sent":0,"loads_transferred":0,"rebinds":0,"execs":0});
+        let traffic: Traffic = serde_json::from_value(old.clone()).unwrap();
+        assert_eq!(traffic.native_ggml_raw_execs, 0);
+        assert_eq!(serde_json::to_value(traffic).unwrap(), old);
+    }
+    fn dispatch() -> routing::RankDispatch {
+        routing::RankDispatch {
+            stamp: moe::Stamp {
+                run_id: "test".into(),
+                model_revision: "model".into(),
+                plan_id: "plan".into(),
+                layer: 0,
+                batch: 1,
+                epoch: 1,
+            },
+            rank: 2,
+            hidden: 4,
+            tokens: 1,
+            resident_order: vec![0],
+            slots: vec![],
+        }
+    }
+    #[test]
+    fn raw_f32_roundtrip_is_bit_exact_and_bound_to_header() {
+        let values = vec![0.0f32, -0.0, f32::from_bits(1), f32::MAX];
+        let (header, body) =
+            native_raw_f32_frame(dispatch(), 42, &[(7, values.clone())], false).unwrap();
+        let req: Request = serde_json::from_slice(&header).unwrap();
+        match req {
+            Request::ExecNativeGgmlRawF32 {
+                dispatch: decoded,
+                attempt,
+                inputs,
+                activation_bytes,
+                unweighted_f32,
+            } => {
+                assert_eq!(decoded, dispatch());
+                assert_eq!(attempt, 42);
+                assert!(!unweighted_f32);
+                let rows = read_native_raw_f32(
+                    &mut std::io::Cursor::new(body),
+                    header.len(),
+                    activation_bytes,
+                    inputs,
+                )
+                .unwrap();
+                assert_eq!(rows[0].0, 7);
+                assert_eq!(
+                    rows[0].1.iter().map(|x| x.to_bits()).collect::<Vec<_>>(),
+                    values.iter().map(|x| x.to_bits()).collect::<Vec<_>>()
+                );
+            }
+            _ => panic!("wrong request kind"),
+        }
+    }
+    #[test]
+    fn raw_f32_refuses_wrong_length_truncation_and_nonfinite() {
+        let meta = vec![RawTokenInputMeta {
+            token: 0,
+            values: 1,
+        }];
+        assert!(
+            read_native_raw_f32(&mut std::io::Cursor::new(vec![0; 4]), 1, 8, meta.clone()).is_err()
+        );
+        assert!(
+            read_native_raw_f32(&mut std::io::Cursor::new(vec![0; 3]), 1, 4, meta.clone()).is_err()
+        );
+        assert!(read_native_raw_f32(
+            &mut std::io::Cursor::new(f32::NAN.to_le_bytes()),
+            1,
+            4,
+            meta
+        )
+        .is_err());
+        assert!(native_raw_f32_frame(dispatch(), 1, &[(0, vec![f32::INFINITY])], false).is_err());
+        assert!(native_raw_f32_frame(dispatch(), 1, &[(0, vec![0.0; 65537])], false).is_err());
+    }
+    #[test]
+    fn truncated_raw_body_refuses_and_ends_the_session() {
+        let mut wire = encode(&Request::Hello {
+            protocol: PROTOCOL,
+            rank: 2,
+        })
+        .unwrap();
+        let (header, body) =
+            native_raw_f32_frame(dispatch(), 1, &[(0, vec![1.0, 2.0])], false).unwrap();
+        wire.extend(header);
+        wire.extend(&body[..body.len() - 1]);
+        let mut input = std::io::BufReader::new(std::io::Cursor::new(wire));
+        let mut output = Vec::new();
+        assert!(serve(&mut input, &mut output).is_err());
+        let replies: Vec<serde_json::Value> = output
+            .split(|&c| c == b'\n')
+            .filter(|line| !line.is_empty())
+            .map(|line| serde_json::from_slice(line).unwrap())
+            .collect();
+        assert_eq!(replies.len(), 2);
+        assert_eq!(replies[0]["reply"], "hello");
+        assert_eq!(replies[1]["reply"], "refused");
+    }
 }
 
 #[cfg(test)]

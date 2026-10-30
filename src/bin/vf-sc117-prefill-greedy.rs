@@ -579,7 +579,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r489-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r490-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -758,15 +758,15 @@ fn run() -> Result<(), E> {
     }
     let receipts = segment.close_with_counts();
     if receipts.len() != layer_count * 2
-        || receipts
-            .iter()
-            .any(|(r, expected)| !valid_close(r, *expected, input_tokens.len() as u64))
+        || receipts.iter().any(|(r, expected, raw)| {
+            *raw > *expected || !valid_close(r, *expected, input_tokens.len() as u64)
+        })
     {
         return Err("worker shutdown receipt".into());
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to 32 prompt tokens and 32 predictions within 39 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to 32 prompt tokens and 32 predictions within 39 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.len()==1 { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }

@@ -574,6 +574,22 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     for (actual, value) in output[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
     }
+    assert_eq!(
+        sessions
+            .iter()
+            .map(|s| s.traffic.native_ggml_raw_execs)
+            .collect::<Vec<_>>(),
+        vec![1, 1]
+    );
+    // Simulate an older rank: the next request must use the legacy JSON path.
+    let raw_capability = voltafabric::session::CAPABILITY_NATIVE_GGML_RAW_F32.to_owned();
+    assert!(sessions
+        .iter()
+        .all(|s| s.hello.capabilities.contains(&raw_capability)));
+    sessions[1]
+        .hello
+        .capabilities
+        .retain(|c| c != &raw_capability);
     let mut reserved = p.clone();
     reserved.stamp.batch = 101;
     let ticket_attempt = u64::try_from(
@@ -597,6 +613,14 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     .unwrap();
     assert_eq!(collected.stamp(), &reserved.stamp);
     assert_eq!(collected.attempt(), ticket_attempt);
+    sessions[1].hello.capabilities.push(raw_capability);
+    assert_eq!(
+        sessions
+            .iter()
+            .map(|s| s.traffic.native_ggml_raw_execs)
+            .collect::<Vec<_>>(),
+        vec![2, 1]
+    );
     assert_eq!(
         sessions.iter().map(|s| s.traffic.execs).collect::<Vec<_>>(),
         vec![2, 2]
@@ -619,6 +643,13 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     assert_eq!(
         sessions.iter().map(|s| s.traffic.execs).collect::<Vec<_>>(),
         vec![3, 2]
+    );
+    assert_eq!(
+        sessions
+            .iter()
+            .map(|s| s.traffic.native_ggml_raw_execs)
+            .collect::<Vec<_>>(),
+        vec![3, 1]
     );
     for (actual, value) in collected.rows()[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
