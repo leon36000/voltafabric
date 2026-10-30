@@ -1,0 +1,48 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-pc3-release-tiny45-20261026-b",
+  "effective_run_id": "r53-pc3-release-tiny45-20261026-b",
+  "reserved_ns": 126367897233376,
+  "context": {
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm120-worker-fresh-identities-r53/CASE_PLAN.b.json",
+    "case_plan_sha256": "847b13650a005a21e154c473e0c44ab03e3d78bbb6304a6d80a46a2fa72cc463",
+    "remote_root": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r53-sm120-worker-20261026-b",
+    "result_receipt": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r53-sm120-worker-20261026-b/nominal-case/operation.json",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-pc3-release-tiny45-20261026-b",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 20
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-pc3-release-tiny45-20261026-b",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 20
+        },
+        "attempt_id": 2,
+        "rank": 7
+      }
+    ],
+    "source_hashes": {
+      "hardware_release": "0e806a3908cbdcb0e3cc3c3651617fc229b62a3127a41edea6d0005e5f7f2d42",
+      "worker_release": "0a7d79e691b759a199208976b98f8bf9d4998efb8fff791e269c350a6922d156",
+      "libvf_r13.so": "f856c9bdf5c4d021203b2b7ce5b1f393058370e3f5d2d0f05072fb067e739213",
+      "fixtures/preweighted_mxfp4_tiny.safetensors": "f0bfbf4220713b7aae0200e15f5232d118f0abfc65d7c322a6540a837fb279a7",
+      "fixtures/preweighted_mxfp4_tiny_golden.json": "51e4c60545c4f29dcbe03d57f017e522095ec2d37e19f67d2fe890670227d1ed",
+      "worker_guard.py": "308a2d776e6ce0c7fa84988c4728654cf4ee6b1ecbf4f809d201256a440e1463",
+      "gpu_case.py": "feb85a845f95014788b1fc8065a7f0efc7cad18662cd2083187c583c0b27598a"
+    }
+  }
+}

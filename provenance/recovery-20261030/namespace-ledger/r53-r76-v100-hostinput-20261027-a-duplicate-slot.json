@@ -1,0 +1,160 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r76-v100-hostinput-20261027-a",
+  "effective_run_id": "r53-r76-v100-hostinput-20261027-a-duplicate-slot",
+  "reserved_ns": 244477105257190,
+  "context": {
+    "phase": "R76",
+    "case_plan_sha256": "a6f22ae298863718f3e64c2ee57a4d9833a881a79eef1f4c3f39e6fe6fecf9cf",
+    "scope": "direct native Owner ABI, no Session/Collector/transport qualification",
+    "native_calls": [
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 0,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 1,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 2,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 3,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 4,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 5,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 6,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "baseline",
+        "expert": 0,
+        "token": 7,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 0,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 1,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 2,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 3,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 4,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 5,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 6,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      },
+      {
+        "variant": "candidate",
+        "expert": 0,
+        "token": 7,
+        "hidden": 5120,
+        "middle": 2304,
+        "coefficient_bits": "3ec00000",
+        "native_only_not_Session_Stamp": true
+      }
+    ],
+    "hardware_invocation_limit": 1,
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/host-input-native-owner-r76-20261027/gpu-result/operation.json"
+  }
+}

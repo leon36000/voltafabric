@@ -1,0 +1,20 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r72-v100-20261027-02-rollback",
+  "effective_run_id": "r53-r72-v100-20261027-02-rollback-duplicate-slot",
+  "reserved_ns": 227761604643651,
+  "context": {
+    "phase": "R72",
+    "case_id": "02-rollback",
+    "case_plan_sha256": "2aac568b2eb65ec815f3cce526f40783ba041a5aa0fc75ffeef920b32fce1f6d",
+    "logical_requests": [],
+    "load_epochs": [
+      60,
+      61,
+      62
+    ],
+    "source_harness_sha256": "967b72dc6dfd5ea7869f539e7a1a104b6a52ff2d04d0535a8a6d68d404237980",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-remaining-faults-r72-20261027/vm-02-rollback/operation.json"
+  }
+}

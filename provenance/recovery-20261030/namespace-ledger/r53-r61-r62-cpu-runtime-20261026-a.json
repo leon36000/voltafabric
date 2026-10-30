@@ -1,0 +1,12 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r61-r62-cpu-runtime-20261026-a",
+  "effective_run_id": "r53-r61-r62-cpu-runtime-20261026-a",
+  "reserved_ns": 162812521921339,
+  "context": {
+    "phase": "R62_CPU_CONTROLLER_INTEGRATION_NOT_GPU",
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-cli-controller-r62/cpu-runtime-case/input.json",
+    "case_plan_sha256": "fc760118ed249817b0140bdf0f021bc177f0af8a062a5122063902324fcbe1f1"
+  }
+}

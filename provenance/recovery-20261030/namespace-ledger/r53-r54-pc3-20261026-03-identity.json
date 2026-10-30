@@ -1,0 +1,64 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r54-pc3-20261026-03-identity",
+  "effective_run_id": "r53-r54-pc3-20261026-03-identity",
+  "reserved_ns": 129945580313498,
+  "context": {
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm120-worker-negative-r54/cases/03-identity/CASE_PLAN.json",
+    "case_plan_sha256": "dbdec120da18a226bc054c90ecddfa6a06bc547071a039580ad45ed65e17c754",
+    "remote_root": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r54-sm120-worker-20261026",
+    "result_receipt": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r54-sm120-worker-20261026/cases/03-identity/result/operation.json",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r54-pc3-20261026-03-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 40
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r54-pc3-20261026-03-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 41
+        },
+        "attempt_id": 2,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r54-pc3-20261026-03-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 2,
+          "epoch": 42
+        },
+        "attempt_id": 3,
+        "rank": 7
+      }
+    ],
+    "files": {
+      "hardware_debug": "33a1624e5e23cbbef487072d8676f70f79e49406f154706d760f81a8f9730e1c",
+      "hardware_release": "0e806a3908cbdcb0e3cc3c3651617fc229b62a3127a41edea6d0005e5f7f2d42",
+      "worker_debug": "ebfe03eaff0c99c095e822be869cc4b1dfd47dcc8564962fbfcb03457b458ef1",
+      "worker_release": "0a7d79e691b759a199208976b98f8bf9d4998efb8fff791e269c350a6922d156",
+      "libvf_r13.so": "f856c9bdf5c4d021203b2b7ce5b1f393058370e3f5d2d0f05072fb067e739213",
+      "fixtures/preweighted_mxfp4_tiny.safetensors": "f0bfbf4220713b7aae0200e15f5232d118f0abfc65d7c322a6540a837fb279a7",
+      "fixtures/preweighted_mxfp4_tiny_golden.json": "51e4c60545c4f29dcbe03d57f017e522095ec2d37e19f67d2fe890670227d1ed",
+      "worker_guard.py": "308a2d776e6ce0c7fa84988c4728654cf4ee6b1ecbf4f809d201256a440e1463",
+      "gpu_case.py": "86ce0a08ea7fb33a687fa5cb9ed5c85f791a3698bcdb51dd372c4e3d2e19d6a8",
+      "case_specs.py": "1d1e3ee692b3b62802d3de8b9dd7d36c54cdb0f46f71d476dc3db564ceee9650",
+      "results.py": "6d422b69a003576e7150cbe859654fe34522e9ed781b43a01dbf9f79a8f8e940"
+    }
+  }
+}

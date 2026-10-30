@@ -1,0 +1,31 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r70-v100-20261027-01-rebind",
+  "effective_run_id": "r53-r70-v100-20261027-01-rebind",
+  "reserved_ns": 220864777197062,
+  "context": {
+    "phase": "R70",
+    "case_id": "01-rebind",
+    "case_plan_sha256": "d5a9266e0ba0f86c8c46015719c93d537b04437111e2642deed1d77a41b5c39d",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-01-rebind",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 31
+        },
+        "attempt_id": 1,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      30
+    ],
+    "source_harness_sha256": "82cf8a825fb236b9f73637045f5947a01420d1f9e44906a04112a0065bf38e6a",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-faults-r70-20261027/vm-01-rebind/operation.json"
+  }
+}

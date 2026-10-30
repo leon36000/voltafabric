@@ -1,0 +1,57 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r70-v100-20261027-02-identity",
+  "effective_run_id": "r53-r70-v100-20261027-02-identity",
+  "reserved_ns": 220898344049591,
+  "context": {
+    "phase": "R70",
+    "case_id": "02-identity",
+    "case_plan_sha256": "cb6159fcf7beae200b1456c09756c17b058e512287774db6c963b53be990718e",
+    "logical_requests": [
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-02-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 0,
+          "epoch": 40
+        },
+        "attempt_id": 1,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-02-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 1,
+          "epoch": 41
+        },
+        "attempt_id": 2,
+        "rank": 7
+      },
+      {
+        "stamp": {
+          "run_id": "r53-r70-v100-20261027-02-identity",
+          "model_revision": "r13-tiny-independent-golden",
+          "plan_id": "tiny-45-independent-cases",
+          "layer": 0,
+          "batch": 2,
+          "epoch": 42
+        },
+        "attempt_id": 3,
+        "rank": 7
+      }
+    ],
+    "load_epochs": [
+      40,
+      41,
+      42
+    ],
+    "source_harness_sha256": "82cf8a825fb236b9f73637045f5947a01420d1f9e44906a04112a0065bf38e6a",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-current-worker-faults-r70-20261027/vm-02-identity/operation.json"
+  }
+}

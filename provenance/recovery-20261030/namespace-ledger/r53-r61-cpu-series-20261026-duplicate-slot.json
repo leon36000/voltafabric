@@ -1,0 +1,39 @@
+{
+  "status": "CONSUMED_RETROSPECTIVE_CPU_NO_REPLAY",
+  "effective_run_id": "r53-r61-cpu-series-20261026-duplicate-slot",
+  "base_id": "r53-r61-cpu-series-20261026",
+  "recorded_after_execution": true,
+  "reserved_before_execution": false,
+  "recorded_ns": 159669514279944,
+  "scope": "Explicit local CPU reference qualification only; initial reservation was omitted. Not a pre-execution reservation.",
+  "execution_receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-case-contract-r61/series/debug-operation.json",
+  "input_sha256": "b1866c9e5bd3f01b7190bccdd13370e2102b1ee14695120c247e32b70e7501ab",
+  "stdout_sha256": "c0ecc56333d465a92c9670f87a5ded21aba62a2115f48132d2386ec80cb314d7",
+  "logical_requests": [
+    {
+      "stamp": {
+        "batch": 0,
+        "epoch": 20,
+        "layer": 0,
+        "model_revision": "r13-tiny-independent-golden",
+        "plan_id": "tiny-45-independent-cases",
+        "run_id": "r53-r61-cpu-series-20261026"
+      },
+      "rank": 7,
+      "attempt": 1
+    },
+    {
+      "stamp": {
+        "batch": 1,
+        "epoch": 20,
+        "layer": 0,
+        "model_revision": "r13-tiny-independent-golden",
+        "plan_id": "tiny-45-independent-cases",
+        "run_id": "r53-r61-cpu-series-20261026"
+      },
+      "rank": 7,
+      "attempt": 2
+    }
+  ],
+  "automatic_retry": false
+}

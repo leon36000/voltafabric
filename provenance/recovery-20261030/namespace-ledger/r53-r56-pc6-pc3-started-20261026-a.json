@@ -1,0 +1,13 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r56-pc6-pc3-started-20261026-a",
+  "effective_run_id": "r53-r56-pc6-pc3-started-20261026-a",
+  "reserved_ns": 136765905437976,
+  "context": {
+    "scope": "CPU_SIMULATION_ALIAS_RETIRED_BEFORE_GPU",
+    "reason": "Initial CPU CLI/fake-peer tests used prospective case namespace; all were simulated, no real GPU/backend submission. Retire these aliases; actual GPU plans use separate -gpu-a and future CPU runs unique tempfile names.",
+    "gpu_executed": false,
+    "retroactive_retirement_not_pre_execution_reservation": true
+  }
+}

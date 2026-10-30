@@ -1,0 +1,20 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r73-v100-load-state-20261027-a",
+  "effective_run_id": "r53-r73-v100-load-state-20261027-a-duplicate-slot",
+  "reserved_ns": 230478515660923,
+  "context": {
+    "phase": "R73",
+    "case_id": "01-load-state",
+    "case_plan_sha256": "c20bbc06c159372cb8561b76cf4ab71f7da28307d128e5412f565b0bb1e4f415",
+    "logical_requests": [],
+    "load_epochs": [
+      60,
+      61,
+      62
+    ],
+    "source_harness_sha256": "b5036e33a06830de8987c449995ffc47caea8a28339fb93b3f4f7ab70944a117",
+    "receipt": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/sm70-immediate-load-state-r73-20261027/vm-01-load-state/operation.json"
+  }
+}

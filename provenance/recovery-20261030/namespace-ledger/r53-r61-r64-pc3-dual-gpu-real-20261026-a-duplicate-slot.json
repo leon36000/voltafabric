@@ -1,0 +1,12 @@
+{
+  "status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "scope": "Namespace consumption only; see linked execution receipt for actual outcome",
+  "base_id": "r53-r61-r64-pc3-dual-gpu-real-20261026-a",
+  "effective_run_id": "r53-r61-r64-pc3-dual-gpu-real-20261026-a-duplicate-slot",
+  "reserved_ns": 192441901679768,
+  "context": {
+    "phase": "R64_TWO_REAL_EXPERTS_DUAL_GPU_PC3_SSH",
+    "case_plan": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc3-pc6-resource-continuation-r64/dual-case/input.json",
+    "case_plan_sha256": "0d22905c611d70ac68239c335f9eebbaf3fe2284e5b780bc75cb9e04db02e20f"
+  }
+}
