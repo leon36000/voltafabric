@@ -381,6 +381,15 @@ where
     Ok(residual)
 }
 
+#[cfg(feature = "ple-cpu-qualification")]
+#[derive(Debug, serde::Serialize)]
+pub struct PleQualificationSnapshot {
+    pub position: u64,
+    pub previous: [i32; 2],
+    pub history_sha256: String,
+    pub attention_position: u64,
+    pub sessions: Vec<(u32, u64, bool)>,
+}
 pub struct Segment {
     layers: Vec<Layer>,
     base: Stamp,
@@ -468,6 +477,39 @@ impl Segment {
                 last_attempt: 0,
                 poisoned: false,
             },
+        })
+    }
+    /// Read-only diagnostics for the explicitly gated CPU qualification path.
+    #[cfg(feature = "ple-cpu-qualification")]
+    pub fn ple_qualification_snapshot(&self) -> Result<PleQualificationSnapshot> {
+        let layer = self
+            .layers
+            .iter()
+            .find(|layer| layer.ple.is_some())
+            .ok_or_else(|| invalid("qualification PLE missing"))?;
+        let ple = layer
+            .ple
+            .as_ref()
+            .ok_or_else(|| invalid("qualification PLE missing"))?;
+        let attention_position = match &layer.attention {
+            Attention::Gdn(gdn, _) => gdn.next_token(),
+            _ => return Err(invalid("qualification attention type")),
+        };
+        let mut bytes = Vec::with_capacity(ple.state.history.len() * 4);
+        for value in &ple.state.history {
+            bytes.extend_from_slice(&value.to_le_bytes());
+        }
+        Ok(PleQualificationSnapshot {
+            position: ple.state.position,
+            previous: ple.state.previous,
+            history_sha256: crate::sha256::hex(&bytes),
+            attention_position,
+            sessions: layer
+                .owners
+                .sessions
+                .iter()
+                .map(|s| (s.rank(), s.traffic.frames_received, s.is_usable()))
+                .collect(),
         })
     }
     pub fn position(&self) -> u64 {
