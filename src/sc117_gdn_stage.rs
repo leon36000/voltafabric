@@ -77,7 +77,7 @@ pub struct Stage {
     state: GdnState,
     next_token: u64,
 }
-fn read(f: &mut std::fs::File, s: &Span, expected: usize) -> Result<Vec<u8>> {
+pub(crate) fn read(f: &mut std::fs::File, s: &Span, expected: usize) -> Result<Vec<u8>> {
     if s.bytes != expected
         || !sha256::is_hex_digest(&s.sha256)
         || s.offset
@@ -95,13 +95,13 @@ fn read(f: &mut std::fs::File, s: &Span, expected: usize) -> Result<Vec<u8>> {
     }
     Ok(b)
 }
-fn floats(b: &[u8]) -> Vec<f32> {
+pub(crate) fn floats(b: &[u8]) -> Vec<f32> {
     b.chunks_exact(4)
         .map(|x| f32::from_le_bytes(x.try_into().unwrap()))
         .collect()
 }
 #[cfg(unix)]
-fn same(a: &std::fs::Metadata, b: &std::fs::Metadata) -> bool {
+pub(crate) fn same(a: &std::fs::Metadata, b: &std::fs::Metadata) -> bool {
     use std::os::unix::fs::MetadataExt;
     (
         a.dev(),
