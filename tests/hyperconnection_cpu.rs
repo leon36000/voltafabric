@@ -1,9 +1,25 @@
-use voltafabric::hyperconnection_cpu::read;
+use voltafabric::hyperconnection_cpu::{read, write};
 fn b16(values: &[f32]) -> Vec<u8> {
     values
         .iter()
         .flat_map(|v| ((v.to_bits() >> 16) as u16).to_le_bytes())
         .collect()
+}
+
+#[test]
+fn write_scales_each_stream_and_rejects_partial_or_nonfinite() {
+    let result = write(
+        &[1.0, 2.0, 3.0, 4.0],
+        &[2.0, -1.0],
+        &[0.0, 2.0 * 3.0_f32.ln()],
+    )
+    .unwrap();
+    for (actual, expected) in result.iter().zip([3.0, 1.0, 6.0, 2.5]) {
+        assert!((actual - expected).abs() < 1e-6);
+    }
+    assert!(write(&[1.0; 3], &[1.0; 2], &[0.0; 2]).is_err());
+    assert!(write(&[f32::MAX; 4], &[f32::MAX; 2], &[0.0; 2]).is_err());
+    assert!(write(&[0.0; 4], &[f32::NAN; 2], &[0.0; 2]).is_err());
 }
 #[test]
 fn symmetric_zero_projection_and_stream_injection() {

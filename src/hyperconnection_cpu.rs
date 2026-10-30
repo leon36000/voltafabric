@@ -8,6 +8,39 @@ pub struct ReadOutput {
     pub inject: Vec<f32>,
 }
 
+/// Apply one completed block output to all residual streams; returns a staged result.
+pub fn write(residual: &[f32], block: &[f32], inject: &[f32]) -> Result<Vec<f32>> {
+    let hidden = block.len();
+    let streams = inject.len();
+    if hidden == 0
+        || streams == 0
+        || streams > 16
+        || hidden.checked_mul(streams).filter(|&n| n <= 16384) != Some(residual.len())
+        || residual
+            .iter()
+            .chain(block)
+            .chain(inject)
+            .any(|x| !x.is_finite())
+    {
+        return Err(invalid("invalid hyperconnection write input"));
+    }
+    let mut output = Vec::with_capacity(residual.len());
+    for (stream, &injection) in residual.chunks_exact(hidden).zip(inject) {
+        let x = injection / streams as f32;
+        let sigmoid = if x >= 0.0 {
+            1.0 / (1.0 + (-x).exp())
+        } else {
+            let e = x.exp();
+            e / (1.0 + e)
+        };
+        let weight = 2.0 * sigmoid;
+        for (&previous, &value) in stream.iter().zip(block) {
+            output.push(finite(previous + value * weight)?);
+        }
+    }
+    Ok(output)
+}
+
 fn bf16(x: f32) -> f32 {
     let b = x.to_bits();
     f32::from_bits(b.wrapping_add(0x7fff + ((b >> 16) & 1)) & 0xffff_0000)
