@@ -1,0 +1,50 @@
+[
+  {
+    "attempt": 2,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r426-invalid-registry",
+      "run_id": "r426-rejection-2369152"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 4,
+    "stamp": {
+      "batch": 4,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r426-invalid-registry",
+      "run_id": "r426-rejection-2369152"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r426-invalid-registry",
+      "run_id": "r426-rejection-2369152"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 3,
+    "stamp": {
+      "batch": 3,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r426-invalid-registry",
+      "run_id": "r426-rejection-2369152"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]

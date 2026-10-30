@@ -31,6 +31,16 @@ pub struct Collected {
     value: NativeCollected,
     marker: Arc<()>,
 }
+impl Shared {
+    pub fn values(&self) -> &[f32] {
+        &self.value
+    }
+}
+impl Collected {
+    pub fn rows(&self) -> &[Vec<f64>] {
+        self.value.rows()
+    }
+}
 impl Routed {
     /// Consumes a reserved proposal; the residual must be exactly the bytes used to prepare it.
     pub fn prepare(
@@ -59,6 +69,15 @@ impl Routed {
             route,
             marker: Arc::new(()),
         })
+    }
+    pub fn activation(&self) -> &[f32] {
+        &self.route.mixed
+    }
+    pub fn attention_residual(&self) -> &[f32] {
+        &self.route.residual
+    }
+    pub fn injection(&self) -> &[f32] {
+        &self.route.inject
     }
     pub fn choices(&self) -> &[crate::sc117_router_cpu::Choice] {
         &self.route.choices
