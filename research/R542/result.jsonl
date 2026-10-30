@@ -1,0 +1,4 @@
+{"bit_equal": true, "projection": "q", "rows": 12288, "sha256": "e96ab0190a7a31fc14b884e0241e0154c8bd0220bd953bf7bdacd8a49ca3ab40", "values": 31457280}
+{"bit_equal": true, "projection": "k", "rows": 512, "sha256": "87d71609f70c195144b132195e3d026f20489cec39b725aa4b91f168ba0fd2b5", "values": 1310720}
+{"bit_equal": true, "projection": "v", "rows": 512, "sha256": "77491054f3ec3737f82e6a74254c96df7cfd96d15afde726dad7c95853f7128f", "values": 1310720}
+{"bit_equal": true, "projection": "out", "rows": 2560, "sha256": "6a2cf9a7f900ae004c29230f3027e56ee6cf758c87d9a636256ecc47b165677e", "values": 15728640}

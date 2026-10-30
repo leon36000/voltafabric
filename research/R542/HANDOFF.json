@@ -1,0 +1,11 @@
+{
+  "round": "R542",
+  "parent_gitlab_commit": "dc38d96ac682eee23abf28043fed2bb1ee844384",
+  "active_operations": [],
+  "status": "PASS_FULL_QSA_PROJECTION_WEIGHT_DECODER_CROSSCHECK",
+  "rows": 15872,
+  "values": 49807360,
+  "negative_control": "REJECTED",
+  "limitations": ["Same GGML format lineage; activation quantization not independently checked", "Only layer-3 weights, not full model parity", "R428 expert-255 strict failure remains open", "Original shared R53 ledger missing; no GPU or inter-PC execution"],
+  "next_action": "Check real upstream hyperconnection or activation quantization independently, and resolve R428 numerical policy; reconcile R53 and satisfy fresh identity, lease, resource and hardware gates before inter-PC work."
+}
