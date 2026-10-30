@@ -1,0 +1,50 @@
+[
+  {
+    "attempt": 1793373651228028355,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r452-cpu-only",
+      "run_id": "r452-direct-embed-3161255-1793373651228028355"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373651228028355,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r452-cpu-only",
+      "run_id": "r452-direct-embed-3161255-1793373651228028355"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373660713414159,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r452-cpu-only",
+      "run_id": "r452-direct-embed-3161661-1793373660713414159"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  {
+    "attempt": 1793373660713414159,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r452-cpu-only",
+      "run_id": "r452-direct-embed-3161661-1793373660713414159"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+]
