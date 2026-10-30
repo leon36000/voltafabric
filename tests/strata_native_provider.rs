@@ -523,7 +523,14 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
             ],
         },
         stamp: Stamp {
-            run_id: "r383-two-processes".into(),
+            run_id: format!(
+                "r482-two-processes-{}-{}",
+                std::process::id(),
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap()
+                    .as_nanos()
+            ),
             model_revision: "model-test".into(),
             plan_id: "plan".into(),
             layer: 0,
@@ -593,6 +600,25 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     assert_eq!(
         sessions.iter().map(|s| s.traffic.execs).collect::<Vec<_>>(),
         vec![2, 2]
+    );
+    let mut one_rank = p.clone();
+    one_rank.stamp.batch = 103;
+    one_rank.routes = vec![vec![Choice {
+        expert: 0,
+        weight: 1.0,
+    }]];
+    let sparse_output = Session::exec_native_ggml_batch(
+        &mut sessions,
+        &one_rank,
+        std::slice::from_ref(&x),
+        &ledger,
+        timeout,
+    )
+    .unwrap();
+    assert_eq!(sparse_output[0], expected);
+    assert_eq!(
+        sessions.iter().map(|s| s.traffic.execs).collect::<Vec<_>>(),
+        vec![3, 2]
     );
     for (actual, value) in collected.rows()[0].iter().zip(&expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
