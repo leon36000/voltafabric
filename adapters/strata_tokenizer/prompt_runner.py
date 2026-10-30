@@ -44,12 +44,12 @@ def run_prompt(prompt: str, tokenizer, eos: int, binary: str, engine_paths: list
         raise ValueError("prompt must be nonempty and bounded UTF-8")
     if len(engine_paths) != 8 or any(not pathlib.Path(p).is_absolute() for p in [binary, *engine_paths]):
         raise ValueError("absolute engine and eight input paths required")
-    if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= 4:
-        raise ValueError("generation limit must be between one and four")
+    if type(max_new_tokens) is not int or not 1 <= max_new_tokens <= 8:
+        raise ValueError("generation limit must be between one and eight")
     prompt_ids = tokenizer.encode(prompt, parse_special=False)
-    if (not 1 <= len(prompt_ids) <= 2 or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
+    if (not 1 <= len(prompt_ids) <= 8 or any(type(t) is not int or not 0 <= t < len(tokenizer.tokens)
             or t == eos or tokenizer.token_types[t] != 1 for t in prompt_ids)):
-        raise ValueError("this qualification accepts one or two ordinary prompt tokens")
+        raise ValueError("this qualification accepts one to eight ordinary prompt tokens")
     command = [binary, *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     if max_new_tokens != 2:
         command.append(str(max_new_tokens))

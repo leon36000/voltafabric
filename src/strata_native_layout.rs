@@ -143,6 +143,21 @@ impl NativeLayout {
     pub fn layers(&self) -> &[NativeLayer] {
         &self.layers
     }
+    /// Maximum new expert-payload bytes for one token when every layer
+    /// requests `routed_per_layer` previously absent experts. Does not include
+    /// cache state, activations, allocator overhead or transient copies.
+    pub fn worst_case_admission_bytes(&self, routed_per_layer: usize) -> Result<u64> {
+        if routed_per_layer == 0 || routed_per_layer as u64 > EXPERTS {
+            return Err(invalid("invalid native routed expert count"));
+        }
+        self.layers.iter().try_fold(0u64, |total, layer| {
+            layer
+                .bytes
+                .checked_mul(routed_per_layer as u64)
+                .and_then(|amount| total.checked_add(amount))
+                .ok_or_else(|| invalid("native admission budget overflow"))
+        })
+    }
     pub fn index_sha256(&self) -> &str {
         &self.index_sha256
     }

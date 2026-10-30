@@ -438,7 +438,7 @@ fn select_evictions(
     if used <= target {
         return Ok(Vec::new());
     }
-    if max_evictions == 0 || max_evictions > 64 {
+    if max_evictions == 0 || max_evictions > 768 {
         return Err(invalid("eviction limit"));
     }
     let mut counts = counts.clone();
@@ -946,7 +946,7 @@ mod tests {
         );
         assert!(select_evictions(16, 4, 2, &c, &counts).is_err());
         assert!(select_evictions(16, 8, 1, &c, &counts).is_err());
-        assert!(select_evictions(16, 8, 65, &c, &counts).is_err());
+        assert!(select_evictions(16, 8, 769, &c, &counts).is_err());
         assert!(select_evictions(3, 0, 2, &c, &counts).is_err());
         assert!(select_evictions(16, 16, 0, &c, &counts).unwrap().is_empty());
     }

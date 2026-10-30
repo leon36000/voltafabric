@@ -3,6 +3,8 @@ use crate::{invalid, Result};
 
 pub const HIDDEN: usize = 2560;
 pub const EXPERTS: usize = 512;
+/// Number of routed experts per SC117 layer and token.
+pub const ROUTED_EXPERTS: usize = 10;
 pub const WEIGHT_BYTES: usize = HIDDEN * EXPERTS * 2;
 
 #[derive(Debug, Clone, serde::Serialize)]

@@ -8,7 +8,7 @@ from adapters.strata_tokenizer.test_adapter import FakeTokenizer
 
 class Tokenizer(FakeTokenizer):
     def encode(self, text, parse_special=False):
-        return {"A": [0], "multi": [0, 1], "special": [3], "too many": [0, 1, 2]}.get(text, [])
+        return {"A": [0], "multi": [0, 1], "eight": [0] * 8, "special": [3], "too many": [0] * 9}.get(text, [])
 
 
 def receipt():
@@ -60,7 +60,22 @@ class RunnerTests(unittest.TestCase):
             run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=4,
                        runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(short).encode(), b""))
         with self.assertRaises(ValueError):
-            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=5, runner=runner)
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=9, runner=runner)
+
+    def test_eight_token_bound_and_prompt_bound(self):
+        value = dict(receipt(), prompt_tokens=[0, 1], input_tokens=[0, 1] + [0]*7,
+                     requested_max_new_tokens=8, generated_token_ids=[0]*8,
+                     output_sha256=["a" * 64] * 9, logits_sha256=["b" * 64] * 8)
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        out = run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=8, runner=runner)
+        self.assertEqual(out["output"]["text"], "A" * 8)
+        prefill = dict(receipt(), prompt_tokens=[0]*8, input_tokens=[0]*8,
+                       requested_max_new_tokens=1, generated_token_ids=[0],
+                       output_sha256=["a" * 64] * 8, logits_sha256=["b" * 64])
+        out = run_prompt("eight", Tokenizer(), 3, "/engine", ["/input"] * 8, max_new_tokens=1,
+                         runner=lambda args, **kw: subprocess.CompletedProcess(args, 0, json.dumps(prefill).encode(), b""))
+        self.assertEqual(out["prompt_token_ids"], [0]*8)
 
     def test_refuses_prompt_before_spawning_and_never_retries_failure(self):
         calls = []

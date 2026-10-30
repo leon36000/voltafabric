@@ -1,4 +1,4 @@
-//! Bounded two-token prompt and two-token CPU generation qualification.
+//! Bounded SC117 CPU generation qualification with pre-position expert headroom.
 use std::{
     collections::BTreeMap,
     time::{Duration, SystemTime, UNIX_EPOCH},
@@ -10,7 +10,7 @@ use voltafabric::{
     native_ledger::NativeBatchLedger,
     sc117_ffn_stage, sc117_gdn_stage,
     sc117_layer_chain::{Layer, Owners, Segment},
-    sc117_post_attention, sc117_qsa_stage, sc117_shared_stage,
+    sc117_post_attention, sc117_qsa_stage, sc117_router_cpu, sc117_shared_stage,
     session::{Endpoint, Session},
     sha256,
     strata_native_layout::NativeLayout,
@@ -389,10 +389,10 @@ fn run() -> Result<(), E> {
     }
     let prompt_tokens: Vec<u32> = a[10].split(',').map(str::parse).collect::<Result<_, _>>()?;
     let max_new_tokens: usize = if a.len() == 12 { a[11].parse()? } else { 2 };
-    if !(1..=4).contains(&max_new_tokens) {
+    if !(1..=8).contains(&max_new_tokens) {
         return Err("invalid generation limit".into());
     }
-    if !(1..=2).contains(&prompt_tokens.len())
+    if !(1..=8).contains(&prompt_tokens.len())
         || prompt_tokens.iter().any(|&t| t >= 248_320 || t == 248_046)
     {
         return Err("invalid prompt tokens".into());
@@ -405,6 +405,21 @@ fn run() -> Result<(), E> {
         return Err("index digest".into());
     }
     let layout = NativeLayout::parse_sc117_v3(&index, pack.metadata()?.len())?;
+    let worst_case_headroom =
+        layout.worst_case_admission_bytes(sc117_router_cpu::ROUTED_EXPERTS)?;
+    let budget = match std::env::var("VF_CPU_EXPERT_BUDGET") {
+        Ok(value) => value.parse::<u64>()?,
+        Err(std::env::VarError::NotPresent) => BUDGET,
+        Err(error) => return Err(error.into()),
+    };
+    let seed_bytes = layout.worst_case_admission_bytes(2)?;
+    if budget > BUDGET
+        || seed_bytes
+            .checked_add(worst_case_headroom)
+            .is_none_or(|minimum| budget < minimum)
+    {
+        return Err("expert budget cannot cover seeds and worst-case headroom".into());
+    }
     let m: voltafabric::sc117_ple_weights::Manifest =
         serde_json::from_reader(std::fs::File::open(&a[8])?)?;
     let weights =
@@ -414,7 +429,7 @@ fn run() -> Result<(), E> {
     let token_table =
         voltafabric::sc117_embedding::Table::open(shard.try_clone()?, 55_063_448_064, 545_644_544)?;
     let attempt = u64::try_from(SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos())?;
-    let run_id = format!("r470-prefill-greedy-{}-{attempt}", std::process::id());
+    let run_id = format!("r474-prefill-greedy-{}-{attempt}", std::process::id());
     let head_id = Identity {
         run_id: run_id.clone(),
         model_revision: "sc117-local-observation".into(),
@@ -455,7 +470,7 @@ fn run() -> Result<(), E> {
                 .checked_add(layout.expert(layer, expert.into())?.bytes)
                 .ok_or("seed budget overflow")?;
         }
-        if used > BUDGET {
+        if used > budget {
             return Err("seed budget exceeded".into());
         }
         let id = Identity {
@@ -501,7 +516,7 @@ fn run() -> Result<(), E> {
     let ledger = NativeBatchLedger::open(std::path::Path::new(&a[6]))?;
     let mut segment = Segment::new_ple_cpu_qualification(
         layers,
-        "r470-cpu-only".into(),
+        "r474-cpu-only".into(),
         ledger,
         Duration::from_secs(30),
     )?;
@@ -514,12 +529,12 @@ fn run() -> Result<(), E> {
             identity: voltafabric::sc117_expert_source::Identity {
                 run_id: run_id.clone(),
                 model_revision: "sc117-local-observation".into(),
-                plan_id: "r470-cpu-only".into(),
+                plan_id: "r474-cpu-only".into(),
                 epoch: 1,
             },
             ranks: vec![2, 3],
             seeds: &seed_records,
-            limit: BUDGET,
+            limit: budget,
         },
     )?;
     if source.used_bytes() != used {
@@ -530,6 +545,7 @@ fn run() -> Result<(), E> {
     let mut output_hashes = Vec::new();
     let mut logits_hashes = Vec::new();
     let mut generated = Vec::new();
+    let mut evictions = Vec::new();
     let mut current_token = prompt_tokens[0];
     for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
         if pos < prompt_tokens.len() {
@@ -539,12 +555,15 @@ fn run() -> Result<(), E> {
         let embedding = token_table.gather(current_token)?;
         embedding_hashes.push(bytes_hash(&embedding));
         let input: Vec<f32> = (0..4).flat_map(|_| embedding.iter().copied()).collect();
-        let output = segment.advance_token_with_source(
+        let (output, removed) = segment.advance_token_with_headroom(
             attempt.checked_add(pos as u64).ok_or("attempt overflow")?,
             current_token as i32,
             &input,
             &mut source,
+            worst_case_headroom,
+            768,
         )?;
+        evictions.extend(removed);
         if segment.position() != pos as u64 + 1 || segment.is_poisoned() {
             return Err("segment did not commit complete position".into());
         }
@@ -573,7 +592,7 @@ fn run() -> Result<(), E> {
     }
     println!(
         "{}",
-        serde_json::json!({"scope":"up to two supplied prompt tokens and four greedy predictions through 48 local CPU layers", "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":BUDGET,"resident_payload_bytes":source.used_bytes(),"dynamic_admissions":source.admissions()})
+        serde_json::json!({"scope":"up to eight supplied prompt tokens and eight greedy predictions through 48 local CPU layers", "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "layer_count":layer_count,"run_id":run_id,"attempt_base":attempt,"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"dynamic_admissions":source.admissions()})
     );
     Ok(())
 }

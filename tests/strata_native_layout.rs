@@ -7,6 +7,9 @@ const SIZE: u64 = 50_292_326_400;
 fn actual_sc117_index_locates_bounded_mixed_format_experts() {
     let layout = NativeLayout::parse_sc117_v3(INDEX, SIZE).unwrap();
     assert_eq!(layout.layers().len(), 48);
+    assert_eq!(layout.worst_case_admission_bytes(10).unwrap(), 982_272_000);
+    assert!(layout.worst_case_admission_bytes(0).is_err());
+    assert!(layout.worst_case_admission_bytes(513).is_err());
     let first = layout.expert(0, 0).unwrap();
     assert_eq!(
         (

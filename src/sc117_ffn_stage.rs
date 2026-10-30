@@ -93,7 +93,8 @@ impl Stage {
             320,
             1e-6,
         )?;
-        let choices = sc117_router_cpu::route(&self.router, &hc.mixed, 10)?;
+        let choices =
+            sc117_router_cpu::route(&self.router, &hc.mixed, sc117_router_cpu::ROUTED_EXPERTS)?;
         Ok(Routed {
             residual,
             mixed: hc.mixed,

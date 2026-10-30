@@ -131,13 +131,13 @@ def decode_greedy_receipt(tokenizer: Tokenizer, eos: int, receipt: dict) -> dict
         raise ValueError("full layer receipt required")
     inputs, generated = receipt.get("input_tokens"), receipt.get("generated_token_ids")
     requested = receipt.get("requested_max_new_tokens", 2)
-    if (type(requested) is not int or not 1 <= requested <= 4
+    if (type(requested) is not int or not 1 <= requested <= 8
             or not isinstance(inputs, list) or not inputs or not isinstance(generated, list)
             or not 1 <= len(generated) <= requested):
         raise ValueError("invalid autoregressive receipt")
     prompt = receipt.get("prompt_tokens", inputs[:1])
-    if (not isinstance(prompt, list) or not 1 <= len(prompt) <= 2
-            or inputs != prompt + generated[:-1] or len(inputs) > 5
+    if (not isinstance(prompt, list) or not 1 <= len(prompt) <= 8
+            or inputs != prompt + generated[:-1] or len(inputs) > 15
             or any(type(token) is not int or not 0 <= token < len(tokenizer.tokens) for token in inputs)
             or not isinstance(receipt.get("run_id"), str) or not receipt["run_id"].strip()
             or receipt.get("workers_closed") != 96):
