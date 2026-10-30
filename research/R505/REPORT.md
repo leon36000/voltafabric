@@ -1,0 +1,9 @@
+# R505 — independent source checks for completed R503 multi-turn answer
+
+Parent GitLab R503 9b3c9b20aaba36297d2e0d3f1fa5eb90a575131e. The R503 complete local CPU multi-turn answer used 3081 distinct admitted experts. R498/R500 supplied independent source-slice observations for 2511; this batch selected exactly the remaining 570, without rerunning generation or replaying any claim.
+
+On PC1 the existing independent Python observer `tools/observe_sc117_experts.py` read the pinned native index, each selected pack span and its corresponding three IQ3 source-shard slices, compared their SHA256 hashes and checked stable pack/source file identities within every bounded batch and across batches. All 570 matched the R503 admission digests. This establishes local pack/source consistency, not publisher authentication, model quality, GPU or inter-machine validation. The scope was limited to 512 MiB RAM, zero swap, 16 tasks, 50% CPU and best-effort low I/O priority; it exited successfully with empty stderr.
+
+The independent verifier reconstructs exact selection and observation bytes from compressed parts, reruns the R503/R500 proofs, and checks that the selection is precisely the previously unobserved subset, with expert IDs, lengths, offsets, source-match flags and digests. All 3081 distinct R503 experts now have independent local source-slice comparisons. Selection SHA256 5e36c82e61c36343f4753c41fbe51be8002107ebea9b834c8ae6f724697f86f9; observation SHA256 7a070b659e52490f56d6696d31ffb27e85a5c87e0b8b0afb2d3d0024b2f6dc08; wrapper SHA256 fd8b6bf4f44450295600d9eaa33697b386ba4c131cb4d108dc2a10ab6d1b6e0f; observer SHA256 0a1bda87ff0f6bbedce2451418cc9c9f27d6017215a94efaf84620987a87bba9.
+
+No GPU, worker, network transfer of model payload or generation ran. All R503 UNKNOWN claims remain non-replayable. PC6 free swap remains below 1 GiB, preventing the planned inter-PC test; fresh resource, lease, host identity and hardware admissions are still required.
