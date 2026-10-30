@@ -480,6 +480,10 @@ mod tests {
         assert_eq!(charge(8, 2, 10).unwrap(), 10);
         assert!(charge(9, 2, 10).is_err());
         assert!(charge(u64::MAX, 1, u64::MAX).is_err());
+        assert_eq!(
+            charge(9, 2, 10).unwrap_err().to_string(),
+            "INVALID_INPUT: expert payload budget exceeded"
+        );
     }
     #[test]
     fn acknowledged_release_changes_accounting_once_only() {

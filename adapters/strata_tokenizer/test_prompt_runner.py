@@ -100,11 +100,12 @@ class RunnerTests(unittest.TestCase):
 
     def test_failure_diagnostic_is_allowlisted_and_never_returns_partial_output(self):
         cases = [
-            (b"prefill-greedy qualification refused: no rank has expert payload capacity\n", "rank_payload_capacity"),
-            (b"prefill-greedy qualification refused: expert payload budget exceeded\n", "global_payload_capacity"),
-            (b"prefill-greedy qualification refused: eviction target cannot be met safely\n", "eviction_target"),
-            (b"prefill-greedy qualification refused: eviction limit\n", "eviction_limit"),
-            (b"prefill-greedy qualification refused: no rank has expert payload capacity SECRET\n", "unclassified"),
+            (b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity\n", "rank_payload_capacity"),
+            (b"prefill-greedy qualification refused: INVALID_INPUT: expert payload budget exceeded\n", "global_payload_capacity"),
+            (b"prefill-greedy qualification refused: INVALID_INPUT: eviction target cannot be met safely\n", "eviction_target"),
+            (b"prefill-greedy qualification refused: INVALID_INPUT: eviction limit\n", "eviction_limit"),
+            (b"prefill-greedy qualification refused: worker shutdown receipt\n", "worker_shutdown"),
+            (b"prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity SECRET\n", "unclassified"),
             (b"private path or secret", "unclassified"),
         ]
         for stderr, category in cases:
@@ -121,13 +122,21 @@ class RunnerTests(unittest.TestCase):
     def test_real_subprocess_reports_known_failure_without_stdout(self):
         def runner(args, **kwargs):
             program = ('import sys; print("private partial output"); '
-                       'print("prefill-greedy qualification refused: no rank has expert payload capacity", file=sys.stderr); '
+                       'print("prefill-greedy qualification refused: INVALID_INPUT: no rank has expert payload capacity", file=sys.stderr); '
                        'sys.exit(1)')
             return subprocess.run([sys.executable, "-c", program], **kwargs)
         with self.assertRaises(RuntimeError) as caught:
             run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
         self.assertIn("rank_payload_capacity", str(caught.exception))
         self.assertNotIn("private", str(caught.exception))
+
+    def test_signal_status_is_preserved_without_exposing_stderr(self):
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, -9, b"secret stdout", b"secret stderr")
+        with self.assertRaises(RuntimeError) as caught:
+            run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertIn("unclassified, exit=-9", str(caught.exception))
+        self.assertNotIn("secret", str(caught.exception))
 
 
 if __name__ == "__main__":
