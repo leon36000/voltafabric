@@ -561,6 +561,38 @@ impl Collector {
         }
         Ok(slot_count)
     }
+    /// Return complete unweighted rows in original token/slot order. This is a
+    /// distinct contract from `finish`: the consumer must apply routing weights
+    /// exactly once. No rows are exposed if any completion is missing or invalid.
+    pub fn finish_unweighted_slots(mut self) -> Result<Vec<Vec<Vec<f64>>>> {
+        if self.failed || self.received.len() != self.expected.len() {
+            return Err(Error::new("BATCH_INCOMPLETE", "aborted or missing results"));
+        }
+        let mut out = vec![Vec::new(); self.tokens];
+        for (key, slot) in self.expected {
+            let values = self
+                .received
+                .remove(&key)
+                .ok_or_else(|| Error::new("BATCH_INCOMPLETE", "missing slot"))?;
+            let row = match values {
+                ReceivedValues::F64(values) => values,
+                ReceivedValues::Fp16 { batch, offset } => self.fp16_batches[batch]
+                    [offset..offset + self.hidden]
+                    .iter()
+                    .map(|&value| decode_fp16(value))
+                    .collect::<Result<Vec<_>>>()?,
+                ReceivedValues::PreweightedFp32(_) => {
+                    return Err(Error::new(
+                        "ARITHMETIC_CONTRACT_MISMATCH",
+                        "preweighted results are not unweighted slots",
+                    ))
+                }
+            };
+            out[slot.token].push(row);
+        }
+        Ok(out)
+    }
+
     pub fn finish(self) -> Result<Vec<Vec<f64>>> {
         if self.failed || self.received.len() != self.expected.len() {
             return Err(Error::new("BATCH_INCOMPLETE", "aborted or missing results"));

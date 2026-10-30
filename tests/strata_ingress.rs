@@ -251,3 +251,60 @@ fn f64_transport_refuses_nonfinite_stale_and_invalid_routes() {
     )
     .is_err());
 }
+
+#[test]
+fn collector_exposes_only_complete_unweighted_slots_in_original_order() {
+    let p = template();
+    let admitted = strata_ingress::admit_pool_batch_f64(
+        &p,
+        &p.stamp,
+        3,
+        2,
+        2,
+        &[1.0; 8],
+        &[10, 20, 20, 10],
+        &[0.25, 0.75, 0.125, 0.875],
+    )
+    .unwrap();
+    let dispatch = routing::dispatch(&admitted.routing).unwrap();
+    let mut collector = moe::Collector::from_routing(&admitted.routing).unwrap();
+    for slot in dispatch.slots.iter().rev() {
+        let value = vec![(slot.token * 10 + slot.slot + 1) as f64; 4];
+        collector
+            .accept(moe::Completion {
+                stamp: p.stamp.clone(),
+                token: slot.token,
+                slot: slot.slot,
+                expert: slot.expert,
+                rank: slot.rank,
+                local: slot.local,
+                value,
+            })
+            .unwrap();
+    }
+    let rows = collector.finish_unweighted_slots().unwrap();
+    assert_eq!(
+        rows,
+        vec![
+            vec![vec![1.0; 4], vec![2.0; 4]],
+            vec![vec![11.0; 4], vec![12.0; 4]]
+        ]
+    );
+    let mut partial = moe::Collector::from_routing(&admitted.routing).unwrap();
+    let slot = &dispatch.slots[0];
+    let c = moe::Completion {
+        stamp: p.stamp.clone(),
+        token: slot.token,
+        slot: slot.slot,
+        expert: slot.expert,
+        rank: slot.rank,
+        local: slot.local,
+        value: vec![1.0; 4],
+    };
+    partial.accept(c.clone()).unwrap();
+    assert!(partial.finish_unweighted_slots().is_err());
+    let mut duplicate = moe::Collector::from_routing(&admitted.routing).unwrap();
+    duplicate.accept(c.clone()).unwrap();
+    assert!(duplicate.accept(c).is_err());
+    assert!(duplicate.finish_unweighted_slots().is_err());
+}

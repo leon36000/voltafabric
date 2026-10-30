@@ -4851,6 +4851,54 @@ fn cli_runs_a_compressed_series_end_to_end() {
 }
 
 #[test]
+fn unweighted_slot_collector_receives_local_experts_in_strata_order() {
+    let p = routing_problem("r369-unweighted-slots");
+    let x = activations(6, HIDDEN as usize, 7);
+    let (mut sessions, artifacts) = bound(&p);
+    let dispatch = routing::dispatch(&p).unwrap();
+    let mut collector = moe::Collector::from_routing(&p).unwrap();
+    let attempt = ATTEMPT.fetch_add(1, Ordering::Relaxed);
+    let mut pending = Vec::new();
+    for rank in &dispatch.ranks {
+        let index = sessions.iter().position(|s| s.rank == rank.rank).unwrap();
+        let req = sessions[index]
+            .start_exec(rank, attempt, token_rows(rank, &x), Fault::None)
+            .unwrap();
+        pending.push((index, req));
+    }
+    for (index, req) in pending {
+        let receipt =
+            sessions[index].finish_exec(req, Some(&mut collector), std::time::Instant::now() + T);
+        assert_eq!(receipt.state, ReceiptState::Completed, "{receipt:?}");
+        assert!(receipt.error.is_none());
+    }
+    let rows = collector.finish_unweighted_slots().unwrap();
+    let dims = moe::Model {
+        hidden: HIDDEN as usize,
+        intermediate: INTER as usize,
+        experts: vec![],
+    };
+    for slot in &dispatch.slots {
+        let stack = artifacts
+            .iter()
+            .find(|a| a.stack().rank() == slot.rank)
+            .unwrap()
+            .stack();
+        let physical = stack
+            .physical_experts()
+            .iter()
+            .position(|e| e.id() == slot.expert)
+            .unwrap();
+        let expert = stack.dense_expert(physical).unwrap();
+        let expected = moe::expert_value(&dims, &expert, &x[slot.token]).unwrap();
+        assert_eq!(bits(&rows[slot.token][slot.slot]), bits(&expected));
+    }
+    for s in sessions {
+        assert_eq!(s.close(T).exit_code, Some(0));
+    }
+}
+
+#[test]
 fn strata_f32_exact_f64_reaches_local_sessions_and_oracle() {
     let p = routing_problem("r368-strata-f64-local");
     let ids: Vec<i32> = p.routes.iter().flatten().map(|c| c.expert as i32).collect();
