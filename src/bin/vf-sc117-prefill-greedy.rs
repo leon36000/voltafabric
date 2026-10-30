@@ -462,7 +462,7 @@ fn pin_known_hosts(_: &mut Endpoint, _: &str, _: &str, _: &str) -> Result<std::f
 
 /// Cooperative lease identity. The operator must pin the actual shared lease;
 /// this check cannot establish that other services cooperate with that lock.
-#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 #[serde(deny_unknown_fields)]
 struct SharedLease {
     path: String,
@@ -531,6 +531,154 @@ fn verify_shared_lease(_: &SharedLease, _: i32) -> Result<(), E> {
     Err("shared lease requires Linux".into())
 }
 
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Namespace {
+    root: String,
+    dev: u64,
+    ino: u64,
+    uid: u32,
+    base_id: String,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NamespaceContext {
+    plan_id: String,
+    shared_lease: SharedLease,
+}
+#[derive(serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+struct NamespaceRecord {
+    status: String,
+    scope: String,
+    base_id: String,
+    effective_run_id: String,
+    reserved_ns: u64,
+    context: NamespaceContext,
+}
+#[cfg(target_os = "linux")]
+fn open_namespace(spec: &Namespace) -> Result<std::fs::File, E> {
+    use std::os::unix::fs::MetadataExt;
+    let base = spec
+        .base_id
+        .strip_prefix("r53-")
+        .ok_or("invalid R53 namespace")?;
+    if !(8..=60).contains(&base.len())
+        || !base
+            .bytes()
+            .all(|c| c.is_ascii_alphanumeric() || b"_-".contains(&c))
+        || !std::path::Path::new(&spec.root).is_absolute()
+        || spec.root.len() > 4096
+        || spec.uid != rustix::process::geteuid().as_raw()
+    {
+        return Err("invalid R53 identity".into());
+    }
+    let fd = rustix::fs::open(
+        &spec.root,
+        rustix::fs::OFlags::RDONLY
+            | rustix::fs::OFlags::DIRECTORY
+            | rustix::fs::OFlags::NOFOLLOW
+            | rustix::fs::OFlags::CLOEXEC,
+        rustix::fs::Mode::empty(),
+    )?;
+    let directory = std::fs::File::from(fd);
+    let m = directory.metadata()?;
+    if !m.is_dir()
+        || (m.dev(), m.ino(), m.uid()) != (spec.dev, spec.ino, spec.uid)
+        || m.mode() & 0o077 != 0
+    {
+        return Err("R53 directory identity or permissions changed".into());
+    }
+    Ok(directory)
+}
+#[cfg(target_os = "linux")]
+fn consume_namespace(spec: &Namespace, plan: &str, lease: &SharedLease) -> Result<(), E> {
+    use std::os::unix::fs::MetadataExt;
+    let directory = open_namespace(spec)?;
+    for effective in [
+        spec.base_id.clone(),
+        format!("{}-duplicate-slot", spec.base_id),
+    ] {
+        let fd = rustix::fs::openat(
+            &directory,
+            format!("{effective}.json"),
+            rustix::fs::OFlags::RDONLY
+                | rustix::fs::OFlags::NOFOLLOW
+                | rustix::fs::OFlags::NONBLOCK
+                | rustix::fs::OFlags::CLOEXEC,
+            rustix::fs::Mode::empty(),
+        )?;
+        let file = std::fs::File::from(fd);
+        let before = file.metadata()?;
+        if !before.is_file()
+            || before.uid() != spec.uid
+            || before.mode() & 0o077 != 0
+            || before.nlink() != 1
+            || before.len() == 0
+            || before.len() > 65536
+        {
+            return Err("invalid R53 reservation file".into());
+        }
+        let mut bytes = Vec::new();
+        (&file).take(65537).read_to_end(&mut bytes)?;
+        let after = file.metadata()?;
+        let identity = |m: &std::fs::Metadata| {
+            (
+                m.dev(),
+                m.ino(),
+                m.len(),
+                m.mtime(),
+                m.mtime_nsec(),
+                m.ctime(),
+                m.ctime_nsec(),
+            )
+        };
+        if identity(&before) != identity(&after) || bytes.len() as u64 != before.len() {
+            return Err("R53 reservation changed".into());
+        }
+        let record: NamespaceRecord = serde_json::from_slice(&bytes)?;
+        if record.status != "RESERVED_UNKNOWN_NO_REPLAY"
+            || record.scope
+                != "Namespace consumption only; see linked execution receipt for actual outcome"
+            || record.base_id != spec.base_id
+            || record.effective_run_id != effective
+            || record.reserved_ns == 0
+            || record.context.plan_id != plan
+            || record.context.shared_lease != *lease
+        {
+            return Err("R53 reservation identity mismatch".into());
+        }
+    }
+    // This single-use marker is consumed even if the write, sync, or subsequent
+    // launch fails. Never remove it or retry an UNKNOWN operation.
+    let name = format!("{}-sc117-started.json", spec.base_id);
+    let fd = rustix::fs::openat(
+        &directory,
+        name.as_str(),
+        rustix::fs::OFlags::WRONLY
+            | rustix::fs::OFlags::CREATE
+            | rustix::fs::OFlags::EXCL
+            | rustix::fs::OFlags::NOFOLLOW
+            | rustix::fs::OFlags::CLOEXEC,
+        rustix::fs::Mode::from_bits_truncate(0o600),
+    )?;
+    let mut file = std::fs::File::from(fd);
+    let value = serde_json::json!({"status":"RESERVED_UNKNOWN_NO_REPLAY","base_id":spec.base_id,"plan_id":plan});
+    serde_json::to_writer(&mut file, &value)?;
+    file.write_all(b"\n")?;
+    file.sync_all()?;
+    directory.sync_all()?;
+    Ok(())
+}
+#[cfg(not(target_os = "linux"))]
+fn open_namespace(_: &Namespace) -> Result<std::fs::File, E> {
+    Err("R53 namespace requires Linux".into())
+}
+#[cfg(not(target_os = "linux"))]
+fn consume_namespace(_: &Namespace, _: &str, _: &SharedLease) -> Result<(), E> {
+    Err("R53 namespace requires Linux".into())
+}
+
 fn optional_env(name: &str) -> Result<Option<String>, E> {
     match std::env::var(name) {
         Ok(value) => Ok(Some(value)),
@@ -570,6 +718,7 @@ struct WorkerPlan<'a> {
     endpoints: &'a BTreeMap<u32, Endpoint>,
     known_hosts_sha256: &'a BTreeMap<u32, String>,
     shared_lease: &'a Option<SharedLease>,
+    r53_namespace: &'a Option<Namespace>,
 }
 
 fn prompt_tokens_hash(tokens: &[u32]) -> String {
@@ -591,6 +740,7 @@ fn worker_plan_id(
     ple_manifest_sha256: &str,
     known_hosts_sha256: &BTreeMap<u32, String>,
     shared_lease: &Option<SharedLease>,
+    r53_namespace: &Option<Namespace>,
 ) -> Result<String, E> {
     let prompt_length = prompt_tokens.len();
     if !sha256::is_hex_digest(ple_manifest_sha256)
@@ -605,6 +755,7 @@ fn worker_plan_id(
         || prompt_length + max_new_tokens - 1 > 64
         || endpoints.len() != 2
         || (shared_lease.is_some() != !known_hosts_sha256.is_empty())
+        || (r53_namespace.is_some() != !known_hosts_sha256.is_empty())
         || known_hosts_sha256
             .iter()
             .any(|(rank, hash)| !endpoints.contains_key(rank) || !sha256::is_hex_digest(hash))
@@ -633,7 +784,7 @@ fn worker_plan_id(
     }
     let prompt_tokens_sha256 = prompt_tokens_hash(prompt_tokens);
     let plan = WorkerPlan {
-        version: "vf-sc117-worker-plan-v14",
+        version: "vf-sc117-worker-plan-v15",
         wire_policy: "native-f32-raw-if-advertised-otherwise-json-v1",
         eviction_policy: "rank-lru-then-size-v2",
         origin_policy: "stable-source-digest-cache-v1",
@@ -652,8 +803,9 @@ fn worker_plan_id(
         endpoints,
         known_hosts_sha256,
         shared_lease,
+        r53_namespace,
     };
-    Ok(format!("r528-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
+    Ok(format!("r529-{}", sha256::hex(&serde_json::to_vec(&plan)?)))
 }
 
 fn owners(
@@ -816,6 +968,18 @@ fn run() -> Result<(), E> {
         }
         _ => return Err("explicit shared lease identity required for SSH".into()),
     };
+    let r53_namespace: Option<Namespace> = match (
+        host_digests.is_empty(),
+        optional_env("VF_R53_NAMESPACE_SPEC")?,
+    ) {
+        (true, None) => None,
+        (false, Some(json)) if json.len() <= 8192 => {
+            let spec: Namespace = serde_json::from_str(&json)?;
+            open_namespace(&spec)?;
+            Some(spec)
+        }
+        _ => return Err("explicit R53 namespace identity required for SSH".into()),
+    };
     let mut dense = std::fs::File::open(&a[1])?;
     let mut shard = std::fs::File::open(&a[2])?;
     let mut pack = std::fs::File::open(&a[3])?;
@@ -880,6 +1044,7 @@ fn run() -> Result<(), E> {
         &manifest_hash,
         &host_digests,
         &shared_lease,
+        &r53_namespace,
     )?;
     if plan_only {
         println!(
@@ -905,6 +1070,9 @@ fn run() -> Result<(), E> {
     } else {
         None
     };
+    if let (Some(namespace), Some(lease)) = (&r53_namespace, &shared_lease) {
+        consume_namespace(namespace, &plan_id, lease)?;
+    }
     // The sealed memfd stays alive for all SSH children. Keep the canonical
     // path in the plan; only replace the runtime option with our immutable fd.
     #[cfg(target_os = "linux")]
@@ -1155,6 +1323,13 @@ mod tests {
     }
     #[test]
     fn worker_plan_binds_rank_endpoints_and_capacities() {
+        let namespace = Some(Namespace {
+            root: "/ledger".into(),
+            dev: 3,
+            ino: 4,
+            uid: 3,
+            base_id: "r53-test1234".into(),
+        });
         let lease = Some(SharedLease {
             path: "/lease".into(),
             dev: 1,
@@ -1178,12 +1353,13 @@ mod tests {
             DIGEST,
             &known_hosts,
             &lease,
+            &namespace,
         )
         .unwrap();
         assert_eq!(id.len(), 69);
         assert_eq!(
             id,
-            "r528-5f2bf588175b17fdb53e5f4ee9e0dc956e9114af797f7ce5d21d4750bb26538f"
+            "r529-13574f1a3e24e5aa1424a1e1350ffc384d27a7f5ee61b2241eb6464dfbb71da2"
         );
         let changed_lease = Some(SharedLease {
             path: "/lease".into(),
@@ -1203,7 +1379,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &changed_lease
+                &changed_lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1217,7 +1394,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &None
+            &None,
+            &namespace
         )
         .is_err());
         let changed_host_key = BTreeMap::from([(3u32, "b".repeat(64))]);
@@ -1233,7 +1411,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &changed_host_key,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1247,7 +1426,8 @@ mod tests {
             "plain",
             DIGEST,
             &BTreeMap::new(),
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert_ne!(
@@ -1262,7 +1442,8 @@ mod tests {
                 "plain",
                 &"b".repeat(64),
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1276,7 +1457,8 @@ mod tests {
             "plain",
             "BAD",
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         let p12 = worker_plan_id(
@@ -1290,6 +1472,7 @@ mod tests {
             DIGEST,
             &known_hosts,
             &lease,
+            &namespace,
         )
         .unwrap();
         let p21 = worker_plan_id(
@@ -1303,6 +1486,7 @@ mod tests {
             DIGEST,
             &known_hosts,
             &lease,
+            &namespace,
         )
         .unwrap();
         assert_ne!(id, p12);
@@ -1317,7 +1501,8 @@ mod tests {
             "chat",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1330,7 +1515,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1343,7 +1529,8 @@ mod tests {
             "chat",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_ok());
         assert_ne!(
@@ -1358,7 +1545,8 @@ mod tests {
                 "chat",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1372,7 +1560,8 @@ mod tests {
             "invalid",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert_eq!(
@@ -1387,7 +1576,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1410,7 +1600,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1434,7 +1625,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1457,7 +1649,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1487,7 +1680,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1503,7 +1697,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1519,7 +1714,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1535,7 +1731,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1551,7 +1748,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1567,7 +1765,8 @@ mod tests {
                 "plain",
                 DIGEST,
                 &known_hosts,
-                &lease
+                &lease,
+                &namespace
             )
             .unwrap()
         );
@@ -1581,7 +1780,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1594,7 +1794,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1607,7 +1808,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1620,7 +1822,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1633,7 +1836,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1646,7 +1850,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1659,7 +1864,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1672,7 +1878,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1685,7 +1892,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_ok());
         assert!(worker_plan_id(
@@ -1698,7 +1906,8 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
         assert!(worker_plan_id(
@@ -1711,9 +1920,62 @@ mod tests {
             "plain",
             DIGEST,
             &known_hosts,
-            &lease
+            &lease,
+            &namespace
         )
         .is_err());
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn r53_requires_both_matching_reservations_and_consumes_once() {
+        use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
+        let name = format!(
+            "vf-test-r53-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        );
+        let root = std::env::temp_dir().join(name);
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&root)
+            .unwrap();
+        let meta = std::fs::metadata(&root).unwrap();
+        let namespace = Namespace {
+            root: root.to_str().unwrap().into(),
+            dev: meta.dev(),
+            ino: meta.ino(),
+            uid: meta.uid(),
+            base_id: "r53-test1234".into(),
+        };
+        let lease = SharedLease {
+            path: "/lease".into(),
+            dev: 1,
+            ino: 2,
+            uid: meta.uid(),
+        };
+        let plan = format!("r529-{}", "a".repeat(64));
+        let write_record = |effective: &str| {
+            let value = serde_json::json!({"status":"RESERVED_UNKNOWN_NO_REPLAY", "scope":"Namespace consumption only; see linked execution receipt for actual outcome", "base_id":namespace.base_id, "effective_run_id":effective, "reserved_ns":1, "context":{"plan_id":plan,"shared_lease":lease}});
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .mode(0o600)
+                .open(root.join(format!("{effective}.json")))
+                .unwrap();
+            serde_json::to_writer(&mut file, &value).unwrap();
+        };
+        write_record(&namespace.base_id);
+        assert!(consume_namespace(&namespace, &plan, &lease).is_err());
+        assert!(!root.join("r53-test1234-sc117-started.json").exists());
+        write_record("r53-test1234-duplicate-slot");
+        assert!(consume_namespace(&namespace, "wrong-plan", &lease).is_err());
+        assert!(!root.join("r53-test1234-sc117-started.json").exists());
+        assert!(consume_namespace(&namespace, &plan, &lease).is_ok());
+        assert!(consume_namespace(&namespace, &plan, &lease).is_err());
+        // Synthetic records stay in the isolated TMPDIR; no actual operation ran.
     }
     #[cfg(target_os = "linux")]
     #[test]
