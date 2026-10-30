@@ -72,3 +72,7 @@ target_compile_options(vf_check_sc117_shared PRIVATE -Wall -Wextra -Werror)
 add_executable(vf_check_sc117_layer1_qkv check_sc117_layer1_qkv.cpp)
 target_link_libraries(vf_check_sc117_layer1_qkv PRIVATE ggml-cpu ggml-base)
 target_compile_options(vf_check_sc117_layer1_qkv PRIVATE -Wall -Wextra -Werror)
+# Explicit layer-1 attention projections diagnostic; not a CTest.
+add_executable(vf_check_sc117_layer1_route check_sc117_layer1_route.cpp)
+target_link_libraries(vf_check_sc117_layer1_route PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_check_sc117_layer1_route PRIVATE -Wall -Wextra -Werror)
