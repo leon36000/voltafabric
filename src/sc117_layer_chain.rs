@@ -344,6 +344,28 @@ struct Cursor {
     poisoned: bool,
 }
 
+fn validate_advance(cursor: &Cursor, count: usize, attempt: u64, input: &[f32]) -> Result<()> {
+    if cursor.poisoned
+        || count == 0
+        || attempt == 0
+        || attempt <= cursor.last_attempt
+        || cursor.position == u64::MAX
+        || input.len() != 10240
+        || input.iter().any(|x| !x.is_finite())
+    {
+        return Err(invalid("segment state, attempt or input"));
+    }
+    Ok(())
+}
+
+fn headroom_target(used: u64, limit: u64, reserve: u64) -> Result<Option<u64>> {
+    if used > limit || reserve > limit {
+        return Err(invalid("invalid expert headroom"));
+    }
+    let target = limit - reserve;
+    Ok((used > target).then_some(target))
+}
+
 // All intermediate outputs remain private. If a later layer fails, earlier
 // resident states may have advanced: the entire segment becomes unusable.
 fn advance<F>(
@@ -358,16 +380,7 @@ fn advance<F>(
 where
     F: FnMut(usize, Reservation, &[f32]) -> Result<Vec<f32>>,
 {
-    if cursor.poisoned
-        || count == 0
-        || attempt == 0
-        || attempt <= cursor.last_attempt
-        || cursor.position == u64::MAX
-        || input.len() != 10240
-        || input.iter().any(|x| !x.is_finite())
-    {
-        return Err(invalid("segment state, attempt or input"));
-    }
+    validate_advance(cursor, count, attempt, input)?;
     let mut residual = input.to_vec();
     cursor.poisoned = true;
     for i in 0..count {
@@ -821,6 +834,36 @@ impl Segment {
     ) -> Result<Vec<f32>> {
         self.advance_inner(attempt, input, Some(token), &mut Some(source))
     }
+    /// Advance with caller-selected pre-position expert-payload headroom. This
+    /// does not reserve the next gate's unknown payload, predict its route, or
+    /// measure RSS. When trimming is needed the previous committed route stays
+    /// protected. A failure never publishes partial token output.
+    pub fn advance_token_with_headroom(
+        &mut self,
+        attempt: u64,
+        token: i32,
+        input: &[f32],
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        headroom_bytes: u64,
+        max_evictions: usize,
+    ) -> Result<(Vec<f32>, Vec<EvictionReceipt>)> {
+        validate_advance(&self.cursor, self.layers.len(), attempt, input)?;
+        if self.layers.iter().any(|layer| layer.ple.is_some())
+            && !(0..sc117_ple::VOCAB).contains(&token)
+        {
+            return Err(invalid("segment PLE token required or invalid"));
+        }
+        let receipts = if let Some(target) =
+            headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?
+        {
+            self.evict_to_target(source, target, max_evictions)?
+        } else {
+            Vec::new()
+        };
+        let output = self.advance_token_with_source(attempt, token, input, source)?;
+        Ok((output, receipts))
+    }
+
     fn advance_inner(
         &mut self,
         attempt: u64,
@@ -855,6 +898,18 @@ impl Segment {
 mod tests {
     use super::*;
     use std::time::{SystemTime, UNIX_EPOCH};
+
+    #[test]
+    fn headroom_preflight_is_overflow_safe_and_only_triggers_on_pressure() {
+        assert_eq!(headroom_target(60, 100, 40).unwrap(), None);
+        assert_eq!(headroom_target(61, 100, 40).unwrap(), Some(60));
+        assert_eq!(
+            headroom_target(u64::MAX, u64::MAX, 1).unwrap(),
+            Some(u64::MAX - 1)
+        );
+        assert!(headroom_target(101, 100, 0).is_err());
+        assert!(headroom_target(0, 100, 101).is_err());
+    }
 
     #[test]
     fn eviction_plan_is_bounded_and_preserves_last_resident_per_rank() {

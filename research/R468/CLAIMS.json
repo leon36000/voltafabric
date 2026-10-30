@@ -1,0 +1,1776 @@
+{
+  "native-0019ddfb15c444d92cdfe6930d21fbbe157fcd5b86591495cf89dae35819355b.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 42,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-00a5c618aac1adf421599d11fb796ebae88886b909304192b8d3b782efbb9943.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-036906556c654dbde323f115afcc31e83163d508e1d3e7c9185de59d85fa1a30.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0525bdd479449e3437d5550e0f13cefef1123d923255c8bd1d8d73f8934ff971.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 34,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-05ac452698f695e936f1413d89f3d1cd177d5ed4951561c16b078f01c4605db4.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 18,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-074bdacf07c7689839c4a0cfa3eff659aeb856c6331b2f17eabff6266225b725.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 29,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-08bf64e8c116acf729cabe0a13766d908ad98651c5824aec447ffe9a900d89a5.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 38,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0b8b99123ee7ddb6e7dafd40bcf7f0c2af4753c819011a4e709a110023e3b986.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 30,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-0c99c4fccb20f913b5fd0ae2c8ae06b9072da6a86d0db7de9cce77de9ca76186.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 43,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-111c3eeabf7e8e92ae02c943545c45d69f19867eefec224092e0c338e8043952.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 39,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-116a53f8b0daa4ac0dd09675fde3e5b4f8dc220a3c14d2c453e4d28e07751b44.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-181a00f81ebf525a0b46d3cb729dd7bdaa943d4584ddb7760af71c33264beb7e.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 40,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-19482b8164ba5eef62770263eca39c30c0e9c495b7465f942ecaa49f750fb984.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 9,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1af5edf9ebad4d48500791b660f947ac47dc643b637c97014af3c53bb1e8a063.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 36,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1d429739cf81a830d531e0767497266c3f547ff77fc0e995effd1dfb4d642c03.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 14,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1dd4ee2820d0f13dc85e80caf386685a5ebf2e4c9ff76191ea58fabf6a787642.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 8,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1e3f0438d862b4b49846957f80f511e2bd6d1a2730e6a6210185d0aa3c78c618.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 45,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-1fec6f4f14cec29046946c0fb9c9874b8476f96036ff91696d257ae95fe70451.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 27,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2059372e65037224369446dbb7ec0a25096fbf8fb4cafaf2236cb58403f1a991.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 26,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-22e082762e0853223bafceaef3b8195e8fda8974884673c0094693b9cb40d943.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 28,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-24825e1efd649c6aa06e4ca0eef96a6a99af931d8c163a2d460e82e5e46e2eeb.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 35,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-26c6252604a77cdb8597bb2f3155a898641e0dbbf3f8781a5e75c662b486e37a.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 17,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-26e51b94d8d8bd5604bef4287b57b8d42c79eafabcc358533e55cdbddbfe52b1.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 22,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2978969ab84f579dc01557d5ad03931955692384bfc910a90f322248e50adec5.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 37,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2bc56d850dc71312ba993549394ea2d03cfd775bd30c4d308d475d4eeb99f8b8.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 38,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2eab4bf5d6f03cba4ab770efd7f92dd5c61f33280f0dbff3f3c0421484934dd2.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 11,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-2f85860288ce1b655d3ca3b28d7643b3a9c8b99d524989dbb31b984996285419.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 41,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-30757a29a086c757f11c2dd7284bdd4f224d6e34baa97d52df8824e3d9e4603b.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 6,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-321dd2fd044ce6477c694191c57acd6b21ab81fc74010081f2b47b93267934e7.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 46,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-32b86b1807d1623770633a1278a8a017b71dcc956c94aa846494e8c8939a4617.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 38,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-332fd7d8a95d4c02d204389c5a55ac3ce8849ca00244dd6393549524a593748c.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 43,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-341e1acc60d5ef9f7e6cc3bf4514932e083d62a7b1b242c26e09330f1e6e4c93.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 39,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-377044653ff0a7b7da253839ad40e3c954e9ac9be9c2a7b8661e99aff99c38bb.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 41,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-3780b2550478c76c19ee063589e0d1a4bbfbe6ec4cdd1d571e45682ecc2f178e.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 22,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-3798c57f5159168e425f037c1c19dbcd8895fd7309c112d5f68b7345a5564915.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 17,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-39be3ffe9805996dd120e851bf829e4267a5144b44ec9493351f975108a358bc.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 4,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-3beaa04115cfd05675595f5e2b166a8767b38b2105d60d2a55c997821f70c6e4.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 30,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-3fae14aa92b47c2fe1f26c4463627b0131e11e0f86f66e6fd02eb3222b4b19a1.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 7,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-42a9c37359700cc5e09b4d4a0409969219d31f45603ca8d3d8de7d90f261a93d.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 27,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-43fca48e77dbd17b25a1defac8c176f47e4e95b20322d48262a8de11089a1d94.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 46,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4519bb5385284b5fc5af3fe8586dc2ef355affd0a1f846c2ce954a22d8f0c808.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 32,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-459991b4307412d7fdd06733e5fd1d3b7453105e7f4b324c09ebbf19d9e6b1fc.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4807537c6fe9f26171008312412d3c11c7fc4c327a27f5efb7673d32f280fb4c.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 11,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-482ac1486da81fdee9c6d8fd0bfa5b5f5ff8861537544976a0bd404b68c9d08d.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 14,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-48d01b114b44edaa7232761fb929a3b58293382a3423e488103817c344decb59.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 9,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-497c6d4578cdc57862623d2460b562202fbe70ccca2a3275242fad84426de081.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 9,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4ab4f038d5d94ac15c0ad1d3567dfc41087546a8c97aea8fbf887946070beff1.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 20,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4ac093ee26914d0e1bb41d78d34ff89e45e6a87b4b0bb8ebe8a37e43dd829cf6.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 32,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4c2338bf12ec2928d787d023d5e5b336b911daf500eafe414efdca53cb153724.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 18,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4dc3c946c0ab9789a211a596806c59448a585e3f49f5785e996f4baa32ca6b16.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 26,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4dd9d63b29fdc7ec5fbb5863a8fb317f97cb319fc9f390767b92e8a21c0ef55f.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 16,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4e8dd10554685dd0498dc314299e17da367449bcc1ee76bef488e2192d9764da.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 25,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4fcb33c7e58185d17b9567772289c93665b60a3de8e0caf56055a2a23d48c316.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 16,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-4fe8f07dcba0efc413a0a95eb0dc4d50f6dbe070c6eacfb72ee66b59b480a4a5.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 32,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-50de50f9ce5d415881351af0f419a3f956285998d590a0df399ffd8b50dcc266.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 47,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-538ba07acc8545fd90291966dc1686f71669d7543ce447ede1516f300ce42021.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 21,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-54987fa328e818d6af1caffc3fac233e09b6e241194e161214b4ef6b30a2ba39.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 7,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-54c3a44f40c9d71d534a926001d95bd70910f87e6ee4e6c983e0ff597ecac7f1.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 35,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-550f8b830c400db9ecafb984b15b724819f8a83dd066ea53ffa099fcf147e9b3.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-55c9e3b8c32a52fb63c8f0e4e722bd500935ad24d0119acbae57c9c050ec78ec.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-561af369bd0074d15f888fa910cac267c7ced43e4d0cbdb055111ba2b87d70ec.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 44,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-574c43afb97364082ee6d7d8bdda65fb7ec76976d5445ef3b7b95f86a1084d50.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 42,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-5c5bc7d7a60bd998c312d86285fa99be61e69deaced71b8abb512760e9db06f2.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 29,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-5d9ff26ffe604d22eda0be4d43b1d702cb29f76c11b1ce6d4224e89b31f3d140.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 44,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-5e481bc663b200daf925d752acc510648daf2582c16f9c762858a278017e1521.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 40,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-5fb94f9fe824810eb48f9959223996e1e65e87f81bc259dfd5f0a5cd735c34e9.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 5,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-60a26e82397a21597b4b03165f29209f412e5367fd9d65316b418ed65b188d29.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 20,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-612f4bbdf4ca6bc932a9f8249a641f98489b152dbf412a3b49b09986a81d7fb3.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 45,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-61bd255f690d8f80d2186668532da2e209ed7d9f7a5d3c43f52b8f4c98b805c6.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 10,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-6449207428b706337ab17484c450321090718b804795af8f8b6af1aa757dd332.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 41,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-65c490a6c97af721fc8d41c32ac2ce1837a01ba22214b894ece4cdab9425ed8a.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 31,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-6802cc09c1b6f1a5336f392b47cd4933a17aa409bb417bf1eb960d654724f5b0.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 8,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-6895a1698edd737cdc88fae243568a367c398f56aac33f7017c5187e3d86d109.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 23,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-6cecde0ee4b6906abe3e5e1b96970a2d0e568bc5a0704b5a27a406bce03f0b9b.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 25,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7243b7f6ed5fd7c626efedbaff1fe0e7d964f828895e254c7dec3069860ed3e1.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 8,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7370c0ae5f60996f48911909dbd0856dbcc8cfba893e1fffcad282efd33bd278.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 34,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-74547fe8aa022b16947c5c2d054ed90276ce7c39871470b8c4057aeaf7a85579.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 24,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-74973e9d70781d5326ef2378bcc951f76d18fcc30de403599d25565abf72d67e.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 25,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7654e22081ef1b7f644bbf5f3ce07b41ca0f19eacc9e9d5bbd3da1612b8d6ec7.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 26,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-765fb2b3ad508b2fa734a38c376540d3b23f94508f69f9ce183de1e0a8eab459.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 33,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7b44f8fdbbad1019439fd53e79b1e752b96fd7f29dade9494c8ef52d7bd57b2d.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7b4bbab184987d466b4e3fd434114c68c5b908fe04d35ef2b0f5f68ee3788095.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 21,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7bdf22e65f960b3e8c05d5fe2b0e42e6225b5c4680b579b45eb28f777d3da385.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 30,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7c41df88680fe82ce438e5b7c9f4566552e645f25b2e6bbe8bb9b0839fadeada.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 10,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-7e3d780c241d760c1c55bac5e86ac0cb15b958c1db5070ddd8076230fd777906.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 20,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-80d761613f0ccdcd81527c12286d1e0fb6b6094d0a3a9dbbec881a1414db8a0c.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-83e1c2c9a5ac7d969ff4c2b8040724613635817756d86b8d78836163b172e868.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 43,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-87ed25722de32c27c4f09c7d186fc88f5bf06a8b6d381387e5511c5f48a3640d.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 39,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-88faa28a04f687b4fb8c2e82d4a3d31d3413f18d776a10a505389a0b6cc7d713.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 45,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8919dbee23855e674dfbb6f62ffff3bea16d676a5c1d9aff0d549bb3e8c708e8.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 18,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8c3fd2268c1aee74dd95e2daad92be8c9373d36eee3dbfada37d7d759908259d.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 4,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8e4bf658c54897f5440f591ee84c97461053c5928a97f065eb65bfdc81161338.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 6,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-8fb5fcdc21d1d5922f36a4011c342c74622e33f131ab69455a8266b0212c1981.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 6,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-90734e83d35ec5012466016fc45e387872b5c8687ce91049021848828e5a8926.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 5,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-9603c6a59d3be9bc923008dad61e7c334c15443314035b270549ae27258aea75.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 7,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-96fdcee99c7d8444fece58b44c6deae8ddf3a421cff0a9e037e3f04cd66f46b1.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 28,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-9a8dede53e18f8c6917df522001055a2d89c2b512555a85cfeec629155862bd7.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 15,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-9e127f8f2cbefc9aa66f28bf2707e6f8783562a4151190a033975ff3187aceeb.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 12,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a15a70bf0db1123304fa01b173ecd657ed3a2bbfdab6b508fd796dbfb3b9f668.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 36,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a19430d38c1b343d88f0fbdd3733ee298b83003cfa280f1e45cc04d74ddb382d.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 15,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a2477b46329a8b48d534bc15621856bd197ed80cc5ec7272259d7cc42c9a0ae5.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 3,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a5ea41236ae76b7d46f0aaf72e18c93677ca0b62423e4c13dfc2505e538a9dbf.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 5,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a63309ed15c0fb0448cc74cb8fc23f30c169f0ef08d2c14e0f13664088f6e7ff.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 23,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-a8e39db5a3d149f4d70879806d6c9194edd960cddb1eb0d7c15246f1ab3bcbad.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 23,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-ab86501db5e8992e6515c7ee746231440a4c9d5ce4eef2e6fd44f7669b07c188.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 13,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-ae2aecd6722f29f026f160e8569bea26e968f833157654aa7ed73866530f88e5.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 21,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-aec0b9f9ef5b3149db49c853561fda8700eb21f8ed86ff82c716496fcdff6e22.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b532416121d4cb17fbb4886188a7ab6ca89b18af19b01ddbab6e03b10495e6f6.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 29,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b54e7942d65500c79e7bcee2d34faf16b22719e828317092c6b2cc8eef1756a8.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 19,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b62f59fc9736d62cf418a262185c43b1adff993ac242bac65fb4f3f1a3f6a5a9.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 15,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b6d51280fade050fa07e3163a184421dff9e21ebb2d941731b821ba7455051a6.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 34,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b943527f0a5ba587d10832a31c9ede5c80cec2f4d3a55f82829b8db01be60df9.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 33,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-b9b92ffabcd90318ed582c03775a397c64459405e0c4618eb249c8bedc212b42.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 13,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bad5da4333e8b0e0dda4369c4e81506dac830fb4abd696fa2ef3d9fe08017526.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 19,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bb21b8f38fb895f464a4ceae5f072dcd76c9e57c5bde91f9ff5cc86a0db5b0ca.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 36,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bb893ff03a767e90a206ce7d256e73f004fcf6a0057c4fac9160bf231c9d1430.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 4,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bd1a89738292821b01446a295a3201c7ec6f61d37b223dac2fbccd64c4372bc9.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 10,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-bd693301c5f3b017282e2f94ecd91ced82f32771bd359a23bcd7cd8a1e14074c.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 46,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c28c7169442374592f385f3df12d533b8125733eede6e1d8b73b5a52cd7043a1.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 37,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c48b78e069236fbe8a75313d05857472cfb1ac33965abbbc8230c165490db77d.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 44,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c61995043d373fb79cf33e51ba8369e7ce3cfdaae202228f355f9e60ae45455b.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 35,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c77aa90ea87621de44a2a1728c1851855d74a115b4ce3c408ae88c12e6c6488d.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 16,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-c97e7ef71b4a8bf033eae12bf013a154ccab267b827563c04f89158fa2a50fa8.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 33,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-cc7aaa911b09065e0da8fffb71bb6cbc43debf345d943b8b70c986b27d78af88.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 22,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-cfb0148d7f8d92ee74c229ec76f51fbe1bc723b18623956b741f96275e6d77da.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 37,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-d201e8d0dc3592ad41b6b9570506cc96597b68f3493c30dc16897875e6af12cc.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 12,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-dab5b0f2083fadb825f994998d8a4de8f09a80b6afd8a4ec0fca99df9f085267.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 11,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-dc188f636a5def25816c41c39a5549f5983ffbd3b0dce10a7202fe313f16b149.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 47,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-df03e20225ca4f8f822c814911e8f2dcade1c91f0fb16115598fdd1b1b2b1258.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 12,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e2276c6edbb07c8c21526354246a0bdb7ed64f11391c6d19a6903c767a485f86.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 2,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e2701247730a5163b7baec4dd71171575bb363f5879dc51e7973d83f896451fb.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 14,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e6fba8debaf0727fc433be2fb35dce7d57ec7a920fa31c38d6936b15543ba6f8.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 24,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e70930e30c8343c9e405178ae65fd87a73c0d6cf4d8048b159d6a8274da40169.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 19,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-e9fdd612c6a77c07c994f7d2fc89539c3ef834f9f5849bb7f755d496ab7db62c.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 40,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-eacdaa51388d45799dde794c3359d9efb96a1154d8cdc53857e3c2291ed302ac.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 31,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-ec1daf97af2f0536c2a34404a613d8abfa3fbca081d2314a90401f971dbe98de.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 17,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-evict-71f633ccc92318a9d14b48f08dd911bca6d5cced7d506f404cfb96ed4feb0bde.claim.json": {
+    "attempt": 1793378004775231925,
+    "binding": {
+      "blob_sha256": "cf78946c34e7974c84f524cc2c61b6a8a493d0a70a8866259a27a75a2b97dadc",
+      "epoch": 1,
+      "expert": 1,
+      "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+      "layer": 0,
+      "local": 0,
+      "model_revision": "sc117-local-observation",
+      "rank": 3
+    },
+    "operation_id": "71f633ccc92318a9d14b48f08dd911bca6d5cced7d506f404cfb96ed4feb0bde",
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-evict-a117d774608e1bf71be2829fd4fc069a0a4c324dfbe1ecce5fa3121c0fad78ff.claim.json": {
+    "attempt": 1793378004775231925,
+    "binding": {
+      "blob_sha256": "f13d07f6ff33a274c4b22903c00ac13aafee621849c47e995ae133f5f61ca465",
+      "epoch": 1,
+      "expert": 0,
+      "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+      "layer": 0,
+      "local": 0,
+      "model_revision": "sc117-local-observation",
+      "rank": 2
+    },
+    "operation_id": "a117d774608e1bf71be2829fd4fc069a0a4c324dfbe1ecce5fa3121c0fad78ff",
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 0,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-f218b7e1dd6cd18bb6ae6d8425a8bff50e0f411f77bc04846db56aebc20d0458.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 1,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-f54e35998b8d51d06fb84d9743cf8971947cdf7ac02c2cc237c61683d1319d3e.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 27,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-f812e1c44a050a63c566ab947fdd86b9017f5f2e7b2b4d3b1d742e4bcd48458d.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 31,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-f8ce14f0c4307d4f7cb855571ed2862cb0ba1118d5a7a959ddf7bb8246276412.claim.json": {
+    "attempt": 1793378004775231925,
+    "stamp": {
+      "batch": 0,
+      "epoch": 1,
+      "layer": 47,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-fa9953957fe4656424ec8bfbf25d9c85d19af67b7efd79adbf4e070691918a5c.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 28,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-fd371f2f3e620146e8d7b85d4ae3bbfda402bfc38d4efba97f1769fe1a1a6317.claim.json": {
+    "attempt": 1793378004775231927,
+    "stamp": {
+      "batch": 2,
+      "epoch": 1,
+      "layer": 13,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-fddb2b04abf64ee8539e11b4e9945be0aad138e51356615240b0d56d255ea508.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 24,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "native-fe624c48e8b755ac6184847be3f4dd550afd0c4296fcb9f466933559ac0a1362.claim.json": {
+    "attempt": 1793378004775231926,
+    "stamp": {
+      "batch": 1,
+      "epoch": 1,
+      "layer": 42,
+      "model_revision": "sc117-local-observation",
+      "plan_id": "r468-cpu-only",
+      "run_id": "r468-prefill-headroom-3477044-1793378004775231925"
+    },
+    "status": "RESERVED_UNKNOWN_NO_REPLAY"
+  }
+}

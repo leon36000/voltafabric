@@ -211,6 +211,9 @@ impl<'a> Source<'a> {
     pub fn used_bytes(&self) -> u64 {
         self.used
     }
+    pub fn limit_bytes(&self) -> u64 {
+        self.limit
+    }
     pub fn admissions(&self) -> &[(u32, u32, u32, u32, String)] {
         &self.admissions
     }
