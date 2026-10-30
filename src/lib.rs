@@ -40,6 +40,8 @@ pub(crate) mod work;
 
 #[cfg(feature = "native-ggml-cpu")]
 pub mod native_ggml_cpu;
+#[cfg(feature = "native-ggml-cpu")]
+pub mod native_ledger;
 pub mod qpn2;
 pub mod routing;
 pub mod strata_ingress;

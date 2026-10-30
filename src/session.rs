@@ -3542,13 +3542,14 @@ impl Session {
     }
 
     /// One native rank wave. On any error no output is returned and every
-    /// participating session is invalidated. The replay guard is process-local;
-    /// callers must maintain the durable ledger across coordinator restarts.
+    /// participating session is invalidated. The caller must retain and consistently
+    /// reuse the same local durable ledger across coordinator restarts. It is not R53.
     #[cfg(feature = "native-ggml-cpu")]
     pub fn exec_native_ggml_batch(
         sessions: &mut [Session],
         problem: &routing::RoutingProblem,
         inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration,
     ) -> Result<Vec<Vec<f64>>> {
         if timeout.is_zero()
@@ -3594,6 +3595,7 @@ impl Session {
         let mut collector = moe::Collector::from_routing(problem)?;
         let attempt = next_attempt()?;
         claim_identity(&problem.stamp, false)?;
+        ledger.reserve(&problem.stamp, attempt)?;
         let deadline = Instant::now() + timeout;
         for (index, dispatch, rows) in &selected {
             if let Err(error) = sessions[*index].exec_native_ggml(

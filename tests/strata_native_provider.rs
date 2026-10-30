@@ -434,6 +434,18 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         session::{Endpoint, Session},
     };
     let timeout = Duration::from_secs(30);
+    let ledger_path = std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(".runs")
+        .join(format!(
+            "r384-ledger-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+    std::fs::create_dir(&ledger_path).unwrap();
+    let ledger = voltafabric::native_ledger::NativeBatchLedger::open(&ledger_path).unwrap();
     let mut data = vec![0u8; 2_176_000];
     for i in (0..1_254_400).step_by(98) {
         data[i + 1] = 0x28;
@@ -522,16 +534,48 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
         preferred_owners: BTreeMap::new(),
         resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
     };
-    let output =
-        Session::exec_native_ggml_batch(&mut sessions, &p, std::slice::from_ref(&x), timeout)
-            .unwrap();
+    let mut consumed = p.clone();
+    consumed.stamp.batch = 99;
+    ledger.reserve(&consumed.stamp, 123).unwrap();
+    let sent: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+    assert_eq!(
+        Session::exec_native_ggml_batch(
+            &mut sessions,
+            &consumed,
+            std::slice::from_ref(&x),
+            &ledger,
+            timeout
+        )
+        .unwrap_err()
+        .code,
+        "LEDGER_RESERVATION"
+    );
+    assert_eq!(
+        sent,
+        sessions
+            .iter()
+            .map(|s| s.traffic.bytes_sent)
+            .collect::<Vec<_>>()
+    );
+    let output = Session::exec_native_ggml_batch(
+        &mut sessions,
+        &p,
+        std::slice::from_ref(&x),
+        &ledger,
+        timeout,
+    )
+    .unwrap();
     for (actual, value) in output[0].iter().zip(expected) {
         assert_eq!(actual.to_bits(), (0.25 * value + 0.75 * value).to_bits());
     }
-    assert!(
-        Session::exec_native_ggml_batch(&mut sessions, &p, std::slice::from_ref(&x), timeout)
-            .is_err()
-    );
+    assert!(Session::exec_native_ggml_batch(
+        &mut sessions,
+        &p,
+        std::slice::from_ref(&x),
+        &ledger,
+        timeout
+    )
+    .is_err());
     let mut overflow = p.clone();
     overflow.stamp.batch = 1;
     overflow.routes = vec![
@@ -549,6 +593,7 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
             &mut sessions,
             &overflow,
             &[x.clone(), vec![0.125; 2560]],
+            &ledger,
             timeout
         )
         .unwrap_err()
@@ -558,7 +603,9 @@ fn native_ggml_sessions_execute_two_actual_child_processes() {
     assert!(sessions.iter().all(|s| !s.is_usable()));
     let mut after = p.clone();
     after.stamp.batch = 2;
-    assert!(Session::exec_native_ggml_batch(&mut sessions, &after, &[x], timeout).is_err());
+    assert!(
+        Session::exec_native_ggml_batch(&mut sessions, &after, &[x], &ledger, timeout).is_err()
+    );
     for session in sessions {
         let _ = session.close(timeout);
     }
