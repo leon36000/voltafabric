@@ -1,0 +1,9 @@
+import ast,hashlib,json,pathlib
+p=pathlib.Path(__file__).parent;b=p.parent/'gitlab-import-r113-20261028/repository';raw=(b/'research/R129/configs.json').read_bytes();config=json.loads(raw)['results'][0];assert config['repo']=='nvidia/Qwen3.6-35B-A3B-NVFP4' and config['revision']=='1355db6a052410cfd62085d94b58866fd0f2c3c5'
+fields=config['fields'];assert fields['architectures']==['Qwen3_5MoeForConditionalGeneration'];layers=fields['text_config']['layer_types'];assert len(layers)==40 and layers.count('linear_attention')==30 and layers.count('full_attention')==10
+s=(p/'qwen3_5.py').read_bytes();r=json.loads((p/'zip-receipt.json').read_text());assert hashlib.sha256(s).hexdigest()==r['member_sha256'];t=ast.parse(s);classes={n.name:n for n in t.body if isinstance(n,ast.ClassDef)}
+assert 'Qwen3_5MoeForConditionalGeneration' in classes and any(isinstance(n,ast.Call) and getattr(n.func,'id',None)=='Qwen3_5MoeForCausalLM' for n in ast.walk(classes['Qwen3_5MoeForConditionalGeneration']))
+assert any(isinstance(n,ast.Call) and getattr(n.func,'id',None)=='Qwen3_5GatedDeltaNet' for n in ast.walk(classes['Qwen3_5DecoderLayer']))
+assert any(isinstance(n,ast.Name) and n.id=='QwenGatedDeltaNetAttention' for n in classes['Qwen3_5GatedDeltaNet'].bases)
+assert any(isinstance(n,ast.Constant) and n.value=='linear_attention' for n in ast.walk(classes['Qwen3_5DecoderLayer']))
+print(json.dumps({'status':'MODEL_STATIC_ROUTE_CONFIRMED','model':config['repo'],'revision':config['revision'],'config_sha256_declared':config['config_sha256'],'extracted_config_sha256':hashlib.sha256(raw).hexdigest(),'wheel_sha256':r['wheel_sha256'],'model_source_sha256':r['member_sha256'],'linear_attention_layers':30,'full_attention_layers':10,'layer0':layers[0],'limits':'Config and Python source only; does not show runtime route, FlashQLA execution, model load, V100 support or full checkpoint hash.'},indent=2,sort_keys=True))

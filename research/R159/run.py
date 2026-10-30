@@ -1,0 +1,7 @@
+import pathlib,json,hashlib,subprocess,os,signal
+p=pathlib.Path(__file__).parent;raw=(p/'plan.json').read_bytes();assert hashlib.sha256(raw).hexdigest()=='57a2b9126c0707044f8dd2bc452e7b417e183dc0ece677727072865ca2ff8515';q=json.loads(raw);body=(p/'input.json').read_bytes();assert hashlib.sha256(body).hexdigest()==q['input_sha256'];inp=json.loads(body);assert hashlib.sha256(pathlib.Path(q['argv'][0]).read_bytes()).hexdigest()==q['cli_sha256'];assert hashlib.sha256(pathlib.Path(inp['workers'][0]['argv'][0]).read_bytes()).hexdigest()==q['worker_sha256'];assert [hashlib.sha256(pathlib.Path(a).read_bytes()).hexdigest() for a in inp['artifacts']]==q['artifact_sha256']
+proc=subprocess.Popen(q['argv'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,start_new_session=True);(p/'intent.json').write_text(json.dumps({'pid':proc.pid,'pgid':os.getpgid(proc.pid),'plan_sha256':hashlib.sha256(raw).hexdigest(),'no_retry':True})+'\n')
+try:out,err=proc.communicate(body,timeout=q['timeout_seconds']);status='TERMINAL'
+except subprocess.TimeoutExpired:
+ os.killpg(proc.pid,signal.SIGKILL);out,err=proc.communicate();status='UNKNOWN_TIMEOUT_NO_REPLAY'
+(p/'stdout.json').write_bytes(out);(p/'stderr.log').write_bytes(err);o={'status':status,'exit':proc.returncode,'stdout_sha256':hashlib.sha256(out).hexdigest(),'stderr_sha256':hashlib.sha256(err).hexdigest(),'pid':proc.pid};(p/'receipt.json').write_text(json.dumps(o,indent=2,sort_keys=True)+'\n');print(json.dumps(o));
