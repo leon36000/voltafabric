@@ -59,8 +59,24 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "differs from expected plan"):
                 prepare()
 
+    def test_strict_receipt_rejects_forged_shorter_prompt(self):
+        # Input starts with the actual two-token prompt, but the receipt treats
+        # its second token as generated; the old prefix-only check accepted it.
+        value = dict(receipt(), prompt_tokens=[0], plan_id="r520-" + "a" * 64,
+                     prompt_tokens_sha256=hashlib.sha256(struct.pack("<II", 0, 1)).hexdigest())
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        with patch.dict("os.environ", {}, clear=True):
+            for forged in ([0], [0, True], None, [0, 1, 2]):
+                value["prompt_tokens"] = forged
+                with self.assertRaisesRegex(ValueError, "receipt differs from prompt tokens"):
+                    _run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+            value.pop("prompt_tokens")
+            with self.assertRaisesRegex(ValueError, "receipt differs from prompt tokens"):
+                _run_prompt("multi", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+
     def test_expected_plan_is_checked_before_and_after_engine(self):
-        value = dict(receipt(), plan_id="r512-" + "a" * 64,
+        value = dict(receipt(), prompt_tokens=[0], plan_id="r512-" + "a" * 64,
                      prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
         calls = []
         def runner(args, **kwargs):
@@ -80,7 +96,7 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(len(calls), count)
 
     def test_strict_plan_rejects_missing_unknown_malformed_and_missing_digest(self):
-        value = dict(receipt(), plan_id="r512-" + "a" * 64,
+        value = dict(receipt(), prompt_tokens=[0], plan_id="r512-" + "a" * 64,
                      prompt_tokens_sha256=hashlib.sha256(struct.pack("<I", 0)).hexdigest())
         def runner(args, **kwargs):
             return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")

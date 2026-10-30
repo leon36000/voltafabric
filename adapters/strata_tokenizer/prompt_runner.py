@@ -195,6 +195,9 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     input_tokens = receipt.get("input_tokens") if isinstance(receipt, dict) else None
     if not isinstance(input_tokens, list) or input_tokens[:len(prompt_ids)] != prompt_ids:
         raise ValueError("engine receipt differs from prompt token")
+    if require_bound_plan and (receipt.get("prompt_tokens") != prompt_ids
+                               or any(type(t) is not int for t in receipt.get("prompt_tokens", []))):
+        raise ValueError("engine receipt differs from prompt tokens")
     plan_id = receipt.get("plan_id")
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
