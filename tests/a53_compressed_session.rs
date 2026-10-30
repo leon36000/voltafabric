@@ -8225,7 +8225,6 @@ fn mixed_pool_execute_preflights_and_never_exposes_partial_failure() {
 fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
     let p = routing_problem("r374-external-only");
     let mut ids: Vec<i32> = p.routes.iter().flatten().map(|c| c.expert as i32).collect();
-    let weights: Vec<f32> = p.routes.iter().flatten().map(|c| c.weight as f32).collect();
     ids[0] = 777;
     let mut all_experts = p.experts.clone();
     all_experts.push(777);
@@ -8236,7 +8235,7 @@ fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
         .collect();
     let mut kinds = vec![-1; 12];
     kinds[0] = 0;
-    let plan = voltafabric::strata_ingress::admit_strata_kind_f64(
+    let plan = voltafabric::strata_ingress::admit_strata_unweighted_f64(
         &p,
         &p.stamp,
         LAYER,
@@ -8244,12 +8243,11 @@ fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
         2,
         &inputs,
         &ids,
-        &weights,
         &kinds,
         &all_experts,
     )
     .unwrap();
-    let (mut sessions, artifacts) = bound(&plan.misses().unwrap().routing);
+    let (mut sessions, artifacts) = bound(&p);
     let mut out = vec![99.0_f32; 12 * HIDDEN as usize];
     let report = plan
         .execute(&mut sessions, &artifacts, &BTreeMap::new(), T, &mut out)
@@ -8257,7 +8255,34 @@ fn external_expert_without_registry_copy_can_coexist_with_real_sessions() {
     assert!(report.error.is_none(), "{:?}", report.error);
     assert_eq!(report.receipts.len(), 2);
     assert!(out[..HIDDEN as usize].iter().all(|v| *v == 99.0));
-    assert!(out[HIDDEN as usize..].iter().any(|v| *v != 99.0));
+    let dims = moe::Model {
+        hidden: HIDDEN as usize,
+        intermediate: INTER as usize,
+        experts: vec![],
+    };
+    for slot in routing::dispatch(&p).unwrap().slots.into_iter().skip(1) {
+        let stack = artifacts
+            .iter()
+            .find(|a| a.stack().rank() == slot.rank)
+            .unwrap()
+            .stack();
+        let index = stack
+            .physical_experts()
+            .iter()
+            .position(|e| e.id() == slot.expert)
+            .unwrap();
+        let source: Vec<f64> = inputs
+            [slot.token * HIDDEN as usize..(slot.token + 1) * HIDDEN as usize]
+            .iter()
+            .map(|&x| f64::from(x))
+            .collect();
+        let expected =
+            moe::expert_value(&dims, &stack.dense_expert(index).unwrap(), &source).unwrap();
+        let offset = (slot.token * 2 + slot.slot) * HIDDEN as usize;
+        for (actual, reference) in out[offset..offset + HIDDEN as usize].iter().zip(expected) {
+            assert_eq!(actual.to_bits(), (reference as f32).to_bits());
+        }
+    }
     for s in sessions {
         assert_eq!(s.close(T).exit_code, Some(0));
     }

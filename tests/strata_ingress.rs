@@ -577,3 +577,33 @@ fn strata_kind_decision_maps_only_known_owner_codes() {
         .is_err());
     }
 }
+
+#[test]
+fn strata_callback_admission_requires_no_gate_coefficients() {
+    let p = template();
+    let batch = strata_ingress::admit_strata_unweighted_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 20],
+        &[-1, 0],
+        &[10, 20],
+    )
+    .unwrap();
+    assert_eq!(batch.miss_count(), 1);
+    assert!(strata_ingress::admit_strata_unweighted_f64(
+        &p,
+        &p.stamp,
+        3,
+        1,
+        2,
+        &[1.0; 4],
+        &[10, 20],
+        &[-1, 7],
+        &[10, 20],
+    )
+    .is_err());
+}

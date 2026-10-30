@@ -1,7 +1,8 @@
 //! CPU admission of a complete Strata-style pool batch into VoltaFabric routing.
 //!
-//! The multi-token Strata callback does not expose coefficients; a caller must
-//! supply the actual gate weights for the same layer and batch. This module
+//! The multi-token Strata callback does not expose coefficients. Weighted
+//! admission requires actual gate weights; the explicit unweighted path does not.
+//! This module
 //! neither hooks Strata nor reserves a session, starts a worker, or assigns an
 //! attempt. It refuses negative expert IDs. The FP16 path refuses inexact
 //! conversion; the separate FP64 path preserves finite FP32 activations.
@@ -295,6 +296,63 @@ pub fn admit_strata_kind_f64(
         &external,
         model_experts,
     )
+}
+
+/// A Strata-specific unweighted plan. Its internal unit routing coefficients
+/// are intentionally not exposed to callers as model coefficients.
+pub struct StrataUnweightedBatch(MixedPoolBatch);
+
+impl StrataUnweightedBatch {
+    pub fn miss_count(&self) -> usize {
+        self.0.positions.len()
+    }
+
+    pub fn execute(
+        self,
+        sessions: &mut [session::Session],
+        artifacts: &[session::CompressedArtifact],
+        faults: &BTreeMap<u32, process::Fault>,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<MixedExecutionReport> {
+        self.0.execute(sessions, artifacts, faults, timeout, output)
+    }
+}
+
+/// Admit a Strata-style callback without gate coefficients for the unweighted
+/// `MixedPoolBatch::execute` contract. The internal unit coefficients are only
+/// routing placeholders: they are not Strata gate weights and must never be
+/// used to reduce outputs. The donor applies its own weights later, exactly once.
+/// The ownership decisions must still be supplied and bound by the caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_strata_unweighted_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    kinds: &[i32],
+    model_experts: &[u32],
+) -> Result<StrataUnweightedBatch> {
+    if ids.len() > 262_144 {
+        return Err(invalid("pool slot count exceeds bound"));
+    }
+    let placeholders = vec![1.0_f32; ids.len()];
+    admit_strata_kind_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        &placeholders,
+        kinds,
+        model_experts,
+    )
+    .map(StrataUnweightedBatch)
 }
 
 /// Convert complete, unweighted Session results to a token/slot-major FP32
