@@ -56,7 +56,7 @@ impl Stage {
         if identity.model_revision != m.model_revision
             || identity.layer != m.layer
             || m.layer >= 48
-            || !matches!(m.gate_type, 14 | 23)
+            || !matches!(m.gate_type, 12 | 13 | 14 | 23)
         {
             return Err(invalid("post attention identity or type"));
         }
@@ -70,10 +70,12 @@ impl Stage {
         let gate_bytes = sc117_gdn_stage::read(
             shard,
             &m.gate,
-            if m.gate_type == 14 {
-                12_902_400
-            } else {
-                8_355_840
+            match m.gate_type {
+                12 => 8_847_360,
+                13 => 10_813_440,
+                14 => 12_902_400,
+                23 => 8_355_840,
+                _ => return Err(invalid("unsupported SC117 attention gate type")),
             },
         )?;
         let out_bytes = sc117_gdn_stage::read(shard, &m.out, 16_711_680)?;

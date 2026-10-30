@@ -154,7 +154,7 @@ impl Stage {
         if identity.layer != manifest.layer
             || identity.model_revision != manifest.model_revision
             || manifest.layer >= 48
-            || !matches!(manifest.qkv_type, 13 | 14)
+            || !matches!(manifest.qkv_type, 12 | 13 | 14 | 23)
         {
             return Err(invalid("SC117 layer, model or QKV type mismatch"));
         }
@@ -176,10 +176,12 @@ impl Stage {
         let beta = read(dense, &manifest.beta, 245760)?;
         let conv = floats(&read(dense, &manifest.conv, 163840)?);
         let dt = floats(&read(dense, &manifest.dt, 192)?);
-        let qlen = if manifest.qkv_type == 13 {
-            18022400
-        } else {
-            21504000
+        let qlen = match manifest.qkv_type {
+            12 => 14_745_600,
+            13 => 18_022_400,
+            14 => 21_504_000,
+            23 => 13_926_400,
+            _ => return Err(invalid("unsupported SC117 QKV type")),
         };
         let w = read(shard, &manifest.qkv, qlen)?;
         #[cfg(unix)]

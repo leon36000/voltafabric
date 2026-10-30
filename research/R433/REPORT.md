@@ -1,0 +1,13 @@
+# R433 — SC117 GDN checkpoint formats
+
+Parent R432 `d22e7d5022f75a1712a807e3af4a1b75f4c7b254`. The source checkpoint's 36 GDN QKV tensors contain 22 Q6_K, 10 Q5_K, 2 Q4_K and 2 IQ4_XS tensors. Its 36 attention gates contain 14 Q6_K, 10 Q4_K, 8 IQ4_XS and 4 Q5_K tensors. The native GGML matrix boundary already supports all of those distinct GGML types. This change admits their exact fixed-geometry lengths in the existing resident GDN and post-attention loaders, retaining identity, size and SHA checks. The IQ formats are not MXFP4 or QPN2.
+
+Metadata and SHA spans in `fixtures/r433` are observations of local checkpoint and dense pack files, not authenticated provenance. Actual local CPU GDN prefix diagnostics loaded layer 13 Q4_K and layer 33 IQ4_XS QKV, using a new deterministic synthetic 10240-float residual; these are independent zero-state diagnostics, not generated tokens. An independent scalar row-product check sampled nine rows each after separately dequantizing the same GGML activation quantizer and weights: maximum absolute error was 1.472e-7 for Q4_K and 3.050e-8 for IQ4_XS. All 10240 QKV values were finite.
+
+The post-attention loader also ran on actual layer 13 Q4_K and layer 14 Q5_K gate weights. The layer 14 run deliberately used layer 13's diagnostic prefix, so it checks matrix loading and arithmetic, not a layer-14 forward pass. Seven sampled gate rows per type matched scalar row products with maximum absolute errors 2.181e-7 and 2.052e-7 respectively. These references share GGML quantization and dequantization and do not establish full inference parity. The diagnostic helper assembles only the relevant values into the reference input; it is not a model executor.
+
+The first layer-33 attempt was rejected before computation because an older local provider library did not admit IQ4_XS; the successful, fresh local diagnostic uses the later R414 provider. No owner request, durable reservation, GPU or network worker was submitted. No UNKNOWN was replayed.
+
+Targeted GDN and shared-stage rejection tests passed in debug and release on PC1; Clippy for the native-feature library passed with warnings denied. Formatting checks passed for both changed Rust files. These checks are not a full project test suite.
+
+Next: build a persistent transaction-aware layer-chain with resident owners, avoid intermediate file handoffs and expose output only after the whole requested chain succeeds. Generalize and verify all 12 QSA projection manifests, then connect the full 48-layer chain, head and tokenizer. Existing R428 expert-255 scalar threshold mismatch, model-level parity, recurrent multi-token correctness and physical distribution remain unresolved; this change proves no complete generation or performance gain.
