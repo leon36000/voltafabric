@@ -1,0 +1,35 @@
+{
+  "kernel": {
+    "bytes": 81920,
+    "offset": 2914679680,
+    "sha256": "641401da210da6f59575065c9a035edfe1c1908945ed03c60baac5180ffbb097"
+  },
+  "key": {
+    "bytes": 52428800,
+    "offset": 2914761600,
+    "sha256": "f431e2b51311b4bbea97ea0e02b6c35944033490dd5dc76bb5cc5b594f7af7de"
+  },
+  "layer": 1,
+  "model_revision": "sc117-local-observation",
+  "norm_conv": {
+    "bytes": 40960,
+    "offset": 2967190400,
+    "sha256": "c199565dbd4e8d83d95fd47d1e3910a218408427672abea1427187002ab33903"
+  },
+  "norm_key": {
+    "bytes": 40960,
+    "offset": 2967231360,
+    "sha256": "430c0c3f20adb0c438d9bd1b001a4aaa9b0374f6cf022dd865cb4215d13afc9d"
+  },
+  "norm_query": {
+    "bytes": 40960,
+    "offset": 2967272320,
+    "sha256": "340bae6f41d339ce00eeb4600f49aedf99714bacd698909297d4c52c6748ec7d"
+  },
+  "source_bytes": 55063448064,
+  "value": {
+    "bytes": 13107200,
+    "offset": 2967313280,
+    "sha256": "d25aabbce09091bf133d776b41d5b3e0802c4d2523b9ca97003491c28db3c437"
+  }
+}

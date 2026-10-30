@@ -58,6 +58,7 @@ pub mod sc117_head_cpu;
 pub mod sc117_layer_completion;
 pub mod sc117_ple;
 pub mod sc117_ple_post;
+pub mod sc117_ple_weights;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod sc117_layer_chain;
 #[cfg(feature = "native-ggml-cpu")]
