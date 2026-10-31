@@ -1,0 +1,5 @@
+# R582 — Link two unfinished historical claims
+
+The two PC1 archived session claims without a done marker identified by R581 carry the exact run identities recorded in the retained R278 and R287 handoff entries. Six associated source files match their recorded SHA-256 hashes. The handoff describes fault-injection CPU exercises. It is retained historical metadata, not independent proof of execution outcomes: the original report contents and receipts were not verified. Both claims remain UNKNOWN and must never be replayed; neither the snapshot nor this correlation constitutes a shared lease or a reconciled live R53 ledger.
+
+`verify_fault_links.py` checks the archive part hashes against R581, identities, absence of done and closed markers, and the six source hashes, producing `LINKS.json`. Three tests pass for the expected links and rejection of altered source and identity. No hardware run, worker submission or service change was made. Inter-PC execution still requires a genuine shared lease, a reconciled authoritative ledger and all applicable fresh admissions.
