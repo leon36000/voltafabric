@@ -124,6 +124,129 @@ fn scalar_reference_preserves_binding_and_collector_weight_once() {
 }
 
 #[test]
+fn scalar_prepared_reuses_per_token_without_crossing_slots_or_batches() {
+    let layout = NativeLayout::parse_sc117_v3(INDEX, 50_292_326_400).unwrap();
+    let span = layout.expert(2, 0).unwrap();
+    let mut bytes = vec![0u8; span.bytes as usize];
+    let up = 2 * 640 * (2560 / 256) * 82;
+    for i in (0..up).step_by(82) {
+        bytes[i + 1] = 0x28;
+    }
+    for i in (up..bytes.len()).step_by(18) {
+        bytes[i + 1] = 0x28;
+    }
+    let mut owners = Vec::new();
+    let mut references = Vec::new();
+    let x = [vec![0.001_f32; 2560], vec![0.125_f32; 2560]];
+    for id in 0..2u32 {
+        let binding = Binding {
+            model_revision: "reuse-test".into(),
+            rank: 2,
+            layer: 2,
+            expert: id,
+            local: id,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let expert = VerifiedNativeExpert {
+            layer: 2,
+            expert: u64::from(id),
+            span: layout.expert(2, u64::from(id)).unwrap(),
+            bytes: bytes.clone(),
+        };
+        references.push(
+            x.iter()
+                .map(|v| scalar_reference(&layout, &expert, &binding, v).unwrap())
+                .collect::<Vec<_>>(),
+        );
+        owners.push(Resident::load_scalar(&layout, expert, binding).unwrap());
+    }
+    assert_ne!(references[0][0], references[0][1]);
+    let p = RoutingProblem {
+        hidden: 2560,
+        experts: vec![0, 1],
+        routes: vec![
+            vec![
+                Choice {
+                    expert: 1,
+                    weight: 0.25,
+                },
+                Choice {
+                    expert: 0,
+                    weight: 0.75,
+                },
+            ],
+            vec![
+                Choice {
+                    expert: 0,
+                    weight: 0.5,
+                },
+                Choice {
+                    expert: 1,
+                    weight: 0.5,
+                },
+            ],
+        ],
+        registry: Registry {
+            epoch: 1,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 2,
+                    local: 1,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "reuse-test".into(),
+            model_revision: "reuse-test".into(),
+            plan_id: "local".into(),
+            layer: 2,
+            batch: 0,
+            epoch: 1,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(2, vec![0, 1])]),
+    };
+    let dispatch = routing::dispatch(&p).unwrap();
+    let mut worker = RankWorker::new(owners).unwrap();
+    let got = worker
+        .execute_f32(
+            &dispatch.ranks[0],
+            &[(0, x[0].clone()), (1, x[1].clone())],
+            1,
+        )
+        .unwrap();
+    for (slot, row) in got.slots.iter().zip(&got.rows) {
+        for (v, expected) in row
+            .iter()
+            .zip(&references[slot.expert as usize][slot.token])
+        {
+            assert_eq!(v.to_bits(), (*expected as f32).to_bits());
+        }
+    }
+    let mut next = dispatch.ranks[0].clone();
+    next.stamp.batch = 1;
+    let got = worker
+        .execute_f32(&next, &[(0, x[1].clone()), (1, x[0].clone())], 2)
+        .unwrap();
+    for (slot, row) in got.slots.iter().zip(&got.rows) {
+        for (v, expected) in row
+            .iter()
+            .zip(&references[slot.expert as usize][1 - slot.token])
+        {
+            assert_eq!(v.to_bits(), (*expected as f32).to_bits());
+        }
+    }
+}
+
+#[test]
 fn scalar_boundary_accepts_each_observed_format_pair() {
     let layout = NativeLayout::parse_sc117_v3(INDEX, 50_292_326_400).unwrap();
     let mut formats = std::collections::BTreeSet::new();

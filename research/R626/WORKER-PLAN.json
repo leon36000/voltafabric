@@ -1,0 +1,51 @@
+{
+  "attempts": [
+    1
+  ],
+  "batches": [
+    0
+  ],
+  "epoch": 1,
+  "expert_source_sha256": "6fbe9e5add7aad58248bda7bed492d65852d06de34400864d64987acbcb2bfba",
+  "gpu": false,
+  "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+  "input_sha256": {
+    ".runs/vf-r574-input/activation0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    ".runs/vf-r574-input/expert255.bin": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    ".runs/vf-r590-work/expert12.bin": "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e",
+    ".runs/vf-r590-work/expert75.bin": "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d",
+    ".runs/vf-r590-work/pc1-12.bin": "927784846bbddb3407f551cf33a82a998d9b74d4cefe343ec79f074fdb390fe5",
+    ".runs/vf-r590-work/pc1-75.bin": "43c6043458558d33a359170aa3a6deffbda0ae388008231622f84f9ac5ddac3d",
+    ".runs/vf-r590-work/pc1.bin": "8bbbf4a9bd630873700f39bb6eb69e6fc67e43fa707e5491e6ca337d1ab2cd52"
+  },
+  "integration_sha256": {
+    ".runs/vf-r626-build/libvf_native_scalar_reference.a": "8917450a9631dc5db83e2f4c470f4d788703dfb11c2532b7d3132854a9d0b2bd",
+    "adapters/native_ggml/scalar_reference.cpp": "e9fb41312513d68e09132e86de3fb80b629df77f6e05a7b21bb20dbf07d897bd",
+    "adapters/native_ggml/scalar_reference.hpp": "e4a2b46a4e47bc1976dc0dc00d46de470da8a3b834cb88191bee50e1b8b6d5b8",
+    "adapters/native_ggml/scalar_reference_c.cpp": "dca22df2c792912ec81fa451a57ba77fd4a3a0eb96b360502f42c3e8becf5b88",
+    "crates/ggml-native-ffi/src/lib.rs": "79b493c0a3001b41524e6b8b51d0e623797e80474f2276f1e2ba3fcd914860de"
+  },
+  "layer": 2,
+  "layer_source_sha256": "3788186b9cdf41fa43a5bae6cc374c2f72507572acf15c9394687f54152e0ae9",
+  "model_revision": "sc117-r603-observed",
+  "native_source_sha256": "716af51782e920d21948173ee21f254ee97b2def347164c62119cb623b1b6be9",
+  "network": false,
+  "purpose": "fresh local CPU prepared scalar worker vs retained real captures",
+  "replay": false,
+  "run_id": "r626-a9356ac0e4e941d3a2047988651ea9d5",
+  "runner_sha256": "df117abcd850e229a22777d1f6a9f5af7a70c0537211a592f839911f6b3f5892",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "max_workers": 2,
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "session_source_sha256": "eaee514ff10ca9d2d88b8095b8de531d8d48fb5381cd3f72ca502c4e106933d8",
+  "test": ".runs/vf-r626-rust/debug/deps/voltafabric-d6451dba1d09332c",
+  "test_name": "sc117_layer_chain::scalar_observed_owner_tests::scalar_observed_three_experts_fresh_local_workers",
+  "test_sha256": "ecf5d40e2eabd03fa6d83a70eb5c00fba177d785d5155647125d3e26fcc05dc2",
+  "verifier_sha256": "684b3ccff96b23ea9d0438c0b1bec4bbb4cf479da1ef3b839e5897998c393a0c",
+  "worker": ".runs/vf-r626-rust/debug/vf-rank-session",
+  "worker_sha256": "6b645f65a502b4a0402233f108c494619633c2fa5aab5def4fc2a7fcd24f5942"
+}

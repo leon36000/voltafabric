@@ -1,0 +1,13 @@
+{
+  "capture_origin": "R590 prior PC1 scalar captures",
+  "collector_sha256": "535c8bcc17bcad4ac9e01a58f00f9ee2e4fe880dd84dd6804825930120aed08b",
+  "exact_rows": 2560,
+  "full_layer_or_generation": false,
+  "model_authentication": false,
+  "real_experts": [
+    75,
+    12,
+    255
+  ],
+  "routes_omitted": 7
+}

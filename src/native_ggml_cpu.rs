@@ -174,6 +174,31 @@ impl Resident {
             }
         }
     }
+    #[cfg(feature = "native-scalar-reference")]
+    fn prepare_scalar(input: &[f32]) -> Result<vf_ggml_native_ffi::NativeScalarPrepared> {
+        vf_ggml_native_ffi::scalar_prepare(input).map_err(invalid)
+    }
+    #[cfg(feature = "native-scalar-reference")]
+    fn forward_scalar_prepared(
+        &mut self,
+        prepared: &vf_ggml_native_ffi::NativeScalarPrepared,
+    ) -> Result<Vec<f32>> {
+        match &mut self.owner {
+            ResidentBackend::Scalar { gu, down, bytes } => {
+                let values =
+                    vf_ggml_native_ffi::scalar_reference_prepared(*gu, *down, bytes, prepared)
+                        .map_err(invalid)?;
+                let values: Vec<f32> = values.into_iter().map(|v| v as f32).collect();
+                if values.iter().any(|v| !v.is_finite()) {
+                    return Err(invalid("scalar resident FP32 overflow"));
+                }
+                Ok(values)
+            }
+            ResidentBackend::Vector(_) => {
+                Err(invalid("vector resident cannot use scalar preparation"))
+            }
+        }
+    }
     /// Returns one unweighted FP32 expert row; no gate is applied here.
     pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>> {
         match &mut self.owner {
@@ -437,6 +462,8 @@ impl RankWorker {
             // Scoped to this batch. Never reuse an activation across tokens or
             // gate/up formats. Compute by physical owner, then restore slot order.
             let mut prepared = BTreeMap::new();
+            #[cfg(feature = "native-scalar-reference")]
+            let mut scalar_prepared = BTreeMap::new();
             for index in expert_execution_order(&plan) {
                 let s = &dispatch.slots[index].slot;
                 let resident = &mut self.owners[plan[index]];
@@ -447,7 +474,20 @@ impl RankWorker {
                     }
                     resident.forward_prepared(&prepared[&key])?
                 } else {
-                    resident.forward(tokens[&s.token])?
+                    #[cfg(feature = "native-scalar-reference")]
+                    {
+                        let key = (s.token, resident.gate_up_type());
+                        if let std::collections::btree_map::Entry::Vacant(entry) =
+                            scalar_prepared.entry(key)
+                        {
+                            entry.insert(Resident::prepare_scalar(tokens[&s.token])?);
+                        }
+                        resident.forward_scalar_prepared(&scalar_prepared[&key])?
+                    }
+                    #[cfg(not(feature = "native-scalar-reference"))]
+                    {
+                        return Err(invalid("scalar backend is unavailable"));
+                    }
                 });
             }
             let rows = rows

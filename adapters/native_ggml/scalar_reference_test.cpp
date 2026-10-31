@@ -10,6 +10,8 @@
 #include <string>
 #include <vector>
 extern "C" int vf_native_scalar_reference(int,int,const uint8_t*,size_t,const float*,size_t,double*,size_t);
+extern "C" int vf_native_scalar_prepare(const float*,size_t,float*,size_t);
+extern "C" int vf_native_scalar_reference_prepared(int,int,const uint8_t*,size_t,const float*,size_t,double*,size_t);
 int main() {
     constexpr size_t H=2560, BLOB=1971200;
     std::vector<uint8_t> blob(BLOB,0);
@@ -86,6 +88,22 @@ int main() {
         const auto source_input=x;
         std::vector<double> abi(H,42.0);
         if (vf_native_scalar_reference(pair[0],pair[1],weights.data(),weights.size(),x.data(),x.size(),abi.data(),abi.size())!=0 || abi!=actual) return 22;
+        std::vector<float> prepared(H,42.f);
+        if (vf_native_scalar_prepare(x.data(),x.size(),prepared.data(),prepared.size())!=0) return 25;
+        std::vector<double> reused(H,42.0);
+        if (vf_native_scalar_reference_prepared(pair[0],pair[1],weights.data(),weights.size(),prepared.data(),prepared.size(),reused.data(),reused.size())!=0 || reused!=actual) return 26;
+        const auto saved_reused=reused;
+        if (vf_native_scalar_reference_prepared(pair[0],pair[1],weights.data(),weights.size()-1,prepared.data(),prepared.size(),reused.data(),reused.size())==0 || reused!=saved_reused) return 27;
+        const auto saved_prepared=prepared;
+        if (vf_native_scalar_prepare(x.data(),x.size()-1,prepared.data(),prepared.size())==0 || prepared!=saved_prepared) return 28;
+        auto bad_input=x;bad_input[0]=std::numeric_limits<float>::quiet_NaN();
+        if (vf_native_scalar_prepare(bad_input.data(),bad_input.size(),prepared.data(),prepared.size())==0 || prepared!=saved_prepared) return 29;
+        auto bad_prepared=prepared;bad_prepared[0]=std::numeric_limits<float>::infinity();
+        if (vf_native_scalar_reference_prepared(pair[0],pair[1],weights.data(),weights.size(),bad_prepared.data(),bad_prepared.size(),reused.data(),reused.size())==0 || reused!=saved_reused) return 30;
+        if (std::fesetround(FE_DOWNWARD)!=0) return 31;
+        const bool refused_prepare = vf_native_scalar_prepare(x.data(),x.size(),prepared.data(),prepared.size())!=0;
+        const bool refused_run = vf_native_scalar_reference_prepared(pair[0],pair[1],weights.data(),weights.size(),prepared.data(),prepared.size(),reused.data(),reused.size())!=0;
+        if (std::fesetround(FE_TONEAREST)!=0 || !refused_prepare || !refused_run || prepared!=saved_prepared || reused!=saved_reused) return 32;
         if (weights!=source_weights || x!=source_input) return 23;
         const auto abi_before=abi;
         if (vf_native_scalar_reference(pair[0],pair[1],weights.data(),weights.size()-1,x.data(),x.size(),abi.data(),abi.size())==0 || abi!=abi_before) return 24;

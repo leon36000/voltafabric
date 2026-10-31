@@ -3,6 +3,24 @@ use std::{ffi::c_void, ptr::NonNull};
 
 unsafe extern "C" {
     #[cfg(feature = "scalar-reference")]
+    fn vf_native_scalar_prepare(
+        input: *const f32,
+        input_len: usize,
+        output: *mut f32,
+        output_len: usize,
+    ) -> i32;
+    #[cfg(feature = "scalar-reference")]
+    fn vf_native_scalar_reference_prepared(
+        gu: i32,
+        down: i32,
+        blob: *const u8,
+        blob_len: usize,
+        input: *const f32,
+        input_len: usize,
+        output: *mut f64,
+        output_len: usize,
+    ) -> i32;
+    #[cfg(feature = "scalar-reference")]
     fn vf_native_scalar_reference(
         gu: i32,
         down: i32,
@@ -46,6 +64,64 @@ unsafe extern "C" {
         output_len: usize,
     ) -> i32;
     fn vf_native_matrix_destroy(instance: *mut c_void);
+}
+
+/// Decoded Q8_K activation scoped by the caller to one token and batch.
+/// Its private contents can only be made by the checked scalar preparation.
+#[cfg(feature = "scalar-reference")]
+pub struct NativeScalarPrepared {
+    activation: Vec<f32>,
+}
+
+#[cfg(feature = "scalar-reference")]
+pub fn scalar_prepare(input: &[f32]) -> Result<NativeScalarPrepared, &'static str> {
+    if input.len() != 2560 || input.iter().any(|v| !v.is_finite()) {
+        return Err("invalid scalar activation");
+    }
+    let mut activation = vec![0f32; 2560];
+    // SAFETY: checked immutable input and unique output remain valid for the call.
+    let status = unsafe {
+        vf_native_scalar_prepare(
+            input.as_ptr(),
+            input.len(),
+            activation.as_mut_ptr(),
+            activation.len(),
+        )
+    };
+    if status != 0 || activation.iter().any(|x| !x.is_finite()) {
+        return Err("scalar activation preparation refused");
+    }
+    Ok(NativeScalarPrepared { activation })
+}
+
+#[cfg(feature = "scalar-reference")]
+pub fn scalar_reference_prepared(
+    gu: i32,
+    down: i32,
+    blob: &[u8],
+    prepared: &NativeScalarPrepared,
+) -> Result<Vec<f64>, &'static str> {
+    if blob.is_empty() || blob.len() > 4 * 1024 * 1024 {
+        return Err("invalid scalar reference input");
+    }
+    let mut output = vec![0f64; 2560];
+    // SAFETY: blob and the private prepared activation are immutable; output is unique.
+    let status = unsafe {
+        vf_native_scalar_reference_prepared(
+            gu,
+            down,
+            blob.as_ptr(),
+            blob.len(),
+            prepared.activation.as_ptr(),
+            prepared.activation.len(),
+            output.as_mut_ptr(),
+            output.len(),
+        )
+    };
+    if status != 0 || output.iter().any(|x| !x.is_finite()) {
+        return Err("scalar reference refused prepared input");
+    }
+    Ok(output)
 }
 
 /// Diagnostic-only unweighted SC117 f64 values; caller authenticates bytes and format.
