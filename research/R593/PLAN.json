@@ -1,0 +1,22 @@
+{
+  "cases_sha256": "51277ddb453914496c25f9f64ea4d8e73beeb692c2d64ca890f163fd044eb4d1",
+  "cpu_quota_percent": 50,
+  "driver_sha256": "624d5aafb2743e653d538bb5f88ce74793b7609f774fab32eb1299bcba120bdb",
+  "gpu": false,
+  "header_sha256": "412d02528f8ecc01d3997245a47fca6a47e60bee85ce9d20a0291deffd557070",
+  "inputs": {
+    "b0-v0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    "b0-v1.f32": "2f7635a31cafa88c592ebb28a05d3cf4c339006d4de9e78539ac62a686b3a155",
+    "b1-v0.f32": "9cdd44775e6d5afd50f61662745765e1b1a5701c3f31a85c766f82efed8a3403",
+    "b1-v1.f32": "b3799d302f341f1ba849d348ae1cdcdeda6b1714bd1f791c5bed6cb6c935f1cd"
+  },
+  "memory_max_bytes": 536870912,
+  "network_worker": false,
+  "no_replay": true,
+  "pc1_binary_sha256": "599dcfb432c7642db6ed3e0c0b300a42e0261cfe651131ef6845c8df028c0e2e",
+  "pc6_binary_sha256": "d5c2b74062be7f62e4d7d222115c6aeee49eb83f97ba0ad7b1431facb1d96026",
+  "purpose": "seven distinct SC117 format pairs on two CPU builds",
+  "reference_sha256": "e20373566d2991ecff862a2bdb612091c94e5bbe0763f2e10683d405c3f73be1",
+  "runner_sha256": "d5d873e59d6957b1cf0dd40f1fddc8cdb6107445b3c7819b11f551122d6adf19",
+  "swap_max_bytes": 0
+}

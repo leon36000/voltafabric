@@ -1,0 +1,65 @@
+[
+  {
+    "bytes": 2176000,
+    "down": 20,
+    "expert": 0,
+    "gate_up": 18,
+    "layer": 0,
+    "offset": 0,
+    "sha256": "f13d07f6ff33a274c4b22903c00ac13aafee621849c47e995ae133f5f61ca465"
+  },
+  {
+    "bytes": 1510400,
+    "down": 42,
+    "expert": 0,
+    "gate_up": 22,
+    "layer": 1,
+    "offset": 1114112000,
+    "sha256": "26e05c02700e723ec68544d46f598d76af5f1454736c55b7560102c86388d535"
+  },
+  {
+    "bytes": 1971200,
+    "down": 20,
+    "expert": 0,
+    "gate_up": 22,
+    "layer": 2,
+    "offset": 1887436800,
+    "sha256": "35878c2a8c029ebb9eed384ab8c0e9a00bb7a4039963ee943641de12bb8c8deb"
+  },
+  {
+    "bytes": 1715200,
+    "down": 42,
+    "expert": 0,
+    "gate_up": 18,
+    "layer": 12,
+    "offset": 11612979200,
+    "sha256": "0caa1281ebcf5679235c0aaf9d3ea7b920ae727f9679a1e46ae931ed01212943"
+  },
+  {
+    "bytes": 2329600,
+    "down": 20,
+    "expert": 0,
+    "gate_up": 21,
+    "layer": 17,
+    "offset": 16501964800,
+    "sha256": "d489e9f20f7ba37928e0834e8e98846e680a977ed39f6fa0ac611331d602b31d"
+  },
+  {
+    "bytes": 1868800,
+    "down": 42,
+    "expert": 0,
+    "gate_up": 21,
+    "layer": 21,
+    "offset": 20696268800,
+    "sha256": "b0d96cefd879ccda74414baa5ef917cc1c4fb46f44c5d4b21c95d348029bc5fa"
+  },
+  {
+    "bytes": 2662400,
+    "down": 20,
+    "expert": 0,
+    "gate_up": 23,
+    "layer": 47,
+    "offset": 48929177600,
+    "sha256": "794ff3e547ef9136050434485fb98b6d9a23e5eaf8f1028ea71abf92421bbb2c"
+  }
+]

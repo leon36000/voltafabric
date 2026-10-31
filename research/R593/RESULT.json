@@ -1,0 +1,232 @@
+{
+  "all_host_outputs_identical": true,
+  "captures": 28,
+  "inputs": 4,
+  "pairs": 7,
+  "records": [
+    {
+      "down": 20,
+      "gate_up": 18,
+      "input": "b0-v0.f32",
+      "layer": 0,
+      "pc1_equals_pc6": true,
+      "sha256": "f9b665199109f1dcb2b1cef9a81537115ecc6ad6040919a71bf0c21cb91baa33"
+    },
+    {
+      "down": 20,
+      "gate_up": 18,
+      "input": "b0-v1.f32",
+      "layer": 0,
+      "pc1_equals_pc6": true,
+      "sha256": "3c9183618fbbe78bdff8bb119adb46c44c2d784313d370220278bed08330e885"
+    },
+    {
+      "down": 20,
+      "gate_up": 18,
+      "input": "b1-v0.f32",
+      "layer": 0,
+      "pc1_equals_pc6": true,
+      "sha256": "1187cbe254a73ef5382869fa33d7bd8b893a5b1a847e3237b019cd07faa9447d"
+    },
+    {
+      "down": 20,
+      "gate_up": 18,
+      "input": "b1-v1.f32",
+      "layer": 0,
+      "pc1_equals_pc6": true,
+      "sha256": "6a8554fee92729c151f2c45e3f0c6808ac4c0c9d2857f058456f2b471136da10"
+    },
+    {
+      "down": 42,
+      "gate_up": 22,
+      "input": "b0-v0.f32",
+      "layer": 1,
+      "pc1_equals_pc6": true,
+      "sha256": "32e78ba046f264c982ca6b7df5f41f3d2685f09053e0daad14843490ced46b50"
+    },
+    {
+      "down": 42,
+      "gate_up": 22,
+      "input": "b0-v1.f32",
+      "layer": 1,
+      "pc1_equals_pc6": true,
+      "sha256": "dfc7ddd3a05c902c0957f41399048fd11e28d039645520f621f21a2ade6b67a5"
+    },
+    {
+      "down": 42,
+      "gate_up": 22,
+      "input": "b1-v0.f32",
+      "layer": 1,
+      "pc1_equals_pc6": true,
+      "sha256": "5a7fb47f25ef3396f8ba06fba8782bdac08699edb74af7903bfee6069b4d2f0f"
+    },
+    {
+      "down": 42,
+      "gate_up": 22,
+      "input": "b1-v1.f32",
+      "layer": 1,
+      "pc1_equals_pc6": true,
+      "sha256": "b9e49f6791a78c12d6b613d0f96ca4a7290cd7f994a9221773e10a345fe554f9"
+    },
+    {
+      "down": 20,
+      "gate_up": 22,
+      "input": "b0-v0.f32",
+      "layer": 2,
+      "pc1_equals_pc6": true,
+      "sha256": "6a45f3036251202b5ab457b87a6d61bd7ae009a3946d150a873cb801c3a5845c"
+    },
+    {
+      "down": 20,
+      "gate_up": 22,
+      "input": "b0-v1.f32",
+      "layer": 2,
+      "pc1_equals_pc6": true,
+      "sha256": "a5038d963144664e26e79f765e4e98617d279f832f658dbab8adb899336c8571"
+    },
+    {
+      "down": 20,
+      "gate_up": 22,
+      "input": "b1-v0.f32",
+      "layer": 2,
+      "pc1_equals_pc6": true,
+      "sha256": "0b3f8a2776d66e285bb27aa33a87d2ab76d6bb4c2acb4bc1f0f9423509e929e9"
+    },
+    {
+      "down": 20,
+      "gate_up": 22,
+      "input": "b1-v1.f32",
+      "layer": 2,
+      "pc1_equals_pc6": true,
+      "sha256": "bbb71e283173af7001151b59a555717d6fd25e4a8732571256fe925ddb6b13c4"
+    },
+    {
+      "down": 42,
+      "gate_up": 18,
+      "input": "b0-v0.f32",
+      "layer": 12,
+      "pc1_equals_pc6": true,
+      "sha256": "cb9a06cc209cbda01d79586b58455966311383f6403ed10411b227945786a5bf"
+    },
+    {
+      "down": 42,
+      "gate_up": 18,
+      "input": "b0-v1.f32",
+      "layer": 12,
+      "pc1_equals_pc6": true,
+      "sha256": "5ddbb19e4cfc7dc1648ff2e2aca7115347d1257a9ac2e3602f076fc3ebb60bfa"
+    },
+    {
+      "down": 42,
+      "gate_up": 18,
+      "input": "b1-v0.f32",
+      "layer": 12,
+      "pc1_equals_pc6": true,
+      "sha256": "811a67059d0094178151fbc0f9ace66894b05ead302144bf5d73fcfa16381458"
+    },
+    {
+      "down": 42,
+      "gate_up": 18,
+      "input": "b1-v1.f32",
+      "layer": 12,
+      "pc1_equals_pc6": true,
+      "sha256": "dca6f781eacf525aa36ebef97ccb8784c583da38a800ce6ca13e3f68ddec353c"
+    },
+    {
+      "down": 20,
+      "gate_up": 21,
+      "input": "b0-v0.f32",
+      "layer": 17,
+      "pc1_equals_pc6": true,
+      "sha256": "45f054792d4412067f620e0e435e5e69a5aba78ca16a3f18e984b67852e1af1c"
+    },
+    {
+      "down": 20,
+      "gate_up": 21,
+      "input": "b0-v1.f32",
+      "layer": 17,
+      "pc1_equals_pc6": true,
+      "sha256": "09643cfd84fadf273737b245186fc0be7dc61320073e53d7327012606df6c781"
+    },
+    {
+      "down": 20,
+      "gate_up": 21,
+      "input": "b1-v0.f32",
+      "layer": 17,
+      "pc1_equals_pc6": true,
+      "sha256": "0235268442be8e147fb3d1dc5c9a5180389aa2ceaa562e89c4d42e8fc61b574e"
+    },
+    {
+      "down": 20,
+      "gate_up": 21,
+      "input": "b1-v1.f32",
+      "layer": 17,
+      "pc1_equals_pc6": true,
+      "sha256": "bef4fe9ce7ceed4ea22a659ed6843b8fbe03e1fd2c4ea7a7088345510a6f2f9b"
+    },
+    {
+      "down": 42,
+      "gate_up": 21,
+      "input": "b0-v0.f32",
+      "layer": 21,
+      "pc1_equals_pc6": true,
+      "sha256": "b2268c4c7c27d60484d7023c0973c4cff296ca659b70dffcf9c55d8383648776"
+    },
+    {
+      "down": 42,
+      "gate_up": 21,
+      "input": "b0-v1.f32",
+      "layer": 21,
+      "pc1_equals_pc6": true,
+      "sha256": "733f0210c53c71c6e462975a58e51b110509f880c8f1f64a749491cb6661e4dc"
+    },
+    {
+      "down": 42,
+      "gate_up": 21,
+      "input": "b1-v0.f32",
+      "layer": 21,
+      "pc1_equals_pc6": true,
+      "sha256": "4d60023deff59002d03a60e5f508f331c94a1bd1f49b5ad8d797d75c4ae57be9"
+    },
+    {
+      "down": 42,
+      "gate_up": 21,
+      "input": "b1-v1.f32",
+      "layer": 21,
+      "pc1_equals_pc6": true,
+      "sha256": "386745514b031b104cc47c678b4f023d298c495b6b7c78f320509ce304583ddb"
+    },
+    {
+      "down": 20,
+      "gate_up": 23,
+      "input": "b0-v0.f32",
+      "layer": 47,
+      "pc1_equals_pc6": true,
+      "sha256": "e19b16783f2045dfa9916d46646e61bd43c34f1d51d293f70103cd415277cf4f"
+    },
+    {
+      "down": 20,
+      "gate_up": 23,
+      "input": "b0-v1.f32",
+      "layer": 47,
+      "pc1_equals_pc6": true,
+      "sha256": "3cc3ae8d3da8fe0c7b4e0c75158b583faff645019ea2c088a6941e71d59353ba"
+    },
+    {
+      "down": 20,
+      "gate_up": 23,
+      "input": "b1-v0.f32",
+      "layer": 47,
+      "pc1_equals_pc6": true,
+      "sha256": "73503e209e35617279f1a02777365aca0e43a6c3af329669d27aa8087e7af694"
+    },
+    {
+      "down": 20,
+      "gate_up": 23,
+      "input": "b1-v1.f32",
+      "layer": 47,
+      "pc1_equals_pc6": true,
+      "sha256": "b608a03cc2e4dbeef67e6c4501ad6d86d1be367b98151d714c509dc04d87b951"
+    }
+  ]
+}

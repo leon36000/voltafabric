@@ -22,20 +22,22 @@ double scalar_dot(const std::vector<float>& a, const std::vector<float>& b) {
     double sum=0; for(size_t i=0;i<a.size();++i) sum+=double(a[i])*double(b[i]); return sum;
 }
 }
-bool scalar_reference_iq2s_iq4nl(const std::vector<uint8_t>& blob,
-                                  const std::vector<float>& input,
-                                  std::vector<double>& output,
-                                  std::string& error) {
+bool scalar_reference(int gate_up_type, int down_type, const std::vector<uint8_t>& blob,
+                      const std::vector<float>& input, std::vector<double>& output,
+                      std::string& error) {
     error.clear();
     const uint32_t endian=1;
     if (*reinterpret_cast<const uint8_t*>(&endian)!=1 || sizeof(float)!=4 || sizeof(double)!=8 ||
         !std::numeric_limits<float>::is_iec559 || !std::numeric_limits<double>::is_iec559 ||
         std::fegetround()!=FE_TONEAREST)
         return fail(error,"unsupported scalar arithmetic environment");
-    if (input.size()!=H || blob.size()!=1971200) return fail(error,"invalid scalar input geometry");
+    if ((gate_up_type!=18 && gate_up_type!=21 && gate_up_type!=22 && gate_up_type!=23) ||
+        (down_type!=20 && down_type!=42) || (gate_up_type==23 && down_type==42))
+        return fail(error,"unsupported scalar format pair");
+    if (input.size()!=H) return fail(error,"invalid scalar input geometry");
     for(float v:input) if(!bounded(v)) return fail(error,"invalid scalar input value");
     std::call_once(init, []{ggml_cpu_init();});
-    const auto gt=GGML_TYPE_IQ2_S, dt=GGML_TYPE_IQ4_NL;
+    const auto gt=static_cast<ggml_type>(gate_up_type), dt=static_cast<ggml_type>(down_type);
     const auto *g=ggml_get_type_traits_cpu(gt), *d=ggml_get_type_traits_cpu(dt);
     const auto *gc=ggml_get_type_traits(gt), *dc=ggml_get_type_traits(dt);
     if(!g||!d||!gc||!dc||!gc->to_float||!dc->to_float||g->vec_dot_type!=GGML_TYPE_Q8_K||d->vec_dot_type!=GGML_TYPE_Q8_0)
@@ -75,5 +77,11 @@ bool scalar_reference_iq2s_iq4nl(const std::vector<uint8_t>& blob,
         if(!std::isfinite(staged[i])) return fail(error,"nonfinite scalar output");
     }
     output.swap(staged); return true;
+}
+bool scalar_reference_iq2s_iq4nl(const std::vector<uint8_t>& blob,
+                                  const std::vector<float>& input,
+                                  std::vector<double>& output,
+                                  std::string& error) {
+    return scalar_reference(22,20,blob,input,output,error);
 }
 }
