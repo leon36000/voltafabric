@@ -1,0 +1,24 @@
+{
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r551-work/native/ggml/src/libggml-base.a": "54558b38a3f14789ce7b8cdab493788c2dd6ff495a3953970da66b026c47fc23",
+    "/home/pc1/NAOS/vf-r551-work/native/ggml/src/libggml-cpu.a": "42e39eea5894bed527fef2feb9bf8a23e970733fa9ea892fd060cafe5505412a",
+    "/home/pc1/NAOS/vf-r616-work/include/ggml-cpu.h": "316279e004cdeb8e6ef78599acb602bf79a8abdf897fed9fd1914808c1518c6e",
+    "/home/pc1/NAOS/vf-r616-work/include/ggml.h": "12ee71f99db7db9b353bc02b1fbb57c344ee17c01ac5fb7952b41a637a747ea9",
+    "/home/pc1/NAOS/vf-r621-work/full-head-check": "823fa1aa587f038eec625ce786b034a32333f8b21b6601643952b4af837383c2",
+    "/home/pc1/NAOS/vf-r621-work/research/R621/full_head_check.cpp": "db74cb29ce32e16519d2f2a35981d9168bbdf40c5c7c2ffc06150a22fc46757f",
+    "/home/pc1/NAOS/vf-r623-work/fixtures/r429/head.json": "9c5c134eea44b2362357a71acd048b4928624a9e58d0b8f6121541ecbc27e401",
+    "/home/pc1/NAOS/vf-r623-work/head.bin": "9ca04e1de0988eb14786f56f65cda4e81332c24b9ee480fdc3c22fdf6ca56813",
+    "/home/pc1/NAOS/vf-r623-work/research/R623/run.py": "76605d522e3de8aa605b57ef30868f5bc2f4b1b05fcd2ec6c7d23821b487a3ff"
+  },
+  "gpu": false,
+  "head": "/home/pc1/NAOS/vf-r623-work/head.bin",
+  "network_worker": false,
+  "scope": {
+    "cpu_quota_percent": 50,
+    "memory_mib": 512,
+    "swap_mib": 0,
+    "task_limit": 16
+  },
+  "shard": "/home/pc1/Strata-data/models/SC117-Qwen3.8-Flash-Next-GSQ-RCO-abliterated/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00001-of-00002.gguf",
+  "source_generation_plan": "r600-2647069932b7319bc7116ef62b4b7a103eb4cc7cb27ee18023d13f10c20bd07e"
+}

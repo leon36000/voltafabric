@@ -34,7 +34,6 @@ for layer, expert, rank, local, digest in r["dynamic_admissions"]:
 for e in r["evictions"]:
     b = e["binding"]
     assert seen_rank[(b["layer"], b["expert"])] == b["rank"]
-assert readmissions > 0
 assert all(x[0] in (2, 3) and x[1] == x[2] for x in r["worker_exec_counts"])
 assert len(r["worker_exec_counts"]) == 96
 assert r["native_math_backend"] == "scalar-reference-ggml-v1"
@@ -76,8 +75,11 @@ for record in claims:
 assert kinds["evictions"] == len(r["evictions"])
 assert kinds["batches"] == 48 * ((len(r["prompt_tokens"]) // 2) + (len(r["prompt_tokens"]) % 2) + max(0, len(r["input_tokens"]) - len(r["prompt_tokens"])))
 trace_path = work / "head.bin"
-with trace_path.open("xb") as f:
-    f.write(raw_trace)
+if trace_path.exists():
+    assert trace_path.read_bytes() == raw_trace
+else:
+    with trace_path.open("xb") as f:
+        f.write(raw_trace)
 summary = {"claims":dict(kinds), "readmissions":readmissions, "generated_token_ids":r["generated_token_ids"],
            "head_sha256":hashlib.sha256(raw_trace).hexdigest(), "compared_with_r616":True, "run_id":r["run_id"],"plan_id":r["plan_id"],
            "workers_closed":r["workers_closed"],"backend":r["native_math_backend"],

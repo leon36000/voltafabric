@@ -1,0 +1,12 @@
+{
+  "generation_plan_id": "r600-2647069932b7319bc7116ef62b4b7a103eb4cc7cb27ee18023d13f10c20bd07e",
+  "generation_receipt_sha256": "cbffcb6516cbec8edc5979fc9822978e24a6186d0c5999cc57ae2331ca268d78",
+  "head_sha256": "9ca04e1de0988eb14786f56f65cda4e81332c24b9ee480fdc3c22fdf6ca56813",
+  "max_abs": 2.2463788331705814e-06,
+  "max_tolerance_fraction": 0.08513857843929365,
+  "observed_argmax": 9419,
+  "plan_sha256": "fbbc374ef15afcbf3fe27e9642d5f2db7a455971a2a4dd38eab6a92705c8ba62",
+  "reference_argmax": 9419,
+  "rows": 248320,
+  "violations": 0
+}
