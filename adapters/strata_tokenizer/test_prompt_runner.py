@@ -32,6 +32,21 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_head_trace_never_runs_or_escapes_through_prompt_adapter(self):
+        calls = []
+        def runner(args, **kwargs):
+            calls.append(args)
+            value = dict(receipt(), head_trace={"base64": "unexpected"})
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        with patch.dict("os.environ", {"VF_SC117_HEAD_TRACE": "1"}, clear=True):
+            with self.assertRaisesRegex(ValueError, "local diagnostic"):
+                run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertEqual(calls, [])
+        with patch.dict("os.environ", {}, clear=True):
+            with self.assertRaisesRegex(ValueError, "unexpected head trace"):
+                run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner)
+        self.assertEqual(len(calls), 1)
+
     def test_qsa_trace_validates_length_digest_and_metadata(self):
         raw = b"\0" * (37380 * 4)
         trace = {"version": "vf-qsa-trace-v1-layer3-f32le", "layer": 3,

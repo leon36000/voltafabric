@@ -230,6 +230,8 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     Legacy receipt compatibility requires an explicit opt-out. A caller still
     authenticates the engine and plan inputs.
     """
+    if os.environ.get("VF_SC117_HEAD_TRACE") is not None:
+        raise ValueError("head trace is only available to the local diagnostic")
     if type(chat) is not bool:
         raise ValueError("invalid prompt mode")
     if type(require_bound_plan) is not bool:
@@ -306,6 +308,8 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if prepare_plan and len(completed.stdout) > 1024:
         raise ValueError("invalid prepared plan receipt")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
+    if isinstance(receipt, dict) and "head_trace" in receipt:
+        raise ValueError("unexpected head trace")
     if prepare_plan:
         if not isinstance(receipt, dict) or set(receipt) not in ({"plan_id", "prompt_tokens_sha256"}, {"plan_id", "prompt_tokens_sha256", "native_math_backend"}):
             raise ValueError("invalid prepared plan receipt")

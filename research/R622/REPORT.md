@@ -1,0 +1,7 @@
+# R622 — trace locale de tête liée au plan
+
+Le coordinateur propose `VF_SC117_HEAD_TRACE=1` uniquement pour une prédiction scalaire avec workers CPU locaux. Un domaine SHA-256 distinct est incorporé dans le plan scalaire attendu ; le mode absent conserve le plan précédent. Il capture les 2 560 éléments de l’entrée mélangée, les 248 320 logits et l’argmax dans un format f32/u32 little-endian. Les valeurs et tailles sont vérifiées ; aucun reçu n’est émis avant fermeture confirmée des 96 workers. La trace reste une donnée dérivée du modèle : l’adaptateur de conversation refuse ce mode avant lancement et refuse aussi une trace inattendue.
+
+Les 18 tests du coordinateur passent en debug et release ; le contrôle de compilation vectoriel seul, Clippy ciblé (dead_code historique autorisé) et rustfmt passent. Sur PC1, les 38 tests de l’adaptateur de prompt passent. Le Python système de PC6 ne disposait pas du module regex : cet essai échoué n’est pas compté. Le plan local d’une nouvelle génération a été reconstruit indépendamment dans `verify_plan.py`.
+
+Une seule soumission locale sous plan et marqueur propres a été engagée après préflight ; son résultat doit être réconcilié avant toute autre action. Cette trace n’autorise ni worker réseau ni GPU et ne constitue pas un oracle de tout le modèle. La lease et le registre R53 partagés restent nécessaires pour la distribution. Aucun UNKNOWN historique n’est rejoué.

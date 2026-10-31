@@ -1,0 +1,23 @@
+{
+  "engine_plan_id": "r600-2647069932b7319bc7116ef62b4b7a103eb4cc7cb27ee18023d13f10c20bd07e",
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r443-work/manifest.json": "436066427aaca7f163943b3f0f00c98cb59ddb5df7b2fa410b90d474ab1fe824",
+    "/home/pc1/NAOS/vf-r622-work/PREPARED.json": "e876d19dc567b0e4ddc455345e63b6080076d9c1ec17323de2ac8b609681cfd0",
+    "/home/pc1/NAOS/vf-r622-work/project/src/bin/vf-sc117-prefill-greedy.rs": "c6e0bdadf225a07f43e1e2b84ac0c22decb2a3c5642070cb294e72ab7b253d44",
+    "/home/pc1/NAOS/vf-r622-work/project/src/session.rs": "0009a2340f542acfc19d95756690910ec9f420971def3b7678e766fedcf8557c",
+    "/home/pc1/NAOS/vf-r622-work/target/release/vf-rank-session": "732a829494677e17d759bcfadf15bf9787bc830bf625ab18a7755a875a7a6925",
+    "/home/pc1/NAOS/vf-r622-work/target/release/vf-sc117-prefill-greedy": "6bff90bf655631ee0949e0455c2d4ed7f44df440f8e1481851054719c388c9de"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "scope": {
+    "cpu_quota": 200,
+    "memory_high_gib": 11,
+    "memory_max_gib": 13,
+    "swap_gib": 0,
+    "tasks_max": 320
+  },
+  "submit_sha256": "ef36c9bc108090c1442bfd6432973c0f276dc081f24d09e7ba473d42190372fa",
+  "unknown_never_replay": true,
+  "verify_plan_sha256": "b2f70cc8bd7f5c69f9b7d14a05201fdc5e3db242f1994762f4c33298fd082968"
+}

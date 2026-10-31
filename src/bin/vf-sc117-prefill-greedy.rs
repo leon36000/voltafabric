@@ -780,6 +780,44 @@ fn backend_plan(base: &str, backend: NativeMath) -> String {
     }
 }
 
+fn head_trace_plan(base: &str, enabled: bool) -> String {
+    if !enabled {
+        return base.to_owned();
+    }
+    let mut bytes = b"vf-sc117-local-head-trace-v1\0".to_vec();
+    bytes.extend_from_slice(base.as_bytes());
+    format!("r622-{}", sha256::hex(&bytes))
+}
+
+fn head_trace_bytes(output: &voltafabric::sc117_head_cpu::Output) -> Result<Vec<u8>, E> {
+    if output.mixed.len() != 2560
+        || output.logits.len() != 248_320
+        || output
+            .mixed
+            .iter()
+            .chain(&output.logits)
+            .any(|x| !x.is_finite())
+        || output.greedy as usize >= output.logits.len()
+    {
+        return Err("invalid head trace".into());
+    }
+    let mut best = 0;
+    for index in 1..output.logits.len() {
+        if output.logits[index] > output.logits[best] {
+            best = index;
+        }
+    }
+    if output.greedy as usize != best {
+        return Err("invalid head trace argmax".into());
+    }
+    let mut bytes = Vec::with_capacity((2560 + 248_320) * 4 + 4);
+    for value in output.mixed.iter().chain(&output.logits) {
+        bytes.extend_from_slice(&value.to_le_bytes());
+    }
+    bytes.extend_from_slice(&output.greedy.to_le_bytes());
+    Ok(bytes)
+}
+
 // An external controller supplies the admitted plan. This comparison is not
 // itself a lease, attestation, or resource reservation.
 fn verify_expected_plan(plan: &str, expected: Option<&str>, remote: bool) -> Result<(), E> {
@@ -1165,6 +1203,11 @@ fn run() -> Result<(), E> {
         return Err("invalid prompt tokens".into());
     }
     let native_math = parse_native_math(optional_env("VF_SC117_NATIVE_BACKEND")?.as_deref())?;
+    let head_trace = match optional_env("VF_SC117_HEAD_TRACE")?.as_deref() {
+        None => false,
+        Some("1") => true,
+        _ => return Err("unsupported head trace mode".into()),
+    };
     let trace_mode = match optional_env("VF_QSA_TRACE_LAYER")?.as_deref() {
         None => TraceMode::Off,
         Some("3") => TraceMode::Attention,
@@ -1219,6 +1262,14 @@ fn run() -> Result<(), E> {
     }
     require_remote_affinity(!host_digests.is_empty(), rank_affinity)?;
     native_math.validate_transport(!host_digests.is_empty())?;
+    if head_trace
+        && (native_math != NativeMath::Scalar
+            || !host_digests.is_empty()
+            || max_new_tokens != 1
+            || trace_qsa)
+    {
+        return Err("head trace requires local scalar workers and one prediction".into());
+    }
     if trace_qsa && !host_digests.is_empty() {
         return Err("QSA trace requires local CPU workers".into());
     }
@@ -1322,12 +1373,15 @@ fn run() -> Result<(), E> {
         &r53_namespace,
     )?;
     let plan_id = backend_plan(
-        &affinity_plan(
-            &batch_plan(
-                &trace_plan(&admission_plan(&base_plan_id), trace_mode),
-                batched_prompt,
+        &head_trace_plan(
+            &affinity_plan(
+                &batch_plan(
+                    &trace_plan(&admission_plan(&base_plan_id), trace_mode),
+                    batched_prompt,
+                ),
+                rank_affinity,
             ),
-            rank_affinity,
+            head_trace,
         ),
         native_math,
     );
@@ -1529,6 +1583,7 @@ fn run() -> Result<(), E> {
     let mut evictions = Vec::new();
     let mut rank_history = Vec::new();
     let mut trace_bytes = Vec::new();
+    let mut head_trace_data = None;
     let mut current_token = prompt_tokens[0];
     let mut pos = 0;
     while pos < prompt_tokens.len() + max_new_tokens - 1 {
@@ -1580,6 +1635,9 @@ fn run() -> Result<(), E> {
             pos += 2;
             if pos == prompt_tokens.len() {
                 let prediction = head.evaluate(&head_id, &outputs[1])?;
+                if head_trace {
+                    head_trace_data = Some(head_trace_bytes(&prediction)?);
+                }
                 logits_hashes.push(bytes_hash(&prediction.logits));
                 generated.push(prediction.greedy);
                 current_token = prediction.greedy;
@@ -1652,6 +1710,9 @@ fn run() -> Result<(), E> {
             continue;
         }
         let prediction = head.evaluate(&head_id, &output)?;
+        if head_trace {
+            head_trace_data = Some(head_trace_bytes(&prediction)?);
+        }
         logits_hashes.push(bytes_hash(&prediction.logits));
         generated.push(prediction.greedy);
         current_token = prediction.greedy;
@@ -1671,6 +1732,13 @@ fn run() -> Result<(), E> {
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
     let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_affinity":rank_affinity,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
     receipt["native_math_backend"] = serde_json::json!(native_math.label());
+    if head_trace {
+        let bytes = head_trace_data.ok_or("missing head trace")?;
+        if generated.len() != 1 {
+            return Err("head trace prediction count".into());
+        }
+        receipt["head_trace"] = serde_json::json!({"version":"vf-sc117-head-v1-f32le", "sha256":sha256::hex(&bytes), "base64":voltafabric::base64::encode(&bytes)});
+    }
     if trace_qsa {
         if trace_bytes.len() != input_tokens.len() * trace_mode.words() * 4 {
             return Err("QSA trace incomplete".into());
@@ -1695,6 +1763,39 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn head_trace_is_bounded_and_plan_separated() {
+        assert_eq!(
+            super::head_trace_plan("r576-example", false),
+            "r576-example"
+        );
+        assert_eq!(
+            super::head_trace_plan("r576-example", true),
+            "r622-1433eefba5545c0f6ef8b822cffc74787303db2470e8e5dba05fa658fa50500e"
+        );
+        let mut output = voltafabric::sc117_head_cpu::Output {
+            mixed: vec![0.0; 2560],
+            logits: vec![0.0; 248_320],
+            greedy: 7,
+        };
+        output.mixed[0] = 1.5;
+        output.logits[7] = 2.5;
+        let bytes = super::head_trace_bytes(&output).unwrap();
+        assert_eq!(bytes.len(), 1_003_524);
+        assert_eq!(&bytes[..4], &1.5f32.to_le_bytes());
+        assert_eq!(
+            &bytes[10_240 + 7 * 4..10_240 + 8 * 4],
+            &2.5f32.to_le_bytes()
+        );
+        assert_eq!(&bytes[bytes.len() - 4..], &7u32.to_le_bytes());
+        output.greedy = 8;
+        assert!(super::head_trace_bytes(&output).is_err());
+        output.greedy = 7;
+        output.logits[0] = f32::NAN;
+        assert!(super::head_trace_bytes(&output).is_err());
+        output.logits.pop();
+        assert!(super::head_trace_bytes(&output).is_err());
+    }
     #[test]
     fn remote_workers_require_sticky_expert_affinity() {
         assert!(super::require_remote_affinity(false, false).is_ok());
