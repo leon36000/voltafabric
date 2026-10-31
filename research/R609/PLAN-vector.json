@@ -1,0 +1,27 @@
+{
+  "backend": "vector",
+  "engine_plan_id": "r544-2c3a7e2988972a275a4eceefeb0a532ffe1b15172c072565aba87512972008e7",
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r443-work/manifest.json": "436066427aaca7f163943b3f0f00c98cb59ddb5df7b2fa410b90d474ab1fe824",
+    "/home/pc1/NAOS/vf-r609-vector/PREPARED.json": "1c0df665b947d41f4d7dbf25923dd51fcce3003350531a3d89f91737e2ce6b3b",
+    "/home/pc1/NAOS/vf-r609-vector/PROMPT.json": "110b1ae3e7b6103dbf92d6b607f9975fb4fe060f94c0fe890799e35936056f60",
+    "/home/pc1/NAOS/vf-r609-vector/adapters/strata_tokenizer/adapter.py": "715bf33484dce075f5de18d5174129e753a9a5448f7ab1904306e5983534d240",
+    "/home/pc1/NAOS/vf-r609-vector/adapters/strata_tokenizer/observed-sc117.json": "6a625b74d2db4b359947fb37b0aaa8c1088375e41d846b6cdbfd8bb2ba126b6d",
+    "/home/pc1/NAOS/vf-r609-vector/adapters/strata_tokenizer/prompt_runner.py": "f1b7d0b914007d4b0ad09d8e0c70d9d7082cd953936599d780ef510bd8aec1fb",
+    "/home/pc1/NAOS/vf-r609-vector/adapters/strata_tokenizer/vendor/strata_tokenizer.py": "9b0327e25aa62754406a924db6cc137e6edb1d93c7af76a4f3d14a8920ea72c8",
+    "/home/pc1/NAOS/vf-r609-vector/target/release/vf-rank-session": "b3195f7f4b36256d1a2700fa53c65b1a45df3eb61a8d0fefebdfc99380ad8fdd",
+    "/home/pc1/NAOS/vf-r609-vector/target/release/vf-sc117-prefill-greedy": "80eb18e5bdd35e5e9cf64538fae69f94dfd66e968f72f27f684939aa995cf280"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "scope": {
+    "cpu_quota": 200,
+    "memory_high_gib": 11,
+    "memory_max_gib": 13,
+    "swap_gib": 0,
+    "tasks_max": 320
+  },
+  "submit_sha256": "32dde54d9b2be15629bc08cce12a491c5a979c0c69974665c501ad1e7fc04214",
+  "trace": "layer3-input-qsa",
+  "unknown_never_replay": true
+}

@@ -33,10 +33,11 @@ TRACE_MAX_POSITIONS = 96
 EXIT_PIPE_GRACE_SECONDS = 2.0
 
 
-def _verify_qsa_trace(receipt: dict) -> None:
+def _verify_qsa_trace(receipt: dict, *, scalar_mode: str | None = None) -> None:
     trace = receipt.get("qsa_trace")
     inputs = receipt.get("input_tokens")
-    is_v2 = isinstance(receipt.get("plan_id"), str) and receipt["plan_id"].startswith("r544-")
+    is_v2 = (scalar_mode == "3:input" if scalar_mode is not None
+             else isinstance(receipt.get("plan_id"), str) and receipt["plan_id"].startswith("r544-"))
     version = "vf-qsa-trace-v2-layer3-input-f32le" if is_v2 else "vf-qsa-trace-v1-layer3-f32le"
     words = TRACE_WORDS + 10240 if is_v2 else TRACE_WORDS
     if (not isinstance(trace, dict) or set(trace) != {"version", "layer", "positions", "words_per_position", "sha256", "base64"}
@@ -256,6 +257,9 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if backend not in ("vector", "scalar"):
         raise ValueError("invalid native backend")
     expected_backend = {"vector": "vector-ggml-v1", "scalar": "scalar-reference-ggml-v1"}[backend]
+    scalar_trace_mode = os.environ.get("VF_QSA_TRACE_LAYER") if backend == "scalar" else None
+    if scalar_trace_mode not in (None, "3", "3:input"):
+        raise ValueError("invalid scalar trace mode")
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
     if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-", "r600-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
@@ -344,7 +348,9 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("engine receipt differs from tokenizer EOS")
     if chat and receipt.get("prompt_mode") != "chat":
         raise ValueError("engine receipt differs from prompt mode")
-    if isinstance(plan_id, str) and plan_id.startswith(("r537-", "r544-")):
+    if backend == "scalar" and scalar_trace_mode is not None:
+        _verify_qsa_trace(receipt, scalar_mode=scalar_trace_mode)
+    elif isinstance(plan_id, str) and plan_id.startswith(("r537-", "r544-")):
         _verify_qsa_trace(receipt)
     elif "qsa_trace" in receipt:
         raise ValueError("QSA trace requires trace-bound plan")

@@ -162,6 +162,36 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 call()
 
+    def test_scalar_qsa_trace_follows_requested_bound_mode(self):
+        plan = "r600-" + "d" * 64
+        prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
+        value = dict(receipt(), input_tokens=[0], generated_token_ids=[0], requested_max_new_tokens=1,
+                     output_sha256=["a" * 64], logits_sha256=["b" * 64],
+                     prompt_tokens=[0], plan_id=plan, prompt_tokens_sha256=prompt_hash,
+                     native_math_backend="scalar-reference-ggml-v1")
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        def call():
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8,
+                               max_new_tokens=1, runner=runner)
+        for mode, words, version in (("3", 37380, "vf-qsa-trace-v1-layer3-f32le"),
+                                     ("3:input", 47620, "vf-qsa-trace-v2-layer3-input-f32le")):
+            raw = bytes(words * 4)
+            value["qsa_trace"] = {"version": version, "layer": 3, "positions": 1,
+                                  "words_per_position": words, "sha256": hashlib.sha256(raw).hexdigest(),
+                                  "base64": base64.b64encode(raw).decode("ascii")}
+            env = {"VF_SC117_NATIVE_BACKEND":"scalar", "VF_EXPECTED_PLAN_ID":plan,
+                   "VF_QSA_TRACE_LAYER":mode}
+            with patch.dict("os.environ", env, clear=True):
+                self.assertEqual(call()["receipt"]["qsa_trace"]["version"], version)
+                value["qsa_trace"]["sha256"] = "0" * 64
+                with self.assertRaises(ValueError): call()
+                del value["qsa_trace"]
+                with self.assertRaises(ValueError): call()
+        with patch.dict("os.environ", {"VF_SC117_NATIVE_BACKEND":"scalar", "VF_EXPECTED_PLAN_ID":plan}, clear=True):
+            value["qsa_trace"] = {"version":"unexpected"}
+            with self.assertRaises(ValueError): call()
+
     def test_vector_prepared_receipt_accepts_explicit_backend(self):
         prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
         value = {"plan_id": "r576-" + "b" * 64, "prompt_tokens_sha256": prompt_hash,

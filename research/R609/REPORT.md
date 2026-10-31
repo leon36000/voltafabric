@@ -1,0 +1,7 @@
+# R609 — traces QSA liées au backend scalaire
+
+Le domaine `r600` enveloppe le plan de trace Rust, ce qui masque à l'adaptateur de prompt les anciens préfixes de trace `r537` et `r544`. L'adaptateur rejetait donc une trace valide émise par une exécution scalaire. Il vérifie désormais le mode explicitement demandé (`3` ou `3:input`), exige le format et la taille correspondants, contrôle le digest, et refuse une trace absente, inattendue ou altérée. L'identité du plan attendue demeure obligatoire pour le backend scalaire ; sa comparaison n'est pas une authentification.
+
+Le test de régression reproduit d'abord le refus « trace requires trace-bound plan » ; après correction, les 49 tests du tokenizer passent sur PC1, dont huit ignorés faute de données externes. Les anciens modes vectoriels restent couverts. Deux plans locaux distincts, scalaire et vectoriel, ont été préparés sans lancer de workers et reconstruits indépendamment ; ils demandent une trace de couche 3 avec résiduel d'entrée, le même prompt et un token produit.
+
+Au moment de cette publication, la soumission scalaire dispose d'un marqueur exclusif et est en cours sur PC1, et la soumission vectorielle n'a pas encore été lancée. Les scripts et plans sont conservés pour réconciliation : ne jamais relancer une identité déjà soumise. Cette étape ne qualifie ni GPU ni transport inter-PC ; l'objectif est une comparaison numérique, pas une comparaison de performances.
