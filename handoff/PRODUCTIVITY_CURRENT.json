@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T21:29:23Z",
+  "updated_utc": "2026-10-31T21:39:22Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -18,14 +18,15 @@
   },
   "current_wave": [
     {
-      "id": "R636",
+      "id": "R637",
       "owner": "integrator",
       "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
-      "branch": "r636-strata-shape-guard-20261031",
-      "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1",
-      "path": "research/R636",
-      "commit": "8a8d9d346f3231a620fe26bd6e1f4d74ddf25b83",
-      "published_utc": "2026-10-31T21:29:23Z"
+      "branch": "r637-strata-pool-owner-20261031",
+      "parent_commit": "89d3913c08a91b1b9f0a0f100157df2423a30077",
+      "path": "research/R637",
+      "commit": "1f24dadb55403198f9bf64f34137cfff5c994cf5",
+      "published_utc": "2026-10-31T21:38:09Z",
+      "readback_files_verified": 7
     }
   ],
   "acceptance": [
@@ -43,191 +44,15 @@
     "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
-  "last_verified_results": {
-    "R81": {
-      "status": "PRIVATE_SESSION_VERIFIED",
-      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r81-submission-wrapper-r101-20261028",
-      "Collector_values": 2944,
-      "budget_used": 1,
-      "budget_max": 1,
-      "postflight": "four PID and two groups absent, same lease free, GPU apps empty"
-    },
-    "R99": {
-      "status": "AIDER_FAILED_NO_REPLAY",
-      "upstream_status": "success",
-      "request_id": "gen-1793152665-ggD7XZUL8B9idk8EKaVK",
-      "forwarded_requests": 1,
-      "source_unchanged": true,
-      "proxy_reported_spend_usd": 0.00254601,
-      "supplier_invoice_cost": "UNKNOWN",
-      "cause": "INCONCLUSIVE; no complete response/finish_reason available",
-      "manifest_sha256": "2125e55f7d8dcdfaf2872d1249662d67cd43070699b9f4d15a79ac6c96b49827"
-    },
-    "R103": {
-      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/workload-native-implementation-r103-20261028/MANIFEST.json",
-      "sha256": "9dcfea0ac784db6fe720f58946a3bf1cb739068d5ad6cde7b983708baf3ba808",
-      "files": 2,
-      "methods": 21,
-      "first_test_harness_defect_preserved": true
-    },
-    "R104": {
-      "status": "PRIVATE_WORKLOAD_COMPARISON_INTEGRATED_CPU_VERIFIED",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/benchmark-workload-integration-r104-20261028",
-      "manifest_sha256": "d430937c681545fba90af3486425e28151fff93a700723996f055c717b9d9318",
-      "updated_utc": "2026-10-28T02:40:35.926314+00:00",
-      "GPU_executed": false,
-      "canonical_changed": false,
-      "tests": 9,
-      "parent_finding_fixed": "bounded nonblocking regular quality files",
-      "producer_authenticated": false,
-      "benchmark_measured": false
-    },
-    "R105": {
-      "status": "CPU_ADMISSION_VERIFIED_ARCHIVAL_LOCALIZATION_BLOCKED",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/full-model-vertical-slice-r105-20261028",
-      "manifest_sha256": "f5b717a7b4b555cb9bd0d10717430a49e2da1caec835b8b962d03344026282a4",
-      "updated_utc": "2026-10-28T02:40:35.926314+00:00",
-      "GPU_executed": false,
-      "canonical_changed": false,
-      "tests": 12,
-      "localization_followup": "R107 found real installation; do not repeat unchanged blocked R105 command"
-    },
-    "R106": {
-      "status": "CPU_DIAGNOSTICS_VERIFIED_NO_MODEL_POST",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/aider-relay-diagnostics-r106-20261028",
-      "manifest_sha256": "b30c909cc77259bdc2ed5f5c3d352930dae0fc17903c1c1249d7af76dd01a2cd",
-      "updated_utc": "2026-10-28T02:40:35.926314+00:00",
-      "GPU_executed": false,
-      "canonical_changed": false,
-      "tests": 33,
-      "real_model_POST": false,
-      "review": "parent and independent source/proof review, no concrete remaining finding",
-      "R99_cause": "INCONCLUSIVE",
-      "deployed": false
-    },
-    "R107": {
-      "status": "EXISTING_PC1_FULL_MODEL_PATHS_FOUND_METADATA_LINKED",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/full-model-local-discovery-r107-20261028",
-      "manifest_sha256": "a99f64b2ac571a582aa5f122d36a8c1c1663bcdc95eafbe035accedcc4bb6742",
-      "updated_utc": "2026-10-28T02:40:35.926314+00:00",
-      "GPU_executed": false,
-      "canonical_changed": false,
-      "binding": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/full-model-local-discovery-r107-20261028/BINDING.json",
-      "model": "qwen3.8-flash-next-sc117-abliterated-iq3_s",
-      "engine_version": "0.1.44.1 DECLARED not binary-qualified",
-      "weight_payload_bytes_read": 0,
-      "generation_qualified": false,
-      "voltafabric_integrated": false
-    },
-    "R108": {
-      "status": "PARTIAL_CPU_PC1_SSH_BOTH_ROUTES_FAILED_BEFORE_AUTH",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-pack-admission-r108-20261028",
-      "manifest_sha256": "702e7d4f1c34b8bd5fcdca8cb8db3ef46f8cc88f8327bb79f5fcbded29b5183",
-      "tests": 7,
-      "full_pack_admitted": false
-    },
-    "R109": {
-      "status": "CPU_PARTIAL_PROFILE_NO_REAL_POST_NOT_READY",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/aider-r106-profile-r109-20261028",
-      "manifest_sha256": "21eb36a5b51474f40d9a450adba35fc4c3c59099683cd53e736f8500a8ffb57e",
-      "tests": 28,
-      "real_aider_started": false,
-      "real_model_POST": false,
-      "launcher_external_pin_missing": true
-    },
-    "R110": {
-      "status": "SYNTHETIC_IQ3S_TO_E2M1_E8M0_UNIVERSAL_EXACT_REJECTED",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/strata-vf-compat-r110-20261028",
-      "manifest_sha256": "ea00c149c3cc82b1a951033ba078ae45f2e4f9e645d7fa86383730d57bb556ea",
-      "witness": "5/16 not representable in 4080 code-scale pairs; error 1/16 on this value only",
-      "actual_sc117_weights_read": false,
-      "independent_review": "no concrete finding"
-    },
-    "R111": {
-      "status": "PC4_PIN_MATCH_SSH_AUTH_DENIED_NO_BACKUP",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc4-backup-identity-r111-20261028",
-      "manifest_sha256": "f9efadf92fd673448ed56976100c6a7420eaafa7fb4849d8a577781a062e505a",
-      "pc4_backup_verified": false
-    },
-    "R112": {
-      "status": "TARGETED_INVENTORY_NO_SAFE_DELETION",
-      "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc6-targeted-storage-r112-20261028",
-      "manifest_sha256": "6b6c17854c31f1302f1b5bd450e380061cc4575ace1387ba0bdedce8a1651c21",
-      "no_deletion": true
-    },
-    "R626": {
-      "status": "CPU_COMPONENT_ADAPTATION_VERIFIED",
-      "source": "llama.cpp",
-      "source_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
-      "license": "MIT",
-      "detail": "shared per-token scalar Q8_K activation preparation; local CPU evidence only"
-    },
-    "R627": {
-      "status": "STRATA_HEAD_ADAPTATION_CPU_VERIFIED",
-      "source": "Strata",
-      "source_commit": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
-      "license": "MIT",
-      "detail": "13-token Hi prompt through 48 layers; no GPU/inter-PC"
-    },
-    "R630": {
-      "status": "LOCAL_CPU_SC117_GENERATION_REACHED_EOS",
-      "detail": "prompt Hi generated Hello! How can I help you today? and EOS in 10 tokens through 48 layers; 96 local workers closed; claims remain RESERVED_UNKNOWN_NO_REPLAY"
-    },
-    "R634": {
-      "status": "INCOMPATIBLE_REMOTE_MODES_REFUSED_BEFORE_R53",
-      "branch": "r634-preflight-before-r53-reservation-20261031",
-      "commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
-      "tests_pc1": 47,
-      "tests_pc6_debug_release": 21,
-      "gpu_executed": false,
-      "real_r53_used": false
-    },
-    "R635": {
-      "status": "PASS_PLAN_MISMATCH_REFUSED_BEFORE_RESERVATION",
-      "branch": "r635-plan-before-r53-reservation-20261031",
-      "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
-      "tests_pc1": 43,
-      "plan_only_invocations": 2,
-      "full_generation_invocations": 0,
-      "ip_socket_creation": "DENIED",
-      "synthetic_ledger_files": [],
-      "gpu_executed": false,
-      "real_r53_used": false,
-      "receipt": "research/R635/receipt.json",
-      "publication_commit": "deedb817a58c199a231686036e7a6bd8dfb80200",
-      "readback_hashes_verified": 7
-    },
-    "R636": {
-      "status": "PASS_PINNED_DONOR_SHAPE_GUARD_FAILS_CLOSED",
-      "branch": "r636-strata-shape-guard-20261031",
-      "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1",
-      "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
-      "donor_target_files_dirty": false,
-      "generated_patch_sha256": "2e86bbcb65ad6763cd9c47ec02a85da7ce3147ee50633e974ec5815f2f6bd10a",
-      "syntax_only_translation_units_passed": 4,
-      "shape_test_cases": [
-        "n_tok=0",
-        "n_tok=-1",
-        "n_tok=INT64_MAX"
-      ],
-      "hook_calls": 0,
-      "destination_unchanged": true,
-      "gpu_executed": false,
-      "network_worker_started": false,
-      "real_r53_used": false,
-      "generation_invocations": 0,
-      "receipt": "research/R636/receipt.json",
-      "next_action": "R637: inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU; keep GPU and real R53 suspended.",
-      "publication_commit": "8a8d9d346f3231a620fe26bd6e1f4d74ddf25b83",
-      "readback_hashes_verified": 8
-    }
-  },
+  "last_verified_results": [
+    "R637"
+  ],
   "active_operations": [],
   "next_action": {
-    "status": "R637_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU. No automatic relaunch; GPU and real R53 stay suspended pending separate admissions."
+    "status": "R638_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Wire the owned 48-layer callback context through an explicit Strata launcher handoff that preserves run/model/plan/layer/batch identity. The pinned generator currently leaves the candidate callback null. Keep live generation, GPU, inter-PC transport, and real R53 separately gated."
   },
-  "report": "research/R636/REPORT.md",
+  "report": "research/R637/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R636/PUBLISH_SHA256SUMS",

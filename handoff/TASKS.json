@@ -9735,5 +9735,14 @@
     "generation_invocations": 0,
     "receipt": "research/R636/receipt.json",
     "next_action": "R637: inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU; keep GPU and real R53 suspended."
+  },
+  "r637_pool_fleet_owner": {
+    "status": "PASS_CPU_CONTEXT_OWNER_LIFETIME_TEST; ACTUAL_GENERATOR_CALLBACK_NOT_INSTALLED",
+    "branch": "r637-strata-pool-owner-20261031",
+    "source_commit": "1f24dadb55403198f9bf64f34137cfff5c994cf5",
+    "report": "research/R637/REPORT.md",
+    "receipt": "research/R637/receipt.json",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R638: implement explicit launcher-to-Strata callback context handoff; do not treat this owner helper as a complete Strata integration."
   }
 }

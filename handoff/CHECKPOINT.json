@@ -4334,9 +4334,9 @@
   "automatic_retry": false,
   "automation": {
     "id": "voltafabric-recherches-et-exp-riences-r32",
-    "reason": "No independent ready CPU packaging task; GPU occupied and existing shared GPU coordination absent; stop unchanged polling per owner heartbeat instruction",
-    "rrule": "FREQ=HOURLY;INTERVAL=1",
-    "status": "PAUSED"
+    "reason": "Owner requested stopping automatic relaunch; resume only during an active owner-requested turn.",
+    "rrule": null,
+    "status": "STOPPED_BY_OWNER"
   },
   "candidate_not_integrated_into_pc1_canonical": true,
   "candidate_promoted": false,
