@@ -1,0 +1,33 @@
+{
+  "attempts": [
+    1,
+    2
+  ],
+  "batches": [
+    0,
+    1
+  ],
+  "epoch": 1,
+  "expert_source_sha256": "f87c08f36db743e4828c1b566c22174ce3da3507ba8e88e18b48440a0e8ac361",
+  "gpu": false,
+  "layer": 0,
+  "model_revision": "synthetic-r579",
+  "network": false,
+  "prior_test_name": "R579 with new identity, ledger and current binaries",
+  "purpose": "fresh local CPU worker validation of native write deadlines",
+  "replay": false,
+  "run_id": "r587-71f5208f810d4688b046a90becc026e6",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "max_workers": 2,
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "session_source_sha256": "64d81c53ade8290d54febcc8418a947cd39a32f846fc326d41af5b7b77929f10",
+  "test": ".runs/vf-r576-build/debug/deps/voltafabric-d9cbd7320ff0c051",
+  "test_name": "sc117_expert_source::tests::sticky_preflight_survives_acknowledged_local_worker_eviction",
+  "test_sha256": "ca1b35c1d28d66ea9766d79cd763e47d487eeb7bb2900ee56ddb10259d13a699",
+  "worker": ".runs/vf-r576-build/release/vf-rank-session",
+  "worker_sha256": "a61da8328d723b4265fe95a53dea15c14c76d63973b4ea51a311e04f66cdf907"
+}

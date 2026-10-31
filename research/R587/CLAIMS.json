@@ -1,0 +1,17 @@
+[
+  {
+    "file": "native-3db91762ba549210b8f22c207e05b7088f4e9919c6afab23bc29621b8e08364b.claim.json",
+    "raw": "{\"attempt\":2,\"stamp\":{\"batch\":1,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-bd024902bb8439e7fc26a160f929b2be0db907c9d1e566c389673b6b01d1a6ff\",\"run_id\":\"r587-71f5208f810d4688b046a90becc026e6\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "7147bed75d31dc89ba4d66ef34f56edb43478adbc774fbb7aeacef5ca325a62e"
+  },
+  {
+    "file": "native-5f92b96c5cefc354f62e108caa7b6e8e48adc1c526a43d5075d070a86f2d428d.claim.json",
+    "raw": "{\"attempt\":1,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-bd024902bb8439e7fc26a160f929b2be0db907c9d1e566c389673b6b01d1a6ff\",\"run_id\":\"r587-71f5208f810d4688b046a90becc026e6\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "f1e957b940a4b8242dcd029f693aa8ff634eb2784a83cb4d909ff8708abc1f1e"
+  },
+  {
+    "file": "native-evict-99e8a8b1a4a3594d149bb929d0293ad59a0ade41286209bc27904867f3383e59.claim.json",
+    "raw": "{\"attempt\":1,\"binding\":{\"blob_sha256\":\"2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0\",\"epoch\":1,\"expert\":2,\"index_sha256\":\"adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24\",\"layer\":0,\"local\":1,\"model_revision\":\"synthetic-r579\",\"rank\":2},\"operation_id\":\"99e8a8b1a4a3594d149bb929d0293ad59a0ade41286209bc27904867f3383e59\",\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-bd024902bb8439e7fc26a160f929b2be0db907c9d1e566c389673b6b01d1a6ff\",\"run_id\":\"r587-71f5208f810d4688b046a90becc026e6\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "d0d29cdc8c90f6e251a85388eff60746bd557f3931411d1edb5dbde5c74ce98e"
+  }
+]
