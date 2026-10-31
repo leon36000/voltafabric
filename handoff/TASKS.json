@@ -9681,8 +9681,7 @@
     "remote_content_verified": false,
     "pushed": false,
     "tls_verified_via_existing_tailscale_socks": true
-  }
-,
+  },
   "r635_plan_preflight": {
     "status": "PASS_PLAN_MISMATCH_REFUSED_BEFORE_RESERVATION",
     "branch": "r635-plan-before-r53-reservation-20261031",
