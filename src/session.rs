@@ -68,6 +68,8 @@ pub const CAPABILITY_ENGRAM_ROWS_RAW: &str = "cpu_engram_owner_rows_raw_v1";
 pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
+#[cfg(feature = "native-scalar-reference")]
+pub const CAPABILITY_NATIVE_SCALAR_GGML_CPU: &str = "cpu_strata_sc117_scalar_reference_fp16_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_EXTEND: &str = "cpu_strata_sc117_append_resident_v1";
 #[cfg(feature = "native-ggml-cpu")]
@@ -132,6 +134,14 @@ pub enum Request {
     },
     #[cfg(feature = "native-ggml-cpu")]
     LoadNativeGgmlRaw {
+        binding: crate::native_ggml_cpu::Binding,
+        index: String,
+        pack_bytes: u64,
+        artifact_bytes: u64,
+    },
+    /// Explicit experimental CPU reference; never an implicit vector fallback.
+    #[cfg(feature = "native-scalar-reference")]
+    LoadNativeScalarGgmlRaw {
         binding: crate::native_ggml_cpu::Binding,
         index: String,
         pack_bytes: u64,
@@ -324,6 +334,10 @@ pub enum Request {
 pub enum Reply {
     #[cfg(feature = "native-ggml-cpu")]
     NativeGgmlLoaded {
+        binding: crate::native_ggml_cpu::Binding,
+    },
+    #[cfg(feature = "native-scalar-reference")]
+    NativeScalarGgmlLoaded {
         binding: crate::native_ggml_cpu::Binding,
     },
     #[cfg(feature = "native-ggml-cpu")]
@@ -2727,6 +2741,10 @@ fn serve_impl(
                     #[cfg(feature = "native-ggml-cpu")]
                     if executor.is_none() {
                         hello.capabilities.push(CAPABILITY_NATIVE_GGML_CPU.into());
+                        #[cfg(feature = "native-scalar-reference")]
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_SCALAR_GGML_CPU.into());
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_RAW_F32.into());
@@ -2761,6 +2779,23 @@ fn serve_impl(
             )?;
             return Err(error);
         };
+        #[cfg(feature = "native-scalar-reference")]
+        let native_scalar_requested = matches!(&request, Request::LoadNativeScalarGgmlRaw { .. });
+        #[cfg(feature = "native-scalar-reference")]
+        let request = match request {
+            Request::LoadNativeScalarGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
+            } => Request::LoadNativeGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
+            },
+            other => other,
+        };
         #[cfg(feature = "native-ggml-cpu")]
         if (!native_owners.is_empty() || native_worker.is_some())
             && !matches!(
@@ -2786,6 +2821,10 @@ fn serve_impl(
         #[cfg(feature = "native-ggml-cpu")]
         let native_extending = matches!(&request, Request::ExtendNativeGgmlRaw { .. });
         match request {
+            #[cfg(feature = "native-scalar-reference")]
+            Request::LoadNativeScalarGgmlRaw { .. } => {
+                return Err(invalid("scalar load normalization failed"));
+            }
             #[cfg(feature = "native-ggml-cpu")]
             Request::LoadNativeGgmlRaw {
                 binding,
@@ -2807,6 +2846,16 @@ fn serve_impl(
                     || engram_resident.is_some()
                     || native_worker.is_some() != native_extending
                     || binding.rank != rank
+                    || native_owners.iter().any(|owner| {
+                        #[cfg(feature = "native-scalar-reference")]
+                        {
+                            owner.uses_vector() == native_scalar_requested
+                        }
+                        #[cfg(not(feature = "native-scalar-reference"))]
+                        {
+                            !owner.uses_vector()
+                        }
+                    })
                     || owner_count >= crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
                     || artifact_bytes > 4 * 1024 * 1024
                     || native_payload_bytes
@@ -2848,6 +2897,14 @@ fn serve_impl(
                         span,
                         bytes,
                     };
+                    #[cfg(feature = "native-scalar-reference")]
+                    if native_scalar_requested {
+                        return crate::native_ggml_cpu::Resident::load_scalar(
+                            &layout,
+                            blob,
+                            binding.clone(),
+                        );
+                    }
                     crate::native_ggml_cpu::Resident::load(&layout, blob, binding.clone())
                 })();
                 match loaded {
@@ -2864,6 +2921,13 @@ fn serve_impl(
                         match result {
                             Ok(()) => {
                                 native_payload_bytes += artifact_bytes;
+                                #[cfg(feature = "native-scalar-reference")]
+                                if native_scalar_requested {
+                                    send_reply(output, &Reply::NativeScalarGgmlLoaded { binding })?;
+                                } else {
+                                    send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
+                                }
+                                #[cfg(not(feature = "native-scalar-reference"))]
                                 send_reply(output, &Reply::NativeGgmlLoaded { binding })?;
                             }
                             Err(error) => send_reply(output, &Reply::Refused { error })?,
@@ -3895,6 +3959,55 @@ impl Session {
             _ => {
                 self.usable = false;
                 Err(invalid("native GGML load reply identity"))
+            }
+        }
+    }
+
+    /// Explicit diagnostic scalar CPU load; caller must bind this choice to its trusted plan.
+    /// No distributed execution, worker authentication or shared lease is established.
+    #[cfg(feature = "native-scalar-reference")]
+    pub fn load_native_scalar_ggml(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_SCALAR_GGML_CPU)
+            || binding.rank != self.rank
+            || bytes.len() > 4 * 1024 * 1024
+        {
+            return Err(invalid("native scalar capability, rank or size"));
+        }
+        let layout = crate::strata_native_layout::NativeLayout::parse_sc117_v3(index, pack_bytes)?;
+        let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+        if layout.index_sha256() != binding.index_sha256
+            || span.bytes != bytes.len() as u64
+            || sha256::hex(bytes) != binding.blob_sha256
+        {
+            return Err(invalid("native scalar index or payload digest"));
+        }
+        let request = Request::LoadNativeScalarGgmlRaw {
+            binding: binding.clone(),
+            index: index.to_owned(),
+            pack_bytes,
+            artifact_bytes: bytes.len() as u64,
+        };
+        let deadline = Instant::now() + timeout;
+        self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
+        match self.reply_until(deadline)? {
+            Reply::NativeScalarGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::Refused { error } => Err(error),
+            _ => {
+                self.usable = false;
+                Err(invalid("native scalar load reply identity"))
             }
         }
     }
@@ -10337,5 +10450,245 @@ mod a166_fp16_mode_tests {
         assert!(!session.is_usable());
         assert_eq!(collector.finish().unwrap_err().code, "BATCH_INCOMPLETE");
         stop(session);
+    }
+}
+
+#[cfg(all(test, feature = "native-scalar-reference"))]
+mod scalar_session_tests {
+    use super::*;
+    use std::{collections::BTreeMap, io::Cursor};
+
+    #[test]
+    fn coordinator_rejects_missing_scalar_capability_without_writing() {
+        use crate::native_ggml_cpu::Binding;
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        session
+            .hello
+            .capabilities
+            .push(CAPABILITY_NATIVE_GGML_CPU.into());
+        let binding = Binding {
+            model_revision: "test".into(),
+            rank: 2,
+            layer: 2,
+            expert: 0,
+            local: 0,
+            epoch: 1,
+            index_sha256: "0".repeat(64),
+            blob_sha256: "0".repeat(64),
+        };
+        let sent = session.traffic.bytes_sent;
+        assert!(session
+            .load_native_scalar_ggml(&binding, "", 0, &[], Duration::from_secs(1))
+            .is_err());
+        assert_eq!(session.traffic.bytes_sent, sent);
+        assert!(session.is_usable());
+    }
+
+    #[test]
+    fn mixed_session_load_refuses_before_reading_foreign_body() {
+        use crate::{native_ggml_cpu::Binding, strata_native_layout::NativeLayout};
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        for scalar_first in [false, true] {
+            let mut input = encode(&Request::Hello {
+                protocol: PROTOCOL,
+                rank: 2,
+            })
+            .unwrap();
+            for expert in [0u32, 1] {
+                let span = layout.expert(2, u64::from(expert)).unwrap();
+                let bytes = vec![0; span.bytes as usize];
+                let binding = Binding {
+                    model_revision: "mixed-test".into(),
+                    rank: 2,
+                    layer: 2,
+                    expert,
+                    local: expert,
+                    epoch: 1,
+                    index_sha256: layout.index_sha256().into(),
+                    blob_sha256: sha256::hex(&bytes),
+                };
+                let scalar = (expert == 0) == scalar_first;
+                let request = if scalar {
+                    Request::LoadNativeScalarGgmlRaw {
+                        binding,
+                        index: index.into(),
+                        pack_bytes: 50_292_326_400,
+                        artifact_bytes: bytes.len() as u64,
+                    }
+                } else {
+                    Request::LoadNativeGgmlRaw {
+                        binding,
+                        index: index.into(),
+                        pack_bytes: 50_292_326_400,
+                        artifact_bytes: bytes.len() as u64,
+                    }
+                };
+                input.extend(encode(&request).unwrap());
+                input.extend(bytes);
+            }
+            let mut reader = Cursor::new(input);
+            let mut output = Vec::new();
+            assert!(serve(&mut reader, &mut output).is_err());
+            assert!(reader.position() < reader.get_ref().len() as u64);
+            let mut replies = Cursor::new(output);
+            assert!(matches!(
+                read_message_with_len::<Reply>(&mut replies)
+                    .unwrap()
+                    .unwrap()
+                    .0,
+                Reply::Hello { .. }
+            ));
+            let first = read_message_with_len::<Reply>(&mut replies)
+                .unwrap()
+                .unwrap()
+                .0;
+            assert!(if scalar_first {
+                matches!(first, Reply::NativeScalarGgmlLoaded { .. })
+            } else {
+                matches!(first, Reply::NativeGgmlLoaded { .. })
+            });
+            assert!(matches!(
+                read_message_with_len::<Reply>(&mut replies)
+                    .unwrap()
+                    .unwrap()
+                    .0,
+                Reply::Refused { .. }
+            ));
+            assert!(read_message_with_len::<Reply>(&mut replies)
+                .unwrap()
+                .is_none());
+        }
+    }
+
+    #[test]
+    fn explicit_scalar_load_executes_through_session_and_collector() {
+        use crate::{
+            completion,
+            moe::{Choice, Collector, Registry, Replica, Stamp},
+            native_ggml_cpu::Binding,
+            routing::{self, RoutingProblem},
+            strata_native_layout::NativeLayout,
+        };
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let span = layout.expert(2, 255).unwrap();
+        let mut bytes = vec![0u8; span.bytes as usize];
+        let up = 2 * 640 * (2560 / 256) * 82;
+        for i in (0..up).step_by(82) {
+            bytes[i + 1] = 0x28;
+        }
+        for i in (up..bytes.len()).step_by(18) {
+            bytes[i + 1] = 0x28;
+        }
+        let binding = Binding {
+            model_revision: "scalar-session".into(),
+            rank: 2,
+            layer: 2,
+            expert: 255,
+            local: 0,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let stamp = Stamp {
+            run_id: "scalar-session".into(),
+            model_revision: "scalar-session".into(),
+            plan_id: "local-test".into(),
+            layer: 2,
+            batch: 0,
+            epoch: 1,
+        };
+        let problem = RoutingProblem {
+            hidden: 2560,
+            experts: vec![255],
+            routes: vec![vec![Choice {
+                expert: 255,
+                weight: 0.25,
+            }]],
+            registry: Registry {
+                epoch: 1,
+                copies: vec![Replica {
+                    expert: 255,
+                    rank: 2,
+                    local: 0,
+                }],
+            },
+            stamp,
+            preferred_owners: BTreeMap::new(),
+            resident_order: BTreeMap::from([(2, vec![0])]),
+        };
+        let dispatch = routing::dispatch(&problem).unwrap().ranks.remove(0);
+        let mut input = encode(&Request::Hello {
+            protocol: PROTOCOL,
+            rank: 2,
+        })
+        .unwrap();
+        input.extend(
+            encode(&Request::LoadNativeScalarGgmlRaw {
+                binding: binding.clone(),
+                index: index.into(),
+                pack_bytes: 50_292_326_400,
+                artifact_bytes: bytes.len() as u64,
+            })
+            .unwrap(),
+        );
+        input.extend(bytes);
+        input.extend(encode(&Request::SealNativeGgml).unwrap());
+        input.extend(
+            encode(&Request::ExecNativeGgml {
+                dispatch,
+                attempt: 1,
+                inputs: vec![(0, vec![0.001; 2560])],
+            })
+            .unwrap(),
+        );
+        input.extend(encode(&Request::Shutdown).unwrap());
+        let mut output = Vec::new();
+        serve(&mut Cursor::new(input), &mut output).unwrap();
+        let mut replies = Cursor::new(output);
+        let mut next = || {
+            read_message_with_len::<Reply>(&mut replies)
+                .unwrap()
+                .unwrap()
+                .0
+        };
+        match next() {
+            Reply::Hello { hello } => assert!(hello
+                .capabilities
+                .iter()
+                .any(|v| v == CAPABILITY_NATIVE_SCALAR_GGML_CPU)),
+            _ => panic!("missing hello"),
+        }
+        match next() {
+            Reply::NativeScalarGgmlLoaded { binding: b } => assert_eq!(b, binding),
+            _ => panic!("missing scalar acknowledgement"),
+        }
+        assert!(matches!(next(), Reply::NativeGgmlReady { experts: 1 }));
+        assert!(matches!(
+            next(),
+            Reply::Event {
+                event: WorkerEvent {
+                    event: EventKind::Started,
+                    ..
+                }
+            }
+        ));
+        let raw = match next() {
+            Reply::NativeGgmlResult { output } => output,
+            other => panic!("missing result: {other:?}"),
+        };
+        assert!(raw.fp16_bits.iter().any(|v| *v != 0));
+        let bits = raw.fp16_bits.clone();
+        let mut collector = Collector::from_routing(&problem).unwrap();
+        completion::accept_routed_output(1, raw, &mut collector).unwrap();
+        for (actual, bit) in collector.finish().unwrap()[0].iter().zip(bits) {
+            assert_eq!(*actual, completion::decode_fp16(bit).unwrap() * 0.25);
+        }
+        assert!(matches!(next(), Reply::Bye { .. }));
     }
 }

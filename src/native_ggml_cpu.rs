@@ -143,7 +143,7 @@ impl Resident {
     pub fn binding(&self) -> &Binding {
         &self.binding
     }
-    fn uses_vector(&self) -> bool {
+    pub(crate) fn uses_vector(&self) -> bool {
         matches!(self.owner, ResidentBackend::Vector(_))
     }
     fn gate_up_type(&self) -> i32 {

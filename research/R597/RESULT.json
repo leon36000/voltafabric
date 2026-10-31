@@ -1,0 +1,1 @@
+{"scope":"synthetic in-memory framed CPU session; no remote worker","library_debug":{"passed":145,"ignored":6},"library_release":{"passed":145,"ignored":6},"scalar_session_cases":3,"vector_only_check":"passed","clippy":"passed, historical dead_code allowed","scalar_dynamic_extension":false,"authenticated_plan":false,"gpu_or_network_qualified":false}
