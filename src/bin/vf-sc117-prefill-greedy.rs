@@ -708,6 +708,46 @@ fn optional_env(name: &str) -> Result<Option<String>, E> {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum NativeMath {
+    Vector,
+    Scalar,
+}
+impl NativeMath {
+    fn requires_expected(self, remote: bool) -> bool {
+        remote || self == Self::Scalar
+    }
+    fn validate_transport(self, remote: bool) -> Result<(), E> {
+        if remote && self == Self::Scalar {
+            return Err("scalar CPU backend is not qualified over SSH".into());
+        }
+        Ok(())
+    }
+    fn label(self) -> &'static str {
+        match self {
+            Self::Vector => "vector-ggml-v1",
+            Self::Scalar => "scalar-reference-ggml-v1",
+        }
+    }
+}
+fn parse_native_math(value: Option<&str>) -> Result<NativeMath, E> {
+    match value {
+        None | Some("vector") => Ok(NativeMath::Vector),
+        Some("scalar") if cfg!(feature = "native-scalar-reference") => Ok(NativeMath::Scalar),
+        _ => Err("unsupported or unavailable native CPU backend".into()),
+    }
+}
+fn backend_plan(base: &str, backend: NativeMath) -> String {
+    match backend {
+        NativeMath::Vector => base.to_owned(),
+        NativeMath::Scalar => {
+            let mut bytes = b"vf-sc117-scalar-reference-backend-v1\0".to_vec();
+            bytes.extend_from_slice(base.as_bytes());
+            format!("r600-{}", sha256::hex(&bytes))
+        }
+    }
+}
+
 // An external controller supplies the admitted plan. This comparison is not
 // itself a lease, attestation, or resource reservation.
 fn verify_expected_plan(plan: &str, expected: Option<&str>, remote: bool) -> Result<(), E> {
@@ -943,6 +983,7 @@ fn owners(
     index: &str,
     pack: &mut std::fs::File,
     layout: &NativeLayout,
+    backend: NativeMath,
 ) -> Result<Owners, E> {
     let mut sessions = Vec::new();
     let mut copies = Vec::new();
@@ -975,13 +1016,27 @@ fn owners(
                 index_sha256: INDEX_HASH.into(),
                 blob_sha256: preview.hashes[slot].clone(),
             };
-            session.load_native_ggml(
-                &bind,
-                index,
-                pack.metadata()?.len(),
-                &blob.bytes,
-                Duration::from_secs(30),
-            )?;
+            match backend {
+                NativeMath::Vector => session.load_native_ggml(
+                    &bind,
+                    index,
+                    pack.metadata()?.len(),
+                    &blob.bytes,
+                    Duration::from_secs(30),
+                )?,
+                NativeMath::Scalar => {
+                    #[cfg(feature = "native-scalar-reference")]
+                    session.load_native_scalar_ggml(
+                        &bind,
+                        index,
+                        pack.metadata()?.len(),
+                        &blob.bytes,
+                        Duration::from_secs(30),
+                    )?;
+                    #[cfg(not(feature = "native-scalar-reference"))]
+                    return Err("scalar backend not compiled".into());
+                }
+            }
             copies.push(Replica {
                 expert,
                 rank,
@@ -1077,6 +1132,7 @@ fn run() -> Result<(), E> {
     {
         return Err("invalid prompt tokens".into());
     }
+    let native_math = parse_native_math(optional_env("VF_SC117_NATIVE_BACKEND")?.as_deref())?;
     let trace_mode = match optional_env("VF_QSA_TRACE_LAYER")?.as_deref() {
         None => TraceMode::Off,
         Some("3") => TraceMode::Attention,
@@ -1130,6 +1186,7 @@ fn run() -> Result<(), E> {
         endpoints.insert(rank, endpoint);
     }
     require_remote_affinity(!host_digests.is_empty(), rank_affinity)?;
+    native_math.validate_transport(!host_digests.is_empty())?;
     if trace_qsa && !host_digests.is_empty() {
         return Err("QSA trace requires local CPU workers".into());
     }
@@ -1232,17 +1289,20 @@ fn run() -> Result<(), E> {
         &shared_lease,
         &r53_namespace,
     )?;
-    let plan_id = affinity_plan(
-        &batch_plan(
-            &trace_plan(&admission_plan(&base_plan_id), trace_mode),
-            batched_prompt,
+    let plan_id = backend_plan(
+        &affinity_plan(
+            &batch_plan(
+                &trace_plan(&admission_plan(&base_plan_id), trace_mode),
+                batched_prompt,
+            ),
+            rank_affinity,
         ),
-        rank_affinity,
+        native_math,
     );
     if plan_only {
         println!(
             "{}",
-            serde_json::json!({"plan_id":plan_id, "prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens)})
+            serde_json::json!({"plan_id":plan_id, "native_math_backend":native_math.label(), "prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens)})
         );
         return Ok(());
     }
@@ -1250,9 +1310,11 @@ fn run() -> Result<(), E> {
     verify_expected_plan(
         &plan_id,
         expected.as_deref(),
-        endpoints
-            .values()
-            .any(|v| v.argv.get(1).is_none_or(|arg| arg != "--guarded-local")),
+        native_math.requires_expected(
+            endpoints
+                .values()
+                .any(|v| v.argv.get(1).is_none_or(|arg| arg != "--guarded-local")),
+        ),
     )?;
     let lease_fd = if let Some(spec) = &shared_lease {
         let fd = optional_env("VF_SHARED_LEASE_FD")?
@@ -1345,7 +1407,15 @@ fn run() -> Result<(), E> {
         if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
             verify_shared_lease(spec, fd)?;
         }
-        let owners = owners(layer as u32, &seed, &endpoints, &index, &mut pack, &layout)?;
+        let owners = owners(
+            layer as u32,
+            &seed,
+            &endpoints,
+            &index,
+            &mut pack,
+            &layout,
+            native_math,
+        )?;
         if layer % 4 == 3 {
             let qsa = sc117_qsa_stage::Stage::load(
                 serde_json::from_str(qsa_manifests(id.layer).0)?,
@@ -1574,6 +1644,7 @@ fn run() -> Result<(), E> {
     }
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
     let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_affinity":rank_affinity,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
+    receipt["native_math_backend"] = serde_json::json!(native_math.label());
     if trace_qsa {
         if trace_bytes.len() != input_tokens.len() * trace_mode.words() * 4 {
             return Err("QSA trace incomplete".into());
@@ -1605,6 +1676,115 @@ mod tests {
         assert!(super::require_remote_affinity(true, true).is_ok());
         assert!(super::require_remote_affinity(true, false).is_err());
     }
+    #[cfg(feature = "native-scalar-reference")]
+    #[test]
+    fn scalar_seed_loading_uses_the_explicit_session_opcode() {
+        let index = include_str!("../../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let span = layout.expert(2, 0).unwrap();
+        assert_eq!(span.bytes, 1_971_200);
+        let seeds = Seeds {
+            ids: vec![0, 1],
+            hashes: vec![
+                "94ed1ed77bb5bbdd3136799a00c0ed4301802ceb3553185f621d3bd59b223c8e".into();
+                2
+            ],
+        };
+        let suffix = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        let path = format!(
+            ".runs/vf-r600-work/sparse-pack-{}-{suffix}",
+            std::process::id()
+        );
+        let mut pack = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .create_new(true)
+            .open(path)
+            .unwrap();
+        pack.set_len(50_292_326_400).unwrap();
+        let python = r#"import sys,json,os
+b=sys.stdin.buffer
+h=json.loads(b.readline())
+assert h['op']=='hello'
+print(json.dumps({'reply':'hello','hello':{'protocol':1,'rank':h['rank'],'arch':'test','os':'test','endian':'little','build':'test','capabilities':['cpu_f64_dense_moe_v1','cpu_strata_sc117_ggml_fp16_v1','cpu_strata_sc117_scalar_reference_fp16_v1'],'max_message_bytes':16777216,'pid':os.getpid()}}),flush=True)
+h=json.loads(b.readline()); assert h['op']=='load_native_scalar_ggml_raw'
+n=h['artifact_bytes']
+while n:
+ x=b.read(min(n,65536)); assert x; n-=len(x)
+print(json.dumps({'reply':'native_scalar_ggml_loaded','binding':h['binding']}),flush=True)
+h=json.loads(b.readline()); assert h['op']=='seal_native_ggml'
+print(json.dumps({'reply':'native_ggml_ready','experts':1}),flush=True)
+h=json.loads(b.readline()); assert h['op']=='shutdown'
+print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
+"#;
+        let endpoints = [2, 3]
+            .into_iter()
+            .map(|rank| {
+                (
+                    rank,
+                    Endpoint {
+                        rank,
+                        argv: vec!["python3".into(), "-c".into(), python.into()],
+                    },
+                )
+            })
+            .collect();
+        let owners = owners(
+            2,
+            &seeds,
+            &endpoints,
+            index,
+            &mut pack,
+            &layout,
+            NativeMath::Scalar,
+        )
+        .unwrap();
+        assert_eq!(owners.registry.copies.len(), 2);
+        for session in owners.sessions {
+            let receipt = session.close(Duration::from_secs(10));
+            assert_eq!(receipt.exit_code, Some(0));
+            assert_eq!(receipt.bye_execs, Some(0));
+        }
+    }
+
+    #[test]
+    fn scalar_backend_has_a_distinct_plan_and_requires_local_expected_plan() {
+        let base = format!("r576-{}", "a".repeat(64));
+        assert_eq!(backend_plan(&base, NativeMath::Vector), base);
+        let scalar = backend_plan(&base, NativeMath::Scalar);
+        assert_eq!(
+            scalar,
+            "r600-484f0177d81fc89ce4ed802eccc9abf178bda45cda900667b6a49edbcd2a1295"
+        );
+        assert_ne!(scalar, base);
+        assert_ne!(
+            scalar,
+            backend_plan(&format!("r576-{}", "b".repeat(64)), NativeMath::Scalar)
+        );
+        assert!(
+            verify_expected_plan(&scalar, None, NativeMath::Scalar.requires_expected(false))
+                .is_err()
+        );
+        assert!(verify_expected_plan(
+            &scalar,
+            Some(&scalar),
+            NativeMath::Scalar.requires_expected(false)
+        )
+        .is_ok());
+        assert!(NativeMath::Scalar.validate_transport(true).is_err());
+        assert!(NativeMath::Scalar.validate_transport(false).is_ok());
+        assert!(NativeMath::Vector.validate_transport(true).is_ok());
+        assert!(parse_native_math(Some("unsupported")).is_err());
+        assert_eq!(parse_native_math(None).unwrap(), NativeMath::Vector);
+        assert_eq!(
+            parse_native_math(Some("scalar")).is_ok(),
+            cfg!(feature = "native-scalar-reference")
+        );
+    }
+
     #[test]
     fn admission_preflight_changes_plan_identity() {
         let base = format!("r531-{}", "a".repeat(64));
