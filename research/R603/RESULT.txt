@@ -1,0 +1,7 @@
+
+running 1 test
+test sc117_layer_chain::scalar_observed_owner_tests::scalar_observed_three_experts_fresh_local_workers ... r603 pass: three observed experts, actual dynamic Owners, two guarded local workers, one complete collection
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 156 filtered out; finished in 8.07s
+
