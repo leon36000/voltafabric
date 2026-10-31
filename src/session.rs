@@ -4625,16 +4625,17 @@ impl Session {
             }
         };
         let deadline = Instant::now() + timeout;
-        for (index, dispatch, rows) in &selected {
-            if let Err(error) = sessions[*index].exec_native_ggml(
-                dispatch.clone(),
+        let participating: Vec<_> = selected.iter().map(|(index, _, _)| *index).collect();
+        for (index, dispatch, rows) in selected {
+            if let Err(error) = sessions[index].exec_native_ggml(
+                dispatch,
                 attempt,
-                rows.clone(),
+                rows,
                 &mut collector,
                 deadline.saturating_duration_since(Instant::now()),
                 unweighted_f32,
             ) {
-                for (i, _, _) in &selected {
+                for i in &participating {
                     sessions[*i].usable = false;
                 }
                 return Err(error);
@@ -10708,6 +10709,21 @@ mod scalar_session_tests {
         sessions[0].native_backend = Some(NativeBackend::Vector);
         sessions[1].native_backend = Some(NativeBackend::Vector);
         assert!(Session::validate_native_backends(&sessions).is_ok());
+        // Once a homogeneous batch is reserved, a stalled first rank must
+        // poison every participant, including the rank not yet contacted.
+        let error = Session::exec_native_ggml_batch(
+            &mut sessions,
+            &p,
+            &[vec![0.0; 2560]],
+            &ledger,
+            Duration::from_millis(100),
+        )
+        .unwrap_err();
+        assert_eq!(error.code, "SESSION_TIMEOUT");
+        assert!(sessions.iter().all(|s| !s.is_usable()));
+        assert!(sessions[0].traffic.bytes_sent > 0);
+        assert_eq!(sessions[1].traffic.bytes_sent, 0);
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 1);
     }
 
     #[test]

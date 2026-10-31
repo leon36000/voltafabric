@@ -1,0 +1,7 @@
+# R624 — supprimer la seconde copie des requêtes d’experts
+
+Le coordinateur avait déjà construit les activations nécessaires à chaque rang, puis clonait une seconde fois le dispatch et ces activations lors de l’envoi. Il transfère maintenant directement la propriété des objets préparés à la session ; seule une petite liste des indices participants est conservée pour l’invalidation collective en cas d’échec. Les routes, coefficients, ordre des slots, traitement des poids résidents et Collector ne changent pas. La première sélection des activations par rang subsiste. Ce changement réduit une copie temporaire explicite, sans revendication de gain de débit ou de mémoire mesurée.
+
+Le test de session utilise deux rangs synthétiques : après réservation, le premier ne répond pas, les deux sessions sont invalidées, le second n’a reçu aucun octet et un seul claim reste consommé. Les 150 tests de bibliothèque passent en debug et release, 10 essais explicites restent ignorés. Le contrôle de compilation vectoriel seul, Clippy ciblé (dead_code historique autorisé) et rustfmt passent. Aucun worker réel, GPU, réseau inter-PC, R53 ou UNKNOWN antérieur n’a été utilisé.
+
+Cette optimisation concerne la frontière CPU Session–Collector existante et ne qualifie pas un runtime donneur, un transport de production ou une génération distribuée. La réconciliation du registre partagé, la lease et les admissions restent nécessaires.

@@ -1,0 +1,15 @@
+{
+  "source_sha256": "eaee514ff10ca9d2d88b8095b8de531d8d48fb5381cd3f72ca502c4e106933d8",
+  "tests_debug": {
+    "passed": 150,
+    "ignored": 10
+  },
+  "tests_release": {
+    "passed": 150,
+    "ignored": 10
+  },
+  "vector_only_check": "pass",
+  "clippy": "pass, dead_code allowed",
+  "rustfmt": "pass",
+  "performance_measured": false
+}
