@@ -1067,6 +1067,100 @@ impl Segment {
             })
             .collect()
     }
+    /// Execute a single non-PLE GDN layer over a causal group. Missing experts
+    /// are admitted before dispatch; there is no eviction within this call.
+    /// Once a reservation is made, any error leaves the segment terminal.
+    pub fn advance_gdn_batch_with_source(
+        &mut self,
+        attempt: u64,
+        inputs: &[Vec<f32>],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
+        if self.cursor.poisoned
+            || self.layers.len() != 1
+            || inputs.is_empty()
+            || inputs.len() > 128
+            || attempt == 0
+            || attempt <= self.cursor.last_attempt
+            || self
+                .cursor
+                .position
+                .checked_add(inputs.len() as u64)
+                .is_none()
+            || inputs
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+            || !matches!(&self.layers[0].attention, Attention::Gdn(..))
+            || self.layers[0].ple.is_some()
+        {
+            return Err(invalid("GDN segment batch state, attempt or input"));
+        }
+        let position = self.cursor.position;
+        let mut stamp = self.base.clone();
+        stamp.batch = position;
+        self.cursor.poisoned = true;
+        let ticket = self.ledger.reserve_ticket(&stamp, attempt)?;
+        let layer = &mut self.layers[0];
+        let Attention::Gdn(gdn, post) = &mut layer.attention else {
+            unreachable!()
+        };
+        let batch =
+            sc117_bound_layer::RoutedBatch::prepare(gdn, post, &self.ledger, &ticket, inputs)?;
+        let mut selected = std::collections::BTreeSet::new();
+        let mut uses = Vec::with_capacity(inputs.len());
+        let mut source = Some(source);
+        for choices in batch.choices() {
+            layer
+                .owners
+                .ensure(&stamp, attempt, choices, &mut source, self.timeout)?;
+            let ids: Vec<_> = choices.iter().map(|c| c.expert).collect();
+            selected.extend(ids.iter().copied());
+            uses.push(ids);
+        }
+        let shared = batch.shared(&mut layer.shared)?;
+        let before: BTreeMap<_, _> = layer
+            .owners
+            .sessions
+            .iter()
+            .map(|s| (s.rank(), s.traffic.execs))
+            .collect();
+        let collected = batch.dispatch(
+            &mut layer.owners.sessions,
+            layer.owners.registry.clone(),
+            layer.owners.preferred.clone(),
+            layer.owners.order.clone(),
+            &self.ledger,
+            ticket,
+            self.timeout,
+        )?;
+        let committed = batch.commit(shared, collected)?;
+        if committed.residuals.len() != inputs.len()
+            || committed
+                .residuals
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+        {
+            return Err(invalid("GDN segment batch output"));
+        }
+        for (i, ids) in uses.iter().enumerate() {
+            for &expert in ids {
+                layer.last_used.insert(expert, position + i as u64 + 1);
+            }
+        }
+        layer.last_selected = selected.into_iter().collect();
+        layer.last_active_ranks = layer
+            .owners
+            .sessions
+            .iter()
+            .filter(|s| before.get(&s.rank()).is_some_and(|n| s.traffic.execs > *n))
+            .map(|s| s.rank())
+            .collect();
+        self.cursor.last_batch_start = Some(position);
+        self.cursor.position += inputs.len() as u64;
+        self.cursor.last_attempt = attempt;
+        self.cursor.poisoned = false;
+        Ok(committed.residuals)
+    }
     /// Execute one QSA layer on a causal group of positions. Missing experts are
     /// loaded through the caller's bounded source before any dispatch. There is
     /// no eviction in this operation: insufficient budget fails closed. Once

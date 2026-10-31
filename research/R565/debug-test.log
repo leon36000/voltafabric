@@ -1,0 +1,183 @@
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling cfg-if v1.0.5
+   Compiling linux-raw-sys v0.12.1
+   Compiling bitflags v2.13.2
+   Compiling rustix v1.1.5
+   Compiling getrandom v0.4.3
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.23
+   Compiling vf-ggml-native-ffi v0.1.0 (/home/pc1/NAOS/vf-r565-work/crates/ggml-native-ffi)
+   Compiling fastrand v2.5.0
+   Compiling memchr v2.8.3
+   Compiling foldhash v0.2.0
+   Compiling allocator-api2 v0.2.21
+   Compiling itoa v1.0.18
+   Compiling once_cell v1.21.4
+   Compiling equivalent v1.0.2
+   Compiling tempfile v3.27.0
+   Compiling hashbrown v0.16.1
+   Compiling serde_json v1.0.151
+   Compiling serde v1.0.229
+   Compiling num-integer v0.1.47
+   Compiling num-bigint v0.4.6
+   Compiling safetensors v0.8.0
+   Compiling voltafabric v0.1.0 (/home/pc1/NAOS/vf-r565-work)
+warning: fields `input` and `output` are never read
+   --> src/sc117_layer_chain.rs:128:5
+    |
+127 | struct CapturedQsa {
+    |        ----------- fields in this struct
+128 |     input: Vec<f32>,
+    |     ^^^^^
+129 |     output: sc117_qsa_stage::Output,
+    |     ^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `voltafabric` (lib test) generated 1 warning
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 8.17s
+     Running unittests src/lib.rs (target/debug/deps/voltafabric-8a4ec911330750c6)
+
+running 138 tests
+test base64::tests::rfc4648_vectors ... ok
+test checkpoint::file_tests::fifo_open_is_nonblocking_before_file_type_check ... ok
+test completion::tests::exact_output_cap_precedes_allocation ... ok
+test completion::tests::fp16_encoder_matches_independent_python_struct_oracle ... ok
+test completion::tests::output_shape_arithmetic_does_not_wrap ... ok
+test deepseek_v41::a100_shared_artifact_tests::all_six_planes_share_one_immutable_safetensors_allocation ... ok
+test deepseek_v41::a101_shared_shard_tests::every_projection_plane_for_multiple_experts_shares_one_backing_allocation ... ok
+test deepseek_v41::a103_official_shard_header_tests::pinned_full_shard_header_matches_the_multi_expert_name_parser ... ok
+test deepseek_v41::a104_official_mtp_shard_header_tests::all_pinned_mtp_headers_match_the_namespace_parser_and_official_schema ... ok
+test deepseek_v41::a104_official_mtp_shard_header_tests::backbone_and_mtp_planes_share_the_single_immutable_shard_backing ... ok
+test deepseek_v41::a105_full_pinned_expert_index_tests::pinned_full_index_expert_names_have_exact_backbone_and_mtp_coverage ... ok
+test deepseek_v41::a125_qpn2_conversion_tests::exact_e4m3_power_codes_cover_normal_and_subnormal_scales ... ok
+test deepseek_v41::a125_qpn2_conversion_tests::ordered_kernel_half_steps_match_independent_fp4_dyadics_and_edges ... ok
+test deepseek_v41::a125_qpn2_conversion_tests::qpn2_conversion_preserves_every_code_coordinate_on_a_small_adversarial_plane ... ok
+test engram::partition_tests::bounded_row_cache_binds_full_identity_and_evicts_oldest_without_exceeding_capacity ... ok
+test engram::partition_tests::decoded_owner_reconstruction_does_not_hash_payload_twice ... ok
+test engram::partition_tests::engram_cache_insert_batch_profile ... ignored, explicit cold-insert CPU/RSS profile; set VF_CACHE_PROFILE_ROWS and VF_CACHE_INSERT_VARIANT
+test engram::partition_tests::engram_cache_rss_profile ... ignored, explicit Linux RSS profile; run separately for each VF_CACHE_PROFILE_ROWS
+test engram::partition_tests::immutable_shard_frame_path_hashes_payload_once_and_matches_public_encoder ... ok
+test engram::partition_tests::mutable_owner_reconstruction_still_rehashes_and_rejects_mutation ... ok
+test engram::partition_tests::owned_verified_decode_reads_payload_from_consumed_frame_allocation ... ok
+test engram::partition_tests::owner_partition_preserves_input_order_duplicates_and_empty_owners ... ok
+test engram::partition_tests::owner_query_deduplication_keeps_first_occurrence_order ... ok
+test engram::partition_tests::partitioned_reconstruction_accepts_sparse_frames_and_reorders_exactly ... ok
+test engram::partition_tests::partitioned_reconstruction_refuses_missing_and_empty_owner_frames ... ok
+test engram::partition_tests::row_cache_batch_insert_matches_scalar_fifo_and_identity ... ok
+test engram::partition_tests::row_cache_batch_insert_rejects_invalid_batch_before_mutation ... ok
+test engram::partition_tests::row_cache_batch_lookup_preserves_order_duplicates_and_identity ... ok
+test engram::partition_tests::row_cache_interns_each_identity_once_and_releases_it_after_eviction ... ok
+test engram::partition_tests::row_cache_refuses_bad_rows_and_treats_subrow_capacity_as_disabled ... ok
+test engram::partition_tests::row_cache_retains_identity_when_fifo_evicts_its_last_row ... ok
+test moe::fp16_collector_tests::fp16_batch_retains_quarter_of_f64_completion_payload ... ok
+test native_ggml_cpu::grouped_execution_tests::grouping_is_stable_and_preserves_every_original_index ... ok
+test native_ggml_cpu::grouped_execution_tests::grouping_matches_independent_bucket_oracle_for_all_small_plans ... ok
+test native_ledger::pinned_directory_tests::claim_is_created_in_pinned_directory_if_path_is_replaced ... ok
+test process::batch_tests::batch_callback_runs_once_and_publishes_unweighted_rows_in_slot_order ... ok
+test process::batch_tests::duplicate_stale_epoch_and_old_attempt_faults_preserve_their_distinct_identities ... ok
+test process::batch_tests::invalid_or_failed_batch_computation_publishes_no_partial_completions ... ok
+test process::batch_tests::oversized_or_overflowing_batch_is_rejected_before_callback_and_start ... ok
+test process::batch_tests::rejection_does_not_invoke_batch_callback_or_start_execution ... ok
+test process::batch_tests::reversed_slots_keep_identity_and_missing_fault_withholds_a_whole_result ... ok
+test qpn2::destination_tests::direct_destinations_preserve_all_opaque_bytes ... ok
+test qpn2::destination_tests::exact_destination_lengths_are_checked_atomically ... ok
+test qpn2::destination_tests::invalid_source_does_not_change_either_destination ... ok
+test resident::a145_admission_tests::a145_bad_gate_up_and_down_keep_the_exact_refusal_without_rescans ... ok
+test resident::a145_admission_tests::a145_empty_rank_retains_zero_payload_and_needs_no_numeric_scan ... ok
+test resident::a145_admission_tests::a145_epoch_rebinding_readmits_and_keeps_old_dispatch_ineligible ... ok
+test resident::a145_admission_tests::a145_gate_up_failure_still_precedes_a_distinct_down_failure ... ok
+test resident::a145_admission_tests::a145_load_scans_once_per_projection_and_batches_never_rescan ... ok
+test resident::a145_admission_tests::a145_source_changes_revision_and_epoch_do_not_reuse_an_old_admission ... ok
+test resident::boundary_tests::exact_cap_includes_f32_tile_factor_bytes_without_allocating_payloads ... ok
+test resident::boundary_tests::payload_addition_and_factor_multiplication_are_checked ... ok
+test resident_artifact::tests::a_header_that_changes_length_is_rebuilt_with_its_new_length ... ok
+test resident_artifact::tests::failed_partial_staging_never_publishes_final_file ... ok
+test resident_artifact::tests::safetensors_output_is_made_canonical_without_a_second_file_buffer ... ok
+test resident_artifact::tests::streamed_canonical_check_matches_full_encoding_for_mutations ... ok
+test sc117_expert_origin::tests::cached_origin_digest_skips_reads_and_refuses_changed_source ... ok
+test sc117_expert_origin::tests::joins_independent_expert_slices_and_rejects_bounds ... ok
+test sc117_expert_origin::tests::observed_format_geometry ... ok
+test sc117_expert_source::tests::acknowledged_release_changes_accounting_once_only ... ok
+test sc117_expert_source::tests::budget_is_bounded_and_overflow_safe ... ok
+test sc117_expert_source::tests::placement_rejects_registry_mismatch_and_balances_deterministically ... ok
+test sc117_expert_source::tests::rank_capabilities_must_match_the_configured_rank_set ... ok
+test sc117_layer_chain::tests::alternate_rank_plan_drives_real_local_workers ... ignored, requires VF_TEST_RANK_SESSION and creates fresh non-replayable CPU claims
+test sc117_layer_chain::tests::alternate_rank_preserves_nonzero_local_results ... ignored, requires VF_TEST_RANK_SESSION and creates fresh non-replayable CPU claims
+test sc117_layer_chain::tests::eviction_plan_is_bounded_and_preserves_last_resident_per_rank ... ok
+test sc117_layer_chain::tests::headroom_preflight_is_overflow_safe_and_only_triggers_on_pressure ... ok
+test sc117_layer_chain::tests::headroom_uses_existing_capacity_or_a_feasible_alternate_without_sending_evictions ... ok
+test sc117_layer_chain::tests::invalid_input_and_repeated_attempt_are_refused_before_reservation ... ok
+test sc117_layer_chain::tests::later_failure_poisons_segment_and_exposes_no_partial_output ... ok
+test sc117_layer_chain::tests::least_recent_order_is_deterministic_and_prefers_unused ... ok
+test sc117_layer_chain::tests::model_chain_refuses_to_skip_required_layer_one_ple ... ok
+test sc117_layer_chain::tests::observation_is_released_only_after_every_layer_commits ... ok
+test sc117_layer_chain::tests::ple_history_commits_only_after_success_and_uses_previous_tokens ... ok
+test sc117_layer_chain::tests::rank_headroom_is_planned_before_global_evictions ... ok
+test sc117_layer_chain::tests::sequential_residuals_and_fresh_claims_across_tokens ... ok
+test sc117_layer_chain::tests::size_fallback_finds_a_feasible_unequal_payload_plan ... ok
+test sc117_layer_chain::tests::source_cannot_substitute_another_expert_and_is_skipped_for_residents ... ok
+test schedule::budget_tests::completed_and_not_ready_jobs_still_consume_scan_budget ... ok
+test schedule::budget_tests::final_makespan_scan_consumes_the_remaining_budget ... ok
+test schedule::budget_tests::resources_are_charged_before_validation_allocation ... ok
+test session::a155_completion_batch_latch_tests::a154_per_exec_capability_keeps_sending_the_opt_in_each_time ... ok
+test session::a155_completion_batch_latch_tests::fp16_completion_encoding_requires_and_sets_the_explicit_capability ... ok
+test session::a155_completion_batch_latch_tests::session_batch_capability_sends_one_opt_in_per_worker_session ... ok
+test session::a165_fp16_session_frame_tests::fp16_batch_roundtrips_little_endian_bits_and_requires_opt_in ... ok
+test session::a165_fp16_session_frame_tests::fp16_reader_rejects_bad_shape_truncation_nonfinite_and_oversize ... ok
+test session::a165_fp16_session_frame_tests::fp16_writer_chunks_bounded_frames_and_sends_fewer_bytes_than_f64 ... ok
+test session::a165_fp16_session_frame_tests::fp16_writer_frame_bound_counts_the_header_newline ... ok
+test session::a165_fp16_session_frame_tests::fp16_writer_preflights_all_rows_before_emitting_any_frame ... ok
+test session::a166_fp16_mode_tests::exec_refused_reply_invalidates_closed_worker_session ... ok
+test session::a166_fp16_mode_tests::fp16_exec_rejects_legacy_f64_completion_batches ... ok
+test session::a166_fp16_mode_tests::fp16_exec_rejects_legacy_f64_completion_events ... ok
+test session::a169_raw_fp16_activation_tests::fp16_activation_decoder_preserves_signed_zero_subnormal_and_finite_edges ... ok
+test session::a169_raw_fp16_activation_tests::fp16_activation_decoder_rejects_bad_lengths_nonfinite_and_oversized_frames ... ok
+test session::a55_raw_activation_tests::raw_activation_decoder_checks_sizes_before_reading ... ok
+test session::a55_raw_activation_tests::raw_activation_decoder_preserves_f64_bits ... ok
+test session::a56_raw_completion_tests::completion_frame_is_never_longer_than_json_and_keeps_bits ... ok
+test session::a56_raw_completion_tests::json_completion_frames_remain_accepted_without_negotiation ... ok
+test session::a56_raw_completion_tests::maximum_valid_hidden_row_fits_the_completion_frame_bound ... ok
+test session::a56_raw_completion_tests::raw_completion_batch_rejects_bad_shapes_truncation_and_nonfinite_values ... ok
+test session::a56_raw_completion_tests::raw_completion_batch_requires_negotiation_and_preserves_f64_bits ... ok
+test session::a56_raw_completion_tests::raw_completion_batch_writer_chunks_at_the_session_limit ... ok
+test session::a56_raw_completion_tests::raw_completion_batch_writer_respects_a_small_frame_bound ... ok
+test session::a56_raw_completion_tests::raw_completion_combined_header_and_body_bound_is_checked_before_reading ... ok
+test session::a56_raw_completion_tests::raw_completion_is_refused_unsolicited_truncated_nonfinite_or_oversized ... ok
+test session::a56_raw_completion_tests::raw_completion_round_trips_bits_and_identity ... ok
+test session::a64_engram_reply_tests::owner_reply_reads_exact_raw_body_and_binds_attempt_and_request ... ok
+test session::a64_engram_reply_tests::owner_reply_refuses_unsolicited_stale_truncated_and_oversized_frames ... ok
+test session::a73_engram_reconstruction_tests::sorted_miss_index_maps_reordered_and_duplicate_requests ... ok
+test session::a78_engram_row_ids_tests::negotiated_row_id_format_never_sends_a_larger_request ... ok
+test session::a78_engram_row_ids_tests::production_varint_request_path_profile ... ignored, explicit A78 production request-codec profile
+test session::a78_engram_row_ids_tests::raw_row_id_reader_checks_declared_bounds_and_truncated_bodies ... ok
+test session::a78_engram_row_ids_tests::request_builder_negotiates_raw_varints_and_retains_legacy_json ... ok
+test session::a78_engram_row_ids_tests::row_id_varint_reader_accepts_exact_limit_and_rejects_one_over_before_read ... ok
+test session::a78_engram_row_ids_tests::row_id_varints_refuse_truncation_overflow_overlong_and_count_mismatch ... ok
+test session::a78_engram_row_ids_tests::row_id_varints_round_trip_u64_boundaries_and_order ... ok
+test session::a78_engram_row_ids_tests::worker_decodes_raw_ids_before_dispatch_and_closes_on_truncated_body ... ok
+test session::mxfp4::admission_tests::a_descendant_holding_stdin_does_not_retain_the_payload_after_timeout ... ok
+test session::mxfp4::admission_tests::actual_header_length_and_value_overflow_refuse_before_body_read ... ok
+test session::mxfp4::admission_tests::an_idle_collector_applies_backpressure_to_control_frame_floods ... ok
+test session::mxfp4::admission_tests::cumulative_body_budget_is_consumed_before_a_second_allocation ... ok
+test session::mxfp4::admission_tests::duplicate_logical_expert_refuses_before_start_and_any_provider_call ... ok
+test session::mxfp4::admission_tests::full_identity_is_checked_before_a_raw_body_read ... ok
+test session::mxfp4::admission_tests::inherited_output_handles_cannot_keep_reader_threads_after_close_or_drop ... ok
+test session::mxfp4::admission_tests::logical_route_uniqueness_keeps_shared_experts_and_selected_replicas_valid ... ok
+test session::mxfp4::admission_tests::producer_and_library_identity_refuse_before_read_without_consuming_budget ... ok
+test session::mxfp4::bf16_wire_tests::all_finite_patterns_roundtrip_without_numeric_conversion ... ok
+test session::mxfp4::bf16_wire_tests::nonfinite_and_inexact_values_are_rejected_atomically ... ok
+test session::mxfp4::bf16_wire_tests::original_decoded_cap_and_metadata_reject_before_any_body_read ... ok
+test session::mxfp4::reader_budget_tests::client_reader_does_not_relabel_or_retry_io_errors ... ok
+test session::mxfp4::reader_budget_tests::client_reader_exact_domain_and_sentinel_counts ... ok
+test session::mxfp4::reader_budget_tests::client_reader_preserves_short_reads_and_digest_failure ... ok
+test session::native_raw_f32_tests::raw_f32_refuses_wrong_length_truncation_and_nonfinite ... ok
+test session::native_raw_f32_tests::raw_f32_roundtrip_is_bit_exact_and_bound_to_header ... ok
+test session::native_raw_f32_tests::traffic_counter_preserves_legacy_json_when_unused ... ok
+test session::native_raw_f32_tests::truncated_raw_body_refuses_and_ends_the_session ... ok
+test sha256::tests::nist_example_vectors ... ok
+test sha256::tests::padding_boundaries ... ok
+
+test result: ok. 133 passed; 0 failed; 5 ignored; 0 measured; 0 filtered out; finished in 11.14s
+
