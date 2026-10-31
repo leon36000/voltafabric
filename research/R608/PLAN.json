@@ -1,0 +1,25 @@
+{
+  "engine_plan_id": "r600-24498628aa5e7846f93dce55daeb38042481f8093c023c9ddb57f8af34babcc0",
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r443-work/manifest.json": "436066427aaca7f163943b3f0f00c98cb59ddb5df7b2fa410b90d474ab1fe824",
+    "/home/pc1/NAOS/vf-r608-work/PREPARED.json": "954952dc73112746ca9a836678a1045ad2f85349c93b72e0cd140c0be4bf7318",
+    "/home/pc1/NAOS/vf-r608-work/PROMPT.json": "110b1ae3e7b6103dbf92d6b607f9975fb4fe060f94c0fe890799e35936056f60",
+    "/home/pc1/NAOS/vf-r608-work/adapters/strata_tokenizer/adapter.py": "715bf33484dce075f5de18d5174129e753a9a5448f7ab1904306e5983534d240",
+    "/home/pc1/NAOS/vf-r608-work/adapters/strata_tokenizer/observed-sc117.json": "6a625b74d2db4b359947fb37b0aaa8c1088375e41d846b6cdbfd8bb2ba126b6d",
+    "/home/pc1/NAOS/vf-r608-work/adapters/strata_tokenizer/prompt_runner.py": "dba09f9cb42ef6b16d27bc41e4cc9076da6d1bfd612a52d4204fda3a57a31dcd",
+    "/home/pc1/NAOS/vf-r608-work/adapters/strata_tokenizer/vendor/strata_tokenizer.py": "9b0327e25aa62754406a924db6cc137e6edb1d93c7af76a4f3d14a8920ea72c8",
+    "/home/pc1/NAOS/vf-r608-work/target/release/vf-rank-session": "b3195f7f4b36256d1a2700fa53c65b1a45df3eb61a8d0fefebdfc99380ad8fdd",
+    "/home/pc1/NAOS/vf-r608-work/target/release/vf-sc117-prefill-greedy": "80eb18e5bdd35e5e9cf64538fae69f94dfd66e968f72f27f684939aa995cf280"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "scope": {
+    "cpu_quota": 200,
+    "memory_high_gib": 11,
+    "memory_max_gib": 13,
+    "swap_gib": 0,
+    "tasks_max": 320
+  },
+  "submit_sha256": "8edebc8524c16004fe0a1b9b210564ac6da66d59114dd29976b083543e8d77ef",
+  "unknown_never_replay": true
+}
