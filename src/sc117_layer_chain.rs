@@ -261,6 +261,7 @@ impl Layer {
         if identity.layer >= 48 || identity.layer % 4 == 3 || gdn.next_token() != 0 {
             return Err(invalid("invalid initial GDN layer"));
         }
+        Session::validate_native_backends(&owners.sessions)?;
         Ok(Self {
             identity,
             attention: Attention::Gdn(gdn, post),
@@ -282,6 +283,7 @@ impl Layer {
         if identity.layer >= 48 || identity.layer % 4 != 3 || !qsa.is_empty() {
             return Err(invalid("invalid initial QSA layer"));
         }
+        Session::validate_native_backends(&owners.sessions)?;
         Ok(Self {
             identity,
             attention: Attention::Qsa(qsa, ffn),
@@ -800,6 +802,7 @@ impl Segment {
                 return Err(invalid("segment layer identity or owners"));
             }
         }
+        Session::validate_native_backends(layers.iter().flat_map(|layer| &layer.owners.sessions))?;
         let base = Stamp {
             run_id: first.identity.run_id.clone(),
             model_revision: first.identity.model_revision.clone(),

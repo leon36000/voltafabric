@@ -4531,6 +4531,22 @@ impl Session {
         }
     }
 
+    /// Coordinator-side consistency check; backend labels are not attestation
+    /// and do not establish cross-host numerical equivalence. All-unknown is
+    /// retained for legacy session providers; mixed known/unknown is refused.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub(crate) fn validate_native_backends<'a>(
+        sessions: impl IntoIterator<Item = &'a Session>,
+    ) -> Result<()> {
+        let mut modes = sessions.into_iter().map(|s| s.native_backend);
+        if let Some(first) = modes.next() {
+            if modes.any(|mode| mode != first) {
+                return Err(invalid("native backend mismatch"));
+            }
+        }
+        Ok(())
+    }
+
     #[cfg(feature = "native-ggml-cpu")]
     fn collect_native_ggml_batch(
         sessions: &mut [Session],
@@ -4588,6 +4604,7 @@ impl Session {
                 .collect::<Vec<_>>();
             selected.push((matches[0].0, rank, rows));
         }
+        Self::validate_native_backends(selected.iter().map(|(index, _, _)| &sessions[*index]))?;
         let mut collector = moe::Collector::from_routing(problem)?;
         claim_identity(&problem.stamp, false)?;
         let attempt = match ticket {
@@ -10590,6 +10607,102 @@ mod a166_fp16_mode_tests {
 mod scalar_session_tests {
     use super::*;
     use std::{collections::BTreeMap, io::Cursor};
+
+    #[test]
+    fn mixed_native_backends_are_refused_before_claim_and_write() {
+        use crate::moe::{Choice, Registry, Replica, Stamp};
+        use crate::routing::RoutingProblem;
+        let endpoint = |rank| Endpoint {
+            rank,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut sessions = vec![
+            Session::spawn(&endpoint(2)).unwrap(),
+            Session::spawn(&endpoint(3)).unwrap(),
+        ];
+        sessions[0].native_backend = Some(NativeBackend::Scalar);
+        sessions[1].native_backend = Some(NativeBackend::Vector);
+        for session in &mut sessions {
+            session
+                .hello
+                .capabilities
+                .push(CAPABILITY_NATIVE_GGML_CPU.into());
+        }
+        let p = RoutingProblem {
+            hidden: 2560,
+            experts: vec![10, 11],
+            routes: vec![vec![
+                Choice {
+                    expert: 10,
+                    weight: 0.5,
+                },
+                Choice {
+                    expert: 11,
+                    weight: 0.5,
+                },
+            ]],
+            registry: Registry {
+                epoch: 1,
+                copies: vec![
+                    Replica {
+                        expert: 10,
+                        rank: 2,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 11,
+                        rank: 3,
+                        local: 0,
+                    },
+                ],
+            },
+            stamp: Stamp {
+                run_id: "r613-mixed-test".into(),
+                model_revision: "synthetic".into(),
+                plan_id: "mixed".into(),
+                layer: 0,
+                batch: 0,
+                epoch: 1,
+            },
+            preferred_owners: BTreeMap::new(),
+            resident_order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+        };
+        let dir = std::env::temp_dir().join(format!(
+            "vf-r613-mixed-{}-{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir(&dir).unwrap();
+        let ledger = crate::native_ledger::NativeBatchLedger::open(&dir).unwrap();
+        let err = Session::exec_native_ggml_batch(
+            &mut sessions,
+            &p,
+            &[vec![0.0; 2560]],
+            &ledger,
+            Duration::from_millis(100),
+        )
+        .unwrap_err();
+        assert!(
+            err.message.contains("native backend mismatch"),
+            "{}",
+            err.message
+        );
+        assert!(sessions.iter().all(|s| s.traffic.bytes_sent == 0));
+        assert_eq!(std::fs::read_dir(&dir).unwrap().count(), 0);
+        sessions[1].native_backend = None;
+        assert!(Session::validate_native_backends(&sessions).is_err());
+        sessions[0].native_backend = None;
+        assert!(Session::validate_native_backends(&sessions).is_ok());
+        sessions[0].native_backend = Some(NativeBackend::Scalar);
+        sessions[1].native_backend = Some(NativeBackend::Scalar);
+        assert!(Session::validate_native_backends(&sessions).is_ok());
+        sessions[0].native_backend = Some(NativeBackend::Vector);
+        sessions[1].native_backend = Some(NativeBackend::Vector);
+        assert!(Session::validate_native_backends(&sessions).is_ok());
+    }
 
     #[test]
     fn scalar_extension_preserves_worker_identity_and_rejects_mixing() {
