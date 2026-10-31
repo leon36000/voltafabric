@@ -1,0 +1,42 @@
+{
+  "status": "PASS_PINNED_DONOR_SHAPE_GUARD_FAILS_CLOSED",
+  "host": "pc1",
+  "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+  "donor_target_files_dirty": false,
+  "generator_exact_patch_check": true,
+  "generated_patch_sha256": "2e86bbcb65ad6763cd9c47ec02a85da7ce3147ee50633e974ec5815f2f6bd10a",
+  "syntax_only_translation_units_passed": 4,
+  "test_mode": "extracted_shape_guard_only",
+  "invalid_token_counts": [
+    0,
+    -1,
+    "INT64_MAX"
+  ],
+  "hook_calls": 0,
+  "destination_unchanged": true,
+  "invalid_dispatches_failed": true,
+  "resource_scope": {
+    "MemoryMax": "768M",
+    "MemorySwapMax": 0,
+    "TasksMax": 16,
+    "CPUQuota": "100%",
+    "timeout_seconds": 120,
+    "nice": 10
+  },
+  "pc1_naos_free_bytes_before": 50576617472,
+  "pc1_memavailable_kib_before": 32410616,
+  "pc1_swapfree_kib_before": 28537624,
+  "vf_rank_session_after": "none",
+  "gpu_executed": false,
+  "network_worker_started": false,
+  "real_r53_used": false,
+  "generation_invocations": 0,
+  "failed_harness_attempts": [
+    {
+      "cause": "shape test initially selected the full donor branch and referenced a non-copied forbidden-stubs file",
+      "result": "compile failed before test execution; no donor source changed, no worker or GPU started"
+    }
+  ],
+  "branch": "r636-strata-shape-guard-20261031",
+  "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1"
+}

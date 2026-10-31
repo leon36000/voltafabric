@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T21:23:46Z",
+  "updated_utc": "2026-10-31T21:28:18Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -18,14 +18,12 @@
   },
   "current_wave": [
     {
-      "id": "R635",
+      "id": "R636",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
-      "branch": "r635-plan-before-r53-reservation-20261031",
-      "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
-      "path": "research/R635",
-      "commit": "deedb817a58c199a231686036e7a6bd8dfb80200",
-      "published_utc": "2026-10-31T21:23:46Z"
+      "state": "LOCAL_PC1_DONOR_GUARD_VERIFIED_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+      "branch": "r636-strata-shape-guard-20261031",
+      "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1",
+      "path": "research/R636"
     }
   ],
   "acceptance": [
@@ -196,18 +194,40 @@
       "receipt": "research/R635/receipt.json",
       "publication_commit": "deedb817a58c199a231686036e7a6bd8dfb80200",
       "readback_hashes_verified": 7
+    },
+    "R636": {
+      "status": "PASS_PINNED_DONOR_SHAPE_GUARD_FAILS_CLOSED",
+      "branch": "r636-strata-shape-guard-20261031",
+      "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1",
+      "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+      "donor_target_files_dirty": false,
+      "generated_patch_sha256": "2e86bbcb65ad6763cd9c47ec02a85da7ce3147ee50633e974ec5815f2f6bd10a",
+      "syntax_only_translation_units_passed": 4,
+      "shape_test_cases": [
+        "n_tok=0",
+        "n_tok=-1",
+        "n_tok=INT64_MAX"
+      ],
+      "hook_calls": 0,
+      "destination_unchanged": true,
+      "gpu_executed": false,
+      "network_worker_started": false,
+      "real_r53_used": false,
+      "generation_invocations": 0,
+      "receipt": "research/R636/receipt.json",
+      "next_action": "R637: inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU; keep GPU and real R53 suspended."
     }
   },
   "active_operations": [],
   "next_action": {
-    "status": "R636_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Wire the actual Strata PoolMultiFn callback into the VoltaFabric boundary and verify on CPU with an independent oracle. No automatic relaunch; GPU and production R53 stay suspended pending distinct admissions."
+    "status": "R636_PRIVATE_GITLAB_PUBLICATION",
+    "purpose": "Publish the reviewed shape guard, donor test, proof, receipt and handoff on a branch from R635; then investigate actual Strata PoolMultiFn context installation on CPU only. No automatic relaunch, GPU, production network, or real R53."
   },
-  "report": "research/R635/REPORT.md",
-  "operating_mode": "No automatic relaunch; owner-requested bounded CPU/source work only. GPU and production network remain suspended without fresh admissions.",
+  "report": "research/R636/REPORT.md",
+  "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R635/PUBLISH_SHA256SUMS",
-    "sha256": "74eebb060070615e7d481ed27679ffd7bc600de8dd92f719d2eaf332708a042c",
-    "files": 7
+    "path": "research/R636/PUBLISH_SHA256SUMS",
+    "sha256": "8f6ca8929ff367c155be7dd7d5e9d3d53b77c032afac31fa7f2cc2fa88a87c69",
+    "files": 8
   }
 }

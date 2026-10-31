@@ -34,7 +34,8 @@ old = '''    if (d.lookahead != nullptr) d.lookahead->submit(d.layers, x_f, n_to
 '''
 new = '''    if (d.vf_cpu_pool != nullptr) {
         // This first candidate refuses all other expert owners before launching them.
-        if (!x_f || !ids || !out || k < 1 || k > 64 || n_tok * k > kMaxWindowEntries ||
+        if (!x_f || !ids || !out || k < 1 || k > 64 || n_tok < 1 ||
+            n_tok > kMaxWindowEntries / k ||
             d.layers < 0 || d.layers >= 48 || d.n_expert != 512 || d.fs != nullptr ||
             d.peer != nullptr || d.remote_count != 0 || d.lookahead != nullptr || d.pcie_num != 0) {
             d.failed = true; d.fail = "VoltaFabric requires a CPU-only expert plan"; d.fail_layer = d.layers; return;
