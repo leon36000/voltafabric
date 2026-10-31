@@ -2853,3 +2853,264 @@ for i in range(2):
         assert_eq!(owners.order[&2], vec![0]);
     }
 }
+
+#[cfg(all(test, feature = "native-scalar-reference", unix))]
+mod scalar_real_owner_tests {
+    use super::*;
+    use crate::{
+        completion,
+        moe::{Choice, Replica},
+        native_ggml_cpu::{scalar_reference, Binding},
+        sc117_expert_origin::Origin,
+        sc117_expert_source::{Config, Identity as SourceIdentity, Seed, Source},
+        session::Endpoint,
+        sha256,
+        strata_native_layout::{NativeLayout, VerifiedNativeExpert},
+    };
+    use std::{io::Write, os::unix::fs::FileExt, path::Path};
+
+    #[test]
+    #[ignore = "fresh plan and single-use local worker claims required"]
+    fn scalar_real_owners_admit_and_collect_once() {
+        const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        const PACK: u64 = 50_292_326_400;
+        const SHARD: u64 = 55_063_448_064;
+        const N: usize = 2_176_000;
+        let worker = std::env::var("VF_R602_WORKER").unwrap();
+        let worker_sha = std::env::var("VF_R602_WORKER_SHA256").unwrap();
+        let plan = std::env::var("VF_R602_PLAN").unwrap();
+        let run = std::env::var("VF_R602_RUN").unwrap();
+        let ledger_path = std::env::var("VF_R602_LEDGER").unwrap();
+        let outdir = std::env::var("VF_R602_OUTDIR").unwrap();
+        assert!(
+            Path::new(&worker).is_absolute()
+                && Path::new(&ledger_path).is_absolute()
+                && Path::new(&outdir).is_absolute()
+        );
+        assert!(sha256::is_hex_digest(&worker_sha) && sha256::is_hex_digest(&plan));
+        assert_eq!(sha256::hex(&std::fs::read(&worker).unwrap()), worker_sha);
+        let layout = NativeLayout::parse_sc117_v3(INDEX, PACK).unwrap();
+        let sparse = |name: &str, len| {
+            let path = std::env::temp_dir().join(format!("vf-r602-{}-{name}", std::process::id()));
+            let f = std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(path)
+                .unwrap();
+            f.set_len(len).unwrap();
+            f
+        };
+        let mut pack = sparse("pack", PACK);
+        let shard = sparse("shard", SHARD);
+        let mut blob = vec![0u8; N];
+        for i in (0..1_254_400).step_by(98) {
+            blob[i + 1] = 0x28;
+        }
+        for i in (1_254_400..N).step_by(18) {
+            blob[i + 1] = 0x28;
+        }
+        let digest = sha256::hex(&blob);
+        assert_eq!(
+            digest,
+            "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0"
+        );
+        let layer = &layout.layers()[0];
+        for expert in 0..=2u64 {
+            pack.write_all_at(&blob, layout.expert(0, expert).unwrap().offset)
+                .unwrap();
+            for (base, offset, len) in [
+                (layer.gguf_offsets[0], 0, 627_200),
+                (layer.gguf_offsets[1], 627_200, 627_200),
+                (layer.gguf_offsets[2], 1_254_400, 921_600),
+            ] {
+                shard
+                    .write_all_at(&blob[offset..offset + len], base + expert * len as u64)
+                    .unwrap();
+            }
+        }
+        let origin = Origin::open(shard, &layout).unwrap();
+        let seeds = [
+            Seed {
+                layer: 0,
+                expert: 0,
+                rank: 2,
+                local: 0,
+            },
+            Seed {
+                layer: 0,
+                expert: 1,
+                rank: 3,
+                local: 0,
+            },
+        ];
+        let plan_id = format!("r602-{plan}");
+        let model = "synthetic-r602";
+        let mut source = Source::new(
+            &mut pack,
+            &layout,
+            INDEX,
+            origin,
+            Config {
+                identity: SourceIdentity {
+                    run_id: run.clone(),
+                    model_revision: model.into(),
+                    plan_id: plan_id.clone(),
+                    epoch: 1,
+                },
+                ranks: vec![2, 3],
+                seeds: &seeds,
+                limit: 32 * N as u64,
+            },
+        )
+        .unwrap();
+        let stamp = Stamp {
+            run_id: run,
+            model_revision: model.into(),
+            plan_id,
+            layer: 0,
+            batch: 0,
+            epoch: 1,
+        };
+        let bind = |rank, expert, local| Binding {
+            model_revision: model.into(),
+            rank,
+            layer: 0,
+            expert,
+            local,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: digest.clone(),
+        };
+        let timeout = Duration::from_secs(30);
+        let mut sessions = Vec::new();
+        for (rank, expert) in [(2, 0), (3, 1)] {
+            let endpoint = Endpoint {
+                rank,
+                argv: vec![
+                    worker.clone(),
+                    "--guarded-local".into(),
+                    "--expected-exe-sha256".into(),
+                    worker_sha.clone(),
+                ],
+            };
+            let mut session = Session::connect(&endpoint, timeout).unwrap();
+            session
+                .load_native_scalar_ggml(&bind(rank, expert, 0), INDEX, PACK, &blob, timeout)
+                .unwrap();
+            session.seal_native_ggml(1, timeout).unwrap();
+            sessions.push(session);
+        }
+        let mut owners = Owners {
+            sessions,
+            registry: Registry {
+                epoch: 1,
+                copies: vec![
+                    Replica {
+                        expert: 0,
+                        rank: 2,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 1,
+                        rank: 3,
+                        local: 0,
+                    },
+                ],
+            },
+            preferred: BTreeMap::new(),
+            order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+        };
+        let ledger = NativeBatchLedger::open(Path::new(&ledger_path)).unwrap();
+        let ticket = ledger.reserve_ticket(&stamp, 1).unwrap();
+        let choices = vec![
+            crate::sc117_router_cpu::Choice {
+                expert: 1,
+                weight: 0.5,
+                logit: 0.0,
+            },
+            crate::sc117_router_cpu::Choice {
+                expert: 2,
+                weight: 0.5,
+                logit: 0.0,
+            },
+        ];
+        owners
+            .ensure(&stamp, 1, &choices, &mut Some(&mut source), timeout)
+            .unwrap();
+        assert!(owners
+            .registry
+            .copies
+            .iter()
+            .any(|r| r.expert == 2 && r.rank == 2));
+        assert_eq!(owners.order[&2], vec![0, 1]);
+        let problem = crate::routing::RoutingProblem {
+            hidden: 2560,
+            experts: vec![0, 1, 2],
+            routes: vec![vec![
+                Choice {
+                    expert: 1,
+                    weight: 0.5,
+                },
+                Choice {
+                    expert: 2,
+                    weight: 0.5,
+                },
+            ]],
+            registry: owners.registry.clone(),
+            stamp: stamp.clone(),
+            preferred_owners: BTreeMap::new(),
+            resident_order: owners.order.clone(),
+        };
+        let input = vec![0.001f32; 2560];
+        let result = Session::exec_native_ggml_reserved(
+            &mut owners.sessions,
+            &problem,
+            &[input.clone()],
+            &ledger,
+            ticket,
+            timeout,
+        )
+        .unwrap();
+        let reference = scalar_reference(
+            &layout,
+            &VerifiedNativeExpert {
+                layer: 0,
+                expert: 1,
+                span: layout.expert(0, 1).unwrap(),
+                bytes: blob,
+            },
+            &bind(3, 1, 0),
+            &input,
+        )
+        .unwrap();
+        assert!(result.rows()[0].iter().any(|v| v.abs() > 1e-8));
+        for (got, expected) in result.rows()[0].iter().zip(&reference) {
+            let bit = completion::encode_fp16(f64::from(*expected as f32)).unwrap();
+            let decoded = completion::decode_fp16(bit).unwrap();
+            assert_eq!(*got, decoded * 0.5 + decoded * 0.5);
+        }
+        for (name, values) in [
+            ("oracle.f64", reference.as_slice()),
+            ("collector.f64", result.rows()[0].as_slice()),
+        ] {
+            let path = Path::new(&outdir).join(name);
+            let mut file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(path)
+                .unwrap();
+            for v in values {
+                file.write_all(&v.to_le_bytes()).unwrap();
+            }
+            file.sync_all().unwrap();
+        }
+        for session in owners.sessions {
+            let receipt = session.close(timeout);
+            assert!(
+                !receipt.killed && receipt.exit_code == Some(0) && receipt.bye_execs == Some(1)
+            );
+        }
+        println!("r602 pass: actual dynamic Owners admission, two guarded workers, one complete nonzero collection");
+    }
+}

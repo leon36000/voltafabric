@@ -1,0 +1,35 @@
+{
+  "attempts": [
+    1
+  ],
+  "batches": [
+    0
+  ],
+  "epoch": 1,
+  "expert_source_sha256": "6fbe9e5add7aad58248bda7bed492d65852d06de34400864d64987acbcb2bfba",
+  "gpu": false,
+  "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+  "layer": 0,
+  "layer_source_sha256": "c4c2c7868d53307be44ed35cb4c918b3d3b88b0f645c42d8c62564a66e964b1f",
+  "model_revision": "synthetic-r602",
+  "native_source_sha256": "4c30a1aedc53933446b2e18261dd1df7da70ed2499c6869ae77fb41bb4527d42",
+  "network": false,
+  "purpose": "fresh synthetic local CPU dynamic Owners admission through guarded scalar workers and independently checked collection",
+  "replay": false,
+  "run_id": "r602-f36786d8e0b0418c85fee8bf414b5a63",
+  "runner_sha256": "498ef4fae640f7bffa78aef71e44728f1042bc58d6528786168b3a34ae36d3ba",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "max_workers": 2,
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "session_source_sha256": "bf044295d9e850696b30ed60972bcd41a0b9a506efcb1057750183aa08a0adff",
+  "test": ".runs/vf-r602-build/debug/deps/voltafabric-266db965fc6fcf4c",
+  "test_name": "sc117_layer_chain::scalar_real_owner_tests::scalar_real_owners_admit_and_collect_once",
+  "test_sha256": "07cc8f103e0a1906f0eebd43d978b4bda14d5d4be61b8f41d7242d4e7b96fb78",
+  "verifier_sha256": "c1a300bd8252079e29200068e218ff252acce9698fcf4e8772a7f80a8cdd7479",
+  "worker": ".runs/vf-r602-build/debug/vf-rank-session",
+  "worker_sha256": "76df720649b6deaf7fde2b85f7ba7368be96e2ae780986b6ae641ef44273c430"
+}

@@ -1,0 +1,7 @@
+[
+  {
+    "file": "native-3778674d9f9c0bba5f1fe949ba06c4958fd635ca18d301a019f9959411f3e0e0.claim.json",
+    "raw": "{\"attempt\":1,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r602\",\"plan_id\":\"r602-dc84f1858455c5c4b0d9a12dcc69a1c84e7314338e5247e6528ba48a24856e6e\",\"run_id\":\"r602-f36786d8e0b0418c85fee8bf414b5a63\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "fa46a097a255981c90e453a859fb0fc73e9b6a1f196543f9851f51eda2d65334"
+  }
+]
