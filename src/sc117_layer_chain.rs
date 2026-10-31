@@ -1107,35 +1107,8 @@ impl Segment {
         inputs: &[Vec<f32>],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
+        self.validate_token_batch(attempt, tokens, inputs)?;
         let position = self.cursor.position;
-        if self.cursor.poisoned
-            || self.layers.is_empty()
-            || inputs.is_empty()
-            || inputs.len() > 128
-            || tokens.len() != inputs.len()
-            || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
-            || attempt == 0
-            || attempt <= self.cursor.last_attempt
-            || position.checked_add(inputs.len() as u64).is_none()
-            || inputs
-                .iter()
-                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
-            || self.layers.iter().any(|layer| {
-                layer
-                    .ple
-                    .as_ref()
-                    .is_some_and(|p| p.state.position != position)
-                    || match &layer.attention {
-                        Attention::Gdn(gdn, _) => gdn.next_token() != position,
-                        Attention::Qsa(qsa, _) => {
-                            u64::try_from(qsa.len()).ok() != Some(position)
-                                || !qsa.batch_fits(inputs.len())
-                        }
-                    }
-            })
-        {
-            return Err(invalid("multi-layer batch state, attempt or input"));
-        }
         let original_layer = self.base.layer;
         let previous_attempt = self.cursor.last_attempt;
         let previous_batch_start = self.cursor.last_batch_start;
@@ -1168,6 +1141,77 @@ impl Segment {
         self.cursor.last_attempt = attempt;
         self.cursor.poisoned = false;
         Ok(residuals)
+    }
+    #[cfg(feature = "ple-cpu-qualification")]
+    fn validate_token_batch(
+        &self,
+        attempt: u64,
+        tokens: &[i32],
+        inputs: &[Vec<f32>],
+    ) -> Result<()> {
+        let position = self.cursor.position;
+        if self.cursor.poisoned
+            || self.layers.is_empty()
+            || inputs.is_empty()
+            || inputs.len() > 128
+            || tokens.len() != inputs.len()
+            || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
+            || attempt == 0
+            || attempt <= self.cursor.last_attempt
+            || position.checked_add(inputs.len() as u64).is_none()
+            || inputs
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+            || self.layers.iter().any(|layer| {
+                layer
+                    .ple
+                    .as_ref()
+                    .is_some_and(|p| p.state.position != position)
+                    || match &layer.attention {
+                        Attention::Gdn(gdn, _) => gdn.next_token() != position,
+                        Attention::Qsa(qsa, _) => {
+                            u64::try_from(qsa.len()).ok() != Some(position)
+                                || !qsa.batch_fits(inputs.len())
+                        }
+                    }
+            })
+        {
+            return Err(invalid("multi-layer batch state, attempt or input"));
+        }
+        Ok(())
+    }
+    /// Between complete layer-major batches, free accounted expert payload to
+    /// a caller-supplied headroom target. Preflight precedes any eviction.
+    #[cfg(feature = "ple-cpu-qualification")]
+    pub fn advance_token_batch_with_headroom(
+        &mut self,
+        attempt: u64,
+        tokens: &[i32],
+        inputs: &[Vec<f32>],
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        headroom_bytes: u64,
+        max_evictions: usize,
+    ) -> Result<(Vec<Vec<f32>>, Vec<EvictionReceipt>)> {
+        self.validate_token_batch(attempt, tokens, inputs)?;
+        let global_target =
+            headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?;
+        let rank_options = if let Some(limits) = source.rank_limits() {
+            rank_headroom_options(limits, source.rank_used_bytes(), headroom_bytes)?
+        } else {
+            vec![None]
+        };
+        let receipts = if global_target.is_some() || rank_options.iter().all(Option::is_some) {
+            self.evict_to_targets(
+                source,
+                global_target.unwrap_or(source.used_bytes()),
+                max_evictions,
+                &rank_options,
+            )?
+        } else {
+            Vec::new()
+        };
+        let output = self.advance_token_batch_with_source(attempt, tokens, inputs, source)?;
+        Ok((output, receipts))
     }
     /// Execute a single non-PLE GDN layer over a causal group. Missing experts
     /// are admitted before dispatch; there is no eviction within this call.
