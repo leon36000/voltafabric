@@ -1,0 +1,92 @@
+{
+  "activation": "/home/pc1/NAOS/vf-r612-witness/activation.f32",
+  "activation_sha256": "effe20798ae776df9992528760132c39eab7cfa5f9e06f576012f215249abc1e",
+  "binary_sha256": "527da0e98dbdb7449069416e5c2b58b42cfc27750eda642554c3d219a80a6613",
+  "experts": [
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-136.bin",
+      "blob_sha256": "4afdad83a3af091e94d0b4265dda2bd8f905aa818b831940cd34e9009d205511",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-136.bin",
+      "capture_sha256": "928ba1aec5df602c4f1b71ac3969e49d13dd06374c3ec27483556a4274ae2998",
+      "id": 136
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-317.bin",
+      "blob_sha256": "f5714f3b62a17ed4e9f812e905eb978ae8f91c1ef7a8cebc8fa9fe42b7c42d35",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-317.bin",
+      "capture_sha256": "0f9e6cd2442026e90f0a33d138124ef9f738c59f823ae025cc8499ebd0773c68",
+      "id": 317
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-77.bin",
+      "blob_sha256": "4c2fee7f5f2128f8acc3c644169d2d47e106bf53f7b8f76d9f4def7ba9c346fb",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-77.bin",
+      "capture_sha256": "36199ae6d93c4416419ddb76c282e470e72e4c8f19e34741296d6b4cb41b4d41",
+      "id": 77
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-257.bin",
+      "blob_sha256": "72331450edfab4d94b6e6e0fdca6f40e811fbfb6da3d1f371754527c6b80ca1d",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-257.bin",
+      "capture_sha256": "8e2706846bc4820ac7e6a89812d70d067910dff3ae8469beb31d102513568e14",
+      "id": 257
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-175.bin",
+      "blob_sha256": "f277de1ae0ecee1b82e108ad8a573c92e24b9db74d3dd91169d1b0e66b5c8d7f",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-175.bin",
+      "capture_sha256": "95221b41584754a861eb2781592d185a7df6803cf1e3396df895ee2c9f5dc4a7",
+      "id": 175
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-414.bin",
+      "blob_sha256": "d3ac7f1e77dd59092aac4db08b5d3dd7c7db5e00d93e48480e69dbf5a07a4276",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-414.bin",
+      "capture_sha256": "28eb3e72a74b32da49911b1c3d27582bd00677969fc843b1f219990534c763e1",
+      "id": 414
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-373.bin",
+      "blob_sha256": "f665692c081f9b3adcd3dc5e75401035fe930ab36c746fa530e146931fe594d5",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-373.bin",
+      "capture_sha256": "1f3a4590fb29a85583cff7abb9f17ee9486f3b0715b87a61b96db7f4309241d0",
+      "id": 373
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-142.bin",
+      "blob_sha256": "682f89850023e924ba9924309c9cc9559ae744d17f5cd6e0c10758a410c5ccd1",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-142.bin",
+      "capture_sha256": "68eb277346a3edf238f7384e273df20a82f848816ca654946f86a4fe223a97fd",
+      "id": 142
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-2.bin",
+      "blob_sha256": "b428f2d34ca933aa7c89b4f6fe87db30a575000d44fcbd4eeac1185cbe3eac60",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-2.bin",
+      "capture_sha256": "64277ef0182f23df9624ecbb8c8b33ca7eb4de012eecdb185d50be75dc90fdfc",
+      "id": 2
+    },
+    {
+      "blob": "/home/pc1/NAOS/vf-r612-witness/expert-226.bin",
+      "blob_sha256": "ab47298249651d73228d2661919d087826d107f7989f0fd104f26e8d9efd8b4c",
+      "capture": "/home/pc1/NAOS/vf-r612-pairs/expert-226.bin",
+      "capture_sha256": "0fc18651b52c11d16cce537385b5f2a0a6f7cd7c53e2c851ca12f93cc8ca7983",
+      "id": 226
+    }
+  ],
+  "gpu": false,
+  "network_worker": false,
+  "runner_sha256": "cdec76efe6bb9f886bc9b07588dee8a2c0f5a267aad2b3ff823a989e6e57ded8",
+  "scope": {
+    "cpu_quota_percent": 50,
+    "memory_max_bytes": 536870912,
+    "swap_max_bytes": 0,
+    "tasks_max": 16
+  },
+  "source_sha256": {
+    "/home/pc1/NAOS/vf-r627-work/project/adapters/native_ggml/scalar_reference.cpp": "e9fb41312513d68e09132e86de3fb80b629df77f6e05a7b21bb20dbf07d897bd",
+    "/home/pc1/NAOS/vf-r627-work/project/adapters/native_ggml/scalar_reference.hpp": "e4a2b46a4e47bc1976dc0dc00d46de470da8a3b834cb88191bee50e1b8b6d5b8",
+    "/home/pc1/NAOS/vf-r627-work/project/adapters/native_ggml/scalar_reference_c.cpp": "dca22df2c792912ec81fa451a57ba77fd4a3a0eb96b360502f42c3e8becf5b88",
+    "/home/pc1/NAOS/vf-r627-work/research/R627/check_pc1.cpp": "09dfb14e16da6992f4afccc198469fcbc31d2f7c17df120761f68eab3a190b0e"
+  }
+}

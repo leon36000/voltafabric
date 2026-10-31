@@ -1,0 +1,19 @@
+{
+  "backend": "scalar-reference-ggml-v1",
+  "claims": {
+    "batches": 336,
+    "evictions": 1145
+  },
+  "compared_with_r622": true,
+  "generated_token_ids": [
+    9419
+  ],
+  "gpu": false,
+  "head_sha256": "9ca04e1de0988eb14786f56f65cda4e81332c24b9ee480fdc3c22fdf6ca56813",
+  "network_worker": false,
+  "plan_id": "r600-f3ae724e513398d68d76bcd9b2621154e23115e76c9a339150da71ddd0ab2c4f",
+  "readmissions": 184,
+  "receipt_sha256": "89ff0cd906951ae6658dae82582f49c6e756021a7081a92bde3ef1dcd2122f5b",
+  "run_id": "r494-prefill-greedy-3581597-1793422911181006142",
+  "workers_closed": 96
+}

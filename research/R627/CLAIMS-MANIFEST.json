@@ -1,0 +1,16 @@
+{
+  "original_sha256": "3a6f69c197c5e3d36d06c29516ed9a2f6c9ef6032d174b1a3db13332105dda29",
+  "count": 1481,
+  "parts": [
+    {
+      "path": "CLAIMS-0.json",
+      "sha256": "e0a2af25ab8e6b2235b3f20459b8e024e1e019487e4500a90789987fe0b628d4",
+      "count": 740
+    },
+    {
+      "path": "CLAIMS-1.json",
+      "sha256": "6d473613516faaa7311b841cbc75d45c18122c230cf1965b05e8ac2d0841ddfe",
+      "count": 741
+    }
+  ]
+}
