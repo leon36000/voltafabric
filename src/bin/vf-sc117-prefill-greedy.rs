@@ -714,6 +714,24 @@ fn consume_namespace(_: &Namespace, _: &str, _: &SharedLease) -> Result<(), E> {
     Err("R53 namespace requires Linux".into())
 }
 
+/// Check both pinned authorities together at each distributed boundary.
+/// A successful check does not prevent a later replacement or prove cooperation.
+fn verify_runtime_admission(
+    lease: Option<&SharedLease>,
+    fd: Option<i32>,
+    namespace: Option<&Namespace>,
+) -> Result<(), E> {
+    match (lease, fd, namespace) {
+        (None, None, None) => Ok(()),
+        (Some(spec), Some(fd), Some(namespace)) => {
+            verify_shared_lease(spec, fd)?;
+            drop(open_namespace(namespace)?);
+            Ok(())
+        }
+        _ => Err("incomplete distributed admission".into()),
+    }
+}
+
 fn optional_env(name: &str) -> Result<Option<String>, E> {
     match std::env::var(name) {
         Ok(value) => Ok(Some(value)),
@@ -1418,9 +1436,7 @@ fn run() -> Result<(), E> {
             layer: layer as u32,
             epoch: 1,
         };
-        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
-            verify_shared_lease(spec, fd)?;
-        }
+        verify_runtime_admission(shared_lease.as_ref(), lease_fd, r53_namespace.as_ref())?;
         let owners = owners(
             layer as u32,
             &seed,
@@ -1516,9 +1532,7 @@ fn run() -> Result<(), E> {
     let mut current_token = prompt_tokens[0];
     let mut pos = 0;
     while pos < prompt_tokens.len() + max_new_tokens - 1 {
-        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
-            verify_shared_lease(spec, fd)?;
-        }
+        verify_runtime_admission(shared_lease.as_ref(), lease_fd, r53_namespace.as_ref())?;
         if batched_prompt && pos + 1 < prompt_tokens.len() {
             let tokens = &prompt_tokens[pos..pos + 2];
             let mut batch_inputs = Vec::with_capacity(2);
@@ -1613,9 +1627,7 @@ fn run() -> Result<(), E> {
                 768,
             )?
         };
-        if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
-            verify_shared_lease(spec, fd)?;
-        }
+        verify_runtime_admission(shared_lease.as_ref(), lease_fd, r53_namespace.as_ref())?;
         evictions.extend(removed);
         if segment.position() != pos as u64 + 1 || segment.is_poisoned() {
             return Err("segment did not commit complete position".into());
@@ -2715,7 +2727,7 @@ print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
     #[test]
     fn shared_lease_requires_exact_descriptor_and_exclusive_lock() {
         use std::os::fd::AsRawFd;
-        use std::os::unix::fs::MetadataExt;
+        use std::os::unix::fs::{DirBuilderExt, MetadataExt};
         let name = format!(
             "vf-test-lease-{}-{}",
             std::process::id(),
@@ -2741,6 +2753,34 @@ print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
         assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_err());
         rustix::fs::flock(&file, rustix::fs::FlockOperation::NonBlockingLockExclusive).unwrap();
         assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_ok());
+        let ledger = path.with_extension("ledger");
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&ledger)
+            .unwrap();
+        let lm = std::fs::metadata(&ledger).unwrap();
+        let namespace = Namespace {
+            root: ledger.to_str().unwrap().into(),
+            dev: lm.dev(),
+            ino: lm.ino(),
+            uid: lm.uid(),
+            base_id: "r53-runtime123".into(),
+        };
+        assert!(verify_runtime_admission(None, None, None).is_ok());
+        assert!(verify_runtime_admission(Some(&spec), None, Some(&namespace)).is_err());
+        assert!(
+            verify_runtime_admission(Some(&spec), Some(file.as_raw_fd()), Some(&namespace)).is_ok()
+        );
+        std::fs::rename(&ledger, ledger.with_extension("ledger-original")).unwrap();
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&ledger)
+            .unwrap();
+        assert!(verify_shared_lease(&spec, file.as_raw_fd()).is_ok());
+        assert!(
+            verify_runtime_admission(Some(&spec), Some(file.as_raw_fd()), Some(&namespace))
+                .is_err()
+        );
         let other = std::fs::OpenOptions::new()
             .read(true)
             .write(true)

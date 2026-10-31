@@ -1,0 +1,9 @@
+{
+  "source_sha256": "8f5f4a86b8b265a694684fa59aa0bc34753cf656918b955fdcc460522d74d458",
+  "coordinator_tests_debug": 17,
+  "coordinator_tests_release": 17,
+  "targeted_clippy": "pass, dead_code allowed",
+  "rustfmt": "pass",
+  "gpu": false,
+  "network_worker": false
+}
