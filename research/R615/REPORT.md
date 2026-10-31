@@ -1,0 +1,13 @@
+# R615 — poids empruntés par le backend scalaire
+
+L'ABI C du fournisseur scalaire recopiait les poids et l'entrée dans de nouveaux vecteurs à chaque calcul d'expert, alors que le résident Rust conserve déjà les poids. Elle transmet désormais des vues en lecture seule au calcul C++ ; les buffers de l'appelant doivent rester valides et immuables pendant l'appel. L'ancienne interface C++ prenant des vecteurs reste disponible et délègue au même calcul. La sortie reste calculée dans un buffer temporaire puis copiée uniquement après succès, afin de conserver le refus atomique.
+
+Les tests C++ couvrent les sept couples de formats déjà admis, comparent la vue et l'ABI à l'interface existante et à une accumulation scalaire de référence, vérifient que les entrées ne sont pas modifiées et que les erreurs de taille ou pointeur ne modifient pas la sortie. Ils passent en build optimisé et en compilation `-O0`. Le test Rust du résident et du Collector passe en debug et release, y compris l'application unique du coefficient et le refus des backends mélangés ; Clippy ciblé passe avec l'avertissement historique `dead_code` autorisé.
+
+La première commande Rust optimisée du dépôt a été interrompue parce qu'elle compilait de nombreux exécutables sans rapport ; son résultat n'est pas compté comme un succès. Les mêmes trois tests ciblés ont ensuite réussi dans le paquet isolé R595. Les fichiers de build restent sous Naos.
+
+Sur PC1, un programme de contrôle distinct a appelé la nouvelle ABI pour les dix experts IQ3_XXS/IQ4_NL et l'activation réelle conservés en R612. Les 25 600 valeurs f64 correspondent octet pour octet aux captures de référence ; pour chaque expert, une taille invalide laisse la sortie inchangée. La comparaison partage les décodeurs et quantificateurs GGML épinglés et ne constitue pas un oracle complet indépendant. Les poids, activations et captures restent locaux ; le plan et le résumé sont conservés ici.
+
+Sur PC6, le même contrôle a ensuite comparé 28 cas réels conservés en R593, couvrant les sept couples de formats admis et quatre activations. Les 71 680 valeurs f64 correspondent exactement aux captures antérieures et les 28 refus de taille préservent la sortie. Ce corpus reste borné et partage les composants GGML.
+
+La modification supprime les copies temporaires du blob et de l'entrée dans cette frontière, mais ne revendique aucun gain de vitesse mesuré. Elle est limitée au backend scalaire expérimental ; elle ne qualifie ni GPU, ni distribution inter-PC, ni équivalence générale des backends. Aucun worker, registre R53 ou UNKNOWN antérieur n'a été utilisé pour le contrôle réel. Le code GGML adapté demeure celui de llama.cpp `3cf03257f219afbe7334045ff7c6a06ac68c627d` (MIT).

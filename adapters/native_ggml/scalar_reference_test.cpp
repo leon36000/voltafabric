@@ -9,6 +9,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+extern "C" int vf_native_scalar_reference(int,int,const uint8_t*,size_t,const float*,size_t,double*,size_t);
 int main() {
     constexpr size_t H=2560, BLOB=1971200;
     std::vector<uint8_t> blob(BLOB,0);
@@ -79,6 +80,19 @@ int main() {
         if(!std::isfinite(expected) || std::abs(expected)<1e-9 ||
            !vf::native_ggml::scalar_reference(pair[0],pair[1],weights,x,actual,error)) return 16;
         for(double v:actual) if(v!=expected) return 17;
+        std::vector<double> borrowed(3,42.0);
+        if (!vf::native_ggml::scalar_reference_view(pair[0],pair[1],weights.data(),weights.size(),x.data(),x.size(),borrowed,error) || borrowed!=actual) return 18;
+        const auto source_weights=weights;
+        const auto source_input=x;
+        std::vector<double> abi(H,42.0);
+        if (vf_native_scalar_reference(pair[0],pair[1],weights.data(),weights.size(),x.data(),x.size(),abi.data(),abi.size())!=0 || abi!=actual) return 22;
+        if (weights!=source_weights || x!=source_input) return 23;
+        const auto abi_before=abi;
+        if (vf_native_scalar_reference(pair[0],pair[1],weights.data(),weights.size()-1,x.data(),x.size(),abi.data(),abi.size())==0 || abi!=abi_before) return 24;
+        const auto unchanged=borrowed;
+        if (vf::native_ggml::scalar_reference_view(pair[0],pair[1],nullptr,weights.size(),x.data(),x.size(),borrowed,error) || borrowed!=unchanged) return 19;
+        if (vf::native_ggml::scalar_reference_view(pair[0],pair[1],weights.data(),weights.size()-1,x.data(),x.size(),borrowed,error) || borrowed!=unchanged) return 20;
+        if (vf::native_ggml::scalar_reference_view(pair[0],pair[1],weights.data(),weights.size(),nullptr,x.size(),borrowed,error) || borrowed!=unchanged) return 21;
     }
     return 0;
 }

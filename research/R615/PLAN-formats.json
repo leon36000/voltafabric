@@ -1,0 +1,274 @@
+{
+  "binary": ".runs/vf-r615-build/check_formats",
+  "binary_sha256": "704b1feb8c85c58f21888efd3b8ad0a14c834c649751f0784132ad6f2ed611d9",
+  "cases": [
+    {
+      "blob": ".runs/vf-r593-work/experts/layer0.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l0-b0-v0.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 0
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer0.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l0-b0-v1.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 0
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer0.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l0-b1-v0.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 0
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer0.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l0-b1-v1.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 0
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer1.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l1-b0-v0.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 1
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer1.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l1-b0-v1.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 1
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer1.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l1-b1-v0.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 1
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer1.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l1-b1-v1.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 1
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer2.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l2-b0-v0.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 2
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer2.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l2-b0-v1.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 2
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer2.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l2-b1-v0.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 2
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer2.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l2-b1-v1.bin",
+      "gu": 22,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 2
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer12.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l12-b0-v0.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 12
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer12.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l12-b0-v1.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 12
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer12.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l12-b1-v0.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 12
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer12.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l12-b1-v1.bin",
+      "gu": 18,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 12
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer17.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l17-b0-v0.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 17
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer17.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l17-b0-v1.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 17
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer17.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l17-b1-v0.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 17
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer17.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l17-b1-v1.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 17
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer21.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l21-b0-v0.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 21
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer21.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l21-b0-v1.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 21
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer21.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l21-b1-v0.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 21
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer21.bin",
+      "down": 42,
+      "expected": ".runs/vf-r593-work/results/l21-b1-v1.bin",
+      "gu": 21,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 21
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer47.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l47-b0-v0.bin",
+      "gu": 23,
+      "input": ".runs/vf-r591-work/inputs/b0-v0.f32",
+      "layer": 47
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer47.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l47-b0-v1.bin",
+      "gu": 23,
+      "input": ".runs/vf-r591-work/inputs/b0-v1.f32",
+      "layer": 47
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer47.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l47-b1-v0.bin",
+      "gu": 23,
+      "input": ".runs/vf-r591-work/inputs/b1-v0.f32",
+      "layer": 47
+    },
+    {
+      "blob": ".runs/vf-r593-work/experts/layer47.bin",
+      "down": 20,
+      "expected": ".runs/vf-r593-work/results/l47-b1-v1.bin",
+      "gu": 23,
+      "input": ".runs/vf-r591-work/inputs/b1-v1.f32",
+      "layer": 47
+    }
+  ],
+  "files": {
+    ".runs/vf-r591-work/inputs/b0-v0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    ".runs/vf-r591-work/inputs/b0-v1.f32": "2f7635a31cafa88c592ebb28a05d3cf4c339006d4de9e78539ac62a686b3a155",
+    ".runs/vf-r591-work/inputs/b1-v0.f32": "9cdd44775e6d5afd50f61662745765e1b1a5701c3f31a85c766f82efed8a3403",
+    ".runs/vf-r591-work/inputs/b1-v1.f32": "b3799d302f341f1ba849d348ae1cdcdeda6b1714bd1f791c5bed6cb6c935f1cd",
+    ".runs/vf-r593-work/experts/layer0.bin": "f13d07f6ff33a274c4b22903c00ac13aafee621849c47e995ae133f5f61ca465",
+    ".runs/vf-r593-work/experts/layer1.bin": "26e05c02700e723ec68544d46f598d76af5f1454736c55b7560102c86388d535",
+    ".runs/vf-r593-work/experts/layer12.bin": "0caa1281ebcf5679235c0aaf9d3ea7b920ae727f9679a1e46ae931ed01212943",
+    ".runs/vf-r593-work/experts/layer17.bin": "d489e9f20f7ba37928e0834e8e98846e680a977ed39f6fa0ac611331d602b31d",
+    ".runs/vf-r593-work/experts/layer2.bin": "35878c2a8c029ebb9eed384ab8c0e9a00bb7a4039963ee943641de12bb8c8deb",
+    ".runs/vf-r593-work/experts/layer21.bin": "b0d96cefd879ccda74414baa5ef917cc1c4fb46f44c5d4b21c95d348029bc5fa",
+    ".runs/vf-r593-work/experts/layer47.bin": "794ff3e547ef9136050434485fb98b6d9a23e5eaf8f1028ea71abf92421bbb2c",
+    ".runs/vf-r593-work/results/l0-b0-v0.bin": "f9b665199109f1dcb2b1cef9a81537115ecc6ad6040919a71bf0c21cb91baa33",
+    ".runs/vf-r593-work/results/l0-b0-v1.bin": "3c9183618fbbe78bdff8bb119adb46c44c2d784313d370220278bed08330e885",
+    ".runs/vf-r593-work/results/l0-b1-v0.bin": "1187cbe254a73ef5382869fa33d7bd8b893a5b1a847e3237b019cd07faa9447d",
+    ".runs/vf-r593-work/results/l0-b1-v1.bin": "6a8554fee92729c151f2c45e3f0c6808ac4c0c9d2857f058456f2b471136da10",
+    ".runs/vf-r593-work/results/l1-b0-v0.bin": "32e78ba046f264c982ca6b7df5f41f3d2685f09053e0daad14843490ced46b50",
+    ".runs/vf-r593-work/results/l1-b0-v1.bin": "dfc7ddd3a05c902c0957f41399048fd11e28d039645520f621f21a2ade6b67a5",
+    ".runs/vf-r593-work/results/l1-b1-v0.bin": "5a7fb47f25ef3396f8ba06fba8782bdac08699edb74af7903bfee6069b4d2f0f",
+    ".runs/vf-r593-work/results/l1-b1-v1.bin": "b9e49f6791a78c12d6b613d0f96ca4a7290cd7f994a9221773e10a345fe554f9",
+    ".runs/vf-r593-work/results/l12-b0-v0.bin": "cb9a06cc209cbda01d79586b58455966311383f6403ed10411b227945786a5bf",
+    ".runs/vf-r593-work/results/l12-b0-v1.bin": "5ddbb19e4cfc7dc1648ff2e2aca7115347d1257a9ac2e3602f076fc3ebb60bfa",
+    ".runs/vf-r593-work/results/l12-b1-v0.bin": "811a67059d0094178151fbc0f9ace66894b05ead302144bf5d73fcfa16381458",
+    ".runs/vf-r593-work/results/l12-b1-v1.bin": "dca6f781eacf525aa36ebef97ccb8784c583da38a800ce6ca13e3f68ddec353c",
+    ".runs/vf-r593-work/results/l17-b0-v0.bin": "45f054792d4412067f620e0e435e5e69a5aba78ca16a3f18e984b67852e1af1c",
+    ".runs/vf-r593-work/results/l17-b0-v1.bin": "09643cfd84fadf273737b245186fc0be7dc61320073e53d7327012606df6c781",
+    ".runs/vf-r593-work/results/l17-b1-v0.bin": "0235268442be8e147fb3d1dc5c9a5180389aa2ceaa562e89c4d42e8fc61b574e",
+    ".runs/vf-r593-work/results/l17-b1-v1.bin": "bef4fe9ce7ceed4ea22a659ed6843b8fbe03e1fd2c4ea7a7088345510a6f2f9b",
+    ".runs/vf-r593-work/results/l2-b0-v0.bin": "6a45f3036251202b5ab457b87a6d61bd7ae009a3946d150a873cb801c3a5845c",
+    ".runs/vf-r593-work/results/l2-b0-v1.bin": "a5038d963144664e26e79f765e4e98617d279f832f658dbab8adb899336c8571",
+    ".runs/vf-r593-work/results/l2-b1-v0.bin": "0b3f8a2776d66e285bb27aa33a87d2ab76d6bb4c2acb4bc1f0f9423509e929e9",
+    ".runs/vf-r593-work/results/l2-b1-v1.bin": "bbb71e283173af7001151b59a555717d6fd25e4a8732571256fe925ddb6b13c4",
+    ".runs/vf-r593-work/results/l21-b0-v0.bin": "b2268c4c7c27d60484d7023c0973c4cff296ca659b70dffcf9c55d8383648776",
+    ".runs/vf-r593-work/results/l21-b0-v1.bin": "733f0210c53c71c6e462975a58e51b110509f880c8f1f64a749491cb6661e4dc",
+    ".runs/vf-r593-work/results/l21-b1-v0.bin": "4d60023deff59002d03a60e5f508f331c94a1bd1f49b5ad8d797d75c4ae57be9",
+    ".runs/vf-r593-work/results/l21-b1-v1.bin": "386745514b031b104cc47c678b4f023d298c495b6b7c78f320509ce304583ddb",
+    ".runs/vf-r593-work/results/l47-b0-v0.bin": "e19b16783f2045dfa9916d46646e61bd43c34f1d51d293f70103cd415277cf4f",
+    ".runs/vf-r593-work/results/l47-b0-v1.bin": "3cc3ae8d3da8fe0c7b4e0c75158b583faff645019ea2c088a6941e71d59353ba",
+    ".runs/vf-r593-work/results/l47-b1-v0.bin": "73503e209e35617279f1a02777365aca0e43a6c3af329669d27aa8087e7af694",
+    ".runs/vf-r593-work/results/l47-b1-v1.bin": "b608a03cc2e4dbeef67e6c4501ad6d86d1be367b98151d714c509dc04d87b951"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "runner_sha256": "196eea919ae40e47f963cbdac1dadba5114ba63887d48f669f21e44904baecca"
+}

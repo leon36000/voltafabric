@@ -1,0 +1,6 @@
+{
+  "atomic_failure_verified": true,
+  "cases": 28,
+  "exact_f64_values": 71680,
+  "format_pairs": 7
+}
