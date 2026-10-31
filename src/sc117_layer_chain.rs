@@ -144,6 +144,7 @@ struct Ple {
     weights: sc117_ple_weights::Weights,
     state: PleState,
 }
+#[derive(Clone)]
 struct PleState {
     history: Vec<f32>,
     previous: [i32; 2],
@@ -190,6 +191,34 @@ impl PleState {
         self.history = candidate.next_history;
         self.previous = [self.previous[1], token];
         self.position += 1;
+    }
+    fn prepare_batch<F>(
+        &self,
+        position: u64,
+        tokens: &[i32],
+        inputs: &[Vec<f32>],
+        mut produce: F,
+    ) -> Result<(Self, Vec<Vec<f32>>)>
+    where
+        F: FnMut(i32, [i32; 2], &[f32], &[f32]) -> Result<sc117_ple_post::Output>,
+    {
+        if tokens.is_empty()
+            || tokens.len() > 128
+            || tokens.len() != inputs.len()
+            || position != self.position
+            || position.checked_add(tokens.len() as u64).is_none()
+            || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
+        {
+            return Err(invalid("PLE batch identity or size"));
+        }
+        let mut candidate = self.clone();
+        let mut residuals = Vec::with_capacity(inputs.len());
+        for (&token, input) in tokens.iter().zip(inputs) {
+            let next = candidate.prepare(candidate.position, token, input, &mut produce)?;
+            residuals.push(next.residual.clone());
+            candidate.commit(token, next);
+        }
+        Ok((candidate, residuals))
     }
     fn finish(
         &mut self,
@@ -1076,6 +1105,27 @@ impl Segment {
         inputs: &[Vec<f32>],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
+        self.advance_gdn_batch_inner(attempt, inputs, None, source)
+    }
+    /// Diagnostic-only layer-1 PLE/GDN batch. This does not lift the ordinary
+    /// constructor's layer-1 qualification guard.
+    #[cfg(feature = "ple-cpu-qualification")]
+    pub fn advance_gdn_ple_batch_with_source(
+        &mut self,
+        attempt: u64,
+        tokens: &[i32],
+        inputs: &[Vec<f32>],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
+        self.advance_gdn_batch_inner(attempt, inputs, Some(tokens), source)
+    }
+    fn advance_gdn_batch_inner(
+        &mut self,
+        attempt: u64,
+        inputs: &[Vec<f32>],
+        tokens: Option<&[i32]>,
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
         if self.cursor.poisoned
             || self.layers.len() != 1
             || inputs.is_empty()
@@ -1091,7 +1141,16 @@ impl Segment {
                 .iter()
                 .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
             || !matches!(&self.layers[0].attention, Attention::Gdn(..))
-            || self.layers[0].ple.is_some()
+            || match (&self.layers[0].ple, tokens) {
+                (None, None) => false,
+                (Some(ple), Some(tokens)) => {
+                    self.layers[0].identity.layer != 1
+                        || ple.state.position != self.cursor.position
+                        || tokens.len() != inputs.len()
+                        || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
+                }
+                _ => true,
+            }
         {
             return Err(invalid("GDN segment batch state, attempt or input"));
         }
@@ -1101,6 +1160,23 @@ impl Segment {
         self.cursor.poisoned = true;
         let ticket = self.ledger.reserve_ticket(&stamp, attempt)?;
         let layer = &mut self.layers[0];
+        let (ple_candidate, prepared) = match (&layer.ple, tokens) {
+            (Some(ple), Some(tokens)) => {
+                let (candidate, residuals) = ple.state.prepare_batch(
+                    position,
+                    tokens,
+                    inputs,
+                    |token, previous, residual, history| {
+                        let (_, embedding) = ple.table.gather(token, previous)?;
+                        ple.weights.evaluate(&embedding, residual, history)
+                    },
+                )?;
+                (Some(candidate), Some(residuals))
+            }
+            (None, None) => (None, None),
+            _ => unreachable!(),
+        };
+        let inputs = prepared.as_deref().unwrap_or(inputs);
         let Attention::Gdn(gdn, post) = &mut layer.attention else {
             unreachable!()
         };
@@ -1141,6 +1217,9 @@ impl Segment {
                 .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
         {
             return Err(invalid("GDN segment batch output"));
+        }
+        if let Some(candidate) = ple_candidate {
+            layer.ple.as_mut().expect("PLE preflight validated").state = candidate;
         }
         for (i, ids) in uses.iter().enumerate() {
             for &expert in ids {
@@ -2051,6 +2130,61 @@ mod tests {
             .is_err());
         assert!(state
             .prepare(2, sc117_ple::VOCAB, &[], |_, _, _, _| unreachable!())
+            .is_err());
+    }
+
+    #[test]
+    fn ple_batch_is_causal_and_rejects_failures_without_mutating_live_state() {
+        let state = PleState::new();
+        let inputs = vec![vec![0.0; 10240], vec![1.0; 10240]];
+        let produce = |token: i32, previous: [i32; 2], _: &[f32], history: &[f32]| {
+            if token == 42 {
+                assert_eq!((previous, history[0]), ([-1, -1], 0.0));
+            } else {
+                assert_eq!((token, previous, history[0]), (73, [-1, 42], 3.0));
+            }
+            Ok(sc117_ple_post::Output {
+                residual: vec![token as f32; 10240],
+                normalized: vec![],
+                next_history: vec![if token == 42 { 3.0 } else { 6.0 }; 10240 * 9],
+            })
+        };
+        let (candidate, outputs) = state.prepare_batch(0, &[42, 73], &inputs, produce).unwrap();
+        assert_eq!(
+            (candidate.position, candidate.previous, candidate.history[0]),
+            (2, [42, 73], 6.0)
+        );
+        assert_eq!((outputs[0][0], outputs[1][0]), (42.0, 73.0));
+        assert_eq!(
+            (state.position, state.previous, state.history[0]),
+            (0, [-1, -1], 0.0)
+        );
+        assert!(state
+            .prepare_batch(0, &[42, 73], &inputs, |token, _, _, _| {
+                if token == 73 {
+                    return Err(invalid("injected PLE error"));
+                }
+                Ok(sc117_ple_post::Output {
+                    residual: vec![0.0; 10240],
+                    normalized: vec![],
+                    next_history: vec![1.0; 10240 * 9],
+                })
+            })
+            .is_err());
+        assert_eq!(
+            (state.position, state.previous, state.history[0]),
+            (0, [-1, -1], 0.0)
+        );
+        assert!(state
+            .prepare_batch(0, &[42], &inputs, |_, _, _, _| unreachable!())
+            .is_err());
+        assert!(state
+            .prepare_batch(
+                0,
+                &[42, sc117_ple::VOCAB],
+                &inputs,
+                |_, _, _, _| unreachable!()
+            )
             .is_err());
     }
 
