@@ -614,6 +614,15 @@ fn open_namespace(spec: &Namespace) -> Result<std::fs::File, E> {
 }
 #[cfg(target_os = "linux")]
 fn consume_namespace(spec: &Namespace, plan: &str, lease: &SharedLease) -> Result<(), E> {
+    consume_namespace_checked(spec, plan, lease, || {})
+}
+#[cfg(target_os = "linux")]
+fn consume_namespace_checked(
+    spec: &Namespace,
+    plan: &str,
+    lease: &SharedLease,
+    after_write: impl FnOnce(),
+) -> Result<(), E> {
     use std::os::unix::fs::MetadataExt;
     let directory = open_namespace(spec)?;
     for effective in [
@@ -688,7 +697,12 @@ fn consume_namespace(spec: &Namespace, plan: &str, lease: &SharedLease) -> Resul
     serde_json::to_writer(&mut file, &value)?;
     file.write_all(b"\n")?;
     file.sync_all()?;
+    after_write();
     directory.sync_all()?;
+    // A permanent replacement during consumption makes the result unknown.
+    // Keep the marker in the pinned directory and do not launch a worker.
+    // This check cannot exclude a later replacement or prove a shared lease.
+    drop(open_namespace(spec)?);
     Ok(())
 }
 #[cfg(not(target_os = "linux"))]
@@ -2639,6 +2653,63 @@ print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
         assert!(consume_namespace(&namespace, &plan, &lease).is_ok());
         assert!(consume_namespace(&namespace, &plan, &lease).is_err());
         // Synthetic records stay in the isolated TMPDIR; no actual operation ran.
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn r53_rejects_replaced_path_after_marker_is_written() {
+        use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
+        let root = std::env::temp_dir().join(format!(
+            "vf-test-r53-replace-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&root)
+            .unwrap();
+        let meta = std::fs::metadata(&root).unwrap();
+        let namespace = Namespace {
+            root: root.to_str().unwrap().into(),
+            dev: meta.dev(),
+            ino: meta.ino(),
+            uid: meta.uid(),
+            base_id: "r53-replace123".into(),
+        };
+        let lease = SharedLease {
+            path: "/synthetic".into(),
+            dev: 1,
+            ino: 2,
+            uid: meta.uid(),
+        };
+        let plan = format!("r529-{}", "a".repeat(64));
+        for effective in [
+            namespace.base_id.clone(),
+            format!("{}-duplicate-slot", namespace.base_id),
+        ] {
+            let value = serde_json::json!({"status":"RESERVED_UNKNOWN_NO_REPLAY", "scope":"Namespace consumption only; see linked execution receipt for actual outcome", "base_id":namespace.base_id, "effective_run_id":effective, "reserved_ns":1, "context":{"plan_id":plan,"shared_lease":lease}});
+            let file = std::fs::OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .mode(0o600)
+                .open(root.join(format!("{effective}.json")))
+                .unwrap();
+            serde_json::to_writer(file, &value).unwrap();
+        }
+        let pinned = root.with_extension("original");
+        let result = consume_namespace_checked(&namespace, &plan, &lease, || {
+            std::fs::rename(&root, &pinned).unwrap();
+            std::fs::DirBuilder::new()
+                .mode(0o700)
+                .create(&root)
+                .unwrap();
+        });
+        assert!(result.is_err());
+        assert!(pinned.join("r53-replace123-sc117-started.json").is_file());
+        assert!(!root.join("r53-replace123-sc117-started.json").exists());
+        // Both synthetic directories remain in the isolated TMPDIR.
     }
     #[cfg(target_os = "linux")]
     #[test]
