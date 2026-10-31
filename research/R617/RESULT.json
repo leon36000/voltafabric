@@ -1,0 +1,60 @@
+{
+  "cases": [
+    {
+      "expert": 136,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 317,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 77,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 257,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 175,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 414,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 373,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 142,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 2,
+      "exit_code": 0,
+      "stderr": ""
+    },
+    {
+      "expert": 226,
+      "exit_code": 0,
+      "stderr": ""
+    }
+  ],
+  "binary_sha256": "704b1feb8c85c58f21888efd3b8ad0a14c834c649751f0784132ad6f2ed611d9",
+  "input_sha256": "effe20798ae776df9992528760132c39eab7cfa5f9e06f576012f215249abc1e",
+  "exact": 10,
+  "mismatch": 0,
+  "gpu": false,
+  "network_worker": false
+}
