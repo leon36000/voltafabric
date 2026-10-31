@@ -1,0 +1,13 @@
+{
+  "round": "R572",
+  "parent": "e23cc74380bf60ef6fc26d79962ee90e6e5e0775",
+  "scope": "independent NumPy f64 two-position layer-4 GDN recurrence against actual batched stage output",
+  "max_abs": [
+    2.479043163458594e-09,
+    3.686857145968059e-09
+  ],
+  "second_position_state_effect": 0.0029096971092280807,
+  "negative_corruption_rejected": true,
+  "limitations": "synthetic second residual; native projections/gates are oracle inputs; no full-model oracle, GPU or distributed qualification; R428 expert 255 remains unresolved; no R53 lease restored",
+  "next": "validate more of the model independently and reconcile authoritative shared R53 and cooperative lease before remote workers"
+}

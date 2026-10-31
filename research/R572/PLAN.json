@@ -1,0 +1,16 @@
+{
+  "binary_sha256": "710ea34faeffd30db419ad5c9091dcc13ba20a39ee615163818055ea25e4abe9",
+  "conv_sha256": "a65fc39af90d713f5475f7251d7661780779bf32a0e8aebe9a606a0c8e686e49",
+  "cpu_quota_percent": 100,
+  "gpu": false,
+  "identity": "r572-gdn-oracle-cpu",
+  "input_sha256": "653f8385328f68ebebfe966082717b7c566053d540081b0539d5e0370ea15b65",
+  "manifest_sha256": "e828fe4e01fe8c9a86201b79fa40f6e29ceca325b2d0a4ca9be954a939d8afca",
+  "memory_max_bytes": 1073741824,
+  "no_replay": true,
+  "oracle_sha256": "6ffb87a4ecad322952a6f3b81cf029b6b3f0fbeef207036a45ddc833bbbb0a25",
+  "purpose": "R572 CPU-only independent layer-4 batch recurrence check",
+  "source_sha256": "32a694cd9c42cf87f366d9995f7b29f16027ef65846c6d583ad79edbd4eef3d8",
+  "swap_max_bytes": 0,
+  "worker": false
+}
