@@ -1,0 +1,14 @@
+{
+  "backend": "scalar",
+  "claims": {
+    "batches": 624,
+    "evictions": 689
+  },
+  "generated_token_ids": [
+    9419
+  ],
+  "plan_id": "r600-fcd8ed4766808a55eb81f2fbe8faf3c489e28e22fd075a1cb2b3c29c52bd285c",
+  "receipt_sha256": "493acca465816d84ada541d0cb455b746d7016b0da3d9112a32f94f9b5b17e16",
+  "run_id": "r494-prefill-greedy-3206636-1793419354126481435",
+  "workers_closed": 96
+}

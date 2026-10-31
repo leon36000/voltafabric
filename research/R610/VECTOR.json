@@ -1,0 +1,14 @@
+{
+  "backend": "vector",
+  "claims": {
+    "batches": 624,
+    "evictions": 689
+  },
+  "generated_token_ids": [
+    9419
+  ],
+  "plan_id": "r544-2c3a7e2988972a275a4eceefeb0a532ffe1b15172c072565aba87512972008e7",
+  "receipt_sha256": "385753259c44e16bcd6b70347b1166a2fb3c8b3c1b0c107152be850bae9a51d9",
+  "run_id": "r494-prefill-greedy-3218919-1793419545058732912",
+  "workers_closed": 96
+}

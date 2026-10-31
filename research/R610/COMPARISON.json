@@ -1,0 +1,81 @@
+{
+  "comparison_is_numerical_not_performance": true,
+  "outputs": {
+    "scalar": {
+      "generated_token_ids": [
+        9419
+      ],
+      "plan_id": "r600-fcd8ed4766808a55eb81f2fbe8faf3c489e28e22fd075a1cb2b3c29c52bd285c",
+      "receipt_sha256": "493acca465816d84ada541d0cb455b746d7016b0da3d9112a32f94f9b5b17e16",
+      "run_id": "r494-prefill-greedy-3206636-1793419354126481435",
+      "trace_sha256": "21346e71e2a1747af82e7e5b2ed6031854f47d7eb1b800608d62119dbd467bdc"
+    },
+    "vector": {
+      "generated_token_ids": [
+        9419
+      ],
+      "plan_id": "r544-2c3a7e2988972a275a4eceefeb0a532ffe1b15172c072565aba87512972008e7",
+      "receipt_sha256": "385753259c44e16bcd6b70347b1166a2fb3c8b3c1b0c107152be850bae9a51d9",
+      "run_id": "r494-prefill-greedy-3218919-1793419545058732912",
+      "trace_sha256": "05653b34ad1c86c2395bb19aa22ef4996384f5e617623a186567baad21c0a63b"
+    }
+  },
+  "positions": 13,
+  "segments": {
+    "attention": {
+      "different_values": 33280,
+      "first_different_position": 0,
+      "max_abs": 0.00928199291229248
+    },
+    "gate": {
+      "different_values": 79870,
+      "first_different_position": 0,
+      "max_abs": 0.0267336368560791
+    },
+    "gated_attention": {
+      "different_values": 79871,
+      "first_different_position": 0,
+      "max_abs": 0.0060994625091552734
+    },
+    "injection": {
+      "different_values": 52,
+      "first_different_position": 0,
+      "max_abs": 0.03424263000488281
+    },
+    "input_residual": {
+      "different_values": 133118,
+      "first_different_position": 0,
+      "max_abs": 0.0223085880279541
+    },
+    "key": {
+      "different_values": 6656,
+      "first_different_position": 0,
+      "max_abs": 0.05793893337249756
+    },
+    "mixed": {
+      "different_values": 33280,
+      "first_different_position": 0,
+      "max_abs": 0.025078296661376953
+    },
+    "query": {
+      "different_values": 79871,
+      "first_different_position": 0,
+      "max_abs": 0.07448410987854004
+    },
+    "raw_key": {
+      "different_values": 6656,
+      "first_different_position": 0,
+      "max_abs": 0.021001875400543213
+    },
+    "raw_query_gate": {
+      "different_values": 159741,
+      "first_different_position": 0,
+      "max_abs": 0.03565645217895508
+    },
+    "value": {
+      "different_values": 6656,
+      "first_different_position": 0,
+      "max_abs": 0.020952939987182617
+    }
+  }
+}
