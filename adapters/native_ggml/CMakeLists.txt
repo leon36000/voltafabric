@@ -28,6 +28,21 @@ target_link_libraries(vf_native_ggml_test PRIVATE vf_native_ggml)
 enable_testing()
 add_test(NAME native_provider COMMAND vf_native_ggml_test)
 
+# Diagnostic reference only; it is not part of the live worker/provider path.
+option(VF_BUILD_SCALAR_REFERENCE "Build bounded IQ2_S/IQ4_NL scalar diagnostic" OFF)
+if(VF_BUILD_SCALAR_REFERENCE)
+  if(NOT CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    message(FATAL_ERROR "Scalar reference requires a compiler supporting strict float flags")
+  endif()
+  add_library(vf_native_scalar_reference STATIC scalar_reference.cpp)
+  target_compile_features(vf_native_scalar_reference PRIVATE cxx_std_17)
+  target_compile_options(vf_native_scalar_reference PRIVATE -Wall -Wextra -Werror -ffp-contract=off -fno-fast-math)
+  target_link_libraries(vf_native_scalar_reference PUBLIC ggml-cpu ggml-base)
+  add_executable(vf_native_scalar_reference_test scalar_reference_test.cpp)
+  target_link_libraries(vf_native_scalar_reference_test PRIVATE vf_native_scalar_reference)
+  add_test(NAME native_scalar_reference COMMAND vf_native_scalar_reference_test)
+endif()
+
 # Optional reference test only: actual pinned Strata generic native CPU functions.
 # x86-specific paths are aborting stubs on AArch64 and are not qualified here.
 if(STRATA_GENERIC_SOURCE_DIR)

@@ -1,0 +1,14 @@
+{
+  "cmake_release_ctest": "pass",
+  "corrupted_capture_exit": 5,
+  "debug_test": "pass",
+  "local_driver_sha256": "f6d0747f1a7994877212070a061c9e4beecb51ae2ff5a172c324368a46714fa0",
+  "matched_elements_per_case": 2560,
+  "pc1_corpus_cases_passed": 48,
+  "pc1_submission_sha256": "b4a1c3b18088a3f8418197671d7943bffbf748169613e81545bf6feadd024874",
+  "pc6_corpus_cases_passed": 48,
+  "pc6_submission_sha256": "b4a1c3b18088a3f8418197671d7943bffbf748169613e81545bf6feadd024874",
+  "plan_sha256": "1f6e42e0e57fc2b39c6a5af62321c62b96cae3bc1a44c9561262efb9047d599a",
+  "positive_cmake_reference_case": "expert255 b0-v0",
+  "source_sha256": "a813dd2b493cb809f59394d0293eb4d33c356a70d4ad3c31e863c66ffba4528d"
+}

@@ -1,0 +1,21 @@
+{
+  "cpu_quota_percent": 50,
+  "driver_sha256": "d9364cc03bb17bdc20477a110f2e7e872fe17193f2592b357f9a1dcc1f6d3a6d",
+  "expert_sha256": {
+    "12": "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e",
+    "255": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    "75": "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d"
+  },
+  "flags": "-O2 -ffp-contract=off -fno-fast-math",
+  "gpu": false,
+  "header_sha256": "6e2adb6f0def777b1b2f6594c20e5d0f1015d8c05a4de03927f8b2e0a56a2628",
+  "inputs_sha256": "23498f29a5891566829a01c78a9c436db2223a45b4207207eac4506ddd60b325",
+  "memory_max_bytes": 536870912,
+  "network_worker": false,
+  "pc1_binary_sha256": "5f8b797690e34a02cbc6c73dc4bd85dff12b90798be8831cb7683b415499afd0",
+  "pc6_binary_sha256": "f6d0747f1a7994877212070a061c9e4beecb51ae2ff5a172c324368a46714fa0",
+  "purpose": "native scalar reference vs retained R591 corpus on both CPU architectures",
+  "reference_sha256": "a813dd2b493cb809f59394d0293eb4d33c356a70d4ad3c31e863c66ffba4528d",
+  "runner_sha256": "268c32796e32a4ceb04bd26d455e5dad62620db88595a1fcacd62a0780c618ee",
+  "swap_max_bytes": 0
+}
