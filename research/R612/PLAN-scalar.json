@@ -1,0 +1,28 @@
+{
+  "backend": "scalar",
+  "binary": "/home/pc1/NAOS/vf-r612-work/target/release/vf-r612-capture",
+  "embedding_sha256": "ac914238a95d7950bcab749cf5d9358b3467ca3bafc520b1040a113568608423",
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r564-work/fixtures/r438/layer0-gdn.json": "f23d39ddf7fc8df9382994abe4fe8a44415ebeff0bbb86256b64d1a1b3e3b7da",
+    "/home/pc1/NAOS/vf-r564-work/fixtures/r438/layer0-post.json": "9c90b5023a4f678e43c5c08268cd03ad63bed9e4d69c91554083818de9407844",
+    "/home/pc1/NAOS/vf-r564-work/fixtures/r438/layer0-shared.json": "3fc8f3447ecd91fe168965442046633dbbb042a6db2a2e53b0925677d12f452b",
+    "/home/pc1/NAOS/vf-r607-work/target/release/vf-rank-session": "b3195f7f4b36256d1a2700fa53c65b1a45df3eb61a8d0fefebdfc99380ad8fdd",
+    "/home/pc1/NAOS/vf-r612-work/project/research/R612/capture.rs": "2748457f36c7b026ed941f065470dd472ebd7f2d7302de2250541980040e2a3f",
+    "/home/pc1/NAOS/vf-r612-work/target/release/vf-r612-capture": "766afc7ef61b35b2956a41c36f0db74ea6fa9b4fca940aebde3dc4a80517ef0c",
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/native_experts.txt": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "run_id": "r612-c5d4e48250fb4eb7ac98380133b10f48",
+  "runner_sha256": "49911e4f74f97ca5e6f2af32888c5c7fbfb6a3c3e92366cc9685f9be511a9239",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "memory_max_bytes": 2147483648,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "token": 248045,
+  "unknown_never_replay": true,
+  "worker": "/home/pc1/NAOS/vf-r607-work/target/release/vf-rank-session",
+  "worker_sha256": "b3195f7f4b36256d1a2700fa53c65b1a45df3eb61a8d0fefebdfc99380ad8fdd"
+}

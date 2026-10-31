@@ -1,0 +1,72 @@
+[
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 136,
+    "mid_max_abs": 9.53674316e-07,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 317,
+    "mid_max_abs": 1.1920929e-07,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 77,
+    "mid_max_abs": 8.94069672e-08,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 257,
+    "mid_max_abs": 1.1920929e-07,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 175,
+    "mid_max_abs": 2.43308023e-08,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 414,
+    "mid_max_abs": 5.96046448e-08,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 373,
+    "mid_max_abs": 1.1920929e-07,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 142,
+    "mid_max_abs": 1.1920929e-07,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 2,
+    "mid_max_abs": 4.47034836e-08,
+    "quant_bytes_differ": 0
+  },
+  {
+    "dequant_max_abs": 0.0,
+    "exit": 0,
+    "expert": 226,
+    "mid_max_abs": 4.47034836e-08,
+    "quant_bytes_differ": 0
+  }
+]
