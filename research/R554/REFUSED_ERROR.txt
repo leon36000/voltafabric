@@ -1,0 +1,1 @@
+observed batch refused: INVALID_INPUT: native ledger path must be absolute

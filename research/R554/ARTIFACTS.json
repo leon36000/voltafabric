@@ -1,0 +1,43 @@
+{
+  "spec.json": {
+    "sha256": "3c20888b55920f5b108115ca4d24208de578755bc286c7c8ae8301959ecfea20",
+    "bytes": 60013,
+    "encoding": "base64-gzip-concatenated",
+    "parts": [
+      "spec_json.part000.txt",
+      "spec_json.part001.txt",
+      "spec_json.part002.txt"
+    ]
+  },
+  "result.json": {
+    "sha256": "933a1ce46414051e04f7bc29c53ac6d9457694babd2d63bb70bdc7402b4f980d",
+    "bytes": 664399,
+    "encoding": "base64-gzip-concatenated",
+    "parts": [
+      "result_json.part000.txt",
+      "result_json.part001.txt",
+      "result_json.part002.txt",
+      "result_json.part003.txt",
+      "result_json.part004.txt",
+      "result_json.part005.txt",
+      "result_json.part006.txt",
+      "result_json.part007.txt",
+      "result_json.part008.txt",
+      "result_json.part009.txt",
+      "result_json.part010.txt",
+      "result_json.part011.txt",
+      "result_json.part012.txt",
+      "result_json.part013.txt",
+      "result_json.part014.txt",
+      "result_json.part015.txt",
+      "result_json.part016.txt",
+      "result_json.part017.txt",
+      "result_json.part018.txt",
+      "result_json.part019.txt",
+      "result_json.part020.txt",
+      "result_json.part021.txt",
+      "result_json.part022.txt",
+      "result_json.part023.txt"
+    ]
+  }
+}

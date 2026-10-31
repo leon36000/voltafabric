@@ -1,0 +1,1 @@
+{"status": "pass", "tokens": 2, "slots": 20, "collector_elements": 5120, "run_id": "r554-2015451-1793405071806477582", "plan_sha256": "69edd497b0d3ad53e0953b511748b68fbbe0b499f8ee729c130f2981a64c1259", "receipts": [{"exit_code": 0, "pid": 2015452, "rank": 2, "raw_execs": 2}, {"exit_code": 0, "pid": 2015459, "rank": 3, "raw_execs": 2}]}
