@@ -2,7 +2,7 @@
 //! expert and Rust collector to one local durable reservation. Not an R53 lease.
 use crate::{
     gdn_cpu::Identity,
-    invalid,
+    hyperconnection_cpu, invalid,
     moe::{Choice, Registry, Stamp},
     native_ledger::{NativeBatchLedger, Reservation},
     routing::{self, RoutingProblem},
@@ -10,7 +10,7 @@ use crate::{
     sc117_layer_completion::StampedValues,
     sc117_post_attention, sc117_shared_stage,
     session::{NativeCollected, Session},
-    Result,
+    shared_expert_cpu, Result,
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -34,6 +34,170 @@ pub struct Shared {
 pub struct Collected {
     value: NativeCollected,
     marker: Arc<()>,
+}
+/// One reserved local GDN layer batch. Both attention state and all residuals
+/// remain provisional until the same reservation's complete collection.
+pub struct RoutedBatch<'a> {
+    gdn: sc117_gdn_stage::Batch<'a>,
+    routes: Vec<sc117_post_attention::Routed>,
+    identity: Identity,
+    stamp: Stamp,
+    attempt: u64,
+    ledger_id: (u64, u64),
+    marker: Arc<()>,
+}
+pub struct SharedBatch {
+    values: Vec<Vec<f32>>,
+    marker: Arc<()>,
+}
+pub struct CollectedBatch {
+    value: NativeCollected,
+    marker: Arc<()>,
+}
+pub struct CommittedBatch {
+    pub attention: Vec<sc117_gdn_stage::Output>,
+    pub residuals: Vec<Vec<f32>>,
+}
+impl<'a> RoutedBatch<'a> {
+    pub fn choices(&self) -> impl Iterator<Item = &[crate::sc117_router_cpu::Choice]> {
+        self.routes.iter().map(|route| route.choices.as_slice())
+    }
+    pub fn activations(&self) -> impl Iterator<Item = &[f32]> {
+        self.routes.iter().map(|route| route.mixed.as_slice())
+    }
+    pub fn prepare(
+        gdn: &'a mut sc117_gdn_stage::Stage,
+        post: &mut sc117_post_attention::Stage,
+        ledger: &NativeBatchLedger,
+        ticket: &Reservation,
+        residuals: &[Vec<f32>],
+    ) -> Result<Self> {
+        ledger.validate_ticket(ticket, ticket.stamp())?;
+        if residuals.is_empty() || residuals.len() > 128 {
+            return Err(invalid("GDN batch count"));
+        }
+        let stamp = ticket.stamp().clone();
+        let identity = Identity {
+            run_id: stamp.run_id.clone(),
+            model_revision: stamp.model_revision.clone(),
+            layer: stamp.layer,
+            epoch: stamp.epoch,
+        };
+        let mut batch = gdn.begin_batch(residuals.len())?;
+        let mut routes = Vec::with_capacity(residuals.len());
+        for residual in residuals {
+            let output = batch.prepare_next(&identity, residual)?;
+            routes.push(post.compute(&identity, output, residual)?);
+        }
+        Ok(Self {
+            gdn: batch,
+            routes,
+            identity,
+            stamp,
+            attempt: ticket.attempt(),
+            ledger_id: ticket.directory_id(),
+            marker: Arc::new(()),
+        })
+    }
+    pub fn shared(&self, stage: &mut sc117_shared_stage::Stage) -> Result<SharedBatch> {
+        let mut values = Vec::with_capacity(self.routes.len());
+        for route in &self.routes {
+            values.push(stage.compute(&self.identity, &route.mixed)?);
+        }
+        Ok(SharedBatch {
+            values,
+            marker: self.marker.clone(),
+        })
+    }
+    #[allow(clippy::too_many_arguments)]
+    pub fn dispatch(
+        &self,
+        sessions: &mut [Session],
+        registry: Registry,
+        preferred_owners: BTreeMap<u32, u32>,
+        resident_order: BTreeMap<u32, Vec<u32>>,
+        ledger: &NativeBatchLedger,
+        ticket: Reservation,
+        timeout: Duration,
+    ) -> Result<CollectedBatch> {
+        ledger.validate_ticket(&ticket, &self.stamp)?;
+        if ticket.attempt() != self.attempt || ticket.directory_id() != self.ledger_id {
+            return Err(invalid("GDN batch attempt mismatch"));
+        }
+        let experts = registry
+            .copies
+            .iter()
+            .map(|r| r.expert)
+            .collect::<BTreeSet<_>>()
+            .into_iter()
+            .collect();
+        let routes = self
+            .routes
+            .iter()
+            .map(|r| {
+                r.choices
+                    .iter()
+                    .map(|c| Choice {
+                        expert: c.expert,
+                        weight: f64::from(c.weight),
+                    })
+                    .collect()
+            })
+            .collect();
+        let problem = RoutingProblem {
+            hidden: 2560,
+            experts,
+            routes,
+            registry,
+            stamp: self.stamp.clone(),
+            preferred_owners,
+            resident_order,
+        };
+        routing::validate(&problem)?;
+        let inputs = self
+            .routes
+            .iter()
+            .map(|r| r.mixed.clone())
+            .collect::<Vec<_>>();
+        let value = Session::exec_native_ggml_reserved(
+            sessions, &problem, &inputs, ledger, ticket, timeout,
+        )?;
+        Ok(CollectedBatch {
+            value,
+            marker: self.marker.clone(),
+        })
+    }
+    pub fn commit(self, shared: SharedBatch, collected: CollectedBatch) -> Result<CommittedBatch> {
+        if !Arc::ptr_eq(&self.marker, &shared.marker)
+            || !Arc::ptr_eq(&self.marker, &collected.marker)
+            || collected.value.stamp() != &self.stamp
+            || collected.value.attempt() != self.attempt
+            || collected.value.ledger_id() != self.ledger_id
+            || shared.values.len() != self.routes.len()
+            || collected.value.rows().len() != self.routes.len()
+        {
+            return Err(invalid("GDN batch producer identity or size"));
+        }
+        let mut residuals = Vec::with_capacity(self.routes.len());
+        for ((route, shared_row), routed_row) in self
+            .routes
+            .iter()
+            .zip(&shared.values)
+            .zip(collected.value.rows())
+        {
+            let combined = shared_expert_cpu::combine(routed_row, shared_row)?;
+            residuals.push(hyperconnection_cpu::write(
+                &route.residual,
+                &combined,
+                &route.inject,
+            )?);
+        }
+        let attention = self.gdn.commit()?;
+        Ok(CommittedBatch {
+            attention,
+            residuals,
+        })
+    }
 }
 impl Shared {
     pub fn values(&self) -> &[f32] {
