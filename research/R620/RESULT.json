@@ -1,0 +1,15 @@
+{
+  "source_sha256": "0009a2340f542acfc19d95756690910ec9f420971def3b7678e766fedcf8557c",
+  "regression_before": "failed: session remained usable",
+  "regression_after": "pass, scalar and vector",
+  "debug": {
+    "passed": 150,
+    "ignored": 10
+  },
+  "release": {
+    "passed": 150,
+    "ignored": 10
+  },
+  "clippy": "pass, dead_code allowed",
+  "rustfmt": "pass"
+}

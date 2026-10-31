@@ -3997,7 +3997,10 @@ impl Session {
                 self.native_backend = Some(NativeBackend::Vector);
                 Ok(())
             }
-            Reply::Refused { error } => Err(error),
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
             _ => {
                 self.usable = false;
                 Err(invalid("native GGML load reply identity"))
@@ -4052,7 +4055,10 @@ impl Session {
                 self.native_backend = Some(NativeBackend::Scalar);
                 Ok(())
             }
-            Reply::Refused { error } => Err(error),
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
             _ => {
                 self.usable = false;
                 Err(invalid("native scalar load reply identity"))
@@ -10840,6 +10846,74 @@ mod scalar_session_tests {
             other => panic!("unexpected {other:?}"),
         }
         assert!(matches!(next(), Reply::Bye { .. }));
+    }
+
+    #[test]
+    fn refused_initial_native_load_poisoned_for_both_backends() {
+        use crate::{native_ggml_cpu::Binding, strata_native_layout::NativeLayout};
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let bytes = vec![0; layout.expert(2, 0).unwrap().bytes as usize];
+        let binding = Binding {
+            model_revision: "refused-load-test".into(),
+            rank: 2,
+            layer: 2,
+            expert: 0,
+            local: 0,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let peer = r#"import json,sys
+b=sys.stdin.buffer
+h=json.loads(b.readline())
+n=h['artifact_bytes']
+while n:
+ x=b.read(min(n,65536))
+ if not x: sys.exit(3)
+ n-=len(x)
+print(json.dumps({'reply':'refused','error':{'code':'TEST_REFUSAL','message':'load refused'}}),flush=True)
+b.read()
+"#;
+        for scalar in [false, true] {
+            let endpoint = Endpoint {
+                rank: 2,
+                argv: vec!["python3".into(), "-c".into(), peer.into()],
+            };
+            let mut session = Session::spawn(&endpoint).unwrap();
+            session.hello.capabilities.push(
+                if scalar {
+                    CAPABILITY_NATIVE_SCALAR_GGML_CPU
+                } else {
+                    CAPABILITY_NATIVE_GGML_CPU
+                }
+                .into(),
+            );
+            let load = |session: &mut Session| {
+                if scalar {
+                    session.load_native_scalar_ggml(
+                        &binding,
+                        index,
+                        50_292_326_400,
+                        &bytes,
+                        Duration::from_secs(10),
+                    )
+                } else {
+                    session.load_native_ggml(
+                        &binding,
+                        index,
+                        50_292_326_400,
+                        &bytes,
+                        Duration::from_secs(10),
+                    )
+                }
+            };
+            assert_eq!(load(&mut session).unwrap_err().code, "TEST_REFUSAL");
+            assert!(!session.is_usable());
+            let sent = session.traffic.bytes_sent;
+            assert!(load(&mut session).is_err());
+            assert_eq!(sent, session.traffic.bytes_sent);
+        }
     }
 
     #[test]
