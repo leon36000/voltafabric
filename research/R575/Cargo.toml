@@ -1,0 +1,10 @@
+[package]
+name = "vf-r575-collector-compare"
+version = "0.0.0"
+edition = "2021"
+[dependencies]
+voltafabric = { path = "../.." }
+[[bin]]
+name = "collector-compare"
+path = "collector_compare.rs"
+[workspace]

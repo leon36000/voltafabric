@@ -1,0 +1,13 @@
+{
+  "round": "R575",
+  "parent": "c025e6ce737f50818702c6cbc9e0451bb6bb291b",
+  "scope": "two actual local CPU producer outputs through native FP16 and Rust Collector",
+  "raw_max_abs": 5.401950329542e-05,
+  "fp16_different": 1941,
+  "collector_different": 1941,
+  "isolated_contribution_max_abs": 2.1438162605136313e-06,
+  "original_expert_weight": 0.04014204069972038,
+  "python_oracle": "matches count and max",
+  "limitations": "nine other route rows synthetic zero; two builds; no inter-PC execution, whole-model bound or tolerance policy; R428 strict fail open; R53 and lease unresolved",
+  "next": "safe cross-producer compatibility policy and authoritative R53/lease reconciliation"
+}
