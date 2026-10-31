@@ -1,0 +1,9 @@
+# R558 — bounded dynamic admission for a QSA segment batch
+
+`Segment::advance_qsa_batch_with_source` processes one QSA layer over a bounded group of positions. It reserves one batch, prepares provisional attention, admits each distinct missing expert through the existing source and verified owner sessions, collects the complete routed batch and commits all residuals and the cache together. The cursor advances by the position count only on success. The last-used bookkeeping covers each position, and the most recently selected set protects the union of all experts in the batch.
+
+Any failure after reservation makes the segment terminal. The operation does not evict: a payload budget too small for all missing experts fails closed. The caller still owns pre-eviction/headroom, hardware admission and any larger multi-layer transaction. There is no change to Collector order or coefficients.
+
+On PC1 CPU, a fresh two-position test started with one resident on each local rank and dynamically admitted 17 real SC117 experts. Total accounted expert payload was 37,452,800 bytes under a 48 MiB global cap and 24 MiB per-rank caps. Both residual hashes matched R557's separately prepared real-expert batch and sequential comparison. Both workers executed one batch and closed cleanly. In a separate fresh segment with a three-expert payload limit, one additional expert was admitted, the next admission failed, no expert execution was sent, and the poisoned segment refused reuse. Both workers closed cleanly. Both local ledger claims remain RESERVED_UNKNOWN_NO_REPLAY.
+
+The native CPU library and qualification binary passed Clippy with warnings denied and the existing trace-only `dead_code` warning allowed; rustfmt passed. The comparison shares model kernels with R557 and is not an independent full-model oracle. This qualifies one QSA layer and local processes only, not multi-layer prefill, GDN/PLE, GPU, network transport, eviction during a batch or performance.

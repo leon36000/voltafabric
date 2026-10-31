@@ -367,3 +367,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-bound-batch-check"
 path = "src/bin/vf-sc117-bound-batch-check.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-dynamic-qsa-batch-check"
+path = "src/bin/vf-sc117-dynamic-qsa-batch-check.rs"
+required-features = ["native-ggml-cpu"]

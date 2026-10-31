@@ -1037,6 +1037,87 @@ impl Segment {
             })
             .collect()
     }
+    /// Execute one QSA layer on a causal group of positions. Missing experts are
+    /// loaded through the caller's bounded source before any dispatch. There is
+    /// no eviction in this operation: insufficient budget fails closed. Once
+    /// reservation begins, any error leaves the entire segment terminal.
+    pub fn advance_qsa_batch_with_source(
+        &mut self,
+        attempt: u64,
+        inputs: &[Vec<f32>],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
+        if self.cursor.poisoned
+            || self.layers.len() != 1
+            || inputs.is_empty()
+            || inputs.len() > 128
+            || attempt == 0
+            || attempt <= self.cursor.last_attempt
+            || self
+                .cursor
+                .position
+                .checked_add(inputs.len() as u64)
+                .is_none()
+            || inputs
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+            || !matches!(&self.layers[0].attention, Attention::Qsa(..))
+            || self.layers[0].ple.is_some()
+        {
+            return Err(invalid("QSA segment batch state, attempt or input"));
+        }
+        let position = self.cursor.position;
+        let mut stamp = self.base.clone();
+        stamp.batch = position;
+        self.cursor.poisoned = true;
+        let ticket = self.ledger.reserve_ticket(&stamp, attempt)?;
+        let layer = &mut self.layers[0];
+        let Attention::Qsa(qsa, ffn) = &mut layer.attention else {
+            unreachable!()
+        };
+        let batch =
+            sc117_qsa_bound_layer::RoutedBatch::prepare(qsa, ffn, &self.ledger, &ticket, inputs)?;
+        let mut selected = std::collections::BTreeSet::new();
+        let mut uses = Vec::with_capacity(inputs.len());
+        let mut source = Some(source);
+        for choices in batch.choices() {
+            layer
+                .owners
+                .ensure(&stamp, attempt, choices, &mut source, self.timeout)?;
+            let ids: Vec<_> = choices.iter().map(|c| c.expert).collect();
+            selected.extend(ids.iter().copied());
+            uses.push(ids);
+        }
+        let shared = batch.shared(&mut layer.shared)?;
+        let collected = batch.dispatch(
+            &mut layer.owners.sessions,
+            layer.owners.registry.clone(),
+            layer.owners.preferred.clone(),
+            layer.owners.order.clone(),
+            &self.ledger,
+            ticket,
+            self.timeout,
+        )?;
+        let committed = batch.commit(shared, collected)?;
+        if committed.residuals.len() != inputs.len()
+            || committed
+                .residuals
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+        {
+            return Err(invalid("QSA segment batch output"));
+        }
+        for (i, ids) in uses.iter().enumerate() {
+            for &expert in ids {
+                layer.last_used.insert(expert, position + i as u64 + 1);
+            }
+        }
+        layer.last_selected = selected.into_iter().collect();
+        self.cursor.position += inputs.len() as u64;
+        self.cursor.last_attempt = attempt;
+        self.cursor.poisoned = false;
+        Ok(committed.residuals)
+    }
     pub fn advance(&mut self, attempt: u64, input: &[f32]) -> Result<Vec<f32>> {
         self.advance_inner(attempt, input, None, &mut None)
     }
