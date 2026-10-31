@@ -2717,6 +2717,81 @@ print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
     }
     #[cfg(target_os = "linux")]
     #[test]
+    fn r53_pinned_python_producer_is_compatible_with_rust_consumer() {
+        use std::os::fd::AsRawFd;
+        use std::os::unix::fs::{DirBuilderExt, MetadataExt};
+        let parent = std::env::temp_dir().join(format!(
+            "vf-test-r53-python-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&parent)
+            .unwrap();
+        let root = parent.join("ledger");
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&root)
+            .unwrap();
+        let lease_path = parent.join("lease");
+        let plan = "r600-synthetic-plan";
+        let producer = r#"import fcntl,os,sys
+from tools.reserve_r53_pinned import reserve
+root,path,plan=sys.argv[1:]
+with open(path,'x+') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ lm=os.stat(path); dm=os.stat(root)
+ lease=dict(path=path,dev=lm.st_dev,ino=lm.st_ino,uid=lm.st_uid)
+ namespace=dict(root=root,dev=dm.st_dev,ino=dm.st_ino,uid=dm.st_uid,base_id='r53-python123')
+ reserve(namespace,plan,lease,lock.fileno())
+"#;
+        assert!(std::process::Command::new("python3")
+            .env("PYTHONDONTWRITEBYTECODE", "1")
+            .args([
+                "-c",
+                producer,
+                root.to_str().unwrap(),
+                lease_path.to_str().unwrap(),
+                plan
+            ])
+            .status()
+            .unwrap()
+            .success());
+        let file = std::fs::OpenOptions::new()
+            .read(true)
+            .write(true)
+            .open(&lease_path)
+            .unwrap();
+        rustix::fs::flock(&file, rustix::fs::FlockOperation::NonBlockingLockExclusive).unwrap();
+        let m = file.metadata().unwrap();
+        let lease = SharedLease {
+            path: lease_path.to_str().unwrap().into(),
+            dev: m.dev(),
+            ino: m.ino(),
+            uid: m.uid(),
+        };
+        let m = std::fs::metadata(&root).unwrap();
+        let namespace = Namespace {
+            root: root.to_str().unwrap().into(),
+            dev: m.dev(),
+            ino: m.ino(),
+            uid: m.uid(),
+            base_id: "r53-python123".into(),
+        };
+        assert!(
+            verify_runtime_admission(Some(&lease), Some(file.as_raw_fd()), Some(&namespace))
+                .is_ok()
+        );
+        assert!(consume_namespace(&namespace, plan, &lease).is_ok());
+        assert!(consume_namespace(&namespace, plan, &lease).is_err());
+        // The synthetic reservations and marker remain in the isolated TMPDIR.
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
     fn r53_requires_both_matching_reservations_and_consumes_once() {
         use std::os::unix::fs::{DirBuilderExt, MetadataExt, OpenOptionsExt};
         let name = format!(
