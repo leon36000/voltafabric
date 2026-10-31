@@ -1,0 +1,18 @@
+{
+  "status": "PASS_PLAN_MISMATCH_REFUSED_BEFORE_RESERVATION",
+  "plan_only_invocations": 2,
+  "full_generation_invocations": 0,
+  "allowed_socket_family": "AF_UNIX",
+  "ip_socket_creation": "DENIED",
+  "worker_stub": "/usr/bin/false",
+  "worker_stub_sha256": "f84e76ea4da1e0c4e92254bd0d7dccdabe2c8b3098e734f27997dae3ee5d8e02",
+  "gpu_used": false,
+  "real_r53_used": false,
+  "synthetic_ledger_files": [],
+  "actual_plan_id": "r576-9bebc26833edd9acd2a71871e4b8180bf3878bd36f899e6b6e68f7f79dbdc287",
+  "deliberately_wrong_expected_plan_id": "r576-0bebc26833edd9acd2a71871e4b8180bf3878bd36f899e6b6e68f7f79dbdc287",
+  "binary_sha256": "0c7d6d9744dfb0bb639a31dcb97f73f17c5b653b2e2ac0ee5bec2d0ed2e7bba1",
+  "worker_sha256": "f84e76ea4da1e0c4e92254bd0d7dccdabe2c8b3098e734f27997dae3ee5d8e02",
+  "tokenizer_manifest_sha256": "6a625b74d2db4b359947fb37b0aaa8c1088375e41d846b6cdbfd8bb2ba126b6d",
+  "known_hosts_sha256": "a78d7342923c466930c86f9726e5f55b0c55d724d8b0d608e8199e3a03d15177"
+}

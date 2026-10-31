@@ -4288,13 +4288,8 @@
     "state": "EXITED"
   },
   "active_operation": null,
-  "active_operations": [
-    {
-      "id": "R113",
-      "state": "PREPARING_LOCAL_SNAPSHOT"
-    }
-  ],
-  "active_phase": "GITLAB_IMPORT",
+  "active_operations": [],
+  "active_phase": "R635_VERIFIED_SOURCE_UPDATE",
   "active_workers": [],
   "actual_billing_usd": 0,
   "adapter_frontier_coverage": {
@@ -11701,5 +11696,38 @@
     "remote_content_verified": false,
     "pushed": false,
     "tls_verified_via_existing_tailscale_socks": true
+  }
+,
+  "r635_plan_preflight": {
+    "status": "PASS_PLAN_MISMATCH_REFUSED_BEFORE_RESERVATION",
+    "branch": "r635-plan-before-r53-reservation-20261031",
+    "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
+    "changes": [
+      "adapters/strata_tokenizer/prompt_runner.py",
+      "adapters/strata_tokenizer/test_prompt_runner.py",
+      "research/R635/verify_actual_preflight.py",
+      "research/R635/receipt.json",
+      "research/R635/REPORT.md"
+    ],
+    "adapter_tests_pc1": {
+      "passed": 43,
+      "failed": 0,
+      "command": "python -m unittest adapters.strata_tokenizer.test_prompt_runner",
+      "environment": "existing Strata/.venv; no installation"
+    },
+    "actual_preflight": {
+      "plan_only_invocations": 2,
+      "full_generation_invocations": 0,
+      "ip_socket_creation": "DENIED",
+      "allowed_socket_family": "AF_UNIX",
+      "worker_stub": "/usr/bin/false",
+      "synthetic_ledger_files": []
+    },
+    "gpu_executed": false,
+    "real_r53_used": false,
+    "real_worker_started": false,
+    "no_automatic_retry": true,
+    "receipt": "research/R635/receipt.json",
+    "next_action": "R636: wire the actual Strata PoolMultiFn callback into the VoltaFabric boundary and verify on CPU with an independent oracle; no GPU or real R53."
   }
 }

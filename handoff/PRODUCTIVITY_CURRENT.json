@@ -1,8 +1,8 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-28T03:03:25.229663+00:00",
-  "owner_authorization": "Budget discretionary, authorized project context to existing LiteLLM models, continue useful work automatically; never expose credentials or change neighboring workloads.",
-  "objective": "Deliver verified VoltaFabric changes and complete-model integration, with model productivity measured by accepted changes rather than number of agents.",
+  "updated_utc": "2026-10-31T21:18:19Z",
+  "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
+  "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
     "round": "R59",
     "files": 370,
@@ -18,10 +18,12 @@
   },
   "current_wave": [
     {
-      "id": "R113",
+      "id": "R635",
       "owner": "integrator",
-      "state": "GITLAB_IMPORT_LOCAL_SNAPSHOT_PREPARING_REMOTE_AUTH_REQUIRED",
-      "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gitlab-import-r113-20261028"
+      "state": "LOCAL_TESTS_AND_COORDINATOR_PREFLIGHT_VERIFIED_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+      "branch": "r635-plan-before-r53-reservation-20261031",
+      "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
+      "path": "research/R635"
     }
   ],
   "acceptance": [
@@ -31,14 +33,14 @@
     "Check diff, tests, proof linkage and costs before accepting; keep failures."
   ],
   "known_limits": [
-    "R99 application failed, cause incomplete; R106 CPU diagnostics not yet deployed.",
-    "No measured globally fastest model or productive paid-agent fleet.",
-    "R77 full gate remains UNKNOWN; R82 no fresh CPU_FULL_PASS.",
-    "R81 private nominal passed; canonical remains370filesR59.",
-    "R107 complete-model paths and metadata found; payload identity, actual binary version, tokenizer semantics and generation unqualified.",
-    "IQ3_S Strata pack is not directly consumed by current MXFP4 VoltaFabric. No actual full-model integration or fair engine speed ranking yet."
+    "The R59 canonical baseline is historical; the R635 branch is private and is not merged into main.",
+    "R626/R627 adapted llama.cpp GGML and a Strata head under MIT; R630 verified only local CPU SC117 generation through 48 layers. No GPU, inter-PC worker, shared production R53, or complete Strata runtime integration is qualified.",
+    "R635 verifies plan mismatch rejection before reservation only with a synthetic empty ledger, AF_UNIX-only test scope, and a stub worker. It does not establish production lease/registry/checkpoint/resource validity.",
+    "The R630 batch and eviction claims remain RESERVED_UNKNOWN_NO_REPLAY and must not be replayed.",
+    "No qualified integration of vLLM, SGLang, TensorRT-LLM, Maya, or DeepInfer as a runtime is established by this wave; DeepInfer remains a source of ideas, not the target engine.",
+    "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed."
   ],
-  "automatic_continuation": "Existing hourly heartbeat; not continuous execution outside active turns.",
+  "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": {
     "R81": {
       "status": "PRIVATE_SESSION_VERIFIED",
@@ -150,18 +152,58 @@
       "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/pc6-targeted-storage-r112-20261028",
       "manifest_sha256": "6b6c17854c31f1302f1b5bd450e380061cc4575ace1387ba0bdedce8a1651c21",
       "no_deletion": true
+    },
+    "R626": {
+      "status": "CPU_COMPONENT_ADAPTATION_VERIFIED",
+      "source": "llama.cpp",
+      "source_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "license": "MIT",
+      "detail": "shared per-token scalar Q8_K activation preparation; local CPU evidence only"
+    },
+    "R627": {
+      "status": "STRATA_HEAD_ADAPTATION_CPU_VERIFIED",
+      "source": "Strata",
+      "source_commit": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+      "license": "MIT",
+      "detail": "13-token Hi prompt through 48 layers; no GPU/inter-PC"
+    },
+    "R630": {
+      "status": "LOCAL_CPU_SC117_GENERATION_REACHED_EOS",
+      "detail": "prompt Hi generated Hello! How can I help you today? and EOS in 10 tokens through 48 layers; 96 local workers closed; claims remain RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    "R634": {
+      "status": "INCOMPATIBLE_REMOTE_MODES_REFUSED_BEFORE_R53",
+      "branch": "r634-preflight-before-r53-reservation-20261031",
+      "commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
+      "tests_pc1": 47,
+      "tests_pc6_debug_release": 21,
+      "gpu_executed": false,
+      "real_r53_used": false
+    },
+    "R635": {
+      "status": "PASS_PLAN_MISMATCH_REFUSED_BEFORE_RESERVATION",
+      "branch": "r635-plan-before-r53-reservation-20261031",
+      "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
+      "tests_pc1": 43,
+      "plan_only_invocations": 2,
+      "full_generation_invocations": 0,
+      "ip_socket_creation": "DENIED",
+      "synthetic_ledger_files": [],
+      "gpu_executed": false,
+      "real_r53_used": false,
+      "receipt": "research/R635/receipt.json"
     }
   },
   "active_operations": [],
   "next_action": {
-    "status": "SNAPSHOT_IN_PREPARATION",
-    "purpose": "Prepare canonical Git import; destination Git authentication required; never overwrite remote without reading it."
+    "status": "R635_PRIVATE_GITLAB_PUBLICATION_AND_READBACK",
+    "purpose": "Publish only the reviewed R635 source, tests, proof and handoff files from R634 parent; then continue with R636 actual Strata PoolMultiFn integration on CPU. No automatic relaunch, GPU, production network, or real R53 in this wave."
   },
-  "report": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/REPORT.md",
-  "operating_mode": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/OPERATING_MODE.md",
+  "report": "research/R635/REPORT.md",
+  "operating_mode": "No automatic relaunch; owner-requested bounded CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/MANIFEST.json",
-    "sha256": "7315b186d6660e138ab3bc2aad06f6d3ac115de9f97cf4a72709f962bdd5998f",
-    "files": 35
+    "path": "research/R635/PUBLISH_SHA256SUMS",
+    "sha256": "74eebb060070615e7d481ed27679ffd7bc600de8dd92f719d2eaf332708a042c",
+    "files": 7
   }
 }

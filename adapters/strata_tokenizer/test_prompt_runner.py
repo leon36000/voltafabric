@@ -49,6 +49,9 @@ class RunnerTests(unittest.TestCase):
                        'VF_EXPECTED_PLAN_ID':plan, 'VF_EXPERT_RANK_AFFINITY':'sticky'}
                 calls = []
                 def engine(args, **kwargs):
+                    if args[1] == '--plan-only':
+                        value={'plan_id':plan,'prompt_tokens_sha256':hashlib.sha256(struct.pack('<I',0)).hexdigest()}
+                        return subprocess.CompletedProcess(args,0,json.dumps(value).encode(),b'')
                     calls.append(kwargs['pass_fds'])
                     self.assertTrue(os.path.isfile(os.path.join(root, 'r53-synthetic-run.json')))
                     self.assertTrue(os.path.isfile(os.path.join(root, 'r53-synthetic-run-duplicate-slot.json')))
@@ -91,6 +94,9 @@ except BlockingIOError: sys.exit(17)
 sys.exit(99)
 '''
                 def child(_args, **kwargs):
+                    if _args[1] == '--plan-only':
+                        value={'plan_id':env['VF_EXPECTED_PLAN_ID'],'prompt_tokens_sha256':hashlib.sha256(struct.pack('<I',0)).hexdigest()}
+                        return subprocess.CompletedProcess(_args,0,json.dumps(value).encode(),b'')
                     return _run_bounded([sys.executable, '-c', program, str(lock.fileno()), lease_path], **kwargs)
                 bad = dict(env, VF_SHARED_LEASE_SPEC='{"uid": 1, "uid": 1}')
                 with patch.dict('os.environ', bad, clear=True):
@@ -126,6 +132,30 @@ sys.exit(99)
                             run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=engine, reserve_r53=True, require_bound_plan=True)
                     self.assertEqual(os.listdir(root), [])
                 self.assertEqual(calls, [])
+
+    def test_remote_plan_mismatch_refuses_before_reservation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root=os.path.join(directory,'ledger'); os.mkdir(root,0o700)
+            path=os.path.join(directory,'lease')
+            with open(path,'w+') as lock:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                ds,ls=os.stat(root),os.stat(path)
+                ns=dict(root=root,dev=ds.st_dev,ino=ds.st_ino,uid=ds.st_uid,base_id='r53-plancheck01')
+                lease=dict(path=path,dev=ls.st_dev,ino=ls.st_ino,uid=ls.st_uid)
+                env={'VF_RANK2_SSH_HOST':'host','VF_SHARED_LEASE_FD':str(lock.fileno()),
+                     'VF_SHARED_LEASE_SPEC':json.dumps(lease),'VF_R53_NAMESPACE_SPEC':json.dumps(ns),
+                     'VF_EXPECTED_PLAN_ID':'r531-'+'a'*64,'VF_EXPERT_RANK_AFFINITY':'sticky'}
+                calls=[]
+                def engine(args, **_kwargs):
+                    calls.append(args)
+                    result={'plan_id':'r531-'+'b'*64,'prompt_tokens_sha256':hashlib.sha256(struct.pack('<I',0)).hexdigest()}
+                    return subprocess.CompletedProcess(args,0,json.dumps(result).encode(),b'')
+                with patch.dict('os.environ',env,clear=True):
+                    with self.assertRaisesRegex(ValueError, 'expected plan'):
+                        run_prompt('A',Tokenizer(),3,'/engine',['/input']*8,runner=engine,reserve_r53=True,require_bound_plan=True)
+                self.assertEqual(len(calls),1)
+                self.assertEqual(calls[0][1], '--plan-only')
+                self.assertEqual(os.listdir(root),[])
 
     def test_head_trace_never_runs_or_escapes_through_prompt_adapter(self):
         calls = []

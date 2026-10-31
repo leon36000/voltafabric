@@ -311,7 +311,6 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if reserve_r53:
         # Explicit opt-in only. The operator still establishes the real shared
         # ledger, cooperative lease and all hardware/resource admissions.
-        from tools.reserve_r53_pinned import reserve
         raw_namespace = os.environ.get("VF_R53_NAMESPACE_SPEC", "")
         raw_lease = os.environ.get("VF_SHARED_LEASE_SPEC", "")
         if not (0 < len(raw_namespace.encode("utf-8")) <= 8192 and 0 < len(raw_lease.encode("utf-8")) <= 8192):
@@ -320,6 +319,15 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         lease = json.loads(raw_lease, object_pairs_hook=_unique_object)
         if not isinstance(namespace, dict) or not isinstance(lease, dict):
             raise ValueError("R53 namespace and lease identities must be objects")
+        # Use the same executable path and inputs to let the actual coordinator
+        # check its full no-worker plan before consuming identities. The CLI
+        # pins executable bytes with a sealed memfd; library callers must
+        # establish their own executable authenticity. This does not
+        # authenticate the caller or model provenance.
+        run_prompt(prompt, tokenizer, eos, binary, engine_paths,
+                   max_new_tokens=max_new_tokens, chat=chat, require_bound_plan=True,
+                   prepare_plan=True, runner=runner, binary_fd=binary_fd)
+        from tools.reserve_r53_pinned import reserve
         reserve(namespace, expected_plan, lease, fd)
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, **options)
     if completed.returncode != 0:
