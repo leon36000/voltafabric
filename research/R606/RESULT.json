@@ -1,0 +1,31 @@
+{
+  "activation_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "actual_layer_transaction": true,
+  "claim_sha256": "fec6825558a3506b4b7b0072ba91612874aa522238050d9fca51a42caf69ebad",
+  "claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+  "collector_sha256": "ef0a699feb2e5d21cea882c1f7c8cbd517883a2de419e0c511aa91e784514ac5",
+  "expert_ids": [
+    75,
+    12,
+    209,
+    181,
+    257,
+    272,
+    480,
+    159,
+    492,
+    255
+  ],
+  "gdn_next_token": 1,
+  "gdn_sha256": "fceb5c54944b368ba42cf16d8ab86cf425291656250e6e9139632d9648d1d0e4",
+  "generation": false,
+  "gpu": false,
+  "layer_binary_sha256": "ec4d20ea83863c2d6d20ee05e9aac88d70afb4a0955620e3cc8c307aa9cd8352",
+  "network_worker": false,
+  "oracle_values": 10240,
+  "plan_sha256": "7c9cdf11a734b09236fbf6eb96b197f5188ca8f424151453a2b19adc20d07b52",
+  "receipt_sha256": "aa3980e2e9985d7faf46c51e2203eb4b460f255ea646be2d5d950db946906980",
+  "residual_sha256": "0350630913cfe2b369d8bc7043e2cbeae352910229468516a6d55aa960173e90",
+  "run_id": "r606-97ea33e338e042acaa4ebc92134a852d",
+  "worker_sha256": "5504ec288fe4487e796bdb91b22be39b71a472e7f5b273e936b784e5c388e96d"
+}

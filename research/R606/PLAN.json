@@ -1,0 +1,53 @@
+{
+  "args": [
+    "/home/pc1/NAOS/vf-r606-work/project/fixtures/r418/layer2.json",
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/dense.bin",
+    "/home/pc1/Strata-data/models/SC117-Qwen3.8-Flash-Next-GSQ-RCO-abliterated/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00001-of-00002.gguf",
+    "/home/pc1/NAOS/vf-r428-work/residual0.f32",
+    "/home/pc1/NAOS/vf-r428-work/residual1.f32",
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/experts.bin",
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/native_experts.txt",
+    "/home/pc1/NAOS/vf-r606-work/target/release/vf-rank-session",
+    "/home/pc1/NAOS/vf-r606-work/ledger",
+    "/home/pc1/NAOS/vf-r606-work/project/fixtures/r422/layer2.json",
+    "/home/pc1/NAOS/vf-r606-work/project/fixtures/r424/layer2.json"
+  ],
+  "checkpoint_stat": {
+    "/home/pc1/Strata-data/models/SC117-Qwen3.8-Flash-Next-GSQ-RCO-abliterated/IQ3_S/Qwen3.8-Flash-Next-GSQ-RCO-abliterated-IQ3_S-00001-of-00002.gguf": {
+      "device": 66312,
+      "inode": 13500439,
+      "mtime_ns": 1792010675572009604,
+      "size": 55063448064
+    },
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/dense.bin": {
+      "device": 66312,
+      "inode": 13631500,
+      "mtime_ns": 1792010813716593159,
+      "size": 1538035200
+    },
+    "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/experts.bin": {
+      "device": 66312,
+      "inode": 13631491,
+      "mtime_ns": 1792010935757642405,
+      "size": 50292326400
+    }
+  },
+  "claims": "UNKNOWN never replay",
+  "ggml_base_sha256": "54558b38a3f14789ce7b8cdab493788c2dd6ff495a3953970da66b026c47fc23",
+  "ggml_cpu_sha256": "42e39eea5894bed527fef2feb9bf8a23e970733fa9ea892fd060cafe5505412a",
+  "gpu": false,
+  "layer_binary_sha256": "ec4d20ea83863c2d6d20ee05e9aac88d70afb4a0955620e3cc8c307aa9cd8352",
+  "layer_source_sha256": "a9de8c51df516d2c9d9ecb2956b421f0f68bfcd58faa36a265eeee674e8df36f",
+  "native_scalar_library_sha256": "03e79c4024d2d56d68a3d53193dd96236f5ae347cf25f43d11adf6121c086ee2",
+  "network_worker": false,
+  "run_id": "r606-97ea33e338e042acaa4ebc92134a852d",
+  "runner_sha256": "c6bf04baf8b5cd9669eaae8b89fb64f8336ca45ac3904c3eb4c135987cff586f",
+  "scope": {
+    "cpu_quota_percent": 200,
+    "memory_max_bytes": 4294967296,
+    "swap_max_bytes": 0,
+    "tasks_max": 64
+  },
+  "source_tree_sha256": "76fc2ba1287d5f365b9359446f779f58b38bd13fcf4dbe929539d952110278b8",
+  "worker_sha256": "5504ec288fe4487e796bdb91b22be39b71a472e7f5b273e936b784e5c388e96d"
+}

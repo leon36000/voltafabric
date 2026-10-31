@@ -1,0 +1,12 @@
+[package]
+name = "vf-r606-scalar-layer"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+voltafabric = { path = "../..", features = ["native-scalar-reference"] }
+serde_json = "=1.0.151"
+libc = "=0.2.190"
+[[bin]]
+name = "vf-r606-scalar-layer"
+path = "layer.rs"
+[workspace]
