@@ -1,0 +1,21 @@
+{
+  "round": "R578",
+  "parent": "08286d1b2a2955a858b5f2042ed522f81c138766",
+  "scope": "sticky affinity tokenizer-to-48-layer real SC117 checkpoint generation on PC1 CPU",
+  "output": "Hello!",
+  "tokens": [
+    9419,
+    0
+  ],
+  "stop": "token_limit",
+  "prompt_positions": 13,
+  "inputs": 14,
+  "workers_closed": 96,
+  "admissions": 2554,
+  "evictions": 1147,
+  "verified_same_rank_readmissions": 231,
+  "claims": "1531 RESERVED_UNKNOWN_NO_REPLAY exact bytes retained",
+  "comparison": "all input, embedding, output and logits hashes equal R571 same-engine run",
+  "limitations": "one prompt, local CPU only, no independent full-model oracle, GPU, inter-PC execution or numeric compatibility policy; R53 and lease unresolved",
+  "next": "reconcile R53/lease and resolve numerical compatibility before distributed qualification"
+}
