@@ -1,0 +1,69 @@
+{
+  "activation": ".runs/vf-r574-input/activation0.f32",
+  "activation_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "binary": ".runs/vf-r604-work/scalar-capture",
+  "binary_sha256": "b612474633ce2e47a076887edc7ccbab1ac46aacbf67838c7166964849e15434",
+  "experts": [
+    {
+      "expert": 75,
+      "path": ".runs/vf-r590-work/expert75.bin",
+      "sha256": "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d"
+    },
+    {
+      "expert": 12,
+      "path": ".runs/vf-r590-work/expert12.bin",
+      "sha256": "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e"
+    },
+    {
+      "expert": 209,
+      "path": ".runs/vf-r604-work/experts/expert209.bin",
+      "sha256": "6271454ee230559ad5f701f94f8af7edc4b3ba7f10ff98b4763d09837c51db61"
+    },
+    {
+      "expert": 181,
+      "path": ".runs/vf-r604-work/experts/expert181.bin",
+      "sha256": "98a127792dc0ae3709e7c714225f994913404e880e61e55794c0bf4fcb4d77ea"
+    },
+    {
+      "expert": 257,
+      "path": ".runs/vf-r604-work/experts/expert257.bin",
+      "sha256": "6f626990dabe150f19c95ae1576c1563a98909e2333bb01aea0d0984891491ca"
+    },
+    {
+      "expert": 272,
+      "path": ".runs/vf-r604-work/experts/expert272.bin",
+      "sha256": "d3db2278072ae0ac7eb8c42b1597c6fea5a10469a81e4bf6b01274eb49fd26c5"
+    },
+    {
+      "expert": 480,
+      "path": ".runs/vf-r604-work/experts/expert480.bin",
+      "sha256": "a72edc2b4ad6258cb63946914960d24bbbcf763809be93824d0c51e3ce3a727a"
+    },
+    {
+      "expert": 159,
+      "path": ".runs/vf-r604-work/experts/expert159.bin",
+      "sha256": "694842ad3656f0f76eb8307520b83c314bb82fa123e8a7762256c4d9a2b06161"
+    },
+    {
+      "expert": 492,
+      "path": ".runs/vf-r604-work/experts/expert492.bin",
+      "sha256": "2e9bd3f3382db3c813301e257e8d0a603545d6a9e6d939c4715d6d7b4f5457c0"
+    },
+    {
+      "expert": 255,
+      "path": ".runs/vf-r574-input/expert255.bin",
+      "sha256": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5"
+    }
+  ],
+  "gpu": false,
+  "network_worker": false,
+  "runner_sha256": "5723f7407623f90ee1fdfcff2a54ef3fd76f640c17e0c7a4c93a9b848c5dec03",
+  "scope": {
+    "cpu_quota_percent": 50,
+    "memory_max_bytes": 536870912,
+    "swap_max_bytes": 0,
+    "tasks_max": 16
+  },
+  "source": "research/R590/scalar_capture.cpp",
+  "source_sha256": "8e6caaadf4eedadd89967fe9c6b6971261959d46d98d6b5a2a14a29dbf10555f"
+}

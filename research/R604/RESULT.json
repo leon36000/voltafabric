@@ -1,0 +1,21 @@
+{
+  "collector_sha256": "ef0a699feb2e5d21cea882c1f7c8cbd517883a2de419e0c511aa91e784514ac5",
+  "complete_expert_route": true,
+  "complete_layer_or_generation": false,
+  "exact_rows": 2560,
+  "model_authentication": false,
+  "real_experts": [
+    75,
+    12,
+    209,
+    181,
+    257,
+    272,
+    480,
+    159,
+    492,
+    255
+  ],
+  "remaining_captures_host": "PC6",
+  "three_captures_match_pc1": true
+}

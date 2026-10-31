@@ -1,0 +1,8 @@
+{
+  "activation_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "ids_and_coefficients_exact": true,
+  "result_sha256": "31800dc58ccac050049ce417dd0bdb61143e3d022c8ab9cae210f02ccfec8cd4",
+  "route_count": 10,
+  "status": "PASS",
+  "verifier_sha256": "6f0c689986544dc4117bc895b6de431bbf69e8e61c850571f61a95fc75050f63"
+}

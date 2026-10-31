@@ -1,0 +1,7 @@
+[
+  {
+    "file": "native-59ca6b31442e52725df53716b7504b8fca2784083f9a999738b9e787c4547b96.claim.json",
+    "raw": "{\"attempt\":1,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":2,\"model_revision\":\"sc117-r604-observed\",\"plan_id\":\"r604-9e5ae793741d62f2317f9816d2248b235c9969b70222126b067d2ba217dae3b8\",\"run_id\":\"r604-b09e947e2cd846e496e04d11c0ff9515\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "e9c88f0a4166daed5c850a2dc6787190a0e3453a5b2b91b817e8ebe095934f40"
+  }
+]

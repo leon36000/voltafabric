@@ -1,0 +1,58 @@
+{
+  "experts": [
+    {
+      "bytes": 1971200,
+      "expert": 209,
+      "offset": 2299417600,
+      "sha256": "6271454ee230559ad5f701f94f8af7edc4b3ba7f10ff98b4763d09837c51db61"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 181,
+      "offset": 2244224000,
+      "sha256": "98a127792dc0ae3709e7c714225f994913404e880e61e55794c0bf4fcb4d77ea"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 257,
+      "offset": 2394035200,
+      "sha256": "6f626990dabe150f19c95ae1576c1563a98909e2333bb01aea0d0984891491ca"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 272,
+      "offset": 2423603200,
+      "sha256": "d3db2278072ae0ac7eb8c42b1597c6fea5a10469a81e4bf6b01274eb49fd26c5"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 480,
+      "offset": 2833612800,
+      "sha256": "a72edc2b4ad6258cb63946914960d24bbbcf763809be93824d0c51e3ce3a727a"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 159,
+      "offset": 2200857600,
+      "sha256": "694842ad3656f0f76eb8307520b83c314bb82fa123e8a7762256c4d9a2b06161"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 492,
+      "offset": 2857267200,
+      "sha256": "2e9bd3f3382db3c813301e257e8d0a603545d6a9e6d939c4715d6d7b4f5457c0"
+    }
+  ],
+  "fetcher_sha256": "aa54852defa2cc0669e4f6d2d6b8ac515e2b78995696a294ebb48064b29e08f5",
+  "identity": [
+    66312,
+    13631491,
+    50292326400,
+    1792010935757642405,
+    1792010935942648543
+  ],
+  "mode": "read only; no remote file writes",
+  "network_worker": false,
+  "path": "/home/pc1/Strata-data/packs/sc117_abliterated_iq3_s/experts.bin",
+  "source_observation_sha256": "34bc60aedb67edbee7c5cec2d3e1134917f7ddac8c0b58bb3dc681e280ec2371"
+}

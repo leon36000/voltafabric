@@ -1,0 +1,61 @@
+{
+  "attempts": [
+    1
+  ],
+  "batches": [
+    0
+  ],
+  "epoch": 1,
+  "expert_source_sha256": "6fbe9e5add7aad58248bda7bed492d65852d06de34400864d64987acbcb2bfba",
+  "gpu": false,
+  "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+  "input_sha256": {
+    ".runs/vf-r574-input/activation0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    ".runs/vf-r574-input/expert255.bin": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    ".runs/vf-r590-work/expert12.bin": "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e",
+    ".runs/vf-r590-work/expert75.bin": "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d",
+    ".runs/vf-r604-work/captures/expert12.bin": "927784846bbddb3407f551cf33a82a998d9b74d4cefe343ec79f074fdb390fe5",
+    ".runs/vf-r604-work/captures/expert159.bin": "df74d4189f2b412e126c4b26d340a36926cabab8d28668ecd38d0c198400a8f6",
+    ".runs/vf-r604-work/captures/expert181.bin": "cdf323c4de72e2a8ebfaed9b957352d4395b6507c6f975dcbeb7685fb3151f43",
+    ".runs/vf-r604-work/captures/expert209.bin": "35134ddb4c9343acbca62fc51cac11a077663e79be449cbf5ab075cd2f5dd6b5",
+    ".runs/vf-r604-work/captures/expert255.bin": "8bbbf4a9bd630873700f39bb6eb69e6fc67e43fa707e5491e6ca337d1ab2cd52",
+    ".runs/vf-r604-work/captures/expert257.bin": "ed5db617ab04119dc426af9e27d5812f1d98f03e34977681205bb4cbea50a3ed",
+    ".runs/vf-r604-work/captures/expert272.bin": "be8bf3ee7cbd4daef6d6b85708d489523bd5c4665f8c63c7d012906534f21cd3",
+    ".runs/vf-r604-work/captures/expert480.bin": "fc4b6a0565011133188ba96d6f315df35ab0f0bbc5e84a9a48d1168631f45541",
+    ".runs/vf-r604-work/captures/expert492.bin": "1c2887969fd3fdf8fac1a085c517ebbdc7ef031568e318f44e0c2afe7e094967",
+    ".runs/vf-r604-work/captures/expert75.bin": "43c6043458558d33a359170aa3a6deffbda0ae388008231622f84f9ac5ddac3d",
+    ".runs/vf-r604-work/experts/expert159.bin": "694842ad3656f0f76eb8307520b83c314bb82fa123e8a7762256c4d9a2b06161",
+    ".runs/vf-r604-work/experts/expert181.bin": "98a127792dc0ae3709e7c714225f994913404e880e61e55794c0bf4fcb4d77ea",
+    ".runs/vf-r604-work/experts/expert209.bin": "6271454ee230559ad5f701f94f8af7edc4b3ba7f10ff98b4763d09837c51db61",
+    ".runs/vf-r604-work/experts/expert257.bin": "6f626990dabe150f19c95ae1576c1563a98909e2333bb01aea0d0984891491ca",
+    ".runs/vf-r604-work/experts/expert272.bin": "d3db2278072ae0ac7eb8c42b1597c6fea5a10469a81e4bf6b01274eb49fd26c5",
+    ".runs/vf-r604-work/experts/expert480.bin": "a72edc2b4ad6258cb63946914960d24bbbcf763809be93824d0c51e3ce3a727a",
+    ".runs/vf-r604-work/experts/expert492.bin": "2e9bd3f3382db3c813301e257e8d0a603545d6a9e6d939c4715d6d7b4f5457c0",
+    "research/R604/CAPTURE_PLAN.json": "9a157489c912e1e6b1f580f4cf8f79484980eeba6ebae44242c093fe87ae6525",
+    "research/R604/CAPTURE_RESULT.json": "a19173a191e765728da2ee0f741424d67eb71ff3a6cba1b7211217d0e4286207",
+    "research/R604/FETCH_PLAN.json": "2df94ed57b3f20ae7016ecd7008fbd70bd21e86e242b26f2190fc26c1c682657"
+  },
+  "layer": 2,
+  "layer_source_sha256": "c00f622bf2bd57eb3860a65cc849c209946c3bf2b2d3a7965302933e7c522340",
+  "model_revision": "sc117-r604-observed",
+  "native_source_sha256": "4c30a1aedc53933446b2e18261dd1df7da70ed2499c6869ae77fb41bb4527d42",
+  "network_worker": false,
+  "purpose": "fresh local CPU scalar dynamic admission and full top-10 observed experts versus separate scalar captures",
+  "replay": false,
+  "run_id": "r604-b09e947e2cd846e496e04d11c0ff9515",
+  "runner_sha256": "e4cc7a1e26589e3a5e72ac67c23c63b86fef4d8aebc76e0beb1f43bc63374644",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "max_workers": 2,
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "session_source_sha256": "bf044295d9e850696b30ed60972bcd41a0b9a506efcb1057750183aa08a0adff",
+  "test": ".runs/vf-r604-build/debug/deps/voltafabric-266db965fc6fcf4c",
+  "test_name": "sc117_layer_chain::scalar_observed_owner_tests::scalar_observed_top10_fresh_local_workers",
+  "test_sha256": "dea73eec08e3cddb787a55821374ff736f728124a4fb8c854d4685bf453a3d3f",
+  "verifier_sha256": "616894d8d6f163322b101eefa153b6627ed1e07962f311f37ccc5908c3feda53",
+  "worker": ".runs/vf-r604-build/debug/vf-rank-session",
+  "worker_sha256": "76df720649b6deaf7fde2b85f7ba7368be96e2ae780986b6ae641ef44273c430"
+}

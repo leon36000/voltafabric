@@ -3376,4 +3376,292 @@ mod scalar_observed_owner_tests {
         }
         println!("r603 pass: three observed experts, actual dynamic Owners, two guarded local workers, one complete collection");
     }
+    #[test]
+    #[ignore = "fresh plan and single-use local worker claim required"]
+    fn scalar_observed_top10_fresh_local_workers() {
+        const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        const PACK: u64 = 50_292_326_400;
+        const SHARD: u64 = 55_063_448_064;
+        const N: usize = 1_971_200;
+        let worker = std::env::var("VF_R604_WORKER").unwrap();
+        let worker_sha = std::env::var("VF_R604_WORKER_SHA256").unwrap();
+        let plan = std::env::var("VF_R604_PLAN").unwrap();
+        let run = std::env::var("VF_R604_RUN").unwrap();
+        let ledger_path = std::env::var("VF_R604_LEDGER").unwrap();
+        let outdir = std::env::var("VF_R604_OUTDIR").unwrap();
+        assert!(
+            Path::new(&worker).is_absolute()
+                && Path::new(&ledger_path).is_absolute()
+                && Path::new(&outdir).is_absolute()
+        );
+        assert!(sha256::is_hex_digest(&worker_sha) && sha256::is_hex_digest(&plan));
+        assert_eq!(sha256::hex(&std::fs::read(&worker).unwrap()), worker_sha);
+        let items = [
+            (
+                75u32,
+                ".runs/vf-r590-work/expert75.bin",
+                "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d",
+            ),
+            (
+                12u32,
+                ".runs/vf-r590-work/expert12.bin",
+                "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e",
+            ),
+            (
+                209u32,
+                ".runs/vf-r604-work/experts/expert209.bin",
+                "6271454ee230559ad5f701f94f8af7edc4b3ba7f10ff98b4763d09837c51db61",
+            ),
+            (
+                181u32,
+                ".runs/vf-r604-work/experts/expert181.bin",
+                "98a127792dc0ae3709e7c714225f994913404e880e61e55794c0bf4fcb4d77ea",
+            ),
+            (
+                257u32,
+                ".runs/vf-r604-work/experts/expert257.bin",
+                "6f626990dabe150f19c95ae1576c1563a98909e2333bb01aea0d0984891491ca",
+            ),
+            (
+                272u32,
+                ".runs/vf-r604-work/experts/expert272.bin",
+                "d3db2278072ae0ac7eb8c42b1597c6fea5a10469a81e4bf6b01274eb49fd26c5",
+            ),
+            (
+                480u32,
+                ".runs/vf-r604-work/experts/expert480.bin",
+                "a72edc2b4ad6258cb63946914960d24bbbcf763809be93824d0c51e3ce3a727a",
+            ),
+            (
+                159u32,
+                ".runs/vf-r604-work/experts/expert159.bin",
+                "694842ad3656f0f76eb8307520b83c314bb82fa123e8a7762256c4d9a2b06161",
+            ),
+            (
+                492u32,
+                ".runs/vf-r604-work/experts/expert492.bin",
+                "2e9bd3f3382db3c813301e257e8d0a603545d6a9e6d939c4715d6d7b4f5457c0",
+            ),
+            (
+                255u32,
+                ".runs/vf-r574-input/expert255.bin",
+                "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+            ),
+        ];
+        let mut blobs = BTreeMap::new();
+        for (id, path, hash) in items {
+            let data = std::fs::read(path).unwrap();
+            assert_eq!(data.len(), N);
+            assert_eq!(sha256::hex(&data), hash);
+            blobs.insert(id, (data, hash));
+        }
+        let activation = std::fs::read(".runs/vf-r574-input/activation0.f32").unwrap();
+        assert_eq!(activation.len(), 2560 * 4);
+        assert_eq!(
+            sha256::hex(&activation),
+            "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a"
+        );
+        let input: Vec<f32> = activation
+            .chunks_exact(4)
+            .map(|b| f32::from_le_bytes(b.try_into().unwrap()))
+            .collect();
+        let layout = NativeLayout::parse_sc117_v3(INDEX, PACK).unwrap();
+        let sparse = |name: &str, len| {
+            let path = std::env::temp_dir().join(format!("vf-r604-{}-{name}", std::process::id()));
+            let f = std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(path)
+                .unwrap();
+            f.set_len(len).unwrap();
+            f
+        };
+        let mut pack = sparse("pack", PACK);
+        let shard = sparse("shard", SHARD);
+        let layer = &layout.layers()[2];
+        for (&expert, (blob, _)) in &blobs {
+            pack.write_all_at(blob, layout.expert(2, u64::from(expert)).unwrap().offset)
+                .unwrap();
+            for (base, offset, len) in [
+                (layer.gguf_offsets[0], 0, 524_800),
+                (layer.gguf_offsets[1], 524_800, 524_800),
+                (layer.gguf_offsets[2], 1_049_600, 921_600),
+            ] {
+                shard
+                    .write_all_at(
+                        &blob[offset..offset + len],
+                        base + u64::from(expert) * len as u64,
+                    )
+                    .unwrap();
+            }
+        }
+        let origin = Origin::open(shard, &layout).unwrap();
+        let seeds = [
+            Seed {
+                layer: 2,
+                expert: 75,
+                rank: 2,
+                local: 0,
+            },
+            Seed {
+                layer: 2,
+                expert: 12,
+                rank: 3,
+                local: 0,
+            },
+        ];
+        let plan_id = format!("r604-{plan}");
+        let model = "sc117-r604-observed";
+        let mut source = Source::new(
+            &mut pack,
+            &layout,
+            INDEX,
+            origin,
+            Config {
+                identity: SourceIdentity {
+                    run_id: run.clone(),
+                    model_revision: model.into(),
+                    plan_id: plan_id.clone(),
+                    epoch: 1,
+                },
+                ranks: vec![2, 3],
+                seeds: &seeds,
+                limit: 32 * N as u64,
+            },
+        )
+        .unwrap();
+        let stamp = Stamp {
+            run_id: run,
+            model_revision: model.into(),
+            plan_id,
+            layer: 2,
+            batch: 0,
+            epoch: 1,
+        };
+        let binding = |rank, expert, local| Binding {
+            model_revision: model.into(),
+            rank,
+            layer: 2,
+            expert,
+            local,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: blobs[&expert].1.into(),
+        };
+        let timeout = Duration::from_secs(30);
+        let mut sessions = Vec::new();
+        for (rank, expert) in [(2, 75), (3, 12)] {
+            let endpoint = Endpoint {
+                rank,
+                argv: vec![
+                    worker.clone(),
+                    "--guarded-local".into(),
+                    "--expected-exe-sha256".into(),
+                    worker_sha.clone(),
+                ],
+            };
+            let mut session = Session::connect(&endpoint, timeout).unwrap();
+            session
+                .load_native_scalar_ggml(
+                    &binding(rank, expert, 0),
+                    INDEX,
+                    PACK,
+                    &blobs[&expert].0,
+                    timeout,
+                )
+                .unwrap();
+            session.seal_native_ggml(1, timeout).unwrap();
+            sessions.push(session);
+        }
+        let mut owners = Owners {
+            sessions,
+            registry: Registry {
+                epoch: 1,
+                copies: vec![
+                    Replica {
+                        expert: 75,
+                        rank: 2,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 12,
+                        rank: 3,
+                        local: 0,
+                    },
+                ],
+            },
+            preferred: BTreeMap::new(),
+            order: BTreeMap::from([(2, vec![0]), (3, vec![0])]),
+        };
+        let ledger = NativeBatchLedger::open(Path::new(&ledger_path)).unwrap();
+        let ticket = ledger.reserve_ticket(&stamp, 1).unwrap();
+        let weights = [
+            0.3420320749282837f64,
+            0.1739722639322281,
+            0.09913824498653412,
+            0.08050233870744705,
+            0.06733449548482895,
+            0.061283160001039505,
+            0.05222782492637634,
+            0.042672742158174515,
+            0.04069479927420616,
+            0.04014204069972038,
+        ];
+        let ids = [75, 12, 209, 181, 257, 272, 480, 159, 492, 255];
+        let choices: Vec<_> = ids
+            .iter()
+            .zip(weights)
+            .map(|(&expert, weight)| crate::sc117_router_cpu::Choice {
+                expert,
+                weight: weight as f32,
+                logit: 0.0,
+            })
+            .collect();
+        owners
+            .ensure(&stamp, 1, &choices, &mut Some(&mut source), timeout)
+            .unwrap();
+        assert_eq!(owners.registry.copies.len(), 10);
+        assert_eq!(owners.order[&2].len(), 5);
+        assert_eq!(owners.order[&3].len(), 5);
+        let problem = crate::routing::RoutingProblem {
+            hidden: 2560,
+            experts: ids.to_vec(),
+            routes: vec![ids
+                .iter()
+                .zip(weights)
+                .map(|(&expert, weight)| Choice { expert, weight })
+                .collect()],
+            registry: owners.registry.clone(),
+            stamp: stamp.clone(),
+            preferred_owners: BTreeMap::new(),
+            resident_order: owners.order.clone(),
+        };
+        let result = Session::exec_native_ggml_reserved(
+            &mut owners.sessions,
+            &problem,
+            &[input],
+            &ledger,
+            ticket,
+            timeout,
+        )
+        .unwrap();
+        assert!(result.rows()[0].iter().any(|v| v.abs() > 1e-8));
+        let mut out = std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(Path::new(&outdir).join("collector.f64"))
+            .unwrap();
+        for v in &result.rows()[0] {
+            out.write_all(&v.to_le_bytes()).unwrap();
+        }
+        out.sync_all().unwrap();
+        for session in owners.sessions {
+            let receipt = session.close(timeout);
+            assert!(
+                !receipt.killed && receipt.exit_code == Some(0) && receipt.bye_execs == Some(1)
+            );
+        }
+        println!("r604 pass: ten observed experts, actual dynamic Owners, two guarded local workers, one complete collection");
+    }
 }

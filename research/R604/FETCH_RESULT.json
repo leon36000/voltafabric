@@ -1,0 +1,43 @@
+{
+  "bytes": 13798400,
+  "experts": [
+    {
+      "bytes": 1971200,
+      "expert": 209,
+      "sha256": "6271454ee230559ad5f701f94f8af7edc4b3ba7f10ff98b4763d09837c51db61"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 181,
+      "sha256": "98a127792dc0ae3709e7c714225f994913404e880e61e55794c0bf4fcb4d77ea"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 257,
+      "sha256": "6f626990dabe150f19c95ae1576c1563a98909e2333bb01aea0d0984891491ca"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 272,
+      "sha256": "d3db2278072ae0ac7eb8c42b1597c6fea5a10469a81e4bf6b01274eb49fd26c5"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 480,
+      "sha256": "a72edc2b4ad6258cb63946914960d24bbbcf763809be93824d0c51e3ce3a727a"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 159,
+      "sha256": "694842ad3656f0f76eb8307520b83c314bb82fa123e8a7762256c4d9a2b06161"
+    },
+    {
+      "bytes": 1971200,
+      "expert": 492,
+      "sha256": "2e9bd3f3382db3c813301e257e8d0a603545d6a9e6d939c4715d6d7b4f5457c0"
+    }
+  ],
+  "fetch_plan_sha256": "2df94ed57b3f20ae7016ecd7008fbd70bd21e86e242b26f2190fc26c1c682657",
+  "remote_file_read_only": true,
+  "status": "PASS"
+}
