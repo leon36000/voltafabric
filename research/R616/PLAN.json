@@ -1,0 +1,35 @@
+{
+  "engine_plan_id": "r600-bb04a04ea054db9c75f8dd576ef67d7bcaf584c1887d450fa4e009f10a221355",
+  "file_sha256": {
+    "/home/pc1/NAOS/vf-r443-work/manifest.json": "436066427aaca7f163943b3f0f00c98cb59ddb5df7b2fa410b90d474ab1fe824",
+    "/home/pc1/NAOS/vf-r616-work/PREPARED.json": "f91672f68deb7a768690272b8f5fb2d1eef034e5b3ccc6bab18332fdd141fcf3",
+    "/home/pc1/NAOS/vf-r616-work/PROMPT.json": "110b1ae3e7b6103dbf92d6b607f9975fb4fe060f94c0fe890799e35936056f60",
+    "/home/pc1/NAOS/vf-r616-work/adapters/strata_tokenizer/adapter.py": "715bf33484dce075f5de18d5174129e753a9a5448f7ab1904306e5983534d240",
+    "/home/pc1/NAOS/vf-r616-work/adapters/strata_tokenizer/observed-sc117.json": "6a625b74d2db4b359947fb37b0aaa8c1088375e41d846b6cdbfd8bb2ba126b6d",
+    "/home/pc1/NAOS/vf-r616-work/adapters/strata_tokenizer/prompt_runner.py": "f1b7d0b914007d4b0ad09d8e0c70d9d7082cd953936599d780ef510bd8aec1fb",
+    "/home/pc1/NAOS/vf-r616-work/adapters/strata_tokenizer/vendor/strata_tokenizer.py": "9b0327e25aa62754406a924db6cc137e6edb1d93c7af76a4f3d14a8920ea72c8",
+    "/home/pc1/NAOS/vf-r616-work/native/libvf_native_scalar_reference.a": "02f77932e8e3c8e24e831d56440fe0040b0e73ff29cd600c250b0cfb4bfc1700",
+    "/home/pc1/NAOS/vf-r616-work/project/Cargo.lock": "720c2a2d058b882d63d2a827e0106390ef5728a10211d9f75f1f22c9c70a706e",
+    "/home/pc1/NAOS/vf-r616-work/project/Cargo.toml": "a1dc9c094359a1004b1c577f232226083bf1808f6c07fe5713b6a3911f520706",
+    "/home/pc1/NAOS/vf-r616-work/project/adapters/native_ggml/scalar_reference.cpp": "4bba3df97d77d28fe30c860336760d40be9adb187e18cac4274a1eff2a2e8aec",
+    "/home/pc1/NAOS/vf-r616-work/project/adapters/native_ggml/scalar_reference.hpp": "a089210c014ca629948bcdcac9893bbc23e36205cbcbbe82acc83876f40aa05f",
+    "/home/pc1/NAOS/vf-r616-work/project/adapters/native_ggml/scalar_reference_c.cpp": "f3cc234bd56ac8d698c5ffa16e64cfc387effefff9932f7fa30539c90696fd9f",
+    "/home/pc1/NAOS/vf-r616-work/project/src/bin/vf-rank-session.rs": "4563fe61f3b8f6fa3225e85a59f1adde9545c567e7f3c8e406aa6f0aa2c21273",
+    "/home/pc1/NAOS/vf-r616-work/project/src/bin/vf-sc117-prefill-greedy.rs": "af0c5ec428ed136fd73d0deb61de5f321d91aa8e3369c9f0f111e9bce90a7bda",
+    "/home/pc1/NAOS/vf-r616-work/project/src/sc117_layer_chain.rs": "3788186b9cdf41fa43a5bae6cc374c2f72507572acf15c9394687f54152e0ae9",
+    "/home/pc1/NAOS/vf-r616-work/project/src/session.rs": "11ac7756c4959c43980a154be29eeae149b039b3105edb7fd54d14475026fb90",
+    "/home/pc1/NAOS/vf-r616-work/target/release/vf-rank-session": "d5be3d34c8cbd5957f0271e35b5aaeeeeff00fb299c3b788dcf8c906be931874",
+    "/home/pc1/NAOS/vf-r616-work/target/release/vf-sc117-prefill-greedy": "cee625af313e9ef0761a95c286aea69bb4a141a19d9d34c5bd75540843be7bcc"
+  },
+  "gpu": false,
+  "network_worker": false,
+  "scope": {
+    "cpu_quota": 200,
+    "memory_high_gib": 11,
+    "memory_max_gib": 13,
+    "swap_gib": 0,
+    "tasks_max": 320
+  },
+  "submit_sha256": "0d484231eb888e9b7debbca64aaf0abd51c8ae2113aa6cca35f7d1393afa7e33",
+  "unknown_never_replay": true
+}

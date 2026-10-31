@@ -1,0 +1,7 @@
+# R616 — scalar generation regression on PC1
+
+A fresh local CPU-only run integrates the R613 backend admission guard and R615 borrowed immutable scalar weights. The 48-layer prompt produces token IDs `[9419, 0]`, decoded as `Hello!`. Compared with the R608 scalar run, prompt tokens, generated IDs, embedding, every layer output and logits hashes match exactly. The verifier also checks dynamic expert admissions. This is a regression comparison, not an independent correctness oracle for the whole model.
+
+The run closed 96 local workers, with 384 batches and 1,145 eviction claims. All 1,529 records are retained in two parts; `verify_claims.py` reconstructs and checks the exact original claims bytes. The fresh identity and plan appear in PLAN.json and RESULT.json. No GPU or inter-machine worker was used; this does not establish distributed inference or performance. The historic R53 snapshot is not an active shared ledger.
+
+The PC1 build was checked against 140 source files in the published R615 GitLab branch, including the scalar adapter and session guard. It used the same pinned GGML libraries and tokenizer as the prior local run. The new native scalar archive was built with floating-point contraction and fast math disabled. The guarded execution used an isolated fresh workspace, memory limit 13 GiB, swap limit zero and 200% CPU quota. Full raw receipt and claims remain in the PC1 and PC6 run workspaces; only the summarized receipt and claim records are published here.
