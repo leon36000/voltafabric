@@ -718,6 +718,16 @@ fn verify_expected_plan(plan: &str, expected: Option<&str>, remote: bool) -> Res
     }
 }
 
+// Remote producer arithmetic is not qualified as interchangeable. Keep each
+// previously admitted (layer, expert) on its original rank after eviction.
+// This guard does not establish equivalence between different producers.
+fn require_remote_affinity(remote: bool, sticky: bool) -> Result<(), E> {
+    if remote && !sticky {
+        return Err("SSH workers require sticky expert rank affinity".into());
+    }
+    Ok(())
+}
+
 #[derive(serde::Serialize)]
 struct WorkerPlan<'a> {
     version: &'static str,
@@ -1119,6 +1129,7 @@ fn run() -> Result<(), E> {
         }
         endpoints.insert(rank, endpoint);
     }
+    require_remote_affinity(!host_digests.is_empty(), rank_affinity)?;
     if trace_qsa && !host_digests.is_empty() {
         return Err("QSA trace requires local CPU workers".into());
     }
@@ -1587,6 +1598,13 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn remote_workers_require_sticky_expert_affinity() {
+        assert!(super::require_remote_affinity(false, false).is_ok());
+        assert!(super::require_remote_affinity(false, true).is_ok());
+        assert!(super::require_remote_affinity(true, true).is_ok());
+        assert!(super::require_remote_affinity(true, false).is_err());
+    }
     #[test]
     fn admission_preflight_changes_plan_identity() {
         let base = format!("r531-{}", "a".repeat(64));
