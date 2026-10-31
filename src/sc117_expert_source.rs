@@ -466,6 +466,81 @@ impl<'a> Source<'a> {
     }
 }
 impl MissingExpertSource for Source<'_> {
+    fn preflight(
+        &mut self,
+        stamp: &Stamp,
+        attempt: u64,
+        experts: &[u32],
+        registry: &Registry,
+        order: &BTreeMap<u32, Vec<u32>>,
+    ) -> Result<()> {
+        if attempt == 0
+            || stamp.run_id != self.identity.run_id
+            || stamp.model_revision != self.identity.model_revision
+            || stamp.plan_id != self.identity.plan_id
+            || stamp.epoch != self.identity.epoch
+            || !matches_accounted(stamp.layer, registry, &self.known)
+        {
+            return Err(invalid("expert preflight identity or registry"));
+        }
+        let mut unique = BTreeSet::new();
+        let mut virtual_registry = registry.clone();
+        let mut virtual_order = order.clone();
+        let mut virtual_used = self.used;
+        let mut virtual_rank_used = self.rank_used.clone();
+        for &expert in experts {
+            if !unique.insert(expert) || self.known.contains_key(&(stamp.layer, expert)) {
+                return Err(invalid("expert preflight duplicate or resident"));
+            }
+            let span = self.layout.expert(stamp.layer as usize, expert.into())?;
+            virtual_used = charge(virtual_used, span.bytes, self.limit)?;
+            let capacity = self.rank_limits.as_ref().map(|caps| RankCapacity {
+                limits: caps,
+                used: &virtual_rank_used,
+                bytes: span.bytes,
+            });
+            let suggested = placement(
+                &virtual_registry,
+                &virtual_order,
+                &self.ranks,
+                stamp.epoch,
+                expert,
+                capacity,
+            )?;
+            let pinned = self
+                .sticky
+                .as_ref()
+                .and_then(|m| m.get(&(stamp.layer, expert)).copied());
+            let (rank, local) = sticky_placement(
+                pinned,
+                suggested,
+                &StickyInputs {
+                    ranks: &self.ranks,
+                    order: &virtual_order,
+                    used: &virtual_rank_used,
+                    caps: self.rank_limits.as_ref(),
+                    limit: self.limit,
+                    bytes: span.bytes,
+                },
+            )?;
+            let rank_limit = self
+                .rank_limits
+                .as_ref()
+                .map_or(self.limit, |caps| caps[&rank]);
+            let next = charge(virtual_rank_used[&rank], span.bytes, rank_limit)?;
+            virtual_rank_used.insert(rank, next);
+            virtual_registry.copies.push(crate::moe::Replica {
+                expert,
+                rank,
+                local,
+            });
+            virtual_order
+                .get_mut(&rank)
+                .ok_or_else(|| invalid("preflight rank absent"))?
+                .push(local);
+        }
+        Ok(())
+    }
     fn load(
         &mut self,
         stamp: &Stamp,
@@ -644,7 +719,7 @@ mod tests {
             batch: 0,
             epoch: 1,
         };
-        let registry = Registry {
+        let mut registry = Registry {
             epoch: 1,
             copies: vec![
                 Replica {
@@ -659,15 +734,32 @@ mod tests {
                 },
             ],
         };
-        let order = BTreeMap::from([(2, vec![0]), (3, vec![0])]);
+        let mut order = BTreeMap::from([(2, vec![0]), (3, vec![0])]);
         let first = source.load(&stamp, 1, 2, &registry, &order).unwrap();
         assert_eq!((first.binding.rank, first.binding.local), (2, 1));
         let size = first.bytes.len() as u64;
         source.commit_eviction(&first.binding, size).unwrap();
         assert_eq!(source.sticky.as_ref().unwrap().get(&(0, 2)), Some(&2));
+        // A batch has one new expert and then this sticky readmission. If
+        // pinned rank 2 is full, reject the whole plan without source changes.
+        source.rank_limits = Some(BTreeMap::from([(2, size), (3, size * 9)]));
+        let before_used = source.used;
+        let before_known = source.known.clone();
+        let before_admissions = source.admissions.len();
+        assert!(source
+            .preflight(&stamp, 2, &[3, 2], &registry, &order)
+            .is_err());
+        assert_eq!(source.used, before_used);
+        assert_eq!(source.known, before_known);
+        assert_eq!(source.admissions.len(), before_admissions);
         // Simulate a different valid capacity profile to make the ordinary
         // balancing suggestion choose rank 3, while rank 2 still fits.
         source.rank_limits = Some(BTreeMap::from([(2, size * 2), (3, size * 9)]));
+        source
+            .preflight(&stamp, 2, &[3, 2], &registry, &order)
+            .unwrap();
+        assert_eq!(source.used, before_used);
+        assert_eq!(source.known, before_known);
         let caps = source.rank_limits.as_ref().unwrap();
         let suggested = placement(
             &registry,
@@ -683,13 +775,21 @@ mod tests {
         )
         .unwrap();
         assert_eq!(suggested.0, 3);
+        let third = source.load(&stamp, 2, 3, &registry, &order).unwrap();
+        assert_eq!(third.binding.rank, 3);
+        registry.copies.push(Replica {
+            expert: 3,
+            rank: 3,
+            local: third.binding.local,
+        });
+        order.get_mut(&3).unwrap().push(third.binding.local);
         let second = source.load(&stamp, 2, 2, &registry, &order).unwrap();
         assert_eq!((second.binding.rank, second.binding.local), (2, 1));
     }
 
     #[test]
-    #[ignore = "creates fresh local worker and eviction claims; explicit R577 plan required"]
-    fn sticky_affinity_survives_acknowledged_local_worker_eviction() {
+    #[ignore = "creates fresh local worker and eviction claims; explicit fresh plan required"]
+    fn sticky_preflight_survives_acknowledged_local_worker_eviction() {
         use crate::{
             moe::Choice,
             native_ledger::NativeBatchLedger,
@@ -701,21 +801,21 @@ mod tests {
         const PACK_SIZE: u64 = 50_292_326_400;
         const SHARD_SIZE: u64 = 55_063_448_064;
         const N: usize = 2_176_000;
-        let worker = std::env::var("VF_R577_WORKER").unwrap();
-        let worker_sha = std::env::var("VF_R577_WORKER_SHA256").unwrap();
-        let plan = std::env::var("VF_R577_PLAN").unwrap();
-        let run = std::env::var("VF_R577_RUN").unwrap();
-        let ledger_path = std::env::var("VF_R577_LEDGER").unwrap();
+        let worker = std::env::var("VF_R579_WORKER").unwrap();
+        let worker_sha = std::env::var("VF_R579_WORKER_SHA256").unwrap();
+        let plan = std::env::var("VF_R579_PLAN").unwrap();
+        let run = std::env::var("VF_R579_RUN").unwrap();
+        let ledger_path = std::env::var("VF_R579_LEDGER").unwrap();
         assert!(Path::new(&worker).is_absolute() && Path::new(&ledger_path).is_absolute());
         assert!(crate::sha256::is_hex_digest(&worker_sha) && crate::sha256::is_hex_digest(&plan));
         assert_eq!(
             crate::sha256::hex(&std::fs::read(&worker).unwrap()),
             worker_sha
         );
-        let plan_id = format!("r577-{plan}");
+        let plan_id = format!("r579-{plan}");
         let layout = NativeLayout::parse_sc117_v3(INDEX, PACK_SIZE).unwrap();
         let sparse_file = |name: &str, len: u64| {
-            let path = std::env::temp_dir().join(format!("vf-r577-{}-{name}", std::process::id()));
+            let path = std::env::temp_dir().join(format!("vf-r579-{}-{name}", std::process::id()));
             let f = std::fs::OpenOptions::new()
                 .read(true)
                 .write(true)
@@ -771,7 +871,7 @@ mod tests {
         ];
         let identity = Identity {
             run_id: run.clone(),
-            model_revision: "synthetic-r577".into(),
+            model_revision: "synthetic-r579".into(),
             plan_id: plan_id.clone(),
             epoch: 1,
         };
@@ -791,7 +891,7 @@ mod tests {
         source.enable_rank_affinity().unwrap();
         let stamp = Stamp {
             run_id: run,
-            model_revision: "synthetic-r577".into(),
+            model_revision: "synthetic-r579".into(),
             plan_id,
             layer: 0,
             batch: 0,
@@ -848,6 +948,9 @@ mod tests {
             ],
         };
         let mut order = BTreeMap::from([(2, vec![0]), (3, vec![0])]);
+        source
+            .preflight(&stamp, 1, &[2], &registry, &order)
+            .unwrap();
         let first = source.load(&stamp, 1, 2, &registry, &order).unwrap();
         assert_eq!(first.binding.rank, 2);
         sessions[0]
@@ -908,7 +1011,24 @@ mod tests {
         source.commit_eviction(&first.binding, N as u64).unwrap();
         registry.copies.retain(|v| v.expert != 2);
         order.insert(2, vec![0]);
+        source.rank_limits = Some(BTreeMap::from([(2, N as u64), (3, 9 * N as u64)]));
+        let before_traffic: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+        let before_used = source.used_bytes();
+        assert!(source
+            .preflight(&stamp, 2, &[3, 2], &registry, &order)
+            .is_err());
+        assert_eq!(before_used, source.used_bytes());
+        assert_eq!(
+            before_traffic,
+            sessions
+                .iter()
+                .map(|s| s.traffic.bytes_sent)
+                .collect::<Vec<_>>()
+        );
         source.rank_limits = Some(BTreeMap::from([(2, 2 * N as u64), (3, 9 * N as u64)]));
+        source
+            .preflight(&stamp, 2, &[2], &registry, &order)
+            .unwrap();
         let caps = source.rank_limits.as_ref().unwrap();
         assert_eq!(
             placement(

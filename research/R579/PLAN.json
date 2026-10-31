@@ -1,0 +1,17 @@
+{
+  "cpu_quota_percent": 100,
+  "fresh_local_ledger": true,
+  "gpu": false,
+  "layer_source_sha256": "c18b90eee0d6569a323d90563d2bc61d4dbc5e223618e2012362760a2ea132db",
+  "max_workers": 2,
+  "memory_max_bytes": 1073741824,
+  "network_worker": false,
+  "no_replay": true,
+  "purpose": "fresh local guarded CPU test of layer-admission preflight and sticky readmission",
+  "run_id": "r579-preflight-local-1793412766849027672",
+  "source_sha256": "38aaa4dce307b8056d4f9547e24c4bedfda080075992c443ddcbec3e53f8f29a",
+  "swap_max_bytes": 0,
+  "synthetic_blob_sha256": "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0",
+  "test_binary_sha256": "55e86d3aaedc77b996e87edbc2809dc99328f4a81847fc473e9c39de79abc4a8",
+  "worker_sha256": "05df66b3140414af842d24f1ad5a33874d5ba90fe8b5b8b342b46c1442781246"
+}

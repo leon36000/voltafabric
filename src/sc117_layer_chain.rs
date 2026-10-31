@@ -30,6 +30,18 @@ pub struct ExpertAdmission {
 /// A source is consulted only for experts absent from the current registry.
 /// It must supply an independently trusted digest and enforce its own resource budget.
 pub trait MissingExpertSource {
+    /// Optional side-effect-free check before any missing owner is appended.
+    /// Implementations which cannot predict admission may leave this as a no-op.
+    fn preflight(
+        &mut self,
+        _stamp: &Stamp,
+        _attempt: u64,
+        _experts: &[u32],
+        _registry: &Registry,
+        _order: &BTreeMap<u32, Vec<u32>>,
+    ) -> Result<()> {
+        Ok(())
+    }
     fn load(
         &mut self,
         stamp: &Stamp,
@@ -89,21 +101,28 @@ impl Owners {
         let Some(source) = source.as_deref_mut() else {
             return Ok(());
         };
-        for choice in choices {
-            if self
-                .registry
-                .copies
-                .iter()
-                .any(|copy| copy.expert == choice.expert)
-            {
-                continue;
-            }
-            let material =
-                source.load(stamp, attempt, choice.expert, &self.registry, &self.order)?;
+        let mut seen = std::collections::BTreeSet::new();
+        let missing: Vec<u32> = choices
+            .iter()
+            .map(|choice| choice.expert)
+            .filter(|expert| {
+                !self
+                    .registry
+                    .copies
+                    .iter()
+                    .any(|copy| copy.expert == *expert)
+            })
+            .filter(|expert| seen.insert(*expert))
+            .collect();
+        if !missing.is_empty() {
+            source.preflight(stamp, attempt, &missing, &self.registry, &self.order)?;
+        }
+        for expert in missing {
+            let material = source.load(stamp, attempt, expert, &self.registry, &self.order)?;
             if material.binding.model_revision != stamp.model_revision
                 || material.binding.layer != stamp.layer
                 || material.binding.epoch != stamp.epoch
-                || material.binding.expert != choice.expert
+                || material.binding.expert != expert
             {
                 return Err(invalid(
                     "missing expert source returned a different identity",
@@ -1309,10 +1328,11 @@ impl Segment {
         let mut selected = std::collections::BTreeSet::new();
         let mut uses = Vec::with_capacity(inputs.len());
         let mut source = Some(source);
+        let union: Vec<_> = batch.choices().flatten().cloned().collect();
+        layer
+            .owners
+            .ensure(&stamp, attempt, &union, &mut source, self.timeout)?;
         for choices in batch.choices() {
-            layer
-                .owners
-                .ensure(&stamp, attempt, choices, &mut source, self.timeout)?;
             let ids: Vec<_> = choices.iter().map(|c| c.expert).collect();
             selected.extend(ids.iter().copied());
             uses.push(ids);
@@ -1419,10 +1439,11 @@ impl Segment {
         let mut selected = std::collections::BTreeSet::new();
         let mut uses = Vec::with_capacity(inputs.len());
         let mut source = Some(source);
+        let union: Vec<_> = batch.choices().flatten().cloned().collect();
+        layer
+            .owners
+            .ensure(&stamp, attempt, &union, &mut source, self.timeout)?;
         for choices in batch.choices() {
-            layer
-                .owners
-                .ensure(&stamp, attempt, choices, &mut source, self.timeout)?;
             let ids: Vec<_> = choices.iter().map(|c| c.expert).collect();
             selected.extend(ids.iter().copied());
             uses.push(ids);
@@ -2355,6 +2376,63 @@ mod tests {
             last_attempt: 0,
             poisoned: false,
         }
+    }
+
+    struct RefusingPreflight {
+        calls: usize,
+    }
+    impl MissingExpertSource for RefusingPreflight {
+        fn preflight(
+            &mut self,
+            _: &Stamp,
+            _: u64,
+            experts: &[u32],
+            _: &Registry,
+            _: &BTreeMap<u32, Vec<u32>>,
+        ) -> Result<()> {
+            self.calls += 1;
+            assert_eq!(experts, &[7, 8]);
+            Err(invalid("planned capacity refusal"))
+        }
+        fn load(
+            &mut self,
+            _: &Stamp,
+            _: u64,
+            _: u32,
+            _: &Registry,
+            _: &BTreeMap<u32, Vec<u32>>,
+        ) -> Result<ExpertAdmission> {
+            panic!("preflight refusal must precede every worker load")
+        }
+    }
+    #[test]
+    fn distinct_missing_experts_are_preflighted_before_any_admission() {
+        let mut owners = Owners {
+            sessions: vec![],
+            registry: Registry {
+                epoch: 9,
+                copies: vec![],
+            },
+            preferred: BTreeMap::new(),
+            order: BTreeMap::new(),
+        };
+        let choice = |expert| crate::sc117_router_cpu::Choice {
+            expert,
+            weight: 1.0,
+            logit: 0.0,
+        };
+        let mut provider = RefusingPreflight { calls: 0 };
+        let mut src: Option<&mut dyn MissingExpertSource> = Some(&mut provider);
+        let result = owners.ensure(
+            &base(),
+            11,
+            &[choice(7), choice(8), choice(7)],
+            &mut src,
+            Duration::from_secs(1),
+        );
+        assert!(result.is_err());
+        assert_eq!(provider.calls, 1);
+        assert!(owners.registry.copies.is_empty());
     }
 
     struct WrongSource;

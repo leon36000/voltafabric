@@ -1,0 +1,9 @@
+{
+  "round": "R579",
+  "parent": "cc2a4fa6b15ab723edad32ac4b5ab27ea534c648",
+  "change": "side-effect-free SC117 source simulates all missing experts of a layer batch before worker append; plan domain binds new policy",
+  "verified": "guarded local synthetic two-worker test rejected insufficient sticky rank without traffic, then successful eviction/readmission and identical nonzero collection; 137 library, 13 coordinator debug/release; 34 tokenizer; Clippy and fmt",
+  "claims": "3 exact RESERVED_UNKNOWN_NO_REPLAY records retained",
+  "limitations": "ticket already reserved and segment terminal on failure; per-layer only; no guarantee against later source/worker errors; other providers may no-op; no full checkpoint or distributed qualification; R53 and lease unresolved",
+  "next": "qualify R579 on real checkpoint, then reconcile authoritative R53 and cooperative lease before inter-PC work"
+}

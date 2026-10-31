@@ -1,0 +1,17 @@
+[
+  {
+    "file": "native-0cdbb5ce2d33f03ad0c73348afc281dda2189f806b56f2537a09d665460c0e65.claim.json",
+    "raw": "{\"attempt\":1,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-ff430352e4240a779ecf3b2ac39945c12d9be34be21b15b5650d697d00afe2ab\",\"run_id\":\"r579-preflight-local-1793412766849027672\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "13aacf7500623a59722a71809dc99406db2055c63f121530c7f3cd5493ff1693"
+  },
+  {
+    "file": "native-183cbcf4b2dcae06afdafd75a3fa53cc71415c5ab3d1c2a762bd73f21c876bfd.claim.json",
+    "raw": "{\"attempt\":2,\"stamp\":{\"batch\":1,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-ff430352e4240a779ecf3b2ac39945c12d9be34be21b15b5650d697d00afe2ab\",\"run_id\":\"r579-preflight-local-1793412766849027672\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "d60bf2404b95ed8b46abfa0ab16a1cc30394fab8dbc3eb4508061402f8c81058"
+  },
+  {
+    "file": "native-evict-afab5bb919b7404d192638d86342eb8179bb09386a24c8fd0230a4384f0ec905.claim.json",
+    "raw": "{\"attempt\":1,\"binding\":{\"blob_sha256\":\"2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0\",\"epoch\":1,\"expert\":2,\"index_sha256\":\"adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24\",\"layer\":0,\"local\":1,\"model_revision\":\"synthetic-r579\",\"rank\":2},\"operation_id\":\"afab5bb919b7404d192638d86342eb8179bb09386a24c8fd0230a4384f0ec905\",\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r579\",\"plan_id\":\"r579-ff430352e4240a779ecf3b2ac39945c12d9be34be21b15b5650d697d00afe2ab\",\"run_id\":\"r579-preflight-local-1793412766849027672\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "4bbdecab6ffc46da283ac6c4c19317c770bfa981ca46cfdbc2a31be57cee87ce"
+  }
+]

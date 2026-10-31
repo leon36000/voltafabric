@@ -750,6 +750,12 @@ fn prompt_tokens_hash(tokens: &[u32]) -> String {
     sha256::hex(&bytes)
 }
 
+fn admission_plan(base: &str) -> String {
+    let mut bytes = b"vf-sc117-layer-admission-preflight-v1\0".to_vec();
+    bytes.extend_from_slice(base.as_bytes());
+    format!("r579-{}", sha256::hex(&bytes))
+}
+
 fn trace_plan(base: &str, mode: TraceMode) -> String {
     let (prefix, domain) = match mode {
         TraceMode::Off => return base.to_owned(),
@@ -1216,7 +1222,10 @@ fn run() -> Result<(), E> {
         &r53_namespace,
     )?;
     let plan_id = affinity_plan(
-        &batch_plan(&trace_plan(&base_plan_id, trace_mode), batched_prompt),
+        &batch_plan(
+            &trace_plan(&admission_plan(&base_plan_id), trace_mode),
+            batched_prompt,
+        ),
         rank_affinity,
     );
     if plan_only {
@@ -1578,6 +1587,19 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn admission_preflight_changes_plan_identity() {
+        let base = format!("r531-{}", "a".repeat(64));
+        assert_eq!(
+            admission_plan(&base),
+            "r579-d7ce1f1ccbdebf7b385d5223e8bafce849a044ef408da644339907582e01bc77"
+        );
+        assert_ne!(
+            admission_plan(&base),
+            admission_plan(&format!("r531-{}", "b".repeat(64)))
+        );
+    }
+
     #[test]
     fn sticky_plan_binds_policy_and_base() {
         let base = format!("r531-{}", "a".repeat(64));
