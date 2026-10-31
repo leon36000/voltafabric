@@ -1,0 +1,1 @@
+{"prior_behavior":"mixed rank admitted, regression failed", "debug":"3 passed", "release":"3 passed", "clippy":"passed; historical dead_code allowed", "native_without_scalar":"cargo check passed", "cross_rank_negotiation_qualified":false, "gpu_or_remote_worker":false}

@@ -163,3 +163,47 @@ fn scalar_boundary_accepts_each_observed_format_pair() {
         ])
     );
 }
+
+#[test]
+fn worker_rejects_mixed_numerical_backends() {
+    use voltafabric::native_ggml_cpu::Fleet;
+    let layout = NativeLayout::parse_sc117_v3(INDEX, 50_292_326_400).unwrap();
+    let owner = |expert_id: u32, scalar: bool| {
+        let span = layout.expert(2, u64::from(expert_id)).unwrap();
+        let bytes = vec![0; span.bytes as usize];
+        let binding = Binding {
+            model_revision: "backend-test".into(),
+            rank: 2,
+            layer: 2,
+            expert: expert_id,
+            local: expert_id,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let expert = VerifiedNativeExpert {
+            layer: 2,
+            expert: u64::from(expert_id),
+            span,
+            bytes,
+        };
+        if scalar {
+            Resident::load_scalar(&layout, expert, binding).unwrap()
+        } else {
+            Resident::load(&layout, expert, binding).unwrap()
+        }
+    };
+    assert!(RankWorker::new(vec![owner(0, true), owner(1, false)]).is_err());
+    assert!(RankWorker::new(vec![owner(0, false), owner(1, true)]).is_err());
+    assert!(Fleet::new(vec![owner(0, true), owner(1, false)]).is_err());
+    assert!(Fleet::new(vec![owner(0, false), owner(1, true)]).is_err());
+    assert!(Fleet::new(vec![owner(0, true), owner(1, true)]).is_ok());
+    assert!(Fleet::new(vec![owner(0, false), owner(1, false)]).is_ok());
+    let mut vector_worker = RankWorker::new(vec![owner(0, false)]).unwrap();
+    assert!(vector_worker.add_owner(owner(1, true)).is_err());
+    assert_eq!(vector_worker.owner_count(), 1);
+    let mut worker = RankWorker::new(vec![owner(0, true)]).unwrap();
+    assert!(worker.add_owner(owner(1, false)).is_err());
+    assert_eq!(worker.owner_count(), 1);
+    assert!(worker.add_owner(owner(1, true)).is_ok());
+}

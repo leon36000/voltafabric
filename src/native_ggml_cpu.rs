@@ -222,11 +222,13 @@ impl RankWorker {
             return Err(invalid("native rank owner count"));
         }
         let base = owners[0].binding();
+        let vector_backend = owners[0].uses_vector();
         let mut locals = BTreeSet::new();
         let mut experts = BTreeSet::new();
         for owner in &owners {
             let b = owner.binding();
             if b.rank != base.rank
+                || owner.uses_vector() != vector_backend
                 || b.model_revision != base.model_revision
                 || b.layer != base.layer
                 || b.epoch != base.epoch
@@ -255,6 +257,7 @@ impl RankWorker {
         let b = owner.binding();
         if self.terminal
             || self.owners.len() >= MAX_NATIVE_EXPERTS
+            || owner.uses_vector() != self.owners[0].uses_vector()
             || b.rank != base.rank
             || b.model_revision != base.model_revision
             || b.layer != base.layer
@@ -506,9 +509,11 @@ impl Fleet {
         let mut pairs = BTreeSet::new();
         let mut locals = BTreeSet::new();
         let base = owners[0].binding();
+        let vector_backend = owners[0].uses_vector();
         for owner in &owners {
             let b = owner.binding();
-            if b.model_revision != base.model_revision
+            if owner.uses_vector() != vector_backend
+                || b.model_revision != base.model_revision
                 || b.layer != base.layer
                 || b.epoch != base.epoch
                 || b.index_sha256 != base.index_sha256

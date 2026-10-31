@@ -1,0 +1,7 @@
+# R596 — refus des backends numériques mixtes dans un worker
+
+R595 introduit un backend scalaire expérimental mais permettait à un même `RankWorker` ou `Fleet` de mélanger des résidents scalaires et vectoriels. Le test ajouté reproduisait cette admission avant correction. Or les observations R589 ont révélé une divergence possible entre producteurs vectoriels sur deux architectures ; ce mélange ne doit pas être implicite.
+
+La construction de `RankWorker` et `Fleet` refuse maintenant un mélange scalaire/vectoriel. `RankWorker::add_owner` refuse également d'ajouter un résident d'un autre backend sans modifier le nombre de résidents. Les deux ordres de mélange sont testés ; les combinaisons homogènes et l'ajout scalaire homogène restent acceptés. Ce contrôle en mémoire ne distingue pas deux architectures vectorielles, ne négocie rien entre ranks et n'authentifie pas le choix du backend dans le plan ou le protocole de session.
+
+Le test de régression a d'abord échoué sur l'admission d'un mélange, puis les trois tests ciblés sont passés en debug et en release, dans le paquet de test isolé de R595. Clippy de la bibliothèque passe avec l'avertissement historique `dead_code` autorisé ; le contrôle de compilation sans l'option scalaire et le formatage ciblé passent. Aucun worker distant, GPU, réseau de production, registre R53 ou UNKNOWN n'a été utilisé. La prochaine étape reste une identité de backend liée au plan et négociée de bout en bout, soumise aux protections de lease et de registre pour toute exécution matérielle ou inter-PC.
