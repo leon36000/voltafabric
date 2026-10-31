@@ -1,0 +1,98 @@
+[
+  {
+    "file": "b0-v0.f32",
+    "scale": 1.0,
+    "sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    "source": 0
+  },
+  {
+    "file": "b0-v1.f32",
+    "scale": 0.5,
+    "sha256": "2f7635a31cafa88c592ebb28a05d3cf4c339006d4de9e78539ac62a686b3a155",
+    "source": 0
+  },
+  {
+    "file": "b0-v2.f32",
+    "scale": -1.0,
+    "sha256": "d29ddc808696e054cb7717b76ee6faf1b476e5134d5c62ef095a386eb9a7561b",
+    "source": 0
+  },
+  {
+    "file": "b0-v3.f32",
+    "scale": 1.0001,
+    "sha256": "8e21f98899ef48340a910a987f8f651aaa81b69aee4a70092e83f62ce7660f55",
+    "source": 0
+  },
+  {
+    "file": "b0-v4.f32",
+    "scale": 0.9999,
+    "sha256": "04494c95cfa1f08b2854bbb9b516537f6650b70e8f73f73e9d7d176d20c0150b",
+    "source": 0
+  },
+  {
+    "file": "b0-v5.f32",
+    "scale": 2.0,
+    "sha256": "168cf37e5ec6ff0ae8c95e10e6c0b49674bdf7737130b1d1516e5fe1799b1650",
+    "source": 0
+  },
+  {
+    "file": "b0-v6.f32",
+    "scale": 0.125,
+    "sha256": "5e0036936473c9c82c08b53053e18ed1f38ef8e5b4b798721c9e59a462baabf0",
+    "source": 0
+  },
+  {
+    "file": "b0-v7.f32",
+    "scale": -0.75,
+    "sha256": "c7b744042742e3b9fc8f39e9ac2d283e768228bfc37b5b55289164be9a6bc284",
+    "source": 0
+  },
+  {
+    "file": "b1-v0.f32",
+    "scale": 1.0,
+    "sha256": "9cdd44775e6d5afd50f61662745765e1b1a5701c3f31a85c766f82efed8a3403",
+    "source": 1
+  },
+  {
+    "file": "b1-v1.f32",
+    "scale": 0.5,
+    "sha256": "b3799d302f341f1ba849d348ae1cdcdeda6b1714bd1f791c5bed6cb6c935f1cd",
+    "source": 1
+  },
+  {
+    "file": "b1-v2.f32",
+    "scale": -1.0,
+    "sha256": "ef8efee700cc7cba1b680e8f7efbb9527d7c668699d600a05fa8cb8bbf5f5c31",
+    "source": 1
+  },
+  {
+    "file": "b1-v3.f32",
+    "scale": 1.0001,
+    "sha256": "a350c75981e0a955c7dcc3199b2559463bd02d270053a0d1994bf2f3aee9835c",
+    "source": 1
+  },
+  {
+    "file": "b1-v4.f32",
+    "scale": 0.9999,
+    "sha256": "1b7b3b480777ef891facdd1015520840d87d148d8e7bfe2a56a50e65d6c5e95e",
+    "source": 1
+  },
+  {
+    "file": "b1-v5.f32",
+    "scale": 2.0,
+    "sha256": "87f2f0f78703505bf5d24c7dc27e0607b282613ff27b49a91536437625a96260",
+    "source": 1
+  },
+  {
+    "file": "b1-v6.f32",
+    "scale": 0.125,
+    "sha256": "57c55004705d5503a955dda68078436ed59d2ce7e39d9a483c47368bb836d805",
+    "source": 1
+  },
+  {
+    "file": "b1-v7.f32",
+    "scale": -0.75,
+    "sha256": "61f56dd92faf0e0145d7854f2bb512e926719d2429575e7ec332389e0ed5042e",
+    "source": 1
+  }
+]

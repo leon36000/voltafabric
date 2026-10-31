@@ -1,0 +1,21 @@
+{
+  "cpu_quota_percent": 50,
+  "expert_count": 3,
+  "expert_sha256": {
+    "12": "658b2b7b9c7b5055667577babea78964084e1a1dad958c546c46d513249f578e",
+    "255": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    "75": "a312f304226bc4cfb7590ea90e9d91babbba67ef0fe4686a0eae85e26a9ed74d"
+  },
+  "gpu": false,
+  "input_count": 16,
+  "input_manifest_sha256": "23498f29a5891566829a01c78a9c436db2223a45b4207207eac4506ddd60b325",
+  "memory_max_bytes": 536870912,
+  "network_worker": false,
+  "no_replay": true,
+  "pc1_binary_sha256": "bb2dda74dcbae803b75813972bcd68adaa55fe3e32493325fc89aec3b52b601d",
+  "pc6_binary_sha256": "f568386380c7f2587a8d7db18ed425ca1993b8b1821f420242362becdb83dd86",
+  "purpose": "same scalar program and three real expert slices for 16 deterministic activation variants on PC1 and PC6",
+  "runner_sha256": "48ffd9bfc7045632e3e5c956e37df2c2aebea1b8bfa7b67814d8d90b8891600c",
+  "source_sha256": "15a010b65b8366aefc6456a9016aca244d59cb5f485165a7c7591008aebe888e",
+  "swap_max_bytes": 0
+}
