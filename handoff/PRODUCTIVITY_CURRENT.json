@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T21:18:19Z",
+  "updated_utc": "2026-10-31T21:23:46Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -20,10 +20,12 @@
     {
       "id": "R635",
       "owner": "integrator",
-      "state": "LOCAL_TESTS_AND_COORDINATOR_PREFLIGHT_VERIFIED_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
       "branch": "r635-plan-before-r53-reservation-20261031",
       "parent_commit": "f7437dcbc98689ca3c5bde8c36c607f5c3f5a87a",
-      "path": "research/R635"
+      "path": "research/R635",
+      "commit": "deedb817a58c199a231686036e7a6bd8dfb80200",
+      "published_utc": "2026-10-31T21:23:46Z"
     }
   ],
   "acceptance": [
@@ -191,13 +193,15 @@
       "synthetic_ledger_files": [],
       "gpu_executed": false,
       "real_r53_used": false,
-      "receipt": "research/R635/receipt.json"
+      "receipt": "research/R635/receipt.json",
+      "publication_commit": "deedb817a58c199a231686036e7a6bd8dfb80200",
+      "readback_hashes_verified": 7
     }
   },
   "active_operations": [],
   "next_action": {
-    "status": "R635_PRIVATE_GITLAB_PUBLICATION_AND_READBACK",
-    "purpose": "Publish only the reviewed R635 source, tests, proof and handoff files from R634 parent; then continue with R636 actual Strata PoolMultiFn integration on CPU. No automatic relaunch, GPU, production network, or real R53 in this wave."
+    "status": "R636_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Wire the actual Strata PoolMultiFn callback into the VoltaFabric boundary and verify on CPU with an independent oracle. No automatic relaunch; GPU and production R53 stay suspended pending distinct admissions."
   },
   "report": "research/R635/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded CPU/source work only. GPU and production network remain suspended without fresh admissions.",
