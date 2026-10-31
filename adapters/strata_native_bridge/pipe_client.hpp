@@ -12,6 +12,7 @@ class Client {
 public:
     Client(int read_fd, int write_fd, int timeout_ms, uint32_t layer);
     uint32_t layer() const noexcept { return layer_; }
+    bool usable() const noexcept { return usable_; }
     bool run(uint64_t batch, int tokens, int top_k, const std::vector<float>& inputs,
              const std::vector<int32_t>& ids, const std::vector<int32_t>& kinds,
              std::vector<float>& destination, std::string& error);

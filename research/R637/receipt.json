@@ -1,0 +1,50 @@
+{
+  "run_id": "R637-strata-pool-owner-20261031",
+  "created_utc": "2026-10-31T21:37:07Z",
+  "base_branch": "r636-strata-shape-guard-20261031",
+  "base_commit": "89d3913c08a91b1b9f0a0f100157df2423a30077",
+  "donor": {
+    "name": "Strata",
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license": "MIT"
+  },
+  "finding": {
+    "generation_entrypoint_sets_vf_cpu_pool": false,
+    "generation_entrypoint_sets_vf_cpu_context": false,
+    "result": "candidate callback remains disabled in the actual generator entrypoint"
+  },
+  "change": {
+    "files": [
+      "adapters/strata_native_bridge/pipe_client.hpp",
+      "adapters/strata_native_bridge/pool_hook.hpp",
+      "adapters/strata_native_bridge/pool_hook.cpp",
+      "adapters/strata_native_bridge/pool_fleet_owner_test.cpp"
+    ],
+    "semantics": [
+      "own 48 client objects and their per-layer callback contexts",
+      "validate exact layer mapping, client usability, and initial batch range",
+      "expose stable callback user context",
+      "latch shutdown before one terminal attempt per session and refuse repeats",
+      "perform no implicit network I/O from the destructor"
+    ]
+  },
+  "verification": {
+    "command": "c++ -std=c++20 -O2 -Wall -Wextra -Wpedantic -I adapters/strata_native_bridge adapters/strata_native_bridge/pipe_client.cpp adapters/strata_native_bridge/pool_hook.cpp adapters/strata_native_bridge/pool_fleet_owner_test.cpp -o .runs/r637-build/pool_fleet_owner_test",
+    "compile_exit_code": 0,
+    "test_command": ".runs/r637-build/pool_fleet_owner_test",
+    "test_exit_code": 0,
+    "transport_fixture": "48 local AF_UNIX socket pairs",
+    "gpu_executed": false,
+    "ip_network_used": false,
+    "model_loaded": false,
+    "strata_generation_invoked": false,
+    "worker_process_started": false,
+    "real_r53_used": false
+  },
+  "limitations": [
+    "No wiring from generate.cpp to vf_cpu_pool/vf_cpu_context was added.",
+    "Client file descriptors remain borrowed and must outlive PoolFleetOwner.",
+    "No actual Strata runtime, complete generation, GPU, inter-PC transport, or production worker was qualified."
+  ],
+  "next_action": "R638: define and implement explicit launcher-to-Strata callback context handoff while preserving full request identity; keep GPU and real R53 suspended."
+}
