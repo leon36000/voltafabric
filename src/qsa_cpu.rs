@@ -29,6 +29,17 @@ pub struct Proposal {
     cell: Cell,
     output: Vec<f32>,
 }
+/// Provisional causal cache for a bounded group of positions. Outputs returned
+/// by `prepare_next` are tentative; the enclosing layer must not publish them.
+/// Dropping, failing or incompletely committing the transaction leaves the
+/// original cache unchanged. Durable admission remains the caller's obligation.
+pub struct Batch<'a> {
+    original: &'a mut State,
+    provisional: State,
+    expected: usize,
+    outputs: Vec<Vec<f32>>,
+    failed: bool,
+}
 impl Proposal {
     pub fn output(&self) -> &[f32] {
         &self.output
@@ -79,6 +90,35 @@ impl State {
     }
     pub fn is_empty(&self) -> bool {
         self.cells.is_empty()
+    }
+    /// Begin a transaction of at most 128 positions, using an independent
+    /// cache identity so proposals cannot cross the provisional boundary.
+    pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
+        if expected == 0
+            || expected > 128
+            || self
+                .cells
+                .len()
+                .checked_add(expected)
+                .is_none_or(|n| n > self.capacity)
+        {
+            return Err(invalid("QSA batch size or capacity"));
+        }
+        let mut provisional = State::new(
+            self.identity.clone(),
+            self.q_heads,
+            self.kv_heads,
+            self.dim,
+            self.capacity,
+        )?;
+        provisional.cells = self.cells.clone();
+        Ok(Batch {
+            original: self,
+            provisional,
+            expected,
+            outputs: Vec::with_capacity(expected),
+            failed: false,
+        })
     }
     /// Computes a candidate without mutating cache. Q/K must already include the
     /// model's weighted RMS normalization and positional rotation.
@@ -177,5 +217,46 @@ impl State {
         }
         self.cells.push(proposal.cell);
         Ok(proposal.output)
+    }
+}
+
+impl Batch<'_> {
+    /// Prepare the next causal position. The returned output is tentative.
+    pub fn prepare_next(
+        &mut self,
+        identity: &Identity,
+        q: &[f32],
+        k: &[f32],
+        v: &[f32],
+        gate: &[f32],
+    ) -> Result<&[f32]> {
+        if self.failed || self.outputs.len() >= self.expected {
+            self.failed = true;
+            return Err(invalid("QSA batch terminal or complete"));
+        }
+        let result = self
+            .provisional
+            .prepare(identity, self.provisional.len(), q, k, v, gate)
+            .and_then(|proposal| self.provisional.commit(proposal));
+        match result {
+            Ok(output) => {
+                self.outputs.push(output);
+                Ok(self.outputs.last().expect("just pushed"))
+            }
+            Err(error) => {
+                self.failed = true;
+                Err(error)
+            }
+        }
+    }
+
+    /// Publish the cache only after every planned position is prepared and the
+    /// enclosing layer has validated all other work.
+    pub fn commit(self) -> Result<Vec<Vec<f32>>> {
+        if self.failed || self.outputs.len() != self.expected {
+            return Err(invalid("QSA batch incomplete or aborted"));
+        }
+        self.original.cells = self.provisional.cells;
+        Ok(self.outputs)
     }
 }

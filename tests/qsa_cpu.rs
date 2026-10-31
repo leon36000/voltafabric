@@ -10,6 +10,101 @@ fn identity() -> Identity {
         epoch: 4,
     }
 }
+
+#[test]
+fn provisional_batch_matches_serial_and_commits_all_positions() {
+    let id = identity();
+    let mut serial = State::new(id.clone(), 1, 1, 1, 4).unwrap();
+    let mut batch_state = State::new(id.clone(), 1, 1, 1, 4).unwrap();
+    for state in [&mut serial, &mut batch_state] {
+        let p = state.prepare(&id, 0, &[1.], &[1.], &[2.], &[0.]).unwrap();
+        state.commit(p).unwrap();
+    }
+    let mut expected = Vec::new();
+    for (pos, key, value) in [(1, -1., 6.), (2, 0.5, 4.)] {
+        let p = serial
+            .prepare(&id, pos, &[1.], &[key], &[value], &[0.])
+            .unwrap();
+        expected.push(serial.commit(p).unwrap());
+    }
+    let mut tx = batch_state.begin_batch(2).unwrap();
+    assert_eq!(
+        tx.prepare_next(&id, &[1.], &[-1.], &[6.], &[0.]).unwrap(),
+        expected[0]
+    );
+    assert_eq!(
+        tx.prepare_next(&id, &[1.], &[0.5], &[4.], &[0.]).unwrap(),
+        expected[1]
+    );
+    assert_eq!(tx.commit().unwrap(), expected);
+    assert_eq!(batch_state.len(), 3);
+    let left = serial.prepare(&id, 3, &[1.], &[0.], &[8.], &[0.]).unwrap();
+    let right = batch_state
+        .prepare(&id, 3, &[1.], &[0.], &[8.], &[0.])
+        .unwrap();
+    assert_eq!(left.output(), right.output());
+}
+
+#[test]
+fn provisional_batch_failure_or_drop_never_commits_cache() {
+    let id = identity();
+    let mut state = State::new(id.clone(), 1, 1, 1, 4).unwrap();
+    {
+        let mut tx = state.begin_batch(2).unwrap();
+        tx.prepare_next(&id, &[0.], &[0.], &[2.], &[0.]).unwrap();
+        assert!(tx
+            .prepare_next(&id, &[0.], &[0.], &[f32::NAN], &[0.])
+            .is_err());
+        assert!(tx.prepare_next(&id, &[0.], &[0.], &[4.], &[0.]).is_err());
+        assert!(tx.commit().is_err());
+    }
+    assert!(state.is_empty());
+    {
+        let mut tx = state.begin_batch(2).unwrap();
+        tx.prepare_next(&id, &[0.], &[0.], &[2.], &[0.]).unwrap();
+        assert!(tx.commit().is_err());
+    }
+    assert!(state.is_empty());
+    {
+        let mut tx = state.begin_batch(1).unwrap();
+        tx.prepare_next(&id, &[0.], &[0.], &[2.], &[0.]).unwrap();
+    }
+    assert!(state.is_empty());
+    assert!(state.begin_batch(0).is_err());
+    assert!(state.begin_batch(5).is_err());
+}
+
+#[test]
+fn provisional_batch_rejects_foreign_identity_extra_rows_and_stale_proposals() {
+    let id = identity();
+    let mut state = State::new(id.clone(), 1, 1, 1, 130).unwrap();
+    let stale = state.prepare(&id, 0, &[0.], &[0.], &[1.], &[0.]).unwrap();
+    assert!(state.begin_batch(129).is_err());
+    {
+        let mut tx = state.begin_batch(1).unwrap();
+        let foreign = Identity {
+            epoch: 9,
+            ..id.clone()
+        };
+        assert!(tx
+            .prepare_next(&foreign, &[0.], &[0.], &[1.], &[0.])
+            .is_err());
+        assert!(tx.commit().is_err());
+    }
+    assert!(state.is_empty());
+    {
+        let mut tx = state.begin_batch(1).unwrap();
+        tx.prepare_next(&id, &[0.], &[0.], &[1.], &[0.]).unwrap();
+        assert!(tx.prepare_next(&id, &[0.], &[0.], &[2.], &[0.]).is_err());
+        assert!(tx.commit().is_err());
+    }
+    assert!(state.is_empty());
+    let mut tx = state.begin_batch(1).unwrap();
+    tx.prepare_next(&id, &[0.], &[0.], &[3.], &[0.]).unwrap();
+    tx.commit().unwrap();
+    assert!(state.commit(stale).is_err());
+    assert_eq!(state.len(), 1);
+}
 #[test]
 fn gqa_two_steps_and_atomic_rejection() {
     let id = identity();
