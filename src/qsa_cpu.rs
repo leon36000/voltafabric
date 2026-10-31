@@ -103,15 +103,17 @@ impl State {
         provisional.cells = self.cells.clone();
         Ok(provisional)
     }
-    pub(crate) fn fork_batch(&self, expected: usize) -> Result<Self> {
-        if expected == 0
-            || expected > 128
-            || self
+    pub(crate) fn batch_fits(&self, expected: usize) -> bool {
+        expected > 0
+            && expected <= 128
+            && self
                 .cells
                 .len()
                 .checked_add(expected)
-                .is_none_or(|n| n > self.capacity)
-        {
+                .is_some_and(|n| n <= self.capacity)
+    }
+    pub(crate) fn fork_batch(&self, expected: usize) -> Result<Self> {
+        if !self.batch_fits(expected) {
             return Err(invalid("QSA batch size or capacity"));
         }
         self.fork()

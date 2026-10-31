@@ -136,6 +136,7 @@ pub struct Layer {
     ple: Option<Ple>,
     last_selected: Vec<u32>,
     last_used: BTreeMap<u32, u64>,
+    last_active_ranks: std::collections::BTreeSet<u32>,
 }
 
 struct Ple {
@@ -220,6 +221,7 @@ impl Layer {
             ple: None,
             last_selected: Vec::new(),
             last_used: BTreeMap::new(),
+            last_active_ranks: std::collections::BTreeSet::new(),
         })
     }
     pub fn qsa(
@@ -240,6 +242,7 @@ impl Layer {
             ple: None,
             last_selected: Vec::new(),
             last_used: BTreeMap::new(),
+            last_active_ranks: std::collections::BTreeSet::new(),
         })
     }
     /// Attach authenticated PLE inputs before constructing a segment. The caller must
@@ -278,6 +281,12 @@ impl Layer {
     ) -> Result<Vec<f32>> {
         let stamp = ticket.stamp().clone();
         let attempt = ticket.attempt();
+        let before: BTreeMap<_, _> = self
+            .owners
+            .sessions
+            .iter()
+            .map(|s| (s.rank(), s.traffic.execs))
+            .collect();
         let candidate = if let Some(ple) = &self.ple {
             let token = token.ok_or_else(|| invalid("PLE requires token"))?;
             Some(ple.state.prepare(
@@ -353,12 +362,20 @@ impl Layer {
             self.last_used.insert(expert, position + 1);
         }
         self.last_selected = selected;
+        self.last_active_ranks = self
+            .owners
+            .sessions
+            .iter()
+            .filter(|s| before.get(&s.rank()).is_some_and(|n| s.traffic.execs > *n))
+            .map(|s| s.rank())
+            .collect();
         Ok(output)
     }
 }
 
 struct Cursor {
     position: u64,
+    last_batch_start: Option<u64>,
     last_attempt: u64,
     poisoned: bool,
 }
@@ -446,6 +463,7 @@ where
             return Err(invalid("invalid segment layer output"));
         }
     }
+    cursor.last_batch_start = Some(cursor.position);
     cursor.position += 1;
     cursor.last_attempt = attempt;
     cursor.poisoned = false;
@@ -749,6 +767,7 @@ impl Segment {
             timeout,
             cursor: Cursor {
                 position: 0,
+                last_batch_start: None,
                 last_attempt: 0,
                 poisoned: false,
             },
@@ -806,13 +825,19 @@ impl Segment {
             return Err(invalid("segment eviction requires committed position"));
         }
         let mut stamp = self.base.clone();
-        stamp.batch = self.cursor.position - 1;
+        stamp.batch = self
+            .cursor
+            .last_batch_start
+            .ok_or_else(|| invalid("missing last committed batch identity"))?;
         stamp.layer = binding.layer;
         let layer = self
             .layers
             .iter_mut()
             .find(|l| l.identity.layer == binding.layer)
             .ok_or_else(|| invalid("segment eviction layer"))?;
+        if !layer.last_active_ranks.contains(&binding.rank) {
+            return Err(invalid("eviction rank did not participate in last batch"));
+        }
         let bytes = source.validate_eviction(
             &stamp,
             binding,
@@ -923,7 +948,9 @@ impl Segment {
                 *counts
                     .entry((layer.identity.layer, copy.rank))
                     .or_insert(0usize) += 1;
-                if !layer.last_selected.contains(&copy.expert) {
+                if !layer.last_selected.contains(&copy.expert)
+                    && layer.last_active_ranks.contains(&copy.rank)
+                {
                     candidates.push(EvictionCandidate {
                         layer: layer.identity.layer,
                         expert: copy.expert,
@@ -956,7 +983,10 @@ impl Segment {
                 .ok_or_else(|| invalid("eviction plan layer"))?;
             let mut stamp = self.base.clone();
             stamp.layer = item.layer;
-            stamp.batch = self.cursor.position - 1;
+            stamp.batch = self
+                .cursor
+                .last_batch_start
+                .ok_or_else(|| invalid("missing last committed batch identity"))?;
             let bytes = source.validate_eviction(
                 &stamp,
                 &binding,
@@ -1061,7 +1091,7 @@ impl Segment {
             || inputs
                 .iter()
                 .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
-            || !matches!(&self.layers[0].attention, Attention::Qsa(..))
+            || !matches!(&self.layers[0].attention, Attention::Qsa(qsa, _) if qsa.batch_fits(inputs.len()))
             || self.layers[0].ple.is_some()
         {
             return Err(invalid("QSA segment batch state, attempt or input"));
@@ -1089,6 +1119,12 @@ impl Segment {
             uses.push(ids);
         }
         let shared = batch.shared(&mut layer.shared)?;
+        let before: BTreeMap<_, _> = layer
+            .owners
+            .sessions
+            .iter()
+            .map(|s| (s.rank(), s.traffic.execs))
+            .collect();
         let collected = batch.dispatch(
             &mut layer.owners.sessions,
             layer.owners.registry.clone(),
@@ -1113,10 +1149,69 @@ impl Segment {
             }
         }
         layer.last_selected = selected.into_iter().collect();
+        layer.last_active_ranks = layer
+            .owners
+            .sessions
+            .iter()
+            .filter(|s| before.get(&s.rank()).is_some_and(|n| s.traffic.execs > *n))
+            .map(|s| s.rank())
+            .collect();
+        self.cursor.last_batch_start = Some(position);
         self.cursor.position += inputs.len() as u64;
         self.cursor.last_attempt = attempt;
         self.cursor.poisoned = false;
         Ok(committed.residuals)
+    }
+    /// Trim between committed batches, then admit and execute a QSA batch.
+    /// Headroom is a caller-selected payload bound, not a prediction of routes
+    /// or process RSS. Rank-specific headroom follows the existing conservative
+    /// single-rank reservation policy. Failed submitted evictions are never retried.
+    pub fn advance_qsa_batch_with_headroom(
+        &mut self,
+        attempt: u64,
+        inputs: &[Vec<f32>],
+        source: &mut crate::sc117_expert_source::Source<'_>,
+        headroom_bytes: u64,
+        max_evictions: usize,
+    ) -> Result<(Vec<Vec<f32>>, Vec<EvictionReceipt>)> {
+        if self.cursor.poisoned
+            || self.layers.len() != 1
+            || inputs.is_empty()
+            || inputs.len() > 128
+            || attempt == 0
+            || attempt <= self.cursor.last_attempt
+            || self
+                .cursor
+                .position
+                .checked_add(inputs.len() as u64)
+                .is_none()
+            || inputs
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+            || !matches!(&self.layers[0].attention, Attention::Qsa(qsa, _) if qsa.batch_fits(inputs.len()))
+            || self.layers[0].ple.is_some()
+        {
+            return Err(invalid("QSA segment batch state, attempt or input"));
+        }
+        let global_target =
+            headroom_target(source.used_bytes(), source.limit_bytes(), headroom_bytes)?;
+        let rank_options = if let Some(limits) = source.rank_limits() {
+            rank_headroom_options(limits, source.rank_used_bytes(), headroom_bytes)?
+        } else {
+            vec![None]
+        };
+        let receipts = if global_target.is_some() || rank_options.iter().all(Option::is_some) {
+            self.evict_to_targets(
+                source,
+                global_target.unwrap_or(source.used_bytes()),
+                max_evictions,
+                &rank_options,
+            )?
+        } else {
+            Vec::new()
+        };
+        let output = self.advance_qsa_batch_with_source(attempt, inputs, source)?;
+        Ok((output, receipts))
     }
     pub fn advance(&mut self, attempt: u64, input: &[f32]) -> Result<Vec<f32>> {
         self.advance_inner(attempt, input, None, &mut None)
@@ -1892,6 +1987,7 @@ mod tests {
     fn cursor() -> Cursor {
         Cursor {
             position: 0,
+            last_batch_start: None,
             last_attempt: 0,
             poisoned: false,
         }

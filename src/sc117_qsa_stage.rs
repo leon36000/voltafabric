@@ -222,6 +222,9 @@ impl Stage {
     pub fn is_empty(&self) -> bool {
         self.cache.is_empty()
     }
+    pub(crate) fn batch_fits(&self, expected: usize) -> bool {
+        self.cache.batch_fits(expected)
+    }
     pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
         // Validate geometry and capacity using the same bounded cache contract.
         let provisional = self.cache.fork_batch(expected)?;
