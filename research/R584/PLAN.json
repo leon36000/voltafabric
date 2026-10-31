@@ -1,0 +1,20 @@
+{
+  "cpu": "PC6 AArch64",
+  "cpu_quota_percent": 50,
+  "ggml_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "gpu": false,
+  "memory_max": 536870912,
+  "normal_flags": "-O3 default contraction",
+  "purpose": "same-host compiler contraction comparison",
+  "sha256": {
+    ".runs/vf-r574-input/activation0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    ".runs/vf-r574-input/expert255.bin": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    ".runs/vf-r584-work/nocontract": "d9a9a0b28fde7f6f16574d9107e42298e2fe11a119d7e51a362f11db8082df1c",
+    ".runs/vf-r584-work/normal": "64a641431835b4d07fac749236c47c2963eb3e3fa84f2578245f888422183353",
+    "adapters/native_ggml/provider.cpp": "f765a1ac5c9b7708b8fcc3b35469b8c89ff001e7efca78d2e31a1d08506dc042",
+    "research/R575/export_native_expert.cpp": "943a63a37e644cfc21a64c1aef3e4234960ba6204467ee4142374cae14f5bf1e"
+  },
+  "swap_max": 0,
+  "variant_flags": "-O3 -ffp-contract=off for C and C++",
+  "workers": false
+}

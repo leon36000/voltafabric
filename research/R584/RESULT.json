@@ -1,0 +1,26 @@
+{
+  "nocontract": {
+    "max_abs_vs_staged": 5.4018620403439854e-05,
+    "sha256": "777c1f4027aeed7dff8f35962c4ba520dcacad2efc2d60d66e1fc0f54e988e98",
+    "strict_violations": 1167
+  },
+  "normal": {
+    "max_abs_vs_staged": 5.401955172601447e-05,
+    "sha256": "18a183d0d6d73b58df7be7021469d60f1f40fc84bced97c15ed5d0e8c501a007",
+    "strict_violations": 1167
+  },
+  "pc1_previous": {
+    "max_abs_vs_staged": 2.3335928744927514e-09,
+    "sha256": "4e0c48562ba620b32901b61ee1cf3b35050e7f68f675365d2fe2a7ea3b200bb9",
+    "strict_violations": 0
+  },
+  "pc6_previous": {
+    "max_abs_vs_staged": 5.4018620403439854e-05,
+    "sha256": "777c1f4027aeed7dff8f35962c4ba520dcacad2efc2d60d66e1fc0f54e988e98",
+    "strict_violations": 1167
+  },
+  "same_host_comparison": {
+    "different_f32_values": 991,
+    "max_abs": 3.725290298461914e-09
+  }
+}
