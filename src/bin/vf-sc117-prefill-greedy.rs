@@ -760,6 +760,14 @@ fn trace_plan(base: &str, mode: TraceMode) -> String {
     bytes.extend_from_slice(base.as_bytes());
     format!("{prefix}{}", sha256::hex(&bytes))
 }
+fn batch_plan(base: &str, batched: bool) -> String {
+    if !batched {
+        return base.to_owned();
+    }
+    let mut bytes = b"vf-prompt-batch-two-local-cpu-v1\0".to_vec();
+    bytes.extend_from_slice(base.as_bytes());
+    format!("r570-{}", sha256::hex(&bytes))
+}
 
 fn append_qsa_trace(
     bytes: &mut Vec<u8>,
@@ -1030,6 +1038,14 @@ fn run() -> Result<(), E> {
         _ => return Err("unsupported QSA trace mode".into()),
     };
     let trace_qsa = trace_mode != TraceMode::Off;
+    let batched_prompt = match optional_env("VF_PREFILL_GROUP_SIZE")?.as_deref() {
+        None | Some("1") => false,
+        Some("2") => true,
+        _ => return Err("unsupported prefill group size".into()),
+    };
+    if batched_prompt && trace_qsa {
+        return Err("batched prefill does not support QSA trace".into());
+    }
     if trace_qsa && prompt_tokens.len() + max_new_tokens - 1 > TRACE_MAX_POSITIONS {
         return Err("QSA trace position limit".into());
     }
@@ -1061,6 +1077,9 @@ fn run() -> Result<(), E> {
     }
     if trace_qsa && !host_digests.is_empty() {
         return Err("QSA trace requires local CPU workers".into());
+    }
+    if batched_prompt && !host_digests.is_empty() {
+        return Err("batched prefill requires local CPU workers".into());
     }
     let shared_lease: Option<SharedLease> = match (
         host_digests.is_empty(),
@@ -1101,10 +1120,15 @@ fn run() -> Result<(), E> {
         Err(std::env::VarError::NotPresent) => BUDGET,
         Err(error) => return Err(error.into()),
     };
+    let batch_headroom = if batched_prompt {
+        layout.worst_case_admission_bytes(sc117_router_cpu::ROUTED_EXPERTS * 2)?
+    } else {
+        worst_case_headroom
+    };
     let seed_bytes = layout.worst_case_admission_bytes(2)?;
     if budget > BUDGET
         || seed_bytes
-            .checked_add(worst_case_headroom)
+            .checked_add(batch_headroom)
             .is_none_or(|minimum| budget < minimum)
     {
         return Err("expert budget cannot cover seeds and worst-case headroom".into());
@@ -1152,7 +1176,7 @@ fn run() -> Result<(), E> {
         &shared_lease,
         &r53_namespace,
     )?;
-    let plan_id = trace_plan(&base_plan_id, trace_mode);
+    let plan_id = batch_plan(&trace_plan(&base_plan_id, trace_mode), batched_prompt);
     if plan_only {
         println!(
             "{}",
@@ -1341,9 +1365,66 @@ fn run() -> Result<(), E> {
     let mut rank_history = Vec::new();
     let mut trace_bytes = Vec::new();
     let mut current_token = prompt_tokens[0];
-    for pos in 0..(prompt_tokens.len() + max_new_tokens - 1) {
+    let mut pos = 0;
+    while pos < prompt_tokens.len() + max_new_tokens - 1 {
         if let (Some(spec), Some(fd)) = (&shared_lease, lease_fd) {
             verify_shared_lease(spec, fd)?;
+        }
+        if batched_prompt && pos + 1 < prompt_tokens.len() {
+            let tokens = &prompt_tokens[pos..pos + 2];
+            let mut batch_inputs = Vec::with_capacity(2);
+            for &token in tokens {
+                input_tokens.push(token);
+                let embedding = token_table.gather(token)?;
+                embedding_hashes.push(bytes_hash(&embedding));
+                batch_inputs.push(
+                    (0..4)
+                        .flat_map(|_| embedding.iter().copied())
+                        .collect::<Vec<f32>>(),
+                );
+            }
+            let position_attempt = attempt.checked_add(pos as u64).ok_or("attempt overflow")?;
+            let token_ids = [tokens[0] as i32, tokens[1] as i32];
+            let (outputs, removed) = segment.advance_token_batch_with_headroom(
+                position_attempt,
+                &token_ids,
+                &batch_inputs,
+                &mut source,
+                batch_headroom,
+                768,
+            )?;
+            if outputs.len() != 2 || segment.position() != pos as u64 + 2 || segment.is_poisoned() {
+                return Err("segment did not commit complete batch".into());
+            }
+            evictions.extend(removed);
+            let rank_used = source.rank_used_bytes();
+            let accounted = rank_used
+                .values()
+                .try_fold(0u64, |total, value| total.checked_add(*value));
+            if accounted != Some(source.used_bytes())
+                || rank_limits.as_ref().is_some_and(|limits| {
+                    rank_used
+                        .iter()
+                        .any(|(rank, used)| limits.get(rank).is_none_or(|limit| used > limit))
+                })
+            {
+                return Err("rank payload accounting mismatch".into());
+            }
+            for output in &outputs {
+                output_hashes.push(bytes_hash(output));
+                rank_history.push(rank_used.clone());
+            }
+            pos += 2;
+            if pos == prompt_tokens.len() {
+                let prediction = head.evaluate(&head_id, &outputs[1])?;
+                logits_hashes.push(bytes_hash(&prediction.logits));
+                generated.push(prediction.greedy);
+                current_token = prediction.greedy;
+                if current_token == eos_token_id {
+                    break;
+                }
+            }
+            continue;
         }
         if pos < prompt_tokens.len() {
             current_token = prompt_tokens[pos];
@@ -1406,6 +1487,7 @@ fn run() -> Result<(), E> {
         rank_history.push(rank_used.clone());
         output_hashes.push(bytes_hash(&output));
         if pos + 1 < prompt_tokens.len() {
+            pos += 1;
             continue;
         }
         let prediction = head.evaluate(&head_id, &output)?;
@@ -1415,6 +1497,7 @@ fn run() -> Result<(), E> {
         if current_token == eos_token_id {
             break;
         }
+        pos += 1;
     }
     let receipts = segment.close_with_counts();
     if receipts.len() != layer_count * 2
@@ -1450,6 +1533,17 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn batched_prompt_plan_is_distinct_and_binds_the_base() {
+        let base = format!("r531-{}", "a".repeat(64));
+        assert_eq!(super::batch_plan(&base, false), base);
+        let batched = super::batch_plan(&base, true);
+        assert!(batched.starts_with("r570-") && batched.len() == 69);
+        assert_ne!(
+            batched,
+            super::batch_plan(&format!("r531-{}", "b".repeat(64)), true)
+        );
+    }
     use super::*;
 
     #[test]

@@ -1,0 +1,41 @@
+   Compiling serde_core v1.0.229
+   Compiling libc v0.2.190
+   Compiling linux-raw-sys v0.12.1
+   Compiling bitflags v2.13.2
+   Compiling cfg-if v1.0.5
+   Compiling getrandom v0.4.3
+   Compiling rustix v1.1.5
+   Compiling num-traits v0.2.19
+   Compiling zmij v1.0.23
+   Compiling foldhash v0.2.0
+   Compiling vf-ggml-native-ffi v0.1.0 (/home/pc1/NAOS/vf-r570-work/crates/ggml-native-ffi)
+   Compiling once_cell v1.21.4
+   Compiling allocator-api2 v0.2.21
+   Compiling itoa v1.0.18
+   Compiling equivalent v1.0.2
+   Compiling memchr v2.8.3
+   Compiling fastrand v2.5.0
+   Compiling serde_json v1.0.151
+   Compiling tempfile v3.27.0
+   Compiling hashbrown v0.16.1
+   Compiling serde v1.0.229
+   Compiling num-integer v0.1.47
+   Compiling safetensors v0.8.0
+   Compiling num-bigint v0.4.6
+   Compiling voltafabric v0.1.0 (/home/pc1/NAOS/vf-r570-work)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 9.12s
+     Running unittests src/bin/vf-sc117-prefill-greedy.rs (target/debug/deps/vf_sc117_prefill_greedy-a7c1e79ef067efec)
+
+running 9 tests
+test tests::close_requires_actual_dispatched_count_not_every_position ... ok
+test tests::batched_prompt_plan_is_distinct_and_binds_the_base ... ok
+test tests::expected_plan_is_checked_before_remote_work ... ok
+test tests::rank_endpoints_are_explicit_and_reject_shell_metacharacters ... ok
+test tests::shared_lease_requires_exact_descriptor_and_exclusive_lock ... ok
+test tests::worker_plan_binds_rank_endpoints_and_capacities ... ok
+test tests::trace_plan_and_records_are_bound_and_reject_partial_data ... ok
+test tests::r53_requires_both_matching_reservations_and_consumes_once ... ok
+test tests::known_hosts_are_single_pinned_and_sealed ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

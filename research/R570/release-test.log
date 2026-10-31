@@ -1,0 +1,17 @@
+   Compiling voltafabric v0.1.0 (/home/pc1/NAOS/vf-r570-work)
+    Finished `release` profile [optimized] target(s) in 3.84s
+     Running unittests src/bin/vf-sc117-prefill-greedy.rs (target/release/deps/vf_sc117_prefill_greedy-0086d838e22c1b50)
+
+running 9 tests
+test tests::close_requires_actual_dispatched_count_not_every_position ... ok
+test tests::batched_prompt_plan_is_distinct_and_binds_the_base ... ok
+test tests::expected_plan_is_checked_before_remote_work ... ok
+test tests::rank_endpoints_are_explicit_and_reject_shell_metacharacters ... ok
+test tests::shared_lease_requires_exact_descriptor_and_exclusive_lock ... ok
+test tests::worker_plan_binds_rank_endpoints_and_capacities ... ok
+test tests::trace_plan_and_records_are_bound_and_reject_partial_data ... ok
+test tests::r53_requires_both_matching_reservations_and_consumes_once ... ok
+test tests::known_hosts_are_single_pinned_and_sealed ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+

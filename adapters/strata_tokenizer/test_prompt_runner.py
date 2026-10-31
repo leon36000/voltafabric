@@ -184,6 +184,8 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(run()["output"]["text"], "😀")
         value["plan_id"] = "r531-" + "a" * 64
         self.assertEqual(run()["output"]["text"], "😀")
+        value["plan_id"] = "r570-" + "a" * 64
+        self.assertEqual(run()["output"]["text"], "😀")
         for bad in (None, "r508-" + "a" * 64, "r512-" + "A" * 64,
                     "r512-" + "a" * 63, 123):
             value["plan_id"] = bad
