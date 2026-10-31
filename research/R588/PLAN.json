@@ -1,0 +1,22 @@
+{
+  "engine_plan_id": "r576-1617cc85766f02ee3c40e4b9fadbd77b2a5aa9ea4eb8a21333247e628d79a048",
+  "engine_sha256": "eea9612b670f7766accf7dd2314e81fe74dc5ae7aae2e124e203371ddf6effb2",
+  "expert_source_sha256": "f87c08f36db743e4828c1b566c22174ce3da3507ba8e88e18b48440a0e8ac361",
+  "fresh_ledger": true,
+  "gpu": false,
+  "layer_source_sha256": "c18b90eee0d6569a323d90563d2bc61d4dbc5e223618e2012362760a2ea132db",
+  "manifest_sha256": "436066427aaca7f163943b3f0f00c98cb59ddb5df7b2fa410b90d474ab1fe824",
+  "max_cpu_percent": 200,
+  "max_memory_bytes": 13958643712,
+  "max_swap_bytes": 0,
+  "max_workers": 96,
+  "network_worker": false,
+  "no_replay": true,
+  "parent": "d58d06c4128a047e8f11e08d32582fa0ffa67329",
+  "prefill_sha256": "005ce14d9b84f225bea534ced0dd4bbf5b27945b18f67e9239ef3ac9f43104a3",
+  "prepared_sha256": "b941d85b1e705d104b571ded7db9bbf8b668ac07408ea0a5e84926ab290b2941",
+  "prompt_sha256": "110b1ae3e7b6103dbf92d6b607f9975fb4fe060f94c0fe890799e35936056f60",
+  "purpose": "fresh PC1 local real SC117 generation with R586 bounded native writes",
+  "session_sha256": "64d81c53ade8290d54febcc8418a947cd39a32f846fc326d41af5b7b77929f10",
+  "worker_sha256": "aa562e626440742e55b2b09f8b4daa51db736c8f0a902082624885aa93d831ae"
+}
