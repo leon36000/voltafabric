@@ -2717,6 +2717,99 @@ print(json.dumps({'reply':'bye','execs':0,'peak_rss_kib':None}),flush=True)
     }
     #[cfg(target_os = "linux")]
     #[test]
+    fn r53_prompt_bridge_child() {
+        if std::env::var_os("VF_TEST_R53_BRIDGE").is_none() {
+            return;
+        }
+        let lease: SharedLease =
+            serde_json::from_str(&std::env::var("VF_SHARED_LEASE_SPEC").unwrap()).unwrap();
+        let namespace: Namespace =
+            serde_json::from_str(&std::env::var("VF_R53_NAMESPACE_SPEC").unwrap()).unwrap();
+        let fd: i32 = std::env::var("VF_SHARED_LEASE_FD")
+            .unwrap()
+            .parse()
+            .unwrap();
+        let plan = std::env::var("VF_EXPECTED_PLAN_ID").unwrap();
+        assert!(fd >= 3);
+        verify_runtime_admission(Some(&lease), Some(fd), Some(&namespace)).unwrap();
+        consume_namespace(&namespace, &plan, &lease).unwrap();
+        assert!(consume_namespace(&namespace, &plan, &lease).is_err());
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn r53_prompt_bridge_reserves_and_consumes_under_same_live_lock() {
+        use std::os::unix::fs::DirBuilderExt;
+        let parent = std::env::temp_dir().join(format!(
+            "vf-test-r53-bridge-{}-{}",
+            std::process::id(),
+            SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::DirBuilder::new()
+            .mode(0o700)
+            .create(&parent)
+            .unwrap();
+        let python = r#"import fcntl,json,os,subprocess,sys,types
+# This test supplies a synthetic tokenizer and never calls regex. No tokenizer
+# semantics or model output are being verified here.
+sys.modules['regex']=types.ModuleType('regex')
+from adapters.strata_tokenizer.prompt_runner import run_prompt
+from adapters.strata_tokenizer.test_prompt_runner import Tokenizer
+exe,parent=sys.argv[1:]
+root=os.path.join(parent,'ledger'); os.mkdir(root,0o700)
+path=os.path.join(parent,'lease')
+with open(path,'x+') as lock:
+ fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
+ lm=os.stat(path); dm=os.stat(root)
+ lease=dict(path=path,dev=lm.st_dev,ino=lm.st_ino,uid=lm.st_uid)
+ ns=dict(root=root,dev=dm.st_dev,ino=dm.st_ino,uid=dm.st_uid,base_id='r53-bridge123')
+ os.environ.update(VF_RANK2_SSH_HOST='synthetic',VF_SHARED_LEASE_FD=str(lock.fileno()),VF_SHARED_LEASE_SPEC=json.dumps(lease),VF_R53_NAMESPACE_SPEC=json.dumps(ns),VF_EXPECTED_PLAN_ID='r531-'+'a'*64)
+ calls=[]; tamper=False
+ def runner(args,**kw):
+  env=dict(os.environ,VF_TEST_R53_BRIDGE='1')
+  if tamper: env['VF_EXPECTED_PLAN_ID']='r531-'+'b'*64
+  child=subprocess.run([exe,'--exact','tests::r53_prompt_bridge_child'],env=env,pass_fds=kw['pass_fds'],capture_output=True)
+  if tamper: assert child.returncode!=0
+  else:
+   assert child.returncode==0, (child.stdout,child.stderr)
+   assert b'1 passed' in child.stdout
+  calls.append(1)
+  return subprocess.CompletedProcess(args,42,b'',b'')
+ for attempt in range(2):
+  try: run_prompt('A',Tokenizer(),3,'/engine',['/input']*8,runner=runner,reserve_r53=True)
+  except RuntimeError:
+   assert attempt==0
+  except FileExistsError:
+   assert attempt==1
+  else: raise AssertionError('expected failure')
+ assert calls==[1]
+ assert os.path.isfile(os.path.join(root,'r53-bridge123-sc117-started.json'))
+ tamper=True; ns['base_id']='r53-bridge456'; os.environ['VF_R53_NAMESPACE_SPEC']=json.dumps(ns)
+ try: run_prompt('A',Tokenizer(),3,'/engine',['/input']*8,runner=runner,reserve_r53=True)
+ except RuntimeError: pass
+ else: raise AssertionError('changed plan accepted')
+ assert calls==[1,1]
+ assert os.path.isfile(os.path.join(root,'r53-bridge456.json'))
+ assert os.path.isfile(os.path.join(root,'r53-bridge456-duplicate-slot.json'))
+ assert not os.path.exists(os.path.join(root,'r53-bridge456-sc117-started.json'))
+"#;
+        assert!(std::process::Command::new("python3")
+            .env("PYTHONDONTWRITEBYTECODE", "1")
+            .args([
+                "-c",
+                python,
+                std::env::current_exe().unwrap().to_str().unwrap(),
+                parent.to_str().unwrap()
+            ])
+            .status()
+            .unwrap()
+            .success());
+        // Synthetic reservations and marker stay in the isolated TMPDIR.
+    }
+    #[cfg(target_os = "linux")]
+    #[test]
     fn r53_pinned_python_producer_is_compatible_with_rust_consumer() {
         use std::os::fd::AsRawFd;
         use std::os::unix::fs::{DirBuilderExt, MetadataExt};
