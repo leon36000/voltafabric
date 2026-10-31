@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T21:28:18Z",
+  "updated_utc": "2026-10-31T21:29:23Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -20,10 +20,12 @@
     {
       "id": "R636",
       "owner": "integrator",
-      "state": "LOCAL_PC1_DONOR_GUARD_VERIFIED_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
       "branch": "r636-strata-shape-guard-20261031",
       "parent_commit": "4188a67f99d07a10f55b3fbde5000e21cf279ac1",
-      "path": "research/R636"
+      "path": "research/R636",
+      "commit": "8a8d9d346f3231a620fe26bd6e1f4d74ddf25b83",
+      "published_utc": "2026-10-31T21:29:23Z"
     }
   ],
   "acceptance": [
@@ -215,13 +217,15 @@
       "real_r53_used": false,
       "generation_invocations": 0,
       "receipt": "research/R636/receipt.json",
-      "next_action": "R637: inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU; keep GPU and real R53 suspended."
+      "next_action": "R637: inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU; keep GPU and real R53 suspended.",
+      "publication_commit": "8a8d9d346f3231a620fe26bd6e1f4d74ddf25b83",
+      "readback_hashes_verified": 8
     }
   },
   "active_operations": [],
   "next_action": {
-    "status": "R636_PRIVATE_GITLAB_PUBLICATION",
-    "purpose": "Publish the reviewed shape guard, donor test, proof, receipt and handoff on a branch from R635; then investigate actual Strata PoolMultiFn context installation on CPU only. No automatic relaunch, GPU, production network, or real R53."
+    "status": "R637_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Inspect the pinned Strata generation entrypoint and prove or reject actual PoolMultiFn context initialization/lifetime on CPU. No automatic relaunch; GPU and real R53 stay suspended pending separate admissions."
   },
   "report": "research/R636/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
