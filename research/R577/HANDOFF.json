@@ -1,0 +1,9 @@
+{
+  "round": "R577",
+  "parent": "392fc6d4da5295b5a500fcc3a0ca5db4d20b3991",
+  "scope": "fresh guarded local CPU workers: sticky source admission, acknowledged eviction, re-admission, nonzero collector equality",
+  "result": "pass, two workers closed after two executions, rank 2 retained while rank 3 was artificially made the balancing suggestion",
+  "claims": "two batch and one eviction claim, all RESERVED_UNKNOWN_NO_REPLAY, original bytes in CLAIMS.json",
+  "limitations": "synthetic weights, test-only manual capacity adjustment, no independent expert oracle, no GPU/network worker or full generation, R53 and lease unresolved",
+  "next": "qualify sticky real-model local generation; reconcile original R53 and shared lease before distributed workers"
+}

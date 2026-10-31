@@ -1,0 +1,17 @@
+[
+  {
+    "file": "native-405b0ad3cf73d791e59fb5eefd874e378627fec52b087daac210723990af10aa.claim.json",
+    "raw": "{\"attempt\":1,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r577\",\"plan_id\":\"r577-1531399d002dd4f900b678a41fb7e0ee0c9349597e9a18a2aa40907b9493072e\",\"run_id\":\"r577-sticky-local-1793412208275715695\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "254246514119e378659d4dda820fa6dc086ca63f975e1a307b93dbdb04e13627"
+  },
+  {
+    "file": "native-41f6c6b26a74179e9e8ce0df6424c591cc06f70ee434f924491a500e4fb3bfe8.claim.json",
+    "raw": "{\"attempt\":2,\"stamp\":{\"batch\":1,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r577\",\"plan_id\":\"r577-1531399d002dd4f900b678a41fb7e0ee0c9349597e9a18a2aa40907b9493072e\",\"run_id\":\"r577-sticky-local-1793412208275715695\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "d6bedc55f12f436e2b0462f7a19b475207ae1c518dfb845af9c9d62bb925ace8"
+  },
+  {
+    "file": "native-evict-0e501e2920a771c17cc22e6e5dde409ace69c071a8456431456cd616ba48db5a.claim.json",
+    "raw": "{\"attempt\":1,\"binding\":{\"blob_sha256\":\"2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0\",\"epoch\":1,\"expert\":2,\"index_sha256\":\"adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24\",\"layer\":0,\"local\":1,\"model_revision\":\"synthetic-r577\",\"rank\":2},\"operation_id\":\"0e501e2920a771c17cc22e6e5dde409ace69c071a8456431456cd616ba48db5a\",\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"synthetic-r577\",\"plan_id\":\"r577-1531399d002dd4f900b678a41fb7e0ee0c9349597e9a18a2aa40907b9493072e\",\"run_id\":\"r577-sticky-local-1793412208275715695\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+    "sha256": "35c0871ca795eb0152c66159a1014906b130ff08170488da051027853cb66370"
+  }
+]

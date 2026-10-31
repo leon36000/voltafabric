@@ -1,0 +1,16 @@
+{
+  "cpu_quota_percent": 100,
+  "fresh_local_ledger": true,
+  "gpu": false,
+  "max_workers": 2,
+  "memory_max_bytes": 1073741824,
+  "network_worker": false,
+  "no_replay": true,
+  "purpose": "fresh R577 synthetic local guarded CPU workers, admitted eviction and same-rank readmission",
+  "run_id": "r577-sticky-local-1793412208275715695",
+  "source_sha256": "f9cb3047930cddd411078de868aced811a363fe6df7357c0e66dabb05ba847e9",
+  "swap_max_bytes": 0,
+  "synthetic_blob_sha256": "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0",
+  "test_binary_sha256": "a5ae117538c3db19a8933360b459c429717126c010054c8b3d025a0db823da04",
+  "worker_sha256": "05df66b3140414af842d24f1ad5a33874d5ba90fe8b5b8b342b46c1442781246"
+}
