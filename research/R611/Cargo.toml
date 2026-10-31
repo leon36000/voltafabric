@@ -1,0 +1,11 @@
+[package]
+name = "vf-r611-layer0"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+voltafabric = { path = "../..", features = ["native-scalar-reference"] }
+serde_json = "=1.0.151"
+[[bin]]
+name = "vf-r611-layer0"
+path = "layer0.rs"
+[workspace]

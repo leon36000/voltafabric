@@ -1,0 +1,28 @@
+{
+  "admissions_equal": true,
+  "claims": {
+    "scalar": {
+      "file": "native-692229840293e8610d302ae25899f82bbd89a9993bebce4c6c8bb3911f2b8536.claim.json",
+      "raw": "{\"attempt\":1793419826280670039,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"sc117-local-observation\",\"plan_id\":\"r611-scalar-28e02102687159b07bd453886d8d7c900832d06464e21b734c5b606b3c1eeb66\",\"run_id\":\"r611-757a354d152a4c37bc08119b73e571d5\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+      "sha256": "db1cfb453f135e6f9035d8cf222164099029be2933b1a7bcf95b375b540e320a"
+    },
+    "vector": {
+      "file": "native-9426177a3955fdfcc01323456393ad6886fb88c9e3f5cbf79ad2409a72917316.claim.json",
+      "raw": "{\"attempt\":1793419831920824674,\"stamp\":{\"batch\":0,\"epoch\":1,\"layer\":0,\"model_revision\":\"sc117-local-observation\",\"plan_id\":\"r611-vector-f4c21eebf57bb5bfe1cfe5729689d954fe3b48eb1696153849fe9e4652028064\",\"run_id\":\"r611-d898603605fb47f3ac18db88cf790522\"},\"status\":\"RESERVED_UNKNOWN_NO_REPLAY\"}\n",
+      "sha256": "09ed6b21fcb43b9f5dfc3d086b73c8e1e418c534da5e0644617f347d71d82753"
+    }
+  },
+  "complete_model_or_independent_expert_oracle": false,
+  "different_values": 20,
+  "dynamic_admissions": 10,
+  "embedding_sha256": "ac914238a95d7950bcab749cf5d9358b3467ca3bafc520b1040a113568608423",
+  "gpu": false,
+  "max_absolute_difference": 9.689480066299438e-06,
+  "network_worker": false,
+  "residual_count": 10240,
+  "residual_sha256": {
+    "scalar": "36e796998107c83d5aacdcd436325bd6c463f8e8085e56364956b739cee4a5b8",
+    "vector": "dfd0dcd481d28eebfbdc0376299ba272eaae1896ec0c042bb74c5cb2a0108ae3"
+  },
+  "token": 248045
+}
