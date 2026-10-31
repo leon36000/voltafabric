@@ -84,6 +84,15 @@ pub struct Committed {
     pub output: Output,
     pub residual: Vec<f32>,
 }
+/// Private multi-position attention state. Outputs remain tentative until the
+/// enclosing layer has validated its complete collection and residuals.
+pub struct Batch<'a> {
+    stage: &'a mut Stage,
+    candidate: GdnState,
+    expected: usize,
+    outputs: Vec<Output>,
+    failed: bool,
+}
 pub struct Stage {
     stage_id: u64,
     identity: Identity,
@@ -224,6 +233,45 @@ impl Stage {
     pub fn next_token(&self) -> u64 {
         self.next_token
     }
+    pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
+        if expected == 0 || expected > 128 || self.next_token.checked_add(expected as u64).is_none()
+        {
+            return Err(invalid("SC117 GDN batch size or token overflow"));
+        }
+        let candidate = self.state.clone();
+        Ok(Batch {
+            stage: self,
+            candidate,
+            expected,
+            outputs: Vec::with_capacity(expected),
+            failed: false,
+        })
+    }
+    fn project(&mut self, residual: &[f32], candidate: &mut GdnState) -> Result<Output> {
+        let hc = hyperconnection_cpu::read(
+            residual,
+            &self.norm,
+            &self.down,
+            &self.up,
+            &self.inject,
+            2560,
+            4,
+            320,
+            1e-6,
+        )?;
+        let qkv = self.qkv.forward(&hc.mixed)?;
+        let (gate, beta) =
+            gdn_cpu::project_gates(&hc.mixed, &self.alpha, &self.beta, &self.dt, &self.a)?;
+        let recurrent = candidate.step(&self.identity, &qkv, &self.conv, 1e-6, &gate, &beta)?;
+        Ok(Output {
+            mixed: hc.mixed,
+            inject: hc.inject,
+            qkv,
+            recurrent,
+            gate,
+            beta,
+        })
+    }
     /// Bind a candidate to an existing local durable claim before dispatch.
     pub fn prepare_reserved(
         &mut self,
@@ -257,22 +305,8 @@ impl Stage {
         {
             return Err(invalid("SC117 stage identity or token ordering mismatch"));
         }
-        let hc = hyperconnection_cpu::read(
-            residual,
-            &self.norm,
-            &self.down,
-            &self.up,
-            &self.inject,
-            2560,
-            4,
-            320,
-            1e-6,
-        )?;
-        let qkv = self.qkv.forward(&hc.mixed)?;
-        let (gate, beta) =
-            gdn_cpu::project_gates(&hc.mixed, &self.alpha, &self.beta, &self.dt, &self.a)?;
         let mut candidate = self.state.clone();
-        let recurrent = candidate.step(&self.identity, &qkv, &self.conv, 1e-6, &gate, &beta)?;
+        let output = self.project(residual, &mut candidate)?;
         Ok(Proposal {
             stage_id: self.stage_id,
             stamp: stamp.clone(),
@@ -287,14 +321,7 @@ impl Stage {
                 sha256::hex(&bytes)
             },
             candidate,
-            output: Output {
-                mixed: hc.mixed,
-                inject: hc.inject,
-                qkv,
-                recurrent,
-                gate,
-                beta,
-            },
+            output,
         })
     }
     /// Experimental unreserved CPU path: validate slots and write the residual, then commit.
@@ -370,5 +397,33 @@ impl Stage {
             output: proposal.output,
             residual,
         })
+    }
+}
+
+impl Batch<'_> {
+    pub fn prepare_next(&mut self, identity: &Identity, residual: &[f32]) -> Result<&Output> {
+        if self.failed || self.outputs.len() >= self.expected || identity != &self.stage.identity {
+            self.failed = true;
+            return Err(invalid("SC117 GDN batch identity or terminal state"));
+        }
+        match self.stage.project(residual, &mut self.candidate) {
+            Ok(output) => {
+                self.outputs.push(output);
+                Ok(self.outputs.last().expect("just pushed"))
+            }
+            Err(error) => {
+                self.failed = true;
+                Err(error)
+            }
+        }
+    }
+    /// The caller must validate the entire enclosing layer before this commit.
+    pub fn commit(self) -> Result<Vec<Output>> {
+        if self.failed || self.outputs.len() != self.expected {
+            return Err(invalid("SC117 GDN batch incomplete or aborted"));
+        }
+        self.stage.state = self.candidate;
+        self.stage.next_token += self.expected as u64;
+        Ok(self.outputs)
     }
 }
