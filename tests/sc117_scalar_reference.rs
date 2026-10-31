@@ -1,10 +1,10 @@
 #![cfg(feature = "native-scalar-reference")]
 use std::collections::BTreeMap;
 use voltafabric::{
-    completion::{self, OutputSlot, RoutedRawOutput},
+    completion::{self},
     moe::{Choice, Collector, Registry, Replica, Stamp},
-    native_ggml_cpu::{scalar_reference, Binding},
-    routing::RoutingProblem,
+    native_ggml_cpu::{scalar_reference, Binding, RankWorker, Resident},
+    routing::{self, RoutingProblem},
     sha256,
     strata_native_layout::{NativeLayout, VerifiedNativeExpert},
 };
@@ -51,6 +51,23 @@ fn scalar_reference_preserves_binding_and_collector_weight_once() {
     let mut invalid = x.clone();
     invalid[0] = f32::NAN;
     assert!(scalar_reference(&layout, &expert, &binding, &invalid).is_err());
+    let invalid_expert = VerifiedNativeExpert {
+        layer: expert.layer,
+        expert: expert.expert,
+        span: expert.span.clone(),
+        bytes: expert.bytes.clone(),
+    };
+    let mut invalid_binding = binding.clone();
+    invalid_binding.blob_sha256 = "0".repeat(64);
+    assert!(Resident::load_scalar(&layout, invalid_expert, invalid_binding).is_err());
+    let mut resident = Resident::load_scalar(&layout, expert, binding.clone()).unwrap();
+    assert_eq!(resident.binding(), &binding);
+    let resident_row = resident.forward(&x).unwrap();
+    assert_eq!(resident_row.len(), row.len());
+    for (got, expected) in resident_row.iter().zip(&row) {
+        assert_eq!(got.to_bits(), (*expected as f32).to_bits());
+    }
+    assert!(resident.forward(&vec![f32::NAN; 2560]).is_err());
     let stamp = Stamp {
         run_id: "scalar-test".into(),
         model_revision: "test-scalar".into(),
@@ -82,20 +99,22 @@ fn scalar_reference_preserves_binding_and_collector_weight_once() {
         .iter()
         .map(|v| completion::encode_fp16(f64::from(*v as f32)).unwrap())
         .collect();
-    let raw = RoutedRawOutput {
-        stamp,
-        rank: 2,
-        attempt: 1,
-        rows: 1,
-        columns: 2560,
-        slots: vec![OutputSlot {
-            token: 0,
-            slot: 0,
-            expert: 255,
-            local: 0,
-        }],
-        fp16_bits: bits.clone(),
-    };
+    let dispatch = routing::dispatch(&problem).unwrap();
+    let mut worker = RankWorker::new(vec![resident]).unwrap();
+    let raw = worker
+        .execute(&dispatch.ranks[0], &[(0, x.clone())], 1)
+        .unwrap();
+    assert_eq!(raw.fp16_bits, bits);
+    assert!(worker
+        .execute(&dispatch.ranks[0], &[(0, x.clone())], 2)
+        .is_err());
+    let mut invalid_dispatch = dispatch.ranks[0].clone();
+    invalid_dispatch.stamp.batch = 1;
+    assert!(worker
+        .execute(&invalid_dispatch, &[(0, vec![1e20; 2560])], 2)
+        .is_err());
+    invalid_dispatch.stamp.batch = 2;
+    assert!(worker.execute(&invalid_dispatch, &[(0, x)], 3).is_err());
     let mut collector = Collector::from_routing(&problem).unwrap();
     completion::accept_routed_output(1, raw, &mut collector).unwrap();
     let result = collector.finish().unwrap();

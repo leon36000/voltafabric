@@ -1,0 +1,12 @@
+{
+ "scope":"local CPU scalar resident; three real SC117 layer-2 expert slices, seven zero rows, synthetic receipts",
+ "resident_fp32_values_match_captures":7680,
+ "collector_python_oracle_rows_exact":2560,
+ "collector_output_sha256":"535c8bcc17bcad4ac9e01a58f00f9ee2e4fe880dd84dd6804825930120aed08b",
+ "focused_debug":"2 passed",
+ "focused_release_isolated":"2 passed",
+ "vector_grouping_regression":"1 passed",
+ "clippy":"library passed with historical dead_code warning allowed",
+ "non_scalar_feature_check":"passed",
+ "hardware_or_distributed_qualification":false
+}

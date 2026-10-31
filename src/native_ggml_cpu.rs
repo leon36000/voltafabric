@@ -66,8 +66,17 @@ pub fn scalar_reference(
 
 pub struct Resident {
     binding: Binding,
-    owner: vf_ggml_native_ffi::NativeResident,
+    owner: ResidentBackend,
     payload_bytes: u64,
+}
+enum ResidentBackend {
+    Vector(vf_ggml_native_ffi::NativeResident),
+    #[cfg(feature = "native-scalar-reference")]
+    Scalar {
+        gu: i32,
+        down: i32,
+        bytes: Vec<u8>,
+    },
 }
 impl Resident {
     /// Recheck the complete local binding and payload hash before native load.
@@ -97,28 +106,89 @@ impl Resident {
         .map_err(invalid)?;
         Ok(Self {
             binding,
-            owner,
+            owner: ResidentBackend::Vector(owner),
+            payload_bytes: expected.bytes,
+        })
+    }
+    /// Explicit CPU diagnostic backend; no lease, trusted manifest, or remote execution.
+    #[cfg(feature = "native-scalar-reference")]
+    pub fn load_scalar(
+        layout: &NativeLayout,
+        expert: VerifiedNativeExpert,
+        binding: Binding,
+    ) -> Result<Self> {
+        let expected = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+        if binding.model_revision.trim().is_empty()
+            || binding.model_revision.len() > 256
+            || binding.epoch == 0
+            || expert.layer != binding.layer as usize
+            || expert.expert != u64::from(binding.expert)
+            || expert.span != expected
+            || binding.index_sha256 != layout.index_sha256()
+            || expert.bytes.len() as u64 != expected.bytes
+            || sha256::hex(&expert.bytes) != binding.blob_sha256
+        {
+            return Err(invalid("scalar resident binding or payload mismatch"));
+        }
+        Ok(Self {
+            binding,
+            owner: ResidentBackend::Scalar {
+                gu: expected.gate_up_type as i32,
+                down: expected.down_type as i32,
+                bytes: expert.bytes,
+            },
             payload_bytes: expected.bytes,
         })
     }
     pub fn binding(&self) -> &Binding {
         &self.binding
     }
+    fn uses_vector(&self) -> bool {
+        matches!(self.owner, ResidentBackend::Vector(_))
+    }
     fn gate_up_type(&self) -> i32 {
-        self.owner.gate_up_type()
+        match &self.owner {
+            ResidentBackend::Vector(owner) => owner.gate_up_type(),
+            #[cfg(feature = "native-scalar-reference")]
+            ResidentBackend::Scalar { gu, .. } => *gu,
+        }
     }
     fn prepare(&self, input: &[f32]) -> Result<vf_ggml_native_ffi::NativePrepared> {
-        self.owner.prepare(input).map_err(invalid)
+        match &self.owner {
+            ResidentBackend::Vector(owner) => owner.prepare(input).map_err(invalid),
+            #[cfg(feature = "native-scalar-reference")]
+            ResidentBackend::Scalar { .. } => {
+                Err(invalid("scalar resident cannot use vector preparation"))
+            }
+        }
     }
     fn forward_prepared(
         &mut self,
         prepared: &vf_ggml_native_ffi::NativePrepared,
     ) -> Result<Vec<f32>> {
-        self.owner.forward_prepared(prepared).map_err(invalid)
+        match &mut self.owner {
+            ResidentBackend::Vector(owner) => owner.forward_prepared(prepared).map_err(invalid),
+            #[cfg(feature = "native-scalar-reference")]
+            ResidentBackend::Scalar { .. } => {
+                Err(invalid("scalar resident cannot use vector preparation"))
+            }
+        }
     }
     /// Returns one unweighted FP32 expert row; no gate is applied here.
     pub fn forward(&mut self, input: &[f32]) -> Result<Vec<f32>> {
-        self.owner.forward(input).map_err(invalid)
+        match &mut self.owner {
+            ResidentBackend::Vector(owner) => owner.forward(input).map_err(invalid),
+            #[cfg(feature = "native-scalar-reference")]
+            ResidentBackend::Scalar { gu, down, bytes } => {
+                let values = vf_ggml_native_ffi::scalar_reference(*gu, *down, bytes, input)
+                    .map_err(invalid)?;
+                let values: Vec<f32> = values.into_iter().map(|v| v as f32).collect();
+                if values.iter().any(|v| !v.is_finite()) {
+                    return Err(invalid("scalar resident FP32 overflow"));
+                }
+                Ok(values)
+            }
+        }
     }
 }
 
@@ -367,11 +437,15 @@ impl RankWorker {
             for index in expert_execution_order(&plan) {
                 let s = &dispatch.slots[index].slot;
                 let resident = &mut self.owners[plan[index]];
-                let key = (s.token, resident.gate_up_type());
-                if let std::collections::btree_map::Entry::Vacant(entry) = prepared.entry(key) {
-                    entry.insert(resident.prepare(tokens[&s.token])?);
-                }
-                rows[index] = Some(resident.forward_prepared(&prepared[&key])?);
+                rows[index] = Some(if resident.uses_vector() {
+                    let key = (s.token, resident.gate_up_type());
+                    if let std::collections::btree_map::Entry::Vacant(entry) = prepared.entry(key) {
+                        entry.insert(resident.prepare(tokens[&s.token])?);
+                    }
+                    resident.forward_prepared(&prepared[&key])?
+                } else {
+                    resident.forward(tokens[&s.token])?
+                });
             }
             let rows = rows
                 .into_iter()

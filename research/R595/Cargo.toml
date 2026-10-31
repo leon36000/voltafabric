@@ -1,0 +1,18 @@
+[package]
+name = "vf-r595-scalar-resident-tests"
+version = "0.1.0"
+edition = "2021"
+[features]
+native-scalar-reference = []
+[dependencies]
+voltafabric = { path = "../..", features = ["native-scalar-reference"] }
+[[test]]
+name = "sc117_scalar_reference"
+path = "../../tests/sc117_scalar_reference.rs"
+[[bin]]
+name = "vf-r595-resident-oracle"
+path = "collector.rs"
+[profile.release]
+overflow-checks = true
+lto = "thin"
+[workspace]
