@@ -81,7 +81,7 @@ impl Owners {
         if matches.next().is_some() {
             return Err(invalid("segment append duplicate rank"));
         }
-        session.extend_native_ggml(binding, index, pack_bytes, bytes, timeout)?;
+        session.extend_native_selected(binding, index, pack_bytes, bytes, timeout)?;
         self.registry.copies.push(crate::moe::Replica {
             expert: binding.expert,
             rank: binding.rank,
@@ -2692,5 +2692,164 @@ mod tests {
         )
         .is_err());
         assert!(!state.poisoned);
+    }
+}
+
+#[cfg(all(test, feature = "native-scalar-reference"))]
+mod scalar_admission_tests {
+    use super::*;
+    use crate::{
+        native_ggml_cpu::Binding,
+        session::{
+            Endpoint, Session, CAPABILITY_NATIVE_GGML_CPU, CAPABILITY_NATIVE_GGML_EXTEND,
+            CAPABILITY_NATIVE_SCALAR_GGML_CPU, CAPABILITY_NATIVE_SCALAR_GGML_EXTEND,
+        },
+        sha256,
+        strata_native_layout::NativeLayout,
+    };
+    #[test]
+    fn dynamic_append_uses_the_confirmed_session_backend() {
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let bytes = vec![0; layout.expert(2, 0).unwrap().bytes as usize];
+        let identity = |expert| Binding {
+            model_revision: "mode-test".into(),
+            rank: 2,
+            layer: 2,
+            expert,
+            local: expert,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let python = r#"import sys,json
+b=sys.stdin.buffer
+a=sys.argv[1]
+for i in range(2):
+ h=json.loads(b.readline())
+ n=h['artifact_bytes']
+ while n:
+  x=b.read(min(n,65536))
+  if not x: sys.exit(3)
+  n-=len(x)
+ expected=('load_native_scalar_ggml_raw' if i==0 else 'extend_native_scalar_ggml_raw') if a=='scalar' else ('load_native_ggml_raw' if i==0 else 'extend_native_ggml_raw')
+ if h['op']!=expected:
+  print(json.dumps({'reply':'refused','error':{'code':'WRONG_BACKEND','message':'unexpected operation'}}),flush=True);sys.exit(4)
+ reply='native_scalar_ggml_loaded' if a=='scalar' else 'native_ggml_loaded'
+ print(json.dumps({'reply':reply,'binding':h['binding']}),flush=True)
+"#;
+        for scalar in [false, true] {
+            let endpoint = Endpoint {
+                rank: 2,
+                argv: vec![
+                    "python3".into(),
+                    "-c".into(),
+                    python.into(),
+                    if scalar { "scalar" } else { "vector" }.into(),
+                ],
+            };
+            let mut session = Session::spawn(&endpoint).unwrap();
+            session.hello.capabilities = vec![
+                CAPABILITY_NATIVE_GGML_CPU.into(),
+                CAPABILITY_NATIVE_GGML_EXTEND.into(),
+                CAPABILITY_NATIVE_SCALAR_GGML_CPU.into(),
+                CAPABILITY_NATIVE_SCALAR_GGML_EXTEND.into(),
+            ];
+            if scalar {
+                session
+                    .load_native_scalar_ggml(
+                        &identity(0),
+                        index,
+                        50_292_326_400,
+                        &bytes,
+                        Duration::from_secs(10),
+                    )
+                    .unwrap();
+            } else {
+                session
+                    .load_native_ggml(
+                        &identity(0),
+                        index,
+                        50_292_326_400,
+                        &bytes,
+                        Duration::from_secs(10),
+                    )
+                    .unwrap();
+            }
+            let sent = session.traffic.bytes_sent;
+            let wrong = if scalar {
+                session.load_native_ggml(
+                    &identity(1),
+                    index,
+                    50_292_326_400,
+                    &bytes,
+                    Duration::from_secs(10),
+                )
+            } else {
+                session.load_native_scalar_ggml(
+                    &identity(1),
+                    index,
+                    50_292_326_400,
+                    &bytes,
+                    Duration::from_secs(10),
+                )
+            };
+            assert!(wrong.is_err());
+            assert_eq!(session.traffic.bytes_sent, sent);
+            let mut owners = Owners {
+                sessions: vec![session],
+                registry: Registry {
+                    epoch: 1,
+                    copies: vec![crate::moe::Replica {
+                        expert: 0,
+                        rank: 2,
+                        local: 0,
+                    }],
+                },
+                preferred: BTreeMap::new(),
+                order: BTreeMap::from([(2, vec![0])]),
+            };
+            owners
+                .append(
+                    &identity(1),
+                    index,
+                    50_292_326_400,
+                    &bytes,
+                    Duration::from_secs(10),
+                )
+                .unwrap();
+            assert_eq!(owners.order[&2], vec![0, 1]);
+            assert_eq!(owners.registry.copies.len(), 2);
+        }
+        let session = Session::spawn(&Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        })
+        .unwrap();
+        let mut owners = Owners {
+            sessions: vec![session],
+            registry: Registry {
+                epoch: 1,
+                copies: vec![crate::moe::Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                }],
+            },
+            preferred: BTreeMap::new(),
+            order: BTreeMap::from([(2, vec![0])]),
+        };
+        assert!(owners
+            .append(
+                &identity(1),
+                index,
+                50_292_326_400,
+                &bytes,
+                Duration::from_secs(1)
+            )
+            .is_err());
+        assert_eq!(owners.sessions[0].traffic.bytes_sent, 0);
+        assert_eq!(owners.registry.copies.len(), 1);
+        assert_eq!(owners.order[&2], vec![0]);
     }
 }

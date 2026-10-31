@@ -3851,11 +3851,20 @@ impl NativeCollected {
     }
 }
 
+#[cfg(feature = "native-ggml-cpu")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum NativeBackend {
+    Vector,
+    #[cfg(feature = "native-scalar-reference")]
+    Scalar,
+}
 /// One rank session: a live worker process and its framed stream.
 pub struct Session {
     pub rank: u32,
     pub hello: ServerHello,
     pub traffic: Traffic,
+    #[cfg(feature = "native-ggml-cpu")]
+    native_backend: Option<NativeBackend>,
     child: Child,
     stdin: Option<SessionInput>,
     #[cfg(unix)]
@@ -3952,7 +3961,10 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
-        if timeout.is_zero()
+        if self
+            .native_backend
+            .is_some_and(|v| v != NativeBackend::Vector)
+            || timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || !self
                 .hello
@@ -3981,7 +3993,10 @@ impl Session {
         let deadline = Instant::now() + timeout;
         self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
         match self.reply_until(deadline)? {
-            Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => {
+                self.native_backend = Some(NativeBackend::Vector);
+                Ok(())
+            }
             Reply::Refused { error } => Err(error),
             _ => {
                 self.usable = false;
@@ -4001,7 +4016,10 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
-        if timeout.is_zero()
+        if self
+            .native_backend
+            .is_some_and(|v| v != NativeBackend::Scalar)
+            || timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || !self
                 .hello
@@ -4030,7 +4048,10 @@ impl Session {
         let deadline = Instant::now() + timeout;
         self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
         match self.reply_until(deadline)? {
-            Reply::NativeScalarGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::NativeScalarGgmlLoaded { binding: returned } if returned == *binding => {
+                self.native_backend = Some(NativeBackend::Scalar);
+                Ok(())
+            }
             Reply::Refused { error } => Err(error),
             _ => {
                 self.usable = false;
@@ -4050,7 +4071,10 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
-        if timeout.is_zero()
+        if self
+            .native_backend
+            .is_some_and(|v| v != NativeBackend::Vector)
+            || timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || !self
                 .hello
@@ -4102,7 +4126,10 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
-        if timeout.is_zero()
+        if self
+            .native_backend
+            .is_some_and(|v| v != NativeBackend::Scalar)
+            || timeout.is_zero()
             || timeout > Duration::from_secs(60)
             || !self
                 .hello
@@ -4142,6 +4169,29 @@ impl Session {
                 self.usable = false;
                 Err(invalid("native scalar append reply identity"))
             }
+        }
+    }
+
+    /// Route admission only after a backend-specific initial load acknowledgement.
+    /// This in-memory selection is not authentication of the caller's plan.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub(crate) fn extend_native_selected(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        match self.native_backend {
+            Some(NativeBackend::Vector) => {
+                self.extend_native_ggml(binding, index, pack_bytes, bytes, timeout)
+            }
+            #[cfg(feature = "native-scalar-reference")]
+            Some(NativeBackend::Scalar) => {
+                self.extend_native_scalar_ggml(binding, index, pack_bytes, bytes, timeout)
+            }
+            None => Err(invalid("native session backend was not confirmed")),
         }
     }
 
@@ -4773,6 +4823,8 @@ impl Session {
             rank: endpoint.rank,
             hello: ServerHello::default(),
             traffic: Traffic::default(),
+            #[cfg(feature = "native-ggml-cpu")]
+            native_backend: None,
             child,
             stdin,
             #[cfg(unix)]

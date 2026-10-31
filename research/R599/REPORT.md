@@ -1,0 +1,9 @@
+# R599 — admission dynamique selon le backend confirmé
+
+L'admission dynamique de `Owners` utilisait toujours l'extension vectorielle, même si la session avait chargé un résident scalaire. Le test ajouté reproduisait ce défaut avec un pair de protocole local simulé.
+
+Une `Session` retient désormais en mémoire le backend correspondant au premier accusé de chargement natif vérifié. L'admission dynamique sélectionne l'extension scalaire ou vectorielle correspondante et refuse une session dont aucun backend n'a été confirmé. Les appels explicites qui contredisent un backend confirmé sont également refusés avant écriture. Le registre et l'ordre des résidents ne changent qu'après accusé réussi. La sélection n'authentifie ni le worker, ni le plan, ni l'identité numérique des autres ranks.
+
+Un test utilise la vraie `Session`, le vrai chemin `Owners::append` et un pair Python local simulé : les requêtes initiales et d'extension sont vérifiées pour les deux backends ; un changement contradictoire et une session sans backend sont refusés sans écriture ni mutation du registre. La session du test ne lance pas de worker VoltaFabric, et le pair simulé n'exécute aucun calcul. Les tests R597–R598 de serveur en mémoire restent des preuves distinctes ; leur combinaison ne constitue pas encore un aller-retour complet avec un worker réel.
+
+La suite de bibliothèque passe en debug et release : 148 réussites et 6 ignorés chacune. Clippy passe avec l'avertissement historique `dead_code` autorisé ; le contrôle de compilation vectoriel seul et rustfmt ciblé passent. Aucun GPU, worker distant, registre R53, lease partagée ou UNKNOWN n'a été utilisé. Prochaine étape : lier le backend et les exécutables à un plan authentifié et tester la chaîne complète avec des identités et réservations fraîches avant toute exécution inter-PC.
