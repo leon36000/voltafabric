@@ -2765,7 +2765,7 @@ with open(path,'x+') as lock:
  lm=os.stat(path); dm=os.stat(root)
  lease=dict(path=path,dev=lm.st_dev,ino=lm.st_ino,uid=lm.st_uid)
  ns=dict(root=root,dev=dm.st_dev,ino=dm.st_ino,uid=dm.st_uid,base_id='r53-bridge123')
- os.environ.update(VF_RANK2_SSH_HOST='synthetic',VF_SHARED_LEASE_FD=str(lock.fileno()),VF_SHARED_LEASE_SPEC=json.dumps(lease),VF_R53_NAMESPACE_SPEC=json.dumps(ns),VF_EXPECTED_PLAN_ID='r531-'+'a'*64)
+ os.environ.update(VF_RANK2_SSH_HOST='synthetic',VF_SHARED_LEASE_FD=str(lock.fileno()),VF_SHARED_LEASE_SPEC=json.dumps(lease),VF_R53_NAMESPACE_SPEC=json.dumps(ns),VF_EXPECTED_PLAN_ID='r531-'+'a'*64,VF_EXPERT_RANK_AFFINITY='sticky')
  calls=[]; tamper=False
  def runner(args,**kw):
   env=dict(os.environ,VF_TEST_R53_BRIDGE='1')

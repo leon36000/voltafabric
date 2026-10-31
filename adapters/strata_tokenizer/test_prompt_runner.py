@@ -46,7 +46,7 @@ class RunnerTests(unittest.TestCase):
                 plan = 'r531-' + 'a' * 64
                 env = {'VF_RANK3_SSH_HOST':'host', 'VF_SHARED_LEASE_FD':str(lock.fileno()),
                        'VF_SHARED_LEASE_SPEC':json.dumps(lease), 'VF_R53_NAMESPACE_SPEC':json.dumps(namespace),
-                       'VF_EXPECTED_PLAN_ID':plan}
+                       'VF_EXPECTED_PLAN_ID':plan, 'VF_EXPERT_RANK_AFFINITY':'sticky'}
                 calls = []
                 def engine(args, **kwargs):
                     calls.append(kwargs['pass_fds'])
@@ -81,7 +81,7 @@ class RunnerTests(unittest.TestCase):
                 lease = dict(path=lease_path, dev=ls.st_dev, ino=ls.st_ino, uid=ls.st_uid)
                 env = {'VF_RANK2_SSH_HOST':'host', 'VF_SHARED_LEASE_FD':str(lock.fileno()),
                        'VF_SHARED_LEASE_SPEC':json.dumps(lease), 'VF_R53_NAMESPACE_SPEC':json.dumps(namespace),
-                       'VF_EXPECTED_PLAN_ID':'r531-'+'a'*64}
+                       'VF_EXPECTED_PLAN_ID':'r531-'+'a'*64, 'VF_EXPERT_RANK_AFFINITY':'sticky'}
                 program = '''import fcntl,os,sys
 fd=int(sys.argv[1]); os.fstat(fd)
 assert 'FLOCK' in open('/proc/self/fdinfo/'+str(fd)).read()
@@ -100,6 +100,32 @@ sys.exit(99)
                 with patch.dict('os.environ', env, clear=True):
                     with self.assertRaisesRegex(RuntimeError, r'exit=17'):
                         run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=child, reserve_r53=True, require_bound_plan=True)
+
+    def test_incompatible_remote_modes_refused_before_reservation_or_spawn(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = os.path.join(directory, 'ledger'); os.mkdir(root, 0o700)
+            lease_path = os.path.join(directory, 'lease')
+            with open(lease_path, 'w+') as lock:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                ds, ls = os.stat(root), os.stat(lease_path)
+                namespace = dict(root=root, dev=ds.st_dev, ino=ds.st_ino, uid=ds.st_uid, base_id='r53-preflight01')
+                lease = dict(path=lease_path, dev=ls.st_dev, ino=ls.st_ino, uid=ls.st_uid)
+                valid = {'VF_RANK2_SSH_HOST':'host', 'VF_SHARED_LEASE_FD':str(lock.fileno()),
+                         'VF_SHARED_LEASE_SPEC':json.dumps(lease), 'VF_R53_NAMESPACE_SPEC':json.dumps(namespace),
+                         'VF_EXPECTED_PLAN_ID':'r531-'+'a'*64, 'VF_EXPERT_RANK_AFFINITY':'sticky'}
+                cases = ({'VF_EXPERT_RANK_AFFINITY':'off'}, {'VF_PREFILL_GROUP_SIZE':'2'},
+                         {'VF_QSA_TRACE_LAYER':'3'},
+                         {'VF_SC117_NATIVE_BACKEND':'scalar', 'VF_EXPECTED_PLAN_ID':'r600-'+'a'*64})
+                calls=[]
+                def engine(*args, **kwargs):
+                    calls.append(1)
+                    return subprocess.CompletedProcess(args, 42, b'', b'')
+                for change in cases:
+                    with self.subTest(change=change), patch.dict('os.environ', dict(valid, **change), clear=True):
+                        with self.assertRaises(ValueError):
+                            run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=engine, reserve_r53=True, require_bound_plan=True)
+                    self.assertEqual(os.listdir(root), [])
+                self.assertEqual(calls, [])
 
     def test_head_trace_never_runs_or_escapes_through_prompt_adapter(self):
         calls = []

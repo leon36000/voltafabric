@@ -294,6 +294,11 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     remote = any(os.environ.get(f"VF_RANK{rank}_SSH_HOST") for rank in (2, 3))
     if reserve_r53 and (prepare_plan or not remote or expected_plan is None or not require_bound_plan):
         raise ValueError("R53 reservation requires remote execution and a bound expected plan")
+    if reserve_r53 and (backend != "vector"
+                        or os.environ.get("VF_EXPERT_RANK_AFFINITY") != "sticky"
+                        or os.environ.get("VF_PREFILL_GROUP_SIZE", "1") != "1"
+                        or os.environ.get("VF_QSA_TRACE_LAYER") is not None):
+        raise ValueError("remote mode is incompatible with the coordinator")
     if not prepare_plan and remote:
         raw_fd = os.environ.get("VF_SHARED_LEASE_FD", "")
         if not raw_fd.isascii() or not raw_fd.isdecimal() or int(raw_fd) < 3:
