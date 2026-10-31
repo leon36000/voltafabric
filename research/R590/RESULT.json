@@ -1,0 +1,37 @@
+{
+  "12": {
+    "bytes": 31760,
+    "capture_sha256": "927784846bbddb3407f551cf33a82a998d9b74d4cefe343ec79f074fdb390fe5",
+    "gate_count": 640,
+    "host_bytes_identical": true,
+    "mid_count": 640,
+    "output_count": 2560,
+    "up_count": 640
+  },
+  "255": {
+    "bytes": 31760,
+    "capture_sha256": "8bbbf4a9bd630873700f39bb6eb69e6fc67e43fa707e5491e6ca337d1ab2cd52",
+    "gate_count": 640,
+    "host_bytes_identical": true,
+    "mid_count": 640,
+    "output_count": 2560,
+    "pc1_vector_vs_scalar": {
+      "max_abs": 5.4019493063606205e-05,
+      "violations": 1169
+    },
+    "pc6_vector_vs_scalar": {
+      "max_abs": 3.0669013995066052e-09,
+      "violations": 0
+    },
+    "up_count": 640
+  },
+  "75": {
+    "bytes": 31760,
+    "capture_sha256": "43c6043458558d33a359170aa3a6deffbda0ae388008231622f84f9ac5ddac3d",
+    "gate_count": 640,
+    "host_bytes_identical": true,
+    "mid_count": 640,
+    "output_count": 2560,
+    "up_count": 640
+  }
+}

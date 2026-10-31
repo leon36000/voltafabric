@@ -1,0 +1,19 @@
+{
+  "activation_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "compiler_flags": "-O2 -ffp-contract=off -Wall -Wextra -Werror",
+  "cpu_quota_percent": 50,
+  "expert_sha256": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+  "gpu": false,
+  "memory_max_bytes": 536870912,
+  "network_worker": false,
+  "no_replay": true,
+  "pc1_binary_sha256": "bb2dda74dcbae803b75813972bcd68adaa55fe3e32493325fc89aec3b52b601d",
+  "pc1_ggml_base_sha256": "54558b38a3f14789ce7b8cdab493788c2dd6ff495a3953970da66b026c47fc23",
+  "pc1_ggml_cpu_sha256": "42e39eea5894bed527fef2feb9bf8a23e970733fa9ea892fd060cafe5505412a",
+  "pc6_binary_sha256": "f568386380c7f2587a8d7db18ed425ca1993b8b1821f420242362becdb83dd86",
+  "pc6_ggml_base_sha256": "e07a5b9b97c6daeb87838a888bbaf2c92a25620c323eb2a1b49bf2a9b5003fca",
+  "pc6_ggml_cpu_sha256": "a0b1fd8a1fa298a55901e1f7b02e74a359fbc49fe4f85cf6506a5d906b0b6109",
+  "purpose": "full scalar intermediate and output comparison of R428 expert 255 across observed CPU builds",
+  "source_sha256": "15a010b65b8366aefc6456a9016aca244d59cb5f485165a7c7591008aebe888e",
+  "swap_max_bytes": 0
+}
