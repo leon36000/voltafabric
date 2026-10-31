@@ -1096,6 +1096,79 @@ impl Segment {
             })
             .collect()
     }
+    /// Diagnostic-only, layer-major prefill. Earlier layer states may commit
+    /// before a later failure; then the entire segment is terminal and no
+    /// intermediate residuals are returned. Every layer gets a fresh claim.
+    #[cfg(feature = "ple-cpu-qualification")]
+    pub fn advance_token_batch_with_source(
+        &mut self,
+        attempt: u64,
+        tokens: &[i32],
+        inputs: &[Vec<f32>],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
+        let position = self.cursor.position;
+        if self.cursor.poisoned
+            || self.layers.is_empty()
+            || inputs.is_empty()
+            || inputs.len() > 128
+            || tokens.len() != inputs.len()
+            || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
+            || attempt == 0
+            || attempt <= self.cursor.last_attempt
+            || position.checked_add(inputs.len() as u64).is_none()
+            || inputs
+                .iter()
+                .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
+            || self.layers.iter().any(|layer| {
+                layer
+                    .ple
+                    .as_ref()
+                    .is_some_and(|p| p.state.position != position)
+                    || match &layer.attention {
+                        Attention::Gdn(gdn, _) => gdn.next_token() != position,
+                        Attention::Qsa(qsa, _) => {
+                            u64::try_from(qsa.len()).ok() != Some(position)
+                                || !qsa.batch_fits(inputs.len())
+                        }
+                    }
+            })
+        {
+            return Err(invalid("multi-layer batch state, attempt or input"));
+        }
+        let original_layer = self.base.layer;
+        let previous_attempt = self.cursor.last_attempt;
+        let previous_batch_start = self.cursor.last_batch_start;
+        let mut residuals = inputs.to_vec();
+        for index in 0..self.layers.len() {
+            self.base.layer = self.layers[index].identity.layer;
+            self.cursor.position = position;
+            self.cursor.last_attempt = previous_attempt;
+            self.cursor.poisoned = false;
+            let result = if matches!(self.layers[index].attention, Attention::Gdn(..)) {
+                let ple_tokens = self.layers[index].ple.as_ref().map(|_| tokens);
+                self.advance_gdn_batch_inner(index, attempt, &residuals, ple_tokens, source)
+            } else {
+                self.advance_qsa_batch_inner(index, attempt, &residuals, source)
+            };
+            self.base.layer = original_layer;
+            match result {
+                Ok(next) => residuals = next,
+                Err(error) => {
+                    self.cursor.position = position;
+                    self.cursor.last_attempt = previous_attempt;
+                    self.cursor.last_batch_start = previous_batch_start;
+                    self.cursor.poisoned = true;
+                    return Err(error);
+                }
+            }
+        }
+        self.cursor.position = position + inputs.len() as u64;
+        self.cursor.last_batch_start = Some(position);
+        self.cursor.last_attempt = attempt;
+        self.cursor.poisoned = false;
+        Ok(residuals)
+    }
     /// Execute a single non-PLE GDN layer over a causal group. Missing experts
     /// are admitted before dispatch; there is no eviction within this call.
     /// Once a reservation is made, any error leaves the segment terminal.
@@ -1105,7 +1178,10 @@ impl Segment {
         inputs: &[Vec<f32>],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
-        self.advance_gdn_batch_inner(attempt, inputs, None, source)
+        if self.layers.len() != 1 {
+            return Err(invalid("GDN segment layer count"));
+        }
+        self.advance_gdn_batch_inner(0, attempt, inputs, None, source)
     }
     /// Diagnostic-only layer-1 PLE/GDN batch. This does not lift the ordinary
     /// constructor's layer-1 qualification guard.
@@ -1117,17 +1193,21 @@ impl Segment {
         inputs: &[Vec<f32>],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
-        self.advance_gdn_batch_inner(attempt, inputs, Some(tokens), source)
+        if self.layers.len() != 1 {
+            return Err(invalid("GDN segment layer count"));
+        }
+        self.advance_gdn_batch_inner(0, attempt, inputs, Some(tokens), source)
     }
     fn advance_gdn_batch_inner(
         &mut self,
+        layer_index: usize,
         attempt: u64,
         inputs: &[Vec<f32>],
         tokens: Option<&[i32]>,
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
         if self.cursor.poisoned
-            || self.layers.len() != 1
+            || layer_index >= self.layers.len()
             || inputs.is_empty()
             || inputs.len() > 128
             || attempt == 0
@@ -1140,11 +1220,11 @@ impl Segment {
             || inputs
                 .iter()
                 .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
-            || !matches!(&self.layers[0].attention, Attention::Gdn(..))
-            || match (&self.layers[0].ple, tokens) {
+            || !matches!(&self.layers[layer_index].attention, Attention::Gdn(..))
+            || match (&self.layers[layer_index].ple, tokens) {
                 (None, None) => false,
                 (Some(ple), Some(tokens)) => {
-                    self.layers[0].identity.layer != 1
+                    self.layers[layer_index].identity.layer != 1
                         || ple.state.position != self.cursor.position
                         || tokens.len() != inputs.len()
                         || tokens.iter().any(|t| !(0..sc117_ple::VOCAB).contains(t))
@@ -1159,7 +1239,7 @@ impl Segment {
         stamp.batch = position;
         self.cursor.poisoned = true;
         let ticket = self.ledger.reserve_ticket(&stamp, attempt)?;
-        let layer = &mut self.layers[0];
+        let layer = &mut self.layers[layer_index];
         let (ple_candidate, prepared) = match (&layer.ple, tokens) {
             (Some(ple), Some(tokens)) => {
                 let (candidate, residuals) = ple.state.prepare_batch(
@@ -1250,8 +1330,20 @@ impl Segment {
         inputs: &[Vec<f32>],
         source: &mut dyn MissingExpertSource,
     ) -> Result<Vec<Vec<f32>>> {
+        if self.layers.len() != 1 {
+            return Err(invalid("QSA segment layer count"));
+        }
+        self.advance_qsa_batch_inner(0, attempt, inputs, source)
+    }
+    fn advance_qsa_batch_inner(
+        &mut self,
+        layer_index: usize,
+        attempt: u64,
+        inputs: &[Vec<f32>],
+        source: &mut dyn MissingExpertSource,
+    ) -> Result<Vec<Vec<f32>>> {
         if self.cursor.poisoned
-            || self.layers.len() != 1
+            || layer_index >= self.layers.len()
             || inputs.is_empty()
             || inputs.len() > 128
             || attempt == 0
@@ -1264,8 +1356,8 @@ impl Segment {
             || inputs
                 .iter()
                 .any(|x| x.len() != 10240 || x.iter().any(|v| !v.is_finite()))
-            || !matches!(&self.layers[0].attention, Attention::Qsa(qsa, _) if qsa.batch_fits(inputs.len()))
-            || self.layers[0].ple.is_some()
+            || !matches!(&self.layers[layer_index].attention, Attention::Qsa(qsa, _) if qsa.batch_fits(inputs.len()))
+            || self.layers[layer_index].ple.is_some()
         {
             return Err(invalid("QSA segment batch state, attempt or input"));
         }
@@ -1274,7 +1366,7 @@ impl Segment {
         stamp.batch = position;
         self.cursor.poisoned = true;
         let ticket = self.ledger.reserve_ticket(&stamp, attempt)?;
-        let layer = &mut self.layers[0];
+        let layer = &mut self.layers[layer_index];
         let Attention::Qsa(qsa, ffn) = &mut layer.attention else {
             unreachable!()
         };
