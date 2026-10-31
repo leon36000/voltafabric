@@ -1,0 +1,12 @@
+{
+  "pc1_sessions": 653,
+  "pc1_claims_without_done": 2,
+  "pc6_sessions": 20,
+  "pc6_claims_without_done": 1,
+  "pc6_without_closed": 4,
+  "exact_shared_session_identities": 0,
+  "exact_shared_run_ids": 0,
+  "pc6_run_ids_matching_frozen_r53_effective_ids": 0,
+  "tests_passed": 11,
+  "live_ledger_qualified": false
+}
