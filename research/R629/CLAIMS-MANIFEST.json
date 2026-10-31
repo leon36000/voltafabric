@@ -1,0 +1,31 @@
+{
+  "original_sha256": "1f109fed71a016b630cbc8260343ef7dc0a73f78158698ba47ee0f6d0ed2ff55",
+  "count": 2424,
+  "parts": [
+    {
+      "path": "CLAIMS-0.json",
+      "sha256": "9a75678a87841ee32800c9311f5e9c18227dfce4bdf38162f18bd6c3050b46f4",
+      "count": 500
+    },
+    {
+      "path": "CLAIMS-1.json",
+      "sha256": "280edc9124da7f79e8296382ef271e27f47f9e7b8489994d1182331f3bde062e",
+      "count": 500
+    },
+    {
+      "path": "CLAIMS-2.json",
+      "sha256": "e55816a6325d79f351d696487543421a586549ee61d91b3e6b7bb8a1d2c83ddc",
+      "count": 500
+    },
+    {
+      "path": "CLAIMS-3.json",
+      "sha256": "3baf5568ae37ea881148415f20510082b956155c6c533dc9a4ba04ab5f10ef94",
+      "count": 500
+    },
+    {
+      "path": "CLAIMS-4.json",
+      "sha256": "a8228923be248e9063454ea477896f8ca3c784a9b9c2641e6a34bf4b78c2ee3b",
+      "count": 424
+    }
+  ]
+}
