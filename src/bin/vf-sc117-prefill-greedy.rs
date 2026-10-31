@@ -769,6 +769,17 @@ fn batch_plan(base: &str, batched: bool) -> String {
     format!("r570-{}", sha256::hex(&bytes))
 }
 
+// Domain-separated plan: identical identities must not silently change the
+// rank chosen on readmission when a mixed-architecture fleet is used.
+fn affinity_plan(base: &str, enabled: bool) -> String {
+    if !enabled {
+        return base.to_owned();
+    }
+    let mut bytes = b"vf-expert-rank-affinity-v1\0".to_vec();
+    bytes.extend_from_slice(base.as_bytes());
+    format!("r576-{}", sha256::hex(&bytes))
+}
+
 fn append_qsa_trace(
     bytes: &mut Vec<u8>,
     trace: QsaQualificationTrace,
@@ -1062,6 +1073,14 @@ fn run() -> Result<(), E> {
         Some("2") => true,
         _ => return Err("unsupported prefill group size".into()),
     };
+    let rank_affinity = match optional_env("VF_EXPERT_RANK_AFFINITY")?.as_deref() {
+        None | Some("off") => false,
+        Some("sticky") => true,
+        _ => return Err("unsupported expert rank affinity".into()),
+    };
+    if rank_affinity && trace_qsa {
+        return Err("rank affinity does not support QSA trace".into());
+    }
     if batched_prompt && trace_qsa {
         return Err("batched prefill does not support QSA trace".into());
     }
@@ -1196,7 +1215,10 @@ fn run() -> Result<(), E> {
         &shared_lease,
         &r53_namespace,
     )?;
-    let plan_id = batch_plan(&trace_plan(&base_plan_id, trace_mode), batched_prompt);
+    let plan_id = affinity_plan(
+        &batch_plan(&trace_plan(&base_plan_id, trace_mode), batched_prompt),
+        rank_affinity,
+    );
     if plan_only {
         println!(
             "{}",
@@ -1373,6 +1395,9 @@ fn run() -> Result<(), E> {
             source_config,
         )?
     };
+    if rank_affinity {
+        source.enable_rank_affinity()?;
+    }
     if source.used_bytes() != used {
         return Err("seed budget mismatch".into());
     }
@@ -1528,7 +1553,7 @@ fn run() -> Result<(), E> {
         return Err("worker shutdown receipt".into());
     }
     let (cache_hits, cache_misses, cache_entries) = source.origin_digest_cache_stats();
-    let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
+    let mut receipt = serde_json::json!({"scope":"up to 128 prompt tokens and 128 predictions within 128 input positions through 48 CPU layers", "worker_transports":endpoints.iter().map(|(rank,endpoint)| (*rank, if endpoint.argv.get(1).is_some_and(|arg| arg == "--guarded-local") { "local" } else { "ssh" })).collect::<BTreeMap<_,_>>(), "expert_headroom_bytes":worst_case_headroom, "evictions":evictions, "requested_max_new_tokens":max_new_tokens, "eos_token_id":eos_token_id, "prompt_mode":prompt_mode, "layer_count":layer_count,"run_id":run_id,"plan_id":plan_id,"attempt_base":attempt,"prompt_tokens_sha256":prompt_tokens_hash(&prompt_tokens),"prompt_tokens":prompt_tokens,"input_tokens":input_tokens,"generated_token_ids":generated,"logits_sha256":logits_hashes,"embedding_sha256":embedding_hashes,"output_sha256":output_hashes,"seed_experts":[0,1],"seed_hashes":seeds,"workers_closed":receipts.len(),"worker_exec_counts":receipts.iter().map(|(r, expected, _)| (r.rank, *expected, r.bye_execs)).collect::<Vec<_>>(),"worker_raw_exec_counts":receipts.iter().map(|(r, _, raw)| (r.rank, *raw)).collect::<Vec<_>>(),"payload_budget_bytes":budget,"resident_payload_bytes":source.used_bytes(),"rank_used_bytes":source.rank_used_bytes(),"rank_limits":rank_limits,"rank_affinity":rank_affinity,"rank_history":rank_history,"dynamic_admissions":source.admissions(),"source_digest_cache":{"hits":cache_hits,"misses":cache_misses,"entries":cache_entries}});
     if trace_qsa {
         if trace_bytes.len() != input_tokens.len() * trace_mode.words() * 4 {
             return Err("QSA trace incomplete".into());
@@ -1553,6 +1578,21 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn sticky_plan_binds_policy_and_base() {
+        let base = format!("r531-{}", "a".repeat(64));
+        assert_eq!(affinity_plan(&base, false), base);
+        let sticky = affinity_plan(&base, true);
+        assert_eq!(
+            sticky,
+            "r576-14d8a594dfddda0d9fb3f4ec30d5c53b0c5b1672eb6f88903ebfd05d5354f557"
+        );
+        assert_ne!(
+            sticky,
+            affinity_plan(&format!("r531-{}", "b".repeat(64)), true)
+        );
+    }
+
     #[test]
     fn initial_rank_headroom_is_rejected_before_worker_start() {
         let caps = BTreeMap::from([(2, 20), (3, 18)]);

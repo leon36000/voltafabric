@@ -140,6 +140,48 @@ fn placement(
     Ok((rank, local))
 }
 
+struct StickyInputs<'a> {
+    ranks: &'a [u32],
+    order: &'a BTreeMap<u32, Vec<u32>>,
+    used: &'a BTreeMap<u32, u64>,
+    caps: Option<&'a BTreeMap<u32, u64>>,
+    limit: u64,
+    bytes: u64,
+}
+
+// Pin an already-seen (layer, expert) to the original producer rank. The
+// caller first runs placement() to validate the complete current registry.
+fn sticky_placement(
+    pinned: Option<u32>,
+    suggested: (u32, u32),
+    ctx: &StickyInputs<'_>,
+) -> Result<(u32, u32)> {
+    let Some(rank) = pinned else {
+        return Ok(suggested);
+    };
+    if !ctx.ranks.contains(&rank) {
+        return Err(invalid("sticky expert rank absent"));
+    }
+    let used = *ctx
+        .used
+        .get(&rank)
+        .ok_or_else(|| invalid("sticky rank accounting absent"))?;
+    let cap = match ctx.caps {
+        Some(caps) => *caps
+            .get(&rank)
+            .ok_or_else(|| invalid("sticky rank cap absent"))?,
+        None => ctx.limit,
+    };
+    charge(used, ctx.bytes, cap)?;
+    let local = ctx
+        .order
+        .get(&rank)
+        .and_then(|v| v.iter().copied().max())
+        .and_then(|v| v.checked_add(1))
+        .ok_or_else(|| invalid("sticky rank local overflow"))?;
+    Ok((rank, local))
+}
+
 fn matches_accounted(
     layer: u32,
     registry: &Registry,
@@ -199,6 +241,8 @@ pub struct Source<'a> {
     rank_used: BTreeMap<u32, u64>,
     rank_limits: Option<BTreeMap<u32, u64>>,
     known: BTreeMap<(u32, u32), (u32, u32)>,
+    sticky: Option<BTreeMap<(u32, u32), u32>>,
+    ever_evicted: bool,
     admissions: Vec<(u32, u32, u32, u32, String)>,
 }
 impl<'a> Source<'a> {
@@ -285,9 +329,26 @@ impl<'a> Source<'a> {
             rank_used,
             rank_limits,
             known,
+            sticky: None,
+            ever_evicted: false,
             admissions: Vec::new(),
         })
     }
+    /// Enable once, before any admissions or evictions, with a plan that binds
+    /// this policy. No numerical equivalence between different ranks is implied.
+    pub fn enable_rank_affinity(&mut self) -> Result<()> {
+        if self.sticky.is_some() || !self.admissions.is_empty() || self.ever_evicted {
+            return Err(invalid("rank affinity must precede admission and eviction"));
+        }
+        self.sticky = Some(
+            self.known
+                .iter()
+                .map(|(&k, &(rank, _))| (k, rank))
+                .collect(),
+        );
+        Ok(())
+    }
+
     pub fn used_bytes(&self) -> u64 {
         self.used
     }
@@ -399,7 +460,9 @@ impl<'a> Source<'a> {
             binding,
             bytes,
             expected,
-        )
+        )?;
+        self.ever_evicted = true;
+        Ok(())
     }
 }
 impl MissingExpertSource for Source<'_> {
@@ -430,7 +493,23 @@ impl MissingExpertSource for Source<'_> {
             used: &self.rank_used,
             bytes: span.bytes,
         });
-        let (rank, local) = placement(registry, order, &self.ranks, stamp.epoch, expert, capacity)?;
+        let suggested = placement(registry, order, &self.ranks, stamp.epoch, expert, capacity)?;
+        let pinned = self
+            .sticky
+            .as_ref()
+            .and_then(|m| m.get(&(stamp.layer, expert)).copied());
+        let (rank, local) = sticky_placement(
+            pinned,
+            suggested,
+            &StickyInputs {
+                ranks: &self.ranks,
+                order,
+                used: &self.rank_used,
+                caps: self.rank_limits.as_ref(),
+                limit: self.limit,
+                bytes: span.bytes,
+            },
+        )?;
         let rank_limit = self
             .rank_limits
             .as_ref()
@@ -462,6 +541,9 @@ impl MissingExpertSource for Source<'_> {
             blob_sha256: digest.clone(),
         };
         self.known.insert((stamp.layer, expert), (rank, local));
+        if let Some(sticky) = &mut self.sticky {
+            sticky.insert((stamp.layer, expert), rank);
+        }
         self.used = next;
         self.rank_used.insert(rank, next_rank);
         self.admissions
@@ -478,6 +560,133 @@ impl MissingExpertSource for Source<'_> {
 mod tests {
     use super::*;
     use crate::moe::Replica;
+    #[test]
+    fn sticky_rank_keeps_producer_and_refuses_capacity_shortfall() {
+        let ranks = vec![2, 3];
+        let order = BTreeMap::from([(2, vec![0, 2]), (3, vec![1])]);
+        let used = BTreeMap::from([(2, 8), (3, 1)]);
+        let caps = BTreeMap::from([(2, 10), (3, 20)]);
+        let ctx = |bytes| StickyInputs {
+            ranks: &ranks,
+            order: &order,
+            used: &used,
+            caps: Some(&caps),
+            limit: 100,
+            bytes,
+        };
+        assert_eq!(sticky_placement(Some(2), (3, 2), &ctx(2)).unwrap(), (2, 3));
+        assert!(sticky_placement(Some(2), (3, 2), &ctx(3)).is_err());
+        assert_eq!(sticky_placement(None, (3, 2), &ctx(3)).unwrap(), (3, 2));
+        assert!(sticky_placement(Some(4), (3, 2), &ctx(1)).is_err());
+    }
+
+    #[test]
+    fn sticky_source_retains_rank_after_accounted_eviction_and_readmission() {
+        const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(INDEX, 50_292_326_400).unwrap();
+        // Sparse zero-filled files provide the exact logical lengths without
+        // storing model data or launching any workers.
+        fn sparse_file(name: &str, len: u64) -> File {
+            let path = std::env::temp_dir().join(format!("vf-r576-{}-{name}", std::process::id()));
+            let file = std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(&path)
+                .unwrap();
+            std::fs::remove_file(path).unwrap();
+            file.set_len(len).unwrap();
+            file
+        }
+        let mut pack = sparse_file("pack", 50_292_326_400);
+        let shard = sparse_file("shard", 55_063_448_064);
+        let origin = Origin::open(shard, &layout).unwrap();
+        let seeds = [
+            Seed {
+                layer: 0,
+                expert: 0,
+                rank: 2,
+                local: 0,
+            },
+            Seed {
+                layer: 0,
+                expert: 1,
+                rank: 3,
+                local: 0,
+            },
+        ];
+        let identity = Identity {
+            run_id: "unit".into(),
+            model_revision: "m".into(),
+            plan_id: "sticky-plan".into(),
+            epoch: 1,
+        };
+        let mut source = Source::new(
+            &mut pack,
+            &layout,
+            INDEX,
+            origin,
+            Config {
+                identity,
+                ranks: vec![2, 3],
+                seeds: &seeds,
+                limit: 20_000_000,
+            },
+        )
+        .unwrap();
+        source.enable_rank_affinity().unwrap();
+        assert!(source.enable_rank_affinity().is_err());
+        let stamp = Stamp {
+            run_id: "unit".into(),
+            model_revision: "m".into(),
+            plan_id: "sticky-plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: 1,
+        };
+        let registry = Registry {
+            epoch: 1,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        };
+        let order = BTreeMap::from([(2, vec![0]), (3, vec![0])]);
+        let first = source.load(&stamp, 1, 2, &registry, &order).unwrap();
+        assert_eq!((first.binding.rank, first.binding.local), (2, 1));
+        let size = first.bytes.len() as u64;
+        source.commit_eviction(&first.binding, size).unwrap();
+        assert_eq!(source.sticky.as_ref().unwrap().get(&(0, 2)), Some(&2));
+        // Simulate a different valid capacity profile to make the ordinary
+        // balancing suggestion choose rank 3, while rank 2 still fits.
+        source.rank_limits = Some(BTreeMap::from([(2, size * 2), (3, size * 9)]));
+        let caps = source.rank_limits.as_ref().unwrap();
+        let suggested = placement(
+            &registry,
+            &order,
+            &source.ranks,
+            1,
+            2,
+            Some(RankCapacity {
+                limits: caps,
+                used: &source.rank_used,
+                bytes: size,
+            }),
+        )
+        .unwrap();
+        assert_eq!(suggested.0, 3);
+        let second = source.load(&stamp, 2, 2, &registry, &order).unwrap();
+        assert_eq!((second.binding.rank, second.binding.local), (2, 1));
+    }
+
     #[test]
     fn budget_is_bounded_and_overflow_safe() {
         assert_eq!(charge(8, 2, 10).unwrap(), 10);

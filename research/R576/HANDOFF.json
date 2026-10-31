@@ -1,0 +1,9 @@
+{
+  "round": "R576",
+  "parent": "fce04e70838f319d790ba947d82831b4e0591b6b",
+  "change": "optional plan-bound sticky (layer,expert) to rank mapping survives accounted eviction; refuse insufficient pinned rank capacity",
+  "switch": "VF_EXPERT_RANK_AFFINITY=sticky",
+  "tests": "136 library debug/release with 5 ignored; 12 prefill debug/release; 34 tokenizer; source-level synthetic sparse load/evict/readmit including alternate balancing suggestion; independent plan-domain hash; Clippy and rustfmt",
+  "limitations": "no actual worker eviction or sticky generation; no numerical equivalence proof; default off; different local indices permitted; no distributed or GPU qualification; R53 and lease unresolved",
+  "next": "qualify sticky mode with fresh CPU worker receipts before any hardware admission; reconcile authoritative R53 and lease"
+}
