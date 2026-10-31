@@ -1,0 +1,55 @@
+{
+  "RESULT.json": {
+    "bytes": 327396,
+    "sha256": "2582f417c716fa0b9cdb3697d20c2737b2d891a9415d448ca02f25ac1f20ba8b",
+    "encoding": "base64-gzip-concatenated",
+    "parts": [
+      "RESULT_json.part000.txt",
+      "RESULT_json.part001.txt",
+      "RESULT_json.part002.txt",
+      "RESULT_json.part003.txt",
+      "RESULT_json.part004.txt",
+      "RESULT_json.part005.txt",
+      "RESULT_json.part006.txt",
+      "RESULT_json.part007.txt",
+      "RESULT_json.part008.txt",
+      "RESULT_json.part009.txt",
+      "RESULT_json.part010.txt",
+      "RESULT_json.part011.txt"
+    ]
+  },
+  "old0.f32": {
+    "bytes": 122880,
+    "sha256": "a988a43e1182724453111498f3dceef54d442354e4c486be6ea0c53131fc974b",
+    "encoding": "base64-gzip-concatenated",
+    "parts": [
+      "old0_f32.part000.txt",
+      "old0_f32.part001.txt",
+      "old0_f32.part002.txt",
+      "old0_f32.part003.txt",
+      "old0_f32.part004.txt",
+      "old0_f32.part005.txt",
+      "old0_f32.part006.txt",
+      "old0_f32.part007.txt",
+      "old0_f32.part008.txt",
+      "old0_f32.part009.txt"
+    ]
+  },
+  "old1.f32": {
+    "bytes": 122880,
+    "sha256": "9e7d39ebb18c3838593f302d35e12c2e32f42192c9e9fbb6f3abb81cb64b93ae",
+    "encoding": "base64-gzip-concatenated",
+    "parts": [
+      "old1_f32.part000.txt",
+      "old1_f32.part001.txt",
+      "old1_f32.part002.txt",
+      "old1_f32.part003.txt",
+      "old1_f32.part004.txt",
+      "old1_f32.part005.txt",
+      "old1_f32.part006.txt",
+      "old1_f32.part007.txt",
+      "old1_f32.part008.txt",
+      "old1_f32.part009.txt"
+    ]
+  }
+}
