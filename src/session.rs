@@ -3630,6 +3630,112 @@ impl Write for SessionInput {
     }
 }
 
+#[cfg(all(test, unix, feature = "native-ggml-cpu"))]
+mod native_write_deadline_tests {
+    use super::*;
+
+    #[test]
+    fn stalled_worker_invalidates_session_at_write_deadline() {
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        let body = vec![0u8; 4 * 1024 * 1024];
+        let deadline = Instant::now() + Duration::from_millis(100);
+        let error = session
+            .write_parts_until(&[&body], true, deadline)
+            .unwrap_err();
+        assert_eq!(error.code, "SESSION_TIMEOUT");
+        assert!(!session.is_usable());
+        assert_eq!(session.send_raw(b"x").unwrap_err().code, "SESSION_UNUSABLE");
+    }
+
+    #[test]
+    fn bounded_write_restores_prior_socket_timeout_and_tracks_complete_frame() {
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        let Some(SessionInput::Socket(socket)) = session.stdin.as_ref() else {
+            panic!("socket missing")
+        };
+        let original = Some(Duration::from_secs(2));
+        socket.set_write_timeout(original).unwrap();
+        session
+            .write_parts_until(
+                &[b"abc", b"def"],
+                true,
+                Instant::now() + Duration::from_secs(1),
+            )
+            .unwrap();
+        let Some(SessionInput::Socket(socket)) = session.stdin.as_ref() else {
+            panic!("socket missing")
+        };
+        assert_eq!(socket.write_timeout().unwrap(), original);
+        assert_eq!(
+            (session.traffic.bytes_sent, session.traffic.frames_sent),
+            (6, 1)
+        );
+        assert!(session.is_usable());
+    }
+
+    #[test]
+    fn expired_write_is_refused_and_cannot_reuse_stream() {
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        assert_eq!(
+            session
+                .write_parts_until(&[b"x"], true, Instant::now())
+                .unwrap_err()
+                .code,
+            "SESSION_TIMEOUT"
+        );
+        assert_eq!(session.traffic.bytes_sent, 0);
+        assert!(!session.is_usable());
+    }
+
+    #[test]
+    fn native_load_times_out_when_worker_stops_reading_payload() {
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        session
+            .hello
+            .capabilities
+            .push(CAPABILITY_NATIVE_GGML_CPU.into());
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let bytes = vec![0u8; 2_176_000];
+        let binding = crate::native_ggml_cpu::Binding {
+            model_revision: "test-only".into(),
+            rank: 2,
+            layer: 0,
+            expert: 0,
+            local: 0,
+            epoch: 1,
+            index_sha256: sha256::hex(index.as_bytes()),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let error = session
+            .load_native_ggml(
+                &binding,
+                index,
+                50_292_326_400,
+                &bytes,
+                Duration::from_millis(100),
+            )
+            .unwrap_err();
+        assert_eq!(error.code, "SESSION_TIMEOUT");
+        assert!(!session.is_usable());
+    }
+}
+
 /// CPU FP16/f64 result created only after an admitted local rank wave finishes.
 #[cfg(feature = "native-ggml-cpu")]
 pub struct NativeCollected {
@@ -3755,11 +3861,13 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
-        if !self
-            .hello
-            .capabilities
-            .iter()
-            .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
             || binding.rank != self.rank
             || bytes.len() > 4 * 1024 * 1024
         {
@@ -3779,8 +3887,9 @@ impl Session {
             pack_bytes,
             artifact_bytes: bytes.len() as u64,
         };
-        self.write_parts(&[&encode(&request)?, bytes], true)?;
-        match self.reply(timeout)? {
+        let deadline = Instant::now() + timeout;
+        self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
+        match self.reply_until(deadline)? {
             Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
             Reply::Refused { error } => Err(error),
             _ => {
@@ -3802,6 +3911,7 @@ impl Session {
         timeout: Duration,
     ) -> Result<()> {
         if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
             || !self
                 .hello
                 .capabilities
@@ -3826,8 +3936,9 @@ impl Session {
             pack_bytes,
             artifact_bytes: bytes.len() as u64,
         };
-        self.write_parts(&[&encode(&request)?, bytes], true)?;
-        match self.reply(timeout)? {
+        let deadline = Instant::now() + timeout;
+        self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
+        match self.reply_until(deadline)? {
             Reply::NativeGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
             Reply::Refused { error } => {
                 self.usable = false;
@@ -3845,6 +3956,7 @@ impl Session {
     #[cfg(feature = "native-ggml-cpu")]
     pub fn evict_native_ggml(&mut self, e: &NativeEviction<'_>, timeout: Duration) -> Result<()> {
         if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
             || !self
                 .hello
                 .capabilities
@@ -3867,11 +3979,12 @@ impl Session {
             operation_id: e.operation_id.into(),
             binding: e.binding.clone(),
         };
-        if let Err(error) = self.send(&request) {
+        let deadline = Instant::now() + timeout;
+        if let Err(error) = self.write_parts_until(&[&encode(&request)?], true, deadline) {
             self.usable = false;
             return Err(error);
         }
-        match self.reply(timeout) {
+        match self.reply_until(deadline) {
             Ok(Reply::NativeGgmlEvicted {
                 stamp,
                 attempt,
@@ -3905,17 +4018,20 @@ impl Session {
 
     #[cfg(feature = "native-ggml-cpu")]
     pub fn seal_native_ggml(&mut self, expected_experts: usize, timeout: Duration) -> Result<()> {
-        if !self
-            .hello
-            .capabilities
-            .iter()
-            .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
             || !(1..=crate::native_ggml_cpu::MAX_NATIVE_EXPERTS).contains(&expected_experts)
         {
             return Err(invalid("native GGML capability or expert count"));
         }
-        self.send(&Request::SealNativeGgml)?;
-        match self.reply(timeout)? {
+        let deadline = Instant::now() + timeout;
+        self.write_parts_until(&[&encode(&Request::SealNativeGgml)?], true, deadline)?;
+        match self.reply_until(deadline)? {
             Reply::NativeGgmlReady { experts } if experts == expected_experts => Ok(()),
             Reply::Refused { error } => Err(error),
             _ => {
@@ -3967,7 +4083,7 @@ impl Session {
                 .ok_or_else(|| invalid("native GGML raw execution count overflow"))?;
             let (header, body) =
                 native_raw_f32_frame(dispatch.clone(), attempt, &inputs, unweighted_f32)?;
-            self.write_parts(&[&header, &body], true)?;
+            self.write_parts_until(&[&header, &body], true, deadline)?;
             self.traffic.native_ggml_raw_execs = next_raw;
         } else {
             let request = if unweighted_f32 {
@@ -3983,7 +4099,7 @@ impl Session {
                     inputs,
                 }
             };
-            self.send(&request)?;
+            self.write_parts_until(&[&encode(&request)?], true, deadline)?;
         }
         self.traffic.execs = next_execs;
         let started = self.reply_until(deadline)?;
@@ -4548,6 +4664,99 @@ impl Session {
 
     fn write(&mut self, bytes: &[u8]) -> Result<()> {
         self.write_parts(&[bytes], true)
+    }
+
+    /// Bounded writes for the native owner protocol. A partial write leaves the
+    /// request outcome unknown; permanently invalidate the stream on failure.
+    #[cfg(feature = "native-ggml-cpu")]
+    fn write_parts_until(
+        &mut self,
+        parts: &[&[u8]],
+        enforce_bound: bool,
+        deadline: Instant,
+    ) -> Result<()> {
+        if !self.usable {
+            return Err(Error::new(
+                "SESSION_UNUSABLE",
+                "session must be reopened after a failure",
+            ));
+        }
+        let length = parts
+            .iter()
+            .try_fold(0_usize, |total, part| total.checked_add(part.len()));
+        let Some(length) = length.filter(|&length| !enforce_bound || length <= MAX_MESSAGE_BYTES)
+        else {
+            return Err(Error::new(
+                "MESSAGE_TOO_LARGE",
+                "session request exceeds 16 MiB",
+            ));
+        };
+        #[cfg(unix)]
+        let result: io::Result<()> = (|| {
+            let Some(SessionInput::Socket(socket)) = self.stdin.as_mut() else {
+                return Err(io::Error::new(
+                    io::ErrorKind::BrokenPipe,
+                    "session input closed",
+                ));
+            };
+            let previous = socket.write_timeout()?;
+            let written = (|| {
+                for mut remaining in parts.iter().copied() {
+                    while !remaining.is_empty() {
+                        let duration = deadline.saturating_duration_since(Instant::now());
+                        if duration.is_zero() {
+                            return Err(io::Error::new(io::ErrorKind::TimedOut, "write deadline"));
+                        }
+                        socket.set_write_timeout(Some(duration))?;
+                        match socket.write(remaining) {
+                            Ok(0) => {
+                                return Err(io::Error::new(
+                                    io::ErrorKind::WriteZero,
+                                    "session write zero",
+                                ))
+                            }
+                            Ok(n) => remaining = &remaining[n..],
+                            Err(error) if error.kind() == io::ErrorKind::Interrupted => continue,
+                            Err(error) if error.kind() == io::ErrorKind::WouldBlock => {
+                                return Err(io::Error::new(io::ErrorKind::TimedOut, error))
+                            }
+                            Err(error) => return Err(error),
+                        }
+                    }
+                }
+                Ok(())
+            })();
+            let restored = socket.set_write_timeout(previous);
+            written.and(restored)
+        })();
+        #[cfg(not(unix))]
+        let result: io::Result<()> = Err(io::Error::new(
+            io::ErrorKind::Unsupported,
+            "native write deadline requires Unix socket",
+        ));
+        match result {
+            Ok(()) => {
+                self.traffic.bytes_sent += length as u64;
+                self.traffic.frames_sent += 1;
+                Ok(())
+            }
+            Err(error) => {
+                self.usable = false;
+                if error.kind() == io::ErrorKind::TimedOut {
+                    Err(Error::new(
+                        "SESSION_TIMEOUT",
+                        "session request write deadline",
+                    ))
+                } else if error.kind() == io::ErrorKind::BrokenPipe {
+                    Err(closed())
+                } else {
+                    Err(Error::new(
+                        "WORKER_IO",
+                        format!("write session request: {error}"),
+                    ))
+                }
+            }
+        }
     }
 
     /// Write one logical request made of a JSON header and optional opaque body without
