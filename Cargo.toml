@@ -16,6 +16,7 @@ serde_json = { version = "1.0.145", features = ["float_roundtrip"] }
 [features]
 c-abi-validation = ["dep:vf-qpn2-ffi"]
 native-ggml-cpu = ["dep:vf-ggml-native-ffi"]
+native-scalar-reference = ["native-ggml-cpu", "vf-ggml-native-ffi/scalar-reference"]
 ple-cpu-qualification = ["native-ggml-cpu"]
 
 [lib]

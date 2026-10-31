@@ -32,6 +32,38 @@ pub struct Binding {
     pub blob_sha256: String,
 }
 
+/// Diagnostic reference only: produces unweighted f64 values, never worker output.
+/// The caller supplies an authenticated binding and is responsible for any stamp,
+/// f32/FP16 conversion and Collector admission. No remote execution is qualified.
+#[cfg(feature = "native-scalar-reference")]
+pub fn scalar_reference(
+    layout: &NativeLayout,
+    expert: &VerifiedNativeExpert,
+    binding: &Binding,
+    input: &[f32],
+) -> Result<Vec<f64>> {
+    let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+    if binding.model_revision.trim().is_empty()
+        || binding.model_revision.len() > 256
+        || binding.epoch == 0
+        || expert.layer != binding.layer as usize
+        || expert.expert != u64::from(binding.expert)
+        || expert.span != span
+        || binding.index_sha256 != layout.index_sha256()
+        || expert.bytes.len() as u64 != span.bytes
+        || sha256::hex(&expert.bytes) != binding.blob_sha256
+    {
+        return Err(invalid("scalar reference binding or payload mismatch"));
+    }
+    vf_ggml_native_ffi::scalar_reference(
+        span.gate_up_type as i32,
+        span.down_type as i32,
+        &expert.bytes,
+        input,
+    )
+    .map_err(invalid)
+}
+
 pub struct Resident {
     binding: Binding,
     owner: vf_ggml_native_ffi::NativeResident,

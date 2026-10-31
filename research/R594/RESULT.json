@@ -1,0 +1,12 @@
+{
+  "scope": "local CPU diagnostic; three real SC117 layer-2 expert captures, seven zero rows and synthetic receipts",
+  "reference_capture_rows_exact": 7680,
+  "collector_python_oracle_rows_exact": 2560,
+  "collector_output_sha256": "535c8bcc17bcad4ac9e01a58f00f9ee2e4fe880dd84dd6804825930120aed08b",
+  "debug_focused_tests": "2 passed",
+  "release_focused_tests": "2 passed",
+  "library_clippy": "passed with pre-existing dead_code warning allowed",
+  "native_cpu_without_scalar_feature": "cargo check passed",
+  "rustfmt_targeted": "passed",
+  "gpu_or_distributed_qualification": false
+}

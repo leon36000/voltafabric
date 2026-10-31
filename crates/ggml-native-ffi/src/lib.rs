@@ -2,6 +2,17 @@
 use std::{ffi::c_void, ptr::NonNull};
 
 unsafe extern "C" {
+    #[cfg(feature = "scalar-reference")]
+    fn vf_native_scalar_reference(
+        gu: i32,
+        down: i32,
+        blob: *const u8,
+        blob_len: usize,
+        input: *const f32,
+        input_len: usize,
+        output: *mut f64,
+        output_len: usize,
+    ) -> i32;
     fn vf_native_create(gu: i32, down: i32, bytes: *const u8, len: usize) -> *mut c_void;
     fn vf_native_forward(
         instance: *mut c_void,
@@ -35,6 +46,42 @@ unsafe extern "C" {
         output_len: usize,
     ) -> i32;
     fn vf_native_matrix_destroy(instance: *mut c_void);
+}
+
+/// Diagnostic-only unweighted SC117 f64 values; caller authenticates bytes and format.
+#[cfg(feature = "scalar-reference")]
+pub fn scalar_reference(
+    gu: i32,
+    down: i32,
+    blob: &[u8],
+    input: &[f32],
+) -> Result<Vec<f64>, &'static str> {
+    if blob.is_empty()
+        || blob.len() > 4 * 1024 * 1024
+        || input.len() != 2560
+        || input.iter().any(|x| !x.is_finite())
+    {
+        return Err("invalid scalar reference input");
+    }
+    let mut output = vec![0f64; 2560];
+    // SAFETY: immutable input slices and uniquely borrowed output remain valid and
+    // disjoint throughout this call; C++ copies output only after complete success.
+    let status = unsafe {
+        vf_native_scalar_reference(
+            gu,
+            down,
+            blob.as_ptr(),
+            blob.len(),
+            input.as_ptr(),
+            input.len(),
+            output.as_mut_ptr(),
+            output.len(),
+        )
+    };
+    if status != 0 || output.iter().any(|x| !x.is_finite()) {
+        return Err("scalar reference refused input");
+    }
+    Ok(output)
 }
 
 /// An opaque CPU resident; the native library copies the blob once on load.
