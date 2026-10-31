@@ -1,0 +1,9 @@
+# R598 — extension explicite d'une session scalaire CPU
+
+La session R597 peut maintenant admettre un expert scalaire après scellement avec la requête distincte `ExtendNativeScalarGgmlRaw` et la capacité `cpu_strata_sc117_scalar_append_resident_v1`. Le coordinateur propose `extend_native_scalar_ggml`, vérifie la capacité, le rang, le délai, l'index, la tranche et le digest fournis, et attend l'accusé scalaire correspondant. Une erreur d'écriture, une réponse perdue, refusée ou différente rend la session inutilisable ; la réconciliation d'une issue inconnue reste à la charge du protocole externe. Aucun rejeu automatique.
+
+Un test de protocole synthétique dans `serve` charge et scelle un résident scalaire, refuse un ajout vectoriel, ajoute un second résident scalaire, puis exécute ce second expert en respectant son ordre physique. Un autre contrôle qu'un worker sans la capacité d'extension est refusé par le coordinateur avant toute écriture ; un récepteur artificiellement bloqué produit un timeout et une session inutilisable. Le refus initial d'une extension vectorielle est un test du serveur en mémoire : le coordinateur ordinaire invalide quant à lui sa session après une réponse refusée.
+
+La suite de bibliothèque passe en debug et release : 147 tests réussis, 6 ignorés dans chaque mode. Clippy passe avec l'avertissement historique `dead_code` autorisé ; le contrôle de compilation avec le seul backend vectoriel et le formatage ciblé passent. Les tests ajoutés utilisent des poids synthétiques nuls et aucun worker VF enfant ou distant. La référence numérique et son oracle limité restent documentés en R594–R595.
+
+Ce code n'est pas encore raccordé à l'admission dynamique du modèle, ni lié à un plan authentifié. Il ne qualifie ni transport réel, ni R53, lease partagée, GPU ou exécution inter-PC. Aucun UNKNOWN n'a été rejoué.

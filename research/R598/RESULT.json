@@ -1,0 +1,1 @@
+{"scope":"synthetic in-memory CPU session extension and blocked local reader","library_debug":{"passed":147,"ignored":6},"library_release":{"passed":147,"ignored":6},"older_worker_no_write":true,"timeout_poisons_session":true,"vector_only_check":"passed","clippy":"passed, historical dead_code allowed","model_admission_integrated":false,"gpu_or_network_qualified":false}

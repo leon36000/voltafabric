@@ -70,6 +70,8 @@ pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
 #[cfg(feature = "native-scalar-reference")]
 pub const CAPABILITY_NATIVE_SCALAR_GGML_CPU: &str = "cpu_strata_sc117_scalar_reference_fp16_v1";
+#[cfg(feature = "native-scalar-reference")]
+pub const CAPABILITY_NATIVE_SCALAR_GGML_EXTEND: &str = "cpu_strata_sc117_scalar_append_resident_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_EXTEND: &str = "cpu_strata_sc117_append_resident_v1";
 #[cfg(feature = "native-ggml-cpu")]
@@ -149,6 +151,13 @@ pub enum Request {
     },
     #[cfg(feature = "native-ggml-cpu")]
     ExtendNativeGgmlRaw {
+        binding: crate::native_ggml_cpu::Binding,
+        index: String,
+        pack_bytes: u64,
+        artifact_bytes: u64,
+    },
+    #[cfg(feature = "native-scalar-reference")]
+    ExtendNativeScalarGgmlRaw {
         binding: crate::native_ggml_cpu::Binding,
         index: String,
         pack_bytes: u64,
@@ -2745,6 +2754,10 @@ fn serve_impl(
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_SCALAR_GGML_CPU.into());
+                        #[cfg(feature = "native-scalar-reference")]
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_SCALAR_GGML_EXTEND.into());
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_RAW_F32.into());
@@ -2780,7 +2793,10 @@ fn serve_impl(
             return Err(error);
         };
         #[cfg(feature = "native-scalar-reference")]
-        let native_scalar_requested = matches!(&request, Request::LoadNativeScalarGgmlRaw { .. });
+        let native_scalar_requested = matches!(
+            &request,
+            Request::LoadNativeScalarGgmlRaw { .. } | Request::ExtendNativeScalarGgmlRaw { .. }
+        );
         #[cfg(feature = "native-scalar-reference")]
         let request = match request {
             Request::LoadNativeScalarGgmlRaw {
@@ -2789,6 +2805,17 @@ fn serve_impl(
                 pack_bytes,
                 artifact_bytes,
             } => Request::LoadNativeGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
+            },
+            Request::ExtendNativeScalarGgmlRaw {
+                binding,
+                index,
+                pack_bytes,
+                artifact_bytes,
+            } => Request::ExtendNativeGgmlRaw {
                 binding,
                 index,
                 pack_bytes,
@@ -2822,7 +2849,7 @@ fn serve_impl(
         let native_extending = matches!(&request, Request::ExtendNativeGgmlRaw { .. });
         match request {
             #[cfg(feature = "native-scalar-reference")]
-            Request::LoadNativeScalarGgmlRaw { .. } => {
+            Request::LoadNativeScalarGgmlRaw { .. } | Request::ExtendNativeScalarGgmlRaw { .. } => {
                 return Err(invalid("scalar load normalization failed"));
             }
             #[cfg(feature = "native-ggml-cpu")]
@@ -4060,6 +4087,60 @@ impl Session {
             _ => {
                 self.usable = false;
                 Err(invalid("native append reply identity"))
+            }
+        }
+    }
+
+    /// Explicit scalar append; the caller must reconcile any uncertain acknowledgement.
+    /// This does not authenticate the plan or establish a shared lease.
+    #[cfg(feature = "native-scalar-reference")]
+    pub fn extend_native_scalar_ggml(
+        &mut self,
+        binding: &crate::native_ggml_cpu::Binding,
+        index: &str,
+        pack_bytes: u64,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_SCALAR_GGML_EXTEND)
+            || binding.rank != self.rank
+            || bytes.len() > 4 * 1024 * 1024
+        {
+            return Err(invalid(
+                "native scalar append capability, timeout, rank or size",
+            ));
+        }
+        let layout = crate::strata_native_layout::NativeLayout::parse_sc117_v3(index, pack_bytes)?;
+        let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+        if layout.index_sha256() != binding.index_sha256
+            || span.bytes != bytes.len() as u64
+            || sha256::hex(bytes) != binding.blob_sha256
+        {
+            return Err(invalid("native scalar append index or payload digest"));
+        }
+        let request = Request::ExtendNativeScalarGgmlRaw {
+            binding: binding.clone(),
+            index: index.to_owned(),
+            pack_bytes,
+            artifact_bytes: bytes.len() as u64,
+        };
+        let deadline = Instant::now() + timeout;
+        self.write_parts_until(&[&encode(&request)?, bytes], true, deadline)?;
+        match self.reply_until(deadline)? {
+            Reply::NativeScalarGgmlLoaded { binding: returned } if returned == *binding => Ok(()),
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("native scalar append reply identity"))
             }
         }
     }
@@ -10459,6 +10540,182 @@ mod scalar_session_tests {
     use std::{collections::BTreeMap, io::Cursor};
 
     #[test]
+    fn scalar_extension_preserves_worker_identity_and_rejects_mixing() {
+        use crate::{
+            moe::{Choice, Registry, Replica, Stamp},
+            native_ggml_cpu::Binding,
+            routing::{self, RoutingProblem},
+            strata_native_layout::NativeLayout,
+        };
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let span = layout.expert(2, 0).unwrap();
+        let bytes = vec![0; span.bytes as usize];
+        let binding = |expert| Binding {
+            model_revision: "scalar-extend".into(),
+            rank: 2,
+            layer: 2,
+            expert,
+            local: expert,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let stamp = Stamp {
+            run_id: "scalar-extend".into(),
+            model_revision: "scalar-extend".into(),
+            plan_id: "local-test".into(),
+            layer: 2,
+            batch: 1,
+            epoch: 1,
+        };
+        let problem = RoutingProblem {
+            hidden: 2560,
+            experts: vec![0, 1],
+            routes: vec![vec![Choice {
+                expert: 1,
+                weight: 0.5,
+            }]],
+            registry: Registry {
+                epoch: 1,
+                copies: vec![
+                    Replica {
+                        expert: 0,
+                        rank: 2,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 1,
+                        rank: 2,
+                        local: 1,
+                    },
+                ],
+            },
+            stamp,
+            preferred_owners: BTreeMap::new(),
+            resident_order: BTreeMap::from([(2, vec![0, 1])]),
+        };
+        let dispatch = routing::dispatch(&problem).unwrap().ranks.remove(0);
+        let mut input = encode(&Request::Hello {
+            protocol: PROTOCOL,
+            rank: 2,
+        })
+        .unwrap();
+        input.extend(
+            encode(&Request::LoadNativeScalarGgmlRaw {
+                binding: binding(0),
+                index: index.into(),
+                pack_bytes: 50_292_326_400,
+                artifact_bytes: bytes.len() as u64,
+            })
+            .unwrap(),
+        );
+        input.extend(&bytes);
+        input.extend(encode(&Request::SealNativeGgml).unwrap());
+        input.extend(
+            encode(&Request::ExtendNativeGgmlRaw {
+                binding: binding(1),
+                index: index.into(),
+                pack_bytes: 50_292_326_400,
+                artifact_bytes: bytes.len() as u64,
+            })
+            .unwrap(),
+        );
+        input.extend(&bytes);
+        input.extend(
+            encode(&Request::ExtendNativeScalarGgmlRaw {
+                binding: binding(1),
+                index: index.into(),
+                pack_bytes: 50_292_326_400,
+                artifact_bytes: bytes.len() as u64,
+            })
+            .unwrap(),
+        );
+        input.extend(&bytes);
+        input.extend(
+            encode(&Request::ExecNativeGgml {
+                dispatch,
+                attempt: 1,
+                inputs: vec![(0, vec![0.001; 2560])],
+            })
+            .unwrap(),
+        );
+        input.extend(encode(&Request::Shutdown).unwrap());
+        let mut output = Vec::new();
+        serve(&mut Cursor::new(input), &mut output).unwrap();
+        let mut output = Cursor::new(output);
+        let mut next = || {
+            read_message_with_len::<Reply>(&mut output)
+                .unwrap()
+                .unwrap()
+                .0
+        };
+        assert!(matches!(next(), Reply::Hello { .. }));
+        assert!(matches!(next(), Reply::NativeScalarGgmlLoaded { .. }));
+        assert!(matches!(next(), Reply::NativeGgmlReady { experts: 1 }));
+        assert!(matches!(next(), Reply::Refused { .. }));
+        match next() {
+            Reply::NativeScalarGgmlLoaded { binding: b } => assert_eq!(b, binding(1)),
+            other => panic!("unexpected {other:?}"),
+        }
+        assert!(matches!(
+            next(),
+            Reply::Event {
+                event: WorkerEvent {
+                    event: EventKind::Started,
+                    ..
+                }
+            }
+        ));
+        match next() {
+            Reply::NativeGgmlResult { output } => {
+                assert_eq!(output.slots[0].expert, 1);
+                assert!(output.fp16_bits.iter().all(|&x| x == 0));
+            }
+            other => panic!("unexpected {other:?}"),
+        }
+        assert!(matches!(next(), Reply::Bye { .. }));
+    }
+
+    #[test]
+    fn scalar_extend_timeout_poisons_session() {
+        use crate::{native_ggml_cpu::Binding, strata_native_layout::NativeLayout};
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let bytes = vec![0; layout.expert(2, 0).unwrap().bytes as usize];
+        let binding = Binding {
+            model_revision: "timeout-test".into(),
+            rank: 2,
+            layer: 2,
+            expert: 0,
+            local: 0,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
+        };
+        let endpoint = Endpoint {
+            rank: 2,
+            argv: vec!["/bin/sleep".into(), "5".into()],
+        };
+        let mut session = Session::spawn(&endpoint).unwrap();
+        session
+            .hello
+            .capabilities
+            .push(CAPABILITY_NATIVE_SCALAR_GGML_EXTEND.into());
+        let error = session
+            .extend_native_scalar_ggml(
+                &binding,
+                index,
+                50_292_326_400,
+                &bytes,
+                Duration::from_millis(100),
+            )
+            .unwrap_err();
+        assert_eq!(error.code, "SESSION_TIMEOUT");
+        assert!(!session.is_usable());
+    }
+
+    #[test]
     fn coordinator_rejects_missing_scalar_capability_without_writing() {
         use crate::native_ggml_cpu::Binding;
         let endpoint = Endpoint {
@@ -10470,6 +10727,11 @@ mod scalar_session_tests {
             .hello
             .capabilities
             .push(CAPABILITY_NATIVE_GGML_CPU.into());
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout =
+            crate::strata_native_layout::NativeLayout::parse_sc117_v3(index, 50_292_326_400)
+                .unwrap();
+        let bytes = vec![0; layout.expert(2, 0).unwrap().bytes as usize];
         let binding = Binding {
             model_revision: "test".into(),
             rank: 2,
@@ -10477,12 +10739,33 @@ mod scalar_session_tests {
             expert: 0,
             local: 0,
             epoch: 1,
-            index_sha256: "0".repeat(64),
-            blob_sha256: "0".repeat(64),
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: sha256::hex(&bytes),
         };
         let sent = session.traffic.bytes_sent;
         assert!(session
-            .load_native_scalar_ggml(&binding, "", 0, &[], Duration::from_secs(1))
+            .load_native_scalar_ggml(
+                &binding,
+                index,
+                50_292_326_400,
+                &bytes,
+                Duration::from_secs(1)
+            )
+            .is_err());
+        assert_eq!(session.traffic.bytes_sent, sent);
+        assert!(session.is_usable());
+        session
+            .hello
+            .capabilities
+            .push(CAPABILITY_NATIVE_SCALAR_GGML_CPU.into());
+        assert!(session
+            .extend_native_scalar_ggml(
+                &binding,
+                index,
+                50_292_326_400,
+                &bytes,
+                Duration::from_secs(1)
+            )
             .is_err());
         assert_eq!(session.traffic.bytes_sent, sent);
         assert!(session.is_usable());
