@@ -110,12 +110,18 @@ fn placement(
         *ranks
             .iter()
             .filter(|&&r| {
-                limits
-                    .get(&r)
-                    .zip(used.get(&r))
-                    .is_some_and(|(&limit, &amount)| {
-                        limit > 0 && amount.checked_add(bytes).is_some_and(|next| next <= limit)
-                    })
+                order[&r]
+                    .iter()
+                    .copied()
+                    .max()
+                    .and_then(|n| n.checked_add(1))
+                    .is_some()
+                    && limits
+                        .get(&r)
+                        .zip(used.get(&r))
+                        .is_some_and(|(&limit, &amount)| {
+                            limit > 0 && amount.checked_add(bytes).is_some_and(|next| next <= limit)
+                        })
             })
             .min_by_key(|&&r| {
                 (
@@ -124,12 +130,20 @@ fn placement(
                     r,
                 )
             })
-            .ok_or_else(|| invalid("no rank has expert payload capacity"))?
+            .ok_or_else(|| invalid("no rank has a local slot and expert payload capacity"))?
     } else {
         *ranks
             .iter()
+            .filter(|&&r| {
+                order[&r]
+                    .iter()
+                    .copied()
+                    .max()
+                    .and_then(|n| n.checked_add(1))
+                    .is_some()
+            })
             .min_by_key(|&&r| (order[&r].len(), r))
-            .ok_or_else(|| invalid("expert rank"))?
+            .ok_or_else(|| invalid("no rank has a local slot"))?
     };
     let local = order[&rank]
         .iter()
@@ -635,6 +649,57 @@ impl MissingExpertSource for Source<'_> {
 mod tests {
     use super::*;
     use crate::moe::Replica;
+    #[test]
+    fn placement_skips_rank_whose_next_local_overflows() {
+        let registry = Registry {
+            epoch: 9,
+            copies: vec![
+                Replica {
+                    expert: 1,
+                    rank: 2,
+                    local: u32::MAX,
+                },
+                Replica {
+                    expert: 2,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        };
+        let order = BTreeMap::from([(2, vec![u32::MAX]), (3, vec![0])]);
+        let ranks = [2, 3];
+        assert_eq!(
+            placement(&registry, &order, &ranks, 9, 4, None).unwrap(),
+            (3, 1)
+        );
+        let used = BTreeMap::from([(2, 1), (3, 1)]);
+        let limits = BTreeMap::from([(2, 10), (3, 10)]);
+        let capacity = || {
+            Some(RankCapacity {
+                limits: &limits,
+                used: &used,
+                bytes: 1,
+            })
+        };
+        assert_eq!(
+            placement(&registry, &order, &ranks, 9, 4, capacity()).unwrap(),
+            (3, 1)
+        );
+        let sticky = StickyInputs {
+            ranks: &ranks,
+            order: &order,
+            used: &used,
+            caps: Some(&limits),
+            limit: 10,
+            bytes: 1,
+        };
+        assert!(sticky_placement(Some(2), (3, 1), &sticky).is_err());
+        let mut full_order = order.clone();
+        full_order.insert(3, vec![u32::MAX]);
+        let mut full_registry = registry.clone();
+        full_registry.copies[1].local = u32::MAX;
+        assert!(placement(&full_registry, &full_order, &ranks, 9, 4, capacity()).is_err());
+    }
     #[test]
     fn sticky_rank_keeps_producer_and_refuses_capacity_shortfall() {
         let ranks = vec![2, 3];
