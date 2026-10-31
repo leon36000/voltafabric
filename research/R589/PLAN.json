@@ -1,0 +1,19 @@
+{
+  "cpu": "PC6 AArch64",
+  "cpu_quota_percent": 50,
+  "flags": "-O2 -ffp-contract=off probe, GGML -O3 -ffp-contract=off",
+  "ggml_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "gpu": false,
+  "input_hashes": {
+    ".runs/vf-r574-input/activation0.f32": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+    ".runs/vf-r574-input/expert255.bin": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+    ".runs/vf-r589-work/scalar-witness": "e49efe40f7e4e2f2643fe688279287691aaddc375ab1cab55581e68b46375695",
+    "research/R539/RESULT.txt": "ff8c8a6ca7f1e5e5fc0637e59cbc9b8ff8e9e3e3cbac14de28404f7b18dc57df",
+    "research/R589/scalar_witness.cpp": "43b9d41c3ca856412a2e858e32d5fbc54b01f0007a822a7a02b83b96c4122cad"
+  },
+  "memory_max_bytes": 536870912,
+  "network_worker": false,
+  "no_replay": true,
+  "purpose": "R428 scalar-versus-vector witness on PC6 for comparison with retained PC1 R539",
+  "swap_max_bytes": 0
+}
