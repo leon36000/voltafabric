@@ -1145,6 +1145,299 @@ mod tests {
         println!("r577 pass: rank 2 retained despite rank 3 suggestion; two nonzero collections equal; two workers closed");
     }
 
+    #[cfg(feature = "native-scalar-reference")]
+    #[test]
+    #[ignore = "creates fresh local worker and eviction claims; explicit fresh plan required"]
+    fn scalar_sticky_admission_fresh_guarded_workers() {
+        use crate::{
+            moe::Choice,
+            native_ledger::NativeBatchLedger,
+            routing::RoutingProblem,
+            session::{Endpoint, NativeEviction, Session},
+        };
+        use std::{os::unix::fs::FileExt, path::Path, time::Duration};
+        const INDEX: &str = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        const PACK_SIZE: u64 = 50_292_326_400;
+        const SHARD_SIZE: u64 = 55_063_448_064;
+        const N: usize = 2_176_000;
+        let worker = std::env::var("VF_R601_WORKER").unwrap();
+        let worker_sha = std::env::var("VF_R601_WORKER_SHA256").unwrap();
+        let plan = std::env::var("VF_R601_PLAN").unwrap();
+        let run = std::env::var("VF_R601_RUN").unwrap();
+        let ledger_path = std::env::var("VF_R601_LEDGER").unwrap();
+        assert!(Path::new(&worker).is_absolute() && Path::new(&ledger_path).is_absolute());
+        assert!(crate::sha256::is_hex_digest(&worker_sha) && crate::sha256::is_hex_digest(&plan));
+        assert_eq!(
+            crate::sha256::hex(&std::fs::read(&worker).unwrap()),
+            worker_sha
+        );
+        let plan_id = format!("r601-{plan}");
+        let layout = NativeLayout::parse_sc117_v3(INDEX, PACK_SIZE).unwrap();
+        let sparse_file = |name: &str, len: u64| {
+            let path = std::env::temp_dir().join(format!("vf-r601-{}-{name}", std::process::id()));
+            let f = std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .create_new(true)
+                .open(&path)
+                .unwrap();
+            f.set_len(len).unwrap();
+            f
+        };
+        let mut pack = sparse_file("pack", PACK_SIZE);
+        let shard = sparse_file("shard", SHARD_SIZE);
+        let mut blob = vec![0u8; N];
+        for i in (0..1_254_400).step_by(98) {
+            blob[i + 1] = 0x28;
+        }
+        for i in (1_254_400..N).step_by(18) {
+            blob[i + 1] = 0x28;
+        }
+        let digest = crate::sha256::hex(&blob);
+        assert_eq!(
+            digest,
+            "2c7dcdcf2992bb6127b86407fb43abe67f4ba202acbe005a9bc67d7df9e072b0"
+        );
+        let layer = &layout.layers()[0];
+        for expert in 0..=2_u64 {
+            pack.write_all_at(&blob, layout.expert(0, expert).unwrap().offset)
+                .unwrap();
+            for (base, offset, len) in [
+                (layer.gguf_offsets[0], 0, 627_200),
+                (layer.gguf_offsets[1], 627_200, 627_200),
+                (layer.gguf_offsets[2], 1_254_400, 921_600),
+            ] {
+                shard
+                    .write_all_at(&blob[offset..offset + len], base + expert * len as u64)
+                    .unwrap();
+            }
+        }
+        let origin = Origin::open(shard, &layout).unwrap();
+        let seeds = [
+            Seed {
+                layer: 0,
+                expert: 0,
+                rank: 2,
+                local: 0,
+            },
+            Seed {
+                layer: 0,
+                expert: 1,
+                rank: 3,
+                local: 0,
+            },
+        ];
+        let identity = Identity {
+            run_id: run.clone(),
+            model_revision: "synthetic-r601".into(),
+            plan_id: plan_id.clone(),
+            epoch: 1,
+        };
+        let mut source = Source::new(
+            &mut pack,
+            &layout,
+            INDEX,
+            origin,
+            Config {
+                identity,
+                ranks: vec![2, 3],
+                seeds: &seeds,
+                limit: 32 * N as u64,
+            },
+        )
+        .unwrap();
+        source.enable_rank_affinity().unwrap();
+        let stamp = Stamp {
+            run_id: run,
+            model_revision: "synthetic-r601".into(),
+            plan_id,
+            layer: 0,
+            batch: 0,
+            epoch: 1,
+        };
+        let make_binding = |rank, expert, local| Binding {
+            model_revision: stamp.model_revision.clone(),
+            rank,
+            layer: 0,
+            expert,
+            local,
+            epoch: 1,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: digest.clone(),
+        };
+        let mut sessions = Vec::new();
+        let timeout = Duration::from_secs(30);
+        for (rank, expert) in [(2, 0), (3, 1)] {
+            let endpoint = Endpoint {
+                rank,
+                argv: vec![
+                    worker.clone(),
+                    "--guarded-local".into(),
+                    "--expected-exe-sha256".into(),
+                    worker_sha.clone(),
+                ],
+            };
+            let mut session = Session::connect(&endpoint, timeout).unwrap();
+            session
+                .load_native_scalar_ggml(
+                    &make_binding(rank, expert, 0),
+                    INDEX,
+                    PACK_SIZE,
+                    &blob,
+                    timeout,
+                )
+                .unwrap();
+            session.seal_native_ggml(1, timeout).unwrap();
+            sessions.push(session);
+        }
+        let mut registry = Registry {
+            epoch: 1,
+            copies: vec![
+                Replica {
+                    expert: 0,
+                    rank: 2,
+                    local: 0,
+                },
+                Replica {
+                    expert: 1,
+                    rank: 3,
+                    local: 0,
+                },
+            ],
+        };
+        let mut order = BTreeMap::from([(2, vec![0]), (3, vec![0])]);
+        source
+            .preflight(&stamp, 1, &[2], &registry, &order)
+            .unwrap();
+        let first = source.load(&stamp, 1, 2, &registry, &order).unwrap();
+        assert_eq!(first.binding.rank, 2);
+        sessions[0]
+            .extend_native_selected(&first.binding, INDEX, PACK_SIZE, &first.bytes, timeout)
+            .unwrap();
+        registry.copies.push(Replica {
+            expert: 2,
+            rank: 2,
+            local: first.binding.local,
+        });
+        order.get_mut(&2).unwrap().push(first.binding.local);
+        let problem =
+            |stamp: Stamp, registry: Registry, order: BTreeMap<u32, Vec<u32>>| RoutingProblem {
+                hidden: 2560,
+                experts: vec![0, 1, 2],
+                routes: vec![vec![
+                    Choice {
+                        expert: 1,
+                        weight: 0.5,
+                    },
+                    Choice {
+                        expert: 2,
+                        weight: 0.5,
+                    },
+                ]],
+                registry,
+                stamp,
+                preferred_owners: BTreeMap::new(),
+                resident_order: order,
+            };
+        let ledger = NativeBatchLedger::open(Path::new(&ledger_path)).unwrap();
+        let input = vec![vec![0.001_f32; 2560]];
+        let p0 = problem(stamp.clone(), registry.clone(), order.clone());
+        let first_out = Session::exec_native_ggml_reserved(
+            &mut sessions,
+            &p0,
+            &input,
+            &ledger,
+            ledger.reserve_ticket(&stamp, 1).unwrap(),
+            timeout,
+        )
+        .unwrap();
+        assert!(first_out.rows()[0].iter().any(|v| v.abs() > 1e-8));
+        let operation = ledger.reserve_eviction(&stamp, 1, &first.binding).unwrap();
+        sessions[0]
+            .evict_native_ggml(
+                &NativeEviction {
+                    stamp: &stamp,
+                    attempt: 1,
+                    operation_id: &operation,
+                    binding: &first.binding,
+                    expected_bytes: N as u64,
+                    expected_remaining: 1,
+                },
+                timeout,
+            )
+            .unwrap();
+        source.commit_eviction(&first.binding, N as u64).unwrap();
+        registry.copies.retain(|v| v.expert != 2);
+        order.insert(2, vec![0]);
+        source.rank_limits = Some(BTreeMap::from([(2, N as u64), (3, 9 * N as u64)]));
+        let before_traffic: Vec<_> = sessions.iter().map(|s| s.traffic.bytes_sent).collect();
+        let before_used = source.used_bytes();
+        assert!(source
+            .preflight(&stamp, 2, &[3, 2], &registry, &order)
+            .is_err());
+        assert_eq!(before_used, source.used_bytes());
+        assert_eq!(
+            before_traffic,
+            sessions
+                .iter()
+                .map(|s| s.traffic.bytes_sent)
+                .collect::<Vec<_>>()
+        );
+        source.rank_limits = Some(BTreeMap::from([(2, 2 * N as u64), (3, 9 * N as u64)]));
+        source
+            .preflight(&stamp, 2, &[2], &registry, &order)
+            .unwrap();
+        let caps = source.rank_limits.as_ref().unwrap();
+        assert_eq!(
+            placement(
+                &registry,
+                &order,
+                &source.ranks,
+                1,
+                2,
+                Some(RankCapacity {
+                    limits: caps,
+                    used: &source.rank_used,
+                    bytes: N as u64
+                })
+            )
+            .unwrap()
+            .0,
+            3
+        );
+        let mut next = stamp.clone();
+        next.batch = 1;
+        let second = source.load(&next, 2, 2, &registry, &order).unwrap();
+        assert_eq!(second.binding.rank, 2);
+        sessions[0]
+            .extend_native_selected(&second.binding, INDEX, PACK_SIZE, &second.bytes, timeout)
+            .unwrap();
+        registry.copies.push(Replica {
+            expert: 2,
+            rank: 2,
+            local: second.binding.local,
+        });
+        order.get_mut(&2).unwrap().push(second.binding.local);
+        let p1 = problem(next.clone(), registry, order);
+        let second_out = Session::exec_native_ggml_reserved(
+            &mut sessions,
+            &p1,
+            &input,
+            &ledger,
+            ledger.reserve_ticket(&next, 2).unwrap(),
+            timeout,
+        )
+        .unwrap();
+        assert_eq!(first_out.rows(), second_out.rows());
+        for session in sessions {
+            let receipt = session.close(timeout);
+            assert!(
+                !receipt.killed && receipt.exit_code == Some(0) && receipt.bye_execs == Some(2)
+            );
+        }
+        println!("r601 scalar pass: rank 2 retained despite rank 3 suggestion; two nonzero collections equal; two workers closed");
+    }
+
     #[test]
     fn budget_is_bounded_and_overflow_safe() {
         assert_eq!(charge(8, 2, 10).unwrap(), 10);

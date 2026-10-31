@@ -1,0 +1,7 @@
+
+running 1 test
+test sc117_expert_source::tests::scalar_sticky_admission_fresh_guarded_workers ... r601 scalar pass: rank 2 retained despite rank 3 suggestion; two nonzero collections equal; two workers closed
+ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 154 filtered out; finished in 8.32s
+

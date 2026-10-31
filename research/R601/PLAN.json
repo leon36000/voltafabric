@@ -1,0 +1,36 @@
+{
+  "attempts": [
+    1,
+    2
+  ],
+  "batches": [
+    0,
+    1
+  ],
+  "epoch": 1,
+  "expert_source_sha256": "6fbe9e5add7aad58248bda7bed492d65852d06de34400864d64987acbcb2bfba",
+  "gpu": false,
+  "index_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+  "layer": 0,
+  "layer_source_sha256": "3a9cf2fdca3b36f7480b6733b33dbb2f77f247ae66c8db6a6b6dd8a781182ebc",
+  "model_revision": "synthetic-r601",
+  "native_source_sha256": "4c30a1aedc53933446b2e18261dd1df7da70ed2499c6869ae77fb41bb4527d42",
+  "network": false,
+  "purpose": "fresh guarded local CPU scalar expert load, extension, collection, eviction and readmission",
+  "replay": false,
+  "run_id": "r601-99bfa96084e5408b8f4495a7864ac147",
+  "runner_sha256": "306b5b5e6902f8d741626c903ec19e03a78c11fcdddb773beeb7b5d1c2101337",
+  "scope": {
+    "cpu_quota_percent": 100,
+    "max_workers": 2,
+    "memory_max_bytes": 1073741824,
+    "swap_max_bytes": 0,
+    "tasks_max": 32
+  },
+  "session_source_sha256": "bf044295d9e850696b30ed60972bcd41a0b9a506efcb1057750183aa08a0adff",
+  "test": ".runs/vf-r601-build/debug/deps/voltafabric-266db965fc6fcf4c",
+  "test_name": "sc117_expert_source::tests::scalar_sticky_admission_fresh_guarded_workers",
+  "test_sha256": "daa307de461b6e9ae75013e90b6b7fcbc1049cffba55fe34c8f8d41e5221c3f2",
+  "worker": ".runs/vf-r601-build/debug/vf-rank-session",
+  "worker_sha256": "76df720649b6deaf7fde2b85f7ba7368be96e2ae780986b6ae641ef44273c430"
+}
