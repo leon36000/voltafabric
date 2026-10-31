@@ -11,6 +11,72 @@ fn id() -> Identity {
 }
 
 #[test]
+fn provisional_gdn_batch_matches_sequential_and_commits_both_states() {
+    let mut sequential = GdnState::new(id(), 1, 1, 1).unwrap();
+    let mut batched = GdnState::new(id(), 1, 1, 1).unwrap();
+    let kernel = vec![1.0; 12];
+    let inputs = [[1.0, 2.0, 3.0], [2.0, 3.0, 4.0], [3.0, 4.0, 5.0]];
+    let expected: Vec<_> = inputs
+        .iter()
+        .map(|x| {
+            sequential
+                .step(&id(), x, &kernel, 1e-6, &[0.0], &[0.5])
+                .unwrap()
+        })
+        .collect();
+    let mut tx = batched.begin_batch(3).unwrap();
+    for (i, input) in inputs.iter().enumerate() {
+        assert_eq!(
+            tx.prepare_next(&id(), input, &kernel, 1e-6, &[0.0], &[0.5])
+                .unwrap(),
+            expected[i]
+        );
+    }
+    assert_eq!(tx.commit().unwrap(), expected);
+    assert_eq!(batched.history(), sequential.history());
+    assert_eq!(batched.state(), sequential.state());
+}
+
+#[test]
+fn failed_incomplete_and_dropped_gdn_batches_leave_both_states_unchanged() {
+    let mut state = GdnState::new(id(), 1, 1, 1).unwrap();
+    let kernel = vec![1.0; 12];
+    let before_history = state.history().to_vec();
+    let before_state = state.state().to_vec();
+    {
+        let mut tx = state.begin_batch(2).unwrap();
+        tx.prepare_next(&id(), &[1., 2., 3.], &kernel, 1e-6, &[0.], &[0.5])
+            .unwrap();
+        assert!(tx
+            .prepare_next(&id(), &[2., 3., 4.], &kernel, 1e-6, &[0.], &[1.1])
+            .is_err());
+        assert!(tx
+            .prepare_next(&id(), &[2., 3., 4.], &kernel, 1e-6, &[0.], &[0.5])
+            .is_err());
+        assert!(tx.commit().is_err());
+    }
+    assert_eq!(state.history(), before_history);
+    assert_eq!(state.state(), before_state);
+    {
+        let mut tx = state.begin_batch(2).unwrap();
+        tx.prepare_next(&id(), &[1., 2., 3.], &kernel, 1e-6, &[0.], &[0.5])
+            .unwrap();
+        assert!(tx.commit().is_err());
+    }
+    assert_eq!(state.history(), before_history);
+    assert_eq!(state.state(), before_state);
+    {
+        let mut tx = state.begin_batch(1).unwrap();
+        tx.prepare_next(&id(), &[1., 2., 3.], &kernel, 1e-6, &[0.], &[0.5])
+            .unwrap();
+    }
+    assert_eq!(state.history(), before_history);
+    assert_eq!(state.state(), before_state);
+    assert!(state.begin_batch(0).is_err());
+    assert!(state.begin_batch(129).is_err());
+}
+
+#[test]
 fn output_norm_is_per_head_and_sigmoid_gated() {
     let y = output_norm(&[3.0, 4.0, 0.0, 5.0], &[0.0; 4], &[1.0, 2.0], 1e-6).unwrap();
     let inv = (12.5_f64 + 1e-6).sqrt().recip() as f32;

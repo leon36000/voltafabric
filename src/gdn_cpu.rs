@@ -135,6 +135,17 @@ pub struct GdnState {
     recurrence: RecurrentState,
 }
 
+/// Private convolution and recurrence state for a bounded position group.
+/// Preview outputs are tentative; durable admission and whole-layer commit
+/// remain the caller's responsibility. Failure or drop preserves live state.
+pub struct GdnBatch<'a> {
+    original: &'a mut GdnState,
+    provisional: GdnState,
+    expected: usize,
+    outputs: Vec<Vec<f32>>,
+    failed: bool,
+}
+
 impl GdnState {
     pub fn new(identity: Identity, k_heads: usize, v_heads: usize, dim: usize) -> Result<Self> {
         let recurrence = RecurrentState::new(identity.clone(), k_heads, v_heads, dim)?;
@@ -153,6 +164,20 @@ impl GdnState {
     }
     pub fn state(&self) -> &[f32] {
         self.recurrence.state()
+    }
+
+    pub fn begin_batch(&mut self, expected: usize) -> Result<GdnBatch<'_>> {
+        if expected == 0 || expected > 128 {
+            return Err(invalid("GDN batch size"));
+        }
+        let provisional = self.clone();
+        Ok(GdnBatch {
+            original: self,
+            provisional,
+            expected,
+            outputs: Vec::with_capacity(expected),
+            failed: false,
+        })
     }
 
     /// Both internal states advance only after preprocessing and recurrence succeed.
@@ -179,6 +204,46 @@ impl GdnState {
         let output = self.recurrence.step(identity, &prepared, gate, beta)?;
         self.convolution = candidate;
         Ok(output)
+    }
+}
+
+impl GdnBatch<'_> {
+    /// Advance a private candidate; the caller must not publish this preview.
+    #[allow(clippy::too_many_arguments)]
+    pub fn prepare_next(
+        &mut self,
+        identity: &Identity,
+        qkv: &[f32],
+        kernel: &[f32],
+        epsilon: f32,
+        gate: &[f32],
+        beta: &[f32],
+    ) -> Result<&[f32]> {
+        if self.failed || self.outputs.len() >= self.expected {
+            self.failed = true;
+            return Err(invalid("GDN batch terminal or complete"));
+        }
+        match self
+            .provisional
+            .step(identity, qkv, kernel, epsilon, gate, beta)
+        {
+            Ok(output) => {
+                self.outputs.push(output);
+                Ok(self.outputs.last().expect("just pushed"))
+            }
+            Err(error) => {
+                self.failed = true;
+                Err(error)
+            }
+        }
+    }
+    /// Publish both states only after all expected positions and enclosing work succeed.
+    pub fn commit(self) -> Result<Vec<Vec<f32>>> {
+        if self.failed || self.outputs.len() != self.expected {
+            return Err(invalid("GDN batch incomplete or aborted"));
+        }
+        *self.original = self.provisional;
+        Ok(self.outputs)
     }
 }
 
