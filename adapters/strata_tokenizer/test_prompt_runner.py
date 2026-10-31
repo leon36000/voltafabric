@@ -128,6 +128,51 @@ class RunnerTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "differs from expected plan"):
                 prepare()
 
+    def test_scalar_backend_plan_and_receipt_are_bound(self):
+        prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
+        plan = "r600-" + "a" * 64
+        prepare_receipt = {"plan_id": plan, "prompt_tokens_sha256": prompt_hash,
+                           "native_math_backend": "scalar-reference-ggml-v1"}
+        value = dict(receipt(), prompt_tokens=[0], plan_id=plan,
+                     prompt_tokens_sha256=prompt_hash,
+                     native_math_backend="scalar-reference-ggml-v1")
+        state = {"body": prepare_receipt}
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(state["body"]).encode(), b"")
+        def call(**kwargs):
+            return _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8, runner=runner, **kwargs)
+        with patch.dict("os.environ", {"VF_SC117_NATIVE_BACKEND": "scalar"}, clear=True):
+            self.assertEqual(call(prepare_plan=True)["plan_id"], plan)
+            for bad in (dict(prepare_receipt, native_math_backend="vector-ggml-v1"),
+                        {k: v for k, v in prepare_receipt.items() if k != "native_math_backend"},
+                        dict(prepare_receipt, plan_id="r600-" + "A" * 64)):
+                state["body"] = bad
+                with self.assertRaises(ValueError):
+                    call(prepare_plan=True)
+        state["body"] = value
+        with patch.dict("os.environ", {"VF_SC117_NATIVE_BACKEND": "scalar"}, clear=True):
+            with self.assertRaisesRegex(ValueError, "requires expected plan"):
+                call()
+        with patch.dict("os.environ", {"VF_SC117_NATIVE_BACKEND": "scalar", "VF_EXPECTED_PLAN_ID": "r576-" + "b" * 64}, clear=True):
+            with self.assertRaisesRegex(ValueError, "expected plan backend mismatch"):
+                call()
+        with patch.dict("os.environ", {"VF_SC117_NATIVE_BACKEND": "scalar", "VF_EXPECTED_PLAN_ID": plan}, clear=True):
+            self.assertEqual(call()["receipt"]["plan_id"], plan)
+            value["native_math_backend"] = "vector-ggml-v1"
+            with self.assertRaises(ValueError):
+                call()
+
+    def test_vector_prepared_receipt_accepts_explicit_backend(self):
+        prompt_hash = hashlib.sha256(struct.pack("<I", 0)).hexdigest()
+        value = {"plan_id": "r576-" + "b" * 64, "prompt_tokens_sha256": prompt_hash,
+                 "native_math_backend": "vector-ggml-v1"}
+        def runner(args, **kwargs):
+            return subprocess.CompletedProcess(args, 0, json.dumps(value).encode(), b"")
+        with patch.dict("os.environ", {}, clear=True):
+            result = _run_prompt("A", Tokenizer(), 3, "/engine", ["/input"] * 8,
+                                 prepare_plan=True, runner=runner)
+            self.assertEqual(result["plan_id"], value["plan_id"])
+
     def test_strict_receipt_rejects_forged_shorter_prompt(self):
         # Input starts with the actual two-token prompt, but the receipt treats
         # its second token as generated; the old prefix-only check accepted it.

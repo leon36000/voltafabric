@@ -1,0 +1,9 @@
+{
+  "claim_count": 0,
+  "exit_status": 1,
+  "plan_sha256": "c5c3c7fc58646f2c326f4ca5a68d42c560bb6f51b2d43498d4f5e87d17537088",
+  "reason": "systemd user bus absent from launcher environment before engine startup",
+  "result_bytes": 0,
+  "stderr_sha256": "24bd92b8693e9052f38d86d80d98f5a522a4742d4e5f5774ee9efdbab8ef0083",
+  "submitted_plan_sha256": "c5c3c7fc58646f2c326f4ca5a68d42c560bb6f51b2d43498d4f5e87d17537088"
+}

@@ -252,10 +252,18 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("invalid prompt tokens or token bound")
     if len(prompt_ids) + max_new_tokens - 1 > MAX_INPUT_POSITIONS:
         raise ValueError("prompt and generation exceed 128 input positions")
+    backend = os.environ.get("VF_SC117_NATIVE_BACKEND", "vector")
+    if backend not in ("vector", "scalar"):
+        raise ValueError("invalid native backend")
+    expected_backend = {"vector": "vector-ggml-v1", "scalar": "scalar-reference-ggml-v1"}[backend]
     expected_plan = os.environ.get("VF_EXPECTED_PLAN_ID")
-    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-")) or len(expected_plan) != 69
+    if expected_plan is not None and (not expected_plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-", "r600-")) or len(expected_plan) != 69
                                       or any(c not in "0123456789abcdef" for c in expected_plan[5:])):
         raise ValueError("invalid expected plan identity")
+    if expected_plan is not None and expected_plan.startswith("r600-") != (backend == "scalar"):
+        raise ValueError("expected plan backend mismatch")
+    if backend == "scalar" and not prepare_plan and expected_plan is None:
+        raise ValueError("scalar backend requires expected plan")
     command = [binary, *(["--plan-only"] if prepare_plan else []), *engine_paths, "48", ",".join(str(t) for t in prompt_ids)]
     command.extend((str(max_new_tokens), str(eos)))
     if chat:
@@ -295,12 +303,15 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("invalid prepared plan receipt")
     receipt = json.loads(completed.stdout, object_pairs_hook=_unique_object)
     if prepare_plan:
-        if not isinstance(receipt, dict) or set(receipt) != {"plan_id", "prompt_tokens_sha256"}:
+        if not isinstance(receipt, dict) or set(receipt) not in ({"plan_id", "prompt_tokens_sha256"}, {"plan_id", "prompt_tokens_sha256", "native_math_backend"}):
             raise ValueError("invalid prepared plan receipt")
         plan = receipt["plan_id"]
-        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-")) or len(plan) != 69
+        if (not isinstance(plan, str) or not plan.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-", "r600-")) or len(plan) != 69
                 or any(c not in "0123456789abcdef" for c in plan[5:])):
             raise ValueError("current bound plan identity required")
+        if (receipt.get("native_math_backend", "vector-ggml-v1") != expected_backend
+                or plan.startswith("r600-") != (backend == "scalar")):
+            raise ValueError("prepared plan backend mismatch")
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt["prompt_tokens_sha256"] != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")
@@ -313,14 +324,17 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
     if require_bound_plan and (receipt.get("prompt_tokens") != prompt_ids
                                or any(type(t) is not int for t in receipt.get("prompt_tokens", []))):
         raise ValueError("engine receipt differs from prompt tokens")
+    if (receipt.get("native_math_backend", "vector-ggml-v1") != expected_backend
+            or (isinstance(receipt.get("plan_id"), str) and receipt["plan_id"].startswith("r600-")) != (backend == "scalar")):
+        raise ValueError("engine receipt backend mismatch")
     plan_id = receipt.get("plan_id")
     if expected_plan is not None and plan_id != expected_plan:
         raise ValueError("engine receipt differs from expected plan")
     if require_bound_plan:
-        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-")) or len(plan_id) != 69
+        if (not isinstance(plan_id, str) or not plan_id.startswith(("r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-", "r600-")) or len(plan_id) != 69
                 or any(c not in "0123456789abcdef" for c in plan_id[5:])):
             raise ValueError("current bound plan identity required")
-    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-"))):
+    if require_bound_plan or "prompt_tokens_sha256" in receipt or (isinstance(plan_id, str) and plan_id.startswith(("r506-", "r508-", "r512-", "r518-", "r520-", "r523-", "r525-", "r527-", "r528-", "r529-", "r531-", "r537-", "r544-", "r570-", "r576-", "r579-", "r600-"))):
         prompt_hash = hashlib.sha256(b"".join(struct.pack("<I", token) for token in prompt_ids)).hexdigest()
         if receipt.get("prompt_tokens_sha256") != prompt_hash:
             raise ValueError("engine receipt differs from prompt digest")
