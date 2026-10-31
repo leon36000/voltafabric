@@ -1,0 +1,13 @@
+{
+  "round": "R574",
+  "parent": "f0ae29826952bf022dd16eeabfe4b7b744163e58",
+  "scope": "real SC117 expert 255 donor comparison AArch64 vs retained x86 staged reference",
+  "donor_provider_bit_differences": 0,
+  "x86_staged_reference_violations": 1167,
+  "max_abs": 5.4018620403439854e-05,
+  "aarch64_q8_code": -121,
+  "x86_recorded_code": -120,
+  "negative_input_exit": 5,
+  "limitations": "shared quantizers, staged reference not raw donor output; different builds and architectures; strict R428 failure remains",
+  "next": "cross-producer numerical contract and collector test; restore authoritative R53 and shared lease before inter-PC workers"
+}

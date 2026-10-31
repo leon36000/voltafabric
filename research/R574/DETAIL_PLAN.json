@@ -1,0 +1,16 @@
+{
+  "binary_sha256": "126c20a1068af7984bfbe26fd0247b97734fc4039ff233d159574008f771c698",
+  "cpu": "aarch64",
+  "cpu_quota_percent": 50,
+  "expert_sha256": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+  "gpu": false,
+  "input_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "llama_ggml": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "memory_max_bytes": 536870912,
+  "purpose": "R574 detailed independent donor check",
+  "reference_sha256": "29d8307a5f839c4c44fe9098622ba7faa18cb8a2a0f21781329da1ed36923ddc",
+  "source_sha256": "71c593b408def1b066a85f5d762666aa26892a8ded612a952c8872977ed7d891",
+  "strata": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+  "swap_max_bytes": 0,
+  "worker": false
+}

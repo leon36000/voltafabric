@@ -1,0 +1,15 @@
+{
+  "activation_sha256": "c8a0744a87fade2652acfb34c802a49354379f558791bdf63e53f1f124bcc88a",
+  "binary_sha256": "67ef02d051d879122c9bcf6a94f6dc6e9bba698fa8221bf66b772375f12c42cb",
+  "cpu_quota_percent": 50,
+  "expert_sha256": "8a17e1a2a5f9a21e11d2bae64fc99a656c810e8ed16d15bed9a09800fccd9cb5",
+  "ggml_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "gpu": false,
+  "memory_max_bytes": 536870912,
+  "no_replay": true,
+  "purpose": "R574 pinned Strata generic versus native provider on R428 expert 255",
+  "source_sha256": "1f1af315416854d91261c409412cd38bf5bd86106752e80d27f532b86332816b",
+  "staged_reference_sha256": "29d8307a5f839c4c44fe9098622ba7faa18cb8a2a0f21781329da1ed36923ddc",
+  "strata_commit": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+  "worker": false
+}
