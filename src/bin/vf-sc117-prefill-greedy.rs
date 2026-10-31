@@ -975,6 +975,25 @@ fn owners(
 }
 
 const BUDGET: u64 = 4 * 1024 * 1024 * 1024;
+// Before consuming a remote namespace or starting any worker, mirror the
+// first position's rank-headroom requirement. There is no committed position
+// yet, so the eviction policy cannot make up for insufficient initial space.
+fn initial_rank_headroom(
+    caps: &BTreeMap<u32, u64>,
+    seed_per_rank: u64,
+    headroom: u64,
+) -> Result<(), E> {
+    let required = seed_per_rank
+        .checked_add(headroom)
+        .ok_or("rank budget overflow")?;
+    if caps.is_empty()
+        || caps.values().any(|&cap| cap < seed_per_rank)
+        || !caps.values().any(|&cap| cap >= required)
+    {
+        return Err("rank budget cannot cover initial seeds and first headroom".into());
+    }
+    Ok(())
+}
 fn valid_close(
     receipt: &voltafabric::session::CloseReceipt,
     expected: u64,
@@ -1141,9 +1160,10 @@ fn run() -> Result<(), E> {
         (Ok(a), Ok(b)) => {
             let limits = BTreeMap::from([(2, a.parse::<u64>()?), (3, b.parse::<u64>()?)]);
             let seed_per_rank = layout.worst_case_admission_bytes(1)?;
-            if limits.values().any(|&v| v < seed_per_rank || v > budget) {
-                return Err("rank budget cannot cover seeds or exceeds global budget".into());
+            if limits.values().any(|&v| v > budget) {
+                return Err("rank budget exceeds global budget".into());
             }
+            initial_rank_headroom(&limits, seed_per_rank, batch_headroom)?;
             Some(limits)
         }
         _ => return Err("both rank budgets must be supplied".into()),
@@ -1533,6 +1553,38 @@ fn main() {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn initial_rank_headroom_is_rejected_before_worker_start() {
+        let caps = BTreeMap::from([(2, 20), (3, 18)]);
+        assert!(initial_rank_headroom(&caps, 10, 10).is_ok());
+        assert!(initial_rank_headroom(&caps, 10, 11).is_err());
+        assert!(initial_rank_headroom(&BTreeMap::new(), 10, 1).is_err());
+        assert!(initial_rank_headroom(&caps, u64::MAX, 1).is_err());
+        // A rank that cannot even fit its own initial residents must fail,
+        // even if another rank could hold the entire headroom.
+        assert!(initial_rank_headroom(&BTreeMap::from([(2, 9), (3, 100)]), 10, 5).is_err());
+    }
+
+    #[test]
+    fn sc117_initial_seed_bound_covers_every_layer_and_rank() {
+        let index = include_str!("../../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, 50_292_326_400).unwrap();
+        let bound = layout.worst_case_admission_bytes(1).unwrap();
+        for expert in [0, 1] {
+            let actual: u64 = (0..48)
+                .map(|layer| layout.expert(layer, expert).unwrap().bytes)
+                .sum();
+            assert_eq!(actual, bound);
+        }
+        let reserve = layout
+            .worst_case_admission_bytes(sc117_router_cpu::ROUTED_EXPERTS * 2)
+            .unwrap();
+        let caps = BTreeMap::from([(2, bound + reserve - 1), (3, bound + reserve - 1)]);
+        assert!(initial_rank_headroom(&caps, bound, reserve).is_err());
+        let caps = BTreeMap::from([(2, bound + reserve), (3, bound)]);
+        assert!(initial_rank_headroom(&caps, bound, reserve).is_ok());
+    }
+
     #[test]
     fn batched_prompt_plan_is_distinct_and_binds_the_base() {
         let base = format!("r531-{}", "a".repeat(64));

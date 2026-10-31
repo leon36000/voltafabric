@@ -1,0 +1,8 @@
+{
+  "round": "R573",
+  "parent": "45b0bac69df0e2eb8e9dad3bf93f121c7785b3e4",
+  "change": "preflight first-position per-rank SC117 seed plus conservative headroom before namespace consumption or workers",
+  "validation": "11 coordinator tests debug and release; rustfmt; Clippy -A dead_code -D warnings; independent Python sum of actual 48 index spans",
+  "limitations": "payload only, no guarantee of future placement or peak RSS; no distributed or GPU execution; original R53 and cooperative lease unresolved",
+  "next": "progress real distribution after authoritative R53 and lease reconciliation; independently validate model outputs and unresolved expert-255 numerical discrepancy"
+}
