@@ -1,0 +1,9 @@
+{
+  "round": "R581",
+  "parent": "ed1879bdd63867568cdea2e8d3a5987226627b41",
+  "change": "read-only bounded PC1 session snapshot audit and conservative candidate identity lookup",
+  "evidence": "4398 records, 653 identities, 1212 claims, 1210 done; two claim-without-done; 24 missing close markers; one missing process marker",
+  "tests": "7 Python tests; independent count, part hash and unmatched-path verifier",
+  "limitations": "frozen snapshot possibly incomplete; no FP16 payload verification; no live R53/lease or execution authorization; zero exact R53 run-id overlap does not prove no relation",
+  "next": "reconcile authoritative R53 and all host receipts and locate genuine cooperative lease; maintain UNKNOWN no-replay"
+}
