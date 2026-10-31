@@ -1,0 +1,12 @@
+{
+  "max_abs": 2.0770963500282846e-06,
+  "max_tolerance_fraction": 0.10768694521168706,
+  "negative_control_violations": 1,
+  "negative_result_sha256": "0fac05d73fc669558eb7a0d6c2c02ecdb46b85a94242058309e116aee5e15289",
+  "observed_argmax": 710,
+  "plan_sha256": "85760773c9f8d278790ed3dc5d575a7683eccb9df6c60a20925e6457674e73d9",
+  "reference_argmax": 710,
+  "rows": 248320,
+  "stdout_sha256": "e8ebeee1e60fb6a2f7ff74cfb5c474fbb6e6dc829f0f676269a314b01af73f4f",
+  "violations": 0
+}
