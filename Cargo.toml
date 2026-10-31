@@ -377,3 +377,8 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-qsa-headroom-check"
 path = "src/bin/vf-sc117-qsa-headroom-check.rs"
 required-features = ["native-ggml-cpu"]
+
+[[bin]]
+name = "vf-sc117-qsa-eviction-fault-check"
+path = "src/bin/vf-sc117-qsa-eviction-fault-check.rs"
+required-features = ["native-ggml-cpu"]
