@@ -1,0 +1,21 @@
+{
+  "round": "R580",
+  "parent": "7f8de0cd58a3359edbeec960ac94693f1cf1c149",
+  "scope": "fresh real SC117 checkpoint local CPU generation with layer admission preflight and sticky affinity",
+  "output": "Hello!",
+  "tokens": [
+    9419,
+    0
+  ],
+  "stop": "token_limit",
+  "prompt_positions": 13,
+  "inputs": 14,
+  "workers_closed": 96,
+  "admissions": 2554,
+  "evictions": 1147,
+  "verified_same_rank_readmissions": 231,
+  "claims": "1531 RESERVED_UNKNOWN_NO_REPLAY exact bytes retained",
+  "comparison": "all input, embedding, output and logits hashes and admission list equal R578 same-engine reference",
+  "limitations": "one prompt, local CPU; no independent full-model oracle, GPU, inter-PC or producer numerical policy; R53 and shared lease unresolved",
+  "next": "resolve inter-host numerical compatibility and reconcile authoritative R53 and cooperative lease before distributed work"
+}
