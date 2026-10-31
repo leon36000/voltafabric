@@ -91,9 +91,19 @@ impl State {
     pub fn is_empty(&self) -> bool {
         self.cells.is_empty()
     }
-    /// Begin a transaction of at most 128 positions, using an independent
-    /// cache identity so proposals cannot cross the provisional boundary.
-    pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
+    /// Copy the committed cache under a fresh identity for a private transaction.
+    pub(crate) fn fork(&self) -> Result<Self> {
+        let mut provisional = State::new(
+            self.identity.clone(),
+            self.q_heads,
+            self.kv_heads,
+            self.dim,
+            self.capacity,
+        )?;
+        provisional.cells = self.cells.clone();
+        Ok(provisional)
+    }
+    pub(crate) fn fork_batch(&self, expected: usize) -> Result<Self> {
         if expected == 0
             || expected > 128
             || self
@@ -104,14 +114,12 @@ impl State {
         {
             return Err(invalid("QSA batch size or capacity"));
         }
-        let mut provisional = State::new(
-            self.identity.clone(),
-            self.q_heads,
-            self.kv_heads,
-            self.dim,
-            self.capacity,
-        )?;
-        provisional.cells = self.cells.clone();
+        self.fork()
+    }
+    /// Begin a transaction of at most 128 positions, using an independent
+    /// cache identity so proposals cannot cross the provisional boundary.
+    pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
+        let provisional = self.fork_batch(expected)?;
         Ok(Batch {
             original: self,
             provisional,

@@ -65,6 +65,25 @@ pub struct Proposal {
     cache: qsa_cpu::Proposal,
     output: Output,
 }
+/// Tentative multi-position attention. The outer layer owns durable admission
+/// and must not publish previews until expert work succeeds for the whole lot.
+pub struct Batch<'a> {
+    stage: &'a mut Stage,
+    cache: qsa_cpu::State,
+    expected: usize,
+    outputs: Vec<Output>,
+    failed: bool,
+}
+struct Projection {
+    mixed: Vec<f32>,
+    inject: Vec<f32>,
+    raw_query_gate: Vec<f32>,
+    query: Vec<f32>,
+    gate: Vec<f32>,
+    raw_key: Vec<f32>,
+    key: Vec<f32>,
+    value: Vec<f32>,
+}
 impl Proposal {
     pub fn output(&self) -> &Output {
         &self.output
@@ -203,6 +222,17 @@ impl Stage {
     pub fn is_empty(&self) -> bool {
         self.cache.is_empty()
     }
+    pub fn begin_batch(&mut self, expected: usize) -> Result<Batch<'_>> {
+        // Validate geometry and capacity using the same bounded cache contract.
+        let provisional = self.cache.fork_batch(expected)?;
+        Ok(Batch {
+            stage: self,
+            cache: provisional,
+            expected,
+            outputs: Vec::with_capacity(expected),
+            failed: false,
+        })
+    }
     pub fn prepare(
         &mut self,
         identity: &Identity,
@@ -211,6 +241,30 @@ impl Stage {
     ) -> Result<Proposal> {
         if identity != &self.identity || position != self.cache.len() || residual.len() != 10240 {
             return Err(invalid("QSA stage identity or position"));
+        }
+        let projection = self.project(identity, position, residual)?;
+        let proposal = self.cache.prepare(
+            identity,
+            position,
+            &projection.query,
+            &projection.key,
+            &projection.value,
+            &projection.gate,
+        )?;
+        let output = self.finish_projection(projection, proposal.output().to_vec())?;
+        Ok(Proposal {
+            cache: proposal,
+            output,
+        })
+    }
+    fn project(
+        &mut self,
+        identity: &Identity,
+        position: usize,
+        residual: &[f32],
+    ) -> Result<Projection> {
+        if identity != &self.identity || residual.len() != 10240 {
+            return Err(invalid("QSA stage identity or input"));
         }
         let hc = hyperconnection_cpu::read(
             residual,
@@ -236,30 +290,79 @@ impl Stage {
         let value = self.v.forward(&hc.mixed)?;
         norm_rope(&mut query, &self.qnorm, position)?;
         norm_rope(&mut key, &self.knorm, position)?;
-        let proposal = self
-            .cache
-            .prepare(identity, position, &query, &key, &value, &gate)?;
-        let gated_attention = proposal.output().to_vec();
+        Ok(Projection {
+            mixed: hc.mixed,
+            inject: hc.inject,
+            raw_query_gate: qfull,
+            query,
+            gate,
+            raw_key,
+            key,
+            value,
+        })
+    }
+    fn finish_projection(&mut self, p: Projection, gated_attention: Vec<f32>) -> Result<Output> {
         let attention = self.out.forward(&gated_attention)?;
-        Ok(Proposal {
-            cache: proposal,
-            output: Output {
-                mixed: hc.mixed,
-                inject: hc.inject,
-                raw_query_gate: qfull,
-                query,
-                gate,
-                raw_key,
-                key,
-                value,
-                gated_attention,
-                attention,
-            },
+        Ok(Output {
+            mixed: p.mixed,
+            inject: p.inject,
+            raw_query_gate: p.raw_query_gate,
+            query: p.query,
+            gate: p.gate,
+            raw_key: p.raw_key,
+            key: p.key,
+            value: p.value,
+            gated_attention,
+            attention,
         })
     }
     /// Commit only after the caller has validated the rest of the enclosing layer.
     pub fn commit(&mut self, proposal: Proposal) -> Result<Output> {
         self.cache.commit(proposal.cache)?;
         Ok(proposal.output)
+    }
+}
+
+impl Batch<'_> {
+    pub fn prepare_next(&mut self, identity: &Identity, residual: &[f32]) -> Result<&Output> {
+        if self.failed || self.outputs.len() >= self.expected {
+            self.failed = true;
+            return Err(invalid("QSA stage batch terminal or complete"));
+        }
+        let result = (|| {
+            let pos = self.cache.len();
+            let projection = self.stage.project(identity, pos, residual)?;
+            let proposal = self.cache.prepare(
+                identity,
+                pos,
+                &projection.query,
+                &projection.key,
+                &projection.value,
+                &projection.gate,
+            )?;
+            let output = self
+                .stage
+                .finish_projection(projection, proposal.output().to_vec())?;
+            self.cache.commit(proposal)?;
+            Ok(output)
+        })();
+        match result {
+            Ok(output) => {
+                self.outputs.push(output);
+                Ok(self.outputs.last().expect("just pushed"))
+            }
+            Err(error) => {
+                self.failed = true;
+                Err(error)
+            }
+        }
+    }
+    /// The enclosing layer must validate all positions before invoking this.
+    pub fn commit(self) -> Result<Vec<Output>> {
+        if self.failed || self.outputs.len() != self.expected {
+            return Err(invalid("QSA stage batch incomplete or aborted"));
+        }
+        self.stage.cache = self.cache;
+        Ok(self.outputs)
     }
 }
