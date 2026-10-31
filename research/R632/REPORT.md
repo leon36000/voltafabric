@@ -1,0 +1,9 @@
+# R632 — raccord explicite des réservations au lanceur SC117
+
+L'adaptateur de prompt accepte désormais l'option `--reserve-r53` pour une exécution distante associée à un plan attendu. Après validation du prompt et des paramètres du lanceur, il utilise le producteur épinglé R631 pour réserver la base et le suffixe dans le registre et transmettre au moteur le même descripteur de verrou. La préparation de plan, une exécution locale, l'absence de plan attendu et une identité JSON mal formée sont refusées dans ce mode. L'option est désactivée par défaut ; les réservations préexistantes ne sont pas relancées.
+
+Les tests synthétiques montrent que les deux fichiers sont présents avant le démarrage, qu'un échec laisse les identités consommées, qu'une seconde tentative n'atteint pas le moteur et que les clés JSON dupliquées sont refusées. Un véritable processus enfant local hérite du descripteur ; un autre descripteur ne peut pas acquérir le verrou exclusif. Ce test utilise un moteur simulé, aucun worker distant et aucun GPU.
+
+Sur PC1, les tests d'adaptateur et de lanceur exécutés avec l'environnement Strata existant donnent 46 tests, dont un ignoré faute de configuration du pack observé. Les sept tests du producteur R631 passent sur PC6. La dépendance Python système `regex` étant absente sur PC6, aucun succès de cette suite n'y est revendiqué. Les fichiers de test ont été copiés sous NAOS, sans modifier l'environnement actif.
+
+Cette option ne crée ni ne certifie un registre partagé, une lease coopérative, l'admission matérielle ou un plan externe authentique. Elle ne remplace aucune des protections préalables. Aucun registre R53 réel ni opération UNKNOWN antérieure n'a été utilisé. L'exécution distribuée réelle reste conditionnée à la réconciliation et aux admissions applicables.

@@ -224,7 +224,7 @@ def _chat_prompt_ids(prompt, tokenizer, eos):
     return result
 
 
-def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, prepare_plan: bool = False, runner=_run_bounded, binary_fd: int | None = None) -> dict:
+def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str], *, max_new_tokens: int = 2, chat: bool = False, require_bound_plan: bool = True, prepare_plan: bool = False, runner=_run_bounded, binary_fd: int | None = None, reserve_r53: bool = False) -> dict:
     """Run once; strict mode requires a current plan and prompt digest, not attestation.
 
     Legacy receipt compatibility requires an explicit opt-out. A caller still
@@ -238,6 +238,8 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         raise ValueError("invalid bound-plan mode")
     if type(prepare_plan) is not bool:
         raise ValueError("invalid prepare-plan mode")
+    if type(reserve_r53) is not bool:
+        raise ValueError("invalid reservation mode")
     if chat:
         _chat_messages(prompt)
     elif not isinstance(prompt, str) or not 0 < len(prompt.encode("utf-8")) <= MAX_PROMPT_BYTES:
@@ -289,7 +291,10 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if actual_seals & seals != seals:
             raise ValueError("executable descriptor is not sealed")
         options["pass_fds"] = (binary_fd,)
-    if not prepare_plan and any(os.environ.get(f"VF_RANK{rank}_SSH_HOST") for rank in (2, 3)):
+    remote = any(os.environ.get(f"VF_RANK{rank}_SSH_HOST") for rank in (2, 3))
+    if reserve_r53 and (prepare_plan or not remote or expected_plan is None or not require_bound_plan):
+        raise ValueError("R53 reservation requires remote execution and a bound expected plan")
+    if not prepare_plan and remote:
         raw_fd = os.environ.get("VF_SHARED_LEASE_FD", "")
         if not raw_fd.isascii() or not raw_fd.isdecimal() or int(raw_fd) < 3:
             raise ValueError("inherited shared lease fd required")
@@ -298,6 +303,19 @@ def run_prompt(prompt, tokenizer, eos: int, binary: str, engine_paths: list[str]
         if fd == binary_fd:
             raise ValueError("lease and executable descriptors must differ")
         options["pass_fds"] = options.get("pass_fds", ()) + (fd,)
+    if reserve_r53:
+        # Explicit opt-in only. The operator still establishes the real shared
+        # ledger, cooperative lease and all hardware/resource admissions.
+        from tools.reserve_r53_pinned import reserve
+        raw_namespace = os.environ.get("VF_R53_NAMESPACE_SPEC", "")
+        raw_lease = os.environ.get("VF_SHARED_LEASE_SPEC", "")
+        if not (0 < len(raw_namespace.encode("utf-8")) <= 8192 and 0 < len(raw_lease.encode("utf-8")) <= 8192):
+            raise ValueError("bounded R53 namespace and lease identities required")
+        namespace = json.loads(raw_namespace, object_pairs_hook=_unique_object)
+        lease = json.loads(raw_lease, object_pairs_hook=_unique_object)
+        if not isinstance(namespace, dict) or not isinstance(lease, dict):
+            raise ValueError("R53 namespace and lease identities must be objects")
+        reserve(namespace, expected_plan, lease, fd)
     completed = runner(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=False, **options)
     if completed.returncode != 0:
         category = "unclassified" if getattr(completed, "stderr_truncated", False) else _ENGINE_FAILURES.get(completed.stderr, "unclassified")
@@ -370,6 +388,7 @@ def main() -> int:
     p.add_argument("--binary-sha256", required=True)
     p.add_argument("--max-new-tokens", type=int, default=2)
     p.add_argument("--prepare-plan", action="store_true", help="prepare a plan without starting workers or generating text")
+    p.add_argument("--reserve-r53", action="store_true", help="consume a preselected R53 namespace before one remote execution")
     modes = p.add_mutually_exclusive_group()
     modes.add_argument("--chat", action="store_true", help="format one text-only user turn")
     modes.add_argument("--messages-json", action="store_true", help="read a bounded text-only chat history as JSON")
@@ -388,7 +407,7 @@ def main() -> int:
         tokenizer, eos = load_sc117(args.tokenizer_dir, hashes)
         paths = [args.dense, args.shard, args.pack, args.index, args.session,
                  args.ledger, args.ple_shard, args.ple_manifest]
-        result = run_prompt(prompt, tokenizer, eos, executable, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True, prepare_plan=args.prepare_plan, binary_fd=fds[0])
+        result = run_prompt(prompt, tokenizer, eos, executable, paths, max_new_tokens=args.max_new_tokens, chat=args.chat or args.messages_json, require_bound_plan=True, prepare_plan=args.prepare_plan, binary_fd=fds[0], reserve_r53=args.reserve_r53)
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
     return 0
 

@@ -1,5 +1,6 @@
 import json
 import base64
+import fcntl
 import os
 import hashlib
 import struct
@@ -32,6 +33,74 @@ def receipt():
 
 
 class RunnerTests(unittest.TestCase):
+    def test_opt_in_reservation_precedes_one_remote_spawn_and_cannot_replay(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = os.path.join(directory, 'ledger')
+            os.mkdir(root, 0o700)
+            lease_path = os.path.join(directory, 'lease')
+            with open(lease_path, 'w+') as lock:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                ds, ls = os.stat(root), os.stat(lease_path)
+                namespace = dict(root=root, dev=ds.st_dev, ino=ds.st_ino, uid=ds.st_uid, base_id='r53-synthetic-run')
+                lease = dict(path=lease_path, dev=ls.st_dev, ino=ls.st_ino, uid=ls.st_uid)
+                plan = 'r531-' + 'a' * 64
+                env = {'VF_RANK3_SSH_HOST':'host', 'VF_SHARED_LEASE_FD':str(lock.fileno()),
+                       'VF_SHARED_LEASE_SPEC':json.dumps(lease), 'VF_R53_NAMESPACE_SPEC':json.dumps(namespace),
+                       'VF_EXPECTED_PLAN_ID':plan}
+                calls = []
+                def engine(args, **kwargs):
+                    calls.append(kwargs['pass_fds'])
+                    self.assertTrue(os.path.isfile(os.path.join(root, 'r53-synthetic-run.json')))
+                    self.assertTrue(os.path.isfile(os.path.join(root, 'r53-synthetic-run-duplicate-slot.json')))
+                    return subprocess.CompletedProcess(args, 42, b'', b'')
+                with patch.dict('os.environ', env, clear=True):
+                    with self.assertRaisesRegex(RuntimeError, 'do not replay'):
+                        run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=engine, reserve_r53=True, require_bound_plan=True)
+                    with self.assertRaises(FileExistsError):
+                        run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=engine, reserve_r53=True, require_bound_plan=True)
+                self.assertEqual(calls, [(lock.fileno(),)])
+                with open(os.path.join(root, 'r53-synthetic-run.json')) as stream:
+                    self.assertEqual(json.load(stream)['context'], {'plan_id':plan, 'shared_lease':lease})
+
+    def test_reservation_requires_remote_bound_execution_not_plan_or_local(self):
+        with patch.dict('os.environ', {}, clear=True):
+            with self.assertRaisesRegex(ValueError, 'remote'):
+                run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, reserve_r53=True)
+            with self.assertRaisesRegex(ValueError, 'remote'):
+                run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, reserve_r53=True, prepare_plan=True)
+
+    def test_opt_in_passes_live_lock_to_real_child_and_rejects_bad_spec(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = os.path.join(directory, 'ledger')
+            os.mkdir(root, 0o700)
+            lease_path = os.path.join(directory, 'lease')
+            with open(lease_path, 'w+') as lock:
+                fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                ds, ls = os.stat(root), os.stat(lease_path)
+                namespace = dict(root=root, dev=ds.st_dev, ino=ds.st_ino, uid=ds.st_uid, base_id='r53-child-run01')
+                lease = dict(path=lease_path, dev=ls.st_dev, ino=ls.st_ino, uid=ls.st_uid)
+                env = {'VF_RANK2_SSH_HOST':'host', 'VF_SHARED_LEASE_FD':str(lock.fileno()),
+                       'VF_SHARED_LEASE_SPEC':json.dumps(lease), 'VF_R53_NAMESPACE_SPEC':json.dumps(namespace),
+                       'VF_EXPECTED_PLAN_ID':'r531-'+'a'*64}
+                program = '''import fcntl,os,sys
+fd=int(sys.argv[1]); os.fstat(fd)
+assert 'FLOCK' in open('/proc/self/fdinfo/'+str(fd)).read()
+other=os.open(sys.argv[2],os.O_RDONLY)
+try: fcntl.flock(other,fcntl.LOCK_EX|fcntl.LOCK_NB)
+except BlockingIOError: sys.exit(17)
+sys.exit(99)
+'''
+                def child(_args, **kwargs):
+                    return _run_bounded([sys.executable, '-c', program, str(lock.fileno()), lease_path], **kwargs)
+                bad = dict(env, VF_SHARED_LEASE_SPEC='{"uid": 1, "uid": 1}')
+                with patch.dict('os.environ', bad, clear=True):
+                    with self.assertRaises(ValueError):
+                        run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=child, reserve_r53=True, require_bound_plan=True)
+                self.assertEqual(os.listdir(root), [])
+                with patch.dict('os.environ', env, clear=True):
+                    with self.assertRaisesRegex(RuntimeError, r'exit=17'):
+                        run_prompt('A', Tokenizer(), 3, '/engine', ['/input']*8, runner=child, reserve_r53=True, require_bound_plan=True)
+
     def test_head_trace_never_runs_or_escapes_through_prompt_adapter(self):
         calls = []
         def runner(args, **kwargs):
