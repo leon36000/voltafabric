@@ -1,0 +1,9 @@
+{
+  "exact_python_values": 10240,
+  "historical_residual_sha256": "ffb003ec3d3126d160c7994f4414d02b90ca64e68a4a488dc54ff1856a80fe6d",
+  "max_absolute_difference": 1.6391277313232422e-06,
+  "new_layer_execution": false,
+  "offline_reassembly": true,
+  "scalar_residual_sha256": "0350630913cfe2b369d8bc7043e2cbeae352910229468516a6d55aa960173e90",
+  "values_differ_from_historical": 7754
+}

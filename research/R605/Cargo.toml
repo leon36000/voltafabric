@@ -1,0 +1,11 @@
+[package]
+name = "vf-r605-layer-reassembly"
+version = "0.1.0"
+edition = "2021"
+[dependencies]
+voltafabric = { path = "../.." }
+serde_json = "=1.0.151"
+[[bin]]
+name = "vf-r605-layer-reassembly"
+path = "reassemble.rs"
+[workspace]

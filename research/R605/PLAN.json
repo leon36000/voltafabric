@@ -1,0 +1,14 @@
+{
+  "binary": ".runs/vf-r594-build/debug/vf-r605-layer-reassembly",
+  "gpu": false,
+  "inputs": {
+    ".runs/vf-r594-build/debug/vf-r605-layer-reassembly": "e4520909edb460e27523dab50d850a619b7849b7052dafb967096deb40e19d46",
+    ".runs/vf-r604-work/collector.f64": "ef0a699feb2e5d21cea882c1f7c8cbd517883a2de419e0c511aa91e784514ac5",
+    ".runs/vf-r605-work/r428.json": "31800dc58ccac050049ce417dd0bdb61143e3d022c8ab9cae210f02ccfec8cd4",
+    "research/R605/reassemble.rs": "4d5ec8e3750e78288566fb385f63b89954309f2ac9eeae8deb7527feb44d261d",
+    "research/R605/run.py": "823badc9c904f5ea9f07ac32150cb25ac3d9f0a17f63448208a8a0014662289d",
+    "research/R605/verify.py": "423de224c1d5ef0e6acc79cebcd1923600b4c90ebf1a7563cdbd8b1b4de19668"
+  },
+  "network_worker": false,
+  "purpose": "offline reassembly of previously retained layer fields; no workers or new state"
+}

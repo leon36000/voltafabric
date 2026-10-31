@@ -1,0 +1,9 @@
+# R605 — reconstruction hors ligne de la sortie de couche
+
+La collecte scalaire top-10 R604 a été combinée hors ligne avec les valeurs d'expert partagé, de résiduel post-attention et d'injection déjà calculées lors de l'essai R428. Le fichier historique a été lu sur PC1 et son SHA-256 `31800dc58ccac050049ce417dd0bdb61143e3d022c8ab9cae210f02ccfec8cd4` vérifié ; le hash d'activation correspond à celui de R604. Les données dérivées du modèle restent locales.
+
+Le programme appelle les fonctions Rust existantes de combinaison et d'écriture hyperconnection. En utilisant d'abord la collecte historique R428, il reproduit exactement son hash de résiduel `ffb003ec3d3126d160c7994f4414d02b90ca64e68a4a488dc54ff1856a80fe6d`. Avec la collecte scalaire R604, le résiduel reconstruit a pour SHA-256 `0350630913cfe2b369d8bc7043e2cbeae352910229468516a6d55aa960173e90`.
+
+Un programme Python séparé recalcule les conversions et opérations f32 étape par étape et reproduit exactement les 10 240 valeurs dans les deux cas ; il utilise `expf` de la bibliothèque mathématique du système, comme le chemin Rust sur cette machine. Les deux résiduels reconstruits diffèrent sur 7 754 valeurs, avec un écart absolu maximal de 1,6391277313232422e-6. Cette différence décrit ces deux reconstructions ; elle n'établit pas laquelle est correcte par rapport à un oracle complet indépendant du modèle.
+
+Le plan SHA-256 `a393328ac3ac928873c6d84b7c52024f430fc9c0f91df4795a2d8df8f39c4731` lie le binaire, les scripts et les hashes des entrées ; un marqueur exclusif précède l'assemblage. Clippy et rustfmt ciblés passent, ainsi que la vérification syntaxique Python. Aucun worker, GPU, nouvelle réservation ou UNKNOWN n'a été utilisé. Il s'agit d'un assemblage après coup de composants déjà calculés, sans nouvelle exécution de couche ni commit d'état GDN ; une exécution complète et la qualification distribuée restent nécessaires.
