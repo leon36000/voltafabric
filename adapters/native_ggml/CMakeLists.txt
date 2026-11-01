@@ -53,6 +53,12 @@ add_test(NAME qwen2moe_route_invocation COMMAND vf_qwen2moe_route_invocation_tes
 # This compiles only against a separately patched donor worktree; VoltaFabric
 # does not vendor or install llama.cpp as its engine.
 option(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE "Build CPU fixture for pinned llama.cpp route hooks" OFF)
+option(VF_BUILD_LLAMA_QWEN2MOE_PROCESS_UBATCH_TEST
+  "Register live process_ubatch hook integration test" OFF)
+if(VF_BUILD_LLAMA_QWEN2MOE_PROCESS_UBATCH_TEST AND NOT VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
+  message(FATAL_ERROR "process_ubatch test requires VF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON")
+endif()
+
 if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
   if(NOT VF_LLAMA_SOURCE_DIR OR NOT EXISTS "${VF_LLAMA_SOURCE_DIR}/.git")
     message(FATAL_ERROR "VF_LLAMA_SOURCE_DIR must name the isolated pinned llama.cpp worktree")
@@ -102,6 +108,17 @@ if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
   set_target_properties(vf_qwen2moe_llama_context_attach_test PROPERTIES
     BUILD_RPATH "${vf_llama_library_dir}")
   add_test(NAME qwen2moe_llama_context_attach COMMAND vf_qwen2moe_llama_context_attach_test)
+
+  if(VF_BUILD_LLAMA_QWEN2MOE_PROCESS_UBATCH_TEST)
+    add_test(NAME qwen2moe_llama_process_ubatch
+      COMMAND "${CMAKE_COMMAND}" -E env
+        "VF_LLAMA_SOURCE_DIR=${VF_LLAMA_SOURCE_DIR}"
+        "VF_LLAMA_LIBRARY=${VF_LLAMA_LIBRARY}"
+        "VF_TEST_OUTPUT_DIR=${CMAKE_CURRENT_BINARY_DIR}/qwen2moe_process_ubatch"
+        "CXX=${CMAKE_CXX_COMPILER}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/run_qwen2moe_process_ubatch_test.sh")
+    set_tests_properties(qwen2moe_llama_process_ubatch PROPERTIES TIMEOUT 120)
+  endif()
 endif()
 
 # VFB3 session result enters the GGML graph atomically and is weighted once.

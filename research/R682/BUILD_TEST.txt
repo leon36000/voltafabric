@@ -1,0 +1,24 @@
+R682 CPU build/test record
+Date: 2026-11-01
+Architecture: AArch64 CPU; CUDA, Vulkan, Metal, OpenMP, native tuning disabled.
+Donor: llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT), patched R679/R680 worktree; GGML dependency clean.
+
+Reproducible CTest configuration:
+- VF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON
+- VF_BUILD_LLAMA_QWEN2MOE_PROCESS_UBATCH_TEST=ON
+- VF_LLAMA_SOURCE_DIR points to the isolated pinned donor checkout.
+- VF_LLAMA_LIBRARY points to its already built libllama.so.0.4.1.
+- CTest test: qwen2moe_llama_process_ubatch.
+
+Runner contract:
+- Rechecks exact donor revision, clean donor ggml paths and four expected shared libraries.
+- Compiles qwen2moe_llama_process_ubatch_test.cpp with C++17, -Wall -Wextra -Werror.
+- Stores the binary under the supplied bounded VF_TEST_OUTPUT_DIR and runs with the donor library directory in LD_LIBRARY_PATH.
+
+Observed:
+- CPU-only CMake configure passed.
+- Focused CTest: 1/1 passed in 1.61 s.
+- Test output: live llama_context::process_ubatch CPU hook pass; one dynamic route, one weight application, output [5,10].
+- No network worker, receipt, checkpoint, model weights, GPU or performance run.
+
+The test's synthetic graph invokes the bridge hook from its test graph context. It does not execute the donor production Qwen2MoE build_moe_ffn implementation; this distinction is retained in the report and result.

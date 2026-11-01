@@ -1,0 +1,35 @@
+{
+  "round": "R682",
+  "status": "CPU_CTEST_PROCESS_UBATCH_SYNTHETIC_QWEN2MOE_PASS",
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "donor": {
+    "project": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "change": {
+    "test": "adapters/native_ggml/qwen2moe_llama_process_ubatch_test.cpp",
+    "runner": "adapters/native_ggml/run_qwen2moe_process_ubatch_test.sh",
+    "cmake_option": "VF_BUILD_LLAMA_QWEN2MOE_PROCESS_UBATCH_TEST",
+    "test_name": "qwen2moe_llama_process_ubatch"
+  },
+  "validation": {
+    "architecture": "AArch64 CPU",
+    "warnings_as_errors_compile": "PASS",
+    "cmake_configure_cpu_only": "PASS",
+    "ctest": "1/1 PASS",
+    "callback_calls": 1,
+    "expert_ids": [1],
+    "owner_kinds": [0],
+    "route_weight": 0.5,
+    "collector_output": [5.0, 10.0],
+    "receipt_replayed": false
+  },
+  "limitations": [
+    "Synthetic internal Qwen2MoE model and graph; donor llama_context::process_ubatch executes, but donor production build_moe_ffn does not.",
+    "No checkpoint, tokenizer, token loop, complete generation, or Rust coordinator/worker in this test.",
+    "No GPU/CUDA graph, inter-PC/RDMA, production R53, or performance comparison."
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R683: exercise the donor production Qwen2MoE build_moe_ffn hook on a bounded CPU fixture or document a concrete blocker and the smallest compatible model path."
+}
