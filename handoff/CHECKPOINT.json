@@ -11891,5 +11891,21 @@
     "gpu_executed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R646: exercise the exact VFB3 parser/VFR3 reply path in-process with a bounded synthetic request."
+  },
+  "r646_vfb3_wire_identity_parser": {
+    "status": "CPU_TEST_PASS_PENDING_GITLAB_READBACK; BINARY_LOOP_UNTESTED",
+    "branch": "r646-vfb3-wire-fields-20261101",
+    "base_commit": "211b559c25c7faba64a16cbc5ff3d07dd0e9c9ee",
+    "report": "research/R646/REPORT.md",
+    "parser": "src/strata_native_bridge.rs::parse_vfb3_identity_fields",
+    "test": "research/R646/cpu-harness/native_fleet_ggml.rs",
+    "test_result": "rustfmt clean; 1/1 PASS with --locked --offline",
+    "identity_and_shape_cases": ["run", "model", "plan", "epoch", "layer", "reserved", "short_header", "truncated_identity", "zero_run_length"],
+    "batch_attempt_extracted": true,
+    "binary_loop_and_vfr3_reply_tested": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R647: test binary_loop in-process with a no-worker coordinator and synthetic ledger."
   }
 }

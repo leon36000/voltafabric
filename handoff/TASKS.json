@@ -9864,5 +9864,15 @@
     "limits": "No VFB3 wire parser invocation, socket, checkpoint, Strata callback, model generation, GPU or production network.",
     "automatic_relaunch": false,
     "next_action": "R646: test VFB3 framing/parser and VFR3 response in-process, retaining batch/attempt identity and refusal-before-dispatch checks."
+  },
+  "r646_vfb3_wire_identity_parser": {
+    "status": "CPU_TEST_PASS_PENDING_GITLAB_READBACK",
+    "owner": "Codex integrator",
+    "branch": "r646-vfb3-wire-fields-20261101",
+    "scope": "Extract the fixed VFB3 identity header parser as a production helper, used by binary_loop and tested from a synthetic Fleet receipt.",
+    "test": "rustfmt --check; harness cargo test --locked --offline; 1/1 PASS.",
+    "limits": "No binary_loop/VFR3 response, ticket claim, socket, checkpoint, Strata callback, model generation, GPU or production network.",
+    "automatic_relaunch": false,
+    "next_action": "R647: exercise binary_loop refusal and VFR3 failure output in-process with a synthetic coordinator."
   }
 }

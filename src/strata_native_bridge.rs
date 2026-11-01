@@ -320,6 +320,61 @@ pub fn identity_matches(
         && plan_id == stamp.plan_id.as_bytes()
 }
 
+/// Parsed batch and attempt coordinates from a VFB3 header.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Vfb3IdentityFields {
+    pub batch: u64,
+    pub attempt: u64,
+}
+
+/// Validate the fixed VFB3 header and its variable-length identity bytes.
+/// Operation dimensions and nonzero attempt policy remain the dispatch caller's responsibility.
+pub fn parse_vfb3_identity_fields(
+    header: &[u8],
+    identity: &[u8],
+    stamp: &moe::Stamp,
+) -> Result<Vfb3IdentityFields> {
+    if header.len() != 52 || &header[..4] != b"VFB3" {
+        return Err(invalid("native bridge VFB3 header shape"));
+    }
+    let read_u16 =
+        |offset: usize| u16::from_le_bytes(header[offset..offset + 2].try_into().unwrap());
+    let read_u32 =
+        |offset: usize| u32::from_le_bytes(header[offset..offset + 4].try_into().unwrap());
+    let read_u64 =
+        |offset: usize| u64::from_le_bytes(header[offset..offset + 8].try_into().unwrap());
+    let run_len = usize::from(read_u16(36));
+    let model_len = usize::from(read_u16(38));
+    let plan_len = usize::from(read_u16(40));
+    let expected_identity_len = run_len
+        .checked_add(model_len)
+        .and_then(|value| value.checked_add(plan_len));
+    if !(1..=256).contains(&run_len)
+        || !(1..=256).contains(&model_len)
+        || !(1..=256).contains(&plan_len)
+        || read_u16(42) != 0
+        || expected_identity_len != Some(identity.len())
+    {
+        return Err(invalid("native bridge identity field bounds"));
+    }
+    let run_end = run_len;
+    let model_end = run_end + model_len;
+    if !identity_matches(
+        stamp,
+        read_u64(28),
+        read_u32(24),
+        &identity[..run_end],
+        &identity[run_end..model_end],
+        &identity[model_end..],
+    ) {
+        return Err(invalid("native bridge run/model/plan/epoch/layer mismatch"));
+    }
+    Ok(Vfb3IdentityFields {
+        batch: read_u64(8),
+        attempt: read_u64(44),
+    })
+}
+
 fn reply_v3(
     batch: u64,
     attempt: u64,
@@ -411,8 +466,8 @@ fn binary_loop(
             .read_exact(&mut header[4..])
             .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
         let layer = (version >= 2).then_some(bound_stamp.layer);
-        let batch = u64_at(&header, 8);
-        let attempt = (version == 3).then(|| u64_at(&header, 44));
+        let mut batch = u64_at(&header, 8);
+        let mut attempt = (version == 3).then(|| u64_at(&header, 44));
 
         if version == 3 {
             let run_len = usize::from(u16_at(&header, 36));
@@ -434,22 +489,19 @@ fn binary_loop(
             input
                 .read_exact(&mut identity)
                 .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
-            let run_end = run_len;
-            let model_end = run_end + model_len;
-            if !identity_matches(
-                &bound_stamp,
-                u64_at(&header, 28),
-                u32_at(&header, 24),
-                &identity[..run_end],
-                &identity[run_end..model_end],
-                &identity[model_end..],
-            ) {
-                process::write_frame(
-                    output,
-                    &reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp),
-                    "binary identity rejection",
-                )?;
-                return Err(invalid("native bridge run/model/plan/epoch/layer mismatch"));
+            match parse_vfb3_identity_fields(&header, &identity, &bound_stamp) {
+                Ok(fields) => {
+                    batch = fields.batch;
+                    attempt = Some(fields.attempt);
+                }
+                Err(error) => {
+                    process::write_frame(
+                        output,
+                        &reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp),
+                        "binary identity rejection",
+                    )?;
+                    return Err(error);
+                }
             }
         } else if version == 2 {
             let mut requested = [0_u8; 4];

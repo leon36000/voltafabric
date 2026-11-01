@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:44:03Z",
+  "updated_utc": "2026-11-01T03:48:06Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -138,6 +138,16 @@
       "commit": "9ef574162ae3fe9f60bbb1067e3cf8c19fdcb56c",
       "readback_files_verified": 9,
       "published_utc": "2026-11-01T03:44:03Z"
+    },
+    {
+      "id": "R646",
+      "owner": "integrator",
+      "state": "CPU_VFB3_FIELDS_TESTED_PUBLISHED_PRIVATE_GITLAB_PENDING_READBACK",
+      "branch": "r646-vfb3-wire-fields-20261101",
+      "parent_commit": "211b559c25c7faba64a16cbc5ff3d07dd0e9c9ee",
+      "path": "research/R646",
+      "test": "1/1 PASS with rustfmt and --locked --offline",
+      "test_scope": "native GGML Resident -> Rust Fleet receipt -> exact VFB3 identity parser helper; synthetic CPU; no binary_loop/socket/checkpoint/Strata callback"
     }
   ],
   "acceptance": [
@@ -162,7 +172,8 @@
     "R643 compiles the exact R642 Rust source against llama.cpp GGML 3cf03257f219afbe7334045ff7c6a06ac68c627d and passes one synthetic native-provider CTest plus malformed-init rejection. It does not run a model, qualify Rust bridge output against a numerical oracle, attach the actual Strata callback, or prove full generation.",
     "R644 tests a synthetic in-memory layer-0 SC117-format expert through the real native GGML resident and Rust Fleet. It confirms one-time FP16/f64 Collector weighting and rejects wrong epoch, plan and replay, but does not read checkpoint spans, exercise the VFB3 socket, call Strata's actual generator callback, or qualify complete generation.",
     "R644 tests a synthetic in-memory layer-0 SC117-format expert through the native GGML resident and Rust Fleet. It confirms one-time FP16/f64 Collector weighting and rejects wrong epoch, plan and replay, but does not read checkpoint spans, exercise the VFB3 socket, call Strata's actual generator callback, or qualify complete generation.",
-    "R645 exposes and tests the VFB3 run/model/plan/epoch/layer comparator using a synthetic native-GGML Fleet receipt. Batch/attempt parsing and exact VFB3/VFR3 wire framing, the Strata callback, complete generation, GPU, RDMA and inter-PC execution remain unqualified."
+    "R645 exposes and tests the VFB3 run/model/plan/epoch/layer comparator using a synthetic native-GGML Fleet receipt. Batch/attempt parsing and exact VFB3/VFR3 wire framing, the Strata callback, complete generation, GPU, RDMA and inter-PC execution remain unqualified.",
+    "R646 tests the exact VFB3 header/identity parsing helper used by binary_loop, not binary_loop's VFR3 output or actual ticket reservation. No checkpoint, Strata callback, full generation, GPU, RDMA or inter-PC run."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -172,18 +183,19 @@
     "R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY",
     "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
     "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
-    "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY"
+    "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY",
+    "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R646_READY_ON_OWNER_REQUEST",
-    "purpose": "Test the exact VFB3 parser and VFR3 reply path in-process with a bounded synthetic request, including batch/attempt and refusal before dispatch. Then continue the pinned Strata callback boundary; no full checkpoint, GPU, RDMA or production network."
+    "status": "R647_READY_ON_OWNER_REQUEST",
+    "purpose": "Exercise binary_loop in-process using a coordinator with no worker sessions and a pre-existing isolated ledger directory; verify VFR3 failure response and no claim on identity mismatch. Keep full checkpoint, GPU and production network suspended."
   },
-  "report": "research/R645/REPORT.md",
+  "report": "research/R646/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R645/SHA256SUMS",
-    "sha256": "285fc2b171c6b0422fff70f620f1e7c33b012d9c34d29bce4caed687de4c4e0b",
+    "path": "research/R646/SHA256SUMS",
+    "sha256": "1fd683f083fa0d50535273b06c54b3380b6656129cf800bcc65da5f9fcb2d4e8",
     "files": 5
   }
 }

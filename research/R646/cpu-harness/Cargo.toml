@@ -1,0 +1,18 @@
+[package]
+name = "voltafabric-r646-vfb3-wire-fields-cpu"
+version = "0.1.0"
+edition = "2021"
+publish = false
+autobins = false
+autoexamples = false
+autotests = false
+autobenches = false
+
+[workspace]
+
+[dependencies]
+voltafabric = { path = "../../../", default-features = false, features = ["native-ggml-cpu"] }
+
+[[test]]
+name = "native_fleet_ggml"
+path = "native_fleet_ggml.rs"
