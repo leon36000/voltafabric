@@ -12332,6 +12332,7 @@
     "readback_verified_utc": "2026-11-01 09:06:28 UTC",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   },
+
   "r674_graph_reuse_lifecycle": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "parent_commit": "b4352fe2718e047481ce8c2853c7abffec6a50db",
@@ -12346,7 +12347,7 @@
     "test_result": "AArch64 CPU C++17 warnings-as-errors build; focused CTest 3/3 pass; 5 GitLab files read back and all 4 manifest entries SHA-256 matched.",
     "test_scope": "Synthetic Q8_0/GGML route fixture only; no llama.cpp runtime callback, model/checkpoint, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
     "manifest_sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
-    "pipeline_2286": "running; Gitleaks success, Semgrep running, Trivy pending, fallback created; scan/fallback only",
+    "pipeline_2286": "success; configured scans/fallback only, not C++ build/test",
     "readback_files_verified": 5,
     "readback_verified_utc": "2026-11-01 09:18:12 UTC",
     "model_loaded": false,
@@ -12356,6 +12357,31 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R675: fresh per-invocation graph transaction plus host-side status validation before connecting the Qwen2MoE callback."
+  },
+  "r675_fresh_graph_invocation": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+    "report": "research/R675/REPORT.md",
+    "result": "research/R675/RESULT.json",
+    "build_test": "research/R675/BUILD_TEST.txt",
+    "sha256sums": "research/R675/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Fresh per-invocation route Stamp and transaction on rebuilt GGML graph; stale one-shot replay refuses changed route before Collector or downstream.",
+    "test_result": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; 5 exact GitLab readbacks.",
+    "oracle": "Independent scalar FP64 weighted output [0.75, 1.25, 7.5, 12.5] for synthetic Q8_0 route fixture.",
+    "test_scope": "No donor callback, checkpoint/model, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
+    "pipeline_2288": "pending; scans/fallback only, not C++ build/test",
+    "readback_files_verified": 5,
+    "readback_verified_utc": "2026-11-01 09:21:26 UTC",
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R676: wire fresh transactions and host-side readiness validation into the pinned llama.cpp Qwen2MoE callback."
   }
 
 }

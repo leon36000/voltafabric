@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 09:18:12 UTC",
+  "updated_utc": "2026-11-01 09:21:26 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -802,7 +802,7 @@
       "manifest_entries_verified": "8/8 SHA-256 exacts depuis GitLab",
       "manifest_sha256": "05f63dd95147ceb47a49449ee488395aa5aa0ac1f07aad85bf350c8ebacc5ee0",
       "local_claim_sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
-      "pipeline_2284": "success: Gitleaks, Semgrep, Trivy and configured fallback; scans/fallback only, not C++ build/test",
+      "pipeline_2284": "success: configured scans/fallback only, not C++ build/test",
       "published_utc": "2026-11-01 09:06:07 UTC",
       "readback_verified_utc": "2026-11-01 09:06:28 UTC",
       "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
@@ -810,7 +810,7 @@
     {
       "id": "R674",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_GRAPH_REUSE_GUARD_PIPELINE_2286_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "b4352fe2718e047481ce8c2853c7abffec6a50db",
       "source_commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
@@ -822,10 +822,30 @@
       "readback_files_verified": 5,
       "manifest_entries_verified": "4/4 SHA-256 exact from GitLab readback",
       "manifest_sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
-      "pipeline_2286": "running; Gitleaks success, Semgrep running, Trivy pending, fallback created; scans/fallback only",
+      "pipeline_2286": "success; configured scans/fallback only, not C++ build/test",
       "published_utc": "2026-11-01T09:16:04Z",
       "readback_verified_utc": "2026-11-01 09:18:12 UTC",
       "next_action": "R675: implement a per-invocation graph transaction lifecycle with fresh Stamp and host-side route-status validation before exposing the graph result; then wire the Qwen2MoE routed aggregate callback without double weighting and preserving shared/residual paths."
+    },
+    {
+      "id": "R675",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_CTEST_3_PASS_PIPELINE_2288_PENDING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
+      "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+      "path": "research/R675",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "Tested the safe initial per-call policy: consumed graph/transaction replay is refused; a separately rebuilt GGML graph with a fresh full Stamp/RouteGraphTransaction accepts changed routes once. Host must verify graph and route status before exposing output.",
+      "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; exact readback of 5 files.",
+      "test_scope": "Synthetic Q8_0 and explicit routed inputs; independent scalar FP64 output [0.75,1.25,7.5,12.5]; no donor callback, checkpoint/model, complete generation, GPU, CUDA graph, inter-PC/RDMA, production R53 or performance.",
+      "readback_files_verified": 5,
+      "manifest_entries_verified": "4/4 exact readback",
+      "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
+      "pipeline_2288": "pending; configured scans/fallback only, not C++ build/test",
+      "published_utc": "2026-11-01T09:20:35Z",
+      "readback_verified_utc": "2026-11-01 09:21:26 UTC",
+      "next_action": "R676: wire fresh transaction creation and host status validation into the pinned llama.cpp Qwen2MoE callback, replace only routed-expert aggregate, preserve shared/residual path and apply coefficients once."
     }
   ],
   "acceptance": [
@@ -904,7 +924,9 @@
     "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS",
     "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS",
     "R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING",
-    "R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS"
+    "R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS",
+    "R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS",
+    "R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS"
   ],
   "active_operations": [
     {
@@ -976,6 +998,19 @@
       "id": "gitlab-pipeline-2286",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2287",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
       "status": "running",
       "jobs": {
         "pc4_gitleaks": "success",
@@ -983,15 +1018,28 @@
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       },
-      "scope": "configured scans/fallback only; not C++ build/test"
+      "scope": "configured scans/fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2288",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+      "status": "pending",
+      "jobs": {
+        "pc4_gitleaks": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      },
+      "scope": "configured scans/fallback only; not C++ build/test evidence"
     }
   ],
-  "next_action": "R675: implémenter un cycle de transaction neuf par invocation du graphe et vérifier côté hôte les statuts de toutes les routes avant de rendre le résultat exploitable; ensuite brancher le callback Qwen2MoE sur l’agrégat routé, sans seconde pondération et en préservant shared/résiduel. Pas de génération complète, GPU ou réseau de production.",
-  "report": "research/R674/REPORT.md",
+  "next_action": "R676: brancher le cycle de vie d'une transaction fraîche par invocation et la validation hôte des statuts dans le callback Qwen2MoE llama.cpp épinglé; remplacer uniquement l’agrégat routé, préserver shared/résiduel et appliquer les poids une seule fois. Pas de génération complète, GPU ou réseau de production.",
+  "report": "research/R675/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R674/SHA256SUMS",
-    "sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
+    "path": "research/R675/SHA256SUMS",
+    "sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
     "files": 4
   }
 }

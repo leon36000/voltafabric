@@ -10202,6 +10202,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   },
+
   "r674_graph_reuse_lifecycle": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_2286_RUNNING",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
@@ -10218,18 +10219,47 @@
     ],
     "manifest_sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
     "pipeline_2286": {
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
-        "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 5,
     "readback_verified_utc": "2026-11-01 09:18:12 UTC",
     "next_action": "R675: implement and test per-invocation transaction lifecycle and host-side route status validation before attaching the Qwen2MoE routed-aggregate callback."
+  },
+  "r675_fresh_graph_invocation": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_ORACLE_CTEST_3_PASS_PIPELINE_2288_PENDING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+    "objective": "Verify safe fresh graph and transaction lifecycle after llama.cpp graph reuse conflict.",
+    "changes": [
+      "Changed route on a reused graph is refused by the spent one-shot transaction before a second Collector/downstream call.",
+      "A rebuilt GGML graph with a fresh complete Stamp and transaction accepts routes [2,5,6,0] once."
+    ],
+    "validation": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3; independent scalar FP64 oracle; exact readback of five files.",
+    "limitations": [
+      "No actual pinned llama.cpp callback or checkpoint/model.",
+      "No generation, GPU/CUDA graph, inter-PC/RDMA, production R53, or performance."
+    ],
+    "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
+    "pipeline_2288": {
+      "status": "pending",
+      "jobs": {
+        "pc4_gitleaks": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 5,
+    "readback_verified_utc": "2026-11-01 09:21:26 UTC",
+    "next_action": "R676: wire fresh transaction creation and host-side status validation into the pinned llama.cpp Qwen2MoE callback; route aggregate only, preserve shared/residual, single weighting."
   }
 
 }
