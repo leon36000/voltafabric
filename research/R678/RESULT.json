@@ -1,0 +1,48 @@
+{
+  "round": "R678",
+  "state": "PER_LAYER_QWEN2MOE_INVOCATION_ADAPTER_CPU_PASS",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "seam": "Qwen2MoE build_moe_ffn: original activation, selected IDs, final post-gating weights, raw down-expert outputs"
+  },
+  "adaptation": {
+    "code": "adapters/native_ggml/qwen2moe_route_invocation.hpp/.cpp",
+    "identity": "run/model/plan/layer/batch/epoch/attempt; layer set per fresh transaction",
+    "owner_projection": "expert ID to owner kind before Collector dispatch",
+    "coefficients": "post-gating values forwarded unchanged; Collector applies once",
+    "host_gate": "requires every expected layer transaction READY and GGML SUCCESS; missing layer refuses publication",
+    "graph_reuse": "routed invocation forbids reuse"
+  },
+  "tests": {
+    "platform": "AArch64 CPU",
+    "language": "C++17 -Wall -Wextra -Werror",
+    "focused_ctest": {
+      "passed": 4,
+      "total": 4,
+      "names": [
+        "route_graph_transaction",
+        "route_graph_dynamic_capture",
+        "qwen2moe_route_invocation",
+        "route_graph_vfr3"
+      ]
+    },
+    "layers": [0, 1],
+    "dynamic_expert_ids": [[1, 3], [2, 0]],
+    "dynamic_owner_kinds": [[-1, 2], [1, 0]],
+    "post_gating_weights": [[0.25, 0.75], [0.4, 0.6]],
+    "independent_output": [17.4, 19.4],
+    "incomplete_layer_invocation": "rejected before host publication"
+  },
+  "llama_source_callback_integrated": false,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "cuda_graph_qualified": false,
+  "inter_pc_or_rdma": false,
+  "production_r53": false,
+  "performance_comparison": false,
+  "unknown_receipt_replayed": false,
+  "next_action": "R679: integrate this per-layer adapter into the pinned llama.cpp Qwen2MoE graph/process_ubatch hook and test the exact donor patch on CPU."
+}

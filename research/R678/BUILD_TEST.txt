@@ -1,0 +1,17 @@
+Source donor: ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+Platform: AArch64 CPU
+Compiler mode: C++17 -Wall -Wextra -Werror
+
+Configure:
+  cmake -S adapters/native_ggml -B adapters/build-full
+
+Build:
+  cmake --build adapters/build-full --target vf_qwen2moe_route_invocation_test -j2
+
+Focused tests:
+  ctest --test-dir adapters/build-full --output-on-failure -R '^(route_graph_transaction|route_graph_dynamic_capture|route_graph_vfr3|qwen2moe_route_invocation)$'
+
+Result: 4/4 PASS.
+The new multi-layer fixture returned [17.4, 19.4] against its independent scalar oracle and refused a two-layer host invocation when only one layer was registered. Existing transaction, dynamic capture, and VFR3 numerical tests also passed.
+
+Scope: CPU GGML fixture only. No callback was inserted into llama.cpp source; no checkpoint, complete model generation, GPU/CUDA graph, inter-PC/RDMA, production R53, or performance comparison was executed.

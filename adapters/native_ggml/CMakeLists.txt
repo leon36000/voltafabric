@@ -20,7 +20,7 @@ set(GGML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GGML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${GGML_SOURCE_DIR}/ggml" ggml EXCLUDE_FROM_ALL)
 find_package(Threads REQUIRED)
-add_library(vf_native_ggml STATIC provider.cpp bridge.cpp route_graph_transaction.cpp
+add_library(vf_native_ggml STATIC provider.cpp bridge.cpp route_graph_transaction.cpp qwen2moe_route_invocation.cpp
   session_vfr3_collector.cpp ../strata_native_bridge/pipe_client.cpp)
 target_compile_features(vf_native_ggml PRIVATE cxx_std_17)
 target_compile_options(vf_native_ggml PRIVATE -Wall -Wextra -Werror)
@@ -42,6 +42,12 @@ add_executable(vf_route_graph_dynamic_capture_test route_graph_dynamic_capture_t
 target_link_libraries(vf_route_graph_dynamic_capture_test PRIVATE vf_native_ggml)
 target_compile_options(vf_route_graph_dynamic_capture_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_dynamic_capture COMMAND vf_route_graph_dynamic_capture_test)
+
+# One-shot per-layer wrapper matching the pinned Qwen2MoE raw routed-expert seam.
+add_executable(vf_qwen2moe_route_invocation_test qwen2moe_route_invocation_test.cpp)
+target_link_libraries(vf_qwen2moe_route_invocation_test PRIVATE vf_native_ggml)
+target_compile_options(vf_qwen2moe_route_invocation_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME qwen2moe_route_invocation COMMAND vf_qwen2moe_route_invocation_test)
 
 # VFB3 session result enters the GGML graph atomically and is weighted once.
 add_executable(vf_route_graph_vfr3_test route_graph_vfr3_test.cpp)
