@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:08:19Z",
+  "updated_utc": "2026-11-01T04:18:49Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -207,6 +207,32 @@
       "readback_files_verified": 7,
       "published_utc": "2026-11-01T04:08:12Z",
       "readback_verified_utc": "2026-11-01T04:08:19Z"
+    },
+    {
+      "id": "R651",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS_WITH_QUARANTINED_PRELIMINARY_ATTEMPTS",
+      "branch": "r651-strata-cpp-48-session-fleet-20261101",
+      "parent_commit": "3c39dd317c802802ce5614e7ac790fa6e0294bbb",
+      "source_commit": "35138daa4365979a00695031cf6d192a9301c31a",
+      "path": "research/R651",
+      "test": "locked/offline Rust bridge build PASS; C++17 -Wall -Wextra -Werror build PASS; 48-session CPU harness PASS",
+      "test_scope": "Real PoolFleetOwner::create_from_fds/pool_cpu_by_layer; 48 vf-strata-native-bridge plus 48 local vf-rank-session; two per-layer batches, 96 calls and local claims; atomic invalid-layer refusal, fleet terminal latch and graceful shutdown; synthetic GGML only",
+      "readback_files_verified": 11,
+      "quarantined_runs": [
+        {
+          "run_id": "r651-cpp-48-session-fleet",
+          "claims": 8,
+          "status": "PARTIAL_UNKNOWN_NO_REPLAY"
+        },
+        {
+          "run_id": "r651-cpp-48-session-fleet-v2",
+          "claims": 96,
+          "status": "CPP_CALLBACKS_PASS_HARNESS_CLEANUP_MISMATCH_NO_REPLAY"
+        }
+      ],
+      "published_utc": "2026-11-01T04:18:30Z",
+      "readback_verified_utc": "2026-11-01T04:18:49Z"
     }
   ],
   "acceptance": [
@@ -236,7 +262,8 @@
     "R648 exercises the real VFB3 binary_loop with one local vf-rank-session and a synthetic GGML resident; its expected result uses the same provider, only one consumed local ledger claim is tested, and no checkpoint, donor callback, full generation, GPU or inter-PC path is qualified.",
     "R649 clean CPU test sends two unique VFB3 batches through one vf-rank-session and checks exact unweighted VFR3 responses plus two durable local claims, but uses synthetic GGML and the same-provider Resident.forward comparator; no checkpoint, donor callback or complete generation is qualified.",
     "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed.",
-    "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle."
+    "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle.",
+    "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -250,18 +277,19 @@
     "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY",
     "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
     "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
-    "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY"
+    "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
+    "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R651_READY_ON_OWNER_REQUEST",
-    "purpose": "Inspect and wire the pinned donor's real generation callback to launcher-managed sessions with a bounded CPU fixture; no complete checkpoint, GPU, RDMA or inter-PC run."
+    "status": "R652_READY_ON_OWNER_REQUEST",
+    "purpose": "Connect the exact pinned Strata generation callback to launcher-managed sessions using admitted CPU-only fixtures; no checkpoint/full generation, GPU, production ledger, RDMA or inter-PC run."
   },
-  "report": "research/R650/REPORT.md",
+  "report": "research/R651/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R650/SHA256SUMS",
-    "sha256": "95fd8eab44642bee09eb9127570f746942bae2d3e43625ddd10ac0fe863ba6aa",
-    "files": 3
+    "path": "research/R651/SHA256SUMS",
+    "sha256": "927730e873359f64b1b9489c21862d562f1324020049d7bc2acc96928cde009c",
+    "files": 10
   }
 }

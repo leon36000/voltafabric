@@ -9934,6 +9934,6 @@
     "limits": "Internal helper only, not public 48-layer launch; no Strata donor, checkpoint or independent numeric oracle; no full generation/GPU/RDMA/inter-PC.",
     "identity": "run r650-actual-bridge-launcher, model r650-synthetic-sc117, plan r650-synthetic-plan, layer 0, epoch 77, batch 9650001, attempt 30; one RESERVED_UNKNOWN_NO_REPLAY receipt.",
     "automatic_relaunch": false,
-    "next_action": "R651: bounded donor generation callback integration, CPU fixture only.",
+    "next_action": "R652: connect the pinned Strata donor callback to launcher-managed sessions with admitted CPU-only fixtures; no full checkpoint or GPU.",
     "readback_verified_utc": "2026-11-01T04:08:19Z"
   }

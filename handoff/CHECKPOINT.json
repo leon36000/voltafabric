@@ -12045,6 +12045,6 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 7,
     "published_utc": "2026-11-01T04:08:12Z",
-    "next_action": "R651: bounded actual donor generation callback integration with launcher-managed sessions, CPU fixture only.",
+    "next_action": "R652: connect the pinned Strata donor callback to launcher-managed sessions with admitted CPU-only fixtures; no full checkpoint or GPU.",
     "readback_verified_utc": "2026-11-01T04:08:19Z"
   }
