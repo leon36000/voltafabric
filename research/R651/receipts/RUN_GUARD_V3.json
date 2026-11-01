@@ -1,0 +1,7 @@
+{
+  "claims_captured": 96,
+  "detail": "96 C++ callbacks and graceful shutdown verified",
+  "replay": "forbidden",
+  "run_id": "r651-cpp-48-session-fleet-v3",
+  "status": "CONSUMED_DO_NOT_REPLAY"
+}

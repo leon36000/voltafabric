@@ -1,0 +1,452 @@
+Warning: truncated output (original token count: 7780)
+Total output lines: 1157
+
+{
+  "claims": [
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 0,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 0,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 1,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 1,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 2,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 2,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 3,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 3,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 4,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 4,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 5,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 5,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 6,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 6,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 7,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 7,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 8,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 8,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 9,
+        "model_revision": "r651-synthetic-sc117-v2",
+      …4780 tokens truncated…an_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 39,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 39,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 40,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 40,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 41,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 41,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 42,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 42,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 43,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 43,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 44,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 44,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 45,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 45,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 46,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 46,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 41,
+      "stamp": {
+        "batch": 9651011,
+        "epoch": 79,
+        "layer": 47,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 42,
+      "stamp": {
+        "batch": 9651012,
+        "epoch": 79,
+        "layer": 47,
+        "model_revision": "r651-synthetic-sc117-v2",
+        "plan_id": "r651-synthetic-cpu-plan-v2",
+        "run_id": "r651-cpp-48-session-fleet-v2"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    }
+  ],
+  "count": 96
+}

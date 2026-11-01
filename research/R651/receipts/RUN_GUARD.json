@@ -1,0 +1,7 @@
+{
+  "claims_captured": 8,
+  "detail": "Eight layer callbacks completed before an overly narrow fixture assertion stopped the harness; preserve the eight claims and never replay",
+  "replay": "forbidden",
+  "run_id": "r651-cpp-48-session-fleet",
+  "status": "PARTIAL_UNKNOWN_NO_REPLAY"
+}

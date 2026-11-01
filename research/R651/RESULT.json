@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "wave": "R651",
+  "source_branch": "r650-launcher-native-bridge-20261101",
+  "source_commit": "3c39dd317c802802ce5614e7ac790fa6e0294bbb",
+  "result": "CPU_CPP_FLEET_PASS_WITH_TWO_QUARANTINED_HARNESS_ATTEMPTS",
+  "qualified_scope": {
+    "cxx_pool_owner": "PoolFleetOwner::create_from_fds and pool_cpu_by_layer",
+    "rust_bridge_processes": 48,
+    "rust_rank_session_processes": 48,
+    "callbacks": 96,
+    "batches_per_layer": 2,
+    "finite_output_all_layers": true,
+    "bitwise_repeat_same_layer_across_batches": true,
+    "invalid_layer_atomic_refusal": true,
+    "fleet_terminal_latch": true,
+    "worker_and_coordinator_shutdown": true,
+    "checkpoint_loaded": false,
+    "pinned_strata_donor_loaded": false,
+    "complete_generation": false,
+    "gpu_or_inter_pc": false
+  },
+  "successful_run": {
+    "run_id": "r651-cpp-48-session-fleet-v3",
+    "model_revision": "r651-synthetic-sc117-v3",
+    "plan_id": "r651-synthetic-cpu-plan-v3",
+    "epoch": 80,
+    "layers": 48,
+    "batches": [9651021, 9651022],
+    "attempts": [51, 52],
+    "claim_count": 96,
+    "claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+    "replay": "forbidden"
+  },
+  "quarantined_runs": [
+    {
+      "run_id": "r651-cpp-48-session-fleet",
+      "epoch": 78,
+      "batch": 9651001,
+      "attempt": 31,
+      "layers_completed": [0, 1, 2, 3, 4, 5, 6, 7],
+      "claim_count": 8,
+      "cause": "Harness expected only layer 0 to be nonzero although its fixture builder reused the payload for every identical GGML layout.",
+      "replay": "forbidden"
+    },
+    {
+      "run_id": "r651-cpp-48-session-fleet-v2",
+      "epoch": 79,
+      "batches": [9651011, 9651012],
+      "attempts": [41, 42],
+      "layers": 48,
+      "claim_count": 96,
+      "cause": "All C++ callbacks and worker shutdown passed; the Python harness incorrectly requested another shutdown from already-stopped coordinators.",
+      "replay": "forbidden"
+    }
+  ],
+  "synthetic_pack": {
+    "logical_bytes": 50292326400,
+    "physical_allocation_cap_bytes": 134217728,
+    "temporary": true,
+    "real_checkpoint": false
+  },
+  "provider_pin": {
+    "name": "llama.cpp GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "scope": "CPU native resident only, as established in R643"
+  },
+  "adapter_source_readback": {
+    "branch": "r650-launcher-native-bridge-20261101",
+    "commit": "3c39dd317c802802ce5614e7ac790fa6e0294bbb",
+    "sha256": {
+      "adapters/strata_native_bridge/pipe_client.hpp": "3d7a1b1289888dcb947a8d5d2b75918ca8d265e2ef89c730cd1bbdf354735790",
+      "adapters/strata_native_bridge/pipe_client.cpp": "49b769b6059a9532a736dffd90bf4faf3c3de1c8e4d2cad76aa1b6a45c475ecb",
+      "adapters/strata_native_bridge/pool_hook.hpp": "ed17b5fb6e2cdabfcc868ee3ca0d6e036b08f00c89330b300618213c650473d6",
+      "adapters/strata_native_bridge/pool_hook.cpp": "87fa6e5ecfd2765a2e31c76fb707b746b01b6aad1f5eadee926c800040ea8fda"
+    }
+  },
+  "strata_source_reference": {
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license_claim_in_adapter_readme": "MIT",
+    "source_compiled_or_copied_in_r651": false
+  },
+  "local_production_r53_reservation": false
+}

@@ -1,0 +1,7 @@
+{
+  "claims_captured": 96,
+  "detail": "C++ PoolFleetOwner completed 96 callbacks and shutdown; harness then attempted a duplicate Python coordinator shutdown",
+  "replay": "forbidden",
+  "run_id": "r651-cpp-48-session-fleet-v2",
+  "status": "CPP_CALLBACKS_PASS_HARNESS_CLEANUP_MISMATCH_NO_REPLAY"
+}

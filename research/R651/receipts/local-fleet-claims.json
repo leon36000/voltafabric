@@ -1,0 +1,101 @@
+{
+  "claims": [
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 0,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 1,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 2,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 3,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 4,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 5,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 6,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    {
+      "attempt": 31,
+      "stamp": {
+        "batch": 9651001,
+        "epoch": 78,
+        "layer": 7,
+        "model_revision": "r651-synthetic-sc117",
+        "plan_id": "r651-synthetic-cpu-plan",
+        "run_id": "r651-cpp-48-session-fleet"
+      },
+      "status": "RESERVED_UNKNOWN_NO_REPLAY"
+    }
+  ],
+  "count": 8
+}
