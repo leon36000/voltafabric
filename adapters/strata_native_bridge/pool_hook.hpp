@@ -7,8 +7,7 @@
 #include <memory>
 namespace vf::strata_bridge {
 // One fixed layer and run/plan/epoch, bound by the preceding bridge Init.
-// Batch and attempt advance independently after each complete callback.
-// This opt-in hook serves CPU-only experts; no GPU, peer or helper may be active.
+// Batch and attempt advance independently after each complete CPU callback.
 struct PoolContext {
     Client& client;
     int64_t layer;
@@ -31,6 +30,8 @@ public:
     PoolFleet& operator=(const PoolFleet&) = delete;
     friend bool pool_cpu_by_layer(void*, const float*, const int32_t*, int64_t,
                                   int64_t, float*, int64_t) noexcept;
+    friend bool pool_cpu_misses_by_layer(void*, const float*, const int32_t*, const int32_t*,
+                                         int64_t, int64_t, float*, int64_t) noexcept;
     friend class PoolFleetOwner;
 private:
     const std::array<PoolContext*, 48> contexts_;
@@ -40,6 +41,13 @@ private:
 // Any failure latches the fleet so an incomplete model step is refused.
 bool pool_cpu_by_layer(void* user, const float* x, const int32_t* ids, int64_t tokens,
                        int64_t top_k, float* out, int64_t layer) noexcept;
+
+// Mixed-owner variant for Strata's final per-route ownership decision:
+// -1 rows are computed by VoltaFabric; 0..2 rows remain owned by Strata's
+// VRAM/PCIe/peer path. A successful call writes only the -1 rows.
+bool pool_cpu_misses_by_layer(void* user, const float* x, const int32_t* ids,
+                              const int32_t* kinds, int64_t tokens,
+                              int64_t top_k, float* out, int64_t layer) noexcept;
 
  // Owns the per-layer callback contexts and Client objects for one generation.
  // File descriptors remain borrowed by Client and must outlive this owner.

@@ -6,26 +6,69 @@
 #include <utility>
 #include <vector>
 namespace vf::strata_bridge {
-bool pool_cpu_only(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
-    if (!user) return false;
-    auto& ctx=*static_cast<PoolContext*>(user);
+namespace {
+bool pool_with_kinds(PoolContext& ctx, const float* x, const int32_t* ids,
+                     const int32_t* kinds, int64_t tokens, int64_t k,
+                     float* out, int64_t layer) noexcept {
     try {
         std::lock_guard<std::mutex> lock(ctx.mutex);
-        if(ctx.terminal) return false;
-        ctx.terminal=true;
-        if(!x || !ids || !out || layer!=ctx.layer || layer!=int64_t(ctx.client.layer()) || tokens<1 || tokens>8 || k<1 || k>64 || tokens*k>128 || ctx.next_batch==std::numeric_limits<uint64_t>::max() || ctx.next_attempt==0 || ctx.next_attempt==std::numeric_limits<uint64_t>::max()) {
-            ctx.terminal=true; ctx.error="invalid native pool input"; return false;
+        if (ctx.terminal) return false;
+        ctx.terminal = true;
+        if (!x || !ids || !out || layer != ctx.layer || layer != int64_t(ctx.client.layer()) ||
+            tokens < 1 || tokens > 8 || k < 1 || k > 64 || tokens * k > 128) {
+            ctx.error = "invalid native pool input";
+            return false;
         }
-        const size_t n=size_t(tokens*k), width=2560;
-        std::vector<float> input(x,x+size_t(tokens)*width), staged(n*width);
-        std::vector<int32_t> expert(ids,ids+n), kinds(n,-1);
-        if(!ctx.client.run(ctx.next_batch,ctx.next_attempt,int(tokens),int(k),input,expert,kinds,staged,ctx.error)) { ctx.terminal=true; return false; }
-        std::copy(staged.begin(),staged.end(),out);
+
+        const size_t n = size_t(tokens * k), width = 2560;
+        std::vector<int32_t> experts(ids, ids + n);
+        std::vector<int32_t> owner_kinds = kinds ? std::vector<int32_t>(kinds, kinds + n)
+                                                   : std::vector<int32_t>(n, -1);
+        if (std::any_of(owner_kinds.begin(), owner_kinds.end(), [](int32_t kind) {
+                return kind < -1 || kind > 2;
+            })) {
+            ctx.error = "invalid native pool ownership kind";
+            return false;
+        }
+
+        // A layer whose routes are all already owned by Strata has no VoltaFabric
+        // work and consumes no local ticket.
+        if (std::find(owner_kinds.begin(), owner_kinds.end(), -1) == owner_kinds.end()) {
+            ctx.terminal = false;
+            ctx.error.clear();
+            return true;
+        }
+        if (ctx.next_batch == std::numeric_limits<uint64_t>::max() || ctx.next_attempt == 0 ||
+            ctx.next_attempt == std::numeric_limits<uint64_t>::max()) {
+            ctx.error = "native pool ticket exhausted";
+            return false;
+        }
+
+        std::vector<float> input(x, x + size_t(tokens) * width), staged(n * width, 0.0f);
+        if (!ctx.client.run(ctx.next_batch, ctx.next_attempt, int(tokens), int(k), input,
+                            experts, owner_kinds, staged, ctx.error)) {
+            return false;
+        }
+        // Client::run stages and validates all returned rows. Copy only the
+        // CPU-owned slots so concurrent GPU/peer rows in `out` remain untouched.
+        for (size_t slot = 0; slot < n; ++slot) {
+            if (owner_kinds[slot] != -1) continue;
+            std::copy_n(staged.data() + slot * width, width, out + slot * width);
+        }
         ++ctx.next_batch;
         ++ctx.next_attempt;
-        ctx.terminal=false;
+        ctx.terminal = false;
+        ctx.error.clear();
         return true;
-    } catch (...) { return false; }
+    } catch (...) {
+        return false;
+    }
+}
+}
+
+bool pool_cpu_only(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
+    if (!user) return false;
+    return pool_with_kinds(*static_cast<PoolContext*>(user), x, ids, nullptr, tokens, k, out, layer);
 }
 bool pool_cpu_by_layer(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
     if (!user) return false;
@@ -37,7 +80,24 @@ bool pool_cpu_by_layer(void* user,const float* x,const int32_t* ids,int64_t toke
         if(layer<0 || layer>=int64_t(fleet.contexts_.size())) return false;
         auto* ctx=fleet.contexts_[size_t(layer)];
         if(!ctx || ctx->layer!=layer || ctx->client.layer()!=uint32_t(layer)) return false;
-        if(!pool_cpu_only(ctx,x,ids,tokens,k,out,layer)) return false;
+        if(!pool_with_kinds(*ctx,x,ids,nullptr,tokens,k,out,layer)) return false;
+        fleet.terminal_=false;
+        return true;
+    } catch (...) { return false; }
+}
+
+bool pool_cpu_misses_by_layer(void* user,const float* x,const int32_t* ids,const int32_t* kinds,
+                              int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
+    if (!user || !kinds) return false;
+    auto& fleet=*static_cast<PoolFleet*>(user);
+    try {
+        std::lock_guard<std::mutex> lock(fleet.mutex_);
+        if(fleet.terminal_) return false;
+        fleet.terminal_=true;
+        if(layer<0 || layer>=int64_t(fleet.contexts_.size())) return false;
+        auto* ctx=fleet.contexts_[size_t(layer)];
+        if(!ctx || ctx->layer!=layer || ctx->client.layer()!=uint32_t(layer)) return false;
+        if(!pool_with_kinds(*ctx,x,ids,kinds,tokens,k,out,layer)) return false;
         fleet.terminal_=false;
         return true;
     } catch (...) { return false; }
