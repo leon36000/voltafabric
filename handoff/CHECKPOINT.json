@@ -12108,5 +12108,29 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R654 inspect the pinned llama.cpp CUDA backend for SM70 and integrate/compile a compatible boundary with an independent CPU oracle.",
     "id": "r653_strata_callback_build"
+  },
+  "r654_ggml_mul_mat_id": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ORACLE_PASS",
+    "branch": "r654-ggml-mul-mat-id-20261101",
+    "parent_commit": "1b67bab32d6c681b6dd0ee347c073963d0ea9e9d",
+    "source_commit": "2db041c88391c1f92b0cc0c230c337a87a4b4a8a",
+    "report": "research/R654/REPORT.md",
+    "result": "research/R654/RESULT.json",
+    "build_test": "research/R654/BUILD_TEST.txt",
+    "sha256sums": "research/R654/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Expose pinned GGML_OP_MUL_MAT_ID as routed_matrix_forward; synchronous borrowed resident buffers; raw unweighted FP32 slot outputs; coefficients remain for the Collector.",
+    "test_result": "AArch64 CPU CMake configure PASS; C++17 -Wall -Wextra -Werror target build PASS; CTest native_provider 1/1 PASS against independent scalar FP64 Q8_0 oracle; invalid ID and nonfinite input preserve output atomically.",
+    "readback_files_verified": 7,
+    "published_utc": "2026-11-01T04:37:22Z",
+    "readback_verified_utc": "2026-11-01T04:37:22Z",
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R655: connect raw grouped outputs to the CPU VoltaFabric Collector with fresh synthetic identities; test coefficients once and atomic rejection. No model/GPU/production network."
   }
 }

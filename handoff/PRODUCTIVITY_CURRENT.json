@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:30:20Z",
+  "updated_utc": "2026-11-01T04:37:22Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -278,6 +278,28 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R654",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ORACLE_PASS",
+      "branch": "r654-ggml-mul-mat-id-20261101",
+      "parent_commit": "1b67bab32d6c681b6dd0ee347c073963d0ea9e9d",
+      "commit": "2db041c88391c1f92b0cc0c230c337a87a4b4a8a",
+      "path": "research/R654",
+      "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "donor_license": "MIT",
+      "adaptation": "Added vf::native_ggml::routed_matrix_forward backed by the pinned GGML_OP_MUL_MAT_ID CPU path; borrows resident buffers synchronously and returns raw unweighted FP32 rows.",
+      "test": "AArch64 CPU configure/build passed with C++17 -Wall -Wextra -Werror; ctest native_provider 1/1 passed against an independent scalar FP64 Q8_0 oracle and atomic-invalid-input checks.",
+      "test_scope": "Synthetic 3-expert, 4-slot Q8_0 fixture only; not connected to Rust Fleet, Session, or Strata callback.",
+      "readback_files_verified": 7,
+      "published_utc": "2026-11-01T04:37:22Z",
+      "readback_verified_utc": "2026-11-01T04:37:22Z",
+      "model_loaded": false,
+      "generation_executed": false,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -309,7 +331,8 @@
     "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed.",
     "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle.",
     "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations.",
-    "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653."
+    "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653.",
+    "R654 adapts GGML grouped expert matrix multiplication only for the synchronous CPU Q8_0 fixture. It is not connected to Rust Fleet/Session or the Strata callback; other formats, checkpoint loading, full generation, GPU and inter-PC distribution remain unqualified."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -325,18 +348,19 @@
     "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
     "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
     "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
-    "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM"
+    "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM",
+    "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R654_READY_ON_OWNER_REQUEST",
-    "purpose": "Inspect the llama.cpp revision pinned by R643 for a compatible CUDA SM70 backend and select one native inference boundary that can be integrated and compiled with an independent CPU oracle; do not run a model or GPU."
+    "status": "R655_READY_ON_OWNER_REQUEST",
+    "purpose": "Connect R654 raw unweighted grouped outputs to the VoltaFabric CPU Collector using fresh synthetic identities; verify coefficients are applied once and incomplete outputs are rejected atomically. No model, GPU or production network."
   },
-  "report": "research/R653/REPORT.md",
+  "report": "research/R654/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R651/SHA256SUMS",
-    "sha256": "927730e873359f64b1b9489c21862d562f1324020049d7bc2acc96928cde009c",
-    "files": 10
+    "path": "research/R654/SHA256SUMS",
+    "sha256": "b094f72d22b95d3c3660e23efaf9047ba742cfd33045219e432de98b6ee16c73",
+    "files": 6
   }
 }
