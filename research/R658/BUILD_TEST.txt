@@ -1,0 +1,11 @@
+Isolated worktree: .runs/r655-ggml-collector-cpu-20261101-work
+Donor: llama.cpp/GGML 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+Native CMake: cmake --build build --target vf_native_ggml --parallel 2 — PASS
+CTest: ctest --test-dir build --output-on-failure — PASS (native_provider, 1/1)
+Rust format: rustfmt --edition 2021 --check src/session.rs crates/ggml-native-ffi/src/lib.rs tests/native_matrix_session.rs — PASS
+The test-only Cargo.toml temporarily disabled automatic discovery and selected only `vf-rank-session` plus this integration test; a trap restored the original bytes, verified against SHA-256 `a1dc9c094359a1004b1c577f232226083bf1808f6c07fe5713b6a3911f520706`.
+Scoped debug tests: VF_GGML_NATIVE_BUILD="$PWD/build" cargo test --locked --offline --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session — PASS (2 unit + 4 integration)
+Scoped release tests: VF_GGML_NATIVE_BUILD="$PWD/build" cargo test --locked --offline --release --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session — PASS (2 unit + 4 integration)
+Scoped Clippy: VF_GGML_NATIVE_BUILD="$PWD/build" cargo clippy --locked --offline --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session — PASS; two existing warnings in untouched SC117/Strata files.
+Whole-workspace cargo fmt --all -- --check — not clean due unrelated older binaries; the three changed Rust files pass targeted rustfmt.
+Cargo.toml restored byte-identically after temporary target restriction: SHA-256 a1dc9c094359a1004b1c577f232226083bf1808f6c07fe5713b6a3911f520706.

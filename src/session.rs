@@ -32,6 +32,8 @@ use serde::ser::SerializeSeq;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{self, BufRead, BufReader, Read, Write};
+#[cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
+use std::io::{Seek, SeekFrom};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{mpsc, Arc, Mutex};
@@ -84,6 +86,10 @@ pub const CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32: &str = "cpu_strata_sc117_ggml_u
 pub const CAPABILITY_NATIVE_GGML_RAW_F32: &str = "cpu_strata_sc117_ggml_input_raw_f32_v1";
 pub const MAX_RAW_ACTIVATION_BYTES: usize = MAX_MESSAGE_BYTES - 64 * 1024;
 const MAX_STDERR_KEPT: usize = 64 * 1024;
+#[cfg(feature = "native-ggml-cpu")]
+const GROUPED_MATRIX_STREAM_CHUNK_BYTES: usize = 1024 * 1024;
+#[cfg(feature = "native-ggml-cpu")]
+const GROUPED_MATRIX_LOAD_TIMEOUT_MAX: Duration = Duration::from_secs(30 * 60);
 /// How long close() still waits for the output of a worker it has just killed.
 const PIPE_GRACE: Duration = Duration::from_millis(200);
 
@@ -1620,6 +1626,50 @@ fn read_raw_body(
     Ok(bytes)
 }
 
+#[cfg(feature = "native-ggml-cpu")]
+fn read_grouped_matrix_stream_body(
+    input: &mut impl BufRead,
+    header_bytes: usize,
+    declared: u64,
+) -> Result<Vec<u8>> {
+    let len = usize::try_from(declared).map_err(|_| {
+        Error::new(
+            "MESSAGE_TOO_LARGE",
+            "grouped matrix length does not fit this host",
+        )
+    })?;
+    if len == 0
+        || declared > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES
+        || header_bytes >= MAX_MESSAGE_BYTES
+    {
+        return Err(Error::new(
+            "MESSAGE_TOO_LARGE",
+            "grouped matrix stream exceeds its resident or header bound",
+        ));
+    }
+    let mut bytes = Vec::new();
+    bytes.try_reserve_exact(len).map_err(|error| {
+        Error::new(
+            "ARTIFACT_ALLOC",
+            format!("cannot allocate grouped matrix stream: {error}"),
+        )
+    })?;
+    let mut remaining = len;
+    let mut chunk = [0_u8; GROUPED_MATRIX_STREAM_CHUNK_BYTES];
+    while remaining != 0 {
+        let take = remaining.min(chunk.len());
+        input.read_exact(&mut chunk[..take]).map_err(|error| {
+            Error::new(
+                "WORKER_PROTOCOL",
+                format!("grouped matrix stream ended before its declared size: {error}"),
+            )
+        })?;
+        bytes.extend_from_slice(&chunk[..take]);
+        remaining -= take;
+    }
+    Ok(bytes)
+}
+
 const MAX_VARINT_BYTES_PER_ID: usize = 10;
 const MAX_ENGRAM_ROW_ID_BODY_BYTES: usize = engram::MAX_LOOKUPS * MAX_VARINT_BYTES_PER_ID;
 
@@ -2988,7 +3038,7 @@ fn serve_impl(
                     || executor.is_some()
                     || binding.rank != rank
                     || artifact_bytes == 0
-                    || artifact_bytes > MAX_RAW_ARTIFACT_BYTES as u64
+                    || artifact_bytes > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES
                 {
                     let error = invalid("grouped matrix load state, rank or message size");
                     send_reply(
@@ -2999,8 +3049,26 @@ fn serve_impl(
                     )?;
                     return Err(error); // The raw body remains unread; this stream is terminal.
                 }
-                let bytes = match read_raw_body(input, header_bytes, artifact_bytes, false) {
-                    Ok(bytes) => bytes,
+                let bytes =
+                    match read_grouped_matrix_stream_body(input, header_bytes, artifact_bytes) {
+                        Ok(bytes) => bytes,
+                        Err(error) => {
+                            send_reply(
+                                output,
+                                &Reply::Refused {
+                                    error: error.clone(),
+                                },
+                            )?;
+                            return Err(error);
+                        }
+                    };
+                match crate::native_ggml_cpu::GroupedMatrixResident::load(binding.clone(), &bytes) {
+                    Ok(resident) => {
+                        grouped_matrix_worker = Some(
+                            crate::native_ggml_cpu::GroupedMatrixRankWorker::new(resident),
+                        );
+                        send_reply(output, &Reply::NativeGroupedMatrixLoaded { binding })?;
+                    }
                     Err(error) => {
                         send_reply(
                             output,
@@ -3010,15 +3078,6 @@ fn serve_impl(
                         )?;
                         return Err(error);
                     }
-                };
-                match crate::native_ggml_cpu::GroupedMatrixResident::load(binding.clone(), &bytes) {
-                    Ok(resident) => {
-                        grouped_matrix_worker = Some(
-                            crate::native_ggml_cpu::GroupedMatrixRankWorker::new(resident),
-                        );
-                        send_reply(output, &Reply::NativeGroupedMatrixLoaded { binding })?;
-                    }
-                    Err(error) => send_reply(output, &Reply::Refused { error })?,
                 }
             }
             #[cfg(feature = "native-ggml-cpu")]
@@ -4233,9 +4292,8 @@ impl Session {
         }
     }
 
-    /// Load a bounded digest-bound GGML grouped-matrix stack into one persistent CPU worker.
-    /// The artifact is sent once per session; this testable raw-frame boundary is not a
-    /// checkpoint loader and is limited to one session message.
+    /// Load a digest-bound GGML grouped-matrix stack into one persistent CPU worker.
+    /// This fixture convenience API streams bounded writes from the caller's slice.
     #[cfg(feature = "native-ggml-cpu")]
     pub fn load_grouped_matrix_raw(
         &mut self,
@@ -4243,44 +4301,151 @@ impl Session {
         bytes: &[u8],
         timeout: Duration,
     ) -> Result<()> {
+        if sha256::hex(bytes) != binding.sha256 {
+            return Err(invalid("grouped matrix payload digest"));
+        }
+        self.load_grouped_matrix_reader(
+            binding,
+            &mut io::Cursor::new(bytes),
+            bytes.len() as u64,
+            timeout,
+        )
+    }
+
+    /// Resolve a tensor's packed byte span with the pinned GGUF parser, then stream only
+    /// those bytes into the identified rank Session. The plan supplies the expected digest.
+    #[cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
+    pub fn load_grouped_matrix_gguf_tensor(
+        &mut self,
+        binding: &crate::native_ggml_cpu::GroupedMatrixBinding,
+        checkpoint_path: &std::path::Path,
+        tensor_name: &str,
+        timeout: Duration,
+    ) -> Result<()> {
+        let io_error = |error: io::Error| {
+            Error::new(
+                "CHECKPOINT_IO",
+                format!("cannot read GGUF tensor source: {error}"),
+            )
+        };
+        if tensor_name != binding.tensor || !sha256::is_hex_digest(&binding.sha256) {
+            return Err(invalid(
+                "GGUF tensor name or resident digest differs from plan",
+            ));
+        }
+        if !std::fs::metadata(checkpoint_path)
+            .map_err(io_error)?
+            .is_file()
+        {
+            return Err(invalid("GGUF tensor source must be a regular file"));
+        }
+        let mut file = crate::checkpoint::open_nonblocking(checkpoint_path).map_err(io_error)?;
+        let before = file.metadata().map_err(io_error)?;
+        if !before.is_file() {
+            return Err(invalid("opened GGUF tensor source is not regular"));
+        }
+        let span = vf_ggml_native_ffi::gguf_tensor_span(&file, tensor_name).map_err(invalid)?;
+        let rows = i64::try_from(binding.rows).map_err(|_| invalid("GGUF matrix rows overflow"))?;
+        let columns =
+            i64::try_from(binding.columns).map_err(|_| invalid("GGUF matrix columns overflow"))?;
+        let experts = i64::try_from(binding.residents.len())
+            .map_err(|_| invalid("GGUF resident count overflow"))?;
+        if span.ggml_type != binding.ggml_type
+            || span.dimensions != [columns, rows, experts, 1]
+            || span.bytes == 0
+            || span.bytes > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES
+            || span
+                .offset
+                .checked_add(span.bytes)
+                .is_none_or(|end| end > before.len())
+        {
+            return Err(invalid(
+                "GGUF tensor type, dimensions, size or file span differ from binding",
+            ));
+        }
+        file.seek(SeekFrom::Start(span.offset)).map_err(io_error)?;
+        let result = {
+            let mut bounded = (&mut file).take(span.bytes);
+            self.load_grouped_matrix_reader(binding, &mut bounded, span.bytes, timeout)
+        };
+        result?;
+        let after = file.metadata().map_err(io_error)?;
+        let before_modified = before.modified().map_err(io_error)?;
+        let after_modified = after.modified().map_err(io_error)?;
+        if before.len() != after.len() || before_modified != after_modified || !after.is_file() {
+            let error = invalid("GGUF checkpoint changed during resident tensor load");
+            self.poison_grouped_matrix_load();
+            return Err(error);
+        }
+        Ok(())
+    }
+
+    /// Stream exactly one bounded raw matrix body. The body remains staged until its
+    /// digest and GGML shape validate; a short source invalidates and reaps this Session.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn load_grouped_matrix_reader<R: Read>(
+        &mut self,
+        binding: &crate::native_ggml_cpu::GroupedMatrixBinding,
+        reader: &mut R,
+        artifact_bytes: u64,
+        timeout: Duration,
+    ) -> Result<()> {
         if self.native_backend.is_some()
             || timeout.is_zero()
-            || timeout > Duration::from_secs(60)
+            || timeout > GROUPED_MATRIX_LOAD_TIMEOUT_MAX
             || !self
                 .hello
                 .capabilities
                 .iter()
                 .any(|c| c == CAPABILITY_NATIVE_GROUPED_MATRIX_CPU)
             || binding.rank != self.rank
-            || bytes.is_empty()
-            || bytes.len() > MAX_RAW_ARTIFACT_BYTES
-            || sha256::hex(bytes) != binding.sha256
+            || artifact_bytes == 0
+            || artifact_bytes > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES
+            || !sha256::is_hex_digest(&binding.sha256)
+            || self
+                .traffic
+                .weight_bytes_sent
+                .checked_add(artifact_bytes)
+                .is_none()
         {
             return Err(invalid(
-                "grouped matrix capability, binding, timeout or message size",
+                "grouped matrix capability, binding, timeout or resident size",
             ));
         }
         let request = Request::LoadNativeGroupedMatrixRaw {
             binding: binding.clone(),
-            artifact_bytes: bytes.len() as u64,
+            artifact_bytes,
         };
         let header = encode(&request)?;
-        if header
-            .len()
-            .checked_add(bytes.len())
-            .is_none_or(|n| n > MAX_MESSAGE_BYTES)
-        {
-            return Err(invalid("grouped matrix load frame size"));
+        if header.len() > MAX_MESSAGE_BYTES {
+            return Err(invalid("grouped matrix load header size"));
         }
         let deadline = Instant::now() + timeout;
-        if let Err(error) = self.write_parts_until(&[&header, bytes], true, deadline) {
-            self.usable = false;
+        if let Err(error) = self.write_parts_until(&[&header], true, deadline) {
+            self.poison_grouped_matrix_load();
             return Err(error);
+        }
+        let mut remaining = artifact_bytes;
+        let mut chunk = [0_u8; GROUPED_MATRIX_STREAM_CHUNK_BYTES];
+        while remaining != 0 {
+            let take = remaining.min(chunk.len() as u64) as usize;
+            if let Err(error) = reader.read_exact(&mut chunk[..take]) {
+                self.poison_grouped_matrix_load();
+                return Err(Error::new(
+                    "CHECKPOINT_IO",
+                    format!("GGUF source ended before the bound tensor span: {error}"),
+                ));
+            }
+            if let Err(error) = self.write_stream_chunk_until(&chunk[..take], deadline) {
+                self.poison_grouped_matrix_load();
+                return Err(error);
+            }
+            remaining -= take as u64;
         }
         let reply = match self.reply_until(deadline) {
             Ok(reply) => reply,
             Err(error) => {
-                self.usable = false;
+                self.poison_grouped_matrix_load();
                 return Err(error);
             }
         };
@@ -4291,7 +4456,7 @@ impl Session {
                 self.traffic.weight_bytes_sent = self
                     .traffic
                     .weight_bytes_sent
-                    .checked_add(bytes.len() as u64)
+                    .checked_add(artifact_bytes)
                     .ok_or_else(|| invalid("grouped matrix traffic overflow"))?;
                 self.traffic.loads_transferred = self
                     .traffic
@@ -4301,14 +4466,23 @@ impl Session {
                 Ok(())
             }
             Reply::Refused { error } => {
-                self.usable = false;
+                self.poison_grouped_matrix_load();
                 Err(error)
             }
             _ => {
-                self.usable = false;
-                Err(invalid("grouped matrix load reply identity"))
+                self.poison_grouped_matrix_load();
+                Err(invalid("native GGML load reply identity"))
             }
         }
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn poison_grouped_matrix_load(&mut self) {
+        self.usable = false;
+        self.disconnect_reader_queue();
+        drop(self.stdin.take());
+        let _ = self.reap(Instant::now() + Duration::from_secs(1));
+        self.cancel_output_readers();
     }
 
     /// Explicit diagnostic scalar CPU load; caller must bind this choice to its trusted plan.
@@ -4876,6 +5050,7 @@ impl Session {
         type GroupedRankWork = (usize, routing::RankDispatch, Vec<(usize, Vec<f32>)>);
         let mut selected: Vec<GroupedRankWork> = Vec::new();
         let mut first_binding: Option<crate::native_ggml_cpu::GroupedMatrixBinding> = None;
+        let mut resident_payload_bytes = 0_u64;
         for rank in dispatch
             .ranks
             .into_iter()
@@ -4896,6 +5071,10 @@ impl Session {
                 .grouped_matrix_binding
                 .as_ref()
                 .ok_or_else(|| invalid("grouped matrix participant has no resident binding"))?;
+            resident_payload_bytes = resident_payload_bytes
+                .checked_add(session.traffic.weight_bytes_sent)
+                .filter(|&bytes| bytes <= crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES)
+                .ok_or_else(|| invalid("grouped matrix Sessions exceed resident payload budget"))?;
             if !session.usable
                 || session.native_backend != Some(NativeBackend::GroupedMatrix)
                 || !session
@@ -5527,6 +5706,24 @@ impl Session {
         enforce_bound: bool,
         deadline: Instant,
     ) -> Result<()> {
+        self.write_parts_until_inner(parts, enforce_bound, true, deadline)
+    }
+
+    /// Write one bounded raw portion of an already-framed request. It contributes to
+    /// bytes sent but not to the logical request-frame count.
+    #[cfg(feature = "native-ggml-cpu")]
+    fn write_stream_chunk_until(&mut self, bytes: &[u8], deadline: Instant) -> Result<()> {
+        self.write_parts_until_inner(&[bytes], true, false, deadline)
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn write_parts_until_inner(
+        &mut self,
+        parts: &[&[u8]],
+        enforce_bound: bool,
+        count_frame: bool,
+        deadline: Instant,
+    ) -> Result<()> {
         if !self.usable {
             return Err(Error::new(
                 "SESSION_UNUSABLE",
@@ -5589,7 +5786,7 @@ impl Session {
         match result {
             Ok(()) => {
                 self.traffic.bytes_sent += length as u64;
-                self.traffic.frames_sent += 1;
+                self.traffic.frames_sent += u64::from(count_frame);
                 Ok(())
             }
             Err(error) => {

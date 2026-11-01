@@ -1,6 +1,11 @@
 #![cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
 
-use std::{collections::BTreeMap, path::PathBuf, time::Duration};
+use std::{
+    collections::BTreeMap,
+    io::{self, Read, Write},
+    path::PathBuf,
+    time::Duration,
+};
 use voltafabric::{
     moe::{Choice, Registry, Replica, Stamp},
     native_ggml_cpu::GroupedMatrixBinding,
@@ -38,6 +43,18 @@ fn binding(
     model: &str,
     layer: u32,
 ) -> GroupedMatrixBinding {
+    binding_shape(rank, experts, bytes, model, layer, H, H)
+}
+
+fn binding_shape(
+    rank: u32,
+    experts: &[(u32, u32)],
+    bytes: &[u8],
+    model: &str,
+    layer: u32,
+    rows: usize,
+    columns: usize,
+) -> GroupedMatrixBinding {
     GroupedMatrixBinding {
         model_revision: model.into(),
         layer,
@@ -45,10 +62,94 @@ fn binding(
         ggml_type: 8,
         rank,
         epoch: 9,
-        rows: H,
-        columns: H,
+        rows,
+        columns,
         residents: experts.to_vec(),
         sha256: sha256::hex(bytes),
+    }
+}
+
+fn gguf_fixture(label: &str, tensor_name: &str, dimensions: [u64; 3], payload: &[u8]) -> PathBuf {
+    let runs = std::env::current_dir().unwrap().join(".runs");
+    std::fs::create_dir_all(&runs).unwrap();
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_nanos();
+    let directory = runs.join(format!("r658-gguf-{label}-{}-{nonce}", std::process::id()));
+    std::fs::create_dir(&directory).unwrap();
+    let mut header = Vec::new();
+    header.extend_from_slice(b"GGUF");
+    header.extend_from_slice(&3_u32.to_le_bytes());
+    header.extend_from_slice(&1_u64.to_le_bytes()); // tensors
+    header.extend_from_slice(&0_u64.to_le_bytes()); // key/value entries
+    header.extend_from_slice(&(tensor_name.len() as u64).to_le_bytes());
+    header.extend_from_slice(tensor_name.as_bytes());
+    header.extend_from_slice(&3_u32.to_le_bytes());
+    for dimension in dimensions {
+        header.extend_from_slice(&dimension.to_le_bytes());
+    }
+    header.extend_from_slice(&8_i32.to_le_bytes()); // GGML_TYPE_Q8_0
+    header.extend_from_slice(&0_u64.to_le_bytes()); // tensor-relative offset
+    while header.len() % 32 != 0 {
+        header.push(0);
+    }
+    let path = directory.join("tiny.gguf");
+    let mut file = std::fs::File::create(&path).unwrap();
+    file.write_all(&header).unwrap();
+    file.write_all(payload).unwrap();
+    file.sync_all().unwrap();
+    path
+}
+
+fn q8_0_one_hot_oracle(
+    problem: &RoutingProblem,
+    binding: &GroupedMatrixBinding,
+    weights: &[u8],
+    inputs: &[Vec<f32>],
+) -> Vec<Vec<f64>> {
+    let row_bytes = (binding.columns / 32) * Q8_0_ROW_BYTES;
+    let expert_bytes = binding.rows * row_bytes;
+    problem
+        .routes
+        .iter()
+        .zip(inputs)
+        .map(|(routes, input)| {
+            assert!(input.iter().skip(1).all(|x| *x == 0.0));
+            let mut row = vec![0.0; binding.rows];
+            for route in routes {
+                let physical = binding
+                    .residents
+                    .iter()
+                    .position(|(expert, _)| *expert == route.expert)
+                    .unwrap();
+                for (output, value) in row.iter_mut().enumerate() {
+                    let offset = physical * expert_bytes + output * row_bytes;
+                    let scale = u16::from_le_bytes([weights[offset], weights[offset + 1]]);
+                    let q8_value = weights[offset + 2] as i8;
+                    *value += f64::from(input[0])
+                        * voltafabric::completion::decode_fp16(scale).unwrap()
+                        * f64::from(q8_value)
+                        * route.weight;
+                }
+            }
+            row
+        })
+        .collect()
+}
+
+struct ShortReader {
+    remaining: usize,
+}
+impl Read for ShortReader {
+    fn read(&mut self, out: &mut [u8]) -> io::Result<usize> {
+        if self.remaining == 0 {
+            return Ok(0);
+        }
+        let count = self.remaining.min(out.len());
+        out[..count].fill(0);
+        self.remaining -= count;
+        Ok(count)
     }
 }
 
@@ -136,6 +237,7 @@ fn grouped_ggml_matrix_stays_resident_across_identified_session_batches() {
         "r657-session-model",
         5,
     );
+    let checkpoint = gguf_fixture("small", &binding.tensor, [H as u64, H as u64, 3], &weights);
     let mut session = Session::connect(&endpoint(7), TIMEOUT).unwrap();
     assert!(session
         .hello
@@ -143,7 +245,7 @@ fn grouped_ggml_matrix_stays_resident_across_identified_session_batches() {
         .iter()
         .any(|c| c == voltafabric::session::CAPABILITY_NATIVE_GROUPED_MATRIX_CPU));
     session
-        .load_grouped_matrix_raw(&binding, &weights, TIMEOUT)
+        .load_grouped_matrix_gguf_tensor(&binding, &checkpoint, &binding.tensor, TIMEOUT)
         .unwrap();
     let mut sessions = vec![session];
     let ledger = ledger("success");
@@ -160,6 +262,10 @@ fn grouped_ggml_matrix_stays_resident_across_identified_session_batches() {
         TIMEOUT,
     )
     .unwrap();
+    assert_eq!(
+        first,
+        q8_0_one_hot_oracle(&first_problem, &binding, &weights, &first_inputs)
+    );
     assert_eq!(first[0][0], 3.5);
     assert_eq!(first[1][0], 2.0);
 
@@ -190,6 +296,71 @@ fn grouped_ggml_matrix_stays_resident_across_identified_session_batches() {
     assert!(replay.message.contains("identity already attempted"));
     assert!(sessions[0].is_usable());
     let _ = sessions.pop().unwrap().close(TIMEOUT);
+}
+
+#[test]
+fn gguf_tensor_span_streams_more_than_one_session_frame_into_resident_memory() {
+    let rows = 644;
+    let columns = 6144;
+    let residents = [(3, 1), (18, 2), (40, 0), (55, 3)];
+    let row_bytes = (columns / 32) * Q8_0_ROW_BYTES;
+    let expert_bytes = rows * row_bytes;
+    let mut weights = vec![0_u8; residents.len() * expert_bytes];
+    for (expert_index, code) in [1_u8, 2, 3, 4].into_iter().enumerate() {
+        for row in 0..rows {
+            let offset = expert_index * expert_bytes + row * row_bytes;
+            weights[offset..offset + 2].copy_from_slice(&[0x00, 0x3c]);
+            weights[offset + 2] = code;
+        }
+    }
+    assert!(weights.len() > voltafabric::session::MAX_RAW_ARTIFACT_BYTES);
+    let binding = binding_shape(
+        7,
+        &residents,
+        &weights,
+        "r658-large-gguf-model",
+        5,
+        rows,
+        columns,
+    );
+    let checkpoint = gguf_fixture(
+        "large",
+        &binding.tensor,
+        [columns as u64, rows as u64, residents.len() as u64],
+        &weights,
+    );
+    let mut session = Session::connect(&endpoint(7), Duration::from_secs(60)).unwrap();
+    session
+        .load_grouped_matrix_gguf_tensor(
+            &binding,
+            &checkpoint,
+            &binding.tensor,
+            Duration::from_secs(60),
+        )
+        .unwrap();
+    assert_eq!(session.traffic.weight_bytes_sent, weights.len() as u64);
+    let receipt = session.close(Duration::from_secs(5));
+    assert_eq!(receipt.bye_execs, Some(0));
+    assert_eq!(receipt.exit_code, Some(0));
+}
+
+#[test]
+fn short_checkpoint_span_poison_closes_session_without_loading_a_resident() {
+    let full = stack(H, [0x00, 0x3c], 1);
+    let binding = binding(7, &[(3, 0)], &full, "r658-short-span-model", 0);
+    let mut session = Session::connect(&endpoint(7), TIMEOUT).unwrap();
+    let error = session
+        .load_grouped_matrix_reader(
+            &binding,
+            &mut ShortReader { remaining: 4096 },
+            (2 * 1024 * 1024) as u64,
+            TIMEOUT,
+        )
+        .unwrap_err();
+    assert_eq!(error.code, "CHECKPOINT_IO");
+    assert!(!session.is_usable());
+    let receipt = session.close_input(Duration::from_secs(5));
+    assert!(receipt.exit_code.is_some());
 }
 
 #[test]

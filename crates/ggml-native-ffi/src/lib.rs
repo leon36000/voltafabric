@@ -1,5 +1,113 @@
 #![deny(unsafe_op_in_unsafe_fn)]
-use std::{ffi::c_void, ptr::NonNull};
+use std::{
+    ffi::{c_void, CString},
+    fs::File,
+    ptr::NonNull,
+};
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgufInitParams {
+    no_alloc: bool,
+    ctx: *mut *mut c_void,
+}
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgufContext {
+    _private: [u8; 0],
+}
+
+#[cfg(target_os = "linux")]
+unsafe extern "C" {
+    fn gguf_init_from_file(
+        path: *const std::ffi::c_char,
+        params: GgufInitParams,
+    ) -> *mut GgufContext;
+    fn gguf_free(ctx: *mut GgufContext);
+    fn gguf_get_data_offset(ctx: *const GgufContext) -> usize;
+    fn gguf_find_tensor(ctx: *const GgufContext, name: *const std::ffi::c_char) -> i64;
+    fn gguf_get_tensor_offset(ctx: *const GgufContext, tensor_id: i64) -> usize;
+    fn gguf_get_tensor_size(ctx: *const GgufContext, tensor_id: i64) -> usize;
+    fn gguf_get_tensor_type(ctx: *const GgufContext, tensor_id: i64) -> i32;
+    fn gguf_get_tensor_ne(ctx: *const GgufContext, tensor_id: i64) -> *const i64;
+}
+
+/// Metadata-only span for one tensor in a GGUF file, using the pinned GGUF reader.
+#[cfg(target_os = "linux")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GgufTensorSpan {
+    pub offset: u64,
+    pub bytes: u64,
+    pub ggml_type: i32,
+    /// GGUF/ggml extents in physical order; unused dimensions are one.
+    pub dimensions: [i64; 4],
+}
+
+#[cfg(target_os = "linux")]
+struct GgufGuard(NonNull<GgufContext>);
+
+#[cfg(target_os = "linux")]
+impl Drop for GgufGuard {
+    fn drop(&mut self) {
+        // SAFETY: this guard uniquely owns the context returned by gguf_init_from_file.
+        unsafe { gguf_free(self.0.as_ptr()) }
+    }
+}
+
+/// Read tensor metadata without allocating its tensor data. The descriptor is already
+/// open and regular; `/proc/self/fd` makes the pinned GGUF parser inspect that same inode.
+#[cfg(target_os = "linux")]
+pub fn gguf_tensor_span(file: &File, name: &str) -> Result<GgufTensorSpan, &'static str> {
+    use std::os::fd::AsRawFd;
+    let descriptor_path = CString::new(format!("/proc/self/fd/{}", file.as_raw_fd()))
+        .map_err(|_| "invalid checkpoint descriptor")?;
+    let tensor_name = CString::new(name).map_err(|_| "GGUF tensor name contains NUL")?;
+    // SAFETY: paths remain NUL-terminated and valid during the call. `ctx` is null and
+    // `no_alloc=true`, so GGUF reads only bounded metadata and leaves tensor bytes on disk.
+    let raw = unsafe {
+        gguf_init_from_file(
+            descriptor_path.as_ptr(),
+            GgufInitParams {
+                no_alloc: true,
+                ctx: std::ptr::null_mut(),
+            },
+        )
+    };
+    let ctx = GgufGuard(NonNull::new(raw).ok_or("pinned GGUF metadata parse failed")?);
+    // SAFETY: the context guard stays live and the tensor ID is checked below.
+    let id = unsafe { gguf_find_tensor(ctx.0.as_ptr(), tensor_name.as_ptr()) };
+    if id < 0 {
+        return Err("GGUF tensor name is absent");
+    }
+    // SAFETY: the nonnegative ID came from gguf_find_tensor for this live context.
+    let (relative, bytes, ggml_type, ne) = unsafe {
+        let ne = gguf_get_tensor_ne(ctx.0.as_ptr(), id);
+        if ne.is_null() {
+            return Err("GGUF tensor dimensions are unavailable");
+        }
+        let dimensions = [*ne, *ne.add(1), *ne.add(2), *ne.add(3)];
+        (
+            gguf_get_tensor_offset(ctx.0.as_ptr(), id),
+            gguf_get_tensor_size(ctx.0.as_ptr(), id),
+            gguf_get_tensor_type(ctx.0.as_ptr(), id),
+            dimensions,
+        )
+    };
+    // SAFETY: `ctx` remains live under the guard until the offset is copied out.
+    let absolute = unsafe { gguf_get_data_offset(ctx.0.as_ptr()) }
+        .checked_add(relative)
+        .ok_or("GGUF tensor offset overflow")?;
+    if absolute > 128 * 1024 * 1024 {
+        return Err("GGUF metadata header exceeds 128 MiB");
+    }
+    Ok(GgufTensorSpan {
+        offset: u64::try_from(absolute).map_err(|_| "GGUF offset does not fit u64")?,
+        bytes: u64::try_from(bytes).map_err(|_| "GGUF tensor size does not fit u64")?,
+        ggml_type,
+        dimensions: ne,
+    })
+}
 
 unsafe extern "C" {
     #[cfg(feature = "scalar-reference")]
@@ -346,7 +454,7 @@ impl NativeRoutedMatrix {
             || columns == 0
             || columns > 6144
             || bytes.is_empty()
-            || bytes.len() > 32 * 1024 * 1024
+            || bytes.len() > 1_250_000_000
         {
             return Err("invalid routed matrix binding");
         }

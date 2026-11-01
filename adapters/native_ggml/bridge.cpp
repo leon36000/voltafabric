@@ -84,7 +84,7 @@ extern "C" void* vf_native_routed_matrix_create(int type, size_t experts, size_t
         if (row_bytes == 0 || rows > SIZE_MAX / row_bytes) return nullptr;
         const size_t expert_bytes = rows * row_bytes;
         if (experts > SIZE_MAX / expert_bytes || experts * expert_bytes != len ||
-            len > 32 * 1024 * 1024) return nullptr;
+            len > 1'250'000'000ULL) return nullptr;
         auto matrix = std::make_unique<RoutedMatrix>();
         matrix->type = type;
         matrix->experts = experts;

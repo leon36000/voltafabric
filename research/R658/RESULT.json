@@ -1,0 +1,32 @@
+{
+  "id": "R658",
+  "status": "CPU_GGUF_TENSOR_SPAN_SESSION_PASS",
+  "branch_base": "8a859c9c3605bbd18ec1f77bc8424218753f4ce6",
+  "donor": {
+    "name": "llama.cpp / GGML GGUF metadata API",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "scope_reused": "metadata-only tensor lookup through pinned gguf_* API"
+  },
+  "fixture": {
+    "format": "synthetic GGUF v3, Q8_0",
+    "packed_tensor_bytes": 16816128,
+    "session_raw_frame_limit_bytes": 16777216,
+    "oracle": "independent scalar one-hot projection"
+  },
+  "tests": {
+    "debug_session_unit": "2 passed",
+    "debug_integration": "4 passed",
+    "release_session_unit": "2 passed",
+    "release_integration": "4 passed",
+    "native_provider_ctest": "1 passed",
+    "targeted_rustfmt": "passed",
+    "scoped_clippy": "passed with two pre-existing warnings in untouched files",
+    "full_workspace_rustfmt": "not clean; reports pre-existing formatting in unrelated older binaries"
+  },
+  "gpu": false,
+  "network": false,
+  "full_checkpoint": false,
+  "generation": false,
+  "next": "R659_CPU_checkpoint_architecture_mapping_and_complete_expert_ffn_oracle"
+}
