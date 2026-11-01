@@ -1,0 +1,48 @@
+{
+  "round": "R684",
+  "status": "CPU_GGUF_V3_TO_PINNED_DONOR_BUILD_MOE_FFN_AND_ATOMIC_REFUSAL_PASS",
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "parent_commit": "16eb5029c0bd430a36e09b145c41dc8403ac7ee0",
+  "donor": {
+    "project": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "fixture": {
+    "format": "GGUF v3",
+    "generated_by": "pinned donor GGUF writer",
+    "architecture": "qwen2moe",
+    "layers": 1,
+    "hidden": 2,
+    "expert_ffn": 2,
+    "experts": 2,
+    "tensor_count": 2,
+    "file_bytes": 544,
+    "tensor_type": "F32",
+    "tensor_shape": [
+      2,
+      2,
+      2
+    ]
+  },
+  "evidence": {
+    "compile": "C++17 -Wall -Wextra -Werror against pinned donor libraries: PASS",
+    "direct_runner": "PASS",
+    "ctest_registration_probe": "1/1 PASS",
+    "donor_raw_output": [
+      6,
+      20
+    ],
+    "route_weight": 0.5,
+    "collector_output": [
+      3,
+      10
+    ],
+    "collector_failure": "null llama graph result, GGML_STATUS_FAILED, no output publication",
+    "gpu_executed": false,
+    "production_checkpoint_loaded": false,
+    "complete_generation": false
+  },
+  "scope": "Tiny generated F32 GGUF fixture loaded by pinned GGUF parser into synthetic internal graph invoking the donor build_moe_ffn via live process_ubatch; not an architecture top-k/gate-up/checkpoint/full generation test.",
+  "next_action": "R685: adapt the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture to the pinned donor build_moe_ffn route path on CPU; preserve single application of route coefficient and atomic refusal."
+}

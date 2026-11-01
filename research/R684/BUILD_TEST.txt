@@ -1,0 +1,24 @@
+R684 CPU build/test record
+
+Pinned donor:
+- revision 3cf03257f219afbe7334045ff7c6a06ac68c627d
+- llama.cpp license: MIT
+- donor worktree and built libraries were read-only; GGML dependency clean
+
+Commands:
+1. bash -n adapters/native_ggml/run_qwen2moe_gguf_build_moe_ffn_test.sh
+2. VF_LLAMA_SOURCE_DIR=<pinned donor> VF_LLAMA_LIBRARY=<pinned libllama.so.0.4.1> VF_TEST_OUTPUT_DIR=<Naos scratch> CXX=c++ adapters/native_ggml/run_qwen2moe_gguf_build_moe_ffn_test.sh
+3. Configure a small CMake registration probe with VF_BUILD_LLAMA_QWEN2MOE_GGUF_BUILD_MOE_FFN_TEST=ON and run:
+   ctest --test-dir <Naos scratch>/build/ctest-registration -R '^qwen2moe_llama_gguf_build_moe_ffn$' --output-on-failure
+
+Results:
+- shell syntax: PASS
+- direct C++17 build with -Wall -Wextra -Werror: PASS
+- direct process_ubatch integration: PASS
+- CTest registration probe: 1/1 PASS (about 1.7 s)
+- GGUF v3 round-trip: 2 F32 tensors, 544-byte file; metadata/type/dimensions/size/spans validated
+- successful route: donor raw [6,20], weight 0.5 once, output [3,10]
+- provider refusal: null graph result, failed status, no published collector output
+
+The CTest probe exercised the same test registration command as the optional CMake block. It did not configure the full native_ggml tree or run its repository-wide tests. No GPU, checkpoint download, production network or performance run.
+

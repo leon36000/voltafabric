@@ -64,6 +64,12 @@ if(VF_BUILD_LLAMA_QWEN2MOE_BUILD_MOE_FFN_TEST AND NOT VF_BUILD_LLAMA_QWEN2MOE_BR
   message(FATAL_ERROR "build_moe_ffn test requires VF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON")
 endif()
 
+option(VF_BUILD_LLAMA_QWEN2MOE_GGUF_BUILD_MOE_FFN_TEST
+  "Register tiny GGUF-backed donor build_moe_ffn Qwen2MoE CPU integration test" OFF)
+if(VF_BUILD_LLAMA_QWEN2MOE_GGUF_BUILD_MOE_FFN_TEST AND NOT VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
+  message(FATAL_ERROR "GGUF build_moe_ffn test requires VF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON")
+endif()
+
 if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
   if(NOT VF_LLAMA_SOURCE_DIR OR NOT EXISTS "${VF_LLAMA_SOURCE_DIR}/.git")
     message(FATAL_ERROR "VF_LLAMA_SOURCE_DIR must name the isolated pinned llama.cpp worktree")
@@ -133,6 +139,16 @@ if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
         "CXX=${CMAKE_CXX_COMPILER}"
         "${CMAKE_CURRENT_SOURCE_DIR}/run_qwen2moe_build_moe_ffn_test.sh")
     set_tests_properties(qwen2moe_llama_build_moe_ffn PROPERTIES TIMEOUT 120)
+  endif()
+  if(VF_BUILD_LLAMA_QWEN2MOE_GGUF_BUILD_MOE_FFN_TEST)
+    add_test(NAME qwen2moe_llama_gguf_build_moe_ffn
+      COMMAND "${CMAKE_COMMAND}" -E env
+        "VF_LLAMA_SOURCE_DIR=${VF_LLAMA_SOURCE_DIR}"
+        "VF_LLAMA_LIBRARY=${VF_LLAMA_LIBRARY}"
+        "VF_TEST_OUTPUT_DIR=${CMAKE_CURRENT_BINARY_DIR}/qwen2moe_gguf_build_moe_ffn"
+        "CXX=${CMAKE_CXX_COMPILER}"
+        "${CMAKE_CURRENT_SOURCE_DIR}/run_qwen2moe_gguf_build_moe_ffn_test.sh")
+    set_tests_properties(qwen2moe_llama_gguf_build_moe_ffn PROPERTIES TIMEOUT 120)
   endif()
 endif()
 
@@ -233,3 +249,4 @@ target_compile_options(vf_check_sc117_layer1_shared PRIVATE -Wall -Wextra -Werro
 add_executable(vf_check_sc117_layer2_qkv check_sc117_layer2_qkv.cpp)
 target_link_libraries(vf_check_sc117_layer2_qkv PRIVATE ggml-cpu ggml-base)
 target_compile_options(vf_check_sc117_layer2_qkv PRIVATE -Wall -Wextra -Werror)
+
