@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:37:22Z",
+  "updated_utc": "2026-11-01T04:47:59Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -300,6 +300,29 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R655",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_COLLECTOR_PASS",
+      "branch": "r655-ggml-collector-cpu-20261101",
+      "parent_commit": "7454f574372068515344e6ea1333e7189e0bb353",
+      "commit": "0507af5ca09412b726e4a07881975c7d7cc44cce",
+      "path": "research/R655",
+      "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "donor_license": "MIT",
+      "adaptation": "Adds an owned resident grouped GGML matrix API through C++/Rust FFI. It returns raw unweighted FP32 slot outputs; the VoltaFabric ordinary FP16-decoded f64 Collector applies coefficients once and rejects incomplete batches atomically.",
+      "test": "AArch64 CPU CMake/build passed with C++17 -Wall -Wextra -Werror; native_provider CTest 1/1; focused Rust integration tests 2/2 in debug and release; rustfmt passed; strict clippy identifies an unchanged Strata too_many_arguments warning, while the scoped lint run passes.",
+      "test_scope": "Synthetic Q8_0, three experts, two tokens, four routed slots, resident order [1,2,0], attempt 13; weighted Collector outputs [3.5,2.0], stale attempt rejected, incomplete batch refused.",
+      "readback_files_verified": 8,
+      "published_utc": "2026-11-01T04:46:50Z",
+      "readback_verified_utc": "2026-11-01T04:47:59Z",
+      "model_loaded": false,
+      "generation_executed": false,
+      "session_path_exercised": false,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -332,7 +355,8 @@
     "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle.",
     "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations.",
     "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653.",
-    "R654 adapts GGML grouped expert matrix multiplication only for the synchronous CPU Q8_0 fixture. It is not connected to Rust Fleet/Session or the Strata callback; other formats, checkpoint loading, full generation, GPU and inter-PC distribution remain unqualified."
+    "R654 introduced GGML grouped expert matrix multiplication for a synchronous CPU Q8_0 fixture; R655 now composes its resident output with the VoltaFabric FP16-decoded f64 Collector in focused CPU tests. A persistent VoltaFabric Session/owner path, checkpoint loading, full generation, other formats, GPU and inter-PC distribution remain unqualified.",
+    "R655 verifies a synthetic Q8_0 grouped-matrix-to-Collector path only. It does not exercise the persistent Session/owner runtime, checkpoint loading, full generation, GPU, inter-PC distribution, production R53, other quantization formats, or performance."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -349,18 +373,19 @@
     "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
     "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
     "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM",
-    "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY"
+    "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY",
+    "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R655_READY_ON_OWNER_REQUEST",
-    "purpose": "Connect R654 raw unweighted grouped outputs to the VoltaFabric CPU Collector using fresh synthetic identities; verify coefficients are applied once and incomplete outputs are rejected atomically. No model, GPU or production network."
+    "status": "R656_READY_ON_OWNER_REQUEST",
+    "purpose": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
   },
-  "report": "research/R654/REPORT.md",
+  "report": "research/R655/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R654/SHA256SUMS",
-    "sha256": "b094f72d22b95d3c3660e23efaf9047ba742cfd33045219e432de98b6ee16c73",
-    "files": 6
+    "path": "research/R655/SHA256SUMS",
+    "sha256": "d26fe7855024f2f7c0c00af16ab13263133aedb5903e75ad054f9a65de95216a",
+    "files": 7
   }
 }

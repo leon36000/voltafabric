@@ -12132,5 +12132,32 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R655: connect raw grouped outputs to the CPU VoltaFabric Collector with fresh synthetic identities; test coefficients once and atomic rejection. No model/GPU/production network."
+  },
+  "r655_ggml_collector_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_COLLECTOR_PASS",
+    "branch": "r655-ggml-collector-cpu-20261101",
+    "parent_commit": "7454f574372068515344e6ea1333e7189e0bb353",
+    "source_commit": "0507af5ca09412b726e4a07881975c7d7cc44cce",
+    "report": "research/R655/REPORT.md",
+    "result": "research/R655/RESULT.json",
+    "build_test": "research/R655/BUILD_TEST.txt",
+    "sha256sums": "research/R655/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Adds an owned resident grouped GGML matrix API through C++/Rust FFI. It returns raw unweighted FP32 slot outputs; the VoltaFabric ordinary FP16-decoded f64 Collector applies coefficients once and rejects incomplete batches atomically.",
+    "test_result": "AArch64 CPU CMake/build passed with C++17 -Wall -Wextra -Werror; native_provider CTest 1/1; focused Rust integration tests 2/2 in debug and release; rustfmt passed; strict clippy identifies an unchanged Strata too_many_arguments warning, while the scoped lint run passes.",
+    "fixture": "Synthetic Q8_0, three experts, two tokens, four routed slots, resident order [1,2,0], attempt 13; weighted Collector outputs [3.5,2.0], stale attempt rejected, incomplete batch refused.",
+    "readback_files_verified": 8,
+    "published_utc": "2026-11-01T04:46:50Z",
+    "readback_verified_utc": "2026-11-01T04:47:59Z",
+    "model_loaded": false,
+    "generation_executed": false,
+    "session_path_exercised": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
   }
+
 }
