@@ -1998,7 +1998,6 @@
     "transport_receipt": ".work/a142-rank-partial-layer-r8/evidence/A142_PROFILE_TRANSPORT_RECEIPT_R8.json"
   },
   "a142_r8_preparation_failure": {
-
     "receipt": ".work/a142-rank-partial-layer-r8/evidence/A142_R8_PREPARATION_R1_FAILURE.json",
     "status": "CPU_PREPARATION_R1_FAILED_BUILD_DEPENDENCY_ORDER_FIXED_AND_R2_PASS"
   },
@@ -3999,7 +3998,6 @@
     "a55_earlier_run": "evidence/continuation_a81_pcie_x4/runs/a81-h1-a55-full-20261019/receipt.json",
     "a55_earlier_run_classification": "UNKNOWN_DO_NOT_REPLAY",
     "a55_new_run": "evidence/continuation_a81_pcie_x4/runs/a81-h1-a55-canary-r2-20261018T2248/REMOTE_RESULT_RECOVERY.json",
-
     "a55_new_run_classification": "CONFIRMED_PRE_GPU_FAILURE_NO_KERNEL",
     "a56_cpu_gate": "PENDING_X86_FULL_PASS",
     "a56_gpu_kernel": "PENDING",
@@ -5713,10 +5711,10 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
+  "next_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
   "next_command": "NONE until snapshot is prepared and GitLab authentication exists.",
   "next_command_expected_result": "Read-only filenames of actual native-pack loader; no engine execution, no payload/model/GPU. Store bounded receipt.",
-  "next_cpu_action": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
+  "next_cpu_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
   "next_cwd": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
   "next_hardware_candidate_evidence": null,
   "next_hardware_command": "NONE: no new hardware case admitted; R81 budget1/1 exhausted.",
@@ -5729,8 +5727,8 @@
     "No CUDA/RDMA/GPUDirect/production claim from CPU evidence.",
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
-  "next_required_work": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
-  "next_task": "R641_STRATA_GENERATOR_POOL_OWNER_HANDOFF",
+  "next_required_work": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
+  "next_task": "R687_DONOR_FP16_INTERMEDIATE_ROUNDING_AND_SILU_ORACLE",
   "next_updated_utc": "2026-11-01T02:54:29Z",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
@@ -6000,7 +5998,6 @@
       },
       {
         "attempt": 1,
-
         "rank": 9,
         "replay_allowed": false,
         "started": true,
@@ -8001,7 +7998,6 @@
                   "/usr/bin/strace": "f47342683309e807bca57d6d89b82f94a9b39aa614e9c28c2b67cefbc35eee58"
                 },
                 "lease": "/tmp/vf-lab-GPU-819a4547-5ff3-130b-ea3b-1d1a837b1c77.lease",
-
                 "mode": "gpu",
                 "namespace": "r53-r57-pc6-pc3-diagnostic-20261026-gpu-a",
                 "receipt": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r57-gpu-stderr-diagnostic-20261026/result/guard.json",
@@ -9084,7 +9080,7 @@
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
   "updated_at_utc": "2026-10-27T20:55:19.428217+00:00",
-  "updated_utc": "2026-10-28T03:03:25.229663+00:00",
+  "updated_utc": "2026-11-01 11:34:00 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -10002,7 +9998,6 @@
     "canonical_functional_source_changed": false,
     "canonical_files": 370,
     "canonical_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
-
     "material_invocations": 1,
     "native_owner_instances": 2,
     "native_forwards": 16,
@@ -11646,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "research/R660/REPORT.md",
+  "latest_productivity_report": "research/R686/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -12003,7 +11998,6 @@
       },
       {
         "batch": 9649002,
-
         "attempt": 15
       }
     ],
@@ -12708,5 +12702,57 @@
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R685: use the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture through the pinned donor build_moe_ffn path on CPU; preserve single route weighting and atomic refusal. No checkpoint download, GPU or production network."
+  },
+  "r685_qwen2moe_q8_gguf_build_moe_ffn_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_7_OF_7_CPU_DIRECT_RUNNER_PASS_PIPELINE_2323_SUCCESS",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "070bcf79a2d44030dcd1b2b8c603622e6122724d",
+    "source_commit": "e47af9e5bc5d09c1964d0802576d98fa2299b267",
+    "report": "research/R685/REPORT.md",
+    "result": "research/R685/RESULT.json",
+    "build_test": "research/R685/BUILD_TEST.txt",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "CPU C++17 -Wall -Wextra -Werror; four process_ubatch cases pass. Checkpoint expert 0 maps to registry 3, 1 to 40; route weights 0.25/0.75 applied once; scalar raw Q8_0/SiLU tolerance 1e-3; provider failure and duplicate map refuse publication; R684 identity path passes.",
+    "test_scope": "Generated synthetic one-layer GGUF v3 Q8_0 hidden/FFN 32 fixture; direct runner only. Not Rust R659 loader in the same process, production checkpoint, full generation, GPU, inter-PC or performance.",
+    "readback_files_verified": 7,
+    "pipeline_2323": {
+      "status": "success",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R686: connect R659 rank-local Q8_0 expert slices to the mapped donor graph, measure source bytes read, compare with an independent scalar Q8_0/FP16 collector, and preserve atomic refusal. CPU-only."
+  },
+  "r686_qwen2moe_r659_rank_local_slice_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_6_OF_6_LOCAL_CPU_PASS_PIPELINE_2324_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "e47af9e5bc5d09c1964d0802576d98fa2299b267",
+    "source_commit": "5368a720712cf4a29cc1e2d15a38a66969d9606c",
+    "report": "research/R686/REPORT.md",
+    "result": "research/R686/RESULT.json",
+    "build_test": "research/R686/BUILD_TEST.txt",
+    "sha256sums": "research/R686/SHA256SUMS",
+    "manifest_sha256": "9463f9a9acc7fb927ef31880ae2b8949d4998ad1c3b44ea7bb153d97f2dd986f",
+    "readback_files_verified": 6,
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "CPU C++17 -Wall -Wextra -Werror direct runner PASS; selected bytes 6528/13056 (50%). Independent scalar Q8_0 raw oracle passes; collector route identity/weight and atomic failure withholding pass; duplicate projection rejected. Scalar FP16/f64 collector diverges from donor by max 0.00195304 at output 0 (donor 3.73706, scalar 3.73901); resident expert 40 differs 0.00195312, expert 3 differs 8.71369e-8. Full equivalence rejected.",
+    "test_scope": "Synthetic single-layer CPU fixture; no Rust R659 loader/donor graph in same process, production checkpoint, generation, GPU, inter-PC or performance. Standalone runner, not full CMake/CTest registration.",
+    "pipeline_2324": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch."
   }
 }
