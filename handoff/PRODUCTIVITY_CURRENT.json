@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T08:04:35Z",
+  "updated_utc": "2026-11-01 08:13:30 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -700,6 +700,31 @@
       ],
       "published_utc": "2026-11-01T08:04:35Z",
       "next_action": "Prototype a CPU-only graph operation boundary that consumes VoltaFabric's route-batched expert outputs and returns an explicit failure status before decode accepts the batch; test success and injected failure before considering checkpoints or GPU."
+    },
+    {
+      "id": "R669",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "c95b395b01008b5fb98be98d8dbca83f83f2d096",
+      "source_commit": "f5beaba1eed602a333e23182500204f5e814e4f0",
+      "path": "research/R669",
+      "readback_files_verified": 4,
+      "test": "pinned GGML custom_4d CPU route boundary; 1/1 CTest pass with success and partial-failure refusal",
+      "test_scope": "synthetic CPU collector callback only; no real Rust Session, checkpoint, model, generation, GPU, or network"
+    },
+    {
+      "id": "R670",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_LIBRARY_TEST_PASS",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "f5beaba1eed602a333e23182500204f5e814e4f0",
+      "commit": "0bff5ef06393259180443dc5af60fb208c029c5f",
+      "path": "research/R670",
+      "readback_files_verified": 6,
+      "test": "vf_native_ggml static library build with -Wall -Wextra -Werror; 1/1 targeted CTest pass",
+      "test_scope": "pinned GGML CPU graph; synthetic callback; failure-before-downstream and single-use replay refusal; no real Rust Session/checkpoint/model/GPU/network",
+      "published_utc": "2026-11-01 08:13:30 UTC"
     }
   ],
   "acceptance": [
@@ -742,7 +767,8 @@
     "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified.",
     "R660 source adds a per-slot rectangular GGML Session projection and a synthetic scalar-oracle fixture, but its Rust test and rustfmt did not execute: the current CI has no pinned GGML static build and the separate rustfmt container image could not be pulled. Do not promote this source until CPU verification succeeds.",
     "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified.",
-    "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch."
+    "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch.",
+    "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -769,29 +795,44 @@
     "R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0",
     "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1",
     "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC",
-    "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED"
+    "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED",
+    "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
+    "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST"
   ],
   "active_operations": [
     {
-      "id": "gitlab-pipeline-2271",
+      "id": "gitlab-pipeline-2275",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "ad9f9af1f495e91b36a7f0e3e4e6380a7a0d3997",
+      "commit": "f5beaba1eed602a333e23182500204f5e814e4f0",
       "status": "running",
       "jobs": {
-        "pc4_ci_fallback": "created",
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "running",
+        "pc4_ci_fallback": "created"
+      },
+      "scope": "configured scans/fallback only; not Rust compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2276",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "0bff5ef06393259180443dc5af60fb208c029c5f",
+      "status": "pending",
+      "jobs": {
+        "pc4_gitleaks": "pending",
+        "pc4_semgrep": "pending",
         "pc4_trivy": "pending",
-        "pc4_semgrep": "running",
-        "pc4_gitleaks": "success"
+        "pc4_ci_fallback": "created"
       },
       "scope": "configured scans/fallback only; not Rust compile/test evidence"
     }
   ],
-  "next_action": "Prototype a CPU-only llama.cpp graph operation boundary that consumes VoltaFabric's route-batched expert outputs and returns an explicit failure status before decode accepts the batch; test success and injected failure before considering checkpoints or GPU.",
-  "report": "research/R668/REPORT.md",
-  "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
+  "next_action": "Connect RouteGraphTransaction's single-use collector callback to the existing local vf-rank-session VFR3 response and verify exact identity, missing-result rejection, and no downstream decode on failure; keep the test CPU-only.",
+  "report": "research/R670/REPORT.md",
+  "operating_mode": "Owner-requested bounded CPU/source work only; no skill-based workflow, automatic relaunch remains stopped, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R668/SHA256SUMS",
-    "sha256": "7c9c4851cc1f0a1f4354fa3e97394b9478eaf8e87c742a9bb96fd27c3194b3d0",
-    "files": 2
+    "path": "research/R670/SHA256SUMS",
+    "sha256": "58bd860bf024816cd9faf791a8a8a21f62630ef31ae3d73c6ee61ce2c7b238fa",
+    "files": 5
   }
 }
