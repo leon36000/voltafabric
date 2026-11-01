@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:18:49Z",
+  "updated_utc": "2026-11-01T04:24:29Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -233,6 +233,28 @@
       ],
       "published_utc": "2026-11-01T04:18:30Z",
       "readback_verified_utc": "2026-11-01T04:18:49Z"
+    },
+    {
+      "id": "R652",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+      "branch": "r652-strata-stage-pin-safety-20261101",
+      "parent_commit": "7c510fef199884761256b3634072b204ae0cc41a",
+      "commit": "7863b5d7eeb81c399b3b7cb7e7ae4ec186c5807e",
+      "path": "research/R652",
+      "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+      "donor_license": "MIT",
+      "adaptation": "Strata child environment forces STRATA_STAGE_PIN=0 while preserving other variables and caller environment.",
+      "test": "python3 -B research/R652/cpu-harness/test_strata_stage_pin_sanitization.py -v — 1 passed; py_compile; SHA256SUMS 4/4.",
+      "test_scope": "Actual VoltaFabric launch() call and Popen boundary; 48 synthetic AF_UNIX descriptors; bridge startup and Popen intercepted; no Strata executable/model.",
+      "readback_files_verified": 5,
+      "published_utc": "2026-11-01T04:24:29Z",
+      "readback_verified_utc": "2026-11-01T04:24:29Z",
+      "model_loaded": false,
+      "generation_executed": false,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -282,8 +304,8 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R652_READY_ON_OWNER_REQUEST",
-    "purpose": "Connect the exact pinned Strata generation callback to launcher-managed sessions using admitted CPU-only fixtures; no checkpoint/full generation, GPU, production ledger, RDMA or inter-PC run."
+    "status": "R653_READY_ON_OWNER_REQUEST",
+    "purpose": "R653: compile/adapt the exact pinned Strata expert-source and wire the real generation callback through launcher-managed VoltaFabric sessions using admitted CPU-only fixtures and an independent output oracle; no full checkpoint or hardware run."
   },
   "report": "research/R651/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",

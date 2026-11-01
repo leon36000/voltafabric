@@ -9936,4 +9936,41 @@
     "automatic_relaunch": false,
     "next_action": "R652: connect the pinned Strata donor callback to launcher-managed sessions with admitted CPU-only fixtures; no full checkpoint or GPU.",
     "readback_verified_utc": "2026-11-01T04:08:19Z"
+   },
+  "r651_strata_cpp_48_session_fleet": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS_WITH_QUARANTINED_PRELIMINARY_ATTEMPTS",
+    "branch": "r651-strata-cpp-48-session-fleet-20261101",
+    "parent_commit": "3c39dd317c802802ce5614e7ac790fa6e0294bbb",
+    "source_commit": "35138daa4365979a00695031cf6d192a9301c31a",
+    "final_handoff_commit": "7c510fef199884761256b3634072b204ae0cc41a",
+    "report": "research/R651/REPORT.md",
+    "test": "48-session C++ callback over 48 local Rust sessions; 96 local claims; two quarantined preliminary attempts retained",
+    "readback_files_verified": 11,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R652: guard Strata stage pin opt-in for IQ3_S."
+  },
+  "r652_strata_stage_pin_safety": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+    "branch": "r652-strata-stage-pin-safety-20261101",
+    "parent_commit": "7c510fef199884761256b3634072b204ae0cc41a",
+    "source_commit": "7863b5d7eeb81c399b3b7cb7e7ae4ec186c5807e",
+    "report": "research/R652/REPORT.md",
+    "result": "research/R652/RESULT.json",
+    "test": "research/R652/cpu-harness/test_strata_stage_pin_sanitization.py",
+    "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "donor_license": "MIT",
+    "adaptation": "Force STRATA_STAGE_PIN=0 only in the Strata child environment; retain unrelated inherited variables and leave caller environment unchanged.",
+    "test_result": "Python launch() unit harness 1/1 passed; py_compile passed; SHA256SUMS 4/4 passed.",
+    "readback_files_verified": 5,
+    "published_utc": "2026-11-01T04:24:29Z",
+    "readback_verified_utc": "2026-11-01T04:24:29Z",
+    "model_loaded": false,
+    "strata_binary_executed": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R653: compile/adapt the exact pinned Strata expert-source and wire the real generation callback through launcher-managed VoltaFabric sessions using admitted CPU-only fixtures and an independent output oracle; no full checkpoint or hardware run."
   }
+}
