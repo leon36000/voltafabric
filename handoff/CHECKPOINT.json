@@ -12393,28 +12393,52 @@
       }
     }
   },
+
   "r675_pipeline_reconciled": {
-    "pipeline_2288": {
-      "status": "canceled",
-      "jobs": {
-        "pc4_ci_fallback": "canceled",
-        "pc4_trivy": "canceled",
-        "pc4_semgrep": "canceled",
-        "pc4_gitleaks": "canceled"
-      },
-      "scope": "code commit scan canceled before completion"
-    },
+    "pipeline_2288": "canceled before scan completion; handoff pipeline 2289 is not C++ build/test",
     "pipeline_2289": {
-      "status": "pending",
+      "status": "running",
       "jobs": {
-        "pc4_ci_fallback": "created",
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
         "pc4_trivy": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_gitleaks": "pending"
-      },
-      "scope": "handoff-only commit; not C++ build/test"
+        "pc4_ci_fallback": "created"
+      }
     },
     "updated_utc": "2026-11-01 09:21:59 UTC"
+  },
+  "r676_host_invocation_gate": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "321e975c7fd7996a294244860d47d4d095e7452b",
+    "source_commit": "dab94350f7fa6be4640ba5d019f37518c585a643",
+    "report": "research/R676/REPORT.md",
+    "result": "research/R676/RESULT.json",
+    "build_test": "research/R676/BUILD_TEST.txt",
+    "sha256sums": "research/R676/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Adds one-use RouteGraphInvocation host barrier: exact expected route transactions, complete unique Stamp, disable graph cache if routed, and allow result publication only after every transaction READY with GGML SUCCESS.",
+    "test_result": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; 6 GitLab files read back exactly.",
+    "test_scope": "Synthetic Q8_0 route only; no llama callback, real model/checkpoint, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "pipeline_2291": {
+      "status": "pending",
+      "jobs": {
+        "pc4_gitleaks": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "manifest_sha256": "3026fd6fb4b5a082d6cf8d37c37e381ccf5aa7d6aef3f5f3230104ebe21f8cdf",
+    "readback_files_verified": 6,
+    "readback_verified_utc": "2026-11-01 09:25:36 UTC",
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R677: apply host barrier and fresh transaction lifecycle in exact pinned llama.cpp Qwen2MoE path."
   }
 
 }

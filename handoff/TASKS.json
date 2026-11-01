@@ -10271,33 +10271,51 @@
       }
     }
   },
+
   "r675_ci_reconciliation": {
     "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
     "handoff_commit": "45a267f115260245f72f5098550c3337b30b5364",
     "pipeline_2288": {
       "status": "canceled",
-      "jobs": {
-        "pc4_ci_fallback": "canceled",
-        "pc4_trivy": "canceled",
-        "pc4_semgrep": "canceled",
-        "pc4_gitleaks": "canceled"
-      },
-      "meaning": "R675 source pipeline canceled before scans completed"
+      "meaning": "R675 source scans canceled before completion"
     },
     "pipeline_2289": {
-      "status": "pending",
-      "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_gitleaks": "pending"
-      },
-      "meaning": "handoff-only commit pipeline, not build/test"
+      "status": "running",
+      "meaning": "R675 handoff-only scans/fallback"
     },
     "source_readback_files_verified": 5,
     "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "updated_utc": "2026-11-01 09:21:59 UTC"
+  },
+  "r676_host_invocation_gate": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_HOST_INVOCATION_GATE_CPU_CTEST_3_PASS_PIPELINE_2291_PENDING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "dab94350f7fa6be4640ba5d019f37518c585a643",
+    "objective": "Provide an explicit host contract for one-shot expert-route transactions on llama.cpp reusable graph architecture.",
+    "changes": [
+      "RouteGraphInvocation fixes expected transaction count, complete unique Stamp registration, disables cache for routed graphs, and finalizes accept once.",
+      "It blocks host output on GGML failure, missing route, pending/failed transaction or duplicate accept."
+    ],
+    "validation": "AArch64 C++17 -Wall -Wextra -Werror; focused CTest 3/3; independent FP64 fixture; six exact GitLab readbacks.",
+    "limitations": [
+      "VoltaFabric adapter primitive only; no actual llama.cpp callback/source patch, real checkpoint/model or generation.",
+      "No GPU/CUDA graph/inter-PC/RDMA/production R53/performance."
+    ],
+    "manifest_sha256": "3026fd6fb4b5a082d6cf8d37c37e381ccf5aa7d6aef3f5f3230104ebe21f8cdf",
+    "pipeline_2291": {
+      "status": "pending",
+      "jobs": {
+        "pc4_gitleaks": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 6,
+    "readback_verified_utc": "2026-11-01 09:25:36 UTC",
+    "next_action": "R677: integrate the barrier into the exact pinned llama.cpp Qwen2MoE path while preserving shared/residual and one-time weighting."
   }
 
 }
