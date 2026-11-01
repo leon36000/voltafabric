@@ -19,10 +19,13 @@ set(GGML_OPENMP OFF CACHE BOOL "" FORCE)
 set(GGML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GGML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${GGML_SOURCE_DIR}/ggml" ggml EXCLUDE_FROM_ALL)
-add_library(vf_native_ggml STATIC provider.cpp bridge.cpp route_graph_transaction.cpp)
+find_package(Threads REQUIRED)
+add_library(vf_native_ggml STATIC provider.cpp bridge.cpp route_graph_transaction.cpp
+  session_vfr3_collector.cpp ../strata_native_bridge/pipe_client.cpp)
 target_compile_features(vf_native_ggml PRIVATE cxx_std_17)
 target_compile_options(vf_native_ggml PRIVATE -Wall -Wextra -Werror)
-target_link_libraries(vf_native_ggml PUBLIC ggml-cpu ggml-base)
+target_include_directories(vf_native_ggml PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/../strata_native_bridge")
+target_link_libraries(vf_native_ggml PUBLIC ggml-cpu ggml-base Threads::Threads)
 add_executable(vf_native_ggml_test provider_test.cpp)
 target_link_libraries(vf_native_ggml_test PRIVATE vf_native_ggml)
 enable_testing()
@@ -33,6 +36,12 @@ add_executable(vf_route_graph_transaction_test route_graph_transaction_test.cpp)
 target_link_libraries(vf_route_graph_transaction_test PRIVATE vf_native_ggml)
 target_compile_options(vf_route_graph_transaction_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_transaction COMMAND vf_route_graph_transaction_test)
+
+# VFB3 session result enters the GGML graph atomically and is weighted once.
+add_executable(vf_route_graph_vfr3_test route_graph_vfr3_test.cpp)
+target_link_libraries(vf_route_graph_vfr3_test PRIVATE vf_native_ggml Threads::Threads)
+target_compile_options(vf_route_graph_vfr3_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME route_graph_vfr3 COMMAND vf_route_graph_vfr3_test)
 
 # Diagnostic reference only; it is not part of the live worker/provider path.
 option(VF_BUILD_SCALAR_REFERENCE "Build bounded SC117 scalar diagnostic" OFF)

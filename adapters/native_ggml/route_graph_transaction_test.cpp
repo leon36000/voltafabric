@@ -24,8 +24,10 @@ void downstream_copy(ggml_tensor *dst, const ggml_tensor *src, int ith, int nth,
     ++calls;
 }
 
-RouteStatus fixture_collector(const RouteBatch &batch, const float *input, size_t input_count,
-                              float *output, size_t output_count, void *userdata) {
+RouteStatus fixture_collector(const RouteBatch &batch, const float *activations, size_t activation_count,
+                              const float *input, size_t input_count, float *output,
+                              size_t output_count, void *userdata) {
+    if (activations != nullptr || activation_count != 0) return RouteStatus::invalid_batch;
     auto &calls = *static_cast<int *>(userdata);
     if (batch.identity.run != "run-r669" || batch.identity.model != "qwen2moe-fixture" ||
         batch.identity.plan != "plan-r669" || batch.identity.layer != 2 ||
@@ -50,8 +52,10 @@ RouteStatus fixture_collector(const RouteBatch &batch, const float *input, size_
     return RouteStatus::ready;
 }
 
-RouteStatus partial_failure_collector(const RouteBatch &, const float *, size_t,
-                                      float *output, size_t output_count, void *userdata) {
+RouteStatus partial_failure_collector(const RouteBatch &, const float *activations, size_t activation_count,
+                                      const float *, size_t, float *output, size_t output_count,
+                                      void *userdata) {
+    if (activations != nullptr || activation_count != 0) return RouteStatus::invalid_batch;
     auto &calls = *static_cast<int *>(userdata);
     ++calls;
     if (output_count != 4) return RouteStatus::invalid_batch;

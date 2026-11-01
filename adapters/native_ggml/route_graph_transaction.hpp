@@ -37,10 +37,12 @@ struct RouteBatch {
     size_t tokens = 0;
     size_t experts = 0;
     std::vector<int32_t> expert_ids; // [slot, token]
+    std::vector<int32_t> owner_kinds; // optional VFB3 owner kinds, same route order
     std::vector<float> weights;      // [slot, token], forwarded unchanged
 };
 
-using Collector = RouteStatus (*)(const RouteBatch &, const float *, size_t, float *, size_t, void *);
+using Collector = RouteStatus (*)(const RouteBatch &, const float *, size_t, const float *, size_t,
+                                   float *, size_t, void *);
 
 // A single-threaded GGML graph boundary for a complete route batch. The caller must
 // keep this object alive through ggml_graph_compute and accept output only when
@@ -52,6 +54,9 @@ public:
     RouteGraphTransaction &operator=(const RouteGraphTransaction &) = delete;
 
     ggml_tensor *append(ggml_context *ctx, ggml_tensor *slot_outputs);
+    // Optional activation source is a graph dependency for VFB3 dispatch. Slot
+    // outputs contain raw local-owner results and placeholders for remote owners.
+    ggml_tensor *append(ggml_context *ctx, ggml_tensor *slot_outputs, ggml_tensor *activations);
     void attach_abort(ggml_cplan &plan);
     bool accepts(ggml_status graph_status) const;
     RouteStatus status() const;
@@ -66,6 +71,7 @@ private:
     size_t output_count_ = 0;
     std::vector<float> staging_;
     bool appended_ = false;
+    bool requires_activations_ = false;
     std::atomic<bool> compute_started_{false};
     std::atomic<RouteStatus> status_{RouteStatus::pending};
 };

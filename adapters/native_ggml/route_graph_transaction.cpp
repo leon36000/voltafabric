@@ -39,7 +39,8 @@ bool valid_batch(const RouteBatch &batch, size_t input_count, size_t output_coun
         !checked_product(batch.hidden, batch.tokens, expected_output) ||
         !checked_product(batch.slots, batch.tokens, route_count) ||
         expected_input != input_count || expected_output != output_count ||
-        batch.expert_ids.size() != route_count || batch.weights.size() != route_count) {
+        batch.expert_ids.size() != route_count || batch.weights.size() != route_count ||
+        (!batch.owner_kinds.empty() && batch.owner_kinds.size() != route_count)) {
         return false;
     }
 
@@ -48,7 +49,9 @@ bool valid_batch(const RouteBatch &batch, size_t input_count, size_t output_coun
             const size_t route = slot + batch.slots * token;
             const int32_t expert = batch.expert_ids[route];
             if (expert < 0 || static_cast<size_t>(expert) >= batch.experts ||
-                !std::isfinite(batch.weights[route]) || batch.weights[route] < 0.0f) {
+                !std::isfinite(batch.weights[route]) || batch.weights[route] < 0.0f ||
+                (!batch.owner_kinds.empty() &&
+                 (batch.owner_kinds[route] < -1 || batch.owner_kinds[route] > 2))) {
                 return false;
             }
             for (size_t earlier = 0; earlier < slot; ++earlier) {
@@ -73,19 +76,37 @@ RouteGraphTransaction::RouteGraphTransaction(RouteBatch batch, Collector collect
 }
 
 ggml_tensor *RouteGraphTransaction::append(ggml_context *ctx, ggml_tensor *slot_outputs) {
-    if (appended_ || status_.load(std::memory_order_acquire) != RouteStatus::pending || ctx == nullptr ||
-        slot_outputs == nullptr || slot_outputs->type != GGML_TYPE_F32 || slot_outputs->data == nullptr ||
-        static_cast<size_t>(ggml_nelements(slot_outputs)) > kMaxInputFloats ||
+    return append(ctx, slot_outputs, nullptr);
+}
+
+ggml_tensor *RouteGraphTransaction::append(ggml_context *ctx, ggml_tensor *slot_outputs,
+                                           ggml_tensor *activations) {
+    const bool valid_slot_source = slot_outputs != nullptr && slot_outputs->type == GGML_TYPE_F32 &&
+        slot_outputs->data != nullptr && ggml_is_contiguous(slot_outputs) &&
+        slot_outputs->ne[0] == static_cast<int64_t>(batch_.hidden) &&
+        slot_outputs->ne[1] == static_cast<int64_t>(batch_.slots) &&
+        slot_outputs->ne[2] == static_cast<int64_t>(batch_.tokens) && slot_outputs->ne[3] == 1 &&
+        static_cast<size_t>(ggml_nelements(slot_outputs)) <= kMaxInputFloats;
+    const bool valid_activation_source = activations == nullptr ||
+        (activations->type == GGML_TYPE_F32 && activations->data != nullptr &&
+         ggml_is_contiguous(activations) &&
+         activations->ne[0] == static_cast<int64_t>(batch_.hidden) &&
+         activations->ne[1] == static_cast<int64_t>(batch_.tokens) &&
+         activations->ne[2] == 1 && activations->ne[3] == 1 &&
+         !batch_.owner_kinds.empty());
+    if (appended_ || status_.load(std::memory_order_acquire) != RouteStatus::pending ||
+        ctx == nullptr || !valid_slot_source || !valid_activation_source ||
         !valid_batch(batch_, static_cast<size_t>(ggml_nelements(slot_outputs)), output_count_)) {
         status_.store(RouteStatus::invalid_batch, std::memory_order_release);
         return nullptr;
     }
     appended_ = true;
+    requires_activations_ = activations != nullptr;
 
-    ggml_tensor *args[] = {slot_outputs};
+    ggml_tensor *args[] = {slot_outputs, activations};
     ggml_tensor *result = ggml_custom_4d(ctx, GGML_TYPE_F32,
         static_cast<int64_t>(batch_.hidden), static_cast<int64_t>(batch_.tokens), 1, 1,
-        args, 1, compute, 1, this);
+        args, activations == nullptr ? 1 : 2, compute, 1, this);
     if (result == nullptr) status_.store(RouteStatus::invalid_batch, std::memory_order_release);
     return result;
 }
@@ -115,9 +136,23 @@ void RouteGraphTransaction::compute(ggml_tensor *dst, int ith, int nth, void *us
         return;
     }
     const ggml_tensor *slot_outputs = dst->src[0];
+    const ggml_tensor *activations = dst->src[1];
     const size_t input_count = slot_outputs == nullptr ? 0 : static_cast<size_t>(ggml_nelements(slot_outputs));
-    if (slot_outputs == nullptr || dst->type != GGML_TYPE_F32 || dst->data == nullptr ||
-        slot_outputs->type != GGML_TYPE_F32 || slot_outputs->data == nullptr ||
+    const size_t activation_count = activations == nullptr ? 0 : static_cast<size_t>(ggml_nelements(activations));
+    const bool slot_shape_ok = slot_outputs != nullptr && slot_outputs->type == GGML_TYPE_F32 &&
+        slot_outputs->data != nullptr && ggml_is_contiguous(slot_outputs) &&
+        slot_outputs->ne[0] == static_cast<int64_t>(transaction.batch_.hidden) &&
+        slot_outputs->ne[1] == static_cast<int64_t>(transaction.batch_.slots) &&
+        slot_outputs->ne[2] == static_cast<int64_t>(transaction.batch_.tokens) && slot_outputs->ne[3] == 1;
+    const bool activation_shape_ok = transaction.requires_activations_
+        ? (activations != nullptr && activations->type == GGML_TYPE_F32 && activations->data != nullptr &&
+           ggml_is_contiguous(activations) &&
+           activations->ne[0] == static_cast<int64_t>(transaction.batch_.hidden) &&
+           activations->ne[1] == static_cast<int64_t>(transaction.batch_.tokens) &&
+           activations->ne[2] == 1 && activations->ne[3] == 1)
+        : activations == nullptr;
+    if (dst->type != GGML_TYPE_F32 || dst->data == nullptr || !slot_shape_ok ||
+        !activation_shape_ok ||
         !valid_batch(transaction.batch_, input_count, transaction.output_count_)) {
         transaction.status_.store(RouteStatus::invalid_batch, std::memory_order_release);
         return;
@@ -133,10 +168,22 @@ void RouteGraphTransaction::compute(ggml_tensor *dst, int ith, int nth, void *us
         }
     }
 
+    if (activations != nullptr) {
+        const auto *activation_data = static_cast<const float *>(activations->data);
+        for (size_t i = 0; i < activation_count; ++i) {
+            if (!std::isfinite(activation_data[i])) {
+                transaction.status_.store(RouteStatus::invalid_batch, std::memory_order_release);
+                return;
+            }
+        }
+    }
+
     RouteStatus result = RouteStatus::provider_failure;
     try {
-        result = transaction.collector_(transaction.batch_, input, input_count,
-            transaction.staging_.data(), transaction.staging_.size(), transaction.collector_data_);
+        result = transaction.collector_(transaction.batch_,
+            activations == nullptr ? nullptr : static_cast<const float *>(activations->data),
+            activation_count, input, input_count, transaction.staging_.data(),
+            transaction.staging_.size(), transaction.collector_data_);
     } catch (...) {
         transaction.status_.store(RouteStatus::provider_failure, std::memory_order_release);
         return;
