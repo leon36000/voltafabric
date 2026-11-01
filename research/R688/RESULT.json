@@ -1,0 +1,77 @@
+{
+  "round": "R688",
+  "status": "CPU_HOST_INTEGRATION_PASS_SYNTHETIC_FIXTURE_ONLY",
+  "donor": {
+    "project": "llama.cpp / GGML",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "modified": false
+  },
+  "voltafabric_boundary": [
+    "Session::load_grouped_matrix_gguf_expert_slices",
+    "Session::exec_qwen2moe_ffn_batch",
+    "collect_qwen2moe_ffn_output"
+  ],
+  "fixture": {
+    "tokens": 1,
+    "layers": 1,
+    "hidden": 32,
+    "resident_experts": [
+      40,
+      3
+    ],
+    "checkpoint_experts": [
+      1,
+      0
+    ],
+    "route_weights": {
+      "40": 0.25,
+      "3": 0.75
+    },
+    "format": "GGML Q8_0"
+  },
+  "source_tensor_bytes_read": 6528,
+  "source_tensor_bytes_total": 13056,
+  "source_fraction_read": 0.5,
+  "donor_vs_voltafabric_max_abs_error": 8.71369e-08,
+  "acceptance_max_abs_error": 1e-06,
+  "collector": "ordinary FP16-decoded collector with f64 accumulation; route coefficients applied once",
+  "atomicity": {
+    "invalid_shape_rejected_before_write": true,
+    "sentinel_unchanged": true,
+    "partial_provider_failure_publishes_no_output": true
+  },
+  "execution": {
+    "cpu_only": true,
+    "gpu": false,
+    "production_network": false,
+    "host_cpp_harness": true,
+    "rust_rank_workers_are_child_processes": true,
+    "offline_rust_build": true,
+    "cxx_flags": [
+      "-std=c++17",
+      "-Wall",
+      "-Wextra",
+      "-Werror"
+    ]
+  },
+  "superseded_experiment": {
+    "boundary": "low-level FP16 collector after each projection",
+    "max_abs_error": 0.00195304,
+    "decision": "replaced with existing high-level VoltaFabric Qwen2MoE FFN composition; no compatibility mode added"
+  },
+  "not_qualified": [
+    "real checkpoint",
+    "full token generation",
+    "multi-layer model",
+    "top-k > 2",
+    "NVFP4/QPN2 K16",
+    "MXFP4 K32",
+    "IQ3",
+    "GPU/V100",
+    "CUDA graphs",
+    "inter-PC/RDMA",
+    "production R53 lease",
+    "performance"
+  ]
+}

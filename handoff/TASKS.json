@@ -10636,12 +10636,33 @@
       "superseded": true
     },
     "pipeline_2327": {
-      "status": "running"
+      "status": "success"
     },
     "pipeline_2328": {
-      "status": "pending"
+      "status": "success"
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R688: compose the actual Rust rank-local loader and pinned donor graph in one CPU process; preserve Q8_0 activation quantization, apply route weight once, and withhold partial output on failure."
+    "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network."
+  },
+  "r688": {
+    "state": "CPU_HOST_INTEGRATION_PASS_SYNTHETIC_FIXTURE_ONLY",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "donor_modified": false,
+    "max_abs_error": 8.71369e-8,
+    "acceptance_max_abs_error": 0.000001,
+    "source_bytes_read": 6528,
+    "source_tensor_bytes": 13056,
+    "route_weights_applied_once": true,
+    "atomic_invalid_shape_refusal": true,
+    "partial_provider_failure_withheld": true,
+    "cpu_only": true,
+    "gpu_run": false,
+    "production_network": false,
+    "report": "research/R688/REPORT.md",
+    "result": "research/R688/RESULT.json",
+    "manifest": "research/R688/SHA256SUMS",
+    "manifest_sha256": "2a33c03ac8fbfa67e362c792acd885a3cf28f5e4da182a0317f5d6752a3d2944",
+    "automatic_relaunch": "STOPPED_BY_OWNER"
   }
 }

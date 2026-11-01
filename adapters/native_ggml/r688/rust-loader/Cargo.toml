@@ -1,0 +1,16 @@
+[package]
+name = "vf-r688-loader-ffi"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[lib]
+name = "vf_r688_loader"
+crate-type = ["cdylib"]
+
+[dependencies]
+voltafabric = { path = "../../../../", features = ["native-ggml-cpu"] }
+vf-ggml-native-ffi = { path = "../../../../crates/ggml-native-ffi" }
+
+[workspace]

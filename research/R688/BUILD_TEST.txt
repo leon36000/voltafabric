@@ -1,0 +1,13 @@
+R688 CPU test invocation (all dependencies must already exist; no downloads):
+
+```bash
+VF_LLAMA_SOURCE_DIR=<clean-pinned-llama.cpp-checkout> \
+VF_LLAMA_LIBRARY=<pinned-build>/bin/libllama.so.0.4.1 \
+VF_GGML_NATIVE_BUILD=<verified-R655-static-cpu-build> \
+VF_TEST_OUTPUT_DIR=<bounded-output-under-Naos> \
+CXX=g++ adapters/native_ggml/run_qwen2moe_r659_rank_local_r688_test.sh
+```
+
+Expected donor revision: `3cf03257f219afbe7334045ff7c6a06ac68c627d`. The script checks that pin and the required prebuilt CPU archives, builds Rust offline, compiles the C++ harness with `-Wall -Wextra -Werror`, then runs the fixture.
+
+Observed final result: donor-vs-VoltaFabric maximum absolute error `8.71369e-08` (threshold `1e-6`); invalid output-shape refusal leaves the sentinel untouched; partial provider failure withholds output. CPU only.
