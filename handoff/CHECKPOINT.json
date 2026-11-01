@@ -12305,6 +12305,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: reproduce from exact GitLab source readback, then implement and test the dynamic GGML custom op at the pinned Qwen2MoE seam using fresh synthetic CPU fixtures. No complete generation claim."
   },
+
   "r673_dynamic_route_capture": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "parent_commit": "d22de1463945c41b96c469b5ac6337df4b4bedb0",
@@ -12315,7 +12316,7 @@
     "sha256sums": "research/R673/SHA256SUMS",
     "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
     "donor_license": "MIT",
-    "status": "PRIVATE_GITLAB_READBACK_VERIFIED_CPU_DYNAMIC_ROUTE_CAPTURE_PASS_PIPELINE_2284_RUNNING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_DYNAMIC_ROUTE_CAPTURE_PASS_PIPELINE_2284_SUCCESS",
     "adaptation": "Dynamic GGML IDs and final post-gating weights feed the existing VFB3/VFR3 route transaction and ordinary FP16-decoded/f64 Collector; no donor callback yet.",
     "test": "AArch64 C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; one direct local coordinator/worker integration run PASS.",
     "test_scope": "Synthetic Q8_0 and pinned GGML graph ops; invalid route atomic refusal; top-k output read by strides; no real checkpoint, llama runtime callback, complete generation, independent math oracle, GPU, inter-PC, production R53 or perf.",
@@ -12325,10 +12326,36 @@
     "manifest_entries_verified": "8/8 SHA-256",
     "local_claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
     "local_claim_sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
-    "pipeline_2284": "running; scans/fallback only, not C++ build/test",
+    "pipeline_2284": "success; configured Gitleaks/Semgrep/Trivy/fallback scans only, not C++ build/test",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "published_utc": "2026-11-01 09:06:07 UTC",
     "readback_verified_utc": "2026-11-01 09:06:28 UTC",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
+  },
+  "r674_graph_reuse_lifecycle": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "b4352fe2718e047481ce8c2853c7abffec6a50db",
+    "source_commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
+    "report": "research/R674/REPORT.md",
+    "result": "research/R674/RESULT.json",
+    "build_test": "research/R674/BUILD_TEST.txt",
+    "sha256sums": "research/R674/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Confirmed pinned llama.cpp reuses compatible ggml_cgraph; a fresh route produced by changed logits is atomically refused when bound to a spent one-shot RouteGraphTransaction.",
+    "test_result": "AArch64 CPU C++17 warnings-as-errors build; focused CTest 3/3 pass; 5 GitLab files read back and all 4 manifest entries SHA-256 matched.",
+    "test_scope": "Synthetic Q8_0/GGML route fixture only; no llama.cpp runtime callback, model/checkpoint, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "manifest_sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
+    "pipeline_2286": "running; Gitleaks success, Semgrep running, Trivy pending, fallback created; scan/fallback only",
+    "readback_files_verified": 5,
+    "readback_verified_utc": "2026-11-01 09:18:12 UTC",
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R675: fresh per-invocation graph transaction plus host-side status validation before connecting the Qwen2MoE callback."
   }
+
 }

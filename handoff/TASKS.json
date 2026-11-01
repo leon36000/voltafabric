@@ -10167,8 +10167,9 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: recreate the native build from exact GitLab source readback, then add the dynamic pinned llama.cpp route custom op and verify with fresh CPU synthetic fixtures."
   },
+
   "r673_dynamic_route_capture": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_CPU_ROUTE_CAPTURE_PASS_PIPELINE_2284_RUNNING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_CPU_ROUTE_CAPTURE_PASS_PIPELINE_2284_SUCCESS",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
     "objective": "Make GGML computed Qwen2MoE route IDs and final coefficients available to VoltaFabric's existing identified VFB3/VFR3 Collector boundary.",
@@ -10190,15 +10191,45 @@
       "replay": false
     },
     "pipeline_2284": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "running",
-        "pc4_gitleaks": "success"
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
+  },
+  "r674_graph_reuse_lifecycle": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_2286_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
+    "objective": "Validate the llama.cpp graph reuse constraint against VoltaFabric's deliberately single-use route transaction.",
+    "changes": [
+      "Pinned donor source audit: process_ubatch may reuse compatible graph; can_reuse checks params/inputs but does not renew VF transaction.",
+      "Changed dynamic GGML route IDs/weights across same-graph invocation; stale transaction aborts before Collector/downstream."
+    ],
+    "validation": "AArch64 CPU warnings-as-errors build; focused CTest 3/3; GitLab readback 5 files and exact 4/4 manifest checks.",
+    "limitations": [
+      "No donor callback patch or generation.",
+      "No real checkpoint/model, GPU, CUDA graph, inter-PC/RDMA, production R53 or performance."
+    ],
+    "manifest_sha256": "5c5e25e3bd9168cfdb551513d3dcc94e5955993896f72729119bdf51c1b60497",
+    "pipeline_2286": {
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 5,
+    "readback_verified_utc": "2026-11-01 09:18:12 UTC",
+    "next_action": "R675: implement and test per-invocation transaction lifecycle and host-side route status validation before attaching the Qwen2MoE routed-aggregate callback."
   }
+
 }
