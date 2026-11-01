@@ -152,6 +152,8 @@ pub struct GroupedProjectionBatchOutput {
     pub slots: Vec<GroupedProjectionSlotOutput>,
 }
 
+/dev/stdin:
+
 /// Compose the separate Qwen2MoE gate/up projections into inputs for its down projection.
 /// Caller must pass the exact outputs from the same routed batch and attempt. This helper
 /// returns unweighted per-slot rows; it does not invoke the down Sessions or Collector.
@@ -188,12 +190,18 @@ pub fn qwen2moe_gate_up_to_down_inputs(
             .len()
             .checked_mul(gate.output_columns)
             .is_none_or(|values| values > MAX_VALUES)
-        || [&gate.stamp.run_id, &gate.stamp.model_revision, &gate.stamp.plan_id]
-            .iter()
-            .any(|value| value.trim().is_empty() || value.len() > 256)
+        || [
+            &gate.stamp.run_id,
+            &gate.stamp.model_revision,
+            &gate.stamp.plan_id,
+        ]
+        .iter()
+        .any(|value| value.trim().is_empty() || value.len() > 256)
         || gate.stamp.epoch == 0
     {
-        return Err(invalid("Qwen2MoE gate/up projection identity, role or shape"));
+        return Err(invalid(
+            "Qwen2MoE gate/up projection identity, role or shape",
+        ));
     }
 
     let clamp = swiglu_limit.filter(|limit| *limit > CLAMP_EPSILON);
@@ -202,11 +210,26 @@ pub fn qwen2moe_gate_up_to_down_inputs(
     for (gate_slot, up_slot) in gate.slots.iter().zip(&up.slots) {
         let identity = (gate_slot.token, gate_slot.slot);
         if previous.is_some_and(|last| last >= identity)
-            || (gate_slot.token, gate_slot.slot, gate_slot.expert, gate_slot.rank, gate_slot.local)
-                != (up_slot.token, up_slot.slot, up_slot.expert, up_slot.rank, up_slot.local)
+            || (
+                gate_slot.token,
+                gate_slot.slot,
+                gate_slot.expert,
+                gate_slot.rank,
+                gate_slot.local,
+            ) != (
+                up_slot.token,
+                up_slot.slot,
+                up_slot.expert,
+                up_slot.rank,
+                up_slot.local,
+            )
             || gate_slot.values.len() != gate.output_columns
             || up_slot.values.len() != gate.output_columns
-            || gate_slot.values.iter().chain(&up_slot.values).any(|value| !value.is_finite())
+            || gate_slot
+                .values
+                .iter()
+                .chain(&up_slot.values)
+                .any(|value| !value.is_finite())
         {
             return Err(invalid("Qwen2MoE gate/up slot identity or values"));
         }

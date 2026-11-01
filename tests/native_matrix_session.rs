@@ -649,6 +649,8 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
 }
 
 
+/dev/stdin:
+
 #[cfg(feature = "native-ggml-cpu")]
 #[test]
 fn qwen2moe_gate_up_preserves_slot_identity_and_builds_unweighted_down_inputs() {
@@ -677,11 +679,19 @@ fn qwen2moe_gate_up_preserves_slot_identity_and_builds_unweighted_down_inputs() 
         output_columns: 3,
         slots: vec![
             GroupedProjectionSlotOutput {
-                token: 0, slot: 0, expert: 3, rank: 7, local: 1,
+                token: 0,
+                slot: 0,
+                expert: 3,
+                rank: 7,
+                local: 1,
                 values: vec![-2.0, 0.0, 2.0],
             },
             GroupedProjectionSlotOutput {
-                token: 0, slot: 1, expert: 18, rank: 8, local: 2,
+                token: 0,
+                slot: 1,
+                expert: 18,
+                rank: 8,
+                local: 2,
                 values: vec![0.5, -1.0, 1.0],
             },
         ],
@@ -695,11 +705,19 @@ fn qwen2moe_gate_up_preserves_slot_identity_and_builds_unweighted_down_inputs() 
         output_columns: 3,
         slots: vec![
             GroupedProjectionSlotOutput {
-                token: 0, slot: 0, expert: 3, rank: 7, local: 1,
+                token: 0,
+                slot: 0,
+                expert: 3,
+                rank: 7,
+                local: 1,
                 values: vec![2.0, 3.0, 4.0],
             },
             GroupedProjectionSlotOutput {
-                token: 0, slot: 1, expert: 18, rank: 8, local: 2,
+                token: 0,
+                slot: 1,
+                expert: 18,
+                rank: 8,
+                local: 2,
                 values: vec![5.0, 6.0, 7.0],
             },
         ],
@@ -710,19 +728,26 @@ fn qwen2moe_gate_up_preserves_slot_identity_and_builds_unweighted_down_inputs() 
     for ((actual, gate_slot), up_slot) in actual.iter().zip(&gate.slots).zip(&up.slots) {
         assert_eq!(
             (actual.token, actual.slot, actual.expert, actual.local),
-            (gate_slot.token, gate_slot.slot, gate_slot.expert, gate_slot.local)
+            (
+                gate_slot.token,
+                gate_slot.slot,
+                gate_slot.expert,
+                gate_slot.local
+            )
         );
         for ((&gate_value, &up_value), &value) in gate_slot
-            .values.iter().zip(&up_slot.values).zip(&actual.values)
+            .values
+            .iter()
+            .zip(&up_slot.values)
+            .zip(&actual.values)
         {
-            let oracle = f64::from(gate_value)
-                / (1.0 + (-f64::from(gate_value)).exp())
+            let oracle = f64::from(gate_value) / (1.0 + (-f64::from(gate_value)).exp())
                 * f64::from(up_value);
             assert!((f64::from(value) - oracle).abs() <= 2e-6);
         }
     }
-    // The route weight is intentionally absent at this intermediate stage.
-    assert_eq!(actual[0].values[0], actual[0].values[0]);
+    // Zero gate gives zero output; no route coefficient is present in this helper.
+    assert_eq!(actual[0].values[1], 0.0);
 
     let clamped = qwen2moe_gate_up_to_down_inputs(&gate, &up, Some(1.0)).unwrap();
     assert_eq!(clamped[0].values[2], 1.0);
@@ -753,7 +778,12 @@ fn qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch() {
         input_columns: H,
         output_columns: 1,
         slots: vec![GroupedProjectionSlotOutput {
-            token: 0, slot: 0, expert: 3, rank: 7, local: 1, values: vec![1.0],
+            token: 0,
+            slot: 0,
+            expert: 3,
+            rank: 7,
+            local: 1,
+            values: vec![1.0],
         }],
     };
     let gate = make("blk.5.ffn_gate_exps.weight", 18);
@@ -762,5 +792,10 @@ fn qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch() {
     let wrong_batch = make("blk.5.ffn_up_exps.weight", 19);
     assert!(qwen2moe_gate_up_to_down_inputs(&gate, &wrong_role, None).is_err());
     assert!(qwen2moe_gate_up_to_down_inputs(&gate, &wrong_batch, None).is_err());
-    assert_eq!(qwen2moe_gate_up_to_down_inputs(&gate, &up, None).unwrap().len(), 1);
+    assert_eq!(
+        qwen2moe_gate_up_to_down_inputs(&gate, &up, None)
+            .unwrap()
+            .len(),
+        1
+    );
 }
