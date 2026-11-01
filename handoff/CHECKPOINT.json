@@ -11909,6 +11909,34 @@
     "complete_generation": false,
     "gpu_executed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R647: test binary_loop in-process with a no-worker coordinator and synthetic ledger."
+    "next_action": "R647: direct binary_loop rejection/VFR3/empty-ledger test completed; R648 is a fresh synthetic positive CPU-worker path."
+  },
+  "r647_vfb3_binary_loop_fail_closed": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_TEST_PASS",
+    "branch": "r647-vfb3-parser-real-loop-20261101",
+    "base_commit": "27feba075b0a4af14cd3747851779397b781f810",
+    "source_commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
+    "report": "research/R647/REPORT.md",
+    "test": "src/strata_native_bridge.rs::identity_tests::binary_loop_rejects_identity_mismatch_before_body_or_claim",
+    "test_result": "rustfmt clean; 1/1 PASS, --locked --offline",
+    "tested_cases": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "epoch",
+      "layer",
+      "reserved_field"
+    ],
+    "exact_vfr3_failure": true,
+    "body_sentinel_unread": true,
+    "local_ledger_claims": 0,
+    "compile_time_fixture_stubs_local_unpublished": 8,
+    "worker_sessions": 0,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 3,
+    "published_utc": "2026-11-01T03:53:03Z",
+    "next_action": "R648: exercise the synthetic positive binary_loop path with one isolated CPU worker and fresh identity/ledger."
   }
 }

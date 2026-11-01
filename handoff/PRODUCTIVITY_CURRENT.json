@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:48:21Z",
+  "updated_utc": "2026-11-01T03:53:03Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -151,6 +151,19 @@
       "commit": "a3ffb25bad5f1b06a67659c3b206daccfc499915",
       "readback_files_verified": 9,
       "published_utc": "2026-11-01T03:48:21Z"
+    },
+    {
+      "id": "R647",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_UNIT_TEST",
+      "branch": "r647-vfb3-parser-real-loop-20261101",
+      "parent_commit": "27feba075b0a4af14cd3747851779397b781f810",
+      "source_commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
+      "path": "research/R647",
+      "test": "rustfmt clean; locked/offline root-library unit test 1/1 PASS",
+      "test_scope": "actual binary_loop called in-process; 6 fail-closed VFB3 identity/header cases, exact VFR3 failure, body sentinel unread, empty local ledger; no worker sessions",
+      "readback_files_verified": 3,
+      "published_utc": "2026-11-01T03:53:03Z"
     }
   ],
   "acceptance": [
@@ -191,14 +204,14 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R647_READY_ON_OWNER_REQUEST",
-    "purpose": "Exercise binary_loop in-process using a coordinator with no worker sessions and a pre-existing isolated ledger directory; verify VFR3 failure response and no claim on identity mismatch. Keep full checkpoint, GPU and production network suspended."
+    "status": "R648_READY_ON_OWNER_REQUEST",
+    "purpose": "Test the synthetic positive path through binary_loop with one local CPU worker and a fresh test identity/ledger; verify complete VFR3 output and coefficient application once. Keep checkpoint, GPU, inter-PC and production network suspended."
   },
-  "report": "research/R646/REPORT.md",
+  "report": "research/R647/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R646/SHA256SUMS",
-    "sha256": "1fd683f083fa0d50535273b06c54b3380b6656129cf800bcc65da5f9fcb2d4e8",
-    "files": 5
+    "path": "research/R647/SHA256SUMS",
+    "sha256": "a6b48b1b6795b960de46e530fc1dc59fb08f2549a47c58fe065c834c8e2689da",
+    "files": 2
   }
 }

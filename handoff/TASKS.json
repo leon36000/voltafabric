@@ -9876,6 +9876,19 @@
     "test": "rustfmt --check; harness cargo test --locked --offline; 1/1 PASS.",
     "limits": "No binary_loop/VFR3 response, ticket claim, socket, checkpoint, Strata callback, model generation, GPU or production network.",
     "automatic_relaunch": false,
-    "next_action": "R647: exercise binary_loop refusal and VFR3 failure output in-process with a synthetic coordinator."
+    "next_action": "R647: direct parser-loop refusal path passed. R648 should test the synthetic positive loop with a fresh identity and local worker."
+  },
+  "r647_vfb3_binary_loop_fail_closed": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_TEST_PASS",
+    "commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
+    "readback_files_verified": 3,
+    "published_utc": "2026-11-01T03:53:03Z",
+    "owner": "Codex integrator",
+    "branch": "r647-vfb3-parser-real-loop-20261101",
+    "scope": "Call the production binary_loop in-process with a no-worker coordinator; test fail-closed VFB3 identity mismatch before request body, VFR3 response and local ledger claim.",
+    "test": "rustfmt --edition 2021 --check; cargo test --locked --offline --features native-ggml-cpu --lib strata_native_bridge::identity_tests::binary_loop_rejects_identity_mismatch_before_body_or_claim; 1/1 PASS.",
+    "limits": "Synthetic CPU parser-path test only; no success dispatch, worker, checkpoint, Strata callback, complete generation, GPU, RDMA, inter-PC or production network. Eight compile-only fixture placeholders exist only in local isolated .runs snapshot and were not published.",
+    "automatic_relaunch": false,
+    "next_action": "R648: test a positive synthetic binary_loop batch with one local CPU worker, fresh run identity and dedicated ledger."
   }
 }
