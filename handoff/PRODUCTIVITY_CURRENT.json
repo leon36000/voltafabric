@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T08:01:41Z",
+  "updated_utc": "2026-11-01T08:04:35Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -660,14 +660,46 @@
         "research/R667/REPORT.md": "d559611c3bedb9d5172a378f853fb1465d98d570599ee5369405d10bfd122cf5",
         "research/R667/SHA256SUMS": "bf99a555953bd6e1677371a207c168fb9ea648a474e3335efd598448f1f0288d"
       },
-      "security_pipeline_2271": "created at handoff update; configured scans/fallback only, not Rust compile/test evidence.",
+      "security_pipeline_2271": "running: Gitleaks succeeded, Semgrep running, Trivy pending, configured CPU fallback created; configured checks do not compile/test Rust.",
       "limits": [
         "The helper invokes pinned GGML operations but still uses synthetic logits; it is not a runtime llama.cpp callback.",
         "Top-k ties, group filtering, shared expert/residual path, checkpoint-backed model and full token generation remain unqualified.",
         "No external R53, GPU, inter-PC/RDMA, other quantization formats or performance is qualified."
       ],
       "published_utc": "2026-11-01T08:01:40Z",
-      "next_action": "Inspect the pinned llama.cpp graph execution path for a runtime capture point that can return selected IDs and post-scale weights for the same identified batch; keep the graph-construction cb distinct from runtime output capture."
+      "next_action": "Do not use the pinned eval callback as an expert-dispatch barrier: R668 shows an early break can still report graph success. Design explicit result/failure propagation."
+    },
+    {
+      "id": "R668",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_AUDIT_LEAD_REJECTED",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "94b715629bb984b7a4452996ae71262f98973a7c",
+      "report_commit": "7c84b07734985d1f11135d25db80dd65f51fb72d",
+      "path": "research/R668",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "finding": "The pinned GGML eval callback is a runtime observation hook, but callback false breaks the scheduler loop and the scheduler then returns GGML_STATUS_SUCCESS; llama_context::process_ubatch returns the graph result on that status. Not safe as a remote-expert dispatch/abort barrier.",
+      "sources": [
+        "ggml/include/ggml-backend.h:309-316",
+        "ggml/src/ggml-backend.cpp:1798-1845",
+        "src/llama-context.cpp:1406-1415"
+      ],
+      "decision": "Reject callback-abort as the dispatch seam. A viable integration must feed VoltaFabric results into downstream graph execution and propagate failures as non-success before accepting a batch.",
+      "test_scope": "Exact pinned source review only; no source modification, compilation, checkpoint, model, GPU or network run.",
+      "readback_files_verified": 2,
+      "readback_verified_utc": "2026-11-01T08:04:35Z",
+      "sha256_manifest": "research/R668/SHA256SUMS",
+      "sha256_manifest_sha256": "7c9c4851cc1f0a1f4354fa3e97394b9478eaf8e87c742a9bb96fd27c3194b3d0",
+      "source_readback_sha256": {
+        "research/R668/REPORT.md": "bc656bc89992739a3317b88e8bf07e377d1c518d5c84862d0f4cd821d0a61cc1",
+        "research/R668/SHA256SUMS": "7c9c4851cc1f0a1f4354fa3e97394b9478eaf8e87c742a9bb96fd27c3194b3d0"
+      },
+      "limits": [
+        "This rejects only eval-callback early cancellation as the transfer boundary; it does not reject a patched graph operation or a future donor integration.",
+        "No VoltaFabric expert output is currently consumed by a live llama.cpp generation graph."
+      ],
+      "published_utc": "2026-11-01T08:04:35Z",
+      "next_action": "Prototype a CPU-only graph operation boundary that consumes VoltaFabric's route-batched expert outputs and returns an explicit failure status before decode accepts the batch; test success and injected failure before considering checkpoints or GPU."
     }
   ],
   "acceptance": [
@@ -709,7 +741,8 @@
     "Fused gate/up tensor naming and doubled extent are recognized, but the fused tensor is not split or executed.",
     "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified.",
     "R660 source adds a per-slot rectangular GGML Session projection and a synthetic scalar-oracle fixture, but its Rust test and rustfmt did not execute: the current CI has no pinned GGML static build and the separate rustfmt container image could not be pulled. Do not promote this source until CPU verification succeeds.",
-    "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified."
+    "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified.",
+    "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -735,23 +768,30 @@
     "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING",
     "R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0",
     "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1",
-    "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC"
+    "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC",
+    "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED"
   ],
   "active_operations": [
     {
       "id": "gitlab-pipeline-2271",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "ad9f9af1f495e91b36a7f0e3e4e6380a7a0d3997",
-      "status": "created",
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      },
       "scope": "configured scans/fallback only; not Rust compile/test evidence"
     }
   ],
-  "next_action": "Inspect the pinned llama.cpp graph execution path for a runtime capture point that can return selected IDs and post-scale weights for the same identified batch; keep the graph-construction cb distinct from runtime output capture.",
-  "report": "research/R667/REPORT.md",
+  "next_action": "Prototype a CPU-only llama.cpp graph operation boundary that consumes VoltaFabric's route-batched expert outputs and returns an explicit failure status before decode accepts the batch; test success and injected failure before considering checkpoints or GPU.",
+  "report": "research/R668/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R667/SHA256SUMS",
-    "sha256": "bf99a555953bd6e1677371a207c168fb9ea648a474e3335efd598448f1f0288d",
-    "files": 4
+    "path": "research/R668/SHA256SUMS",
+    "sha256": "7c9c4851cc1f0a1f4354fa3e97394b9478eaf8e87c742a9bb96fd27c3194b3d0",
+    "files": 2
   }
 }
