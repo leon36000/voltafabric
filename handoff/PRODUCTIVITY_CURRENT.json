@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:22:46Z",
+  "updated_utc": "2026-11-01T03:34:20Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -86,6 +86,21 @@
       "commit": "a19ab47b67e7973100ec1375eba77bdf8d709e50",
       "readback_files_verified": 8,
       "published_utc": "2026-11-01T03:22:46Z"
+    },
+    {
+      "id": "R643",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_NATIVE_BUILD",
+      "branch": "r643-strata-registry-ggml-build-20261101",
+      "parent_commit": "4f8a90189d9d1f557e1489f5d940e0bd650fa632",
+      "source_commit": "a19ab47b67e7973100ec1375eba77bdf8d709e50",
+      "report_commit": "b05ef6fe0244b55f958d3681698648029e6006a8",
+      "path": "research/R643",
+      "readback_files_verified": 2,
+      "source_tree_objects_verified": 143,
+      "registry_sha256": "adba4968661f3d59f749a676a87948e29236c81997f649f5526daf71148edc24",
+      "native_provider_ctest": "1 passed; synthetic CPU vectors",
+      "rust_bridge": "offline feature build passed; malformed init rejected before ready"
     }
   ],
   "acceptance": [
@@ -106,24 +121,26 @@
     "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran.",
     "R641 adds an opt-in pinned Strata normal single-token decode callback and owns the PoolFleetOwner for the generator lifetime; it requires 48 inherited initialized AF_UNIX streams and caller-supplied identity. The launcher/session initializer and checkpoint-to-identity binding remain unimplemented.",
     "R641 was reviewed as generated patch text and patch-application readback only. No compiler, tests, independent output oracle, complete generation, GPU, inter-PC worker, production network or shared R53 admission is claimed.",
-    "R642 adds a local launcher and passes 2 CPU fixture tests with fake bridge/Strata children. The real Rust bridge and pinned Strata binary were not built or run; no model/checkpoint, numerical output oracle, GPU, RDMA, inter-PC worker, production network, shared R53 reservation, or generation is qualified."
+    "R642 adds a local launcher and passes 2 CPU fixture tests with fake bridge/Strata children. The real Rust bridge and pinned Strata binary were not built or run; no model/checkpoint, numerical output oracle, GPU, RDMA, inter-PC worker, production network, shared R53 reservation, or generation is qualified.",
+    "R643 compiles the exact R642 Rust source against llama.cpp GGML 3cf03257f219afbe7334045ff7c6a06ac68c627d and passes one synthetic native-provider CTest plus malformed-init rejection. It does not run a model, qualify Rust bridge output against a numerical oracle, attach the actual Strata callback, or prove full generation."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
     "R637",
     "R638",
-    "R642_CPU_LAUNCHER_FIXTURE_ONLY"
+    "R642_CPU_LAUNCHER_FIXTURE_ONLY",
+    "R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R643_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Build and exercise the actual Rust bridge and pinned Strata adapter in a bounded CPU-only fixture; check real VFB3 startup/shutdown and output ownership. Do not load the full checkpoint, start GPU/network work, replay UNKNOWN, or enable automatic relaunch."
+    "status": "R644_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Add a bounded synthetic CPU integration test joining the native GGML resident, VoltaFabric owner/Collector and VFB3 identity checks. Keep full-checkpoint loading, GPU, RDMA and inter-PC work suspended absent fresh admission."
   },
-  "report": "research/R642/REPORT.md",
+  "report": "research/R643/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R642/SHA256SUMS",
-    "sha256": "53ae442f8662f187b93cf7aa933ef60a271df1a9c433970f11395dc8452c887f",
-    "files": 4
+    "path": "research/R643/SHA256SUMS",
+    "sha256": "481073e4734e1ac5ed5f4de6f53013e12fb25598ab3ab2ff4aba328cc6150f4f",
+    "files": 2
   }
 }
