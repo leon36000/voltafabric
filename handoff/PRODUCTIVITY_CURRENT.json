@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T07:42:26Z",
+  "updated_utc": "2026-11-01T08:01:41Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -589,7 +589,7 @@
     {
       "id": "R666",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_SHA256_VERIFIED_CPU_DEBUG_RELEASE_TEST_PASS_SCAN_PIPELINE_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_SHA256_VERIFIED_CPU_DEBUG_RELEASE_12_PASS",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "5c939a7aa4d90882acc4bca7bb070f18612c95ae",
       "source_commit": "dd0d5ccea38f6a1b7590461c06e3f480245a1ca7",
@@ -619,14 +619,55 @@
         "research/R666/REPORT.md": "aadad61b9306ca0bded222fb71dfc7ea4e50f850563a1bb5b6a1116596fa0804",
         "research/R666/SHA256SUMS": "d546971daf9e22c465593c52b68e51caca522637399bf0cda18b5be4763af425"
       },
-      "security_pipeline_2269": "running at handoff update; Gitleaks running, Semgrep/Trivy pending, CPU fallback created. Configured scans are not Rust test evidence.",
+      "security_pipeline_2269": "success: Gitleaks, Semgrep, Trivy, and configured fallback succeeded; configured checks do not compile/test Rust.",
       "limits": [
         "The route adapter accepts caller-supplied donor-shaped arrays; no pinned llama.cpp graph callback currently produces those arrays for VoltaFabric.",
         "Synthetic tensors do not verify top-k tie behavior, a real checkpoint, attention/residual/token loop, full generation, external R53, GPU, inter-PC/RDMA or performance.",
         "Synthetic Q8_0 evidence does not qualify QPN2/NVFP4 K16, MXFP4 K32, or IQ3."
       ],
       "published_utc": "2026-11-01 07:52:08 UTC",
-      "next_action": "Connect a small callback at the pinned llama.cpp Qwen2MoE graph boundary that passes the donor's selected IDs and post-scale weights plus the original Stamp/attempt into this adapter, then compare one resident FFN against independent donor CPU output before advancing to token generation."
+      "next_action": "Inspect the pinned llama.cpp Qwen2MoE runtime after graph execution and identify a concrete capture point for selected IDs/post-scale weights with the same batch identity."
+    },
+    {
+      "id": "R667",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_DEBUG_RELEASE_12_PASS_PIPELINE_CREATED",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "91df05e1e4bc48bd9acee308c6aca1affac714ee",
+      "source_commit": "ad9f9af1f495e91b36a7f0e3e4e6380a7a0d3997",
+      "path": "research/R667",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "changes": [
+        "Uses the pinned GGML CPU softmax, argsort_top_k, get_rows, and scale operators in a bounded routing fixture.",
+        "Reads the argsort_top_k view row-by-row using the retained full-row stride, then packs [slot, token] for the R666 route adapter.",
+        "Verifies 3-expert/2-token ordering, post-scale weights, and import into an identified VoltaFabric route batch."
+      ],
+      "tests_executed": true,
+      "test_results": {
+        "debug": "cargo +1.90.0 test --manifest-path harness/Cargo.toml --locked --offline --features native-ggml-cpu --test native_matrix_session — 12 passed",
+        "release": "same native_matrix_session target with --release — 12 passed",
+        "clippy": "targeted cargo clippy completed; existing Session/Strata warnings remain",
+        "rustfmt": "the extracted R667 FFI/test blocks pass rustfmt --check; whole historical files still contain pre-existing formatting differences"
+      },
+      "test_scope": "Isolated CPU harness linked to the pinned static GGML build. Synthetic 3-expert/2-token logits, no model graph callback, checkpoint, GPU, production R53, inter-PC/RDMA or performance claim.",
+      "readback_files_verified": 4,
+      "readback_verified_utc": "2026-11-01T08:01:41Z",
+      "sha256_manifest": "research/R667/SHA256SUMS",
+      "sha256_manifest_sha256": "bf99a555953bd6e1677371a207c168fb9ea648a474e3335efd598448f1f0288d",
+      "source_readback_sha256": {
+        "crates/ggml-native-ffi/src/lib.rs": "97eb2d1ab7ad7d12dbdc6c1bc6ac4b2ddd4ddc28327fc21e2a01dc54356910c2",
+        "tests/native_matrix_session.rs": "5589ac18983effc9e3bc862a156475373dd7ee0b828012d0cc25f3b45fde270b",
+        "research/R667/REPORT.md": "d559611c3bedb9d5172a378f853fb1465d98d570599ee5369405d10bfd122cf5",
+        "research/R667/SHA256SUMS": "bf99a555953bd6e1677371a207c168fb9ea648a474e3335efd598448f1f0288d"
+      },
+      "security_pipeline_2271": "created at handoff update; configured scans/fallback only, not Rust compile/test evidence.",
+      "limits": [
+        "The helper invokes pinned GGML operations but still uses synthetic logits; it is not a runtime llama.cpp callback.",
+        "Top-k ties, group filtering, shared expert/residual path, checkpoint-backed model and full token generation remain unqualified.",
+        "No external R53, GPU, inter-PC/RDMA, other quantization formats or performance is qualified."
+      ],
+      "published_utc": "2026-11-01T08:01:40Z",
+      "next_action": "Inspect the pinned llama.cpp graph execution path for a runtime capture point that can return selected IDs and post-scale weights for the same identified batch; keep the graph-construction cb distinct from runtime output capture."
     }
   ],
   "acceptance": [
@@ -693,29 +734,24 @@
     "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY",
     "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING",
     "R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0",
-    "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1"
+    "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1",
+    "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC"
   ],
   "active_operations": [
     {
-      "id": "gitlab-pipeline-2269",
+      "id": "gitlab-pipeline-2271",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "dd0d5ccea38f6a1b7590461c06e3f480245a1ca7",
-      "status": "running",
-      "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_gitleaks": "running"
-      },
+      "commit": "ad9f9af1f495e91b36a7f0e3e4e6380a7a0d3997",
+      "status": "created",
       "scope": "configured scans/fallback only; not Rust compile/test evidence"
     }
   ],
-  "next_action": "Connect a small callback at the pinned llama.cpp Qwen2MoE graph boundary that passes the donor's selected IDs and post-scale weights plus the original Stamp/attempt into this adapter, then compare one resident FFN against independent donor CPU output before advancing to token generation.",
-  "report": "research/R666/REPORT.md",
+  "next_action": "Inspect the pinned llama.cpp graph execution path for a runtime capture point that can return selected IDs and post-scale weights for the same identified batch; keep the graph-construction cb distinct from runtime output capture.",
+  "report": "research/R667/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R666/SHA256SUMS",
-    "sha256": "d546971daf9e22c465593c52b68e51caca522637399bf0cda18b5be4763af425",
-    "files": 5
+    "path": "research/R667/SHA256SUMS",
+    "sha256": "bf99a555953bd6e1677371a207c168fb9ea648a474e3335efd598448f1f0288d",
+    "files": 4
   }
 }
