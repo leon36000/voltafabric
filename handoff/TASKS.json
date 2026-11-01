@@ -9856,7 +9856,7 @@
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "commit": "9ef574162ae3fe9f60bbb1067e3cf8c19fdcb56c",
     "readback_files_verified": 9,
-    "published_utc": "2026-11-01 03:44:03Z",
+    "published_utc": "2026-11-01T03:44:03Z",
     "owner": "Codex integrator",
     "branch": "r645-vfb3-identity-cpu-20261101",
     "scope": "Expose the exact run/model/plan/epoch/layer helper used by VFB3 parsing and test mismatch rejection against a synthetic native Fleet receipt.",

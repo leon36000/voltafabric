@@ -11878,7 +11878,7 @@
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_SYNTHETIC_HELPER; VFB3_WIRE_UNTESTED",
     "source_commit": "9ef574162ae3fe9f60bbb1067e3cf8c19fdcb56c",
     "readback_files_verified": 9,
-    "published_utc": "2026-11-01 03:44:03Z",
+    "published_utc": "2026-11-01T03:44:03Z",
     "branch": "r645-vfb3-identity-cpu-20261101",
     "base_commit": "bc3dbbb856730ab622ba6668fa0e87721051143a",
     "report": "research/R645/REPORT.md",
