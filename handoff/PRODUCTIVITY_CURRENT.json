@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 09:56:01 UTC",
+  "updated_utc": "2026-11-01 10:04:03 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -909,7 +909,7 @@
     {
       "id": "R679",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_PLAINTEXT_READBACK_VERIFIED_CPU_LLAMA_LIBRARY_BUILD_PASS_PIPELINE_2298_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_PLAINTEXT_READBACK_VERIFIED_CPU_LLAMA_LIBRARY_BUILD_PASS_PIPELINE_2298_SUCCESS",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "0ae5110de979038f4f665b5d2ed3ae78d54aad01",
       "source_commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
@@ -923,11 +923,32 @@
       "patch_sha256": "df6580199d1b913eb590d81a97dd5a42670fe437416e3965d0bbedb0d43b72f7",
       "manifest_sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
       "pipeline_2297": "success but scanned superseded encoded-content commit; not source validation",
-      "pipeline_2298": "running; Gitleaks success, Semgrep running, Trivy pending; configured scans/fallback only, not C++ build/test",
+      "pipeline_2298": "success; Gitleaks, Semgrep, Trivy and fallback passed; configured scans/fallback only, not C++ build/test",
       "published_utc": "2026-11-01 09:56:01 UTC",
       "readback_verified_utc": "2026-11-01 09:56:01 UTC",
       "automatic_relaunch": "STOPPED_BY_OWNER",
-      "next_action": "R680: connect these hooks to Qwen2MoERouteInvocation with per-ubatch complete identity and add a donor-side callback execution fixture before attempting checkpoint generation."
+      "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading."
+    },
+    {
+      "id": "R680",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_CTEST_6_PASS_1_SKIP_PIPELINE_2301_RUNNING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "2e4986a817f5c57f28cb667cffb50c5ae23a364a",
+      "source_commit": "f5438d6ed634b758f29ec22b55b412a157c15730",
+      "path": "research/R680",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "Binds R679 llm_vf_route_hooks callbacks to the R678 Qwen2MoERouteInvocation. A per-ubatch factory supplies complete identity and owner_by_expert; begin creates one invocation, append forwards donor IDs/final weights/raw outputs, finish accepts only complete READY layers after GGML SUCCESS, and abort discards partial work.",
+      "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; six focused CTests pass and one process-level VFR3 test skips because external fixture paths were not supplied. Synthetic two-layer result [17.4,19.4] and complete run/model/plan/layer/epoch/batch/attempt capture verified; missing-layer host result refused. Pinned donor llama library rebuild and diff check pass.",
+      "test_scope": "Synthetic callback-table/GGML route fixture compiled against exact pinned donor headers plus R679 hook patch. No real llama_context::process_ubatch execution, attachment lifecycle runtime, Rust Session wiring, checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+      "readback_files_verified": 10,
+      "manifest_sha256": "75a1fb63bb380359d27db86202599696d98539cb1ee1f5e881e7792ea25b29da",
+      "pipeline_2301": "running at handoff update; Gitleaks running, Semgrep/Trivy pending, fallback created; configured scans only, not C++ build/test",
+      "published_utc": "2026-11-01T10:03:17Z",
+      "readback_verified_utc": "2026-11-01T10:04:03Z",
+      "superpowers_uninstall": "Explicit removal request checked; plugin manager reports not_installed. No Superpowers skill used.",
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading."
     }
   ],
   "acceptance": [
@@ -1015,7 +1036,8 @@
     "R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS",
     "R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING",
     "R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING",
-    "R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING"
+    "R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING",
+    "R680_LLAMA_HOOK_CALLBACK_BRIDGE_CPU_CTEST_6_PASS_1_SKIP_TWO_LAYER_ORACLE_IDENTITY_CHECK; PINNED_LLAMA_LIBRARY_REBUILD_PASS; GITLAB_READBACK_10_FILES_EXACT; PIPELINE_2301_RUNNING"
   ],
   "active_operations": [
     {
@@ -1225,14 +1247,27 @@
         "pc4_ci_fallback": "created"
       },
       "scope": "R679 final plaintext source artifact scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2301",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "f5438d6ed634b758f29ec22b55b412a157c15730",
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      },
+      "scope": "R680 source scans/fallback only; not local C++ build/test evidence"
     }
   ],
-  "next_action": "R680: connect these hooks to Qwen2MoERouteInvocation with per-ubatch complete identity and add a donor-side callback execution fixture before attempting checkpoint generation.",
+  "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading.",
   "report": "research/R679/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R679/SHA256SUMS",
-    "sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
-    "files": 5
+    "path": "research/R680/SHA256SUMS",
+    "sha256": "75a1fb63bb380359d27db86202599696d98539cb1ee1f5e881e7792ea25b29da",
+    "files": 9
   }
 }

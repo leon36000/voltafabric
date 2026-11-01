@@ -12305,7 +12305,6 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: reproduce from exact GitLab source readback, then implement and test the dynamic GGML custom op at the pinned Qwen2MoE seam using fresh synthetic CPU fixtures. No complete generation claim."
   },
-
   "r673_dynamic_route_capture": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "parent_commit": "d22de1463945c41b96c469b5ac6337df4b4bedb0",
@@ -12332,7 +12331,6 @@
     "readback_verified_utc": "2026-11-01 09:06:28 UTC",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   },
-
   "r674_graph_reuse_lifecycle": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "parent_commit": "b4352fe2718e047481ce8c2853c7abffec6a50db",
@@ -12358,7 +12356,6 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R675: fresh per-invocation graph transaction plus host-side status validation before connecting the Qwen2MoE callback."
   },
-
   "r675_fresh_graph_invocation": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
@@ -12393,7 +12390,6 @@
       }
     }
   },
-
   "r675_pipeline_reconciled": {
     "pipeline_2288": "canceled before scan completion; handoff pipeline 2289 is not C++ build/test",
     "pipeline_2289": {
@@ -12537,5 +12533,42 @@
     "pipeline_2298": "running; scan/fallback only, not compile/test",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R680: bind these callbacks to the R678 Qwen2MoERouteInvocation with per-ubatch full identity and add a donor-side callback execution fixture."
+  },
+  "r680_llama_qwen2moe_route_bridge": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "prior_branch_tip": "2e4986a817f5c57f28cb667cffb50c5ae23a364a",
+    "source_commit": "f5438d6ed634b758f29ec22b55b412a157c15730",
+    "report": "research/R680/REPORT.md",
+    "incremental_patch": "research/R680/llama.cpp-r680.patch",
+    "incremental_patch_sha256": "eaf1b31363b8ad9826c946a64b6c28b7a17933ff024f8336ab07ced11c116b32",
+    "result": "research/R680/RESULT.json",
+    "build_test": "research/R680/BUILD_TEST.txt",
+    "sha256sums": "research/R680/SHA256SUMS",
+    "manifest_sha256": "75a1fb63bb380359d27db86202599696d98539cb1ee1f5e881e7792ea25b29da",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "source_readback_files_verified": 10,
+    "cpu_bridge_build": "PASS AArch64 C++17 -Wall -Wextra -Werror",
+    "focused_ctests": "6 passed, 1 skipped (process fixture absent)",
+    "oracle_output": [
+      17.4,
+      19.4
+    ],
+    "complete_identity_checked": [
+      "run",
+      "model",
+      "plan",
+      "layer",
+      "epoch",
+      "batch",
+      "attempt"
+    ],
+    "missing_layer_refused": true,
+    "live_llama_context_callback_runtime": false,
+    "rust_session_wired": false,
+    "checkpoint_generation": false,
+    "pipeline_2301": "running scans/fallback only",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading."
   }
 }

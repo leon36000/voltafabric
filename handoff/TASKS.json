@@ -10167,7 +10167,6 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: recreate the native build from exact GitLab source readback, then add the dynamic pinned llama.cpp route custom op and verify with fresh CPU synthetic fixtures."
   },
-
   "r673_dynamic_route_capture": {
     "status": "PUBLISHED_PRIVATE_GITLAB_CPU_ROUTE_CAPTURE_PASS_PIPELINE_2284_SUCCESS",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
@@ -10202,7 +10201,6 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   },
-
   "r674_graph_reuse_lifecycle": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_2286_RUNNING",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
@@ -10232,7 +10230,6 @@
     "readback_verified_utc": "2026-11-01 09:18:12 UTC",
     "next_action": "R675: implement and test per-invocation transaction lifecycle and host-side route status validation before attaching the Qwen2MoE routed-aggregate callback."
   },
-
   "r675_fresh_graph_invocation": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_ORACLE_CTEST_3_PASS_PIPELINE_2288_CANCELED",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
@@ -10271,7 +10268,6 @@
       }
     }
   },
-
   "r675_ci_reconciliation": {
     "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
     "handoff_commit": "45a267f115260245f72f5098550c3337b30b5364",
@@ -10406,5 +10402,27 @@
     ],
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R680: connect hooks to Qwen2MoERouteInvocation with per-ubatch full identity and test callback execution in a donor-side CPU fixture before any checkpoint load."
+  },
+  "r680_llama_qwen2moe_route_bridge": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_CTEST_6_PASS_1_SKIP_PIPELINE_2301_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "prior_branch_tip": "2e4986a817f5c57f28cb667cffb50c5ae23a364a",
+    "source_commit": "f5438d6ed634b758f29ec22b55b412a157c15730",
+    "objective": "Bridge pinned llama.cpp Qwen2MoE route-hook callbacks to the existing per-ubatch Qwen2MoERouteInvocation before checkpoint work.",
+    "changes": [
+      "Per-ubatch factory supplies full run/model/plan/epoch/batch/attempt identity and expert-owner projection.",
+      "Callback begin creates one fresh invocation; append passes donor-selected IDs, final post-gating weights and raw outputs; finish gates on all expected layers READY and GGML SUCCESS; abort drops partial state.",
+      "Safe hook ownership checks use the R680 getter; CMake bridge target is opt-in and checks exact donor revision, clean GGML dependency and R679 hook ABI.",
+      "Two-layer CPU callback fixture checks identity, route IDs, owners, unchanged coefficients, oracle output [17.4,19.4], and missing-layer rejection."
+    ],
+    "validation": "AArch64 CPU C++17 -Wall -Wextra -Werror bridge build; 6 focused CTests pass, 1 process fixture skipped; pinned donor llama library rebuild and diff check pass; 10 source/report files exact GitLab readback.",
+    "manifest_sha256": "75a1fb63bb380359d27db86202599696d98539cb1ee1f5e881e7792ea25b29da",
+    "pipeline_2301": "running; configured scans/fallback only, not C++ build/test",
+    "limitations": [
+      "No runtime attach/detach or actual llama_context::process_ubatch callback delivery test.",
+      "No Rust Session, real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance."
+    ],
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading."
   }
 }
