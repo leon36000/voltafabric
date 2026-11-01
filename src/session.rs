@@ -152,7 +152,14 @@ pub struct GroupedProjectionBatchOutput {
     pub slots: Vec<GroupedProjectionSlotOutput>,
 }
 
-/dev/stdin:
+#[cfg(feature = "native-ggml-cpu")]
+struct PreparedQwen2MoEProjectionStage {
+    tensor: String,
+    input_columns: usize,
+    output_columns: usize,
+    slot_count: usize,
+    selected: Vec<(usize, routing::RankDispatch)>,
+}
 
 /// Compose the separate Qwen2MoE gate/up projections into inputs for its down projection.
 /// Caller must pass the exact outputs from the same routed batch and attempt. This helper
@@ -5518,6 +5525,272 @@ impl Session {
 
     /// Execute one rectangular, resident GGML projection with per-route-slot inputs.
     /// The result is staged atomically in route-slot order and remains unweighted FP32.
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn preflight_qwen2moe_projection_stage(
+        sessions: &[Session], problem: &routing::RoutingProblem, tensor: &str,
+        input_columns: usize, output_columns: usize,
+    ) -> Result<PreparedQwen2MoEProjectionStage> {
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.slots.is_empty() || dispatch.slots.len() > 512
+            || tensor.trim().is_empty() || tensor.len() > 256
+            || input_columns == 0 || output_columns == 0
+            || dispatch.slots.len().checked_mul(input_columns)
+                .and_then(|n| n.checked_mul(4))
+                .is_none_or(|bytes| bytes > MAX_RAW_ACTIVATION_BYTES)
+        {
+            return Err(invalid("Qwen2MoE projection preflight shape or budget"));
+        }
+        let mut selected = Vec::new();
+        let mut first_binding: Option<crate::native_ggml_cpu::GroupedMatrixBinding> = None;
+        let mut resident_payload_bytes = 0u64;
+        for rank in dispatch.ranks.into_iter().filter(|r| !r.slots.is_empty()) {
+            let matches: Vec<_> = sessions.iter().enumerate()
+                .filter(|(_, s)| s.rank == rank.rank).collect();
+            if matches.len() != 1 {
+                return Err(invalid("Qwen2MoE stage Session rank missing or duplicate"));
+            }
+            let (index, session) = matches[0];
+            let binding = session.grouped_matrix_binding.as_ref()
+                .ok_or_else(|| invalid("Qwen2MoE stage has no resident matrix"))?;
+            resident_payload_bytes = resident_payload_bytes
+                .checked_add(session.traffic.weight_bytes_sent)
+                .filter(|&n| n <= crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES)
+                .ok_or_else(|| invalid("Qwen2MoE stage resident payload budget"))?;
+            if !session.usable
+                || session.native_backend != Some(NativeBackend::GroupedMatrix)
+                || !session.hello.capabilities.iter()
+                    .any(|c| c == CAPABILITY_NATIVE_GROUPED_PROJECTION_CPU)
+                || binding.rank != rank.rank
+                || binding.model_revision != problem.stamp.model_revision
+                || binding.layer != problem.stamp.layer
+                || binding.epoch != problem.stamp.epoch
+                || binding.tensor != tensor
+                || binding.rows != output_columns
+                || binding.columns != input_columns
+                || binding.residents.iter().map(|(_, local)| *local).collect::<Vec<_>>()
+                    != rank.resident_order
+                || rank.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+            {
+                return Err(invalid("Qwen2MoE stage binding differs from tensor, shape or route"));
+            }
+            if let Some(first) = first_binding.as_ref() {
+                if binding.model_revision != first.model_revision
+                    || binding.layer != first.layer || binding.tensor != first.tensor
+                    || binding.ggml_type != first.ggml_type || binding.epoch != first.epoch
+                    || binding.rows != first.rows || binding.columns != first.columns
+                {
+                    return Err(invalid("Qwen2MoE stage rank bindings are inconsistent"));
+                }
+            } else {
+                first_binding = Some(binding.clone());
+            }
+            selected.push((index, rank));
+        }
+        if selected.is_empty()
+            || selected.iter().map(|(_, rank)| rank.slots.len()).sum::<usize>()
+                != dispatch.slots.len()
+        {
+            return Err(invalid("Qwen2MoE stage slot coverage"));
+        }
+        Ok(PreparedQwen2MoEProjectionStage {
+            tensor: tensor.into(), input_columns, output_columns,
+            slot_count: dispatch.slots.len(), selected,
+        })
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn qwen2moe_projection_work(
+        stage: &PreparedQwen2MoEProjectionStage,
+        inputs: &[crate::native_ggml_cpu::GroupedProjectionInput],
+    ) -> Result<Vec<(usize, routing::RankDispatch, Vec<crate::native_ggml_cpu::GroupedProjectionInput>)>> {
+        if inputs.len() != stage.slot_count {
+            return Err(invalid("Qwen2MoE projection input slot coverage"));
+        }
+        let mut provided = BTreeMap::new();
+        let mut activation_bytes = 0usize;
+        for input in inputs {
+            if input.values.len() != stage.input_columns || input.values.is_empty()
+                || input.values.iter().any(|v| !v.is_finite())
+                || provided.insert((input.token, input.slot), input.clone()).is_some()
+            {
+                return Err(invalid("Qwen2MoE projection input identity or value"));
+            }
+            activation_bytes = activation_bytes
+                .checked_add(input.values.len().checked_mul(4)
+                    .ok_or_else(|| invalid("Qwen2MoE activation size overflow"))?)
+                .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES)
+                .ok_or_else(|| invalid("Qwen2MoE activation budget"))?;
+        }
+        let mut selected = Vec::with_capacity(stage.selected.len());
+        for (index, rank) in &stage.selected {
+            let mut rank_inputs = Vec::with_capacity(rank.slots.len());
+            for entry in &rank.slots {
+                let input = provided.remove(&(entry.slot.token, entry.slot.slot))
+                    .ok_or_else(|| invalid("Qwen2MoE routed slot input missing"))?;
+                if input.expert != entry.slot.expert || input.local != entry.slot.local {
+                    return Err(invalid("Qwen2MoE routed slot input binding"));
+                }
+                rank_inputs.push(input);
+            }
+            selected.push((*index, rank.clone(), rank_inputs));
+        }
+        if !provided.is_empty() {
+            return Err(invalid("Qwen2MoE projection has unmatched inputs"));
+        }
+        Ok(selected)
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn qwen2moe_hidden_projection_inputs(
+        problem: &routing::RoutingProblem,
+        token_inputs: &[Vec<f32>],
+    ) -> Result<Vec<crate::native_ggml_cpu::GroupedProjectionInput>> {
+        if token_inputs.len() != problem.routes.len() || token_inputs.is_empty()
+            || token_inputs.iter().any(|row| {
+                row.len() != problem.hidden || row.iter().any(|v| !v.is_finite())
+            })
+        {
+            return Err(invalid("Qwen2MoE hidden activation shape or values"));
+        }
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.slots.is_empty()
+            || dispatch.slots.len().checked_mul(problem.hidden).and_then(|n| n.checked_mul(4))
+                .is_none_or(|bytes| bytes > MAX_RAW_ACTIVATION_BYTES)
+        {
+            return Err(invalid("Qwen2MoE hidden activation budget"));
+        }
+        Ok(dispatch.slots.into_iter()
+            .map(|slot| crate::native_ggml_cpu::GroupedProjectionInput {
+                token: slot.token, slot: slot.slot, expert: slot.expert, local: slot.local,
+                values: token_inputs[slot.token].clone(),
+            }).collect())
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn run_qwen2moe_projection_stage(
+        sessions: &mut [Session], problem: &routing::RoutingProblem,
+        stage: &PreparedQwen2MoEProjectionStage,
+        work: Vec<(usize, routing::RankDispatch, Vec<crate::native_ggml_cpu::GroupedProjectionInput>)>,
+        attempt: u64, deadline: Instant,
+    ) -> Result<GroupedProjectionBatchOutput> {
+        let participating: Vec<_> = work.iter().map(|(i, _, _)| *i).collect();
+        let mut output_slots = Vec::with_capacity(stage.slot_count);
+        for (index, rank, rank_inputs) in work {
+            match sessions[index].exec_grouped_projection_rank(
+                rank, rank_inputs, attempt, stage.input_columns, stage.output_columns, deadline,
+            ) {
+                Ok(output) => for (slot, values) in output.slots.into_iter().zip(output.rows) {
+                    output_slots.push(GroupedProjectionSlotOutput {
+                        token: slot.token, slot: slot.slot, expert: slot.expert,
+                        rank: output.rank, local: slot.local, values,
+                    });
+                },
+                Err(error) => {
+                    for i in &participating { sessions[*i].usable = false; }
+                    return Err(error);
+                }
+            }
+        }
+        if output_slots.len() != stage.slot_count {
+            for i in &participating { sessions[*i].usable = false; }
+            return Err(invalid("Qwen2MoE projection output coverage"));
+        }
+        output_slots.sort_by_key(|s| (s.token, s.slot));
+        if output_slots.windows(2).any(|p| (p[0].token, p[0].slot) >= (p[1].token, p[1].slot))
+            || output_slots.iter().any(|s| {
+                s.values.len() != stage.output_columns || s.values.iter().any(|v| !v.is_finite())
+            })
+        {
+            for i in &participating { sessions[*i].usable = false; }
+            return Err(invalid("Qwen2MoE projection output order or shape"));
+        }
+        Ok(GroupedProjectionBatchOutput {
+            stamp: problem.stamp.clone(), tensor: stage.tensor.clone(), attempt,
+            dispatch_hidden: problem.hidden, input_columns: stage.input_columns,
+            output_columns: stage.output_columns, slots: output_slots,
+        })
+    }
+
+    /// One identified local Session attempt covers gate, up, SwiGLU, and down.
+    /// The caller is responsible for external R53 admission; the local ledger is not
+    /// a lease or R53. Returns only complete unweighted down rows.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_qwen2moe_ffn_batch(
+        gate_sessions: &mut [Session], up_sessions: &mut [Session],
+        down_sessions: &mut [Session], problem: &routing::RoutingProblem,
+        token_inputs: &[Vec<f32>], ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration, swiglu_limit: Option<f32>,
+    ) -> Result<GroupedProjectionBatchOutput> {
+        if timeout.is_zero() || timeout > Duration::from_secs(60)
+            || swiglu_limit.is_some_and(|x| !x.is_finite() || x < 0.0)
+            || [&problem.stamp.run_id, &problem.stamp.plan_id]
+                .iter().any(|v| v.trim().is_empty() || v.len() > 256)
+        {
+            return Err(invalid("Qwen2MoE batch identity, clamp or timeout"));
+        }
+        routing::validate(problem)?;
+        let dispatch = routing::dispatch(problem)?;
+        let first_rank = dispatch.ranks.iter().find(|r| !r.slots.is_empty())
+            .ok_or_else(|| invalid("Qwen2MoE routing has no selected rank"))?;
+        let gate_matches: Vec<_> = gate_sessions.iter()
+            .filter(|s| s.rank == first_rank.rank).collect();
+        if gate_matches.len() != 1 {
+            return Err(invalid("Qwen2MoE gate Session rank missing or duplicate"));
+        }
+        let gate_tensor = format!("blk.{}.ffn_gate_exps.weight", problem.stamp.layer);
+        let up_tensor = format!("blk.{}.ffn_up_exps.weight", problem.stamp.layer);
+        let down_tensor = format!("blk.{}.ffn_down_exps.weight", problem.stamp.layer);
+        let binding = gate_matches[0].grouped_matrix_binding.as_ref()
+            .ok_or_else(|| invalid("Qwen2MoE gate tensor is not resident"))?;
+        let ffn_width = binding.rows;
+        if binding.tensor != gate_tensor || binding.columns != problem.hidden
+            || !(1..=10_240).contains(&ffn_width)
+        {
+            return Err(invalid("Qwen2MoE gate role or shape"));
+        }
+        let gate_stage = Self::preflight_qwen2moe_projection_stage(
+            gate_sessions, problem, &gate_tensor, problem.hidden, ffn_width,
+        )?;
+        let up_stage = Self::preflight_qwen2moe_projection_stage(
+            up_sessions, problem, &up_tensor, problem.hidden, ffn_width,
+        )?;
+        let down_stage = Self::preflight_qwen2moe_projection_stage(
+            down_sessions, problem, &down_tensor, ffn_width, problem.hidden,
+        )?;
+        let gate_inputs = Self::qwen2moe_hidden_projection_inputs(problem, token_inputs)?;
+        let up_inputs = gate_inputs.clone();
+        let gate_work = Self::qwen2moe_projection_work(&gate_stage, &gate_inputs)?;
+        let up_work = Self::qwen2moe_projection_work(&up_stage, &up_inputs)?;
+        // One full layer Stamp, one attempt, and one local ledger claim.
+        claim_identity(&problem.stamp, false)?;
+        let attempt = next_attempt()?;
+        ledger.reserve(&problem.stamp, attempt)?;
+        let deadline = Instant::now() + timeout;
+        let result = (|| {
+            let gate = Self::run_qwen2moe_projection_stage(
+                gate_sessions, problem, &gate_stage, gate_work, attempt, deadline,
+            )?;
+            let up = Self::run_qwen2moe_projection_stage(
+                up_sessions, problem, &up_stage, up_work, attempt, deadline,
+            )?;
+            let down_inputs = qwen2moe_gate_up_to_down_inputs(&gate, &up, swiglu_limit)?;
+            let down_work = Self::qwen2moe_projection_work(&down_stage, &down_inputs)?;
+            Self::run_qwen2moe_projection_stage(
+                down_sessions, problem, &down_stage, down_work, attempt, deadline,
+            )
+        })();
+        if result.is_err() {
+            for (i, _) in &gate_stage.selected { gate_sessions[*i].usable = false; }
+            for (i, _) in &up_stage.selected { up_sessions[*i].usable = false; }
+            for (i, _) in &down_stage.selected { down_sessions[*i].usable = false; }
+        }
+        result
+    }
+
     /// The caller must reserve the external R53 identity before calling this experimental
     /// local-ledger adapter; this method's ledger is process-local and is not R53.
     #[cfg(feature = "native-ggml-cpu")]

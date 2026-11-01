@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T07:03:16Z",
+  "updated_utc": "2026-11-01T07:10:53Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -468,7 +468,36 @@
       },
       "rustfmt_local": "rustfmt parsed and formatted the added helper/test snippets. Full branch source/test SHA256 was recomputed from exact GitLab readbacks (byte lengths matched repository metadata); no type-check or Rust test run.",
       "security_pipeline_2257": "pending at handoff update; configured Gitleaks/Semgrep/Trivy/fallback only, no Rust compile/test",
-      "security_pipeline_2258": "success; configured Gitleaks/Semgrep/Trivy/fallback only; no Rust compile/test."
+      "security_pipeline_2258": "success; configured Gitleaks/Semgrep/Trivy/fallback only; no Rust compile/test.",
+      "checksum_correction_commit": "78921b7512d8dab4abc0253890644d6699612201"
+    },
+    {
+      "id": "R662",
+      "owner": "integrator",
+      "state": "PRIVATE_GITLAB_SOURCE_COMMITTED_READBACK_SHA256_PENDING_TEST_UNEXECUTED",
+      "branch": "r662-qwen2moe-atomic-ffn-20261101",
+      "path": "research/R662",
+      "parent_commit": "78921b7512d8dab4abc0253890644d6699612201",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "changes": [
+        "Adds one Qwen2MoE gate/up/down coordinator across three resident grouped-projection Session sets.",
+        "Preflights exact tensor roles, rectangular shapes, routed resident bindings, slot coverage, and activation bounds before one layer Stamp claim and one local attempt reservation.",
+        "Executes all projections with the same attempt; composes SiLU(gate)*up; returns only complete unweighted down rows; invalidates all participating Sessions on post-reservation error.",
+        "Removes the literal /dev/stdin: marker from R661 source and test readbacks."
+      ],
+      "tests_added": [
+        "qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_preflights_all_stages"
+      ],
+      "tests_executed": false,
+      "test_limits": "Synthetic Q8_0 CPU fixture only; not executed. Local ledger, not R53. No real model/checkpoint, complete generation, GPU, inter-PC/RDMA or performance claim.",
+      "sha256_manifest": "research/R662/SHA256SUMS",
+      "sha256_manifest_sha256": "750c222ae319652b7bf88ac9415df1f82ba5ed02f1ff87562c4a700e0047e29c",
+      "source_readback_sha256": {
+        "files": 3,
+        "matched": 0,
+        "expected_from_exact_source_readback": true
+      },
+      "next_action": "Independently read back exact committed source and verify SHA256SUMS; then obtain an exact-branch CPU compile/test path. Scan-only CI is not test evidence."
     }
   ],
   "acceptance": [
@@ -535,12 +564,12 @@
     "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING"
   ],
   "active_operations": [],
-  "next_action": "Implement the compound Qwen2MoE gate/up/down Session coordinator as one identity and attempt; preflight all resident matrices, discard partial stages atomically, then hand unweighted down rows to the existing Collector. R661 tests are still unexecuted.",
-  "report": "research/R661/REPORT.md",
+  "next_action": "Verify R662 exact source readbacks and hashes, then locate exact-branch CPU compile/test environment; keep complete generation and hardware claims gated.",
+  "report": "research/R662/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R661/SHA256SUMS",
-    "sha256": "d5d724de322116e655a745d8a67736b025fba129f8d5985eeaa920270d6023ea",
-    "files": 8
+    "path": "research/R662/SHA256SUMS",
+    "sha256": "750c222ae319652b7bf88ac9415df1f82ba5ed02f1ff87562c4a700e0047e29c",
+    "files": 5
   }
 }

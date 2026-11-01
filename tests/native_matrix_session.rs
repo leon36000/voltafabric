@@ -649,7 +649,6 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
 }
 
 
-/dev/stdin:
 
 #[cfg(feature = "native-ggml-cpu")]
 #[test]
@@ -798,4 +797,101 @@ fn qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch() {
             .len(),
         1
     );
+}
+
+
+#[test]
+fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_preflights_all_stages() {
+    let residents = [(3, 1), (18, 2), (40, 0)];
+    let make_weights = |rows: usize, columns: usize, codes: &[u8]| {
+        let row_bytes = (columns / 32) * Q8_0_ROW_BYTES;
+        let mut weights = vec![0_u8; codes.len() * rows * row_bytes];
+        for (physical, &code) in codes.iter().enumerate() {
+            for row in 0..rows {
+                for block in 0..columns / 32 {
+                    let offset = physical * rows * row_bytes + row * row_bytes
+                        + block * Q8_0_ROW_BYTES;
+                    weights[offset..offset + 2].copy_from_slice(&[0x00, 0x3c]);
+                    weights[offset + 2] = code;
+                }
+            }
+        }
+        weights
+    };
+    let load = |label: &str, tensor: &str, rows: usize, columns: usize, codes: &[u8]| {
+        let weights = make_weights(rows, columns, codes);
+        let mut binding = binding_shape(7, &residents, &weights,
+            "r662-qwen2moe-synthetic-model", 5, rows, columns);
+        binding.tensor = tensor.into();
+        let checkpoint = gguf_fixture(label, &binding.tensor,
+            [columns as u64, rows as u64, residents.len() as u64], &weights);
+        let mut session = Session::connect(&endpoint(7), TIMEOUT).unwrap();
+        session.load_grouped_matrix_gguf_tensor(
+            &binding, &checkpoint, &binding.tensor, TIMEOUT,
+        ).unwrap();
+        vec![session]
+    };
+    let mut problem = routed_problem(662);
+    problem.stamp.run_id = "r662-qwen2moe-run".into();
+    problem.stamp.model_revision = "r662-qwen2moe-synthetic-model".into();
+    problem.stamp.plan_id = "r662-qwen2moe-plan".into();
+    let mut hidden = vec![vec![0.0_f32; H]; 2];
+    hidden[0][0] = 2.0;
+    hidden[1][0] = 1.0;
+    let ledger = ledger("qwen2moe-compound-ffn");
+    // Wrong role fails before claiming the Stamp or sending an execution request.
+    let mut bad_gate = load("bad-gate", "blk.5.ffn_gate_up_exps.weight", 64, H, &[1, 2, 4]);
+    let mut preflight_up = load("preflight-up", "blk.5.ffn_up_exps.weight", 64, H, &[2, 3, 5]);
+    let mut preflight_down = load("preflight-down", "blk.5.ffn_down_exps.weight", H, 64, &[3, 1, 2]);
+    let error = Session::exec_qwen2moe_ffn_batch(
+        &mut bad_gate, &mut preflight_up, &mut preflight_down,
+        &problem, &hidden, &ledger, TIMEOUT, None,
+    ).unwrap_err();
+    assert_eq!(error.code, "INVALID_INPUT");
+    assert!(bad_gate.iter().all(Session::is_usable));
+    assert!(preflight_up.iter().all(Session::is_usable));
+    assert!(preflight_down.iter().all(Session::is_usable));
+    let _ = bad_gate.pop().unwrap().close(TIMEOUT);
+    let _ = preflight_up.pop().unwrap().close(TIMEOUT);
+    let _ = preflight_down.pop().unwrap().close(TIMEOUT);
+    let mut gate = load("gate", "blk.5.ffn_gate_exps.weight", 64, H, &[1, 2, 4]);
+    let mut up = load("up", "blk.5.ffn_up_exps.weight", 64, H, &[2, 3, 5]);
+    let mut down = load("down", "blk.5.ffn_down_exps.weight", H, 64, &[3, 1, 2]);
+    let output = Session::exec_qwen2moe_ffn_batch(
+        &mut gate, &mut up, &mut down, &problem, &hidden, &ledger, TIMEOUT, None,
+    ).unwrap();
+    assert_eq!(output.stamp, problem.stamp);
+    assert!(output.attempt > 0);
+    assert_eq!(output.tensor, "blk.5.ffn_down_exps.weight");
+    assert_eq!(output.dispatch_hidden, H);
+    assert_eq!(output.input_columns, 64);
+    assert_eq!(output.output_columns, H);
+    assert_eq!(output.slots.len(), problem.routes.iter().map(Vec::len).sum());
+    let gate_codes = [1_u8, 2, 4];
+    let up_codes = [2_u8, 3, 5];
+    let down_codes = [3_u8, 1, 2];
+    for actual in &output.slots {
+        let route = &problem.routes[actual.token][actual.slot];
+        assert_eq!(actual.expert, route.expert);
+        let physical = residents.iter().position(|(expert, _)| *expert == actual.expert).unwrap();
+        let input = f64::from(hidden[actual.token][0]);
+        let gate_value = input * f64::from(gate_codes[physical]);
+        let up_value = input * f64::from(up_codes[physical]);
+        let silu_up = gate_value / (1.0 + (-gate_value).exp()) * up_value;
+        let expected = silu_up * f64::from(down_codes[physical]) * 2.0;
+        for &value in &actual.values {
+            assert!((f64::from(value) - expected).abs() <= 1e-4 * expected.abs().max(1.0));
+            assert!((f64::from(value) - expected * f64::from(route.weight)).abs() > 1e-3);
+        }
+    }
+    let replay = Session::exec_qwen2moe_ffn_batch(
+        &mut gate, &mut up, &mut down, &problem, &hidden, &ledger, TIMEOUT, None,
+    ).unwrap_err();
+    assert!(replay.message.contains("identity already attempted"));
+    assert!(gate.iter().all(Session::is_usable));
+    assert!(up.iter().all(Session::is_usable));
+    assert!(down.iter().all(Session::is_usable));
+    let _ = gate.pop().unwrap().close(TIMEOUT);
+    let _ = up.pop().unwrap().close(TIMEOUT);
+    let _ = down.pop().unwrap().close(TIMEOUT);
 }
