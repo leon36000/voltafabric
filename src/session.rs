@@ -162,9 +162,10 @@ struct PreparedQwen2MoEProjectionStage {
 }
 
 /// Validate a completed Qwen2MoE down projection and finish it through VoltaFabric's
-/// ordinary FP64 Collector. Input slot rows are unweighted FP32; Collector applies
-/// each original routing coefficient exactly once in token/slot order. This checks
-/// identities and shape, not the provenance of caller-constructed output structs.
+/// ordinary Collector. Input slot rows are unweighted FP32; the adapter first converts
+/// every row to FP16 and decodes it to f64, then Collector applies each original routing
+/// coefficient exactly once in token/slot order. This checks identities and shape, not
+/// the provenance of caller-constructed output structs.
 #[cfg(feature = "native-ggml-cpu")]
 pub fn collect_qwen2moe_ffn_output(
     problem: &routing::RoutingProblem,
@@ -198,8 +199,23 @@ pub fn collect_qwen2moe_ffn_output(
             return Err(invalid("Qwen2MoE down result order, route or value"));
         }
     }
+    // Stage every FP16-decode result before mutating the Collector. A finite FP32 value
+    // can still overflow binary16; refusing here keeps the output batch atomic.
+    let decoded_fp16 = output
+        .slots
+        .iter()
+        .map(|slot| {
+            slot.values
+                .iter()
+                .map(|&value| {
+                    crate::completion::encode_fp16(f64::from(value))
+                        .and_then(crate::completion::decode_fp16)
+                })
+                .collect::<Result<Vec<_>>>()
+        })
+        .collect::<Result<Vec<_>>>()?;
     let mut collector = moe::Collector::from_routing(problem)?;
-    for slot in &output.slots {
+    for (slot, value) in output.slots.iter().zip(decoded_fp16) {
         collector.accept(moe::Completion {
             stamp: output.stamp.clone(),
             token: slot.token,
@@ -207,7 +223,7 @@ pub fn collect_qwen2moe_ffn_output(
             expert: slot.expert,
             rank: slot.rank,
             local: slot.local,
-            value: slot.values.iter().copied().map(f64::from).collect(),
+            value,
         })?;
     }
     collector.finish()

@@ -20,6 +20,53 @@ const H: usize = 32;
 const Q8_0_ROW_BYTES: usize = 34;
 const TIMEOUT: Duration = Duration::from_secs(10);
 
+// Independent scalar rounding for the normal positive values used by this Q8_0 fixture.
+// It models one Q8_0 activation block's stored FP16 scale and the Collector's FP16 result
+// format without calling VoltaFabric's production conversion helpers.
+fn oracle_fp16_round_trip(value: f32) -> f32 {
+    let bits = value.to_bits();
+    let sign = bits & 0x8000_0000;
+    let exponent = ((bits >> 23) & 0xff) as i32 - 127;
+    assert_eq!(sign, 0, "fixture oracle expects positive values");
+    assert!((-14..=15).contains(&exponent), "fixture value must be normal FP16");
+
+    let significand = bits & 0x007f_ffff;
+    let mut mantissa = significand >> 13;
+    let remainder = significand & 0x1fff;
+    if remainder > 0x1000 || (remainder == 0x1000 && mantissa & 1 != 0) {
+        mantissa += 1;
+    }
+    let mut half_exponent = exponent + 15;
+    if mantissa == 0x400 {
+        mantissa = 0;
+        half_exponent += 1;
+    }
+    assert!(half_exponent <= 30, "fixture output must remain finite FP16");
+    let f32_exponent = (half_exponent - 15 + 127) as u32;
+    let decoded = (f32_exponent << 23) | (mantissa << 13);
+    f32::from_bits(decoded)
+}
+
+fn oracle_q8_0_positive_block_value(value: f32) -> f32 {
+    assert!(value >= 0.0 && value.is_finite());
+    oracle_fp16_round_trip(value / 127.0) * 127.0
+}
+
+fn oracle_qwen2moe_down(value: f32, gate_code: u8, up_code: u8, down_code: u8) -> f32 {
+    // The input is one-hot, so GGML Q8_0 reconstructs its maximum from the stored
+    // half-precision scale. Gate and up each have one nonzero Q8_0 tap.
+    let input = oracle_q8_0_positive_block_value(value);
+    let gate = input * f32::from(gate_code);
+    let up = input * f32::from(up_code);
+    let swiglu = gate / (1.0 + (-gate).exp()) * up;
+
+    // The 64-wide down activation consists of two identical 32-value Q8_0 blocks.
+    // Each down weight block has one nonzero tap, so the two dot contributions add.
+    let down_input = oracle_q8_0_positive_block_value(swiglu);
+    let partial = down_input * f32::from(down_code);
+    partial + partial
+}
+
 fn endpoint(rank: u32) -> Endpoint {
     Endpoint {
         rank,
@@ -576,7 +623,8 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
         .load_grouped_matrix_gguf_tensor(&binding, &checkpoint, &binding.tensor, TIMEOUT)
         .unwrap();
     let mut sessions = vec![session];
-    let problem = routed_problem(91);
+    let mut problem = routed_problem(91);
+    problem.stamp.model_revision = "r659-session-model".into();
     let mut inputs = Vec::new();
     for (token, routes) in problem.routes.iter().enumerate() {
         for (slot, route) in routes.iter().enumerate() {
@@ -637,14 +685,17 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
             let offset = physical * rows * Q8_0_ROW_BYTES + row * Q8_0_ROW_BYTES;
             let scale = u16::from_le_bytes([weights[offset], weights[offset + 1]]);
             let quant = weights[offset + 2] as i8;
-            let expected = f64::from(input.values[0])
+            let expected = f64::from(oracle_q8_0_positive_block_value(input.values[0]))
                 * voltafabric::completion::decode_fp16(scale).unwrap()
                 * f64::from(quant);
             assert_eq!(actual.values[row], expected as f32);
         }
     }
     // The first route weight is 0.25; this intermediate result stays unweighted.
-    assert_eq!(output.slots[0].values[0], 4.0);
+    assert_eq!(
+        output.slots[0].values[0],
+        oracle_q8_0_positive_block_value(2.0) * 2.0
+    );
     let _ = sessions.pop().unwrap().close(TIMEOUT);
 }
 
@@ -870,43 +921,42 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
     let gate_codes = [1_u8, 2, 4];
     let up_codes = [2_u8, 3, 5];
     let down_codes = [3_u8, 1, 2];
+    let mut weighted_oracle = vec![vec![0.0_f64; H]; problem.routes.len()];
     for actual in &output.slots {
         let route = &problem.routes[actual.token][actual.slot];
         assert_eq!(actual.expert, route.expert);
-        let physical = residents.iter().position(|(expert, _)| *expert == actual.expert).unwrap();
-        let input = f64::from(hidden[actual.token][0]);
-        let gate_value = input * f64::from(gate_codes[physical]);
-        let up_value = input * f64::from(up_codes[physical]);
-        let silu_up = gate_value / (1.0 + (-gate_value).exp()) * up_value;
-        let expected = silu_up * f64::from(down_codes[physical]) * 2.0;
+        let physical = residents
+            .iter()
+            .position(|(expert, _)| *expert == actual.expert)
+            .unwrap();
+        let expected_unweighted = oracle_qwen2moe_down(
+            hidden[actual.token][0],
+            gate_codes[physical],
+            up_codes[physical],
+            down_codes[physical],
+        );
         for &value in &actual.values {
-            assert!((f64::from(value) - expected).abs() <= 1e-4 * expected.abs().max(1.0));
-            assert!((f64::from(value) - expected * f64::from(route.weight)).abs() > 1e-3);
+            let expected = f64::from(expected_unweighted);
+            assert!((f64::from(value) - expected).abs() <= 2e-5 * expected.abs().max(1.0));
+            assert!((f64::from(value) - expected * route.weight).abs() > 1e-3);
+        }
+        let fp16 = f64::from(oracle_fp16_round_trip(expected_unweighted));
+        for oracle in &mut weighted_oracle[actual.token] {
+            *oracle += route.weight * fp16;
         }
     }
     let mut stale_problem = problem.clone();
     stale_problem.stamp.batch = stale_problem.stamp.batch.checked_add(1).unwrap();
     assert!(voltafabric::session::collect_qwen2moe_ffn_output(&stale_problem, &output).is_err());
-    let collected =
-        voltafabric::session::collect_qwen2moe_ffn_output(&problem, &output).unwrap();
-    let mut weighted_oracle = vec![vec![0.0_f64; H]; problem.routes.len()];
-    for actual in &output.slots {
-        let route = &problem.routes[actual.token][actual.slot];
-        let physical = residents.iter().position(|(expert, _)| *expert == actual.expert).unwrap();
-        let input = f64::from(hidden[actual.token][0]);
-        let gate_value = input * f64::from(gate_codes[physical]);
-        let up_value = input * f64::from(up_codes[physical]);
-        let unweighted = gate_value / (1.0 + (-gate_value).exp()) * up_value
-            * f64::from(down_codes[physical]) * 2.0;
-        for expected in &mut weighted_oracle[actual.token] {
-            *expected += route.weight * unweighted;
-        }
-    }
+    let mut fp16_overflow = output.clone();
+    fp16_overflow.slots[0].values[0] = f32::MAX;
+    assert!(voltafabric::session::collect_qwen2moe_ffn_output(&problem, &fp16_overflow).is_err());
+    let collected = voltafabric::session::collect_qwen2moe_ffn_output(&problem, &output).unwrap();
     assert_eq!(collected.len(), weighted_oracle.len());
     for (actual, expected) in collected.iter().zip(&weighted_oracle) {
         assert_eq!(actual.len(), H);
         for (&value, &oracle) in actual.iter().zip(expected) {
-            assert!((value - oracle).abs() <= 1e-4 * oracle.abs().max(1.0));
+            assert_eq!(value, oracle);
         }
     }
     let replay = Session::exec_qwen2moe_ffn_batch(
