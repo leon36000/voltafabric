@@ -785,12 +785,14 @@ mod identity_tests {
     }
 
     #[test]
-    fn binary_loop_runs_one_synthetic_native_cpu_batch_and_closes() {
+    fn binary_loop_runs_two_synthetic_native_cpu_batches_and_closes() {
         const PACK_BYTES: u64 = 50_292_326_400;
         const EXPERT: u32 = 8;
         const EPOCH: u64 = 77;
-        const BATCH: u64 = 9_648_001;
-        const ATTEMPT: u64 = 4;
+        const BATCH_1: u64 = 9_649_001;
+        const BATCH_2: u64 = 9_649_002;
+        const ATTEMPT_1: u64 = 14;
+        const ATTEMPT_2: u64 = 15;
 
         fn append_vfb3(
             request: &mut Vec<u8>,
@@ -825,13 +827,13 @@ mod identity_tests {
         }
 
         let worker = std::path::PathBuf::from(
-            std::env::var_os("VF_R648_SESSION")
+            std::env::var_os("VF_R649_SESSION")
                 .expect("test must use the isolated local vf-rank-session binary"),
         );
         assert!(worker.is_absolute());
         assert!(worker.is_file());
         let ledger_dir = std::path::PathBuf::from(
-            std::env::var_os("VF_R648_LEDGER_DIR")
+            std::env::var_os("VF_R649_LEDGER_DIR")
                 .expect("test must use its fresh isolated Naos ledger directory"),
         );
         assert!(ledger_dir.is_absolute());
@@ -874,15 +876,23 @@ mod identity_tests {
         let input: Vec<f32> = (0..2560)
             .map(|i| ((i as f32) * 0.17).sin() / 16.0)
             .collect();
+        let input_2: Vec<f32> = (0..2560)
+            .map(|i| ((i as f32) * 0.11).cos() / 24.0)
+            .collect();
         let expected_unweighted = resident.forward(&input).unwrap();
+        let expected_unweighted_2 = resident.forward(&input_2).unwrap();
         assert!(expected_unweighted.iter().all(|value| value.is_finite()));
+        assert!(expected_unweighted_2.iter().all(|value| value.is_finite()));
         assert!(expected_unweighted.iter().any(|value| *value != 0.0));
         assert!(expected_unweighted
             .iter()
             .any(|value| value.to_bits() != (*value * 0.25).to_bits()));
+        assert!(expected_unweighted_2
+            .iter()
+            .any(|value| value.to_bits() != (*value * 0.25).to_bits()));
 
         let stamp = moe::Stamp {
-            run_id: "r648-positive-binary-loop".into(),
+            run_id: "r649-multi-batch-binary-loop".into(),
             model_revision: binding.model_revision.clone(),
             plan_id: "r648-synthetic-plan".into(),
             layer: 0,
@@ -930,37 +940,55 @@ mod identity_tests {
             timeout,
         };
 
-        let mut body = Vec::with_capacity((2560 + 2) * 4);
-        for value in &input {
-            body.extend_from_slice(&value.to_bits().to_le_bytes());
-        }
-        body.extend_from_slice(&EXPERT.to_le_bytes());
-        body.extend_from_slice(&(-1_i32).to_le_bytes());
+        let make_body = |values: &[f32]| {
+            let mut body = Vec::with_capacity((2560 + 2) * 4);
+            for value in values {
+                body.extend_from_slice(&value.to_bits().to_le_bytes());
+            }
+            body.extend_from_slice(&EXPERT.to_le_bytes());
+            body.extend_from_slice(&(-1_i32).to_le_bytes());
+            body
+        };
+        let body_1 = make_body(&input);
+        let body_2 = make_body(&input_2);
         let mut request = Vec::new();
-        append_vfb3(&mut request, &stamp, 1, BATCH, 1, 1, ATTEMPT, &body);
+        append_vfb3(&mut request, &stamp, 1, BATCH_1, 1, 1, ATTEMPT_1, &body_1);
+        append_vfb3(&mut request, &stamp, 1, BATCH_2, 1, 1, ATTEMPT_2, &body_2);
         append_vfb3(&mut request, &stamp, 2, 0, 0, 0, 0, &[]);
         let mut input_stream = std::io::Cursor::new(request);
         let mut output_stream = Vec::new();
         binary_loop(coordinator, &mut input_stream, &mut output_stream).unwrap();
 
-        let rows = [SlotRow {
+        let rows_1 = [SlotRow {
             position: 0,
             value: expected_unweighted.clone(),
         }];
-        let mut expected_reply = reply_v3(BATCH, ATTEMPT, 0, &rows, &stamp);
+        let rows_2 = [SlotRow {
+            position: 0,
+            value: expected_unweighted_2.clone(),
+        }];
+        let mut expected_reply = reply_v3(BATCH_1, ATTEMPT_1, 0, &rows_1, &stamp);
+        expected_reply.extend_from_slice(&reply_v3(BATCH_2, ATTEMPT_2, 0, &rows_2, &stamp));
         expected_reply.extend_from_slice(&reply_v3(0, 0, 2, &[], &stamp));
         assert_eq!(output_stream, expected_reply);
 
-        let claims: Vec<_> = std::fs::read_dir(&ledger_dir)
+        let mut claims: Vec<serde_json::Value> = std::fs::read_dir(&ledger_dir)
             .unwrap()
-            .map(|entry| entry.unwrap().path())
+            .map(|entry| {
+                let path = entry.unwrap().path();
+                serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap()
+            })
             .collect();
-        assert_eq!(claims.len(), 1);
-        let claim: serde_json::Value =
-            serde_json::from_slice(&std::fs::read(&claims[0]).unwrap()).unwrap();
-        assert_eq!(claim["status"], "RESERVED_UNKNOWN_NO_REPLAY");
-        assert_eq!(claim["stamp"]["run_id"], stamp.run_id);
-        assert_eq!(claim["stamp"]["batch"].as_u64(), Some(BATCH));
-        assert_eq!(claim["attempt"].as_u64(), Some(ATTEMPT));
+        claims.sort_by_key(|claim| claim["stamp"]["batch"].as_u64().unwrap());
+        assert_eq!(claims.len(), 2);
+        for (claim, expected_batch, expected_attempt) in [
+            (&claims[0], BATCH_1, ATTEMPT_1),
+            (&claims[1], BATCH_2, ATTEMPT_2),
+        ] {
+            assert_eq!(claim["status"], "RESERVED_UNKNOWN_NO_REPLAY");
+            assert_eq!(claim["stamp"]["run_id"], stamp.run_id);
+            assert_eq!(claim["stamp"]["batch"].as_u64(), Some(expected_batch));
+            assert_eq!(claim["attempt"].as_u64(), Some(expected_attempt));
+        }
     }
 }
