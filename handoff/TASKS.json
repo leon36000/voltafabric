@@ -9910,7 +9910,7 @@
   "r649_binary_loop_two_batches": {
     "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_RECEIPTS_READBACK_VERIFIED_CPU_TEST_PASS",
     "commit": "f37ddf86b8aaaf5fcfca0aa5c5046c89cefc14c1",
-    "readback_files_verified": 8,
+    "readback_files_verified": 11,
     "published_utc": "2026-11-01T04:03:42Z",
     "owner": "Codex integrator",
     "branch": "r649-multi-batch-session-20261101",
@@ -9919,5 +9919,6 @@
     "limits": "Same-provider expected values, synthetic payload and one CPU rank; no checkpoint, donor generation callback, full generation, GPU or inter-PC. The preliminary overlap attempt reused one consumed R648 ticket and is quarantined, fully disclosed and never replayed.",
     "quarantine": "Preserve all R648 and preliminary R649 receipts; the clean R649 run uses run r649-multi-batch-binary-loop, batches 9649001/9649002, attempts 14/15.",
     "automatic_relaunch": false,
-    "next_action": "R650: test the local Strata launcher to Rust bridge lifecycle with fresh identities, no checkpoint/GPU."
+    "next_action": "R650: test the local Strata launcher to Rust bridge lifecycle with fresh identities, no checkpoint/GPU.",
+    "readback_verified_utc": "2026-11-01T04:04:23Z"
   }

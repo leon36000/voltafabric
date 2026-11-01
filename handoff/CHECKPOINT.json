@@ -12007,7 +12007,8 @@
     "complete_generation": false,
     "gpu_executed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "readback_files_verified": 8,
+    "readback_files_verified": 11,
     "published_utc": "2026-11-01T04:03:42Z",
-    "next_action": "R650: bounded local CPU launcher-to-bridge lifecycle test with fresh identities."
+    "next_action": "R650: bounded local CPU launcher-to-bridge lifecycle test with fresh identities.",
+    "readback_verified_utc": "2026-11-01T04:04:23Z"
   }

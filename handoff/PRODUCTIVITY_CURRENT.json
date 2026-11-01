@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:03:42Z",
+  "updated_utc": "2026-11-01T04:04:23Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -190,8 +190,9 @@
       "path": "research/R649",
       "test": "rustfmt clean; locked/offline targeted root-library test 1/1 PASS",
       "test_scope": "real binary_loop + one local vf-rank-session; two distinct VFB3 batches/attempts, bitwise VFR3 outputs and shutdown, two clean durable claims; same-provider synthetic GGML only",
-      "readback_files_verified": 8,
-      "published_utc": "2026-11-01T04:03:42Z"
+      "readback_files_verified": 11,
+      "published_utc": "2026-11-01T04:03:42Z",
+      "readback_verified_utc": "2026-11-01T04:04:23Z"
     }
   ],
   "acceptance": [
