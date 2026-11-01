@@ -101,7 +101,7 @@
     "hashes_equal": true,
     "invalid_cases": 6,
     "kernel_launch_count": 18,
-    "max_abs_error": 0.0,
+    "max_abs_error": 0,
     "oracle_rows": 66,
     "postflight_idle": true,
     "process_inspection_empty": true,
@@ -109,7 +109,7 @@
     "remote_receipt": "evidence/continuation_a112_deepseek_sm70/A114_WARP_ADVERSARIAL_GPU_R1_REMOTE_RECEIPT.json",
     "run_id": "a114-warp-adversarial-sm70-20261019-r1",
     "status": "PASS_GPU_ADVERSARIAL_CANDIDATE_REMAINS_DIAGNOSTIC",
-    "tolerance": 2e-05
+    "tolerance": 0.00002
   },
   "a115_sanitizer_probe": {
     "automatic_retry": false,
@@ -182,7 +182,7 @@
     "actual_model": "claude-opus-5-5",
     "auth_method": "first-party claude.ai",
     "baseline_input_manifest": ".work/a120-claude-opus-r1/BASELINE_INPUTS.json",
-    "budget_cap_usd": 2.0,
+    "budget_cap_usd": 2,
     "candidate_baseline_test": "4/4 PASS",
     "candidate_workspace": ".work/a120-claude-opus-r1/candidate/source",
     "claude_session_id": "93f4419f-9a68-47fe-81fa-7b983e823106",
@@ -483,7 +483,7 @@
     "next": "Create a dedicated canonical DeepSeek QPN2 adapter-layer canary; do not graft the streamed helper into the toy or E2M1/UE8M0 oracle.",
     "oracle_hashes_unchanged": true,
     "peak_rss_reduction_kib": 184080,
-    "rational_sample_max_abs_error": 0.0,
+    "rational_sample_max_abs_error": 0,
     "reconciliation": ".work/a131-oracle-rss-r1/evidence/A131_RECONCILIATION.json",
     "reconciliation_sha256": "fd304d7622af1c26a955b1ec09851916adab4dd5a13f5b660c5423979c6c66a2",
     "source_probe": ".work/a131-oracle-rss-r1/probe_candidate.py",
@@ -515,7 +515,7 @@
     "helper_share_percent": 4.0774666344728185,
     "launches": 20,
     "optimization_candidate_accepted": false,
-    "optimization_threshold_percent": 10.0,
+    "optimization_threshold_percent": 10,
     "output_sha256": "a5c84a417d56d2acd3e0cc0b1c341f5f087bc7e5115020d0ed76896773e18066",
     "postflight_idle": true,
     "processes_remaining": false,
@@ -755,9 +755,9 @@
     "active_operation": null,
     "adoption_gate": {
       "max_latency_regression_percent": -61.41572091482772,
-      "maximum_allowed_max_latency_regression_percent": 5.0,
+      "maximum_allowed_max_latency_regression_percent": 5,
       "median_improvement_percent": 68.78048780487805,
-      "minimum_median_improvement_percent": 20.0,
+      "minimum_median_improvement_percent": 20,
       "passed": true
     },
     "automatic_retry": false,
@@ -891,9 +891,9 @@
     "active_operation": null,
     "adoption_gate": {
       "max_latency_regression_percent": 12.95869802131934,
-      "maximum_allowed_max_latency_regression_percent": 5.0,
+      "maximum_allowed_max_latency_regression_percent": 5,
       "median_improvement_percent": 7.288055786004166,
-      "minimum_median_improvement_percent": 20.0,
+      "minimum_median_improvement_percent": 20,
       "passed": false
     },
     "automatic_retry": false,
@@ -1055,8 +1055,8 @@
   },
   "a141_rankbind_full_layer": {
     "adoption_screen": {
-      "max_latency_regression_percent_maximum": 10.0,
-      "median_improvement_percent_minimum": -5.0,
+      "max_latency_regression_percent_maximum": 10,
+      "median_improvement_percent_minimum": -5,
       "purpose": "end-to-end non-regression check for A139; diagnostic only"
     },
     "artifact_sha256": "e1083148103a79aae95975be14249305c9beabf966e2ef49b3055721ab1b6878",
@@ -1249,7 +1249,7 @@
     "automatic_retry": false,
     "combined_output_different_values": 18,
     "combined_output_differs_from_cpu_expected_bytes": true,
-    "combined_output_max_abs_error": 7.62939453125e-06,
+    "combined_output_max_abs_error": 0.00000762939453125,
     "cuda_context_initialized": true,
     "cuda_executed": true,
     "diagnostic_forward_count": 1,
@@ -1307,7 +1307,7 @@
   "a142_r13_terminal_reconciliation": {
     "automatic_retry": false,
     "combined_actual_sha256": "93ed458dd49619783ca8d59aaf781efd8b263fc281eb03a4c7948e62660ed683",
-    "combined_max_abs_error": 7.62939453125e-06,
+    "combined_max_abs_error": 0.00000762939453125,
     "combined_values_differing": 18,
     "cpu_expected_sha256": "c0fba90d3e3194e070832d07f6d3a01f1c34fbf7d6609b576fefc538e007dd19",
     "cuda_context_initialized": true,
@@ -1316,9 +1316,9 @@
     "dynamic_check_correct": true,
     "dynamic_fp32_accumulator_check": {
       "correct": true,
-      "half_ulp_limit": 1.0,
-      "max_abs_error": 0.0,
-      "max_error_half_ulps": 0.0,
+      "half_ulp_limit": 1,
+      "max_abs_error": 0,
+      "max_error_half_ulps": 0,
       "outputs_over_ulp_limit": 0,
       "values_checked": 10240
     },
@@ -1330,9 +1330,9 @@
     "legacy_check_correct": false,
     "legacy_fp32_accumulator_check": {
       "correct": false,
-      "half_ulp_limit": 1.0,
-      "max_abs_error": 7.62939453125e-06,
-      "max_error_half_ulps": 30.0,
+      "half_ulp_limit": 1,
+      "max_abs_error": 0.00000762939453125,
+      "max_error_half_ulps": 30,
       "outputs_over_ulp_limit": 6,
       "values_checked": 10240
     },
@@ -1500,9 +1500,9 @@
           "max_error_bound_ratio": 0.19550820223714388,
           "swiglu": {
             "correct": true,
-            "half_ulp_limit": 1.0,
-            "max_abs_error": 0.0,
-            "max_error_half_ulps": 0.0,
+            "half_ulp_limit": 1,
+            "max_abs_error": 0,
+            "max_error_half_ulps": 0,
             "outputs_over_ulp_limit": 0,
             "values_checked": 9216
           }
@@ -1514,9 +1514,9 @@
           "max_error_bound_ratio": 0.19550820223714388,
           "swiglu": {
             "correct": true,
-            "half_ulp_limit": 1.0,
-            "max_abs_error": 0.0,
-            "max_error_half_ulps": 0.0,
+            "half_ulp_limit": 1,
+            "max_abs_error": 0,
+            "max_error_half_ulps": 0,
             "outputs_over_ulp_limit": 0,
             "values_checked": 9216
           }
@@ -1601,10 +1601,10 @@
     "overlay_sha256": "bac562b6fdda764d34aebb9aa91af664545fac0016917eae9134827ee27965d3",
     "performance_thresholds": {
       "candidate_faster_pairs_min": 26,
-      "each_order_stratum_median_min": 0.0,
-      "max_paired_regression_percent_max": 10.0,
-      "median_paired_improvement_percent_min": 5.0,
-      "order_stratum_gap_max_percentage_points": 10.0
+      "each_order_stratum_median_min": 0,
+      "max_paired_regression_percent_max": 10,
+      "median_paired_improvement_percent_min": 5,
+      "order_stratum_gap_max_percentage_points": 10
     },
     "plan_id": "deepseek-layer0-topk6-full-local-rankbind-a142-r19",
     "remote_operation_started": true,
@@ -1638,7 +1638,7 @@
     "gpu_postflight_idle": true,
     "gpu_uuid": "GPU-42d06a85-027a-75ea-7857-a8de27ad465e",
     "independent_swiglu_forward_checks": 72,
-    "independent_swiglu_max_half_ulps": 0.0,
+    "independent_swiglu_max_half_ulps": 0,
     "independent_swiglu_values_checked": 1990656,
     "kernel_launch_count": 144,
     "measured_forwards": 64,
@@ -1822,7 +1822,7 @@
     "replay_allowed": false,
     "run_id": "a142-deepseek-topk6-full-local-swiglu-sync-sm70-20261021-r20c",
     "status": "RECONCILED_GPU_CORRECTNESS_PASS_PERFORMANCE_SCREEN_FAIL_CANDIDATE_NOT_PROMOTED",
-    "swiglu_max_half_ulp_error": 0.0,
+    "swiglu_max_half_ulp_error": 0,
     "swiglu_oracle_values_checked": 1990656,
     "terminal_reconciliation": ".work/a142-full-local-layer-r20c/evidence/A142_R20C_TERMINAL_RECONCILIATION.json",
     "terminal_reconciliation_sha256": "fd5caa4250278519c217237788511af2b50a0bb3264a531bb8a6d9ff34838778",
@@ -2488,7 +2488,7 @@
         "before_after_bytes_changed": false,
         "exact": true,
         "exec_request_bytes": 1877330,
-        "max_abs_diff": 0.0,
+        "max_abs_diff": 0,
         "performance_claim": false,
         "remote_worker_is_older_A150_A151": true,
         "remote_worker_sha256": "38d4d8124ecea75f25b04235517b0e498d2703ee68aa1ff12ac3539a86ca5d75",
@@ -2730,7 +2730,7 @@
     "pc1_pc6_batch_receipt": {
       "batches": 150,
       "exec_requests": 300,
-      "max_abs_diff": 0.0,
+      "max_abs_diff": 0,
       "path": "evidence/continuation_a152_compact_rank_dispatch/A155_PC1_PC6_X86_BATCH_150_20261021.json",
       "route_trace_present": false,
       "sha256": "107cbfbe807b0c5c4c9ada7c61945a632d4ab956d67e4af754c352c6596b9e4c"
@@ -3761,7 +3761,7 @@
     "gpu_cuda_rdma_direct_tested": false,
     "manifest": "evidence/continuation_a182_roce2_smoke/A184_MANIFEST.json",
     "manifest_sha256": "4bfdd270e369a399d0c44f4024f40fb6f74013042205940e4127b34f7f9a57f3",
-    "median_improvement_percent": 0.0,
+    "median_improvement_percent": 0,
     "next_action": "Inspect both HCA PCIe link widths/speeds and compare a short TCP baseline; current one/four-QP RoCE host-memory results are ~60.42 Gbit/s.",
     "no_processes_left": true,
     "operation": "evidence/continuation_a182_roce2_smoke/A184_OPERATION.json",
@@ -3769,19 +3769,19 @@
     "operation_sha256": "dc33e42535ee32141502aa74b2fcaa554f605d0550ece28dcc2ba4b57116d0d1",
     "pairs": [
       {
-        "improvement_percent": 0.0,
+        "improvement_percent": 0,
         "pair": 1,
         "q1_gbps": 60.42,
         "q4_gbps": 60.42
       },
       {
-        "improvement_percent": 0.0,
+        "improvement_percent": 0,
         "pair": 2,
         "q1_gbps": 60.42,
         "q4_gbps": 60.42
       },
       {
-        "improvement_percent": 0.0,
+        "improvement_percent": 0,
         "pair": 3,
         "q1_gbps": 60.42,
         "q4_gbps": 60.42
@@ -4173,7 +4173,7 @@
   "a93_v100_projection": {
     "artifact_payload_bytes": 1769856,
     "artifact_sha256": "904f7ab1fdc2ed923c596a24db51944afdadc5dc13669940d7a0d9eee8166710",
-    "atol": 2.384185791015625e-07,
+    "atol": 2.384185791015625e-7,
     "cold_canary_wall_ms_including_validation_and_oracle": 793.8569030011422,
     "device_peak_allocated_bytes": 2077184,
     "dispatch_identity_bound": true,
@@ -4182,8 +4182,8 @@
     "gpu": "Tesla V100-SXM2-16GB SM70",
     "gpu_uuid": "GPU-42d06a85-027a-75ea-7857-a8de27ad465e",
     "kernel_launches": 2,
-    "max_absolute_error": 0.0,
-    "max_relative_error": 0.0,
+    "max_absolute_error": 0,
+    "max_relative_error": 0,
     "oracle": "FP64_DENSE_DOT_AFTER_EXACT_HALF_WEIGHT_STAGES",
     "pcie": "Gen3 x4 verified on host, GPU PCI BDF 81:00.0",
     "postflight_idle": true,
@@ -4289,7 +4289,7 @@
   },
   "active_operation": null,
   "active_operations": [],
-  "active_phase": "R636_VERIFIED_DONOR_SHAPE_GUARD",
+  "active_phase": "R639_PUBLISHED_MIXED_OWNER_SOURCE_REVIEW_ONLY",
   "active_workers": [],
   "actual_billing_usd": 0,
   "adapter_frontier_coverage": {
@@ -4373,7 +4373,7 @@
   "claude_a121_writer": {
     "actual_model": "claude-opus-5-5",
     "candidate_executed_commands": false,
-    "cost_cap_usd": 4.0,
+    "cost_cap_usd": 4,
     "duration_ms": 725032,
     "effort_requested": "high",
     "exit_code": 0,
@@ -4510,13 +4510,13 @@
         0.3861015,
         0.400788
       ],
-      "max_paired_regression_percent": 0.0,
+      "max_paired_regression_percent": 0,
       "median_paired_improvement_percent": 36.998188035762205,
       "passed": true,
       "thresholds": {
         "faster_pairs_min": 12,
-        "max_paired_regression_percent_max": 10.0,
-        "median_paired_improvement_percent_min": 5.0
+        "max_paired_regression_percent_max": 10,
+        "median_paired_improvement_percent_min": 5
       }
     },
     "cpu_validation": ".work/a142-rank-partial-layer-r16/evidence/A142_R16_PROFILE_CPU_VALIDATION.json",
@@ -5711,10 +5711,10 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "Finish reviewed canonical snapshot, resolve GitLab authentication, inspect remote before non-force push.",
+  "next_action": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
   "next_command": "NONE until snapshot is prepared and GitLab authentication exists.",
   "next_command_expected_result": "Read-only filenames of actual native-pack loader; no engine execution, no payload/model/GPU. Store bounded receipt.",
-  "next_cpu_action": "Admit existing PC1 Strata native pack/config/binary/tokenizer from R107 using its actual loader source; no duplicate download, no GPU or generation before a separate current gate. In parallel prepare R106 consumption in a new bounded real-agent profile, no replay R99.",
+  "next_cpu_action": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
   "next_cwd": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
   "next_hardware_candidate_evidence": null,
   "next_hardware_command": "NONE: no new hardware case admitted; R81 budget1/1 exhausted.",
@@ -5727,9 +5727,9 @@
     "No CUDA/RDMA/GPUDirect/production claim from CPU evidence.",
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
-  "next_required_work": "Full-model pack/version/tokenizer admission and distinct upstream generation control, then actual VoltaFabric integration; R81 closed.",
-  "next_task": "R108_EXISTING_STRATA_PACK_ADMISSION",
-  "next_updated_utc": "2026-10-28T02:40:35.926314+00:00",
+  "next_required_work": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
+  "next_task": "R640_STRATA_MIXED_CPU_MISS_CALLBACK",
+  "next_updated_utc": "2026-11-01T02:50:22Z",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
     "active_operation": null,
@@ -6123,8 +6123,8 @@
     "candidate_faster_pairs_min": 12,
     "existing_no_regression_screen": "median improvement >= -5%; max latency regression <= 10%",
     "interpretation": "quality/performance candidate screen only; R17 is a fixed one-rank, one-layer profile.",
-    "max_paired_regression_percent_max": 10.0,
-    "median_paired_improvement_percent_min": 5.0,
+    "max_paired_regression_percent_max": 10,
+    "median_paired_improvement_percent_min": 5,
     "predeclared_before_execution": true,
     "source_metric": "15 latency_samples per adapter keyed by pair; wall metric adapter_wall_sync_ms; pair improvement percent = 100*(baseline-candidate)/baseline"
   },
@@ -6195,8 +6195,8 @@
       },
       "thresholds": {
         "candidate_faster_pairs_min": 12,
-        "max_paired_regression_percent_max": 10.0,
-        "median_paired_improvement_percent_min": 5.0
+        "max_paired_regression_percent_max": 10,
+        "median_paired_improvement_percent_min": 5
       }
     },
     "pcie": "Gen3 x4 negotiated; Gen3 x16 capable",
@@ -6268,15 +6268,15 @@
     "expected_projection_launches": 144,
     "expected_total_forwards": 72,
     "interpretation": "bounded one-rank one-layer profile only; candidate remains unpromoted unless numerical checks, primary paired screen and order-stratified condition all pass.",
-    "max_paired_regression_percent_max": 10.0,
+    "max_paired_regression_percent_max": 10,
     "measured_pairs": 32,
     "measurement_order_seed": 20261020,
-    "median_paired_improvement_percent_min": 5.0,
+    "median_paired_improvement_percent_min": 5,
     "order_strategy": "deterministic shuffled schedule with 16 baseline-first and 16 candidate-first; each pair contains both adapters",
     "order_stratified_requirement": {
-      "absolute_difference_of_stratified_median_improvements_max_percentage_points": 10.0,
-      "baseline_first_median_improvement_min_percent": 0.0,
-      "candidate_first_median_improvement_min_percent": 0.0,
+      "absolute_difference_of_stratified_median_improvements_max_percentage_points": 10,
+      "baseline_first_median_improvement_min_percent": 0,
+      "candidate_first_median_improvement_min_percent": 0,
       "purpose": "R17 showed +10.59% when candidate second and -3.37% when candidate first; report whether that asymmetry persists."
     },
     "predeclared_before_execution": true,
@@ -9216,7 +9216,7 @@
     },
     "activation_body_raw32_baseline": 327680,
     "activation_body_mixed_observed": 245760,
-    "activation_body_reduction_percent": 25.0,
+    "activation_body_reduction_percent": 25,
     "exec_request_bytes_saved": 81904,
     "exec_request_reduction_percent": 24.509827392209907,
     "gpu_input_h2d_bytes_unchanged": 327680,
@@ -9240,9 +9240,9 @@
   "automatic_continuation": {
     "id": "voltafabric-recherches-et-exp-riences-r32",
     "kind": "heartbeat",
-    "status": "ACTIVE",
-    "reason": "R75 proves a faster existing CPU compact producer on its measured CPU boundary. R76 is a concrete same-ABI Owner experiment to test actual H2D request bytes and exact outputs; not full H1/service/model completion.",
-    "confirmed_tool_status": "ACTIVE",
+    "status": "STOPPED_BY_OWNER",
+    "reason": "Owner stopped automatic relaunch. Continue only during an active owner-requested turn.",
+    "confirmed_tool_status": "STOPPED_BY_OWNER",
     "old_resource_blocker_remains_separate": true
   },
   "r69": {
@@ -9278,7 +9278,7 @@
     "final_values_exact": 40960,
     "activation_body_bytes": 163840,
     "raw32_body_baseline_bytes": 327680,
-    "body_reduction_percent": 50.0,
+    "body_reduction_percent": 50,
     "exec_request_bytes": 170376,
     "raw32_baseline_request_bytes": 334168,
     "exec_request_saving_bytes": 163792,
@@ -11641,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/REPORT.md",
+  "latest_productivity_report": "research/R639/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -11774,5 +11774,25 @@
     "real_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R639: wire launcher identity and session ownership into the pinned Strata generation callback; verify CPU generation against an independent oracle before any hardware admission."
+  },
+  "r639_mixed_owner_callback": {
+    "status": "PUBLISHED_SOURCE_REVIEW_ONLY; DONOR_CALLSITE_NOT_WIRED",
+    "branch": "r639-strata-mixed-cpu-miss-20261101",
+    "base_commit": "d51b77da9ed7386e64ccee67d63351ff723dc6c4",
+    "source_commit": "680600509540a1342af9525fb16de2cb2c296df9",
+    "final_evidence_commit": "8beb1f7274bb96ce98e04e7e58b6a15a5c826a9f",
+    "report": "research/R639/REPORT.md",
+    "receipt": "research/R639/receipt.json",
+    "ownership_semantics": "Kind -1 rows go to VFB3; kinds 0..2 remain Strata-owned; only CPU-owned output rows copied; no batch/attempt when no CPU miss.",
+    "compiler_or_tests_run": false,
+    "actual_donor_callback_wired": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "manifest_sha256": "07022a75559cf016aac23b559dbb8e8c0926dbbbcd0c123e09bace8ebf6b22d9",
+    "next_action": "R640 on a new explicit owner request; integrate the exact pinned donor dispatch and qualify CPU behavior against an independent oracle."
   }
 }
