@@ -42,9 +42,16 @@ bool valid_batch(const RouteBatch &batch, size_t input_count, size_t output_coun
         expected_input != input_count || expected_output != output_count ||
         (!dynamic_route_values &&
          (batch.expert_ids.size() != route_count || batch.weights.size() != route_count)) ||
-        (dynamic_route_values && batch.owner_kinds.size() != route_count) ||
-        (!batch.owner_kinds.empty() && batch.owner_kinds.size() != route_count)) {
+        (dynamic_route_values &&
+         !((batch.owner_kinds.size() == route_count && batch.owner_by_expert.empty()) ||
+           (batch.owner_kinds.empty() && batch.owner_by_expert.size() == batch.experts))) ||
+        (!batch.owner_kinds.empty() && batch.owner_kinds.size() != route_count) ||
+        (!batch.owner_by_expert.empty() && batch.owner_by_expert.size() != batch.experts)) {
         return false;
+    }
+
+    for (const int32_t owner_kind : batch.owner_by_expert) {
+        if (owner_kind < -1 || owner_kind > 2) return false;
     }
 
     for (size_t token = 0; token < batch.tokens; ++token) {
@@ -112,7 +119,7 @@ ggml_tensor *RouteGraphTransaction::append_impl(ggml_context *ctx, ggml_tensor *
          activations->ne[0] == static_cast<int64_t>(batch_.hidden) &&
          activations->ne[1] == static_cast<int64_t>(batch_.tokens) &&
          activations->ne[2] == 1 && activations->ne[3] == 1 &&
-         !batch_.owner_kinds.empty());
+         (!batch_.owner_kinds.empty() || !batch_.owner_by_expert.empty()));
     const bool valid_dynamic_route_sources = !dynamic_route_inputs ||
         (activations != nullptr && selected_experts != nullptr &&
          selected_experts->type == GGML_TYPE_I32 &&
@@ -124,11 +131,12 @@ ggml_tensor *RouteGraphTransaction::append_impl(ggml_context *ctx, ggml_tensor *
          final_weights->ne[1] == static_cast<int64_t>(batch_.slots) &&
          final_weights->ne[2] == static_cast<int64_t>(batch_.tokens) &&
          final_weights->ne[3] == 1);
+    const bool valid_batch_inputs = valid_batch(batch_, slot_outputs == nullptr ? 0 :
+        static_cast<size_t>(ggml_nelements(slot_outputs)), output_count_, dynamic_route_inputs);
     if (appended_ || status_.load(std::memory_order_acquire) != RouteStatus::pending ||
         ctx == nullptr || !valid_slot_source || !valid_activation_source ||
         !valid_dynamic_route_sources ||
-        !valid_batch(batch_, static_cast<size_t>(ggml_nelements(slot_outputs)), output_count_,
-                     dynamic_route_inputs)) {
+        !valid_batch_inputs) {
         status_.store(RouteStatus::invalid_batch, std::memory_order_release);
         return nullptr;
     }
@@ -229,6 +237,17 @@ void RouteGraphTransaction::compute(ggml_tensor *dst, int ith, int nth, void *us
                 std::memcpy(&transaction.batch_.weights[route],
                     weight_bytes + slot * final_weights->nb[1] + token * final_weights->nb[2],
                     sizeof(float));
+            }
+        }
+        if (!transaction.batch_.owner_by_expert.empty()) {
+            transaction.batch_.owner_kinds.resize(route_count);
+            for (size_t route = 0; route < route_count; ++route) {
+                const int32_t expert = transaction.batch_.expert_ids[route];
+                if (expert < 0 || static_cast<size_t>(expert) >= transaction.batch_.owner_by_expert.size()) {
+                    transaction.status_.store(RouteStatus::invalid_batch, std::memory_order_release);
+                    return;
+                }
+                transaction.batch_.owner_kinds[route] = transaction.batch_.owner_by_expert[expert];
             }
         }
         if (!valid_batch(transaction.batch_, input_count, transaction.output_count_)) {

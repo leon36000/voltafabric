@@ -38,6 +38,9 @@ struct RouteBatch {
     size_t experts = 0;
     std::vector<int32_t> expert_ids; // [slot, token]
     std::vector<int32_t> owner_kinds; // optional VFB3 owner kinds, same route order
+    // Optional registry projection for dynamic routes: one owner kind per expert
+    // (-1 remote, 0..2 local), resolved after GGML provides each route ID.
+    std::vector<int32_t> owner_by_expert;
     std::vector<float> weights;      // [slot, token], forwarded unchanged
 };
 

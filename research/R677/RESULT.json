@@ -1,0 +1,48 @@
+{
+  "round": "R677",
+  "state": "DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_PASS",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "inspected_paths": [
+      "src/models/qwen2moe.cpp",
+      "src/llama-graph.cpp",
+      "src/llama-context.cpp"
+    ]
+  },
+  "adaptation": {
+    "owner_mapping": "expert_id -> owner_kind (-1 remote, 0..2 local)",
+    "mapping_time": "after dynamic GGML top-k IDs are available, before Collector dispatch",
+    "route_order": "slot-major within each token, same order as selected IDs and final coefficients",
+    "invalid_id_or_map": "rejected before collector invocation",
+    "ambiguous_route_and_expert_mapping": "rejected",
+    "coefficient_application": "final coefficients forwarded unchanged; Collector applies once"
+  },
+  "tests": {
+    "platform": "AArch64 CPU",
+    "build": "C++17 -Wall -Wextra -Werror",
+    "ctest": {
+      "passed": 3,
+      "total": 3,
+      "names": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]
+    },
+    "dynamic_ids": [3, 1, 4, 7],
+    "dynamic_owner_kinds": [2, -1, -1, -1],
+    "fresh_ids": [2, 5, 6, 0],
+    "fresh_owner_kinds": [1, 0, 2, 0],
+    "malformed_owner_map": "rejected before collector; zero collector calls",
+    "ambiguous_mapping": "rejected before collector; zero collector calls",
+    "independent_output": [0.75, 1.25, 7.5, 12.5]
+  },
+  "llama_callback_integrated": false,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "cuda_graph_qualified": false,
+  "inter_pc_or_rdma": false,
+  "production_r53": false,
+  "performance_comparison": false,
+  "unknown_receipt_replayed": false,
+  "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch."
+}

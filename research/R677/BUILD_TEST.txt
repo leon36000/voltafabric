@@ -1,0 +1,18 @@
+R677 BUILD AND TEST RECEIPT
+
+Changed code:
+  adapters/native_ggml/route_graph_transaction.hpp
+  adapters/native_ggml/route_graph_transaction.cpp
+  adapters/native_ggml/route_graph_dynamic_capture_test.cpp
+
+Build:
+  cmake --build adapters/build-full --target vf_route_graph_dynamic_capture_test -j2
+  Result: pass; C++17 -Wall -Wextra -Werror.
+
+Focused suite:
+  ctest --test-dir adapters/build-full --output-on-failure -R '^(route_graph_transaction|route_graph_dynamic_capture|route_graph_vfr3)$'
+  Result: 3/3 passed.
+
+Verified dynamic expert-ID to owner-kind mapping, unchanged final coefficients, pre-dispatch rejection of malformed/ambiguous maps, invalid route-ID atomic rejection, invocation replay refusal and the independent weighted-output fixture.
+
+CPU synthetic fixture only. Pinned llama.cpp callback is not yet modified or built with VoltaFabric; no real checkpoint/model, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance claim. Reserved UNKNOWN receipts were not replayed.
