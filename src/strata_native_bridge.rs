@@ -783,4 +783,184 @@ mod identity_tests {
             );
         }
     }
+
+    #[test]
+    fn binary_loop_runs_one_synthetic_native_cpu_batch_and_closes() {
+        const PACK_BYTES: u64 = 50_292_326_400;
+        const EXPERT: u32 = 8;
+        const EPOCH: u64 = 77;
+        const BATCH: u64 = 9_648_001;
+        const ATTEMPT: u64 = 4;
+
+        fn append_vfb3(
+            request: &mut Vec<u8>,
+            stamp: &moe::Stamp,
+            op: u32,
+            batch: u64,
+            tokens: u32,
+            top_k: u32,
+            attempt: u64,
+            body: &[u8],
+        ) {
+            let run = stamp.run_id.as_bytes();
+            let model = stamp.model_revision.as_bytes();
+            let plan = stamp.plan_id.as_bytes();
+            let mut header = [0_u8; 52];
+            header[..4].copy_from_slice(b"VFB3");
+            header[4..8].copy_from_slice(&op.to_le_bytes());
+            header[8..16].copy_from_slice(&batch.to_le_bytes());
+            header[16..20].copy_from_slice(&tokens.to_le_bytes());
+            header[20..24].copy_from_slice(&top_k.to_le_bytes());
+            header[24..28].copy_from_slice(&stamp.layer.to_le_bytes());
+            header[28..36].copy_from_slice(&stamp.epoch.to_le_bytes());
+            header[36..38].copy_from_slice(&(run.len() as u16).to_le_bytes());
+            header[38..40].copy_from_slice(&(model.len() as u16).to_le_bytes());
+            header[40..42].copy_from_slice(&(plan.len() as u16).to_le_bytes());
+            header[44..52].copy_from_slice(&attempt.to_le_bytes());
+            request.extend_from_slice(&header);
+            request.extend_from_slice(run);
+            request.extend_from_slice(model);
+            request.extend_from_slice(plan);
+            request.extend_from_slice(body);
+        }
+
+        let worker = std::path::PathBuf::from(
+            std::env::var_os("VF_R648_SESSION")
+                .expect("test must use the isolated local vf-rank-session binary"),
+        );
+        assert!(worker.is_absolute());
+        assert!(worker.is_file());
+        let ledger_dir = std::path::PathBuf::from(
+            std::env::var_os("VF_R648_LEDGER_DIR")
+                .expect("test must use its fresh isolated Naos ledger directory"),
+        );
+        assert!(ledger_dir.is_absolute());
+        assert!(ledger_dir.is_dir());
+        assert!(std::fs::read_dir(&ledger_dir).unwrap().next().is_none());
+
+        let index = include_str!("../fixtures/strata_sc117_native_experts_v3.txt");
+        let layout = NativeLayout::parse_sc117_v3(index, PACK_BYTES).unwrap();
+        let span = layout.expert(0, u64::from(EXPERT)).unwrap();
+        let gate_up_bytes = (2560 / 256 * 98) * 640 * 2;
+        let mut bytes = vec![0_u8; span.bytes as usize];
+        for offset in (0..gate_up_bytes).step_by(98) {
+            bytes[offset + 1] = 0x28;
+        }
+        for offset in (gate_up_bytes..bytes.len()).step_by(18) {
+            bytes[offset + 1] = 0x28;
+        }
+        let binding = Binding {
+            model_revision: "r648-synthetic-sc117".into(),
+            rank: 0,
+            layer: 0,
+            expert: EXPERT,
+            local: 0,
+            epoch: EPOCH,
+            index_sha256: layout.index_sha256().into(),
+            blob_sha256: crate::sha256::hex(&bytes),
+        };
+        let expected_span = layout.expert(0, u64::from(EXPERT)).unwrap();
+        let mut resident = crate::native_ggml_cpu::Resident::load(
+            &layout,
+            crate::strata_native_layout::VerifiedNativeExpert {
+                layer: 0,
+                expert: u64::from(EXPERT),
+                span: expected_span,
+                bytes: bytes.clone(),
+            },
+            binding.clone(),
+        )
+        .unwrap();
+        let input: Vec<f32> = (0..2560)
+            .map(|i| ((i as f32) * 0.17).sin() / 16.0)
+            .collect();
+        let expected_unweighted = resident.forward(&input).unwrap();
+        assert!(expected_unweighted.iter().all(|value| value.is_finite()));
+        assert!(expected_unweighted.iter().any(|value| *value != 0.0));
+        assert!(expected_unweighted
+            .iter()
+            .any(|value| value.to_bits() != (*value * 0.25).to_bits()));
+
+        let stamp = moe::Stamp {
+            run_id: "r648-positive-binary-loop".into(),
+            model_revision: binding.model_revision.clone(),
+            plan_id: "r648-synthetic-plan".into(),
+            layer: 0,
+            batch: 0,
+            epoch: EPOCH,
+        };
+        let template = routing::RoutingProblem {
+            hidden: 2560,
+            experts: vec![EXPERT],
+            routes: vec![vec![moe::Choice {
+                expert: EXPERT,
+                weight: 0.25,
+            }]],
+            registry: moe::Registry {
+                epoch: EPOCH,
+                copies: vec![moe::Replica {
+                    expert: EXPERT,
+                    rank: 0,
+                    local: 0,
+                }],
+            },
+            stamp: stamp.clone(),
+            preferred_owners: BTreeMap::new(),
+            resident_order: [(0, vec![0])].into_iter().collect(),
+        };
+
+        let timeout = Duration::from_secs(10);
+        let mut session = Session::connect(
+            &Endpoint {
+                rank: 0,
+                argv: vec![worker.to_string_lossy().into_owned()],
+            },
+            timeout,
+        )
+        .unwrap();
+        session
+            .load_native_ggml(&binding, index, PACK_BYTES, &bytes, timeout)
+            .unwrap();
+        session.seal_native_ggml(1, timeout).unwrap();
+        let coordinator = Coordinator {
+            template,
+            model_experts: vec![EXPERT],
+            sessions: vec![session],
+            ledger: NativeBatchLedger::open(&ledger_dir).unwrap(),
+            timeout,
+        };
+
+        let mut body = Vec::with_capacity((2560 + 2) * 4);
+        for value in &input {
+            body.extend_from_slice(&value.to_bits().to_le_bytes());
+        }
+        body.extend_from_slice(&EXPERT.to_le_bytes());
+        body.extend_from_slice(&(-1_i32).to_le_bytes());
+        let mut request = Vec::new();
+        append_vfb3(&mut request, &stamp, 1, BATCH, 1, 1, ATTEMPT, &body);
+        append_vfb3(&mut request, &stamp, 2, 0, 0, 0, 0, &[]);
+        let mut input_stream = std::io::Cursor::new(request);
+        let mut output_stream = Vec::new();
+        binary_loop(coordinator, &mut input_stream, &mut output_stream).unwrap();
+
+        let rows = [SlotRow {
+            position: 0,
+            value: expected_unweighted.clone(),
+        }];
+        let mut expected_reply = reply_v3(BATCH, ATTEMPT, 0, &rows, &stamp);
+        expected_reply.extend_from_slice(&reply_v3(0, 0, 2, &[], &stamp));
+        assert_eq!(output_stream, expected_reply);
+
+        let claims: Vec<_> = std::fs::read_dir(&ledger_dir)
+            .unwrap()
+            .map(|entry| entry.unwrap().path())
+            .collect();
+        assert_eq!(claims.len(), 1);
+        let claim: serde_json::Value =
+            serde_json::from_slice(&std::fs::read(&claims[0]).unwrap()).unwrap();
+        assert_eq!(claim["status"], "RESERVED_UNKNOWN_NO_REPLAY");
+        assert_eq!(claim["stamp"]["run_id"], stamp.run_id);
+        assert_eq!(claim["stamp"]["batch"].as_u64(), Some(BATCH));
+        assert_eq!(claim["attempt"].as_u64(), Some(ATTEMPT));
+    }
 }
