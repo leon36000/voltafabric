@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 11:47:07 UTC",
+  "updated_utc": "2026-11-01 12:11:45 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1159,6 +1159,19 @@
       },
       "automatic_relaunch": "STOPPED_BY_OWNER",
       "next_action": "R688: compose the actual Rust rank-local loader and pinned donor graph in one CPU process, retain Q8_0 activation quantization and single route-weight application, and preserve atomic refusal. No automatic relaunch."
+    },
+    {
+      "id": "R688",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ONLY",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "6c59e7496a2f25134c0745464fed0387e043d516",
+      "path": "research/R688",
+      "commit": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+      "published_utc": "2026-11-01 12:11:45 UTC",
+      "readback_files_verified": 10,
+      "pipeline_id": 2330,
+      "pipeline_status": "success"
     }
   ],
   "acceptance": [
@@ -1254,7 +1267,8 @@
     "R684_GGUF_V3_F32_DONOR_PARSER_AND_LIVE_BUILD_MOE_FFN_CPU_PASS_RAW_6_20_WEIGHT_ONCE_OUTPUT_3_10_COLLECTOR_REFUSAL_NO_PUBLICATION_GITLAB_READBACK_7_OF_7",
     "R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.",
     "R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.",
-    "R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED"
+    "R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED",
+    "R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success."
   ],
   "active_operations": [
     {
@@ -1560,12 +1574,12 @@
       "id": "gitlab-pipeline-2327",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "c1638d646d1121a883afa2b0ffe12a77f32bdbea",
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_gitleaks": "running"
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
       },
       "scope": "R686 raw-text correction scan/fallback; CPU direct runner evidence is local."
     },
@@ -1573,14 +1587,27 @@
       "id": "gitlab-pipeline-2328",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "74fd82f52f7b6fac51374fd3fc9de7d7b7573003",
-      "status": "pending",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_gitleaks": "pending"
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
       },
       "scope": "R687 raw-text correction scan/fallback; local CPU direct runner evidence remains separate."
+    },
+    {
+      "id": "gitlab-pipeline-2330",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+      "status": "success",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      },
+      "scope": "R688 source scan/fallback pipeline; separate local CPU C++/Rust integration test is recorded in research/R688."
     }
   ],
   "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network.",
@@ -1610,6 +1637,21 @@
     "result": "research/R688/RESULT.json",
     "manifest": "research/R688/SHA256SUMS",
     "manifest_sha256": "2a33c03ac8fbfa67e362c792acd885a3cf28f5e4da182a0317f5d6752a3d2944",
-    "automatic_relaunch": "STOPPED_BY_OWNER"
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "gitlab_commit": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+    "readback_files_verified": 10,
+    "gitlab_pipeline": {
+      "id": 2330,
+      "sha": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+      "status": "success",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2330",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network."
   }
 }

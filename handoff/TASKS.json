@@ -10663,6 +10663,21 @@
     "result": "research/R688/RESULT.json",
     "manifest": "research/R688/SHA256SUMS",
     "manifest_sha256": "2a33c03ac8fbfa67e362c792acd885a3cf28f5e4da182a0317f5d6752a3d2944",
-    "automatic_relaunch": "STOPPED_BY_OWNER"
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "gitlab_commit": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+    "gitlab_pipeline": {
+      "id": 2330,
+      "sha": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
+      "status": "success",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2330",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "readback_files_verified": 10,
+    "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network."
   }
 }
