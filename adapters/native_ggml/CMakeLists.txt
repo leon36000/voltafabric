@@ -28,6 +28,12 @@ target_link_libraries(vf_native_ggml_test PRIVATE vf_native_ggml)
 enable_testing()
 add_test(NAME native_provider COMMAND vf_native_ggml_test)
 
+# CPU-only model-graph transaction fixture: downstream GGML nodes are gated on collector success.
+add_executable(vf_route_graph_transaction_test route_graph_transaction_test.cpp)
+target_link_libraries(vf_route_graph_transaction_test PRIVATE ggml-cpu ggml-base)
+target_compile_options(vf_route_graph_transaction_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME route_graph_transaction COMMAND vf_route_graph_transaction_test)
+
 # Diagnostic reference only; it is not part of the live worker/provider path.
 option(VF_BUILD_SCALAR_REFERENCE "Build bounded SC117 scalar diagnostic" OFF)
 if(VF_BUILD_SCALAR_REFERENCE)
