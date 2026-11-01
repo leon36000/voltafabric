@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:47:59Z",
+  "updated_utc": "2026-11-01T04:56:02Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -323,6 +323,29 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R656",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_GROUPED_MATRIX_CPU_PASS",
+      "branch": "r656-ggml-grouped-matrix-fleet-20261101",
+      "parent_commit": "385226851a6c61c02b472aef73ba026c03ee0a6d",
+      "commit": "35aa816d63a019914b25a4bfde1dfb7093ac7f5d",
+      "path": "research/R656",
+      "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "donor_license": "MIT",
+      "adaptation": "Adds GroupedMatrixBinding/Resident/Fleet: digest-bound physical expert order, existing routing::dispatch, pinned GGML grouped projection, unweighted FP16 output, and ordinary Rust Collector composition. Process-local terminal-on-error; aggregate resident payload and batch staging are bounded.",
+      "test": "Focused AArch64 CPU matrix integration suite passes 4/4 debug and 4/4 release; rustfmt changed-files check passes; scoped clippy passes with only documented pre-existing lints allowed.",
+      "test_scope": "Synthetic Q8_0 only; two fresh batches verify physical order and one-time coefficients; replay of the same full Stamp is refused; a second-rank FP16 overflow yields no receipt and poisons the fleet.",
+      "readback_files_verified": 6,
+      "published_utc": "2026-11-01T04:55:45Z",
+      "readback_verified_utc": "2026-11-01T04:56:02Z",
+      "model_loaded": false,
+      "generation_executed": false,
+      "session_path_exercised": false,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -356,7 +379,8 @@
     "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations.",
     "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653.",
     "R654 introduced GGML grouped expert matrix multiplication for a synchronous CPU Q8_0 fixture; R655 now composes its resident output with the VoltaFabric FP16-decoded f64 Collector in focused CPU tests. A persistent VoltaFabric Session/owner path, checkpoint loading, full generation, other formats, GPU and inter-PC distribution remain unqualified.",
-    "R655 verifies a synthetic Q8_0 grouped-matrix-to-Collector path only. It does not exercise the persistent Session/owner runtime, checkpoint loading, full generation, GPU, inter-PC distribution, production R53, other quantization formats, or performance."
+    "R655 verifies a synthetic Q8_0 grouped-matrix-to-Collector path only. It does not exercise the persistent Session/owner runtime, checkpoint loading, full generation, GPU, inter-PC distribution, production R53, other quantization formats, or performance.",
+    "R656 integrates pinned GGML grouped projection with VoltaFabric routing and the ordinary Collector through an in-process CPU matrix fleet. Synthetic Q8_0 only; no subprocess Session/RankWorker protocol, checkpoint/model, full generation, GPU, inter-PC distribution, durable shared R53, other formats, or performance is qualified."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -374,18 +398,19 @@
     "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
     "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM",
     "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY",
-    "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS"
+    "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS",
+    "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R656_READY_ON_OWNER_REQUEST",
-    "purpose": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
+    "status": "R657_READY_ON_OWNER_REQUEST",
+    "purpose": "R657: wire grouped matrix provider into an identified VoltaFabric Session/RankWorker CPU request path, retaining resident weights, complete Stamp/attempt checks, and terminal UNKNOWN handling. No checkpoint, GPU, or production network."
   },
-  "report": "research/R655/REPORT.md",
+  "report": "research/R656/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R655/SHA256SUMS",
-    "sha256": "d26fe7855024f2f7c0c00af16ab13263133aedb5903e75ad054f9a65de95216a",
-    "files": 7
+    "path": "research/R656/SHA256SUMS",
+    "sha256": "c7f7670c3846be2a238890f104b02db9dbe62ee953b229a7e4ebee6c1c2bcf02",
+    "files": 5
   }
 }

@@ -3,8 +3,11 @@
   "round": "R656",
   "status": "GROUPED_GGML_MATRIX_ROUTING_COLLECTOR_CPU_PASS",
   "branch": "r656-ggml-grouped-matrix-fleet-20261101",
-  "source_commit": null,
+  "source_commit": "35aa816d63a019914b25a4bfde1dfb7093ac7f5d",
   "parent_commit": "385226851a6c61c02b472aef73ba026c03ee0a6d",
+  "published_utc": "2026-11-01T04:55:45Z",
+  "readback_verified_utc": "2026-11-01T04:56:02Z",
+  "readback_files_verified": 6,
   "donor": {
     "project": "llama.cpp / GGML",
     "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",

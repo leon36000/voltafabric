@@ -10048,5 +10048,32 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
   }
+,
+  "r656_grouped_matrix_fleet": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_GROUPED_MATRIX_CPU_PASS",
+    "branch": "r656-ggml-grouped-matrix-fleet-20261101",
+    "parent_commit": "385226851a6c61c02b472aef73ba026c03ee0a6d",
+    "source_commit": "35aa816d63a019914b25a4bfde1dfb7093ac7f5d",
+    "report": "research/R656/REPORT.md",
+    "result": "research/R656/RESULT.json",
+    "build_test": "research/R656/BUILD_TEST.txt",
+    "sha256sums": "research/R656/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Adds GroupedMatrixBinding/Resident/Fleet: digest-bound physical expert order, existing routing::dispatch, pinned GGML grouped projection, unweighted FP16 output, and ordinary Rust Collector composition. Process-local terminal-on-error; aggregate resident payload and batch staging are bounded.",
+    "test_result": "Focused AArch64 CPU matrix integration suite passes 4/4 debug and 4/4 release; rustfmt changed-files check passes; scoped clippy passes with only documented pre-existing lints allowed.",
+    "test_scope": "Synthetic Q8_0 only; two fresh batches verify physical order and one-time coefficients; replay of the same full Stamp is refused; a second-rank FP16 overflow yields no receipt and poisons the fleet.",
+    "readback_files_verified": 6,
+    "published_utc": "2026-11-01T04:55:45Z",
+    "readback_verified_utc": "2026-11-01T04:56:02Z",
+    "model_loaded": false,
+    "generation_executed": false,
+    "session_path_exercised": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R657: wire grouped matrix provider into an identified VoltaFabric Session/RankWorker CPU request path, retaining resident weights, complete Stamp/attempt checks, and terminal UNKNOWN handling. No checkpoint, GPU, or production network."
+  }
 
 }
