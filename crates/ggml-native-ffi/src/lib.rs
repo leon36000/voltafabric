@@ -1,6 +1,6 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 use std::{
-    ffi::{c_void, CString},
+    ffi::{c_char, c_void, CStr, CString},
     fs::File,
     ptr::NonNull,
 };
@@ -26,6 +26,10 @@ unsafe extern "C" {
     ) -> *mut GgufContext;
     fn gguf_free(ctx: *mut GgufContext);
     fn gguf_get_data_offset(ctx: *const GgufContext) -> usize;
+    fn gguf_find_key(ctx: *const GgufContext, key: *const c_char) -> i64;
+    fn gguf_get_kv_type(ctx: *const GgufContext, key_id: i64) -> i32;
+    fn gguf_get_val_str(ctx: *const GgufContext, key_id: i64) -> *const c_char;
+    fn gguf_get_val_u32(ctx: *const GgufContext, key_id: i64) -> u32;
     fn gguf_find_tensor(ctx: *const GgufContext, name: *const std::ffi::c_char) -> i64;
     fn gguf_get_tensor_offset(ctx: *const GgufContext, tensor_id: i64) -> usize;
     fn gguf_get_tensor_size(ctx: *const GgufContext, tensor_id: i64) -> usize;
@@ -55,58 +59,134 @@ impl Drop for GgufGuard {
     }
 }
 
+/// Metadata-only view over one already-open GGUF file. `no_alloc=true` makes the pinned
+/// parser retain metadata but not tensor data; it owns no pointer into the caller's File.
+#[cfg(target_os = "linux")]
+pub struct GgufIndex {
+    ctx: GgufGuard,
+    data_offset: u64,
+}
+
+#[cfg(target_os = "linux")]
+impl GgufIndex {
+    pub fn open(file: &File) -> Result<Self, &'static str> {
+        use std::os::fd::AsRawFd;
+        let descriptor_path = CString::new(format!("/proc/self/fd/{}", file.as_raw_fd()))
+            .map_err(|_| "invalid checkpoint descriptor")?;
+        // SAFETY: path is a live NUL-terminated descriptor path. The no-allocation parser
+        // copies metadata into its uniquely owned context and never allocates tensor data.
+        let raw = unsafe {
+            gguf_init_from_file(
+                descriptor_path.as_ptr(),
+                GgufInitParams {
+                    no_alloc: true,
+                    ctx: std::ptr::null_mut(),
+                },
+            )
+        };
+        let ctx = GgufGuard(NonNull::new(raw).ok_or("pinned GGUF metadata parse failed")?);
+        // SAFETY: the unique context guard keeps this metadata pointer valid.
+        let data_offset = unsafe { gguf_get_data_offset(ctx.0.as_ptr()) };
+        if data_offset > 128 * 1024 * 1024 {
+            return Err("GGUF metadata header exceeds 128 MiB");
+        }
+        Ok(Self {
+            ctx,
+            data_offset: u64::try_from(data_offset).map_err(|_| "GGUF offset does not fit u64")?,
+        })
+    }
+
+    fn key_id(&self, name: &str) -> Result<i64, &'static str> {
+        let key = CString::new(name).map_err(|_| "GGUF key contains NUL")?;
+        // SAFETY: the context and NUL-terminated key remain live for this call.
+        let id = unsafe { gguf_find_key(self.ctx.0.as_ptr(), key.as_ptr()) };
+        if id < 0 {
+            return Err("GGUF metadata key is absent");
+        }
+        Ok(id)
+    }
+
+    /// Read one bounded UTF-8 GGUF string key.
+    pub fn string(&self, name: &str) -> Result<String, &'static str> {
+        const GGUF_TYPE_STRING: i32 = 8;
+        let id = self.key_id(name)?;
+        // SAFETY: id came from gguf_find_key on this live context.
+        if unsafe { gguf_get_kv_type(self.ctx.0.as_ptr(), id) } != GGUF_TYPE_STRING {
+            return Err("GGUF metadata key is not a string");
+        }
+        // SAFETY: this typed accessor returns context-owned, NUL-terminated string storage.
+        let value = unsafe { gguf_get_val_str(self.ctx.0.as_ptr(), id) };
+        if value.is_null() {
+            return Err("GGUF string value is unavailable");
+        }
+        // SAFETY: the GGUF string accessor guarantees a live NUL-terminated value until
+        // the context is dropped; the returned bytes are copied before this method ends.
+        let bytes = unsafe { CStr::from_ptr(value) }.to_bytes();
+        if bytes.is_empty() || bytes.len() > 256 {
+            return Err("GGUF string value is empty or exceeds 256 bytes");
+        }
+        std::str::from_utf8(bytes)
+            .map(str::to_owned)
+            .map_err(|_| "GGUF string value is not UTF-8")
+    }
+
+    /// Read one GGUF unsigned-32 metadata key without coercing another stored type.
+    pub fn u32(&self, name: &str) -> Result<u32, &'static str> {
+        const GGUF_TYPE_UINT32: i32 = 4;
+        let id = self.key_id(name)?;
+        // SAFETY: id came from gguf_find_key on this live context.
+        if unsafe { gguf_get_kv_type(self.ctx.0.as_ptr(), id) } != GGUF_TYPE_UINT32 {
+            return Err("GGUF metadata key is not uint32");
+        }
+        // SAFETY: the key type was checked as GGUF_TYPE_UINT32 on this live context.
+        Ok(unsafe { gguf_get_val_u32(self.ctx.0.as_ptr(), id) })
+    }
+
+    pub fn has_tensor(&self, name: &str) -> Result<bool, &'static str> {
+        let name = CString::new(name).map_err(|_| "GGUF tensor name contains NUL")?;
+        // SAFETY: context and NUL-terminated tensor name remain valid for this call.
+        Ok(unsafe { gguf_find_tensor(self.ctx.0.as_ptr(), name.as_ptr()) } >= 0)
+    }
+
+    /// Read one tensor's span and physical extents without allocating its data.
+    pub fn tensor_span(&self, name: &str) -> Result<GgufTensorSpan, &'static str> {
+        let tensor_name = CString::new(name).map_err(|_| "GGUF tensor name contains NUL")?;
+        // SAFETY: context and NUL-terminated name remain live for this lookup.
+        let id = unsafe { gguf_find_tensor(self.ctx.0.as_ptr(), tensor_name.as_ptr()) };
+        if id < 0 {
+            return Err("GGUF tensor name is absent");
+        }
+        // SAFETY: the nonnegative ID came from gguf_find_tensor for this live context.
+        let (relative, bytes, ggml_type, ne) = unsafe {
+            let ne = gguf_get_tensor_ne(self.ctx.0.as_ptr(), id);
+            if ne.is_null() {
+                return Err("GGUF tensor dimensions are unavailable");
+            }
+            (
+                gguf_get_tensor_offset(self.ctx.0.as_ptr(), id),
+                gguf_get_tensor_size(self.ctx.0.as_ptr(), id),
+                gguf_get_tensor_type(self.ctx.0.as_ptr(), id),
+                [*ne, *ne.add(1), *ne.add(2), *ne.add(3)],
+            )
+        };
+        let offset = self
+            .data_offset
+            .checked_add(u64::try_from(relative).map_err(|_| "GGUF offset does not fit u64")?)
+            .ok_or("GGUF tensor offset overflow")?;
+        Ok(GgufTensorSpan {
+            offset,
+            bytes: u64::try_from(bytes).map_err(|_| "GGUF tensor size does not fit u64")?,
+            ggml_type,
+            dimensions: ne,
+        })
+    }
+}
+
 /// Read tensor metadata without allocating its tensor data. The descriptor is already
 /// open and regular; `/proc/self/fd` makes the pinned GGUF parser inspect that same inode.
 #[cfg(target_os = "linux")]
 pub fn gguf_tensor_span(file: &File, name: &str) -> Result<GgufTensorSpan, &'static str> {
-    use std::os::fd::AsRawFd;
-    let descriptor_path = CString::new(format!("/proc/self/fd/{}", file.as_raw_fd()))
-        .map_err(|_| "invalid checkpoint descriptor")?;
-    let tensor_name = CString::new(name).map_err(|_| "GGUF tensor name contains NUL")?;
-    // SAFETY: paths remain NUL-terminated and valid during the call. `ctx` is null and
-    // `no_alloc=true`, so GGUF reads only bounded metadata and leaves tensor bytes on disk.
-    let raw = unsafe {
-        gguf_init_from_file(
-            descriptor_path.as_ptr(),
-            GgufInitParams {
-                no_alloc: true,
-                ctx: std::ptr::null_mut(),
-            },
-        )
-    };
-    let ctx = GgufGuard(NonNull::new(raw).ok_or("pinned GGUF metadata parse failed")?);
-    // SAFETY: the context guard stays live and the tensor ID is checked below.
-    let id = unsafe { gguf_find_tensor(ctx.0.as_ptr(), tensor_name.as_ptr()) };
-    if id < 0 {
-        return Err("GGUF tensor name is absent");
-    }
-    // SAFETY: the nonnegative ID came from gguf_find_tensor for this live context.
-    let (relative, bytes, ggml_type, ne) = unsafe {
-        let ne = gguf_get_tensor_ne(ctx.0.as_ptr(), id);
-        if ne.is_null() {
-            return Err("GGUF tensor dimensions are unavailable");
-        }
-        let dimensions = [*ne, *ne.add(1), *ne.add(2), *ne.add(3)];
-        (
-            gguf_get_tensor_offset(ctx.0.as_ptr(), id),
-            gguf_get_tensor_size(ctx.0.as_ptr(), id),
-            gguf_get_tensor_type(ctx.0.as_ptr(), id),
-            dimensions,
-        )
-    };
-    // SAFETY: `ctx` remains live under the guard until the offset is copied out.
-    let absolute = unsafe { gguf_get_data_offset(ctx.0.as_ptr()) }
-        .checked_add(relative)
-        .ok_or("GGUF tensor offset overflow")?;
-    if absolute > 128 * 1024 * 1024 {
-        return Err("GGUF metadata header exceeds 128 MiB");
-    }
-    Ok(GgufTensorSpan {
-        offset: u64::try_from(absolute).map_err(|_| "GGUF offset does not fit u64")?,
-        bytes: u64::try_from(bytes).map_err(|_| "GGUF tensor size does not fit u64")?,
-        ggml_type,
-        dimensions: ne,
-    })
+    GgufIndex::open(file)?.tensor_span(name)
 }
 
 unsafe extern "C" {

@@ -1,0 +1,35 @@
+{
+  "round": "R659",
+  "objective": "Resolve and load one synthetic separate gate/up/down MoE FFN checkpoint stage into identified VoltaFabric CPU Sessions, preserving explicit checkpoint expert mapping and comparing against an independent scalar oracle.",
+  "donor": {
+    "project": "llama.cpp / GGML GGUF metadata reader",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "adapted_component": "Typed no-allocation GGUF metadata and tensor-span lookup; exact expert tensor naming remains VoltaFabric policy."
+  },
+  "fixture": {
+    "architecture_label": "qwen2moe",
+    "format": "synthetic GGUF v3, Q8_0",
+    "layers": 1,
+    "hidden": 32,
+    "expert_ffn": 32,
+    "checkpoint_experts": 2,
+    "resident_to_checkpoint_map": [
+      {"resident_expert": 40, "resident_local": 0, "checkpoint_expert": 1},
+      {"resident_expert": 3, "resident_local": 1, "checkpoint_expert": 0}
+    ]
+  },
+  "verification": {
+    "gguf_moe_layout_tests": "4 passed",
+    "native_matrix_session_tests": "5 passed",
+    "result": "Exact output match against a separate scalar Q8_0 decoder/matvec oracle with SiLU(gate)*up and FP16 decode followed by one-time down-projection route weighting.",
+    "cargo_manifest_sha256_restored": "a1dc9c094359a1004b1c577f232226083bf1808f6c07fe5713b6a3911f520706"
+  },
+  "limitations": [
+    "Synthetic CPU fixture only; no production checkpoint or model compatibility was tested.",
+    "The Session dispatcher still requires matrix output width to equal dispatch hidden width, so the rectangular shape was resolved but not executed.",
+    "Fused gate/up is recognized in metadata but not split or executed.",
+    "No full model generation, CUDA/V100, inter-PC worker, RDMA, production R53, or performance claim."
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER"
+}

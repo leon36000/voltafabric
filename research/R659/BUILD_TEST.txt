@@ -1,0 +1,11 @@
+Source base: private GitLab branch r658-gguf-span-session-20261101, commit 54088cdfca0f6635f6b5e23cd84f7961ac4ccbde.
+Donor: llama.cpp/GGML source pin 3cf03257f219afbe7334045ff7c6a06ac68c627d, MIT.
+
+Isolated CPU harness:
+  rustfmt --edition 2021 crates/ggml-native-ffi/src/lib.rs src/gguf_expert_slices.rs src/gguf_moe_layout.rs src/lib.rs src/session.rs tests/gguf_moe_layout.rs tests/native_matrix_session.rs
+  VF_GGML_NATIVE_BUILD=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r655-ggml-collector-cpu-20261101-work/build cargo test --offline --test gguf_moe_layout --features native-ggml-cpu
+  VF_GGML_NATIVE_BUILD=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r655-ggml-collector-cpu-20261101-work/build cargo test --offline --test native_matrix_session --features native-ggml-cpu
+
+Results: `gguf_moe_layout` 4/4 passed; `native_matrix_session` 5/5 passed. The isolated source snapshot is nested under a separate repository and lacks several historical fixtures and some root target dependencies. For these two commands only, Cargo.toml was temporarily narrowed to the rank-session executable, given the already locked libc/rustix dependencies, and made a temporary workspace; Cargo.lock was also guarded. Both files were restored byte-for-byte in a finally block; Cargo.toml SHA256 is a1dc9c094359a1004b1c577f232226083bf1808f6c07fe5713b6a3911f520706 and Cargo.lock is unchanged.
+
+One existing warning remains in untouched `src/sc117_layer_chain.rs` (`CapturedQsa` fields unused). No GPU, model download, network worker, or production ledger was used.

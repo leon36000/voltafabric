@@ -7,6 +7,7 @@ use std::{
     time::Duration,
 };
 use voltafabric::{
+    gguf_expert_slices::ExpertCheckpointSlice,
     moe::{Choice, Registry, Replica, Stamp},
     native_ggml_cpu::GroupedMatrixBinding,
     native_ledger::NativeBatchLedger,
@@ -295,6 +296,119 @@ fn grouped_ggml_matrix_stays_resident_across_identified_session_batches() {
     assert_eq!(replay.code, "INVALID_INPUT");
     assert!(replay.message.contains("identity already attempted"));
     assert!(sessions[0].is_usable());
+    let _ = sessions.pop().unwrap().close(TIMEOUT);
+}
+
+#[test]
+fn gguf_rank_load_selects_only_explicit_checkpoint_experts_in_resident_order() {
+    let mut checkpoint_weights = Vec::new();
+    for code in [1, 2, 4] {
+        checkpoint_weights.extend(stack(H, [0x00, 0x3c], code));
+    }
+    let expert_bytes = H * Q8_0_ROW_BYTES;
+    let mut resident_weights = checkpoint_weights[2 * expert_bytes..].to_vec();
+    resident_weights.extend_from_slice(&checkpoint_weights[..expert_bytes]);
+    let mut binding = binding_shape(
+        7,
+        &[(40, 0), (3, 1)],
+        &resident_weights,
+        "r659-gguf-slices-model",
+        5,
+        H,
+        H,
+    );
+    binding.tensor = "blk.5.ffn_gate_exps.weight".into();
+    let checkpoint = gguf_fixture(
+        "rank-local",
+        &binding.tensor,
+        [H as u64, H as u64, 3],
+        &checkpoint_weights,
+    );
+    let slices = [
+        ExpertCheckpointSlice {
+            resident_expert: 40,
+            resident_local: 0,
+            checkpoint_expert: 2,
+        },
+        ExpertCheckpointSlice {
+            resident_expert: 3,
+            resident_local: 1,
+            checkpoint_expert: 0,
+        },
+    ];
+
+    let mut session = Session::connect(&endpoint(7), TIMEOUT).unwrap();
+    session
+        .load_grouped_matrix_gguf_expert_slices(
+            &binding,
+            &checkpoint,
+            &binding.tensor,
+            &slices,
+            TIMEOUT,
+        )
+        .unwrap();
+    assert_eq!(
+        session.traffic.weight_bytes_sent,
+        resident_weights.len() as u64
+    );
+
+    let problem = RoutingProblem {
+        hidden: H,
+        experts: vec![3, 40],
+        routes: vec![
+            vec![Choice {
+                expert: 40,
+                weight: 0.25,
+            }],
+            vec![Choice {
+                expert: 3,
+                weight: 0.75,
+            }],
+        ],
+        registry: Registry {
+            epoch: 9,
+            copies: vec![
+                Replica {
+                    expert: 40,
+                    rank: 7,
+                    local: 0,
+                },
+                Replica {
+                    expert: 3,
+                    rank: 7,
+                    local: 1,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r659-gguf-slices-run".into(),
+            model_revision: "r659-gguf-slices-model".into(),
+            plan_id: "r659-gguf-slices-plan".into(),
+            layer: 5,
+            batch: 69,
+            epoch: 9,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(7, vec![0, 1])]),
+    };
+    let mut inputs = vec![vec![0.0_f32; H]; 2];
+    inputs[0][0] = 2.0;
+    inputs[1][0] = 1.0;
+    let mut sessions = vec![session];
+    let output = Session::exec_grouped_matrix_batch(
+        &mut sessions,
+        &problem,
+        &inputs,
+        &ledger("rank-local-gguf"),
+        TIMEOUT,
+    )
+    .unwrap();
+    assert_eq!(
+        output,
+        q8_0_one_hot_oracle(&problem, &binding, &resident_weights, &inputs)
+    );
+    assert_eq!(output[0][0], 2.0);
+    assert_eq!(output[1][0], 0.75);
     let _ = sessions.pop().unwrap().close(TIMEOUT);
 }
 

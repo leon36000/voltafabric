@@ -4380,6 +4380,94 @@ impl Session {
         Ok(())
     }
 
+    /// Load only this rank's explicit checkpoint experts from one GGUF expert tensor.
+    ///
+    /// The source tensor may contain more bytes than a rank is allowed to resident-load;
+    /// only the selected physical expert slices are streamed, in `binding.residents` order.
+    /// The plan digest authenticates that concatenated rank-local payload before the worker
+    /// constructs its native matrix. No checkpoint tensor or unselected expert is staged.
+    #[cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
+    pub fn load_grouped_matrix_gguf_expert_slices(
+        &mut self,
+        binding: &crate::native_ggml_cpu::GroupedMatrixBinding,
+        checkpoint_path: &std::path::Path,
+        tensor_name: &str,
+        slices: &[crate::gguf_expert_slices::ExpertCheckpointSlice],
+        timeout: Duration,
+    ) -> Result<()> {
+        use crate::gguf_expert_slices::{validate_checkpoint_slices, SelectedExpertSliceReader};
+        let io_error = |error: io::Error| {
+            Error::new(
+                "CHECKPOINT_IO",
+                format!("cannot read GGUF expert slice source: {error}"),
+            )
+        };
+        if tensor_name != binding.tensor || !sha256::is_hex_digest(&binding.sha256) {
+            return Err(invalid(
+                "GGUF tensor name or resident digest differs from plan",
+            ));
+        }
+        if !std::fs::metadata(checkpoint_path)
+            .map_err(io_error)?
+            .is_file()
+        {
+            return Err(invalid("GGUF expert slice source must be a regular file"));
+        }
+        let mut file = crate::checkpoint::open_nonblocking(checkpoint_path).map_err(io_error)?;
+        let before = file.metadata().map_err(io_error)?;
+        if !before.is_file() {
+            return Err(invalid("opened GGUF expert slice source is not regular"));
+        }
+        let span = vf_ggml_native_ffi::gguf_tensor_span(&file, tensor_name).map_err(invalid)?;
+        let rows = i64::try_from(binding.rows).map_err(|_| invalid("GGUF matrix rows overflow"))?;
+        let columns =
+            i64::try_from(binding.columns).map_err(|_| invalid("GGUF matrix columns overflow"))?;
+        let checkpoint_expert_count = usize::try_from(span.dimensions[2])
+            .map_err(|_| invalid("GGUF checkpoint expert count overflow"))?;
+        if span.ggml_type != binding.ggml_type
+            || span.dimensions[0] != columns
+            || span.dimensions[1] != rows
+            || span.dimensions[2] <= 0
+            || span.dimensions[3] != 1
+            || span.bytes == 0
+            || span
+                .offset
+                .checked_add(span.bytes)
+                .is_none_or(|end| end > before.len())
+        {
+            return Err(invalid(
+                "GGUF expert tensor type, dimensions or file span differ from binding",
+            ));
+        }
+        let (checkpoint_indices, selected_bytes) = validate_checkpoint_slices(
+            &binding.residents,
+            slices,
+            checkpoint_expert_count,
+            span.bytes,
+            crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES,
+        )
+        .map_err(invalid)?;
+        let mut reader = SelectedExpertSliceReader::new(
+            &mut file,
+            span.offset,
+            span.bytes,
+            checkpoint_expert_count,
+            &checkpoint_indices,
+        )
+        .map_err(|error| invalid(format!("invalid GGUF expert slice reader: {error}")))?;
+        self.load_grouped_matrix_reader(binding, &mut reader, selected_bytes, timeout)?;
+
+        let after = file.metadata().map_err(io_error)?;
+        let before_modified = before.modified().map_err(io_error)?;
+        let after_modified = after.modified().map_err(io_error)?;
+        if before.len() != after.len() || before_modified != after_modified || !after.is_file() {
+            let error = invalid("GGUF checkpoint changed during resident expert slice load");
+            self.poison_grouped_matrix_load();
+            return Err(error);
+        }
+        Ok(())
+    }
+
     /// Stream exactly one bounded raw matrix body. The body remains staged until its
     /// digest and GGML shape validate; a short source invalidates and reaps this Session.
     #[cfg(feature = "native-ggml-cpu")]

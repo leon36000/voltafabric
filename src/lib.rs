@@ -39,6 +39,9 @@ pub mod cost;
 pub(crate) mod work;
 
 pub mod gdn_cpu;
+pub mod gguf_expert_slices;
+#[cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
+pub mod gguf_moe_layout;
 pub mod hyperconnection_cpu;
 #[cfg(feature = "native-ggml-cpu")]
 pub mod native_ggml_cpu;
