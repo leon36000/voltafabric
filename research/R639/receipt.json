@@ -4,6 +4,11 @@
   "base_branch": "r638-vfb3-session-identity-20261031",
   "base_commit": "d51b77da9ed7386e64ccee67d63351ff723dc6c4",
   "branch": "r639-strata-mixed-cpu-miss-20261101",
+  "commits": {
+    "source_and_initial_evidence": "680600509540a1342af9525fb16de2cb2c296df9",
+    "no_diff_attempt": "660f3f5f0f1fac0e0115011af8e5697561690982",
+    "corrected_evidence": "8d0bf1a03b99d43807993082127023db15d6cb66"
+  },
   "donor": {
     "name": "Strata",
     "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
@@ -36,7 +41,11 @@
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "next_action": "R640: wire the mixed hook into the exact pinned donor after final kind assignment, preserve external rows, and then verify only the CPU path with an independent oracle.",
   "publication": {
-    "readback_pending": true,
+    "initial_empty_proof_files_detected": true,
+    "history_force_updated": false,
+    "corrected_readback_files": 6,
+    "corrected_readback_exact": true,
+    "branch_head_after_evidence_correction": "8d0bf1a03b99d43807993082127023db15d6cb66",
     "main_merge": false
   }
 }

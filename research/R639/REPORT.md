@@ -12,6 +12,8 @@ The source seam was checked against pinned Strata revision `fb58e0dbc8399662c0e4
 
 This wave received source review only. No compiler, CTest, Rust test, model, Strata generation, GPU, network worker, or R53 admission was run for R639. The new helper is not called by the pinned Strata donor yet; `strata-fb58-cpu-hook.patch` remains the earlier CPU-only candidate and still refuses GPU/peer/PCIe ownership. The generator does not yet construct the 48 sessions or install this callback.
 
+The first publication commit (`680600509540a1342af9525fb16de2cb2c296df9`) left the three newly created proof files empty. Readback exposed this before the handoff was updated. Commit `660f3f5f0f1fac0e0115011af8e5697561690982` contained no file diff; a later corrective commit populated the three files from the reviewed local sources, and exact readback of all six changed source/evidence files succeeded. History was preserved without a force update.
+
 No complete generation or V100 distribution is claimed. This local bridge uses AF_UNIX and a local ledger; it is not a shared R53 registry or production network.
 
 ## Next step
