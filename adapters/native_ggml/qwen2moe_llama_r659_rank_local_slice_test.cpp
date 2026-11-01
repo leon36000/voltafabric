@@ -429,6 +429,79 @@ std::vector<double> scalar_q8_matvec(const std::string & source_path,
     return output;
 }
 
+struct Q8ActivationBlock {
+    float scale = 0.0f;
+    std::array<int8_t, 32> codes{};
+};
+
+std::vector<Q8ActivationBlock> quantize_activation_q8_0(const std::vector<float> & input) {
+    if (input.size() % 32 != 0) throw std::runtime_error("Q8_0 activation width is not block aligned");
+    std::vector<Q8ActivationBlock> blocks(input.size() / 32);
+    for (size_t block = 0; block < blocks.size(); ++block) {
+        float amax = 0.0f;
+        for (size_t lane = 0; lane < 32; ++lane) {
+            amax = std::max(amax, std::fabs(input[block * 32 + lane]));
+        }
+        const float scale = amax / 127.0f;
+        const float inverse = scale == 0.0f ? 0.0f : 1.0f / scale;
+        blocks[block].scale = static_cast<float>(fp16_roundtrip(scale));
+        for (size_t lane = 0; lane < 32; ++lane) {
+            const float quantized = std::round(input[block * 32 + lane] * inverse);
+            if (quantized < -127.0f || quantized > 127.0f) {
+                throw std::runtime_error("Q8_0 activation quantizer exceeded signed code range");
+            }
+            blocks[block].codes[lane] = static_cast<int8_t>(quantized);
+        }
+    }
+    return blocks;
+}
+
+std::vector<double> scalar_q8_matvec_with_q8_0_activation(
+        const std::string & source_path, const SourceTensorSpan & span,
+        size_t expert_count, size_t checkpoint_expert, size_t rows, size_t columns,
+        const std::vector<float> & input) {
+    if (input.size() != columns || columns % 32 != 0) {
+        throw std::runtime_error("Q8_0 dot oracle received an invalid activation shape");
+    }
+    const size_t expert_bytes = rows * (columns / 32) * kQ8RowBytes;
+    if (expert_count == 0 || checkpoint_expert >= expert_count ||
+        rows * expert_count * (columns / 32) * kQ8RowBytes != span.bytes) {
+        throw std::runtime_error("Q8_0 dot oracle received an invalid expert span");
+    }
+    const uint64_t offset = span.data_offset + span.relative_offset +
+                            static_cast<uint64_t>(checkpoint_expert * expert_bytes);
+    std::ifstream file(source_path, std::ios::binary);
+    if (!file) throw std::runtime_error("Q8_0 dot oracle could not open source fixture");
+    file.seekg(static_cast<std::streamoff>(offset), std::ios::beg);
+    std::vector<uint8_t> bytes(expert_bytes);
+    file.read(reinterpret_cast<char *>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
+    if (file.gcount() != static_cast<std::streamsize>(bytes.size())) {
+        throw std::runtime_error("Q8_0 dot oracle read an incomplete weight slice");
+    }
+    const auto activation_blocks = quantize_activation_q8_0(input);
+    const size_t row_bytes = columns / 32 * kQ8RowBytes;
+    std::vector<double> output(rows, 0.0);
+    for (size_t row = 0; row < rows; ++row) {
+        float sumf = 0.0f;
+        for (size_t block = 0; block < columns / 32; ++block) {
+            const size_t block_start = row * row_bytes + block * kQ8RowBytes;
+            const uint16_t weight_scale_bits = static_cast<uint16_t>(bytes[block_start]) |
+                static_cast<uint16_t>(bytes[block_start + 1] << 8);
+            int32_t integer_sum = 0;
+            for (size_t lane = 0; lane < 32; ++lane) {
+                const int8_t weight_code = static_cast<int8_t>(bytes[block_start + 2 + lane]);
+                integer_sum += static_cast<int32_t>(weight_code) *
+                               static_cast<int32_t>(activation_blocks[block].codes[lane]);
+            }
+            const float weight_scale = fp16_to_float(weight_scale_bits);
+            sumf += static_cast<float>(integer_sum) *
+                    (weight_scale * activation_blocks[block].scale);
+        }
+        output[row] = static_cast<double>(sumf);
+    }
+    return output;
+}
+
 struct ScalarExpertResult {
     std::vector<double> gate;
     std::vector<double> up;
@@ -466,6 +539,67 @@ ScalarExpertResult scalar_expert_ffn(const size_t local_expert, const float rout
     return result;
 }
 
+struct ScalarRoundControl {
+    const char * name;
+    bool half_gate;
+    bool half_up;
+    bool half_activation;
+    bool q8_0_linear_inputs;
+};
+
+constexpr std::array<ScalarRoundControl, 7> kRoundControls{{
+    {"fp32_intermediates", false, false, false, false},
+    {"fp16_gate_only", true, false, false, false},
+    {"fp16_up_only", false, true, false, false},
+    {"fp16_gate_and_up", true, true, false, false},
+    {"fp16_activation_only", false, false, true, false},
+    {"fp16_gate_up_activation", true, true, true, false},
+    {"fp32_intermediates_q8_0_linear_inputs", false, false, false, true},
+}};
+
+std::vector<double> scalar_collector_control(size_t local_expert, float route_weight,
+                                             const ScalarRoundControl & control,
+                                             std::array<std::vector<float>, 3> * stages = nullptr) {
+    const auto & resident = kRankLocalSlices.at(local_expert);
+    std::vector<float> input(kHidden, 0.0f);
+    input[0] = 1.0f;
+    const auto matvec = control.q8_0_linear_inputs
+        ? scalar_q8_matvec_with_q8_0_activation : scalar_q8_matvec;
+    const auto gate = matvec(g_source_path, g_source_spans[0], kSourceExperts,
+                             resident.checkpoint_expert, kHidden, kHidden, input);
+    const auto up = matvec(g_source_path, g_source_spans[1], kSourceExperts,
+                           resident.checkpoint_expert, kHidden, kHidden, input);
+    std::vector<float> gate_f32(kHidden), up_f32(kHidden), activation(kHidden);
+    for (size_t i = 0; i < kHidden; ++i) {
+        gate_f32[i] = static_cast<float>(gate[i]);
+        up_f32[i] = static_cast<float>(up[i]);
+        if (control.half_gate) gate_f32[i] = static_cast<float>(fp16_roundtrip(gate_f32[i]));
+        if (control.half_up) up_f32[i] = static_cast<float>(fp16_roundtrip(up_f32[i]));
+        activation[i] = (gate_f32[i] / (1.0f + ::expf(-gate_f32[i]))) * up_f32[i];
+        if (control.half_activation) {
+            activation[i] = static_cast<float>(fp16_roundtrip(activation[i]));
+        }
+    }
+    const auto down = matvec(g_source_path, g_source_spans[2], kSourceExperts,
+                             resident.checkpoint_expert, kHidden, kHidden, activation);
+    std::vector<double> slots(kHidden);
+    for (size_t i = 0; i < kHidden; ++i) {
+        slots[i] = fp16_roundtrip(down[i]) * static_cast<double>(route_weight);
+    }
+    if (stages != nullptr) {
+        (*stages)[0] = std::move(gate_f32);
+        (*stages)[1] = std::move(up_f32);
+        (*stages)[2] = std::move(activation);
+    }
+    return slots;
+}
+
+struct EvalTensorSnapshot {
+    std::string label;
+    std::string op;
+    std::vector<float> values;
+};
+
 struct RouteCapture {
     uint64_t batch_id = 0;
     int32_t checkpoint_expert = -1;
@@ -482,9 +616,37 @@ struct RouteCapture {
     std::vector<float> raw_slots;
     std::vector<float> output;
     std::vector<double> fp16_collector_output;
+    bool capture_intermediates = false;
+    std::vector<EvalTensorSnapshot> intermediates;
     bool scalar_collector_match = true;
     double scalar_collector_max_abs_error = 0.0;
 };
+
+bool capture_graph_tensor(ggml_tensor * tensor, bool ask, void * userdata) {
+    if (tensor == nullptr || userdata == nullptr) return false;
+    auto & capture = *static_cast<RouteCapture *>(userdata);
+    if (!capture.capture_intermediates) return false;
+    const bool glu = tensor->op == GGML_OP_GLU;
+    std::string weight_name;
+    if (tensor->op == GGML_OP_MUL_MAT_ID && tensor->src[0] != nullptr) {
+        weight_name = tensor->src[0]->name;
+    }
+    const bool matmul_id = tensor->op == GGML_OP_MUL_MAT_ID;
+    if (!glu && !matmul_id) return false;
+    if (ask) return true;
+    if (tensor->type != GGML_TYPE_F32 || tensor->data == nullptr ||
+        !ggml_is_contiguous(tensor) || ggml_nbytes(tensor) % sizeof(float) != 0) {
+        return false;
+    }
+    EvalTensorSnapshot snapshot{};
+    snapshot.label = glu ? "swiglu" : (weight_name.empty() ? "mul_mat_id" : weight_name);
+    snapshot.op = ggml_op_name(tensor->op);
+    const size_t bytes = ggml_nbytes(tensor);
+    snapshot.values.resize(bytes / sizeof(float));
+    std::memcpy(snapshot.values.data(), tensor->data, bytes);
+    capture.intermediates.push_back(std::move(snapshot));
+    return true;
+}
 
 class R659MoEInputs final : public llm_graph_input_i {
 public:
@@ -529,6 +691,9 @@ public:
         if (!activations || !logits || !gate || !up || !down) {
             throw std::runtime_error("could not allocate Q8_0 donor graph tensors");
         }
+        ggml_set_name(gate, "r687_gate_weights");
+        ggml_set_name(up, "r687_up_weights");
+        ggml_set_name(down, "r687_down_weights");
         for (auto *input : {activations, logits, gate, up, down}) ggml_set_input(input);
         res->add_input(std::make_unique<R659MoEInputs>(
             activations, logits, gate, up, down, checkpoint_expert));
@@ -584,8 +749,8 @@ bool make_batch(void *userdata, const llama_ubatch &ubatch, llm_graph_type graph
     if (ubatch.n_tokens != 1 || graph_type != LLM_GRAPH_TYPE_DEFAULT || expected_layers != 1) {
         return false;
     }
-    batch.identity = BatchIdentity{"r686-r659-rank-local", "r659-qwen2moe-rank-local-q8-fixture",
-                                   "resident-index-to-registry-cpu", 0, 686,
+    batch.identity = BatchIdentity{"r687-r659-rank-local", "r659-qwen2moe-rank-local-q8-fixture",
+                                   "resident-index-to-registry-cpu", 0, 687,
                                    capture.batch_id, capture.batch_id};
     batch.checkpoint_expert_to_registry_expert = capture.duplicate_projection
         ? std::vector<int32_t>{40, 40} : std::vector<int32_t>{40, 3};
@@ -634,9 +799,18 @@ bool near_oracle(float actual, float expected) {
 
 bool run_graph_case(uint64_t batch_id, int32_t checkpoint_expert, int32_t registry_expert,
                     float route_weight, bool reject, bool duplicate_projection = false,
-                    RouteCapture * completed = nullptr, bool * graph_completed = nullptr) {
+                    RouteCapture * completed = nullptr, bool * graph_completed = nullptr,
+                    bool capture_intermediates = false) {
     if (graph_completed != nullptr) *graph_completed = false;
     R659Qwen2MoEModel model(checkpoint_expert);
+    RouteCapture capture;
+    capture.batch_id = batch_id;
+    capture.checkpoint_expert = checkpoint_expert;
+    capture.registry_expert = registry_expert;
+    capture.route_weight = route_weight;
+    capture.reject = reject;
+    capture.duplicate_projection = duplicate_projection;
+    capture.capture_intermediates = capture_intermediates;
     auto params = llama_context_default_params();
     params.n_ctx = 256;
     params.n_batch = 1;
@@ -647,15 +821,10 @@ bool run_graph_case(uint64_t batch_id, int32_t checkpoint_expert, int32_t regist
     params.offload_kqv = false;
     params.op_offload = false;
     params.flash_attn_type = LLAMA_FLASH_ATTN_TYPE_DISABLED;
+    params.cb_eval = capture_intermediates ? capture_graph_tensor : nullptr;
+    params.cb_eval_user_data = capture_intermediates ? &capture : nullptr;
     llama_context context(model, params);
 
-    RouteCapture capture;
-    capture.batch_id = batch_id;
-    capture.checkpoint_expert = checkpoint_expert;
-    capture.registry_expert = registry_expert;
-    capture.route_weight = route_weight;
-    capture.reject = reject;
-    capture.duplicate_projection = duplicate_projection;
     Qwen2MoELlamaRouteBridge bridge(make_batch, &capture, collect, &capture);
     if (!bridge.attach(context) || context.get_vf_route_hooks() != bridge.hooks()) return false;
 
@@ -685,9 +854,9 @@ bool run_graph_case(uint64_t batch_id, int32_t checkpoint_expert, int32_t regist
     }
     if (result == nullptr || status != GGML_STATUS_SUCCESS || !detached ||
         context.get_vf_route_hooks() != nullptr || capture.calls != 1 ||
-        capture.identity.run != "r686-r659-rank-local" || capture.identity.model != "r659-qwen2moe-rank-local-q8-fixture" ||
+        capture.identity.run != "r687-r659-rank-local" || capture.identity.model != "r659-qwen2moe-rank-local-q8-fixture" ||
         capture.identity.plan != "resident-index-to-registry-cpu" || capture.identity.layer != 0 ||
-        capture.identity.epoch != 686 || capture.identity.batch != batch_id ||
+        capture.identity.epoch != 687 || capture.identity.batch != batch_id ||
         capture.identity.attempt != batch_id ||
         capture.experts != std::vector<int32_t>{registry_expert} ||
         capture.weights.size() != 1 || std::fabs(capture.weights[0] - route_weight) > 1.0e-6f ||
@@ -726,7 +895,8 @@ bool run_graph_case(uint64_t batch_id, int32_t checkpoint_expert, int32_t regist
 
 bool run_combined_layer(bool reject_second, std::vector<double> & published,
                         RouteCapture * first_result = nullptr,
-                        RouteCapture * second_result = nullptr) {
+                        RouteCapture * second_result = nullptr,
+                        bool capture_intermediates = false) {
     std::vector<double> staged(kHidden, 0.0);
     constexpr std::array<float, 2> weights{0.25f, 0.75f};
     for (size_t local_expert = 0; local_expert < kExperts; ++local_expert) {
@@ -736,7 +906,7 @@ bool run_combined_layer(bool reject_second, std::vector<double> & published,
         if (!run_graph_case(local_expert + 1, static_cast<int32_t>(local_expert),
                             registry_expert, weights[local_expert],
                             reject_second && local_expert == 1, false, &capture,
-                            &graph_completed)) {
+                            &graph_completed, capture_intermediates)) {
             return false;
         }
         if (!graph_completed) return false;
@@ -755,6 +925,120 @@ bool reject_partial_combined_layer() {
     const bool complete = run_combined_layer(true, published);
     return !complete && published.empty();
 }
+
+double max_abs_diff(const std::vector<float> & left, const std::vector<double> & right) {
+    if (left.size() != right.size()) return INFINITY;
+    double maximum = 0.0;
+    for (size_t i = 0; i < left.size(); ++i) {
+        maximum = std::max(maximum,
+            std::fabs(static_cast<double>(left[i]) - right[i]));
+    }
+    return maximum;
+}
+
+const EvalTensorSnapshot * find_snapshot(const RouteCapture & capture,
+                                         const std::string & label) {
+    const auto found = std::find_if(capture.intermediates.begin(), capture.intermediates.end(),
+        [&](const EvalTensorSnapshot & snapshot) { return snapshot.label == label; });
+    return found == capture.intermediates.end() ? nullptr : &*found;
+}
+
+bool report_route_rounding_controls(const RouteCapture & capture, size_t local_expert) {
+    std::vector<const EvalTensorSnapshot *> matmuls;
+    for (const auto & snapshot : capture.intermediates) {
+        if (snapshot.op == "MUL_MAT_ID") matmuls.push_back(&snapshot);
+        std::cout << "R687 donor_stage expert=" << capture.registry_expert
+                  << " label=" << snapshot.label << " op=" << snapshot.op
+                  << " elements=" << snapshot.values.size()
+                  << " first=" << (snapshot.values.empty() ? 0.0f : snapshot.values[0]) << '\n';
+    }
+    const auto * gate_tensor = find_snapshot(capture, "r687_gate_weights");
+    const auto * up_tensor = find_snapshot(capture, "r687_up_weights");
+    const auto * down_tensor = find_snapshot(capture, "r687_down_weights");
+    // The source names can be lost through donor graph views. In that case
+    // build_moe_ffn's topological MUL_MAT_ID order is up, gate, down.
+    if (matmuls.size() == 3) {
+        if (up_tensor == nullptr) up_tensor = matmuls[0];
+        if (gate_tensor == nullptr) gate_tensor = matmuls[1];
+        if (down_tensor == nullptr) down_tensor = matmuls[2];
+    }
+    const auto * swiglu_tensor = find_snapshot(capture, "swiglu");
+    if (gate_tensor == nullptr || up_tensor == nullptr || down_tensor == nullptr ||
+        swiglu_tensor == nullptr || gate_tensor->values.size() != kHidden ||
+        up_tensor->values.size() != kHidden || down_tensor->values.size() != kHidden ||
+        swiglu_tensor->values.size() != kHidden) {
+        std::cerr << "R687 did not capture gate/up/SwiGLU/down donor stages for expert "
+                  << capture.registry_expert << '\n';
+        return false;
+    }
+
+    std::vector<float> one_hot(kHidden, 0.0f);
+    one_hot[0] = 1.0f;
+    const auto scalar_gate = scalar_q8_matvec(g_source_path, g_source_spans[0], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden, one_hot);
+    const auto scalar_up = scalar_q8_matvec(g_source_path, g_source_spans[1], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden, one_hot);
+    const auto quantized_gate = scalar_q8_matvec_with_q8_0_activation(
+        g_source_path, g_source_spans[0], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden, one_hot);
+    const auto quantized_up = scalar_q8_matvec_with_q8_0_activation(
+        g_source_path, g_source_spans[1], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden, one_hot);
+    const auto scalar_down = scalar_q8_matvec(g_source_path, g_source_spans[2], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden,
+        swiglu_tensor->values);
+    const auto quantized_down = scalar_q8_matvec_with_q8_0_activation(
+        g_source_path, g_source_spans[2], kSourceExperts,
+        kRankLocalSlices[local_expert].checkpoint_expert, kHidden, kHidden,
+        swiglu_tensor->values);
+    const double gate_error = max_abs_diff(gate_tensor->values, scalar_gate);
+    const double up_error = max_abs_diff(up_tensor->values, scalar_up);
+    const double down_error = max_abs_diff(down_tensor->values, scalar_down);
+    const double quantized_gate_error = max_abs_diff(gate_tensor->values, quantized_gate);
+    const double quantized_up_error = max_abs_diff(up_tensor->values, quantized_up);
+    const double quantized_down_error = max_abs_diff(down_tensor->values, quantized_down);
+    double silu_formula_error = 0.0;
+    for (size_t i = 0; i < kHidden; ++i) {
+        const float expected = (gate_tensor->values[i] /
+            (1.0f + ::expf(-gate_tensor->values[i]))) * up_tensor->values[i];
+        silu_formula_error = std::max(silu_formula_error,
+            std::fabs(static_cast<double>(swiglu_tensor->values[i]) - expected));
+    }
+    std::cout << "R687 stage_errors expert=" << capture.registry_expert
+              << " gate_vs_scalar_q8=" << gate_error
+              << " up_vs_scalar_q8=" << up_error
+              << " swiglu_vs_explicit_expf=" << silu_formula_error
+              << " down_vs_unquantized_scalar=" << down_error
+              << " gate_vs_scalar_q8_0_dot=" << quantized_gate_error
+              << " up_vs_scalar_q8_0_dot=" << quantized_up_error
+              << " down_vs_scalar_q8_0_dot=" << quantized_down_error << '\n';
+
+    double best_error = INFINITY;
+    const char * best_name = "none";
+    double q8_input_control_error = INFINITY;
+    for (const auto & control : kRoundControls) {
+        const auto slots = scalar_collector_control(local_expert, capture.route_weight, control);
+        double error = 0.0;
+        for (size_t i = 0; i < kHidden; ++i) {
+            error = std::max(error, std::fabs(slots[i] - capture.fp16_collector_output[i]));
+        }
+        if (error < best_error) {
+            best_error = error;
+            best_name = control.name;
+        }
+        if (control.q8_0_linear_inputs) q8_input_control_error = error;
+        std::cout << "R687 scalar_control expert=" << capture.registry_expert
+                  << " name=" << control.name << " collector_max_abs=" << error << '\n';
+    }
+    std::cout << "R687 best_scalar_control expert=" << capture.registry_expert
+              << " name=" << best_name << " collector_max_abs=" << best_error << '\n';
+    if (q8_input_control_error > 1.0e-6) {
+        std::cerr << "R687 Q8_0 activation-quantized oracle diverged for expert "
+                  << capture.registry_expert << ": " << q8_input_control_error << '\n';
+        return false;
+    }
+    return true;
+}
 } // namespace
 
 int main() {
@@ -772,11 +1056,13 @@ int main() {
     std::vector<double> combined;
     RouteCapture first_result;
     RouteCapture second_result;
-    if (!run_combined_layer(false, combined, &first_result, &second_result) || combined.size() != kHidden ||
+    if (!run_combined_layer(false, combined, &first_result, &second_result, true) || combined.size() != kHidden ||
         !reject_partial_combined_layer()) {
-        std::cerr << "R686 combined layer or atomic refusal failed\n";
+        std::cerr << "R687 combined layer, stage capture, or atomic refusal failed\n";
         return 1;
     }
+    if (!report_route_rounding_controls(first_result, 0) ||
+        !report_route_rounding_controls(second_result, 1)) return 1;
     std::vector<double> scalar_combined(kHidden, 0.0);
     for (size_t local_expert = 0; local_expert < kExperts; ++local_expert) {
         const auto oracle = scalar_expert_ffn(local_expert,
@@ -792,23 +1078,37 @@ int main() {
             maximum_layer_error_index = i;
         }
     }
+    std::vector<double> quantized_scalar_combined(kHidden, 0.0);
+    for (size_t local_expert = 0; local_expert < kExperts; ++local_expert) {
+        const auto slots = scalar_collector_control(local_expert,
+            local_expert == 0 ? 0.25f : 0.75f, kRoundControls.back());
+        for (size_t i = 0; i < kHidden; ++i) quantized_scalar_combined[i] += slots[i];
+    }
+    double quantized_layer_error = 0.0;
+    for (size_t i = 0; i < kHidden; ++i) {
+        quantized_layer_error = std::max(quantized_layer_error,
+            std::fabs(combined[i] - quantized_scalar_combined[i]));
+    }
     if (first_result.scalar_collector_match || !second_result.scalar_collector_match ||
-        maximum_layer_error <= 1.0e-6) {
-        std::cerr << "R686 expected source-checkpoint expert 1 to diverge at FP16 and expert 0 to match; "
+        maximum_layer_error <= 1.0e-6 || quantized_layer_error > 1.0e-6) {
+        std::cerr << "R687 expected the unquantized oracle to diverge and Q8_0 activation oracle to close; "
                   << "first_match=" << first_result.scalar_collector_match
                   << " first_error=" << first_result.scalar_collector_max_abs_error
                   << " second_match=" << second_result.scalar_collector_match
                   << " second_error=" << second_result.scalar_collector_max_abs_error
-                  << " combined_error=" << maximum_layer_error << '\n';
+                  << " combined_error=" << maximum_layer_error
+                  << " q8_activation_oracle_error=" << quantized_layer_error << '\n';
         return 1;
     }
-    std::cout << "R686 rank-local Q8_0: streamed " << g_rank_local_source_bytes << "/"
+    std::cout << "R687 rank-local Q8_0: streamed " << g_rank_local_source_bytes << "/"
               << g_source_tensor_bytes << " source tensor bytes; mapped donor routes verified; "
-              << "scalar FP16/f64 oracle divergence=" << maximum_layer_error
+              << "unquantized scalar FP16/f64 oracle divergence=" << maximum_layer_error
               << " at output " << maximum_layer_error_index
               << " (donor=" << combined[maximum_layer_error_index]
               << ", scalar=" << scalar_combined[maximum_layer_error_index]
-              << "); expert0_match=" << first_result.scalar_collector_match
+              << "); independent scalar Q8_0 activation-quantized oracle max_error="
+              << quantized_layer_error
+              << "; expert0_match=" << first_result.scalar_collector_match
               << ", expert0_error=" << first_result.scalar_collector_max_abs_error
               << ", expert1_match=" << second_result.scalar_collector_match
               << ", expert1_error=" << second_result.scalar_collector_max_abs_error
