@@ -10383,5 +10383,28 @@
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
+  },
+  "r679_llama_qwen2moe_route_hook": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_PLAINTEXT_READBACK_VERIFIED_CPU_LLAMA_BUILD_PASS_PIPELINE_2298_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "prior_branch_tip": "0ae5110de979038f4f665b5d2ed3ae78d54aad01",
+    "initial_encoding_commit": "aeebc2ae01dce9eaae651beb789d87678dce228e",
+    "source_commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
+    "objective": "Add a pinned llama.cpp Qwen2MoE hook at process_ubatch/build_moe_ffn to replace only the routed aggregate and refuse unsuccessful/incomplete host publication.",
+    "changes": [
+      "Adds an internal opt-in route-hook interface and begins one invocation per actual ubatch.",
+      "Passes dynamic selected IDs, final post-gating weights and raw expert outputs to the callback; accepts only F32 [n_embd,n_tokens,1,1].",
+      "Disables route graph reuse; shared expert and residual remain on the donor model graph; failed append/finish/compute aborts host publication."
+    ],
+    "validation": "AArch64 CPU CMake target llama build exit 0; git diff --check; donor revision pinned; five final GitLab files exact plaintext readback.",
+    "manifest_sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
+    "pipeline_2297": "running on superseded encoded-content commit; not used as validation",
+    "pipeline_2298": "running; Gitleaks success, Semgrep/Trivy pending; scans/fallback only",
+    "limitations": [
+      "No runtime callback test, R678 helper wiring, real checkpoint or complete generation.",
+      "No GPU/CUDA graph, inter-PC/RDMA, production R53 or performance comparison."
+    ],
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R680: connect hooks to Qwen2MoERouteInvocation with per-ubatch full identity and test callback execution in a donor-side CPU fixture before any checkpoint load."
   }
 }

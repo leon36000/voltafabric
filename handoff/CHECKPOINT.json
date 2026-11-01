@@ -12514,5 +12514,28 @@
       }
     },
     "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
+  },
+  "r679_llama_qwen2moe_route_hook": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "prior_branch_tip": "0ae5110de979038f4f665b5d2ed3ae78d54aad01",
+    "initial_encoding_commit": "aeebc2ae01dce9eaae651beb789d87678dce228e",
+    "source_commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
+    "report": "research/R679/REPORT.md",
+    "patch": "research/R679/llama.cpp-r679.patch",
+    "patch_sha256": "df6580199d1b913eb590d81a97dd5a42670fe437416e3965d0bbedb0d43b72f7",
+    "result": "research/R679/RESULT.json",
+    "build_test": "research/R679/BUILD_TEST.txt",
+    "sha256sums": "research/R679/SHA256SUMS",
+    "manifest_sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "source_readback_files_verified": 5,
+    "cpu_library_build": "PASS on AArch64; target llama; no tests/examples/server/GPU enabled",
+    "runtime_bridge_wired": false,
+    "checkpoint_generation": false,
+    "pipeline_2297": "running; superseded initial encoded-content commit",
+    "pipeline_2298": "running; scan/fallback only, not compile/test",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R680: bind these callbacks to the R678 Qwen2MoERouteInvocation with per-ubatch full identity and add a donor-side callback execution fixture."
   }
 }
