@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 05:14:42 UTC",
+  "updated_utc": "2026-11-01T05:15:09Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -362,7 +362,7 @@
       "test_scope": "Synthetic Q8_0 32x32 matrices; two Session subprocesses and two fresh batches; repeated Stamp refused; second-rank FP16 overflow discards the whole batch.",
       "readback_files_verified": 7,
       "published_utc": "2026-11-01T05:13:10Z",
-      "readback_verified_utc": "2026-11-01 05:14:42 UTC",
+      "readback_verified_utc": "2026-11-01T05:15:09Z",
       "model_loaded": false,
       "generation_executed": false,
       "session_path_exercised": true,

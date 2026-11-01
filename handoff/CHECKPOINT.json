@@ -12202,7 +12202,7 @@
     "test_scope": "Synthetic 32x32 Q8_0; two fresh identified Session batches; same-Stamp replay refused; second-rank FP16 overflow returns no partial batch and poisons both Sessions.",
     "readback_files_verified": 7,
     "published_utc": "2026-11-01T05:13:10Z",
-    "readback_verified_utc": "2026-11-01 05:14:42 UTC",
+    "readback_verified_utc": "2026-11-01T05:15:09Z",
     "model_loaded": false,
     "generation_executed": false,
     "session_path_exercised": true,
