@@ -1,0 +1,39 @@
+{
+  "round": "R681",
+  "status": "CPU_CTEST_7_PASS_FRESH_COORDINATOR_WORKER_PROCESS_PASS",
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "parent_commit": "9e62855ad0a250bce356d8199d56b55289c67649",
+  "validation": {
+    "architecture": "AArch64 CPU",
+    "pinned_llama_cpp_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "pinned_llama_cpp_license": "MIT",
+    "focused_ctest": "7/7 pass",
+    "rust_offline_build": "PASS for vf-strata-native-bridge and vf-rank-session with native-ggml-cpu",
+    "process_integration": "PASS; one fresh callback bridge through actual Rust coordinator and rank worker plus GGML VFR3 collector",
+    "claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+    "exact_rust_blob": {
+      "path": "src/session.rs",
+      "git_blob": "f73e0b48bdc15689acb3640a96fb581c6b31b133",
+      "whole_tree_exact": false
+    }
+  },
+  "process_fixture": {
+    "run_id": "r681-live-coordinator-1919556",
+    "model_revision": "r681-synthetic-sc117-1919556",
+    "plan_id": "r681-live-plan-1919556",
+    "layer": 0,
+    "batch": 682919556,
+    "epoch": 6810261101,
+    "attempt": 1,
+    "sparse_pack_logical_bytes": 50292326400,
+    "payload_bytes": 2176000
+  },
+  "limitations": [
+    "No llama_context::process_ubatch callback delivery",
+    "No checkpoint, tokenizer, token loop or complete generation",
+    "No GPU/CUDA graph, inter-PC/RDMA or production R53",
+    "No performance comparison"
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R682: connect the hook through donor process_ubatch on a bounded CPU Qwen2MoE fixture, or establish a small compatible model fixture first."
+}

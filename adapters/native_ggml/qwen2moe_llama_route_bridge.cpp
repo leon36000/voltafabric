@@ -1,5 +1,8 @@
 #include "qwen2moe_llama_route_bridge.hpp"
 
+#include "llama-arch.h"
+#include "llama-model.h"
+
 #include <utility>
 
 namespace vf::ggml {
@@ -23,7 +26,9 @@ Qwen2MoELlamaRouteBridge::~Qwen2MoELlamaRouteBridge() {
 }
 
 bool Qwen2MoELlamaRouteBridge::attach(llama_context & context) {
-    if (attached_context_ != nullptr || context.get_vf_route_hooks() != nullptr) {
+    if (attached_context_ != nullptr || factory_ == nullptr || collector_ == nullptr ||
+        context.get_model().arch != LLM_ARCH_QWEN2MOE ||
+        context.get_vf_route_hooks() != nullptr) {
         return false;
     }
     context.set_vf_route_hooks(&hooks_);

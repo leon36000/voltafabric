@@ -57,6 +57,9 @@ if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
   if(NOT VF_LLAMA_SOURCE_DIR OR NOT EXISTS "${VF_LLAMA_SOURCE_DIR}/.git")
     message(FATAL_ERROR "VF_LLAMA_SOURCE_DIR must name the isolated pinned llama.cpp worktree")
   endif()
+  if(NOT VF_LLAMA_LIBRARY OR NOT EXISTS "${VF_LLAMA_LIBRARY}")
+    message(FATAL_ERROR "VF_LLAMA_LIBRARY must name the built pinned llama.cpp shared library")
+  endif()
   execute_process(COMMAND git -C "${VF_LLAMA_SOURCE_DIR}" rev-parse HEAD
     OUTPUT_VARIABLE vf_llama_revision OUTPUT_STRIP_TRAILING_WHITESPACE RESULT_VARIABLE vf_llama_status)
   if(NOT vf_llama_status EQUAL 0 OR
@@ -83,12 +86,22 @@ if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
     "${CMAKE_CURRENT_SOURCE_DIR}"
     "${VF_LLAMA_SOURCE_DIR}/src"
     "${VF_LLAMA_SOURCE_DIR}/include")
-  target_link_libraries(vf_qwen2moe_llama_route_bridge PUBLIC vf_native_ggml)
+  target_link_libraries(vf_qwen2moe_llama_route_bridge PUBLIC vf_native_ggml "${VF_LLAMA_LIBRARY}")
+  get_filename_component(vf_llama_library_dir "${VF_LLAMA_LIBRARY}" DIRECTORY)
 
   add_executable(vf_qwen2moe_llama_route_bridge_test qwen2moe_llama_route_bridge_test.cpp)
   target_compile_options(vf_qwen2moe_llama_route_bridge_test PRIVATE -Wall -Wextra -Werror)
   target_link_libraries(vf_qwen2moe_llama_route_bridge_test PRIVATE vf_qwen2moe_llama_route_bridge)
+  set_target_properties(vf_qwen2moe_llama_route_bridge_test PROPERTIES
+    BUILD_RPATH "${vf_llama_library_dir}")
   add_test(NAME qwen2moe_llama_route_bridge COMMAND vf_qwen2moe_llama_route_bridge_test)
+
+  add_executable(vf_qwen2moe_llama_context_attach_test qwen2moe_llama_context_attach_test.cpp)
+  target_compile_options(vf_qwen2moe_llama_context_attach_test PRIVATE -Wall -Wextra -Werror)
+  target_link_libraries(vf_qwen2moe_llama_context_attach_test PRIVATE vf_qwen2moe_llama_route_bridge)
+  set_target_properties(vf_qwen2moe_llama_context_attach_test PROPERTIES
+    BUILD_RPATH "${vf_llama_library_dir}")
+  add_test(NAME qwen2moe_llama_context_attach COMMAND vf_qwen2moe_llama_context_attach_test)
 endif()
 
 # VFB3 session result enters the GGML graph atomically and is weighted once.
@@ -104,6 +117,17 @@ target_link_libraries(vf_route_graph_vfr3_bridge_process_test PRIVATE vf_native_
 target_compile_options(vf_route_graph_vfr3_bridge_process_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_vfr3_bridge_process COMMAND vf_route_graph_vfr3_bridge_process_test)
 set_tests_properties(route_graph_vfr3_bridge_process PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 120)
+if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
+  target_link_libraries(vf_route_graph_vfr3_bridge_process_test PRIVATE vf_qwen2moe_llama_route_bridge)
+  target_compile_definitions(vf_route_graph_vfr3_bridge_process_test PRIVATE
+    VF_R681_ENABLE_QWEN2MOE_BRIDGE=1)
+  set_target_properties(vf_route_graph_vfr3_bridge_process_test PROPERTIES
+    BUILD_RPATH "${vf_llama_library_dir}")
+  add_test(NAME qwen2moe_llama_route_bridge_process
+    COMMAND vf_route_graph_vfr3_bridge_process_test --qwen2moe-bridge)
+  set_tests_properties(qwen2moe_llama_route_bridge_process PROPERTIES
+    SKIP_RETURN_CODE 77 TIMEOUT 120)
+endif()
 
 # Diagnostic reference only; it is not part of the live worker/provider path.
 option(VF_BUILD_SCALAR_REFERENCE "Build bounded SC117 scalar diagnostic" OFF)
