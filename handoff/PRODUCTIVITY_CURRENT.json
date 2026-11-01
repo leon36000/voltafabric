@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T02:54:29Z",
+  "updated_utc": "2026-11-01T03:10:00Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -62,6 +62,15 @@
       "commit": "43896929981d00c4e12b7455cb4e221f8be1c0d5",
       "published_utc": "2026-11-01T02:54:29Z",
       "readback_files_verified": 5
+    },
+    {
+      "id": "R641",
+      "owner": "integrator",
+      "state": "PATCH_PUBLISHED_PRIVATE_GITLAB_READBACK_PENDING",
+      "branch": "r641-strata-token-decode-voltafabric-20261101",
+      "parent_commit": "2bf3271f2840e6a2437f2223bc53befbe78d5f90",
+      "path": "research/R641",
+      "readback_files_verified": 0
     }
   ],
   "acceptance": [
@@ -79,7 +88,9 @@
     "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed.",
     "R638 binds local Strata native-pipe batches to run/model/plan/layer/epoch/batch/attempt and reserves the exact local ticket before dispatch; the pinned generator callback remains unset, so complete generation is still not qualified.",
     "R639 adds a mixed-owner CPU-miss callback for Strata kinds -1..2, but the pinned donor dispatch does not call it; no compiler/tests or generation ran for this wave.",
-    "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran."
+    "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran.",
+    "R641 adds an opt-in pinned Strata normal single-token decode callback and owns the PoolFleetOwner for the generator lifetime; it requires 48 inherited initialized AF_UNIX streams and caller-supplied identity. The launcher/session initializer and checkpoint-to-identity binding remain unimplemented.",
+    "R641 was reviewed as generated patch text and patch-application readback only. No compiler, tests, independent output oracle, complete generation, GPU, inter-PC worker, production network or shared R53 admission is claimed."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -88,14 +99,14 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R641_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and make callback refusal drain the active verifier path. Then qualify the CPU row output against an independent oracle. No GPU/inter-PC/production-network/R53 work without fresh admission."
+    "status": "R641_GITLAB_READBACK_IN_PROGRESS",
+    "purpose": "Read back every R641 source/report/receipt and handoff file from the private branch; then leave the next launcher integration for a separately owner-requested bounded step. No automatic relaunch or hardware work."
   },
-  "report": "research/R640/REPORT.md",
+  "report": "research/R641/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R640/SHA256SUMS",
-    "sha256": "9513b3509190b0963a3975bb8da21c85797d526a92cd195a9156a1f2110db41f",
-    "files": 4
+    "path": "research/R641/SHA256SUMS",
+    "sha256": "1c2237bbeb8e9eb6d2bd4ed887d21582f9c4c0011467eb3494347a3e759784eb",
+    "files": 5
   }
 }

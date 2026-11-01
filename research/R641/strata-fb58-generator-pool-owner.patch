@@ -1,0 +1,442 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -69,6 +69,8 @@
+   set(STRATA_ENABLE_CUDA ON CACHE BOOL "" FORCE)
+ endif()
+ option(STRATA_ENABLE_HIP "Build the HIP targets for wave32 AMD GPUs (gfx1100, gfx1201; gfx1012/gfx1030 unvalidated)" OFF)
++option(STRATA_VOLTAFABRIC_POOL "Opt-in VoltaFabric CPU-miss callback in strata generate (Linux CUDA only)" OFF)
++set(VOLTAFABRIC_ADAPTER_ROOT "" CACHE PATH "VoltaFabric checkout containing adapters/strata_native_bridge")
+ option(STRATA_PREFILL_MMQ "Build the optional GGML MMQ prefill path for HIP" OFF)
+ # CUDA: MMQ prompt kernels for Q4_K / Q5_K / Q5_1 (Unsloth's UD-Q4_K_XL experts).  Off by default: the engine loads
+ # every kernel when it starts (CUDA_MODULE_LOADING=EAGER), so these took ~5 MB of VRAM - 1-3 expert slots - from every
+@@ -87,6 +89,23 @@
+ endif()
+ if(STRATA_ENABLE_CUDA AND STRATA_ENABLE_HIP AND NOT STRATA_HIP_GFX906)
+   message(FATAL_ERROR "STRATA_ENABLE_CUDA and STRATA_ENABLE_HIP are separate backends; enable only one")
++endif()
++if(STRATA_VOLTAFABRIC_POOL)
++  find_package(Threads REQUIRED)
++  if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux" OR NOT STRATA_ENABLE_CUDA OR STRATA_ENABLE_HIP OR STRATA_HIP_GFX906)
++    message(FATAL_ERROR "STRATA_VOLTAFABRIC_POOL currently requires Linux with the native CUDA backend")
++  endif()
++  if(NOT EXISTS "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pool_hook.cpp" OR
++     NOT EXISTS "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pool_hook.hpp" OR
++     NOT EXISTS "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pipe_client.cpp" OR
++     NOT EXISTS "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pipe_client.hpp")
++    message(FATAL_ERROR "VOLTAFABRIC_ADAPTER_ROOT must point to a VoltaFabric checkout with the Strata bridge")
++  endif()
++  file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/strata/core/expert_source.hpp" _strata_expert_source)
++  string(FIND "${_strata_expert_source}" "vf_cpu_miss_pool" _strata_vf_callback)
++  if(_strata_vf_callback EQUAL -1)
++    message(FATAL_ERROR "Apply the reviewed R640 mixed-owner Strata patch before enabling VoltaFabric")
++  endif()
+ endif()
+ if(STRATA_ENABLE_HIP)
+   include(cmake/hip_backend.cmake)
+@@ -449,6 +468,9 @@
+     src/core/conversation_snapshot.cpp src/core/conversation_state.cpp src/core/conversation_memory.cpp src/core/peer_experts.cpp
+     src/core/arch_defaults.cpp src/core/vmm.cpp src/core/conversation_file.cpp)
+   target_include_directories(strata_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
++  if(STRATA_VOLTAFABRIC_POOL)
++    target_compile_definitions(strata_engine PRIVATE STRATA_VOLTAFABRIC_POOL=1)
++  endif()
+   target_link_libraries(strata_engine PUBLIC strata_core strata_kernels strata_kernels_cpu ${_strata_gpu_runtime_target})
+   if(STRATA_BUILD_TESTS AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/core/exchange_storage_test.cpp")
+     add_executable(exchange_storage_test tests/core/exchange_storage_test.cpp)
+@@ -549,6 +571,14 @@
+   add_executable(strata src/program/generate.cpp)
+   target_include_directories(strata PRIVATE ${_strata_gpu_include_directories})
+   target_link_libraries(strata PRIVATE strata_engine strata_prefill strata_spec ${_strata_gpu_runtime_target})
++  if(STRATA_VOLTAFABRIC_POOL)
++    target_sources(strata PRIVATE
++      "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pipe_client.cpp"
++      "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge/pool_hook.cpp")
++    target_include_directories(strata PRIVATE "${VOLTAFABRIC_ADAPTER_ROOT}/adapters/strata_native_bridge")
++    target_compile_definitions(strata PRIVATE STRATA_VOLTAFABRIC_POOL=1)
++    target_link_libraries(strata PRIVATE Threads::Threads)
++  endif()
+ 
+   if(STRATA_ENABLE_HIP)
+     enable_testing()
+--- a/src/core/expert_source.cpp
++++ b/src/core/expert_source.cpp
+@@ -2976,28 +2976,63 @@
+                           int64_t k, float* out) {
+     (void) weights;   // clause 2: `moe_combine` applies it on the device.  Not an oversight.
+     ExpertDispatch& d = *(ExpertDispatch*) user;
+-    if (d.failed) return;   // a previous layer already failed; do not make it worse
++    auto vf_clear_output = [&]() noexcept {
++        if (d.vf_cpu_miss_pool != nullptr && out != nullptr && n_embd > 0 && n_embd <= 65536 && k > 0 && k <= 64)
++            std::memset(out, 0, (size_t) k * (size_t) n_embd * sizeof(float));
++    };
++    if (d.failed) {
++        vf_clear_output();
++        return;   // fail-closed output handling is inserted below
++    }
+ 
+     using namespace strata::kernels::cpu;
+     // Clause 3: the blob's internal offsets are compile-time constants, so a mismatched geometry does not
+     // produce a wrong answer - it produces a walk off the end of the blob into the next expert's bytes, which
+     // is finite and plausible.  Refuse, name the number, and let the driver report it.
+     if (n_embd != H) {
+-        d.failed = true;
++        vf_clear_output(); d.failed = true;
+         d.fail = "the expert kernel is compiled for a 2560-wide activation";
+         d.fail_layer = d.layers;
+         return;
+     }
+     if (expert_layout().native) {
+         // plan v0.3 P6: a native pack runs its experts in verify windows only (the driver guarantees it)
+-        d.failed = true;
++        vf_clear_output(); d.failed = true;
+         d.fail = "the single-token expert path does not take a native (IQ) pack";
+         d.fail_layer = d.layers;
+         return;
+     }
+     if (k > (int64_t) d.jobs.size()) d.jobs.resize((size_t) k);
++#ifdef STRATA_VOLTAFABRIC_POOL
++    if (d.vf_cpu_miss_pool != nullptr) {
++        if (k < 1 || k > 64) {
++            vf_clear_output(); d.failed = true; d.fail = "VoltaFabric single-token route width is outside 1..64";
++            d.fail_layer = d.layers; return;
++        }
++        for (int64_t i = 0; i < k; ++i) {
++            if (ids[i] < 0 || ids[i] >= d.n_expert) {
++                vf_clear_output(); d.failed = true; d.fail = "a routed expert id is out of range";
++                d.fail_layer = d.layers; d.fail_expert = ids[i]; return;
++            }
++        }
++    }
++#endif
+ 
+     d.src->begin_layer(d.layers, ids, k);
++#ifdef STRATA_VOLTAFABRIC_POOL
++    const bool vf_pool_active = d.vf_cpu_miss_pool != nullptr;
++    std::vector<const uint8_t*> vf_blobs;
++    if (vf_pool_active) {
++        vf_blobs.resize((size_t) k);
++        for (int64_t i = 0; i < k; ++i) {
++            vf_blobs[(size_t) i] = d.src->blob(d.layers, ids[i]);
++            if (vf_blobs[(size_t) i] == nullptr) {
++                vf_clear_output(); d.failed = true; d.fail = "the expert source could not produce a blob";
++                d.fail_layer = d.layers; d.fail_expert = ids[i]; ++d.missing; return;
++            }
++        }
++    }
++#endif
+ 
+     // Clause 1: rebuilt from `x_f` on EVERY call.  `x_f` is mapped pinned memory whose address never changes,
+     // so anything cached against it would be layer 0's activation reused 48 times.
+@@ -3018,7 +3053,7 @@
+     if (d.remote_count > 0) {
+         int32_t kind[32];
+         if (k > 32) {
+-            d.failed = true; d.fail = "remote experts: routing width exceeds 32"; return;
++            vf_clear_output(); d.failed = true; d.fail = "remote experts: routing width exceeds 32"; return;
+         }
+         for (int64_t i = 0; i < k; ++i)
+             kind[i] = use_hits && ids[i] >= 0 && ids[i] < d.n_expert && (graph_hits
+@@ -3027,25 +3062,66 @@
+         static thread_local std::string remote_error;
+         for (int r = 0; r < d.remote_count; ++r)
+             if (!d.remote[r]->begin(d.layers, x_f, ids, 1, k, kind, d.host_res, remote_error)) {
+-                d.failed = true; d.fail = remote_error.c_str(); d.fail_layer = d.layers; return;
+-            }
+-    }
++                vf_clear_output(); d.failed = true; d.fail = remote_error.c_str(); d.fail_layer = d.layers; return;
++            }
++    }
++
++#ifdef STRATA_VOLTAFABRIC_POOL
++    std::vector<int32_t> vf_kinds;
++    std::vector<uint8_t> vf_handled;
++    if (vf_pool_active) {
++        vf_kinds.resize((size_t) k);
++        vf_handled.assign((size_t) k, 0);
++        bool any_vf_cpu_miss = false;
++        for (int64_t i = 0; i < k; ++i) {
++            const int64_t e = ids[i];
++            const bool hit = use_hits && (graph_hits
++                ? d.host_res[(size_t) d.layers * (size_t) d.n_expert + (size_t) e] >= 0
++                : d.is_hit[(size_t) i] != 0);
++            bool remote_owns = false;
++            if (!hit)
++                for (int r = 0; r < d.remote_count; ++r) remote_owns |= d.remote[r]->owns(i);
++            vf_kinds[(size_t) i] = hit ? 0 : remote_owns ? 2 : -1;
++            any_vf_cpu_miss |= vf_kinds[(size_t) i] < 0;
++        }
++        if (any_vf_cpu_miss) {
++            if (!d.vf_cpu_miss_pool(d.vf_cpu_miss_context, x_f, ids, vf_kinds.data(), 1, k, out, d.layers)) {
++                bool external_drained = true;
++                if (d.remote_count > 0) {
++                    static thread_local std::string drain_error;
++                    for (int r = 0; r < d.remote_count; ++r)
++                        if (!d.remote[r]->finish(out, drain_error)) external_drained = false;
++                }
++                vf_clear_output(); d.failed = true;
++                d.fail = external_drained
++                    ? "VoltaFabric single-token callback failed after external owners drained"
++                    : "VoltaFabric single-token callback failed and an external owner did not drain";
++                d.fail_layer = d.layers; return;
++            }
++            for (int64_t i = 0; i < k; ++i) vf_handled[(size_t) i] = vf_kinds[(size_t) i] < 0;
++        }
++    }
++#endif
+ 
+     for (int64_t i = 0; i < k; ++i) {
+         const int64_t e = ids[i];
+         if (e < 0 || e >= d.n_expert) {
+-            d.failed = true;
++            vf_clear_output(); d.failed = true;
+             d.fail = "a routed expert id is out of range";
+             d.fail_layer = d.layers;
+             d.fail_expert = e;
+             return;
+         }
++#ifdef STRATA_VOLTAFABRIC_POOL
++        const uint8_t* b = vf_pool_active ? vf_blobs[(size_t) i] : d.src->blob(d.layers, e);
++#else
+         const uint8_t* b = d.src->blob(d.layers, e);
++#endif
+         if (b == nullptr) {
+             // The one failure the loop cannot see.  Leaving `out` at its previous contents would feed the NEXT
+             // layer a stale expert vector, which `moe_combine` would weight and add - the token would still be
+             // finite and would still be wrong, 48 layers deep.
+-            d.failed = true;
++            vf_clear_output(); d.failed = true;
+             d.fail = "the expert source could not produce a blob";
+             d.fail_layer = d.layers;
+             d.fail_expert = e;
+@@ -3069,6 +3145,9 @@
+             std::memset(out + (size_t) i * (size_t) n_embd, 0, (size_t) n_embd * sizeof(float));
+             continue;
+         }
++#ifdef STRATA_VOLTAFABRIC_POOL
++        if (vf_pool_active && vf_handled[(size_t) i]) continue;
++#endif
+ 
+         // `njobs` indexes the JOB ARRAY and `i` indexes the OUTPUT - they are the same only when nothing is a
+         // hit, and using one for the other is how a hit's row would get two experts summed into it.
+@@ -3087,7 +3166,7 @@
+         static thread_local std::string remote_error;
+         for (int r = 0; r < d.remote_count; ++r)
+             if (!d.remote[r]->finish(out, remote_error)) {
+-                d.failed = true; d.fail = remote_error.c_str(); d.fail_layer = d.layers; return;
++                vf_clear_output(); d.failed = true; d.fail = remote_error.c_str(); d.fail_layer = d.layers; return;
+             }
+     }
+     ++d.layers;
+--- a/src/program/generate.cpp
++++ b/src/program/generate.cpp
+@@ -72,6 +72,9 @@
+ #define NOMINMAX   // gguf_reader.hpp includes windows.h
+ #endif
+ #include "strata/artifact/gguf_reader.hpp"
++#ifdef STRATA_VOLTAFABRIC_POOL
++#include "pool_hook.hpp"
++#endif
+ #if defined(_WIN32)
+ #include <windows.h>
+ #include <psapi.h>
+@@ -112,6 +115,10 @@
+ #include <string>
+ #include <set>
+ #include <vector>
++
++#ifdef STRATA_VOLTAFABRIC_POOL
++static std::unique_ptr<vf::strata_bridge::PoolFleetOwner> g_vf_pool_owner;
++#endif
+ 
+ namespace {
+ // Windows' WDDM driver model: native Windows, or WSL2 (its GPU goes through /dev/dxg to the Windows driver).  There,
+@@ -311,6 +318,13 @@
+ 
+ struct Options {
+     std::string pack = "pack/full";
++#ifdef STRATA_VOLTAFABRIC_POOL
++    std::string vf_session_fds, vf_run_id, vf_model_revision, vf_plan_id;
++    uint64_t vf_epoch = 0, vf_first_batch = 0, vf_first_attempt = 1;
++    int vf_timeout_ms = 5000;
++    bool vf_epoch_set = false, vf_first_batch_set = false;
++    bool vf_first_attempt_set = false, vf_timeout_set = false;
++#endif
+     std::vector<int64_t> tokens;      // the prompt, PRE-TOKENIZED
+     int64_t max_new = 16;
+     int64_t max_context = 4096;
+@@ -890,6 +904,32 @@
+     for (auto& src : strata::spec::extra_draft_sources()) src->append(t, n);
+ }
+ 
++#ifdef STRATA_VOLTAFABRIC_POOL
++bool parse_vf_u64(const char* text, uint64_t& value) {
++    if (text == nullptr || text[0] == '\0') return false;
++    const char* end = text + std::strlen(text);
++    auto parsed = std::from_chars(text, end, value);
++    return parsed.ec == std::errc{} && parsed.ptr == end;
++}
++bool parse_vf_session_fds(const std::string& text, std::array<int, 48>& fds) {
++    size_t begin = 0;
++    for (size_t i = 0; i < fds.size(); ++i) {
++        size_t end = text.find(',', begin);
++        if (end == std::string::npos) end = text.size();
++        if (end == begin) return false;
++        int fd = -1;
++        auto parsed = std::from_chars(text.data() + begin, text.data() + end, fd);
++        if (parsed.ec != std::errc{} || parsed.ptr != text.data() + end || fd < 3) return false;
++        for (size_t prior = 0; prior < i; ++prior) if (fds[prior] == fd) return false;
++        fds[i] = fd;
++        begin = end + 1;
++        if (i + 1 < fds.size() && end == text.size()) return false;
++        if (i + 1 == fds.size() && end != text.size()) return false;
++    }
++    return true;
++}
++#endif
++
+ bool parse_i64_list(const char* s, std::vector<int64_t>& out, std::string& err) {
+     out.clear();
+     std::string text(s);
+@@ -1560,7 +1600,11 @@
+ 
+ }  // namespace
+ 
++#ifdef STRATA_VOLTAFABRIC_POOL
++static int strata_generate_main(int argc, char** argv) {
++#else
+ int main(int argc, char** argv) {
++#endif
+     // **UNBUFFERED, BECAUSE THE INTERESTING OUTPUT IS THE OUTPUT BEFORE A CRASH.**  `stdout` redirected to a
+     // pipe or a file is block-buffered, so a program that dies loses every line it had already printed - which
+     // turns "it crashed at step 7" into "it crashed somewhere", and the difference is a debugging session.
+@@ -1751,7 +1795,29 @@
+         // The chain continues here in a second statement: one chain of 120+ `else if` passed MSVC's limit of 128
+         // nested blocks (C1061).  The order of the tests and what each does are unchanged.
+         if (!parsed) {
+-        if (a == "--expert-cache") {
++        if (a == "--vf-session-fds") o.vf_session_fds = next("--vf-session-fds");
++        else if (a == "--vf-run-id") o.vf_run_id = next("--vf-run-id");
++        else if (a == "--vf-model-revision") o.vf_model_revision = next("--vf-model-revision");
++        else if (a == "--vf-plan-id") o.vf_plan_id = next("--vf-plan-id");
++        else if (a == "--vf-epoch") {
++            o.vf_epoch_set = parse_vf_u64(next("--vf-epoch"), o.vf_epoch);
++            if (!o.vf_epoch_set) { std::fprintf(stderr, "invalid --vf-epoch\n"); return 2; }
++        }
++        else if (a == "--vf-first-batch") {
++            o.vf_first_batch_set = parse_vf_u64(next("--vf-first-batch"), o.vf_first_batch);
++            if (!o.vf_first_batch_set) { std::fprintf(stderr, "invalid --vf-first-batch\n"); return 2; }
++        }
++        else if (a == "--vf-first-attempt") {
++            o.vf_first_attempt_set = parse_vf_u64(next("--vf-first-attempt"), o.vf_first_attempt);
++            if (!o.vf_first_attempt_set) { std::fprintf(stderr, "invalid --vf-first-attempt\n"); return 2; }
++        }
++        else if (a == "--vf-timeout-ms") {
++            uint64_t value = 0;
++            o.vf_timeout_set = parse_vf_u64(next("--vf-timeout-ms"), value) && value >= 1 && value <= 60000;
++            if (!o.vf_timeout_set) { std::fprintf(stderr, "invalid --vf-timeout-ms\n"); return 2; }
++            o.vf_timeout_ms = static_cast<int>(value);
++        }
++        else if (a == "--expert-cache") {
+             const std::string v = next("--expert-cache");
+             o.expert_cache = (v == "auto") ? -1 : std::atoi(v.c_str());
+         }
+@@ -1950,6 +2016,43 @@
+         }
+         }
+     }
++#ifdef STRATA_VOLTAFABRIC_POOL
++    {
++        const bool any_vf_identity = !o.vf_run_id.empty() || !o.vf_model_revision.empty() ||
++            !o.vf_plan_id.empty() || o.vf_epoch_set || o.vf_first_batch_set ||
++            o.vf_first_attempt_set || o.vf_timeout_set;
++        if (o.vf_session_fds.empty()) {
++            if (any_vf_identity) { std::fprintf(stderr, "VoltaFabric identity requires --vf-session-fds\n"); return 2; }
++        } else {
++            std::array<int, 48> fds{};
++            if (!parse_vf_session_fds(o.vf_session_fds, fds) || o.vf_run_id.empty() ||
++                o.vf_model_revision.empty() || o.vf_plan_id.empty() || !o.vf_epoch_set ||
++                !o.vf_first_batch_set || !o.vf_first_attempt_set || !o.vf_timeout_set) {
++                std::fprintf(stderr, "VoltaFabric pool needs 48 unique inherited stream fds and a complete identity\n");
++                return 2;
++            }
++            if (o.no_pool || o.no_capture) {
++                std::fprintf(stderr, "VoltaFabric pool requires the captured expert-pool generation path\n");
++                return 2;
++            }
++            if (!o.dump_logits.empty() || !o.dump_residual.empty() || !o.dump_mixed.empty() ||
++                !o.dump_layers.empty() || !o.dump_halves.empty() || !o.dump_routing.empty() ||
++                !o.dump_final_r.empty() || !o.window_hashes.empty() ||
++                std::getenv("STRATA_DUMP_FIRST_LOGITS") != nullptr) {
++                std::fprintf(stderr, "VoltaFabric mode refuses diagnostic sidecar files because they are not transactional\n");
++                return 2;
++            }
++            vf::strata_bridge::SessionIdentity identity{o.vf_run_id, o.vf_model_revision, o.vf_plan_id, o.vf_epoch};
++            std::string vf_error;
++            g_vf_pool_owner = vf::strata_bridge::PoolFleetOwner::create_from_fds(
++                fds, o.vf_timeout_ms, std::move(identity), o.vf_first_batch, vf_error, o.vf_first_attempt);
++            if (!g_vf_pool_owner) {
++                std::fprintf(stderr, "VoltaFabric pool admission failed: %s\n", vf_error.c_str());
++                return 2;
++            }
++        }
++    }
++#endif
+ #if defined(STRATA_USE_HIP)
+     {   // gfx1151 (Strix Halo): the switches that are exact there are on by default (strata/core/arch_defaults.hpp); before
+         // any engine code reads its switches (they are read at first use), and the user's own settings are kept
+@@ -4935,6 +5038,12 @@
+ 
+     if (remote_opt && !remote_opt->init(err)) { std::fprintf(stderr, "strata generate: %s\n", err.c_str()); return 1; }
+     Drive drive;
++#ifdef STRATA_VOLTAFABRIC_POOL
++    if (g_vf_pool_owner) {
++        drive.d.vf_cpu_miss_pool = &vf::strata_bridge::pool_cpu_misses_by_layer;
++        drive.d.vf_cpu_miss_context = g_vf_pool_owner->callback_user();
++    }
++#endif
+     // #731 (opt-in, STRATA_DISJOINT_ADAPT=1): the adaptive tiers leave an expert a helper GPU holds out of the primary's
+     // promotion candidates (it would sit in both caches).  Asked live, from the helper's own cache (RemoteExperts::holds,
+     // #854), so an expert the helper's tier swaps in or out later is followed - never a copy taken at load.
+@@ -11332,17 +11441,17 @@
+                 return 1;
+             }
+         }
++        if (drive.d.failed) {
++            std::fprintf(stderr, "strata generate: the expert pool failed at layer %lld expert %lld: %s\n",
++                         (long long) drive.d.fail_layer, (long long) drive.d.fail_expert,
++                         drive.d.fail ? drive.d.fail : "(no message)");
++            return 1;
++        }
+         if (final_r != nullptr) {
+             cudaMemcpy(final_r_host.data(), ss.R, final_r_host.size() * sizeof(float), cudaMemcpyDeviceToHost);
+             const int64_t posrec[2] = {pos, tok};
+             std::fwrite(posrec, sizeof posrec, 1, final_r);
+             std::fwrite(final_r_host.data(), sizeof(float), final_r_host.size(), final_r);
+-        }
+-        if (drive.d.failed) {
+-            std::fprintf(stderr, "strata generate: the expert pool failed at layer %lld expert %lld: %s\n",
+-                         (long long) drive.d.fail_layer, (long long) drive.d.fail_expert,
+-                         drive.d.fail ? drive.d.fail : "(no message)");
+-            return 1;
+         }
+         {
+             // **THE LAYER LOOP ITSELF, WHICH IS WHAT `--gpu-only-full` HAS TO BE COMPARED AGAINST.**
+@@ -12147,3 +12256,18 @@
+     cudaFree(arena);
+     return 0;
+ }
++
++#ifdef STRATA_VOLTAFABRIC_POOL
++int main(int argc, char** argv) {
++    const int result = strata_generate_main(argc, argv);
++    if (g_vf_pool_owner) {
++        std::string error;
++        if (!g_vf_pool_owner->shutdown_all(error)) {
++            std::fprintf(stderr, "VoltaFabric pool shutdown failed: %s\n", error.c_str());
++            if (result == 0) return 1;
++        }
++        g_vf_pool_owner.reset();
++    }
++    return result;
++}
++#endif
