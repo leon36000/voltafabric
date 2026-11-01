@@ -10460,12 +10460,52 @@
       }
     },
     "limits": [
-      "No llama_context::process_ubatch callback delivery.",
+      "Synthetic callback delivery through live process_ubatch passed; donor production build_moe_ffn remains unqualified.",
       "No checkpoint, tokenizer, token loop or complete generation.",
       "No GPU/CUDA graph, inter-PC/RDMA, production R53 or performance comparison.",
       "Rust validation snapshot exactness is limited to src/session.rs blob f73e0b48bdc15689acb3640a96fb581c6b31b133."
     ],
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R682: connect the hook through pinned llama_context::process_ubatch on a bounded CPU Qwen2MoE fixture, or establish a small compatible model fixture first; do not replay R681."
+    "next_action": "R683: exercise callback at donor production build_moe_ffn on bounded CPU fixture; determine the minimal compatible tensor/model path if needed."
+  },
+  "r682_live_process_ubatch_cpu_fixture": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_PROCESS_UBATCH_SYNTHETIC_GRAPH_CTEST_1_PASS",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "7331a3d7f5b84d737bbbd65318eb31163ca92cfc",
+    "objective": "Exercise callback delivery while the pinned donor llama_context::process_ubatch dispatches a bounded CPU synthetic Qwen2MoE graph.",
+    "reused": [
+      "llama.cpp MIT revision 3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "R679/R680 hook ABI and callback bridge",
+      "R681 live context attach/detach ownership"
+    ],
+    "changes": [
+      "Adds test model/graph and calls live donor process_ubatch.",
+      "Captures full identity, dynamic expert/owner, activation and final route coefficient; collector sees one call and returns [5,10].",
+      "Adds opt-in CTest registration and runner guards for donor revision, clean ggml dependency and library set."
+    ],
+    "validation": {
+      "architecture": "AArch64 CPU",
+      "compile": "C++17 -Wall -Wextra -Werror PASS",
+      "cmake": "exact updated CMake mirror configures",
+      "ctest": "1/1 PASS",
+      "manifest_sha256": "a7aecf0b5b83d014d1f2b7f11dd2632b65b2bff40ed92d48ab589d4053038364",
+      "readback_files_verified": 7,
+      "pipeline_2309": {
+        "status": "running",
+        "jobs": {
+          "pc4_ci_fallback": "created",
+          "pc4_trivy": "pending",
+          "pc4_semgrep": "running",
+          "pc4_gitleaks": "success"
+        }
+      }
+    },
+    "limitations": [
+      "The synthetic graph invokes the hook; it does not execute donor production build_moe_ffn.",
+      "No checkpoint/model tensors, tokenizer, token loop, Rust coordinator/worker or complete generation.",
+      "No GPU/CUDA graph, inter-PC/RDMA, production R53 or performance."
+    ],
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R683: exercise callback at donor production Qwen2MoE build_moe_ffn on bounded CPU fixture; determine the minimal compatible tensor/model path if needed."
   }
 }

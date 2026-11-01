@@ -12587,7 +12587,7 @@
     "focused_ctests": "7 passed",
     "fresh_coordinator_worker_process_test": "PASS once; terminal receipt RESERVED_UNKNOWN_NO_REPLAY",
     "live_llama_context_attach_detach": "PASS with vocab-only fixture",
-    "llama_context_process_ubatch_callback": "NOT_QUALIFIED",
+    "llama_context_process_ubatch_callback": "PASS only through synthetic graph dispatched by live donor process_ubatch; production build_moe_ffn remains NOT_QUALIFIED",
     "checkpoint_loaded": false,
     "complete_generation": false,
     "gpu_executed": false,
@@ -12595,6 +12595,33 @@
     "production_r53_used": false,
     "performance_comparison": false,
     "pipeline_2304": {
+      "status": "success",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R683: exercise the hook at the pinned donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture; inspect the smallest compatible model path if real donor graph construction requires tensors."
+  },
+  "r682_live_process_ubatch_cpu_fixture": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_PROCESS_UBATCH_SYNTHETIC_GRAPH_CTEST_1_PASS",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "c8656409930ee8c5e9dd4855871d4be3b13d41d3",
+    "source_commit": "7331a3d7f5b84d737bbbd65318eb31163ca92cfc",
+    "report": "research/R682/REPORT.md",
+    "result": "research/R682/RESULT.json",
+    "build_test": "research/R682/BUILD_TEST.txt",
+    "sha256sums": "research/R682/SHA256SUMS",
+    "manifest_sha256": "a7aecf0b5b83d014d1f2b7f11dd2632b65b2bff40ed92d48ab589d4053038364",
+    "readback_files_verified": 7,
+    "pinned_llama_cpp_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "pinned_llama_cpp_license": "MIT",
+    "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; CMake registration and focused CTest 1/1 pass; output [5,10] with coefficient once",
+    "test_scope": "Live donor process_ubatch dispatches synthetic internal graph and callback; production build_moe_ffn, checkpoint and generation remain unqualified",
+    "pipeline_2309": {
       "status": "running",
       "jobs": {
         "pc4_ci_fallback": "created",
@@ -12603,7 +12630,13 @@
         "pc4_gitleaks": "success"
       }
     },
+    "checkpoint_loaded": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "performance_comparison": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R682: connect the hook through pinned llama_context::process_ubatch on a bounded CPU Qwen2MoE fixture, or establish a small compatible model fixture first; do not replay the terminal R681 receipt."
+    "next_action": "R683: test the production Qwen2MoE build_moe_ffn seam on bounded CPU fixture or identify the minimal tensor/model fixture required."
   }
 }
