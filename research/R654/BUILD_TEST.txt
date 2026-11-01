@@ -1,0 +1,7 @@
+Donor llama.cpp/GGML: 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+Host: aarch64, GCC 13.3.0, GGML CPU backend; CUDA disabled
+Configure: cmake -S adapters/native_ggml -B build -DGGML_SOURCE_DIR=<pinned-clean-checkout> -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DGGML_BUILD_TESTS=OFF -DGGML_BUILD_EXAMPLES=OFF — PASS
+Build: cmake --build build --target vf_native_ggml_test --parallel 2 — PASS (-Wall -Wextra -Werror)
+Test: ctest --test-dir build -R '^native_provider$' --output-on-failure — 1/1 PASS
+Fixture: synthetic Q8_0, 3 resident expert matrices, 4 routed slots [2,0,2,1]; independent scalar FP64 comparator over separately dequantized values.
+No model/checkpoint, full generation, GPU, inter-PC network, or production R53 claim.

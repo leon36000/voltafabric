@@ -118,6 +118,59 @@ static bool matrix_check(int kind) {
     vf_native_matrix_destroy(resident);
     return vf_native_matrix_create(kind,rows,cols,w.data(),w.size()-1)==nullptr;
 }
+static bool routed_matrix_check() {
+    constexpr size_t experts=3,slots=4,rows=5,cols=256;
+    const int kind=GGML_TYPE_Q8_0;
+    const auto type=static_cast<ggml_type>(kind);
+    const auto* traits=ggml_get_type_traits_cpu(type);
+    const auto* dequant=ggml_get_type_traits(type);
+    if(!traits || !traits->from_float || !traits->vec_dot || !dequant || !dequant->to_float) return false;
+    const size_t row_bytes=ggml_row_size(type,cols);
+    std::vector<uint8_t> weights(experts*rows*row_bytes);
+    std::vector<float> source(cols);
+    for(size_t e=0;e<experts;++e) for(size_t r=0;r<rows;++r) {
+        for(size_t i=0;i<cols;++i) source[i]=std::sin(float(i)*0.031f+float(e)*0.37f+float(r)*0.13f)/3.f;
+        traits->from_float(source.data(),weights.data()+(e*rows+r)*row_bytes,cols);
+    }
+    const std::vector<int32_t> ids={2,0,2,1};
+    std::vector<float> input(slots*cols);
+    for(size_t s=0;s<slots;++s) for(size_t i=0;i<cols;++i)
+        input[s*cols+i]=s==2?input[i]:std::cos(float(i)*0.027f+float(s)*0.41f)/5.f;
+    std::vector<float> output(3,71.f);
+    std::string error;
+    if(!vf::native_ggml::routed_matrix_forward(kind,experts,rows,cols,weights,input,ids,output,error) ||
+       output.size()!=slots*rows) {
+        std::fprintf(stderr,"routed matrix: %s\n",error.c_str()); return false;
+    }
+    const auto* act=ggml_get_type_traits_cpu(traits->vec_dot_type);
+    const auto* act_dequant=ggml_get_type_traits(traits->vec_dot_type);
+    if(!act || !act->from_float || !act_dequant || !act_dequant->to_float) return false;
+    std::vector<uint8_t> qx(ggml_row_size(traits->vec_dot_type,cols));
+    std::vector<float> decoded_x(cols),decoded_w(cols);
+    for(size_t s=0;s<slots;++s) {
+        act->from_float(input.data()+s*cols,qx.data(),cols);
+        act_dequant->to_float(qx.data(),decoded_x.data(),cols);
+        for(size_t r=0;r<rows;++r) {
+            const size_t e=size_t(ids[s]);
+            dequant->to_float(weights.data()+(e*rows+r)*row_bytes,decoded_w.data(),cols);
+            double expected=0;
+            for(size_t i=0;i<cols;++i) expected+=double(decoded_w[i])*decoded_x[i];
+            if(!close(output[s*rows+r],expected)) {
+                std::fprintf(stderr,"routed slot %zu row %zu got %.9g expected %.9g\n",
+                             s,r,output[s*rows+r],expected); return false;
+            }
+        }
+    }
+    for(size_t r=0;r<rows;++r) if(output[r]!=output[2*rows+r]) return false;
+    const auto saved=output;
+    auto bad_ids=ids; bad_ids[1]=int32_t(experts);
+    if(vf::native_ggml::routed_matrix_forward(kind,experts,rows,cols,weights,input,bad_ids,output,error) ||
+       output!=saved) return false;
+    auto bad_input=input; bad_input[0]=std::numeric_limits<float>::quiet_NaN();
+    if(vf::native_ggml::routed_matrix_forward(kind,experts,rows,cols,weights,bad_input,ids,output,error) ||
+       output!=saved) return false;
+    return true;
+}
 int main() {
     ggml_cpu_init();
     std::vector<uint8_t> empty;
@@ -132,5 +185,6 @@ int main() {
     for(int kind : {8,12,13,14,23}) if(!matrix_check(kind)) {std::fprintf(stderr,"matrix %d failed\n",kind);return 1;}
     const int pairs[][2]={{18,20},{18,42},{21,20},{21,42},{22,20},{22,42},{23,20}};
     for (auto& pair:pairs) if (!check(pair[0],pair[1])) { std::fprintf(stderr,"failed pair %d/%d\n",pair[0],pair[1]);return 1; }
-    std::puts("all seven native format pairs passed"); return 0;
+    if(!routed_matrix_check()) { std::fprintf(stderr,"routed matrix failed\n"); return 1; }
+    std::puts("native GGML provider fixtures passed, including grouped routed matmul"); return 0;
 }

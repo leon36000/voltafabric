@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "round": "R654",
+  "status": "GGML_MUL_MAT_ID_CPU_ADAPTATION_COMPILED_AND_ORACLE_TEST_PASSED",
+  "donor": {
+    "project": "llama.cpp / GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "source_code_copied": false,
+    "component": "ggml_mul_mat_id and pinned CPU GGML_OP_MUL_MAT_ID implementation"
+  },
+  "adaptation": {
+    "api": "vf::native_ggml::routed_matrix_forward",
+    "returns": "slot-major raw FP32 rows, unweighted",
+    "weight_buffer": "borrowed synchronously from caller; no persistent-copy inside adapter",
+    "validation": "bounded geometry, finite activations, and expert IDs within resident matrix set",
+    "route_coefficients_applied": false,
+    "Rust_Fleet_or_Session_wired": false
+  },
+  "build": {
+    "host": "aarch64 PC6",
+    "cuda_enabled": false,
+    "cmake_configure": "PASS",
+    "target_build": "PASS with C++17, -Wall -Wextra -Werror",
+    "ctest": "1/1 PASS",
+    "test": "native_provider",
+    "independent_oracle": "scalar FP64 dot over independently dequantized Q8_0 rows and activations",
+    "fixture": {
+      "experts": 3,
+      "slots": 4,
+      "expert_ids": [2, 0, 2, 1],
+      "duplicate_route_equal": true,
+      "out_of_range_id_rejected_atomically": true,
+      "nonfinite_activation_rejected_atomically": true
+    }
+  },
+  "model_loaded": false,
+  "generation_executed": false,
+  "gpu_executed": false,
+  "inter_pc_network_used": false,
+  "production_r53_used": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R655: connect grouped raw outputs to the CPU VoltaFabric Collector and verify route coefficients exactly once plus atomic refusal, using synthetic identities."
+}
