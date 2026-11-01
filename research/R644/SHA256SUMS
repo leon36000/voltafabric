@@ -1,0 +1,4 @@
+6fde77de90a2cbcc08579504c6b84755d32d39e9b43f28dbd62d1fc3a15736dd  research/R644/cpu-harness/Cargo.toml
+4a707202fd648a94d251d2465d8b44f9d245d3b04fd69656f6b3a067110883f3  research/R644/cpu-harness/Cargo.lock
+716b247b8b27ca243c77c64015122f0faae8f202f5bb3e7801857a77f9733eef  research/R644/cpu-harness/native_fleet_ggml.rs
+8396d9f711be810ed71892e3262699e56ca3ea2346dd5aa392e081ded3b6df46  research/R644/REPORT.md
