@@ -16,6 +16,105 @@ pub struct RoutingProblem {
     pub resident_order: BTreeMap<u32, Vec<u32>>,
 }
 
+/// The donor's selected-expert and final-weight tensors for a complete Qwen2MoE batch.
+/// Flattened values use GGML's `[top_k, tokens]` layout: `slot + top_k * token`.
+#[derive(Debug, Clone)]
+pub struct Qwen2MoEDonorSelection {
+    pub stamp: moe::Stamp,
+    pub attempt: u64,
+    pub tokens: usize,
+    pub top_k: usize,
+    pub selected_experts: Vec<i32>,
+    /// Final donor-provided weights, including the model expert scale when active.
+    pub final_weights: Vec<f32>,
+}
+
+/// Validated donor routing bound to the attempt used by the subsequent compound FFN.
+/// The route problem is intentionally private so callers cannot alter its Stamp after
+/// validation; this still does not prove who produced the donor tensor values.
+#[derive(Debug, Clone)]
+pub struct Qwen2MoERouteBatch {
+    problem: RoutingProblem,
+    attempt: u64,
+}
+
+impl Qwen2MoERouteBatch {
+    pub fn problem(&self) -> &RoutingProblem {
+        &self.problem
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+}
+
+/// Import the pinned llama.cpp Qwen2MoE router's selected expert IDs and final weights.
+/// The donor has already computed softmax, top-k selection, and any expert weight scale;
+/// this adapter preserves its token/slot order and does not sort, renormalize, or scale.
+/// The nonzero attempt is carried into the later Session FFN, while all other execution
+/// identity is carried by `stamp`. Provenance of these caller-supplied arrays is not
+/// attested here.
+#[allow(clippy::too_many_arguments)]
+pub fn qwen2moe_routes_from_donor(
+    selection: Qwen2MoEDonorSelection,
+    hidden: usize,
+    experts: Vec<u32>,
+    registry: moe::Registry,
+    preferred_owners: BTreeMap<u32, u32>,
+    resident_order: BTreeMap<u32, Vec<u32>>,
+) -> Result<Qwen2MoERouteBatch> {
+    if selection.attempt == 0
+        || selection.tokens == 0
+        || selection.tokens > 4096
+        || selection.top_k == 0
+        || selection.top_k > 64
+    {
+        return Err(invalid("Qwen2MoE donor route identity or dimensions"));
+    }
+    let count = selection
+        .tokens
+        .checked_mul(selection.top_k)
+        .filter(|&n| n <= 262_144)
+        .ok_or_else(|| invalid("Qwen2MoE donor route size limit"))?;
+    if selection.selected_experts.len() != count || selection.final_weights.len() != count {
+        return Err(invalid("Qwen2MoE donor route tensor shape"));
+    }
+
+    let mut routes = Vec::with_capacity(selection.tokens);
+    for token in 0..selection.tokens {
+        let mut route = Vec::with_capacity(selection.top_k);
+        for slot in 0..selection.top_k {
+            let index = token * selection.top_k + slot;
+            let expert = u32::try_from(selection.selected_experts[index])
+                .map_err(|_| invalid("Qwen2MoE donor selected a negative expert ID"))?;
+            let final_weight = selection.final_weights[index];
+            if !final_weight.is_finite() || final_weight < 0.0 {
+                return Err(invalid("Qwen2MoE donor route weight is invalid"));
+            }
+            route.push(moe::Choice {
+                expert,
+                weight: f64::from(final_weight),
+            });
+        }
+        routes.push(route);
+    }
+
+    let problem = RoutingProblem {
+        hidden,
+        experts,
+        routes,
+        registry,
+        stamp: selection.stamp,
+        preferred_owners,
+        resident_order,
+    };
+    validate(&problem)?;
+    Ok(Qwen2MoERouteBatch {
+        problem,
+        attempt: selection.attempt,
+    })
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct RankSlot {

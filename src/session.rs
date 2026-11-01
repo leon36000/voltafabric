@@ -5793,7 +5793,36 @@ impl Session {
         token_inputs: &[Vec<f32>], ledger: &crate::native_ledger::NativeBatchLedger,
         timeout: Duration, swiglu_limit: Option<f32>,
     ) -> Result<GroupedProjectionBatchOutput> {
-        if timeout.is_zero() || timeout > Duration::from_secs(60)
+        Self::exec_qwen2moe_ffn_batch_with_attempt(
+            gate_sessions, up_sessions, down_sessions, problem, token_inputs, ledger,
+            timeout, swiglu_limit, None,
+        )
+    }
+
+    /// Execute donor-selected Qwen2MoE routes with the same attempt that was attached to
+    /// the route tensors. The route batch was validated before it reached this boundary.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_qwen2moe_ffn_from_donor_routes(
+        gate_sessions: &mut [Session], up_sessions: &mut [Session],
+        down_sessions: &mut [Session], route_batch: &routing::Qwen2MoERouteBatch,
+        token_inputs: &[Vec<f32>], ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration, swiglu_limit: Option<f32>,
+    ) -> Result<GroupedProjectionBatchOutput> {
+        Self::exec_qwen2moe_ffn_batch_with_attempt(
+            gate_sessions, up_sessions, down_sessions, route_batch.problem(), token_inputs,
+            ledger, timeout, swiglu_limit, Some(route_batch.attempt()),
+        )
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn exec_qwen2moe_ffn_batch_with_attempt(
+        gate_sessions: &mut [Session], up_sessions: &mut [Session],
+        down_sessions: &mut [Session], problem: &routing::RoutingProblem,
+        token_inputs: &[Vec<f32>], ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration, swiglu_limit: Option<f32>, requested_attempt: Option<u64>,
+    ) -> Result<GroupedProjectionBatchOutput> {
+        if requested_attempt == Some(0)
+            || timeout.is_zero() || timeout > Duration::from_secs(60)
             || swiglu_limit.is_some_and(|x| !x.is_finite() || x < 0.0)
             || [&problem.stamp.run_id, &problem.stamp.plan_id]
                 .iter().any(|v| v.trim().is_empty() || v.len() > 256)
@@ -5835,7 +5864,10 @@ impl Session {
         let up_work = Self::qwen2moe_projection_work(&up_stage, &up_inputs)?;
         // One full layer Stamp, one attempt, and one local ledger claim.
         claim_identity(&problem.stamp, false)?;
-        let attempt = next_attempt()?;
+        let attempt = match requested_attempt {
+            Some(attempt) => attempt,
+            None => next_attempt()?,
+        };
         ledger.reserve(&problem.stamp, attempt)?;
         let deadline = Instant::now() + timeout;
         let result = (|| {
@@ -5858,7 +5890,6 @@ impl Session {
         }
         result
     }
-
     /// The caller must reserve the external R53 identity before calling this experimental
     /// local-ledger adapter; this method's ledger is process-local and is not R53.
     #[cfg(feature = "native-ggml-cpu")]

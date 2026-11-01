@@ -852,6 +852,107 @@ fn qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch() {
 
 
 #[test]
+fn qwen2moe_donor_route_import_preserves_slot_order_scaled_weights_and_attempt() {
+    use voltafabric::routing::{qwen2moe_routes_from_donor, Qwen2MoEDonorSelection};
+
+    let mut base = routed_problem(661);
+    base.stamp.run_id = "r666-qwen2moe-route-run".into();
+    base.stamp.model_revision = "r666-qwen2moe-route-model".into();
+    base.stamp.plan_id = "r666-qwen2moe-route-plan".into();
+    let imported = qwen2moe_routes_from_donor(
+        Qwen2MoEDonorSelection {
+            stamp: base.stamp.clone(),
+            attempt: 661_004,
+            tokens: 2,
+            top_k: 2,
+            // GGML [top_k, tokens], with slot fastest: do not re-sort by expert ID.
+            selected_experts: vec![18, 40, 3, 18],
+            // These are final donor weights after expert_weights_scale. Their sums are
+            // deliberately below one; the adapter must not normalize or scale again.
+            final_weights: vec![0.125, 0.375, 0.25, 0.125],
+        },
+        base.hidden,
+        base.experts.clone(),
+        base.registry.clone(),
+        base.preferred_owners.clone(),
+        base.resident_order.clone(),
+    )
+    .unwrap();
+
+    assert_eq!(imported.problem().stamp, base.stamp);
+    assert_eq!(imported.attempt(), 661_004);
+    assert_eq!(
+        imported
+            .problem()
+            .routes
+            .iter()
+            .map(|route| route.iter().map(|choice| choice.expert).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+        vec![vec![18, 40], vec![3, 18]]
+    );
+    assert_eq!(
+        imported.problem().routes[0]
+            .iter()
+            .map(|choice| choice.weight)
+            .collect::<Vec<_>>(),
+        vec![f64::from(0.125_f32), f64::from(0.375_f32)]
+    );
+    assert_eq!(
+        imported.problem().routes[0]
+            .iter()
+            .map(|choice| choice.weight)
+            .sum::<f64>(),
+        0.5
+    );
+    let dispatched = voltafabric::routing::dispatch(imported.problem()).unwrap();
+    assert_eq!(
+        dispatched
+            .slots
+            .iter()
+            .map(|slot| (slot.token, slot.slot, slot.expert, slot.weight))
+            .collect::<Vec<_>>(),
+        vec![
+            (0, 0, 18, f64::from(0.125_f32)),
+            (0, 1, 40, f64::from(0.375_f32)),
+            (1, 0, 3, f64::from(0.25_f32)),
+            (1, 1, 18, f64::from(0.125_f32)),
+        ]
+    );
+}
+
+#[test]
+fn qwen2moe_donor_route_import_rejects_incomplete_invalid_and_duplicate_selection() {
+    use voltafabric::routing::{qwen2moe_routes_from_donor, Qwen2MoEDonorSelection};
+
+    let base = routed_problem(662);
+    let make = |attempt, selected_experts: Vec<i32>, final_weights: Vec<f32>| {
+        qwen2moe_routes_from_donor(
+            Qwen2MoEDonorSelection {
+                stamp: base.stamp.clone(),
+                attempt,
+                tokens: 2,
+                top_k: 2,
+                selected_experts,
+                final_weights,
+            },
+            base.hidden,
+            base.experts.clone(),
+            base.registry.clone(),
+            base.preferred_owners.clone(),
+            base.resident_order.clone(),
+        )
+    };
+
+    assert!(make(662_001, vec![18, 40, 3], vec![0.25, 0.75, 0.5, 0.25]).is_err());
+    assert!(make(0, vec![18, 40, 3, 18], vec![0.25, 0.75, 0.5, 0.25]).is_err());
+    assert!(make(662_002, vec![-1, 40, 3, 18], vec![0.25, 0.75, 0.5, 0.25]).is_err());
+    assert!(make(662_003, vec![18, 40, 3, 18], vec![0.25, f32::NAN, 0.5, 0.25]).is_err());
+    assert!(make(662_004, vec![18, 18, 3, 18], vec![0.25, 0.75, 0.5, 0.25]).is_err());
+    assert!(make(662_005, vec![18, 99, 3, 18], vec![0.25, 0.75, 0.5, 0.25]).is_err());
+}
+
+
+#[test]
 fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_preflights_all_stages() {
     let residents = [(3, 1), (18, 2), (40, 0)];
     let make_weights = |rows: usize, columns: usize, codes: &[u8]| {
@@ -886,6 +987,33 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
     problem.stamp.run_id = "r662-qwen2moe-run".into();
     problem.stamp.model_revision = "r662-qwen2moe-synthetic-model".into();
     problem.stamp.plan_id = "r662-qwen2moe-plan".into();
+    let route_batch = voltafabric::routing::qwen2moe_routes_from_donor(
+        voltafabric::routing::Qwen2MoEDonorSelection {
+            stamp: problem.stamp.clone(),
+            attempt: 662_006,
+            tokens: problem.routes.len(),
+            top_k: problem.routes.first().unwrap().len(),
+            selected_experts: problem
+                .routes
+                .iter()
+                .flatten()
+                .map(|choice| i32::try_from(choice.expert).unwrap())
+                .collect(),
+            final_weights: problem
+                .routes
+                .iter()
+                .flatten()
+                .map(|choice| choice.weight as f32)
+                .collect(),
+        },
+        problem.hidden,
+        problem.experts.clone(),
+        problem.registry.clone(),
+        problem.preferred_owners.clone(),
+        problem.resident_order.clone(),
+    )
+    .unwrap();
+    problem = route_batch.problem().clone();
     let mut hidden = vec![vec![0.0_f32; H]; 2];
     hidden[0][0] = 2.0;
     hidden[1][0] = 1.0;
@@ -908,11 +1036,11 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
     let mut gate = load("gate", "blk.5.ffn_gate_exps.weight", 64, H, &[1, 2, 4]);
     let mut up = load("up", "blk.5.ffn_up_exps.weight", 64, H, &[2, 3, 5]);
     let mut down = load("down", "blk.5.ffn_down_exps.weight", H, 64, &[3, 1, 2]);
-    let output = Session::exec_qwen2moe_ffn_batch(
-        &mut gate, &mut up, &mut down, &problem, &hidden, &ledger, TIMEOUT, None,
+    let output = Session::exec_qwen2moe_ffn_from_donor_routes(
+        &mut gate, &mut up, &mut down, &route_batch, &hidden, &ledger, TIMEOUT, None,
     ).unwrap();
     assert_eq!(output.stamp, problem.stamp);
-    assert!(output.attempt > 0);
+    assert_eq!(output.attempt, route_batch.attempt());
     assert_eq!(output.tensor, "blk.5.ffn_down_exps.weight");
     assert_eq!(output.dispatch_hidden, H);
     assert_eq!(output.input_columns, 64);
@@ -959,8 +1087,8 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
             assert_eq!(value, oracle);
         }
     }
-    let replay = Session::exec_qwen2moe_ffn_batch(
-        &mut gate, &mut up, &mut down, &problem, &hidden, &ledger, TIMEOUT, None,
+    let replay = Session::exec_qwen2moe_ffn_from_donor_routes(
+        &mut gate, &mut up, &mut down, &route_batch, &hidden, &ledger, TIMEOUT, None,
     ).unwrap_err();
     assert!(replay.message.contains("identity already attempted"));
     assert!(gate.iter().all(Session::is_usable));
