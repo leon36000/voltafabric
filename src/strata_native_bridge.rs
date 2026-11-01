@@ -303,7 +303,9 @@ fn send(output: &mut impl Write, reply: &Reply) -> Result<()> {
     process::write_frame(output, &process::encode(reply)?, "native bridge reply")
 }
 
-fn identity_matches(
+/// Compare the VFB3 run/model/plan/epoch/layer fields with an admitted stamp.
+/// Batch and attempt must still be validated by the caller before dispatch.
+pub fn identity_matches(
     stamp: &moe::Stamp,
     epoch: u64,
     layer: u32,

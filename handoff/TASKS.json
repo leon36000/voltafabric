@@ -9851,5 +9851,15 @@
     "source_commit": "a19ab47b67e7973100ec1375eba77bdf8d709e50",
     "readback_files_verified": 8,
     "published_utc": "2026-11-01T03:22:46Z"
+  },
+  "r645_vfb3_identity_helper": {
+    "status": "CPU_TEST_PASS_PENDING_GITLAB_READBACK",
+    "owner": "Codex integrator",
+    "branch": "r645-vfb3-identity-cpu-20261101",
+    "scope": "Expose the exact run/model/plan/epoch/layer helper used by VFB3 parsing and test mismatch rejection against a synthetic native Fleet receipt.",
+    "test": "rustfmt --check; cargo test --locked --offline --test native_fleet_ggml; 1/1 PASS.",
+    "limits": "No VFB3 wire parser invocation, socket, checkpoint, Strata callback, model generation, GPU or production network.",
+    "automatic_relaunch": false,
+    "next_action": "R646: test VFB3 framing/parser and VFR3 response in-process, retaining batch/attempt identity and refusal-before-dispatch checks."
   }
 }

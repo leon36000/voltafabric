@@ -11873,5 +11873,20 @@
     "source_commit": "a19ab47b67e7973100ec1375eba77bdf8d709e50",
     "readback_files_verified": 8,
     "published_utc": "2026-11-01T03:22:46Z"
+  },
+  "r645_vfb3_identity_helper": {
+    "status": "PASS_CPU_SYNTHETIC_HELPER; VFB3_WIRE_UNTESTED",
+    "branch": "r645-vfb3-identity-cpu-20261101",
+    "base_commit": "bc3dbbb856730ab622ba6668fa0e87721051143a",
+    "report": "research/R645/REPORT.md",
+    "helper": "src/strata_native_bridge.rs::identity_matches",
+    "test": "research/R645/cpu-harness/native_fleet_ggml.rs",
+    "test_result": "rustfmt clean; 1/1 PASS with --locked --offline",
+    "identity_axes_tested": ["run_id", "model_revision", "plan_id", "epoch", "layer"],
+    "batch_and_attempt_wire_fields_tested": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R646: exercise the exact VFB3 parser/VFR3 reply path in-process with a bounded synthetic request."
   }
 }
