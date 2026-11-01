@@ -11903,7 +11903,17 @@
     "parser": "src/strata_native_bridge.rs::parse_vfb3_identity_fields",
     "test": "research/R646/cpu-harness/native_fleet_ggml.rs",
     "test_result": "rustfmt clean; 1/1 PASS with --locked --offline",
-    "identity_and_shape_cases": ["run", "model", "plan", "epoch", "layer", "reserved", "short_header", "truncated_identity", "zero_run_length"],
+    "identity_and_shape_cases": [
+      "run",
+      "model",
+      "plan",
+      "epoch",
+      "layer",
+      "reserved",
+      "short_header",
+      "truncated_identity",
+      "zero_run_length"
+    ],
     "batch_attempt_extracted": true,
     "binary_loop_and_vfr3_reply_tested": false,
     "complete_generation": false,
@@ -11912,7 +11922,7 @@
     "next_action": "R647: direct binary_loop rejection/VFR3/empty-ledger test completed; R648 is a fresh synthetic positive CPU-worker path."
   },
   "r647_vfb3_binary_loop_fail_closed": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_TEST_PASS",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "branch": "r647-vfb3-parser-real-loop-20261101",
     "base_commit": "27feba075b0a4af14cd3747851779397b781f810",
     "source_commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
@@ -11935,8 +11945,9 @@
     "complete_generation": false,
     "gpu_executed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "readback_files_verified": 3,
+    "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:53:03Z",
-    "next_action": "R648: exercise the synthetic positive binary_loop path with one isolated CPU worker and fresh identity/ledger."
+    "next_action": "R648: exercise the synthetic positive binary_loop path with one isolated CPU worker and fresh identity/ledger.",
+    "readback_verified_utc": "2026-11-01T03:54:16Z"
   }
 }

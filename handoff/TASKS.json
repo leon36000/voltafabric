@@ -9879,9 +9879,9 @@
     "next_action": "R647: direct parser-loop refusal path passed. R648 should test the synthetic positive loop with a fresh identity and local worker."
   },
   "r647_vfb3_binary_loop_fail_closed": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_TEST_PASS",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
-    "readback_files_verified": 3,
+    "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:53:03Z",
     "owner": "Codex integrator",
     "branch": "r647-vfb3-parser-real-loop-20261101",
@@ -9889,6 +9889,7 @@
     "test": "rustfmt --edition 2021 --check; cargo test --locked --offline --features native-ggml-cpu --lib strata_native_bridge::identity_tests::binary_loop_rejects_identity_mismatch_before_body_or_claim; 1/1 PASS.",
     "limits": "Synthetic CPU parser-path test only; no success dispatch, worker, checkpoint, Strata callback, complete generation, GPU, RDMA, inter-PC or production network. Eight compile-only fixture placeholders exist only in local isolated .runs snapshot and were not published.",
     "automatic_relaunch": false,
-    "next_action": "R648: test a positive synthetic binary_loop batch with one local CPU worker, fresh run identity and dedicated ledger."
+    "next_action": "R648: test a positive synthetic binary_loop batch with one local CPU worker, fresh run identity and dedicated ledger.",
+    "readback_verified_utc": "2026-11-01T03:54:16Z"
   }
 }

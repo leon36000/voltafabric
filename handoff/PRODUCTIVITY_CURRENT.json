@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:53:03Z",
+  "updated_utc": "2026-11-01T03:54:16Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -155,15 +155,16 @@
     {
       "id": "R647",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_READBACK_VERIFIED_CPU_UNIT_TEST",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
       "branch": "r647-vfb3-parser-real-loop-20261101",
       "parent_commit": "27feba075b0a4af14cd3747851779397b781f810",
       "source_commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
       "path": "research/R647",
       "test": "rustfmt clean; locked/offline root-library unit test 1/1 PASS",
       "test_scope": "actual binary_loop called in-process; 6 fail-closed VFB3 identity/header cases, exact VFR3 failure, body sentinel unread, empty local ledger; no worker sessions",
-      "readback_files_verified": 3,
-      "published_utc": "2026-11-01T03:53:03Z"
+      "readback_files_verified": 6,
+      "published_utc": "2026-11-01T03:53:03Z",
+      "readback_verified_utc": "2026-11-01T03:54:16Z"
     }
   ],
   "acceptance": [
