@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 09:43:59 UTC",
+  "updated_utc": "2026-11-01 09:56:01 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -904,33 +904,335 @@
       "pipeline_2295": "running scans/fallback only; not C++ build/test",
       "published_utc": "2026-11-01 09:43:59 UTC",
       "readback_verified_utc": "2026-11-01 09:43:59 UTC",
-      "next_action": "R680: connecter les hooks llama.cpp publiés à Qwen2MoERouteInvocation avec identité complète par ubatch; ajouter une fixture d’exécution de callback contre le donneur épinglé avant de tenter un checkpoint. Garder les gates CPU, sans génération complète ni GPU/non-résident.",
+      "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
+    },
+    {
+      "id": "R679",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_PLAINTEXT_READBACK_VERIFIED_CPU_LLAMA_LIBRARY_BUILD_PASS_PIPELINE_2298_RUNNING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "0ae5110de979038f4f665b5d2ed3ae78d54aad01",
+      "source_commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
+      "superseded_encoding_commit": "aeebc2ae01dce9eaae651beb789d87678dce228e",
+      "path": "research/R679",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "Adds an opt-in process_ubatch/build_moe_ffn callback for Qwen2MoE. Only the routed aggregate may be replaced; the shared expert and residual remain donor-built. Dynamic selected IDs, final post-gating coefficients, raw per-expert down outputs and original activations are passed once; routed graph reuse is disabled; the host rejects failed or incomplete invocation.",
+      "test": "AArch64 CPU CMake target llama build passed; git diff --check passed; exact plaintext readback of five GitLab files.",
+      "test_scope": "Compile-qualified source seam only. No callback runtime fixture, R678 invocation/Rust Session bridge, real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+      "readback_files_verified": 5,
+      "patch_sha256": "df6580199d1b913eb590d81a97dd5a42670fe437416e3965d0bbedb0d43b72f7",
+      "manifest_sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
+      "pipeline_2297": "success but scanned superseded encoded-content commit; not source validation",
+      "pipeline_2298": "running; Gitleaks success, Semgrep running, Trivy pending; configured scans/fallback only, not C++ build/test",
+      "published_utc": "2026-11-01 09:56:01 UTC",
+      "readback_verified_utc": "2026-11-01 09:56:01 UTC",
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "next_action": "R680: connect these hooks to Qwen2MoERouteInvocation with per-ubatch complete identity and add a donor-side callback execution fixture before attempting checkpoint generation."
+    }
+  ],
+  "acceptance": [
+    "Predetermined task and hidden tests before real model request.",
+    "One fresh identified request, exact model alias discovered; no retry if outcome unknown.",
+    "Run generated code only in private sandbox without real credentials or shared project write access.",
+    "Check diff, tests, proof linkage and costs before accepting; keep failures."
+  ],
+  "known_limits": [
+    "The R59 canonical baseline is historical; the R635 branch is private and is not merged into main.",
+    "R626/R627 adapted llama.cpp GGML and a Strata head under MIT; R630 verified only local CPU SC117 generation through 48 layers. No GPU, inter-PC worker, shared production R53, or complete Strata runtime integration is qualified.",
+    "R635 verifies plan mismatch rejection before reservation only with a synthetic empty ledger, AF_UNIX-only test scope, and a stub worker. It does not establish production lease/registry/checkpoint/resource validity.",
+    "The R630 batch and eviction claims remain RESERVED_UNKNOWN_NO_REPLAY and must not be replayed.",
+    "No qualified integration of vLLM, SGLang, TensorRT-LLM, Maya, or DeepInfer as a runtime is established by this wave; DeepInfer remains a source of ideas, not the target engine.",
+    "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed.",
+    "R638 binds local Strata native-pipe batches to run/model/plan/layer/epoch/batch/attempt and reserves the exact local ticket before dispatch; the pinned generator callback remains unset, so complete generation is still not qualified.",
+    "R639 adds a mixed-owner CPU-miss callback for Strata kinds -1..2, but the pinned donor dispatch does not call it; no compiler/tests or generation ran for this wave.",
+    "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran.",
+    "R641 adds an opt-in pinned Strata normal single-token decode callback and owns the PoolFleetOwner for the generator lifetime; it requires 48 inherited initialized AF_UNIX streams and caller-supplied identity. The launcher/session initializer and checkpoint-to-identity binding remain unimplemented.",
+    "R641 was reviewed as generated patch text and patch-application readback only. No compiler, tests, independent output oracle, complete generation, GPU, inter-PC worker, production network or shared R53 admission is claimed.",
+    "R642 adds a local launcher and passes 2 CPU fixture tests with fake bridge/Strata children. The real Rust bridge and pinned Strata binary were not built or run; no model/checkpoint, numerical output oracle, GPU, RDMA, inter-PC worker, production network, shared R53 reservation, or generation is qualified.",
+    "R643 compiles the exact R642 Rust source against llama.cpp GGML 3cf03257f219afbe7334045ff7c6a06ac68c627d and passes one synthetic native-provider CTest plus malformed-init rejection. It does not run a model, qualify Rust bridge output against a numerical oracle, attach the actual Strata callback, or prove full generation.",
+    "R644 tests a synthetic in-memory layer-0 SC117-format expert through the real native GGML resident and Rust Fleet. It confirms one-time FP16/f64 Collector weighting and rejects wrong epoch, plan and replay, but does not read checkpoint spans, exercise the VFB3 socket, call Strata's actual generator callback, or qualify complete generation.",
+    "R644 tests a synthetic in-memory layer-0 SC117-format expert through the native GGML resident and Rust Fleet. It confirms one-time FP16/f64 Collector weighting and rejects wrong epoch, plan and replay, but does not read checkpoint spans, exercise the VFB3 socket, call Strata's actual generator callback, or qualify complete generation.",
+    "R645 exposes and tests the VFB3 run/model/plan/epoch/layer comparator using a synthetic native-GGML Fleet receipt. Batch/attempt parsing and exact VFB3/VFR3 wire framing, the Strata callback, complete generation, GPU, RDMA and inter-PC execution remain unqualified.",
+    "R646 tests the exact VFB3 header/identity parsing helper used by binary_loop, not binary_loop's VFR3 output or actual ticket reservation. No checkpoint, Strata callback, full generation, GPU, RDMA or inter-PC run.",
+    "R648 exercises the real VFB3 binary_loop with one local vf-rank-session and a synthetic GGML resident; its expected result uses the same provider, only one consumed local ledger claim is tested, and no checkpoint, donor callback, full generation, GPU or inter-PC path is qualified.",
+    "R649 clean CPU test sends two unique VFB3 batches through one vf-rank-session and checks exact unweighted VFR3 responses plus two durable local claims, but uses synthetic GGML and the same-provider Resident.forward comparator; no checkpoint, donor callback or complete generation is qualified.",
+    "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed.",
+    "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle.",
+    "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations.",
+    "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653.",
+    "R654 introduced GGML grouped expert matrix multiplication for a synchronous CPU Q8_0 fixture; R655 now composes its resident output with the VoltaFabric FP16-decoded f64 Collector in focused CPU tests. A persistent VoltaFabric Session/owner path, checkpoint loading, full generation, other formats, GPU and inter-PC distribution remain unqualified.",
+    "R655 verifies a synthetic Q8_0 grouped-matrix-to-Collector path only. It does not exercise the persistent Session/owner runtime, checkpoint loading, full generation, GPU, inter-PC distribution, production R53, other quantization formats, or performance.",
+    "R656 integrates pinned GGML grouped projection with VoltaFabric routing and the ordinary Collector through an in-process CPU matrix fleet. Synthetic Q8_0 only; no subprocess Session/RankWorker protocol, checkpoint/model, full generation, GPU, inter-PC distribution, durable shared R53, other formats, or performance is qualified.",
+    "R657 connects only one synthetic Q8_0 grouped projection to persistent CPU Sessions; single-frame load is below 16 MiB. No compatible checkpoint loader, complete expert FFN/token generation, GPU, inter-PC transport, or production R53.",
+    "R659 resolves a synthetic GGUF carrying the qwen2moe architecture label only; no real Qwen2MoE checkpoint was inspected or loaded.",
+    "R659 executes only a square hidden=FFN=32 synthetic Q8_0 stage. The existing Session dispatcher still requires binding.rows == problem.hidden, so the resolved rectangular layout cannot yet run through the current projection Session.",
+    "Fused gate/up tensor naming and doubled extent are recognized, but the fused tensor is not split or executed.",
+    "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified.",
+    "R660 source adds a per-slot rectangular GGML Session projection and a synthetic scalar-oracle fixture, but its Rust test and rustfmt did not execute: the current CI has no pinned GGML static build and the separate rustfmt container image could not be pulled. Do not promote this source until CPU verification succeeds.",
+    "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified.",
+    "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch.",
+    "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance.",
+    "R671 connects the GGML transaction to the existing VFB3/VFR3 Client, but the graph fixture uses a fake AF_UNIX peer; it does not yet exercise an actual vf-rank-session child or a model/checkpoint graph.",
+    "R672 exercises the actual local native-bridge coordinator and spawned rank-session worker through a synthetic GGML route transaction, but its local Rust source snapshot is not an exact full current GitLab checkout. The pinned llama.cpp runtime callback does not yet supply routes; no real checkpoint or complete generation, independent mathematical oracle, GPU, inter-PC/RDMA, shared production R53 or performance is qualified.",
+    "R677 resolves synthetic dynamic expert IDs to owner kinds before Collector dispatch, but the pinned llama.cpp Qwen2MoE runtime callback remains unintegrated; no real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "R678 tests a per-layer Qwen2MoE invocation adapter against a synthetic two-layer GGML graph, but the adapter is not yet wired into pinned llama.cpp process_ubatch/build_moe_ffn; no model/checkpoint, generation, GPU, inter-PC/RDMA, production R53 or performance.",
+    "R679 publishes a compile-qualified internal llama.cpp Qwen2MoE hook, but the hook is not yet wired to Qwen2MoERouteInvocation or a Rust Session. No real checkpoint or complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance is qualified."
+  ],
+  "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
+  "last_verified_results": [
+    "R637",
+    "R638",
+    "R642_CPU_LAUNCHER_FIXTURE_ONLY",
+    "R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY",
+    "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
+    "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
+    "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY",
+    "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY",
+    "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
+    "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
+    "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
+    "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
+    "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM",
+    "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY",
+    "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS",
+    "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE",
+    "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE",
+    "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS",
+    "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY",
+    "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING",
+    "R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0",
+    "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1",
+    "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC",
+    "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED",
+    "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
+    "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST",
+    "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS",
+    "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS",
+    "R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING",
+    "R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS",
+    "R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS",
+    "R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS",
+    "R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS",
+    "R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING",
+    "R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING",
+    "R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING"
+  ],
+  "active_operations": [
+    {
+      "id": "gitlab-pipeline-2275",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "f5beaba1eed602a333e23182500204f5e814e4f0",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not Rust compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2276",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "0bff5ef06393259180443dc5af60fb208c029c5f",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not Rust compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2278",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not C++ compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2282",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured security scans and fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2284",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2286",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2287",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "R674 handoff scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2288",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+      "status": "canceled",
+      "jobs": {
+        "pc4_gitleaks": "canceled",
+        "pc4_semgrep": "canceled",
+        "pc4_trivy": "canceled",
+        "pc4_ci_fallback": "canceled"
+      },
+      "scope": "R675 code scan canceled before completion"
+    },
+    {
+      "id": "gitlab-pipeline-2289",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "45a267f115260245f72f5098550c3337b30b5364",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "R675 handoff-only scans/fallback; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2290",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "321e975c7fd7996a294244860d47d4d095e7452b",
+      "status": "skipped",
+      "jobs": {
+        "pc4_gitleaks": "skipped",
+        "pc4_semgrep": "skipped",
+        "pc4_trivy": "skipped",
+        "pc4_ci_fallback": "skipped"
+      },
+      "scope": "expected skip-ci handoff update"
+    },
+    {
+      "id": "gitlab-pipeline-2291",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "dab94350f7fa6be4640ba5d019f37518c585a643",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "R676 code pipeline scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2293",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "R677 source security scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2294",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "b3c71a4e5a8bddef1bdc001c8f0c1d1bfb4bcd58",
+      "status": "skipped",
+      "jobs": {
+        "pc4_gitleaks": "skipped",
+        "pc4_semgrep": "skipped",
+        "pc4_trivy": "skipped",
+        "pc4_ci_fallback": "skipped"
+      },
+      "scope": "expected skip-ci R677 handoff commit"
+    },
+    {
+      "id": "gitlab-pipeline-2295",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
+        "pc4_semgrep": "pending",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      },
+      "scope": "R678 source security scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2297",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "aeebc2ae01dce9eaae651beb789d87678dce228e",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "scans/fallback only for superseded encoded-content commit; not treated as source validation"
+    },
+    {
+      "id": "gitlab-pipeline-2298",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      },
+      "scope": "R679 final plaintext source artifact scans/fallback only; not C++ build/test"
+    }
+  ],
+  "next_action": "R680: connect these hooks to Qwen2MoERouteInvocation with per-ubatch complete identity and add a donor-side callback execution fixture before attempting checkpoint generation.",
   "report": "research/R679/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R679/SHA256SUMS",
     "sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
     "files": 5
-  },
-  "latest_engine_route_patch": {
-    "round": "R679",
-    "branch": "r663-qwen2moe-collector-bridge-20261101",
-    "donor": "ggml-org/llama.cpp",
-    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
-    "donor_license": "MIT",
-    "source_commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
-    "initial_encoding_commit": "aeebc2ae01dce9eaae651beb789d87678dce228e; corrected in source_commit",
-    "status": "PRIVATE_GITLAB_PLAINTEXT_READBACK_VERIFIED_CPU_LLAMA_LIBRARY_BUILD_PASS_PIPELINE_2298_RUNNING",
-    "readback_files_verified": 5,
-    "patch_sha256": "df6580199d1b913eb590d81a97dd5a42670fe437416e3965d0bbedb0d43b72f7",
-    "manifest_sha256": "1b68bc72689cf174fe129dc617d63d973540c49a43724d2a7cee699ef09902e3",
-    "local_cpu_build": "cmake --build .runs/llama-vf-route-r679-build --target llama -j2; exit 0 on AArch64",
-    "pipeline_2297": "running on superseded initial encoded-content commit; not considered final source validation",
-    "pipeline_2298": "running; Gitleaks success, Semgrep and Trivy pending; configured scans/fallback only, not C++ build/test",
-    "runtime_callback_test": false,
-    "rust_bridge_wired": false,
-    "checkpoint_generation": false,
-    "automatic_relaunch": "STOPPED_BY_OWNER"
   }
-}
 }
