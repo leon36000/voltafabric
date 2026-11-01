@@ -1,0 +1,73 @@
+{
+  "run_id": "R638-vfb3-session-identity-20261031",
+  "created_utc": "2026-11-01 02:39:25 UTC",
+  "base_branch": "r637-strata-pool-owner-20261031",
+  "base_commit": "46b1886880a2c6799f7c879ddecb4d4cc9d08b9c",
+  "branch": "r638-vfb3-session-identity-20261031",
+  "code_readback_commit": "db2fbfc45e9953b6e14fe5842789d44ea08de90f",
+  "encoding_correction": {
+    "initial_commit": "c771edf45c3dc8aecadbb9b4e90c236bc076101a",
+    "corrective_commit": "db2fbfc45e9953b6e14fe5842789d44ea08de90f",
+    "method": "Replaced base64 text with plain source content on the same private branch; no force update."
+  },
+  "donor": {
+    "name": "Strata",
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license": "MIT"
+  },
+  "protocol": {
+    "request": "VFB3",
+    "reply": "VFR3",
+    "fixed_header_bytes": 52,
+    "bound_coordinates": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "layer",
+      "epoch",
+      "batch",
+      "attempt"
+    ],
+    "mismatch_before_ledger_claim": true,
+    "exact_ticket_passed_to_fp32_native_sessions": true,
+    "legacy_coordinator_versions": [
+      "VFB1",
+      "VFB2"
+    ]
+  },
+  "changed_files": [
+    "adapters/native_ggml/NATIVE_BRIDGE.md",
+    "adapters/strata_native_bridge/CMakeLists.txt",
+    "adapters/strata_native_bridge/pipe_client.cpp",
+    "adapters/strata_native_bridge/pipe_client.hpp",
+    "adapters/strata_native_bridge/pipe_client_identity_test.cpp",
+    "adapters/strata_native_bridge/pipe_client_live_test.cpp",
+    "adapters/strata_native_bridge/pipe_client_test.cpp",
+    "adapters/strata_native_bridge/pool_fleet_owner_test.cpp",
+    "adapters/strata_native_bridge/pool_hook.cpp",
+    "adapters/strata_native_bridge/pool_hook.hpp",
+    "src/session.rs",
+    "src/strata_ingress.rs",
+    "src/strata_native_bridge.rs",
+    "tests/strata_native_provider.rs"
+  ],
+  "verification": {
+    "ctest": "3/3 passed",
+    "rust_identity_unit": "1/1 passed",
+    "rust_native_provider_integration": "1/1 passed",
+    "fixture": "Synthetic local CPU AF_UNIX sessions and SC117 data.",
+    "readback": "13 full files matched the tested local source byte-for-byte; reserved Session method read back, with final blank-line formatting aligned."
+  },
+  "limits": {
+    "actual_strata_generator_callback_installed": false,
+    "complete_generation": false,
+    "real_checkpoint_loaded": false,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false,
+    "ledger": "Local NativeBatchLedger only; not R53.",
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "next_action": "R639: wire launcher identity/session ownership into the pinned Strata generation callback and verify CPU generation against an independent oracle; no automatic relaunch."
+}

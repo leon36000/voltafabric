@@ -4500,6 +4500,7 @@ impl Session {
             }
         }
     }
+
     /// Preserve an already-reserved attempt while transporting unweighted FP32 slots.
     /// A failed execution consumes the ticket and must never be retried.
     #[cfg(feature = "native-ggml-cpu")]

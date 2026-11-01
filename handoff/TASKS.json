@@ -9744,5 +9744,29 @@
     "receipt": "research/R637/receipt.json",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R638: implement explicit launcher-to-Strata callback context handoff; do not treat this owner helper as a complete Strata integration."
+  },
+  "r638_vfb3_session_identity": {
+    "status": "PASS_CPU_VFB3_IDENTITY_AND_ATTEMPT_PROTOCOL; STRATA_GENERATOR_CALLBACK_NOT_INSTALLED",
+    "branch": "r638-vfb3-session-identity-20261031",
+    "base_commit": "46b1886880a2c6799f7c879ddecb4d4cc9d08b9c",
+    "code_readback_commit": "db2fbfc45e9953b6e14fe5842789d44ea08de90f",
+    "report": "research/R638/REPORT.md",
+    "receipt": "research/R638/receipt.json",
+    "protocol": "VFB3/VFR3 binds run/model/plan/layer/epoch/batch/attempt; mismatch rejected before local ledger claim; exact reservation passed through unweighted FP32 native sessions.",
+    "verification": {
+      "cpp_ctest": "3/3 passed",
+      "rust_identity_unit": "1/1 passed",
+      "rust_native_provider_integration": "1/1 passed",
+      "readback_full_files": 13,
+      "readback_reserved_session_method": true
+    },
+    "actual_generator_callback_installed": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R639: wire launcher identity and session ownership into the pinned Strata generation callback; verify CPU generation against an independent oracle before any hardware admission."
   }
 }

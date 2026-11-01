@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-10-31T21:39:22Z",
+  "updated_utc": "2026-11-01 02:39:25 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -27,6 +27,17 @@
       "commit": "1f24dadb55403198f9bf64f34137cfff5c994cf5",
       "published_utc": "2026-10-31T21:38:09Z",
       "readback_files_verified": 7
+    },
+    {
+      "id": "R638",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
+      "branch": "r638-vfb3-session-identity-20261031",
+      "parent_commit": "46b1886880a2c6799f7c879ddecb4d4cc9d08b9c",
+      "path": "research/R638",
+      "commit": "db2fbfc45e9953b6e14fe5842789d44ea08de90f",
+      "published_utc": "2026-11-01 02:39:25 UTC",
+      "readback_files_verified": 20
     }
   ],
   "acceptance": [
@@ -41,22 +52,24 @@
     "R635 verifies plan mismatch rejection before reservation only with a synthetic empty ledger, AF_UNIX-only test scope, and a stub worker. It does not establish production lease/registry/checkpoint/resource validity.",
     "The R630 batch and eviction claims remain RESERVED_UNKNOWN_NO_REPLAY and must not be replayed.",
     "No qualified integration of vLLM, SGLang, TensorRT-LLM, Maya, or DeepInfer as a runtime is established by this wave; DeepInfer remains a source of ideas, not the target engine.",
-    "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed."
+    "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed.",
+    "R638 binds local Strata native-pipe batches to run/model/plan/layer/epoch/batch/attempt and reserves the exact local ticket before dispatch; the pinned generator callback remains unset, so complete generation is still not qualified."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
-    "R637"
+    "R637",
+    "R638"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R638_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Wire the owned 48-layer callback context through an explicit Strata launcher handoff that preserves run/model/plan/layer/batch identity. The pinned generator currently leaves the candidate callback null. Keep live generation, GPU, inter-PC transport, and real R53 separately gated."
+    "status": "R639_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Wire the launcher-supplied identity and owned AF_UNIX session set into the exact pinned Strata generator callback lifetime; first verify CPU generation against an independent oracle. Keep GPU, inter-PC transport, production networking and real R53 suspended without fresh admission."
   },
-  "report": "research/R637/REPORT.md",
+  "report": "research/R638/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R636/PUBLISH_SHA256SUMS",
-    "sha256": "8f6ca8929ff367c155be7dd7d5e9d3d53b77c032afac31fa7f2cc2fa88a87c69",
-    "files": 8
+    "path": "research/R638/SHA256SUMS",
+    "sha256": "ed7e70f0e1dedcc1a735d9354188c871d8d4ff173cf9a6837339b5a41592dfac",
+    "files": 16
   }
 }
