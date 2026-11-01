@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 09:36:45 UTC",
+  "updated_utc": "2026-11-01 09:43:59 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -886,6 +886,25 @@
       "published_utc": "2026-11-01 09:36:45 UTC",
       "readback_verified_utc": "2026-11-01 09:36:45 UTC",
       "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
+    },
+    {
+      "id": "R678",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_PER_LAYER_QWEN2MOE_INVOCATION_CPU_CTEST_4_PASS_PIPELINE_2295_RUNNING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "b3c71a4e5a8bddef1bdc001c8f0c1d1bfb4bcd58",
+      "source_commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
+      "path": "research/R678",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "Adds Qwen2MoERouteInvocation, a per-process_ubatch adapter that creates a fresh RouteGraphTransaction for each layer from a full batch identity, expert->owner map and the donor seam's activation/selected IDs/final weights/raw expert outputs. Host gate requires all expected layers READY and GGML SUCCESS; coefficients are forwarded once.",
+      "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; four focused CTests pass; two-layer fixture output [17.4,19.4] matches independent scalar oracle and missing-layer invocation is refused.",
+      "test_scope": "Synthetic GGML/Q8_0-compatible route fixture only. No llama.cpp callback/source patch, real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+      "readback_files_verified": 8,
+      "manifest_sha256": "d8d1f470e15a0edcc42d74cf3e15011d6fd94ef480a5b3e285c0b40850814df7",
+      "pipeline_2295": "running scans/fallback only; not C++ build/test",
+      "published_utc": "2026-11-01 09:43:59 UTC",
+      "readback_verified_utc": "2026-11-01 09:43:59 UTC",
+      "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
     }
   ],
   "acceptance": [
@@ -932,7 +951,8 @@
     "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance.",
     "R671 connects the GGML transaction to the existing VFB3/VFR3 Client, but the graph fixture uses a fake AF_UNIX peer; it does not yet exercise an actual vf-rank-session child or a model/checkpoint graph.",
     "R672 exercises the actual local native-bridge coordinator and spawned rank-session worker through a synthetic GGML route transaction, but its local Rust source snapshot is not an exact full current GitLab checkout. The pinned llama.cpp runtime callback does not yet supply routes; no real checkpoint or complete generation, independent mathematical oracle, GPU, inter-PC/RDMA, shared production R53 or performance is qualified.",
-    "R677 resolves synthetic dynamic expert IDs to owner kinds before Collector dispatch, but the pinned llama.cpp Qwen2MoE runtime callback remains unintegrated; no real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance."
+    "R677 resolves synthetic dynamic expert IDs to owner kinds before Collector dispatch, but the pinned llama.cpp Qwen2MoE runtime callback remains unintegrated; no real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "R678 tests a per-layer Qwen2MoE invocation adapter against a synthetic two-layer GGML graph, but the adapter is not yet wired into pinned llama.cpp process_ubatch/build_moe_ffn; no model/checkpoint, generation, GPU, inter-PC/RDMA, production R53 or performance."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -969,7 +989,8 @@
     "R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS",
     "R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS",
     "R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS",
-    "R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING"
+    "R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING",
+    "R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING"
   ],
   "active_operations": [
     {
@@ -1119,22 +1140,48 @@
       "id": "gitlab-pipeline-2293",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "R677 source security scans/fallback only; not C++ build/test"
+    },
+    {
+      "id": "gitlab-pipeline-2294",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "b3c71a4e5a8bddef1bdc001c8f0c1d1bfb4bcd58",
+      "status": "skipped",
+      "jobs": {
+        "pc4_gitleaks": "skipped",
+        "pc4_semgrep": "skipped",
+        "pc4_trivy": "skipped",
+        "pc4_ci_fallback": "skipped"
+      },
+      "scope": "expected skip-ci R677 handoff commit"
+    },
+    {
+      "id": "gitlab-pipeline-2295",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
+        "pc4_semgrep": "pending",
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       },
-      "scope": "R677 source security scans/fallback only; not C++ build/test"
+      "scope": "R678 source security scans/fallback only; not C++ build/test"
     }
   ],
-  "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application.",
-  "report": "research/R677/REPORT.md",
+  "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU.",
+  "report": "research/R678/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R677/SHA256SUMS",
-    "sha256": "8b3fdec782ef04309d13fb06d12c1dff4a4fae499124c1a002d4002b1ae69253",
-    "files": 6
+    "path": "research/R678/SHA256SUMS",
+    "sha256": "d8d1f470e15a0edcc42d74cf3e15011d6fd94ef480a5b3e285c0b40850814df7",
+    "files": 7
   }
 }

@@ -10318,7 +10318,7 @@
     "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
   },
   "r677_dynamic_owner_projection": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_DYNAMIC_OWNER_PROJECTION_CPU_CTEST_3_PASS_PIPELINE_2293_RUNNING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_DYNAMIC_OWNER_PROJECTION_CPU_CTEST_3_PASS_PIPELINE_2293_SUCCESS",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
     "objective": "Resolve each dynamic Qwen2MoE selected expert ID to its owner before the VoltaFabric Collector, preserving route slot order and single coefficient application.",
@@ -10337,15 +10337,51 @@
     "readback_files_verified": 7,
     "readback_verified_utc": "2026-11-01 09:36:45 UTC",
     "pipeline_2293": {
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
+  },
+  "r677_pipeline_reconciliation": {
+    "pipeline_2293": "success; scans/fallback only",
+    "pipeline_2294": "skipped handoff commit",
+    "updated_utc": "2026-11-01 09:43:59 UTC"
+  },
+  "r678_qwen2moe_route_invocation": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_PER_LAYER_QWEN2MOE_INVOCATION_CPU_CTEST_4_PASS_PIPELINE_2295_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
+    "objective": "Wrap the pinned Qwen2MoE raw routed-expert graph seam in a fresh per-layer VoltaFabric transaction set guarded by one host invocation.",
+    "changes": [
+      "Added Qwen2MoERouteInvocation, carrying one complete batch identity and expert->owner projection.",
+      "Each layer receives a unique fresh transaction and captures original activation, dynamic selected IDs, final weights and raw unweighted expert outputs.",
+      "Host acceptance requires all expected layer transactions READY and GGML SUCCESS; routed graph reuse is disallowed."
+    ],
+    "validation": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 4/4; two-layer oracle [17.4,19.4]; missing layer refused; exact GitLab readback 8 files.",
+    "limitations": [
+      "No modifications have yet been inserted into pinned llama.cpp process_ubatch or build_moe_ffn; callback remains unintegrated.",
+      "No checkpoint/model or full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance comparison.",
+      "Pipeline 2295 security scans are still running/pending; they are not C++ build/test."
+    ],
+    "manifest_sha256": "d8d1f470e15a0edcc42d74cf3e15011d6fd94ef480a5b3e285c0b40850814df7",
+    "readback_files_verified": 8,
+    "readback_verified_utc": "2026-11-01 09:43:59 UTC",
+    "pipeline_2295": {
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
+        "pc4_semgrep": "pending",
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
+    "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
   }
 }

@@ -12465,14 +12465,54 @@
     "performance_comparison": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "pipeline_2293": {
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
+    },
+    "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
+  },
+  "r677_pipeline_reconciliation": {
+    "pipeline_2293": "success; configured scans/fallback only, not C++ build/test",
+    "pipeline_2294": "skipped handoff commit",
+    "updated_utc": "2026-11-01 09:43:59 UTC"
+  },
+  "r678_qwen2moe_route_invocation": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "b3c71a4e5a8bddef1bdc001c8f0c1d1bfb4bcd58",
+    "source_commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
+    "report": "research/R678/REPORT.md",
+    "result": "research/R678/RESULT.json",
+    "build_test": "research/R678/BUILD_TEST.txt",
+    "sha256sums": "research/R678/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Adds Qwen2MoERouteInvocation, a per-process_ubatch adapter that creates a fresh RouteGraphTransaction for each layer from a full batch identity, expert->owner map and the donor seam's activation/selected IDs/final weights/raw expert outputs. Host gate requires all expected layers READY and GGML SUCCESS; coefficients are forwarded once.",
+    "test_result": "AArch64 CPU C++17 -Wall -Wextra -Werror; four focused CTests pass; two-layer fixture output [17.4,19.4] matches independent scalar oracle and missing-layer invocation is refused.",
+    "test_scope": "Synthetic GGML/Q8_0-compatible route fixture only. No llama.cpp callback/source patch, real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "manifest_sha256": "d8d1f470e15a0edcc42d74cf3e15011d6fd94ef480a5b3e285c0b40850814df7",
+    "readback_files_verified": 8,
+    "readback_verified_utc": "2026-11-01 09:43:59 UTC",
+    "callback_integrated": false,
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "performance_comparison": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "pipeline_2295": {
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
+        "pc4_semgrep": "pending",
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       }
     },
-    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
+    "next_action": "R679: brancher les hooks de cette invocation dans le llama.cpp épinglé: identité et transactions fraîches dans process_ubatch, capture des IDs/poids/sorties brutes de build_moe_ffn uniquement en Qwen2MoE, désactivation du réemploi et refus host atomique. Préserver shared/residual et le coefficient unique; tester le patch source donneur sur CPU."
   }
 }
