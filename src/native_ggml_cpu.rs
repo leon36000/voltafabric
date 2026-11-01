@@ -728,6 +728,300 @@ impl QuantizedMatrix {
     }
 }
 
+/// One rank-local stack for a single quantized GGML projection. `residents` is
+/// ordered exactly like `RoutingProblem::resident_order[rank]`; it binds logical
+/// expert IDs to the physical matrix IDs consumed by GGML's grouped operation.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GroupedMatrixBinding {
+    pub model_revision: String,
+    pub layer: u32,
+    pub tensor: String,
+    pub ggml_type: i32,
+    pub rank: u32,
+    pub epoch: u64,
+    pub rows: usize,
+    pub columns: usize,
+    pub residents: Vec<(u32, u32)>, // (expert, local), in physical stack order
+    pub sha256: String,
+}
+
+/// A digest-checked, CPU-resident GGML matrix stack owned by one rank.
+pub struct GroupedMatrixResident {
+    binding: GroupedMatrixBinding,
+    inner: vf_ggml_native_ffi::NativeRoutedMatrix,
+    payload_bytes: u64,
+}
+impl GroupedMatrixResident {
+    pub fn load(binding: GroupedMatrixBinding, bytes: &[u8]) -> Result<Self> {
+        use std::collections::BTreeSet;
+        let mut experts = BTreeSet::new();
+        let mut locals = BTreeSet::new();
+        if binding.model_revision.trim().is_empty()
+            || binding.model_revision.len() > 256
+            || binding.tensor.trim().is_empty()
+            || binding.tensor.len() > 256
+            || binding.epoch == 0
+            || binding.rows == 0
+            || binding.rows > 10_240
+            || binding.columns == 0
+            || binding.columns > 6_144
+            || binding.residents.is_empty()
+            || binding.residents.len() > 512
+            || !sha256::is_hex_digest(&binding.sha256)
+            || sha256::hex(bytes) != binding.sha256
+            || binding
+                .residents
+                .iter()
+                .any(|(expert, local)| !experts.insert(*expert) || !locals.insert(*local))
+        {
+            return Err(invalid("grouped matrix binding, order or digest mismatch"));
+        }
+        let inner = vf_ggml_native_ffi::NativeRoutedMatrix::load(
+            binding.ggml_type,
+            binding.residents.len(),
+            binding.rows,
+            binding.columns,
+            bytes,
+        )
+        .map_err(invalid)?;
+        Ok(Self {
+            binding,
+            inner,
+            payload_bytes: bytes.len() as u64,
+        })
+    }
+    pub fn binding(&self) -> &GroupedMatrixBinding {
+        &self.binding
+    }
+}
+
+/// Result of one CPU grouped-projection batch after Collector completion.
+#[derive(Debug, Clone, PartialEq)]
+pub struct GroupedMatrixReceipt {
+    pub stamp: crate::moe::Stamp,
+    pub attempt: u64,
+    pub completed_slots: usize,
+    pub output: Vec<Vec<f64>>,
+}
+
+/// In-process routed GGML projection over rank-local resident matrix stacks.
+/// The native grouped op supplies unweighted rows; the ordinary VoltaFabric
+/// Collector performs FP16 decoding, ordered f64 accumulation and route weighting.
+/// This object has only process-local replay memory: it is not a Session transport,
+/// durable ledger, checkpoint loader, model runtime or production admission.
+pub struct GroupedMatrixFleet {
+    residents: std::collections::BTreeMap<u32, GroupedMatrixResident>,
+    attempted: std::collections::BTreeSet<String>,
+    scope: Option<(String, String)>,
+    last_attempt: u64,
+    terminal: bool,
+}
+impl GroupedMatrixFleet {
+    pub fn new(residents: Vec<GroupedMatrixResident>) -> Result<Self> {
+        use std::collections::{BTreeMap, BTreeSet};
+        const MAX_GROUPED_MATRIX_PAYLOAD_BYTES: u64 = 1_250_000_000;
+        if residents.is_empty() || residents.len() > 512 {
+            return Err(invalid("grouped matrix rank count"));
+        }
+        let first = residents[0].binding().clone();
+        let mut by_rank = BTreeMap::new();
+        let mut expert_ranks = BTreeSet::new();
+        let mut local_ranks = BTreeSet::new();
+        let mut payload_bytes = 0_u64;
+        for resident in residents {
+            let binding = resident.binding().clone();
+            payload_bytes = payload_bytes
+                .checked_add(resident.payload_bytes)
+                .filter(|&bytes| bytes <= MAX_GROUPED_MATRIX_PAYLOAD_BYTES)
+                .ok_or_else(|| invalid("grouped matrix fleet exceeds resident payload budget"))?;
+            if binding.model_revision != first.model_revision
+                || binding.layer != first.layer
+                || binding.tensor != first.tensor
+                || binding.ggml_type != first.ggml_type
+                || binding.epoch != first.epoch
+                || binding.rows != first.rows
+                || binding.columns != first.columns
+                || by_rank.insert(binding.rank, resident).is_some()
+            {
+                return Err(invalid("grouped matrix fleet identity or duplicate rank"));
+            }
+            for &(expert, local) in &binding.residents {
+                if !expert_ranks.insert((binding.rank, expert))
+                    || !local_ranks.insert((binding.rank, local))
+                {
+                    return Err(invalid("duplicate grouped matrix owner identity"));
+                }
+            }
+        }
+        Ok(Self {
+            residents: by_rank,
+            attempted: BTreeSet::new(),
+            scope: None,
+            last_attempt: 0,
+            terminal: false,
+        })
+    }
+
+    /// Route a batch through GGML grouped matrix multiplication and the ordinary
+    /// Rust Collector. All participating rank outputs are staged before a receipt
+    /// is returned; any post-dispatch error makes the fleet terminal.
+    pub fn run_fp16_collected(
+        &mut self,
+        problem: &crate::routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        attempt: u64,
+    ) -> Result<GroupedMatrixReceipt> {
+        use crate::{completion, moe, routing};
+        if self.terminal {
+            return Err(crate::Error::new(
+                "BATCH_ABORTED",
+                "grouped matrix fleet is terminal",
+            ));
+        }
+        routing::validate(problem)?;
+        if attempt <= self.last_attempt || inputs.len() != problem.routes.len() {
+            return Err(invalid("grouped matrix batch or attempt is invalid"));
+        }
+        let first = self
+            .residents
+            .values()
+            .next()
+            .ok_or_else(|| invalid("grouped matrix fleet has no residents"))?
+            .binding()
+            .clone();
+        if problem.hidden != first.rows
+            || problem.stamp.model_revision != first.model_revision
+            || problem.stamp.layer != first.layer
+            || problem.stamp.epoch != first.epoch
+            || inputs
+                .iter()
+                .any(|row| row.len() != first.columns || row.iter().any(|x| !x.is_finite()))
+            || [&problem.stamp.run_id, &problem.stamp.plan_id]
+                .iter()
+                .any(|x| x.trim().is_empty() || x.len() > 256)
+            || self.scope.as_ref().is_some_and(|scope| {
+                scope.0 != problem.stamp.run_id || scope.1 != problem.stamp.plan_id
+            })
+        {
+            return Err(invalid(
+                "grouped matrix input or execution identity differs",
+            ));
+        }
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.slots.is_empty() {
+            return Err(invalid("grouped matrix batch has no routed slots"));
+        }
+        let input_values = dispatch
+            .slots
+            .len()
+            .checked_mul(first.columns)
+            .filter(|&count| count <= 16_777_216);
+        let output_values = dispatch
+            .slots
+            .len()
+            .checked_mul(first.rows)
+            .filter(|&count| count <= 16_777_216);
+        if input_values.is_none() || output_values.is_none() {
+            return Err(invalid("grouped matrix batch exceeds bounded CPU staging"));
+        }
+        for rank in dispatch.ranks.iter().filter(|rank| !rank.slots.is_empty()) {
+            let resident = self
+                .residents
+                .get(&rank.rank)
+                .ok_or_else(|| invalid("grouped matrix rank resident is missing"))?;
+            let binding = resident.binding();
+            if rank.slots.len() > 512
+                || binding
+                    .residents
+                    .iter()
+                    .map(|(_, local)| *local)
+                    .collect::<Vec<_>>()
+                    != rank.resident_order
+                || rank.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+            {
+                return Err(invalid(
+                    "grouped matrix physical owner order differs from routing",
+                ));
+            }
+        }
+        let identity = serde_json::to_string(&problem.stamp)
+            .map_err(|_| invalid("grouped matrix identity encoding"))?;
+        if self.attempted.len() >= 4096 || self.attempted.contains(&identity) {
+            return Err(crate::Error::new(
+                "BATCH_REPLAY",
+                "grouped matrix identity was already attempted",
+            ));
+        }
+        let mut collector = moe::Collector::from_routing(problem)?;
+        self.attempted.insert(identity);
+        self.last_attempt = attempt;
+        if self.scope.is_none() {
+            self.scope = Some((problem.stamp.run_id.clone(), problem.stamp.plan_id.clone()));
+        }
+        let work = (|| -> Result<Vec<Vec<f64>>> {
+            for rank in dispatch.ranks.iter().filter(|rank| !rank.slots.is_empty()) {
+                let mut slot_inputs = Vec::with_capacity(rank.slots.len() * first.columns);
+                let mut expert_ids = Vec::with_capacity(rank.slots.len());
+                for entry in &rank.slots {
+                    slot_inputs.extend_from_slice(&inputs[entry.slot.token]);
+                    expert_ids.push(entry.physical_expert as u32);
+                }
+                let resident = self
+                    .residents
+                    .get_mut(&rank.rank)
+                    .expect("participating rank was preflighted");
+                let values = resident
+                    .inner
+                    .forward(&slot_inputs, &expert_ids)
+                    .map_err(invalid)?;
+                let bits = values
+                    .iter()
+                    .map(|&value| completion::encode_fp16(f64::from(value)))
+                    .collect::<Result<Vec<_>>>()?;
+                let raw = completion::RoutedRawOutput {
+                    stamp: problem.stamp.clone(),
+                    rank: rank.rank,
+                    attempt,
+                    rows: rank.slots.len(),
+                    columns: first.rows,
+                    slots: rank
+                        .slots
+                        .iter()
+                        .map(|entry| completion::OutputSlot {
+                            token: entry.slot.token,
+                            slot: entry.slot.slot,
+                            expert: entry.slot.expert,
+                            local: entry.slot.local,
+                        })
+                        .collect(),
+                    fp16_bits: bits,
+                };
+                let accepted = completion::accept_routed_output(attempt, raw, &mut collector)?;
+                if accepted != rank.slots.len() {
+                    return Err(invalid("grouped matrix collector accepted a partial rank"));
+                }
+            }
+            collector.finish()
+        })();
+        match work {
+            Ok(output) => Ok(GroupedMatrixReceipt {
+                stamp: problem.stamp.clone(),
+                attempt,
+                completed_slots: dispatch.slots.len(),
+                output,
+            }),
+            Err(error) => {
+                self.terminal = true;
+                Err(error)
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod grouped_execution_tests {
     use super::expert_execution_order;

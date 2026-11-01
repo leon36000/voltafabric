@@ -1,0 +1,11 @@
+Host: PC6 AArch64 CPU; CUDA disabled; no model/checkpoint or production network.
+Donor pin reused: llama.cpp/GGML 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT).
+
+PASS: rustfmt --edition 2021 --check src/native_ggml_cpu.rs tests/native_matrix.rs
+PASS: VF_GGML_NATIVE_BUILD=<existing isolated R655 CPU CMake build> cargo test --offline --manifest-path harness/Cargo.toml --features native-ggml-cpu --test native_matrix (debug 4/4)
+PASS: same focused cargo test with --release (4/4)
+PASS: cargo clippy --offline --manifest-path harness/Cargo.toml --features native-ggml-cpu --test native_matrix -- -A dead_code -A clippy::too_many_arguments -A clippy::manual_checked_ops -A clippy::needless_range_loop -D warnings
+
+The bounded harness uses the exact R655-published VoltaFabric source snapshot, with only src/native_ggml_cpu.rs and tests/native_matrix.rs changed for R656. The first Cargo invocation omitted VF_GGML_NATIVE_BUILD and stopped at the build-script precondition; the rerun pointed at the already-built isolated CPU libraries and passed. Workspace-wide cargo fmt --check also reports unrelated pre-existing formatting differences in historical binaries; rustfmt was checked directly on both changed Rust files.
+
+No GPU, checkpoint, model, Session subprocess protocol, inter-PC transport, durable shared ledger, or performance test ran. Q8_0 synthetic fixtures only.

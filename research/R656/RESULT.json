@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "round": "R656",
+  "status": "GROUPED_GGML_MATRIX_ROUTING_COLLECTOR_CPU_PASS",
+  "branch": "r656-ggml-grouped-matrix-fleet-20261101",
+  "source_commit": null,
+  "parent_commit": "385226851a6c61c02b472aef73ba026c03ee0a6d",
+  "donor": {
+    "project": "llama.cpp / GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "source_code_copied": false,
+    "operation": "GGML_OP_MUL_MAT_ID"
+  },
+  "adaptation": {
+    "api": "native_ggml_cpu::GroupedMatrixFleet",
+    "resident_binding": "model/layer/tensor/type/rank/epoch/dimensions plus SHA-256 and ordered (expert, local) identities",
+    "routing": "existing VoltaFabric routing::dispatch with physical resident order verified before work",
+    "collector": "ordinary FP16-decoded f64 Collector; raw grouped rows remain unweighted and route coefficients are applied once",
+    "failure": "no receipt until every participating rank succeeds and Collector finishes; any post-dispatch error makes the in-process fleet terminal",
+    "resident_payload_cap_bytes": 1250000000,
+    "staging_cap_values": 16777216
+  },
+  "verification": {
+    "host": "PC6 AArch64 CPU",
+    "cuda_enabled": false,
+    "debug_tests": "4/4 PASS",
+    "release_tests": "4/4 PASS",
+    "rustfmt_changed_files": "PASS",
+    "scoped_clippy": "PASS with pre-existing dead_code, too_many_arguments, manual_checked_ops, and needless_range_loop lints allowed; all other warnings denied",
+    "fixtures": [
+      "two fresh batches, resident order [1,2,0], outputs [3.5,2.0] then [7.0,1.0]",
+      "full Stamp replay rejected as BATCH_REPLAY",
+      "second-rank FP16 overflow returns no receipt and terminally rejects the next batch as BATCH_ABORTED"
+    ]
+  },
+  "model_loaded": false,
+  "generation_executed": false,
+  "session_path_exercised": false,
+  "gpu_executed": false,
+  "inter_pc_network_used": false,
+  "production_r53_used": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R657: connect the grouped matrix provider to a real identified VoltaFabric Session/RankWorker CPU request path; preserve terminal UNKNOWN handling. No checkpoint, GPU, or production network."
+}

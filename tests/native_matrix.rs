@@ -4,7 +4,10 @@ use vf_ggml_native_ffi::NativeRoutedMatrix;
 use voltafabric::{
     completion::{self, OutputSlot, RoutedRawOutput},
     moe::{self, Choice, Registry, Replica, Stamp},
-    native_ggml_cpu::{MatrixBinding, QuantizedMatrix},
+    native_ggml_cpu::{
+        GroupedMatrixBinding, GroupedMatrixFleet, GroupedMatrixResident, MatrixBinding,
+        QuantizedMatrix,
+    },
     routing::{self, RoutingProblem},
     sha256,
 };
@@ -196,4 +199,204 @@ fn grouped_ggml_rows_enter_the_collector_unweighted_and_atomically() {
         1
     );
     assert_eq!(partial.finish().unwrap_err().code, "BATCH_INCOMPLETE");
+}
+
+fn grouped_problem(batch: u64) -> RoutingProblem {
+    RoutingProblem {
+        hidden: 32,
+        experts: vec![3, 18, 40],
+        routes: vec![
+            vec![
+                Choice {
+                    expert: 18,
+                    weight: 0.25,
+                },
+                Choice {
+                    expert: 40,
+                    weight: 0.75,
+                },
+            ],
+            vec![
+                Choice {
+                    expert: 3,
+                    weight: 0.5,
+                },
+                Choice {
+                    expert: 18,
+                    weight: 0.25,
+                },
+            ],
+        ],
+        registry: Registry {
+            epoch: 9,
+            copies: vec![
+                Replica {
+                    expert: 40,
+                    rank: 7,
+                    local: 0,
+                },
+                Replica {
+                    expert: 3,
+                    rank: 7,
+                    local: 1,
+                },
+                Replica {
+                    expert: 18,
+                    rank: 7,
+                    local: 2,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r656-run".into(),
+            model_revision: "r656-model".into(),
+            plan_id: "r656-plan".into(),
+            layer: 5,
+            batch,
+            epoch: 9,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(7, vec![1, 2, 0])]),
+    }
+}
+
+#[test]
+fn grouped_matrix_fleet_runs_fresh_batches_and_refuses_identity_replay() {
+    const H: usize = 32;
+    const ROW_BYTES: usize = 34;
+    let mut weights = vec![0_u8; 3 * H * ROW_BYTES];
+    for (expert, value) in [1_u8, 2, 4].into_iter().enumerate() {
+        for row in 0..H {
+            let start = (expert * H + row) * ROW_BYTES;
+            weights[start + 1] = 0x3c;
+            weights[start + 2] = value;
+        }
+    }
+    let binding = GroupedMatrixBinding {
+        model_revision: "r656-model".into(),
+        layer: 5,
+        tensor: "ffn.projection.weight".into(),
+        ggml_type: 8,
+        rank: 7,
+        epoch: 9,
+        rows: H,
+        columns: H,
+        residents: vec![(3, 1), (18, 2), (40, 0)],
+        sha256: sha256::hex(&weights),
+    };
+    let owner = GroupedMatrixResident::load(binding, &weights).unwrap();
+    let mut fleet = GroupedMatrixFleet::new(vec![owner]).unwrap();
+
+    let mut first_inputs = vec![vec![0.0_f32; H]; 2];
+    first_inputs[0][0] = 1.0;
+    first_inputs[1][0] = 2.0;
+    let first_problem = grouped_problem(41);
+    let first = fleet
+        .run_fp16_collected(&first_problem, &first_inputs, 13)
+        .unwrap();
+    assert_eq!(first.completed_slots, 4);
+    assert_eq!(first.output[0][0], 3.5);
+    assert_eq!(first.output[1][0], 2.0);
+
+    let mut second_inputs = vec![vec![0.0_f32; H]; 2];
+    second_inputs[0][0] = 2.0;
+    second_inputs[1][0] = 1.0;
+    let second = fleet
+        .run_fp16_collected(&grouped_problem(42), &second_inputs, 14)
+        .unwrap();
+    assert_eq!(second.attempt, 14);
+    assert_eq!(second.output[0][0], 7.0);
+    assert_eq!(second.output[1][0], 1.0);
+
+    let replay = fleet
+        .run_fp16_collected(&first_problem, &first_inputs, 15)
+        .unwrap_err();
+    assert_eq!(replay.code, "BATCH_REPLAY");
+}
+
+#[test]
+fn grouped_matrix_rank_failure_returns_no_partial_batch_and_poisoned_fleet() {
+    const H: usize = 32;
+    const ROW_BYTES: usize = 34;
+    let make_owner = |rank: u32, expert: u32, scale: [u8; 2]| {
+        let mut bytes = vec![0_u8; H * ROW_BYTES];
+        for row in 0..H {
+            let start = row * ROW_BYTES;
+            bytes[start] = scale[0];
+            bytes[start + 1] = scale[1];
+            bytes[start + 2] = 1;
+        }
+        let binding = GroupedMatrixBinding {
+            model_revision: "r656-failure-model".into(),
+            layer: 0,
+            tensor: "ffn.projection.weight".into(),
+            ggml_type: 8,
+            rank,
+            epoch: 1,
+            rows: H,
+            columns: H,
+            residents: vec![(expert, 0)],
+            sha256: sha256::hex(&bytes),
+        };
+        GroupedMatrixResident::load(binding, &bytes).unwrap()
+    };
+    let mut fleet = GroupedMatrixFleet::new(vec![
+        make_owner(7, 3, [0x00, 0x3c]),
+        make_owner(8, 18, [0xff, 0x7b]), // maximum finite FP16 scale
+    ])
+    .unwrap();
+    let problem = RoutingProblem {
+        hidden: H,
+        experts: vec![3, 18],
+        routes: vec![vec![
+            Choice {
+                expert: 3,
+                weight: 0.5,
+            },
+            Choice {
+                expert: 18,
+                weight: 0.5,
+            },
+        ]],
+        registry: Registry {
+            epoch: 1,
+            copies: vec![
+                Replica {
+                    expert: 3,
+                    rank: 7,
+                    local: 0,
+                },
+                Replica {
+                    expert: 18,
+                    rank: 8,
+                    local: 0,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r656-failure-run".into(),
+            model_revision: "r656-failure-model".into(),
+            plan_id: "r656-failure-plan".into(),
+            layer: 0,
+            batch: 1,
+            epoch: 1,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(7, vec![0]), (8, vec![0])]),
+    };
+    let mut input = vec![0.0_f32; H];
+    input[0] = 2.0;
+    let error = fleet
+        .run_fp16_collected(&problem, &[input.clone()], 1)
+        .unwrap_err();
+    assert_eq!(error.code, "FP16_OVERFLOW");
+    let mut fresh = problem;
+    fresh.stamp.batch = 2;
+    assert_eq!(
+        fleet
+            .run_fp16_collected(&fresh, &[input], 2)
+            .unwrap_err()
+            .code,
+        "BATCH_ABORTED"
+    );
 }
