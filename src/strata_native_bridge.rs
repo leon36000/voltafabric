@@ -675,4 +675,112 @@ mod identity_tests {
         assert!(!identity_matches(&stamp, 12, 7, run, b"model-x", plan));
         assert!(!identity_matches(&stamp, 12, 7, run, model, b"plan-x"));
     }
+
+    #[test]
+    fn binary_loop_rejects_identity_mismatch_before_body_or_claim() {
+        fn stamp() -> moe::Stamp {
+            moe::Stamp {
+                run_id: "run-a".into(),
+                model_revision: "model-b".into(),
+                plan_id: "plan-c".into(),
+                layer: 7,
+                batch: 91,
+                epoch: 12,
+            }
+        }
+
+        fn coordinator(stamp: &moe::Stamp, ledger_path: &Path) -> Coordinator {
+            Coordinator {
+                template: routing::RoutingProblem {
+                    hidden: 2560,
+                    experts: vec![8],
+                    routes: Vec::new(),
+                    registry: moe::Registry {
+                        epoch: stamp.epoch,
+                        copies: Vec::new(),
+                    },
+                    stamp: stamp.clone(),
+                    preferred_owners: BTreeMap::new(),
+                    resident_order: BTreeMap::new(),
+                },
+                model_experts: vec![8],
+                sessions: Vec::new(),
+                ledger: NativeBatchLedger::open(ledger_path).unwrap(),
+                timeout: Duration::from_millis(1),
+            }
+        }
+
+        let ledger_dir = std::path::PathBuf::from(
+            std::env::var_os("VF_R647_LEDGER_DIR")
+                .expect("test must use its isolated Naos ledger directory"),
+        );
+        assert!(ledger_dir.is_absolute());
+        assert!(ledger_dir.is_dir());
+        assert!(std::fs::read_dir(&ledger_dir).unwrap().next().is_none());
+
+        let stamp = stamp();
+        let run = stamp.run_id.as_bytes();
+        let model = stamp.model_revision.as_bytes();
+        let plan = stamp.plan_id.as_bytes();
+        let identity_len = run.len() + model.len() + plan.len();
+        for (case, field) in ["run", "model", "plan", "epoch", "layer", "reserved"]
+            .into_iter()
+            .enumerate()
+        {
+            let batch = 91 + case as u64;
+            let attempt = 3 + case as u64;
+            let mut header = vec![0_u8; 52];
+            header[..4].copy_from_slice(b"VFB3");
+            header[4..8].copy_from_slice(&1_u32.to_le_bytes());
+            header[8..16].copy_from_slice(&batch.to_le_bytes());
+            header[16..20].copy_from_slice(&1_u32.to_le_bytes());
+            header[20..24].copy_from_slice(&1_u32.to_le_bytes());
+            header[24..28].copy_from_slice(&stamp.layer.to_le_bytes());
+            header[28..36].copy_from_slice(&stamp.epoch.to_le_bytes());
+            header[36..38].copy_from_slice(&(run.len() as u16).to_le_bytes());
+            header[38..40].copy_from_slice(&(model.len() as u16).to_le_bytes());
+            header[40..42].copy_from_slice(&(plan.len() as u16).to_le_bytes());
+            header[44..52].copy_from_slice(&attempt.to_le_bytes());
+
+            let mut identity = [run, model, plan].concat();
+            match field {
+                "run" => identity[0] ^= 1,
+                "model" => identity[run.len()] ^= 1,
+                "plan" => identity[run.len() + model.len()] ^= 1,
+                "epoch" => header[28..36].copy_from_slice(&99_u64.to_le_bytes()),
+                "layer" => header[24..28].copy_from_slice(&99_u32.to_le_bytes()),
+                "reserved" => header[42..44].copy_from_slice(&1_u16.to_le_bytes()),
+                _ => unreachable!(),
+            }
+
+            let mut request = header;
+            request.extend_from_slice(&identity);
+            request.extend_from_slice(&[0xa5; 4]); // sentinel body bytes must remain unread
+            let expected_consumed = if field == "reserved" {
+                52
+            } else {
+                (52 + identity_len) as u64
+            };
+            let mut input = std::io::Cursor::new(request);
+            let mut output = Vec::new();
+            let error =
+                binary_loop(coordinator(&stamp, &ledger_dir), &mut input, &mut output).unwrap_err();
+
+            assert_eq!(error.code, "INVALID_INPUT", "case {field}");
+            assert_eq!(
+                input.position(),
+                expected_consumed,
+                "case {field} read past its rejection point"
+            );
+            assert_eq!(
+                output,
+                reply_v3(batch, attempt, 1, &[], &stamp),
+                "case {field}"
+            );
+            assert!(
+                std::fs::read_dir(&ledger_dir).unwrap().next().is_none(),
+                "case {field} claimed a ticket"
+            );
+        }
+    }
 }
