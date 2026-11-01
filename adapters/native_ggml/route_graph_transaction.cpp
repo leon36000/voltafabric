@@ -54,6 +54,16 @@ bool valid_batch(const RouteBatch &batch, size_t input_count, size_t output_coun
         if (owner_kind < -1 || owner_kind > 2) return false;
     }
 
+    for (size_t checkpoint_index = 0;
+         checkpoint_index < batch.checkpoint_expert_to_registry_expert.size();
+         ++checkpoint_index) {
+        const int32_t expert = batch.checkpoint_expert_to_registry_expert[checkpoint_index];
+        if (expert < 0 || static_cast<size_t>(expert) >= batch.experts) return false;
+        for (size_t prior = 0; prior < checkpoint_index; ++prior) {
+            if (batch.checkpoint_expert_to_registry_expert[prior] == expert) return false;
+        }
+    }
+
     for (size_t token = 0; token < batch.tokens; ++token) {
         for (size_t slot = 0; slot < batch.slots; ++slot) {
             const size_t route = slot + batch.slots * token;
@@ -231,9 +241,24 @@ void RouteGraphTransaction::compute(ggml_tensor *dst, int ith, int nth, void *us
         for (size_t token = 0; token < transaction.batch_.tokens; ++token) {
             for (size_t slot = 0; slot < transaction.batch_.slots; ++slot) {
                 const size_t route = slot + transaction.batch_.slots * token;
-                std::memcpy(&transaction.batch_.expert_ids[route],
+                int32_t checkpoint_expert = -1;
+                std::memcpy(&checkpoint_expert,
                     id_bytes + slot * selected_experts->nb[0] + token * selected_experts->nb[1],
                     sizeof(int32_t));
+                if (!transaction.batch_.checkpoint_expert_to_registry_expert.empty()) {
+                    if (checkpoint_expert < 0 ||
+                        static_cast<size_t>(checkpoint_expert) >=
+                            transaction.batch_.checkpoint_expert_to_registry_expert.size()) {
+                        transaction.status_.store(RouteStatus::invalid_batch,
+                                                  std::memory_order_release);
+                        return;
+                    }
+                    transaction.batch_.expert_ids[route] =
+                        transaction.batch_.checkpoint_expert_to_registry_expert[
+                            static_cast<size_t>(checkpoint_expert)];
+                } else {
+                    transaction.batch_.expert_ids[route] = checkpoint_expert;
+                }
                 std::memcpy(&transaction.batch_.weights[route],
                     weight_bytes + slot * final_weights->nb[1] + token * final_weights->nb[2],
                     sizeof(float));
@@ -308,3 +333,4 @@ bool RouteGraphTransaction::abort_after_failed_route(void *userdata) {
 }
 
 } // namespace vf::ggml
+

@@ -1,0 +1,53 @@
+{
+  "round": "R685",
+  "objective": "Feed the R659 synthetic Q8_0 Qwen2MoE GGUF tensor layout through the pinned donor top-1 gate/build_moe_ffn CPU path and translate donor checkpoint expert IDs into VoltaFabric registry IDs.",
+  "donor": {
+    "project": "llama.cpp / GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "reused_components": [
+      "GGUF v3 parser",
+      "Qwen2MoE sigmoid/top-1 route graph",
+      "Q8_0 gate/up/down matmuls and SiLU activation",
+      "build_moe_ffn and live process_ubatch route hook"
+    ]
+  },
+  "fixture": {
+    "source_recipe": "R659 tests/gguf_moe_layout.rs fixture(false, 32), reproduced locally; generated R659 artifact was not persisted",
+    "architecture": "qwen2moe",
+    "format": "GGUF v3, Q8_0",
+    "tensors": [
+      {"name": "blk.0.ffn_gate_exps.weight", "dimensions": [32, 32, 2]},
+      {"name": "blk.0.ffn_up_exps.weight", "dimensions": [32, 32, 2]},
+      {"name": "blk.0.ffn_down_exps.weight", "dimensions": [32, 32, 2]}
+    ],
+    "file_bytes": 7008,
+    "resident_to_checkpoint_map": [
+      {"resident_expert": 40, "resident_local": 0, "checkpoint_expert": 1},
+      {"resident_expert": 3, "resident_local": 1, "checkpoint_expert": 0}
+    ]
+  },
+  "adaptation": {
+    "field": "RouteBatch.checkpoint_expert_to_registry_expert",
+    "mapping": [3, 40],
+    "validation": "mapped IDs in range and injective; donor selected checkpoint ID translated once before owner lookup; empty map preserves identity behavior"
+  },
+  "verification": {
+    "direct_runner": "PASS; C++17 -Wall -Wextra -Werror; 4 process_ubatch CPU cases",
+    "donor_selected_ids": "checkpoint 0 -> VoltaFabric expert 3; checkpoint 1 -> VoltaFabric expert 40",
+    "route_weights": "donor sigmoid weights 0.25 and 0.75; collector output equals raw output times final weight once within 1e-6",
+    "scalar_oracle": "raw Q8_0/SiLU outputs within 1e-3 relative tolerance",
+    "atomic_refusal": "provider_failure -> null result, GGML_STATUS_FAILED, hooks detached, no published output",
+    "invalid_mapping": "duplicate checkpoint-to-registry IDs rejected before collector callback or output publication",
+    "r684_regression": "PASS; existing F32 GGUF donor bridge identity-map case still passes"
+  },
+  "limitations": [
+    "CPU synthetic one-layer fixture only; no production checkpoint or generation.",
+    "R659 Rust expert-slice loader and donor graph are not composed in a single process in this round.",
+    "Top-1 only; no top-k greater than one, fused gate/up, full generation, CUDA/V100, inter-PC/RDMA, production R53, or performance claim.",
+    "Full CMake configure/CTest registration was not qualified because this isolated source copy omits unrelated files referenced by the full adapter CMakeLists.txt; direct script execution passed.",
+    "Donor CPU SiLU differs slightly from the scalar formula; the explicitly checked relative tolerance is 1e-3."
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R686: connect R659 rank-local Q8_0 expert-slice loading to the mapped donor graph boundary without full tensor staging; compare to the independent scalar Q8_0/FP16 Collector oracle and preserve atomic refusal, CPU-only."
+}

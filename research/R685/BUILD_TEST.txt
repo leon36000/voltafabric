@@ -1,0 +1,22 @@
+Source branch prior to R685: `r663-qwen2moe-collector-bridge-20261101` at the R684 handoff commit `070bcf79a2d44030dcd1b2b8c603622e6122724d`.
+Donor: llama.cpp/GGML revision `3cf03257f219afbe7334045ff7c6a06ac68c627d` (MIT), isolated CPU build; donor GGML tree clean.
+
+Direct R685 test command:
+  VF_LLAMA_SOURCE_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-vf-route-r679 \
+  VF_LLAMA_LIBRARY=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-vf-route-r679-build/bin/libllama.so.0.4.1 \
+  VF_TEST_OUTPUT_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r685-qwen2moe-q8-gguf-20261101/build/manual \
+  CXX=g++ adapters/native_ggml/run_qwen2moe_r659_q8_gguf_build_moe_ffn_test.sh
+
+Result: PASS. The runner compiled the integration test and VoltaFabric route bridge with `-std=c++17 -Wall -Wextra -Werror`; donor parser loaded the 7,008-byte R659-format GGUF v3 file; donor top-1 and Q8_0 gate/up/SiLU/down path completed for two routed experts; mapped IDs 3 and 40 reached the collector; route weights 0.25/0.75 were applied once; collector failure withheld output and duplicate mapping was rejected before callback.
+
+R684 regression command:
+  VF_LLAMA_SOURCE_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-vf-route-r679 \
+  VF_LLAMA_LIBRARY=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-vf-route-r679-build/bin/libllama.so.0.4.1 \
+  VF_TEST_OUTPUT_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r685-qwen2moe-q8-gguf-20261101/build/r684-regression \
+  CXX=g++ adapters/native_ggml/run_qwen2moe_gguf_build_moe_ffn_test.sh
+
+Result: PASS; the optional checkpoint-to-registry map is empty and prior identity-ID behavior remains unchanged.
+
+The full adapter CMake configure probe was attempted but cannot run against this partial isolated source copy: its copied `CMakeLists.txt` refers to unrelated existing adapter files omitted from this scratch directory. This is not a source-build failure in the complete GitLab tree. CTest registration is therefore not claimed; direct runner evidence is the qualified test for this round.
+
+No checkpoint downloads, GPU, production network, R53 reservation, install, cleanup, or automatic relaunch occurred.

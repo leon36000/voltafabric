@@ -41,6 +41,9 @@ struct RouteBatch {
     // Optional registry projection for dynamic routes: one owner kind per expert
     // (-1 remote, 0..2 local), resolved after GGML provides each route ID.
     std::vector<int32_t> owner_by_expert;
+    // Optional checkpoint-index -> VoltaFabric expert-ID projection for donor
+    // graph routes. Empty preserves the original identity mapping.
+    std::vector<int32_t> checkpoint_expert_to_registry_expert;
     std::vector<float> weights;      // [slot, token], forwarded unchanged
 };
 
@@ -146,3 +149,4 @@ private:
 };
 
 } // namespace vf::ggml
+
