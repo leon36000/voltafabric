@@ -1,1 +1,51 @@
-IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLWV1byBwaXBlZmFpbAoKZGllKCkgewogIHByaW50ZiAnUjY4NiBSNjU5IHJhbmstbG9jYWwgc2xpY2UgZG9ub3IgYnJpZGdlIHRlc3Q6ICVzXG4nICIkMSIgPiYyCiAgZXhpdCAyCn0KCjogIiR7VkZfTExBTUFfU09VUkNFX0RJUjo/VkZfTExBTUFfU09VUkNFX0RJUiBpcyByZXF1aXJlZH0iCjogIiR7VkZfTExBTUFfTElCUkFSWTo/VkZfTExBTUFfTElCUkFSWSBpcyByZXF1aXJlZH0iCjogIiR7VkZfVEVTVF9PVVRQVVRfRElSOj9WRl9URVNUX09VVFBVVF9ESVIgaXMgcmVxdWlyZWR9Igo6ICIke0NYWDo/Q1hYIGlzIHJlcXVpcmVkfSIKCmV4cGVjdGVkX3JldmlzaW9uPTNjZjAzMjU3ZjIxOWFmYmU3MzM0MDQ1ZmY3YzZhMDZhYzY4YzYyN2QKYWN0dWFsX3JldmlzaW9uPSQoZ2l0IC1DICIkVkZfTExBTUFfU09VUkNFX0RJUiIgcmV2LXBhcnNlIEhFQUQpCltbICIkYWN0dWFsX3JldmlzaW9uIiA9PSAiJGV4cGVjdGVkX3JldmlzaW9uIiBdXSB8fCBkaWUgInVuZXhwZWN0ZWQgZG9ub3IgcmV2aXNpb246ICRhY3R1YWxfcmV2aXNpb24iCmRvbm9yX2RpcnR5PSQoZ2l0IC1DICIkVkZfTExBTUFfU09VUkNFX0RJUiIgc3RhdHVzIC0tcG9yY2VsYWluIC0tIGdnbWwpCltbIC16ICIkZG9ub3JfZGlydHkiIF1dIHx8IGRpZSAiZG9ub3IgR0dNTCBkZXBlbmRlbmN5IGhhcyBsb2NhbCBjaGFuZ2VzIgoKZm9yIGxpYnJhcnkgaW4gXAogIGxpYmdnbWwtY3B1LnNvLjAuMjQuMCBcCiAgbGliZ2dtbC1iYXNlLnNvLjAuMjQuMCBcCiAgbGliZ2dtbC5zby4wLjI0LjA7IGRvCiAgW1sgLWYgIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKS8kbGlicmFyeSIgXV0gfHwgZGllICJtaXNzaW5nIHBpbm5lZCBkb25vciBsaWJyYXJ5OiAkbGlicmFyeSIKZG9uZQpbWyAtZiAiJFZGX0xMQU1BX0xJQlJBUlkiIF1dIHx8IGRpZSAicGlubmVkIGxsYW1hIGxpYnJhcnkgZG9lcyBub3QgZXhpc3QiCltbICIkKGJhc2VuYW1lIC0tICIkVkZfTExBTUFfTElCUkFSWSIpIiA9PSAibGlibGxhbWEuc28uMC40LjEiIF1dIHx8IGRpZSAidW5leHBlY3RlZCBsbGFtYSBsaWJyYXJ5IGZpbGVuYW1lIgoKbWtkaXIgLXAgIiRWRl9URVNUX09VVFBVVF9ESVIiCnNjcmlwdF9kaXI9JChjZCAtLSAiJChkaXJuYW1lIC0tICIke0JBU0hfU09VUkNFWzBdfSIpIiAmJiBwd2QpCmJpbmFyeT0iJFZGX1RFU1RfT1VUUFVUX0RJUi9xd2VuMm1vZV9sbGFtYV9yNjU5X3JhbmtfbG9jYWxfc2xpY2VfdGVzdCIKCiIkQ1hYIiAtc3RkPWMrKzE3IC1XYWxsIC1XZXh0cmEgLVdlcnJvciAtTzAgLWcgXAogIC1JIiRzY3JpcHRfZGlyIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvc3JjIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvaW5jbHVkZSIgXAogIC1JIiRWRl9MTEFNQV9TT1VSQ0VfRElSL2dnbWwvaW5jbHVkZSIgXAogIC1JIiRWRl9MTEFNQV9TT1VSQ0VfRElSL2dnbWwvc3JjIiBcCiAgIiRzY3JpcHRfZGlyL3F3ZW4ybW9lX2xsYW1hX3I2NTlfcmFua19sb2NhbF9zbGljZV90ZXN0LmNwcCIgXAogICIkc2NyaXB0X2Rpci9yb3V0ZV9ncmFwaF90cmFuc2FjdGlvbi5jcHAiIFwKICAiJHNjcmlwdF9kaXIvcXdlbjJtb2Vfcm91dGVfaW52b2NhdGlvbi5jcHAiIFwKICAiJHNjcmlwdF9kaXIvcXdlbjJtb2VfbGxhbWFfcm91dGVfYnJpZGdlLmNwcCIgXAogICIkVkZfTExBTUFfTElCUkFSWSIgXAogICIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikvbGliZ2dtbC1jcHUuc28uMC4yNC4wIiBcCiAgIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKS9saWJnZ21sLWJhc2Uuc28uMC4yNC4wIiBcCiAgIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKS9saWJnZ21sLnNvLjAuMjQuMCIgXAogIC1XbCwtcnBhdGgsIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKSIgXAogIC1vICIkYmluYXJ5IgoKZG9ub3JfbGlicmFyeV9kaXI9JChkaXJuYW1lIC0tICIkVkZfTExBTUFfTElCUkFSWSIpCkxEX0xJQlJBUllfUEFUSD0iJGRvbm9yX2xpYnJhcnlfZGlyJHtMRF9MSUJSQVJZX1BBVEg6KzokTERfTElCUkFSWV9QQVRIfSIgIiRiaW5hcnkiCg==
+#!/usr/bin/env bash
+set -euo pipefail
+
+die() {
+  printf 'R686 R659 rank-local slice donor bridge test: %s\n' "$1" >&2
+  exit 2
+}
+
+: "${VF_LLAMA_SOURCE_DIR:?VF_LLAMA_SOURCE_DIR is required}"
+: "${VF_LLAMA_LIBRARY:?VF_LLAMA_LIBRARY is required}"
+: "${VF_TEST_OUTPUT_DIR:?VF_TEST_OUTPUT_DIR is required}"
+: "${CXX:?CXX is required}"
+
+expected_revision=3cf03257f219afbe7334045ff7c6a06ac68c627d
+actual_revision=$(git -C "$VF_LLAMA_SOURCE_DIR" rev-parse HEAD)
+[[ "$actual_revision" == "$expected_revision" ]] || die "unexpected donor revision: $actual_revision"
+donor_dirty=$(git -C "$VF_LLAMA_SOURCE_DIR" status --porcelain -- ggml)
+[[ -z "$donor_dirty" ]] || die "donor GGML dependency has local changes"
+
+for library in \
+  libggml-cpu.so.0.24.0 \
+  libggml-base.so.0.24.0 \
+  libggml.so.0.24.0; do
+  [[ -f "$(dirname -- "$VF_LLAMA_LIBRARY")/$library" ]] || die "missing pinned donor library: $library"
+done
+[[ -f "$VF_LLAMA_LIBRARY" ]] || die "pinned llama library does not exist"
+[[ "$(basename -- "$VF_LLAMA_LIBRARY")" == "libllama.so.0.4.1" ]] || die "unexpected llama library filename"
+
+mkdir -p "$VF_TEST_OUTPUT_DIR"
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+binary="$VF_TEST_OUTPUT_DIR/qwen2moe_llama_r659_rank_local_slice_test"
+
+"$CXX" -std=c++17 -Wall -Wextra -Werror -O0 -g \
+  -I"$script_dir" \
+  -I"$VF_LLAMA_SOURCE_DIR/src" \
+  -I"$VF_LLAMA_SOURCE_DIR/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/src" \
+  "$script_dir/qwen2moe_llama_r659_rank_local_slice_test.cpp" \
+  "$script_dir/route_graph_transaction.cpp" \
+  "$script_dir/qwen2moe_route_invocation.cpp" \
+  "$script_dir/qwen2moe_llama_route_bridge.cpp" \
+  "$VF_LLAMA_LIBRARY" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-cpu.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-base.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml.so.0.24.0" \
+  -Wl,-rpath,"$(dirname -- "$VF_LLAMA_LIBRARY")" \
+  -o "$binary"
+
+donor_library_dir=$(dirname -- "$VF_LLAMA_LIBRARY")
+LD_LIBRARY_PATH="$donor_library_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" "$binary"
