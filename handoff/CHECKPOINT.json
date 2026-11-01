@@ -11971,7 +11971,8 @@
     "complete_generation": false,
     "gpu_executed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "readback_files_verified": 3,
+    "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:58:19Z",
-    "next_action": "R649: multiple fresh VFB3 batches through one local session, then bounded donor-launcher boundary."
+    "next_action": "R649: multiple fresh VFB3 batches through one local session, then bounded donor-launcher boundary.",
+    "readback_verified_utc": "2026-11-01T04:00:20Z"
   }

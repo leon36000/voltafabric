@@ -9895,7 +9895,7 @@
   "r648_native_binary_loop_local_worker": {
     "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_TEST_PASS",
     "commit": "3d0c87bdb2a446706b79f0b92241bf59f1d51ea5",
-    "readback_files_verified": 3,
+    "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:58:19Z",
     "owner": "Codex integrator",
     "branch": "r648-native-binary-loop-local-worker-20261101",
@@ -9904,5 +9904,6 @@
     "limits": "One local CPU rank, synthetic format blob, same-provider Resident.forward comparator; no checkpoint, Strata donor, full generation, GPU, RDMA or inter-PC. Ledger claim is consumed and must not be replayed. Eight compile-only fixture stubs remain local under isolated .runs and were not published.",
     "diagnosis": "vf-rank-worker is one-shot and closed before HELLO; no claim was created. vf-rank-session is the persistent process for Session::connect.",
     "automatic_relaunch": false,
-    "next_action": "R649: multiple fresh batches through one local resident session and donor launcher integration."
+    "next_action": "R649: multiple fresh batches through one local resident session and donor launcher integration.",
+    "readback_verified_utc": "2026-11-01T04:00:20Z"
   }
