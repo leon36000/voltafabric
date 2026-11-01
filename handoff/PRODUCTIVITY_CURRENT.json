@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 08:29:12 UTC",
+  "updated_utc": "2026-11-01 08:55:28 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -762,6 +762,29 @@
       "next_action": "Replace the fake peer with the actual local vf-strata-native-bridge coordinator and its vf-rank-session child, using a fresh isolated test identity and ledger; preserve the VFB3/VFR3 client boundary and do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs/post-scale weights from a pinned llama.cpp runtime graph.",
       "boundary_clarification": "The C++ vf::strata_bridge::Client speaks VFB3/VFR3 to the VoltaFabric native-bridge coordinator over AF_UNIX. vf-rank-session is a separate child-side worker protocol; the raw session binary is not a direct peer for this client.",
       "evidence_correction_commit": "418caa32a67f6a8228b5fd21b2354c5d9cf71915"
+    },
+    {
+      "id": "R672",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_PROCESS_TEST_PASS_SECURITY_PIPELINE_SUCCESS",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "961c445636ef319945658a052df1a9a28a55c16f",
+      "source_commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
+      "path": "research/R672",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "R672 adds an opt-in GGML CTest that sends an identified synthetic route through the existing C++ VFB3/VFR3 Client, actual vf-strata-native-bridge coordinator, spawned vf-rank-session worker, RouteGraphTransaction and FP16-decoded/f64 Collector. No transport redesign.",
+      "pinned_route_seam": "Read-only source trace: Qwen2MoE graph call at src/models/qwen2moe.cpp:131-142; selected IDs and post-normalization/w_scale weights in src/llama-graph.cpp:2107-2155; donor later applies weights to down rows at 2316-2318. Callback must replace routed aggregate and avoid double coefficient; preserve shared expert and residual. Runtime callback untested.",
+      "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; four CTest targets built and 4/4 passed, including actual local coordinator/worker process test; direct invocation PASS.",
+      "test_scope": "Synthetic one-slot SC117-format Q8_0 pack; complete run/model/plan/layer/batch/epoch/attempt identity; one route coefficient, downstream once, replay rejected, clean worker/coordinator shutdown; no real checkpoint, donor callback, independent mathematical oracle, GPU, inter-PC, shared R53 or generation.",
+      "local_claim_sha256": "3bafb2bf7f2cc41ee2d1042d6dab4ee5562b3e1032db15b4cf5c005652722776",
+      "donor_source_revision": "https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "security_pipeline_2282": "success: Gitleaks, Semgrep, Trivy and configured fallback; scans only, no C++ build/test",
+      "sha256_manifest": "research/R672/SHA256SUMS",
+      "sha256_manifest_sha256": "47a495615aed585a2bd1d4f88c93a53609eef420830ac48acb7760e42325eb64",
+      "readback_files_verified": 9,
+      "published_utc": "2026-11-01 08:55:28 UTC",
+      "readback_verified_utc": "2026-11-01 08:55:28 UTC",
+      "next_action": "R673: reproduce the native coordinator/worker build from exact current GitLab source readback, then add a pinned llama.cpp dynamic GGML custom op that consumes selected IDs and post-scale weights and replaces only the routed-expert aggregate. Test first with a fresh synthetic CPU fixture. No full generation claim."
     }
   ],
   "acceptance": [
@@ -806,7 +829,8 @@
     "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified.",
     "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch.",
     "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance.",
-    "R671 connects the GGML transaction to the existing VFB3/VFR3 Client, but the graph fixture uses a fake AF_UNIX peer; it does not yet exercise an actual vf-rank-session child or a model/checkpoint graph."
+    "R671 connects the GGML transaction to the existing VFB3/VFR3 Client, but the graph fixture uses a fake AF_UNIX peer; it does not yet exercise an actual vf-rank-session child or a model/checkpoint graph.",
+    "R672 exercises the actual local native-bridge coordinator and spawned rank-session worker through a synthetic GGML route transaction, but its local Rust source snapshot is not an exact full current GitLab checkout. The pinned llama.cpp runtime callback does not yet supply routes; no real checkpoint or complete generation, independent mathematical oracle, GPU, inter-PC/RDMA, shared production R53 or performance is qualified."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -836,7 +860,8 @@
     "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED",
     "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
     "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST",
-    "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS"
+    "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS",
+    "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS"
   ],
   "active_operations": [
     {
@@ -877,14 +902,27 @@
         "pc4_ci_fallback": "success"
       },
       "scope": "configured scans/fallback only; not C++ compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2282",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured security scans and fallback only; not C++ build/test evidence"
     }
   ],
-  "next_action": "Replace the fake peer with the actual local vf-strata-native-bridge coordinator and its vf-rank-session child, using a fresh isolated test identity and ledger; preserve the VFB3/VFR3 client boundary and do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs/post-scale weights from a pinned llama.cpp runtime graph.",
-  "report": "research/R671/REPORT.md",
+  "next_action": "R673: reproduce the native coordinator/worker build from exact current GitLab source readback, then add a pinned llama.cpp dynamic GGML custom op that consumes selected IDs and post-scale weights and replaces only the routed-expert aggregate. Test first with a fresh synthetic CPU fixture. No full generation claim.",
+  "report": "research/R672/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skill-based workflow, automatic relaunch remains stopped, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R671/SHA256SUMS",
-    "sha256": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9",
-    "files": 8
+    "path": "research/R672/SHA256SUMS",
+    "sha256": "47a495615aed585a2bd1d4f88c93a53609eef420830ac48acb7760e42325eb64",
+    "files": 6
   }
 }

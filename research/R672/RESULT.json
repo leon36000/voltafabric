@@ -1,12 +1,23 @@
 {
   "round": "R672",
-  "state": "LOCAL_CPU_PROCESS_INTEGRATION_PASS_PENDING_GITLAB_PUBLICATION",
+  "state": "PRIVATE_GITLAB_PROCESS_INTEGRATION_PASS_SECURITY_SCANS_SUCCESS",
   "branch": "r663-qwen2moe-collector-bridge-20261101",
   "parent_commit": "961c445636ef319945658a052df1a9a28a55c16f",
+  "source_commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
   "donor": {
     "repository": "ggml-org/llama.cpp",
     "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
     "license": "MIT"
+  },
+  "pinned_runtime_route_trace": {
+    "model_file": "src/models/qwen2moe.cpp",
+    "model_lines": "131-142",
+    "graph_file": "src/llama-graph.cpp",
+    "graph_lines": "2107-2155",
+    "capture_point": "selected expert IDs and final weights after optional normalization and w_scale; before expert projections",
+    "coefficient_guard": "replace routed expert aggregate and bypass donor's later weights multiply; preserve Qwen2MoE shared expert and residual",
+    "runtime_callback_tested": false,
+    "upstream_source": "https://github.com/ggml-org/llama.cpp/tree/3cf03257f219afbe7334045ff7c6a06ac68c627d"
   },
   "test": {
     "cmake": "AArch64 C++17, -Wall -Wextra -Werror; four targets built",
@@ -55,5 +66,16 @@
     "inter_pc_network_used": false,
     "performance_claim": false
   },
-  "next_action": "R673: capture real selected Qwen2MoE expert IDs and post-scale weights at a pinned llama.cpp runtime graph seam; first reproduce the Rust coordinator build from exact GitLab source readback."
+  "next_action": "R673: connect the pinned llama.cpp route outputs to the identified VoltaFabric graph transaction; first reproduce the Rust coordinator build from exact GitLab source readback.",
+  "security_pipeline": {
+    "id": 2282,
+    "status": "success",
+    "jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "scope": "configured security scans and fallback only; no compile or test evidence"
+  }
 }

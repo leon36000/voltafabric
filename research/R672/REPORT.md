@@ -14,6 +14,16 @@ The logical pack is 50,292,326,400 bytes, created sparsely; the only expert payl
 - Reuses VoltaFabric's existing C++ VFB3/VFR3 client, Rust coordinator, `vf-rank-session` worker, GGML graph transaction and ordinary FP16-decoded/f64 Collector. No new transport protocol was introduced.
 - Adds only a process-level test target in CMake and its synthetic fixture input; the production graph/collector implementation is unchanged by R672.
 
+## Pinned donor route seam
+
+Read-only inspection of the official pinned source identifies a concrete integration point:
+
+- The [Qwen2MoE model graph](https://github.com/ggml-org/llama.cpp/blob/3cf03257f219afbe7334045ff7c6a06ac68c627d/src/models/qwen2moe.cpp#L131-L142) calls `build_moe_ffn` with softmax gating and `hparams.expert_weights_scale`.
+- In [llm_graph_context::build_moe_ffn](https://github.com/ggml-org/llama.cpp/blob/3cf03257f219afbe7334045ff7c6a06ac68c627d/src/llama-graph.cpp#L2107-L2155), the graph produces selected IDs with `ggml_argsort_top_k`, gathers their probabilities, applies any configured normalization and `w_scale`, then expands the resulting weights before expert execution.
+- The same function later multiplies the down-projection rows by those weights before summing experts. A VoltaFabric callback must consume IDs and final weights after scaling, replace the routed-expert aggregate, and avoid the donor's subsequent weight multiply; the Qwen2MoE shared-expert and residual paths remain in the graph.
+
+This is source tracing only. The R672 test still supplies a synthetic route and does not execute that llama.cpp runtime callback.
+
 ## Verification
 
 On the AArch64 CPU, the four-target CMake build completed with C++17 `-Wall -Wextra -Werror`. CTest passed 4/4: `native_provider`, `route_graph_transaction`, `route_graph_vfr3`, and `route_graph_vfr3_bridge_process`. A direct invocation of the process test also passed with a fresh run/model/plan/batch/epoch/attempt and ledger claim.
@@ -32,4 +42,5 @@ The Rust executables were built offline from the isolated source snapshot docume
 
 ## Next step
 
-R673: inspect the pinned llama.cpp Qwen2MoE runtime graph after routing and capture its actual selected expert IDs and post-scale weights into the existing identified route transaction, preserving token/slot order and single-use coefficient application. First make the Rust process build reproducible from the exact GitLab branch readback, then use only a fresh CPU synthetic fixture to verify the capture seam. Do not claim complete generation until a compatible checkpoint runs through the complete token loop.
+R673: add a dynamic GGML custom op at the pinned `build_moe_ffn` seam that consumes actual selected IDs and post-scale weights, submits the identified route through the existing VoltaFabric client, and replaces only the routed-expert aggregate. Keep coefficient application single-use and preserve the Qwen2MoE shared-expert and residual branches. First reproduce the coordinator build from exact GitLab source readback; then test only with a fresh synthetic CPU fixture. Do not claim complete generation until a compatible checkpoint runs through the complete token loop.
+

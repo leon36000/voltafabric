@@ -12290,5 +12290,19 @@
     "readback_sha256_files": 8,
     "local_rustfmt": "rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0; --edition 2021 --config skip_children=true --check passed on three changed Rust files; child modules skipped.",
     "security_pipeline_2253": "success_security_scan_only"
+  },
+  "r672_live_coordinator_vfr3": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "961c445636ef319945658a052df1a9a28a55c16f",
+    "source_commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; four CTest targets built and 4/4 passed, including actual local native bridge coordinator plus spawned rank-session worker.",
+    "test_scope": "Synthetic one-slot GGML route, Q8_0 fixture, local single-use ledger; no exact full current-tip Rust build, real llama.cpp callback/checkpoint, generation, independent mathematical oracle, GPU, inter-PC, production R53 or performance.",
+    "route_seam": "Pinned llama.cpp Qwen2MoE IDs and post-normalization/w_scale weights are available before expert projections; replacing the routed aggregate must bypass donor down-row weight multiply while preserving shared/residual paths. Source trace only.",
+    "local_claim_sha256": "3bafb2bf7f2cc41ee2d1042d6dab4ee5562b3e1032db15b4cf5c005652722776",
+    "pipeline_2282": "success; security scans/fallback only, not build/test",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R673: reproduce from exact GitLab source readback, then implement and test the dynamic GGML custom op at the pinned Qwen2MoE seam using fresh synthetic CPU fixtures. No complete generation claim."
   }
 }
