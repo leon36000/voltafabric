@@ -4289,7 +4289,7 @@
   },
   "active_operation": null,
   "active_operations": [],
-  "active_phase": "R639_PUBLISHED_MIXED_OWNER_SOURCE_REVIEW_ONLY",
+  "active_phase": "R640_PUBLISHED_MIXED_OWNER_DISPATCH_PATCH_SOURCE_REVIEW_ONLY",
   "active_workers": [],
   "actual_billing_usd": 0,
   "adapter_frontier_coverage": {
@@ -5711,10 +5711,10 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
+  "next_action": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
   "next_command": "NONE until snapshot is prepared and GitLab authentication exists.",
   "next_command_expected_result": "Read-only filenames of actual native-pack loader; no engine execution, no payload/model/GPU. Store bounded receipt.",
-  "next_cpu_action": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
+  "next_cpu_action": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
   "next_cwd": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/source",
   "next_hardware_candidate_evidence": null,
   "next_hardware_command": "NONE: no new hardware case admitted; R81 budget1/1 exhausted.",
@@ -5727,9 +5727,9 @@
     "No CUDA/RDMA/GPUDirect/production claim from CPU evidence.",
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
-  "next_required_work": "R640: wire the mixed CPU-miss callback into the exact pinned Strata dispatch after final ownership classification; preserve failure drain/refusal, then build and compare the CPU row outputs to an independent oracle. No hardware or production R53 admission.",
-  "next_task": "R640_STRATA_MIXED_CPU_MISS_CALLBACK",
-  "next_updated_utc": "2026-11-01T02:50:22Z",
+  "next_required_work": "R641: connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and preserve fail-closed draining. Then qualify the CPU row output against an independent oracle. No hardware or real R53 admission.",
+  "next_task": "R641_STRATA_GENERATOR_POOL_OWNER_HANDOFF",
+  "next_updated_utc": "2026-11-01T02:54:29Z",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
     "active_operation": null,
@@ -11641,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "research/R639/REPORT.md",
+  "latest_productivity_report": "research/R640/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -11794,5 +11794,29 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "manifest_sha256": "07022a75559cf016aac23b559dbb8e8c0926dbbbcd0c123e09bace8ebf6b22d9",
     "next_action": "R640 on a new explicit owner request; integrate the exact pinned donor dispatch and qualify CPU behavior against an independent oracle."
+  },
+  "r640_mixed_owner_dispatch": {
+    "status": "PUBLISHED_PATCH_ARTIFACT_SOURCE_REVIEW_ONLY; GENERATOR_CALLBACK_UNSET",
+    "branch": "r640-strata-mixed-miss-dispatch-20261101",
+    "base_commit": "43896929981d00c4e12b7455cb4e221f8be1c0d5",
+    "commit": "43896929981d00c4e12b7455cb4e221f8be1c0d5",
+    "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "report": "research/R640/REPORT.md",
+    "receipt": "research/R640/receipt.json",
+    "generator": "adapters/strata_native_bridge/make_mixed_owner_patch.py",
+    "patch": "adapters/strata_native_bridge/strata-fb58-mixed-owner.patch",
+    "patch_sha256": "c8e2848813ebd079a71cfa81a8d31c62214a413e0be50803e0b9619b8481da9b",
+    "ownership_semantics": "Callback runs after final -1..2 owner mapping; a separate mask marks only successfully handled -1 rows; remaining misses stay on Strata CPU. Failure drains started peer/remote owners and returns through verifier refusal/drain.",
+    "generator_callback_initialized": false,
+    "donor_modified": false,
+    "compiler_or_tests_run": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "manifest_sha256": "9513b3509190b0963a3975bb8da21c85797d526a92cd195a9156a1f2110db41f",
+    "next_action": "R641 on the active owner-requested turn: wire owner lifetime and launcher identity into generation context, then qualify CPU output with an independent oracle."
   }
 }

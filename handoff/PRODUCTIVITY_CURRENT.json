@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T02:50:22Z",
+  "updated_utc": "2026-11-01T02:54:29Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -51,6 +51,17 @@
       "commit": "8beb1f7274bb96ce98e04e7e58b6a15a5c826a9f",
       "published_utc": "2026-11-01T02:50:22Z",
       "readback_files_verified": 6
+    },
+    {
+      "id": "R640",
+      "owner": "integrator",
+      "state": "PATCH_ARTIFACT_PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_REVIEW_ONLY",
+      "branch": "r640-strata-mixed-miss-dispatch-20261101",
+      "parent_commit": "43896929981d00c4e12b7455cb4e221f8be1c0d5",
+      "path": "research/R640",
+      "commit": "43896929981d00c4e12b7455cb4e221f8be1c0d5",
+      "published_utc": "2026-11-01T02:54:29Z",
+      "readback_files_verified": 5
     }
   ],
   "acceptance": [
@@ -67,7 +78,8 @@
     "No qualified integration of vLLM, SGLang, TensorRT-LLM, Maya, or DeepInfer as a runtime is established by this wave; DeepInfer remains a source of ideas, not the target engine.",
     "No performance comparison, full-model GPU run, RDMA run, or inter-PC generation is claimed.",
     "R638 binds local Strata native-pipe batches to run/model/plan/layer/epoch/batch/attempt and reserves the exact local ticket before dispatch; the pinned generator callback remains unset, so complete generation is still not qualified.",
-    "R639 adds a mixed-owner CPU-miss callback for Strata kinds -1..2, but the pinned donor dispatch does not call it; no compiler/tests or generation ran for this wave."
+    "R639 adds a mixed-owner CPU-miss callback for Strata kinds -1..2, but the pinned donor dispatch does not call it; no compiler/tests or generation ran for this wave.",
+    "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -76,14 +88,14 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R640_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Wire the R639 mixed CPU-miss callback after the exact pinned Strata ownership map is final; skip only successfully handled CPU-miss rows and route failures through the existing drain/refusal path. Then build and compare against an independent CPU row oracle. No GPU, inter-PC, production-network, or real-R53 work without fresh admission."
+    "status": "R641_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Connect the 48-session PoolFleetOwner lifetime and launcher identity to the pinned Strata generation Drive, install the mixed callback only when explicitly admitted, and make callback refusal drain the active verifier path. Then qualify the CPU row output against an independent oracle. No GPU/inter-PC/production-network/R53 work without fresh admission."
   },
-  "report": "research/R639/REPORT.md",
+  "report": "research/R640/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R639/SHA256SUMS",
-    "sha256": "07022a75559cf016aac23b559dbb8e8c0926dbbbcd0c123e09bace8ebf6b22d9",
-    "files": 5
+    "path": "research/R640/SHA256SUMS",
+    "sha256": "9513b3509190b0963a3975bb8da21c85797d526a92cd195a9156a1f2110db41f",
+    "files": 4
   }
 }
