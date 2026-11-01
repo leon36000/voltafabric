@@ -1,0 +1,37 @@
+{
+  "round": "R676",
+  "state": "HOST_INVOCATION_GATE_CPU_PASS",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "adaptation": {
+    "type": "RouteGraphInvocation",
+    "expected_transactions": "fixed before invocation; exact number required before accept",
+    "identity": "complete run/model/plan/layer/epoch/batch/attempt Stamp",
+    "duplicate_stamp": "rejected",
+    "graph_reuse": "disallowed when routed transaction count is nonzero",
+    "acceptance": "single use; GGML SUCCESS plus every expected transaction READY",
+    "failure": "missing transaction or any non-ready route blocks host result publication"
+  },
+  "tests": {
+    "platform": "AArch64 CPU",
+    "build": "C++17 -Wall -Wextra -Werror",
+    "ctest": {"passed": 3, "total": 3, "names": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]},
+    "complete_invocation_output": [0.75, 1.25, 7.5, 12.5],
+    "independent_scalar_oracle": "FP64 weighted sum; max absolute error <= 1e-6",
+    "second_expected_transaction_pending": "host gate refuses batch despite graph SUCCESS",
+    "acceptance_replay": "refused"
+  },
+  "llama_callback_integrated": false,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "cuda_graph_qualified": false,
+  "inter_pc_or_rdma": false,
+  "production_r53": false,
+  "performance_comparison": false,
+  "r673_unknown_receipt_replayed": false,
+  "next_action": "R677: apply reuse veto, fresh transaction creation and host acceptance gate in the pinned llama.cpp Qwen2MoE source path."
+}

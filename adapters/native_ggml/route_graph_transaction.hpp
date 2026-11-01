@@ -65,6 +65,7 @@ public:
     void attach_abort(ggml_cplan &plan);
     bool accepts(ggml_status graph_status) const;
     RouteStatus status() const;
+    const BatchIdentity &identity() const { return batch_.identity; }
 
 private:
     static void compute(ggml_tensor *dst, int ith, int nth, void *userdata);
@@ -83,6 +84,62 @@ private:
     bool dynamic_route_inputs_ = false;
     std::atomic<bool> compute_started_{false};
     std::atomic<RouteStatus> status_{RouteStatus::pending};
+};
+
+// Host-side gate for one graph execution. Routed graphs are not reusable because
+// every RouteGraphTransaction carries one complete, single-use Stamp. Construct
+// the gate with the number of route transactions expected in this graph, register
+// them before compute, and expose the graph result only after accepts() succeeds.
+class RouteGraphInvocation {
+public:
+    explicit RouteGraphInvocation(size_t expected_transactions)
+        : expected_transactions_(expected_transactions) {}
+
+    bool add(const RouteGraphTransaction &transaction) {
+        if (finalized_ || transactions_.size() >= expected_transactions_ ||
+            transaction.status() != RouteStatus::pending) {
+            return false;
+        }
+        const auto &identity = transaction.identity();
+        for (const auto *existing : transactions_) {
+            const auto &prior = existing->identity();
+            if (prior.run == identity.run && prior.model == identity.model &&
+                prior.plan == identity.plan && prior.layer == identity.layer &&
+                prior.epoch == identity.epoch && prior.batch == identity.batch &&
+                prior.attempt == identity.attempt) {
+                return false;
+            }
+        }
+        transactions_.push_back(&transaction);
+        return true;
+    }
+
+    bool graph_reuse_allowed() const {
+        return expected_transactions_ == 0 && transactions_.empty() && !finalized_;
+    }
+
+    bool accepts(ggml_status graph_status) {
+        if (finalized_) return false;
+        finalized_ = true;
+        if (transactions_.size() != expected_transactions_ ||
+            graph_status != GGML_STATUS_SUCCESS) {
+            return false;
+        }
+        for (const auto *transaction : transactions_) {
+            if (transaction == nullptr || transaction->status() != RouteStatus::ready) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    size_t expected_transactions() const { return expected_transactions_; }
+    size_t registered_transactions() const { return transactions_.size(); }
+
+private:
+    size_t expected_transactions_ = 0;
+    std::vector<const RouteGraphTransaction *> transactions_;
+    bool finalized_ = false;
 };
 
 } // namespace vf::ggml

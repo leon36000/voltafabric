@@ -10,6 +10,7 @@
 namespace {
 using vf::ggml::BatchIdentity;
 using vf::ggml::RouteBatch;
+using vf::ggml::RouteGraphInvocation;
 using vf::ggml::RouteGraphTransaction;
 using vf::ggml::RouteStatus;
 
@@ -285,6 +286,18 @@ bool run_fresh_invocation() {
 
     FreshCapture capture;
     RouteGraphTransaction transaction(batch, capture_fresh_invocation, &capture);
+    RouteBatch pending_batch = batch;
+    pending_batch.identity.batch++;
+    RouteGraphTransaction pending_transaction(pending_batch, capture_fresh_invocation, &capture);
+    RouteGraphInvocation invocation(1);
+    RouteGraphInvocation incomplete_invocation(2);
+    RouteGraphInvocation duplicate_stamp_invocation(2);
+    if (!invocation.add(transaction) || invocation.graph_reuse_allowed() ||
+        !incomplete_invocation.add(transaction) || !incomplete_invocation.add(pending_transaction) ||
+        !duplicate_stamp_invocation.add(transaction) || duplicate_stamp_invocation.add(transaction)) {
+        std::cerr << "per-invocation route registration/reuse gate failed\\n";
+        return false;
+    }
     size_t downstream_calls = 0;
     Graph g;
     ggml_init_params params{};
@@ -322,7 +335,10 @@ bool run_fresh_invocation() {
 
     const ggml_status status = ggml_graph_compute(g.graph, &g.plan);
     const auto *out = static_cast<const float *>(g.downstream->data);
-    return transaction.accepts(status) && transaction.status() == RouteStatus::ready &&
+    const bool complete_batch_accepted = invocation.accepts(status);
+    const bool incomplete_batch_rejected = !incomplete_invocation.accepts(status);
+    return complete_batch_accepted && !invocation.accepts(status) && incomplete_batch_rejected &&
+           transaction.status() == RouteStatus::ready &&
            capture.calls == 1 && downstream_calls == 1 &&
            std::fabs(out[0] - 0.75f) <= 1e-6f && std::fabs(out[1] - 1.25f) <= 1e-6f &&
            std::fabs(out[2] - 7.5f) <= 1e-6f && std::fabs(out[3] - 12.5f) <= 1e-6f;

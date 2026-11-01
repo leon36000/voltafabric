@@ -1,0 +1,17 @@
+R676 BUILD AND TEST RECEIPT
+
+Changed code:
+  adapters/native_ggml/route_graph_transaction.hpp
+  adapters/native_ggml/route_graph_dynamic_capture_test.cpp
+
+Build:
+  cmake --build ../build-full --target vf_route_graph_dynamic_capture_test -j2
+  Result: pass; C++17 -Wall -Wextra -Werror.
+
+Focused suite:
+  ctest --test-dir ../build-full --output-on-failure -R '^(route_graph_transaction|route_graph_vfr3|route_graph_dynamic_capture)$'
+  Result: 3/3 passed.
+
+The dynamic test registers complete fresh identities before compute, refuses duplicate Stamp registration, confirms graph reuse is disabled for a routed invocation, accepts one fully ready invocation once, and refuses a two-transaction invocation when one transaction remains pending despite GGML_SUCCESS.
+
+CPU synthetic fixture only. No llama.cpp callback, real checkpoint/model, generation, GPU/CUDA graph, inter-PC/RDMA, production R53, or performance run. R673 process receipt remains RESERVED_UNKNOWN_NO_REPLAY and was not rerun.
