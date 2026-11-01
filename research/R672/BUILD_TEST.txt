@@ -1,0 +1,27 @@
+R672 BUILD AND TEST RECEIPT
+
+Platform: aarch64 (CPU only).
+
+Pinned donor:
+  git -C /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-ggml-3cf03257 rev-parse HEAD
+  3cf03257f219afbe7334045ff7c6a06ac68c627d
+
+Rust binaries (offline, locked; local R663 source snapshot with selected later Session sources):
+  VF_GGML_NATIVE_BUILD=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r655-ggml-collector-cpu-20261101-work/build cargo +1.90.0 build --manifest-path /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r663-exact-collector-test-20261101/source/Cargo.toml --locked --offline --features native-ggml-cpu --bin vf-strata-native-bridge --bin vf-rank-session
+
+C++ build:
+  cmake --build /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r671-vfr3-route-graph-20261101/build-full --target vf_native_ggml_test vf_route_graph_transaction_test vf_route_graph_vfr3_test vf_route_graph_vfr3_bridge_process_test -j2
+  Result: all four targets built with C++17 -Wall -Wextra -Werror.
+
+CTest:
+  env VF_R672_BRIDGE_EXE=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r663-exact-collector-test-20261101/source/target/debug/vf-strata-native-bridge VF_R672_SESSION_EXE=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r663-exact-collector-test-20261101/source/target/debug/vf-rank-session VF_R672_TMP_ROOT=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r672-live-coordinator-test-20261101 VF_R672_INDEX_PATH=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r671-vfr3-route-graph-20261101/fixtures/strata_sc117_native_experts_v3.txt ctest --test-dir /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r671-vfr3-route-graph-20261101/build-full --output-on-failure
+  Result: 4/4 passed; total 0.40 sec.
+
+Direct test:
+  vf_route_graph_vfr3_bridge_process_test
+  Result: PASS; run r672-live-coordinator-1554949; one fresh local RESERVED_UNKNOWN_NO_REPLAY claim.
+  Test files are intentionally retained under Naos .runs. The sparse GGUF fixture is 50,292,326,400 logical bytes, with 2,179,072 allocated bytes and 2,176,000 bytes of synthetic expert payload.
+
+Limits:
+  This test does not load a checkpoint, call a real llama.cpp inference runtime, use shared/production R53, use GPU/inter-PC transport, or qualify complete generation. The Rust test binary source tree is not claimed to be the exact current GitLab branch checkout; see REPORT.md and RESULT.json.
+

@@ -43,6 +43,14 @@ target_link_libraries(vf_route_graph_vfr3_test PRIVATE vf_native_ggml Threads::T
 target_compile_options(vf_route_graph_vfr3_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_vfr3 COMMAND vf_route_graph_vfr3_test)
 
+# Process-level CPU integration against the real coordinator and its rank worker.
+# The executables and fixture paths are supplied explicitly by the isolated run.
+add_executable(vf_route_graph_vfr3_bridge_process_test route_graph_vfr3_bridge_process_test.cpp)
+target_link_libraries(vf_route_graph_vfr3_bridge_process_test PRIVATE vf_native_ggml)
+target_compile_options(vf_route_graph_vfr3_bridge_process_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME route_graph_vfr3_bridge_process COMMAND vf_route_graph_vfr3_bridge_process_test)
+set_tests_properties(route_graph_vfr3_bridge_process PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 120)
+
 # Diagnostic reference only; it is not part of the live worker/provider path.
 option(VF_BUILD_SCALAR_REFERENCE "Build bounded SC117 scalar diagnostic" OFF)
 if(VF_BUILD_SCALAR_REFERENCE)

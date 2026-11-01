@@ -1,0 +1,59 @@
+{
+  "round": "R672",
+  "state": "LOCAL_CPU_PROCESS_INTEGRATION_PASS_PENDING_GITLAB_PUBLICATION",
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "parent_commit": "961c445636ef319945658a052df1a9a28a55c16f",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "test": {
+    "cmake": "AArch64 C++17, -Wall -Wextra -Werror; four targets built",
+    "ctest": {
+      "result": "4/4 passed",
+      "tests": [
+        "native_provider",
+        "route_graph_transaction",
+        "route_graph_vfr3",
+        "route_graph_vfr3_bridge_process"
+      ]
+    },
+    "direct_process_run": {
+      "result": "PASS",
+      "run_id": "r672-live-coordinator-1554949",
+      "model_revision": "r672-synthetic-sc117-1554949",
+      "plan_id": "r672-live-plan-1554949",
+      "layer": 0,
+      "batch": 673554949,
+      "epoch": 6720261101,
+      "attempt": 1,
+      "sparse_pack_logical_bytes": 50292326400,
+      "expert_payload_bytes": 2176000,
+      "allocated_sparse_pack_bytes": 2179072,
+      "local_claim_sha256": "3bafb2bf7f2cc41ee2d1042d6dab4ee5562b3e1032db15b4cf5c005652722776"
+    },
+    "ledger_claim_state": "RESERVED_UNKNOWN_NO_REPLAY",
+    "automatic_retry": false
+  },
+  "rust_test_binaries": {
+    "source_snapshot": "R663 baseline documented in SNAPSHOT.txt with selected later Session source files",
+    "bridge_sha256": "db1b64ce446fd6dea3a2f7ba8a85ce2afa466f5c05a6206726b293cf5e14c95c",
+    "rank_session_sha256": "3ac217dfc372126bdf2503df3719b26345f33b818aea3c6e984321b4a7f6357a",
+    "source_tree_exact_gitlab_tip": false,
+    "reason": "Several local Rust crate files differ from current branch readback; coordinator/worker entrypoints, Cargo files, lib.rs, routing.rs and native_ledger.rs matched byte-for-byte."
+  },
+  "scope": {
+    "cpu_only": true,
+    "aarch64": true,
+    "model_loaded": false,
+    "checkpoint_loaded": false,
+    "complete_generation": false,
+    "real_donor_routes_captured": false,
+    "production_r53_used": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "performance_claim": false
+  },
+  "next_action": "R673: capture real selected Qwen2MoE expert IDs and post-scale weights at a pinned llama.cpp runtime graph seam; first reproduce the Rust coordinator build from exact GitLab source readback."
+}
