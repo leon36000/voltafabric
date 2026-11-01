@@ -9919,6 +9919,20 @@
     "limits": "Same-provider expected values, synthetic payload and one CPU rank; no checkpoint, donor generation callback, full generation, GPU or inter-PC. The preliminary overlap attempt reused one consumed R648 ticket and is quarantined, fully disclosed and never replayed.",
     "quarantine": "Preserve all R648 and preliminary R649 receipts; the clean R649 run uses run r649-multi-batch-binary-loop, batches 9649001/9649002, attempts 14/15.",
     "automatic_relaunch": false,
-    "next_action": "R650: test the local Strata launcher to Rust bridge lifecycle with fresh identities, no checkpoint/GPU.",
+    "next_action": "R649 two-batch CPU VFB3 session passed; R650 verified the real launcher helper to Rust bridge path.",
     "readback_verified_utc": "2026-11-01T04:04:23Z"
+  },
+  "r650_native_launcher_bridge_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+    "commit": "3f960e897a1eba8dfe09154596f6c4a2db7fd97e",
+    "readback_files_verified": 4,
+    "published_utc": "2026-11-01T04:08:12Z",
+    "owner": "Codex integrator",
+    "branch": "r650-launcher-native-bridge-20261101",
+    "scope": "Existing launcher helper launches actual vf-strata-native-bridge and local vf-rank-session; sparse synthetic SC117 expert; one valid VFB3 batch, VFR3 identity/shape/finiteness and graceful shutdown.",
+    "test": "cargo build --locked --offline --features native-ggml-cpu --bin vf-strata-native-bridge; python3 -B research/R650/cpu-harness/test_native_bridge_launcher.py; PASS.",
+    "limits": "Internal helper only, not public 48-layer launch; no Strata donor, checkpoint or independent numeric oracle; no full generation/GPU/RDMA/inter-PC.",
+    "identity": "run r650-actual-bridge-launcher, model r650-synthetic-sc117, plan r650-synthetic-plan, layer 0, epoch 77, batch 9650001, attempt 30; one RESERVED_UNKNOWN_NO_REPLAY receipt.",
+    "automatic_relaunch": false,
+    "next_action": "R651: bounded donor generation callback integration, CPU fixture only."
   }

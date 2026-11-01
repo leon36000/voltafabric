@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:04:23Z",
+  "updated_utc": "2026-11-01T04:08:12Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -193,6 +193,19 @@
       "readback_files_verified": 11,
       "published_utc": "2026-11-01T04:03:42Z",
       "readback_verified_utc": "2026-11-01T04:04:23Z"
+    },
+    {
+      "id": "R650",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+      "branch": "r650-launcher-native-bridge-20261101",
+      "parent_commit": "f62253aee7e8c4f8c6aaf65fc828e130d50196e4",
+      "source_commit": "3f960e897a1eba8dfe09154596f6c4a2db7fd97e",
+      "path": "research/R650",
+      "test": "locked/offline native bridge build PASS; Python CPU harness PASS",
+      "test_scope": "existing Strata launcher _start_bridge/_finish_sessions with actual Rust vf-strata-native-bridge and vf-rank-session; one synthetic sparse-pack expert; VFB3/VFR3 identity/shape/finiteness and graceful shutdown; one local claim",
+      "readback_files_verified": 4,
+      "published_utc": "2026-11-01T04:08:12Z"
     }
   ],
   "acceptance": [
@@ -221,7 +234,8 @@
     "R646 tests the exact VFB3 header/identity parsing helper used by binary_loop, not binary_loop's VFR3 output or actual ticket reservation. No checkpoint, Strata callback, full generation, GPU, RDMA or inter-PC run.",
     "R648 exercises the real VFB3 binary_loop with one local vf-rank-session and a synthetic GGML resident; its expected result uses the same provider, only one consumed local ledger claim is tested, and no checkpoint, donor callback, full generation, GPU or inter-PC path is qualified.",
     "R649 clean CPU test sends two unique VFB3 batches through one vf-rank-session and checks exact unweighted VFR3 responses plus two durable local claims, but uses synthetic GGML and the same-provider Resident.forward comparator; no checkpoint, donor callback or complete generation is qualified.",
-    "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed."
+    "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed.",
+    "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -234,18 +248,19 @@
     "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY",
     "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY",
     "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
-    "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML"
+    "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
+    "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R650_READY_ON_OWNER_REQUEST",
-    "purpose": "Connect the proven Rust bridge/session boundary to the existing Strata launcher with a bounded local CPU fixture and fresh identities; verify lifecycle and atomic result handoff. No checkpoint load, GPU or inter-PC work."
+    "status": "R651_READY_ON_OWNER_REQUEST",
+    "purpose": "Inspect and wire the pinned donor's real generation callback to launcher-managed sessions with a bounded CPU fixture; no complete checkpoint, GPU, RDMA or inter-PC run."
   },
-  "report": "research/R649/REPORT.md",
+  "report": "research/R650/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R649/SHA256SUMS",
-    "sha256": "6a8d9a00a6b309fef2fe3b4d64cb104c210ba4d09faca694abbf94572e976f03",
-    "files": 7
+    "path": "research/R650/SHA256SUMS",
+    "sha256": "95fd8eab44642bee09eb9127570f746942bae2d3e43625ddd10ac0fe863ba6aa",
+    "files": 3
   }
 }
