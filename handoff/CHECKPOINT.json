@@ -12358,6 +12358,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R675: fresh per-invocation graph transaction plus host-side status validation before connecting the Qwen2MoE callback."
   },
+
   "r675_fresh_graph_invocation": {
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
@@ -12372,7 +12373,7 @@
     "oracle": "Independent scalar FP64 weighted output [0.75, 1.25, 7.5, 12.5] for synthetic Q8_0 route fixture.",
     "test_scope": "No donor callback, checkpoint/model, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
     "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
-    "pipeline_2288": "pending; scans/fallback only, not C++ build/test",
+    "pipeline_2288": "canceled by subsequent handoff push before scans completed",
     "readback_files_verified": 5,
     "readback_verified_utc": "2026-11-01 09:21:26 UTC",
     "model_loaded": false,
@@ -12381,7 +12382,39 @@
     "inter_pc_network_used": false,
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R676: wire fresh transactions and host-side readiness validation into the pinned llama.cpp Qwen2MoE callback."
+    "next_action": "R676: wire fresh transactions and host-side readiness validation into the pinned llama.cpp Qwen2MoE callback.",
+    "pipeline_2289": {
+      "status": "pending",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "pending"
+      }
+    }
+  },
+  "r675_pipeline_reconciled": {
+    "pipeline_2288": {
+      "status": "canceled",
+      "jobs": {
+        "pc4_ci_fallback": "canceled",
+        "pc4_trivy": "canceled",
+        "pc4_semgrep": "canceled",
+        "pc4_gitleaks": "canceled"
+      },
+      "scope": "code commit scan canceled before completion"
+    },
+    "pipeline_2289": {
+      "status": "pending",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "pending"
+      },
+      "scope": "handoff-only commit; not C++ build/test"
+    },
+    "updated_utc": "2026-11-01 09:21:59 UTC"
   }
 
 }

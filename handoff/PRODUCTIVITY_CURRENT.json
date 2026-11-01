@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 09:21:26 UTC",
+  "updated_utc": "2026-11-01 09:21:59 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -830,7 +830,7 @@
     {
       "id": "R675",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_CTEST_3_PASS_PIPELINE_2288_PENDING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_CTEST_3_PASS_PIPELINE_2288_CANCELED_PIPELINE_2289_PENDING",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
       "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
@@ -842,10 +842,11 @@
       "readback_files_verified": 5,
       "manifest_entries_verified": "4/4 exact readback",
       "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
-      "pipeline_2288": "pending; configured scans/fallback only, not C++ build/test",
+      "pipeline_2288": "canceled when handoff commit pipeline 2289 superseded it; no CI scan completion; scans/fallback only",
       "published_utc": "2026-11-01T09:20:35Z",
       "readback_verified_utc": "2026-11-01 09:21:26 UTC",
-      "next_action": "R676: wire fresh transaction creation and host status validation into the pinned llama.cpp Qwen2MoE callback, replace only routed-expert aggregate, preserve shared/residual path and apply coefficients once."
+      "next_action": "R676: wire fresh transaction creation and host status validation into the pinned llama.cpp Qwen2MoE callback, replace only routed-expert aggregate, preserve shared/residual path and apply coefficients once.",
+      "pipeline_2289": "pending for handoff-only commit; not C++ build/test"
     }
   ],
   "acceptance": [
@@ -1013,28 +1014,41 @@
       "commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
       "status": "running",
       "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
+        "pc4_ci_fallback": "created",
         "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
       },
-      "scope": "configured scans/fallback only; not C++ build/test evidence"
+      "scope": "handoff-only commit scans/fallback; no source build/test"
     },
     {
       "id": "gitlab-pipeline-2288",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+      "status": "canceled",
+      "jobs": {
+        "pc4_ci_fallback": "canceled",
+        "pc4_trivy": "canceled",
+        "pc4_semgrep": "canceled",
+        "pc4_gitleaks": "canceled"
+      },
+      "scope": "R675 source commit pipeline; canceled by subsequent handoff push before scan completion"
+    },
+    {
+      "id": "gitlab-pipeline-2289",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "45a267f115260245f72f5098550c3337b30b5364",
       "status": "pending",
       "jobs": {
-        "pc4_gitleaks": "pending",
-        "pc4_semgrep": "pending",
+        "pc4_ci_fallback": "created",
         "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "pending"
       },
-      "scope": "configured scans/fallback only; not C++ build/test evidence"
+      "scope": "handoff-only commit scans/fallback; no source build/test"
     }
   ],
-  "next_action": "R676: brancher le cycle de vie d'une transaction fraîche par invocation et la validation hôte des statuts dans le callback Qwen2MoE llama.cpp épinglé; remplacer uniquement l’agrégat routé, préserver shared/résiduel et appliquer les poids une seule fois. Pas de génération complète, GPU ou réseau de production.",
+  "next_action": "R676: brancher le cycle de vie d'une transaction fraîche par invocation et la validation hôte des statuts dans le callback Qwen2MoE llama.cpp épinglé; remplacer uniquement l’agrégat routé, préserver shared/résiduel et appliquer les poids une seule fois. Le pipeline 2288 du code R675 a été annulé avant la fin des scans; pas de build CI.",
   "report": "research/R675/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {

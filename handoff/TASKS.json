@@ -10232,8 +10232,9 @@
     "readback_verified_utc": "2026-11-01 09:18:12 UTC",
     "next_action": "R675: implement and test per-invocation transaction lifecycle and host-side route status validation before attaching the Qwen2MoE routed-aggregate callback."
   },
+
   "r675_fresh_graph_invocation": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_ORACLE_CTEST_3_PASS_PIPELINE_2288_PENDING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_FRESH_GRAPH_CPU_ORACLE_CTEST_3_PASS_PIPELINE_2288_CANCELED",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
     "objective": "Verify safe fresh graph and transaction lifecycle after llama.cpp graph reuse conflict.",
@@ -10248,18 +10249,55 @@
     ],
     "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
     "pipeline_2288": {
-      "status": "pending",
+      "status": "canceled",
       "jobs": {
-        "pc4_gitleaks": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_ci_fallback": "canceled",
+        "pc4_trivy": "canceled",
+        "pc4_semgrep": "canceled",
+        "pc4_gitleaks": "canceled"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 5,
     "readback_verified_utc": "2026-11-01 09:21:26 UTC",
-    "next_action": "R676: wire fresh transaction creation and host-side status validation into the pinned llama.cpp Qwen2MoE callback; route aggregate only, preserve shared/residual, single weighting."
+    "next_action": "R676: wire fresh transaction creation and host-side status validation into the pinned llama.cpp Qwen2MoE callback; route aggregate only, preserve shared/residual, single weighting.",
+    "pipeline_2289": {
+      "status": "pending",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "pending"
+      }
+    }
+  },
+  "r675_ci_reconciliation": {
+    "source_commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
+    "handoff_commit": "45a267f115260245f72f5098550c3337b30b5364",
+    "pipeline_2288": {
+      "status": "canceled",
+      "jobs": {
+        "pc4_ci_fallback": "canceled",
+        "pc4_trivy": "canceled",
+        "pc4_semgrep": "canceled",
+        "pc4_gitleaks": "canceled"
+      },
+      "meaning": "R675 source pipeline canceled before scans completed"
+    },
+    "pipeline_2289": {
+      "status": "pending",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "pending"
+      },
+      "meaning": "handoff-only commit pipeline, not build/test"
+    },
+    "source_readback_files_verified": 5,
+    "manifest_sha256": "cec621dcffe3e6ed276639bc7f9157e5f118df5cd2111b58405157b0bd870860",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "updated_utc": "2026-11-01 09:21:59 UTC"
   }
 
 }
