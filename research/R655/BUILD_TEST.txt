@@ -1,0 +1,14 @@
+Donor: llama.cpp/GGML commit 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+Host: PC6 AArch64; CPU only; CUDA off; no model/checkpoint or network.
+
+PASS: cmake -S adapters/native_ggml -B build -DGGML_SOURCE_DIR=<clean-pinned-checkout> -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release -DGGML_BUILD_TESTS=OFF -DGGML_BUILD_EXAMPLES=OFF
+PASS: cmake --build build --target vf_native_ggml vf_native_ggml_test --parallel 2
+PASS: ctest --test-dir build -R '^native_provider$' --output-on-failure (1/1; R654 independent scalar FP64 Q8_0 oracle)
+PASS: rustfmt --edition 2021 --check crates/ggml-native-ffi/src/lib.rs tests/native_matrix.rs
+PASS: cargo test --offline --manifest-path harness/Cargo.toml --features native-ggml-cpu --test native_matrix (debug 2/2)
+PASS: cargo test --offline --release --manifest-path harness/Cargo.toml --features native-ggml-cpu --test native_matrix (release 2/2)
+PASS: cargo clippy --offline --manifest-path harness/Cargo.toml --features native-ggml-cpu --test native_matrix -- -A dead_code -A clippy::too_many_arguments -D warnings
+Clippy note: strict run reports existing clippy::too_many_arguments in src/strata_native_bridge.rs:237; this source is unchanged by R655. The focused pass allowed that pre-existing lint and dead_code, then kept all other warnings denied.
+
+Collector fixture: 3 resident Q8_0 expert matrices, 2 tokens, 4 routes, physical resident order [1,2,0]. Raw rows remain unweighted. Correct attempt 13 is admitted; stale attempt 12 is refused. The ordinary Collector returns [3.5,2.0] after one coefficient application. A one-slot partial output cannot finish and returns BATCH_INCOMPLETE.
+An initial unscoped Cargo invocation tried auto-discovered binary targets whose fixtures were not part of the bounded scratch; those targets did not run. Subsequent exact-source focused harness tests passed in debug and release.

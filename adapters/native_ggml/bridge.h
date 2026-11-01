@@ -18,6 +18,14 @@ void vf_native_prepared_destroy(void* prepared);
 void* vf_native_matrix_create(int type, size_t rows, size_t columns, const uint8_t* bytes, size_t len);
 int vf_native_matrix_forward(void* instance, const float* input, size_t input_len, float* output, size_t output_len);
 void vf_native_matrix_destroy(void* instance);
+// Owns one bounded stack of same-format expert matrices; weights stay resident
+// and every forward call preserves slot order and returns unweighted FP32 rows.
+void* vf_native_routed_matrix_create(int type, size_t experts, size_t rows, size_t columns,
+                                     const uint8_t* bytes, size_t len);
+int vf_native_routed_matrix_forward(void* instance, const float* slot_inputs,
+                                    size_t slot_input_len, const int32_t* expert_ids,
+                                    size_t slots, float* slot_outputs, size_t output_len);
+void vf_native_routed_matrix_destroy(void* instance);
 #ifdef __cplusplus
 }
 #endif

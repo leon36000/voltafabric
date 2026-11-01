@@ -64,6 +64,24 @@ unsafe extern "C" {
         output_len: usize,
     ) -> i32;
     fn vf_native_matrix_destroy(instance: *mut c_void);
+    fn vf_native_routed_matrix_create(
+        kind: i32,
+        experts: usize,
+        rows: usize,
+        columns: usize,
+        bytes: *const u8,
+        len: usize,
+    ) -> *mut c_void;
+    fn vf_native_routed_matrix_forward(
+        instance: *mut c_void,
+        slot_inputs: *const f32,
+        slot_input_len: usize,
+        expert_ids: *const i32,
+        slots: usize,
+        slot_outputs: *mut f32,
+        output_len: usize,
+    ) -> i32;
+    fn vf_native_routed_matrix_destroy(instance: *mut c_void);
 }
 
 /// Decoded Q8_K activation scoped by the caller to one token and batch.
@@ -301,5 +319,105 @@ impl Drop for NativeMatrix {
     fn drop(&mut self) {
         // SAFETY: instance is uniquely owned and destroyed exactly once.
         unsafe { vf_native_matrix_destroy(self.ptr.as_ptr()) }
+    }
+}
+
+/// Resident stack of same-format expert matrices for CPU GGML_OP_MUL_MAT_ID.
+/// It returns raw, unweighted FP32 rows in caller slot order.
+pub struct NativeRoutedMatrix {
+    ptr: NonNull<c_void>,
+    experts: usize,
+    rows: usize,
+    columns: usize,
+}
+impl NativeRoutedMatrix {
+    /// Copy one bounded matrix stack into resident native storage exactly once.
+    pub fn load(
+        kind: i32,
+        experts: usize,
+        rows: usize,
+        columns: usize,
+        bytes: &[u8],
+    ) -> Result<Self, &'static str> {
+        if experts == 0
+            || experts > 512
+            || rows == 0
+            || rows > 10240
+            || columns == 0
+            || columns > 6144
+            || bytes.is_empty()
+            || bytes.len() > 32 * 1024 * 1024
+        {
+            return Err("invalid routed matrix binding");
+        }
+        // SAFETY: bytes are immutable for the call; native code validates and copies them.
+        let raw = unsafe {
+            vf_native_routed_matrix_create(
+                kind,
+                experts,
+                rows,
+                columns,
+                bytes.as_ptr(),
+                bytes.len(),
+            )
+        };
+        Ok(Self {
+            ptr: NonNull::new(raw).ok_or("native routed matrix refused")?,
+            experts,
+            rows,
+            columns,
+        })
+    }
+
+    /// Run a compact slot batch; IDs index the physical resident matrix order.
+    pub fn forward(
+        &mut self,
+        slot_inputs: &[f32],
+        expert_ids: &[u32],
+    ) -> Result<Vec<f32>, &'static str> {
+        let input_len = expert_ids
+            .len()
+            .checked_mul(self.columns)
+            .ok_or("routed input size overflow")?;
+        let output_len = expert_ids
+            .len()
+            .checked_mul(self.rows)
+            .ok_or("routed output size overflow")?;
+        if expert_ids.is_empty()
+            || expert_ids.len() > 512
+            || slot_inputs.len() != input_len
+            || slot_inputs.iter().any(|x| !x.is_finite())
+            || expert_ids.iter().any(|&id| id as usize >= self.experts)
+        {
+            return Err("invalid routed matrix batch");
+        }
+        let ids = expert_ids
+            .iter()
+            .map(|&id| i32::try_from(id).map_err(|_| "expert ID overflow"))
+            .collect::<Result<Vec<_>, _>>()?;
+        let mut output = vec![0.0; output_len];
+        // SAFETY: the resident is uniquely borrowed; all slices are valid for the synchronous call,
+        // and the native bridge stages results before writing this unique output buffer.
+        let status = unsafe {
+            vf_native_routed_matrix_forward(
+                self.ptr.as_ptr(),
+                slot_inputs.as_ptr(),
+                slot_inputs.len(),
+                ids.as_ptr(),
+                ids.len(),
+                output.as_mut_ptr(),
+                output.len(),
+            )
+        };
+        if status != 0 || output.iter().any(|x| !x.is_finite()) {
+            return Err("native routed matrix execution failed");
+        }
+        Ok(output)
+    }
+}
+impl Drop for NativeRoutedMatrix {
+    fn drop(&mut self) {
+        // SAFETY: the opaque native resident is uniquely owned and destroyed once.
+        unsafe { vf_native_routed_matrix_destroy(self.ptr.as_ptr()) }
     }
 }
