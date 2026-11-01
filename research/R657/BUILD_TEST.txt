@@ -1,0 +1,29 @@
+CPU integration build and verification
+Host: aarch64 (PC6)
+Rust: rustc 1.90.0; cargo 1.90.0
+
+Native GGML CMake artifacts were the R656 pinned build under the isolated .runs harness. Cargo.toml was temporarily narrowed to the single vf-rank-session binary because this harness lacks unrelated historical SC117 fixtures; the original manifest was restored byte-for-byte before completion. No production service, GPU, network, or R53 ledger was used.
+
+Command:
+  VF_GGML_NATIVE_BUILD="$PWD/build" CARGO_TARGET_DIR=target cargo test --locked --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session
+Result:
+  vf-rank-session unit tests: 2 passed
+  native_matrix_session subprocess tests: 2 passed
+  total: 4 passed, 0 failed
+
+Release command:
+  VF_GGML_NATIVE_BUILD="$PWD/build" CARGO_TARGET_DIR=target cargo test --locked --release --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session
+Result:
+  vf-rank-session unit tests: 2 passed
+  native_matrix_session subprocess tests: 2 passed
+  total: 4 passed, 0 failed
+
+Formatting:
+  rustfmt --check --edition 2021 src/native_ggml_cpu.rs src/session.rs tests/native_matrix_session.rs
+Result: passed
+
+Lint:
+  VF_GGML_NATIVE_BUILD="$PWD/build" CARGO_TARGET_DIR=target cargo clippy --locked --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session
+Result: completed. Existing warnings remain for an SC117 dead-code capture and the Strata bridge's too_many_arguments function. The new grouped-matrix coordinator has no Clippy warning.
+
+An initial broad Cargo target build could not compile because the isolated R656 harness does not contain fixtures referenced by unrelated legacy SC117 binaries. Those targets are excluded only in the temporary test manifest; no source or fixture was removed.

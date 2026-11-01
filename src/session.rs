@@ -68,6 +68,8 @@ pub const CAPABILITY_ENGRAM_ROWS_RAW: &str = "cpu_engram_owner_rows_raw_v1";
 pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
+#[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GROUPED_MATRIX_CPU: &str = "cpu_ggml_grouped_matrix_session_fp16_v1";
 #[cfg(feature = "native-scalar-reference")]
 pub const CAPABILITY_NATIVE_SCALAR_GGML_CPU: &str = "cpu_strata_sc117_scalar_reference_fp16_v1";
 #[cfg(feature = "native-scalar-reference")]
@@ -141,6 +143,12 @@ pub enum Request {
         pack_bytes: u64,
         artifact_bytes: u64,
     },
+    /// One bounded, digest-checked resident GGML matrix stack for the grouped CPU path.
+    #[cfg(feature = "native-ggml-cpu")]
+    LoadNativeGroupedMatrixRaw {
+        binding: crate::native_ggml_cpu::GroupedMatrixBinding,
+        artifact_bytes: u64,
+    },
     /// Explicit experimental CPU reference; never an implicit vector fallback.
     #[cfg(feature = "native-scalar-reference")]
     LoadNativeScalarGgmlRaw {
@@ -192,6 +200,20 @@ pub enum Request {
         inputs: Vec<RawTokenInputMeta>,
         activation_bytes: u64,
         unweighted_f32: bool,
+    },
+    /// Bounded raw FP32 activations for the resident grouped-matrix CPU provider.
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGroupedMatrixRawF32 {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<RawTokenInputMeta>,
+        activation_bytes: u64,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGroupedMatrix {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<(usize, Vec<f32>)>,
     },
     Load {
         artifact_sha256: String,
@@ -344,6 +366,10 @@ pub enum Reply {
     #[cfg(feature = "native-ggml-cpu")]
     NativeGgmlLoaded {
         binding: crate::native_ggml_cpu::Binding,
+    },
+    #[cfg(feature = "native-ggml-cpu")]
+    NativeGroupedMatrixLoaded {
+        binding: crate::native_ggml_cpu::GroupedMatrixBinding,
     },
     #[cfg(feature = "native-scalar-reference")]
     NativeScalarGgmlLoaded {
@@ -1868,6 +1894,56 @@ fn native_raw_f32_frame(
 }
 
 #[cfg(feature = "native-ggml-cpu")]
+fn native_grouped_matrix_raw_f32_frame(
+    dispatch: routing::RankDispatch,
+    attempt: u64,
+    inputs: &[(usize, Vec<f32>)],
+) -> Result<(Vec<u8>, Vec<u8>)> {
+    if inputs.len() > 4096
+        || inputs.iter().any(|(_, row)| {
+            row.is_empty() || row.len() > 65536 || row.iter().any(|value| !value.is_finite())
+        })
+    {
+        return Err(invalid("grouped matrix raw FP32 input metadata or values"));
+    }
+    let count = inputs
+        .iter()
+        .try_fold(0usize, |n, (_, row)| n.checked_add(row.len()))
+        .and_then(|n| n.checked_mul(4))
+        .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES)
+        .ok_or_else(|| invalid("grouped matrix raw FP32 input size"))?;
+    let metadata = inputs
+        .iter()
+        .map(|(token, row)| RawTokenInputMeta {
+            token: *token,
+            values: row.len() as u64,
+        })
+        .collect();
+    let header = encode(&Request::ExecNativeGroupedMatrixRawF32 {
+        dispatch,
+        attempt,
+        inputs: metadata,
+        activation_bytes: count as u64,
+    })?;
+    if header
+        .len()
+        .checked_add(count)
+        .is_none_or(|n| n > MAX_MESSAGE_BYTES)
+    {
+        return Err(invalid("grouped matrix raw FP32 frame size"));
+    }
+    let mut body = Vec::new();
+    body.try_reserve_exact(count)
+        .map_err(|_| invalid("grouped matrix raw FP32 allocation"))?;
+    for (_, row) in inputs {
+        for value in row {
+            body.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+    Ok((header, body))
+}
+
+#[cfg(feature = "native-ggml-cpu")]
 fn read_native_raw_f32(
     input: &mut impl BufRead,
     header_bytes: usize,
@@ -2461,6 +2537,8 @@ fn serve_impl(
     let mut native_payload_bytes = 0_u64;
     #[cfg(feature = "native-ggml-cpu")]
     let mut native_worker: Option<crate::native_ggml_cpu::RankWorker> = None;
+    #[cfg(feature = "native-ggml-cpu")]
+    let mut grouped_matrix_worker: Option<crate::native_ggml_cpu::GroupedMatrixRankWorker> = None;
     loop {
         let mut raw_completions = false;
         let mut raw_completion_batch = false;
@@ -2628,6 +2706,32 @@ fn serve_impl(
                         }
                     }
                 }
+                #[cfg(feature = "native-ggml-cpu")]
+                Request::ExecNativeGroupedMatrixRawF32 {
+                    dispatch,
+                    attempt,
+                    inputs,
+                    activation_bytes,
+                } => {
+                    let inputs =
+                        match read_native_raw_f32(input, header_bytes, activation_bytes, inputs) {
+                            Ok(inputs) => inputs,
+                            Err(error) => {
+                                send_reply(
+                                    output,
+                                    &Reply::Refused {
+                                        error: error.clone(),
+                                    },
+                                )?;
+                                return Err(error); // Unknown body boundary; do not reuse this stream.
+                            }
+                        };
+                    Request::ExecNativeGroupedMatrix {
+                        dispatch,
+                        attempt,
+                        inputs,
+                    }
+                }
                 Request::ExecRaw {
                     artifact_sha256,
                     dispatch,
@@ -2768,6 +2872,9 @@ fn serve_impl(
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GGML_UNWEIGHTED_F32.into());
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_GROUPED_MATRIX_CPU.into());
                     }
                     if let Some(provider) = executor.as_ref() {
                         hello.capabilities = vec![
@@ -2846,11 +2953,73 @@ fn serve_impl(
             return Err(error);
         }
         #[cfg(feature = "native-ggml-cpu")]
+        if grouped_matrix_worker.is_some()
+            && !matches!(
+                request,
+                Request::ExecNativeGroupedMatrix { .. } | Request::Shutdown
+            )
+        {
+            let error = invalid("grouped matrix session cannot mix resident contracts");
+            send_reply(
+                output,
+                &Reply::Refused {
+                    error: error.clone(),
+                },
+            )?;
+            return Err(error);
+        }
+        #[cfg(feature = "native-ggml-cpu")]
         let native_extending = matches!(&request, Request::ExtendNativeGgmlRaw { .. });
         match request {
             #[cfg(feature = "native-scalar-reference")]
             Request::LoadNativeScalarGgmlRaw { .. } | Request::ExtendNativeScalarGgmlRaw { .. } => {
                 return Err(invalid("scalar load normalization failed"));
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::LoadNativeGroupedMatrixRaw {
+                binding,
+                artifact_bytes,
+            } => {
+                if grouped_matrix_worker.is_some()
+                    || !native_owners.is_empty()
+                    || native_worker.is_some()
+                    || resident.is_some()
+                    || engram_resident.is_some()
+                    || executor.is_some()
+                    || binding.rank != rank
+                    || artifact_bytes == 0
+                    || artifact_bytes > MAX_RAW_ARTIFACT_BYTES as u64
+                {
+                    let error = invalid("grouped matrix load state, rank or message size");
+                    send_reply(
+                        output,
+                        &Reply::Refused {
+                            error: error.clone(),
+                        },
+                    )?;
+                    return Err(error); // The raw body remains unread; this stream is terminal.
+                }
+                let bytes = match read_raw_body(input, header_bytes, artifact_bytes, false) {
+                    Ok(bytes) => bytes,
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &Reply::Refused {
+                                error: error.clone(),
+                            },
+                        )?;
+                        return Err(error);
+                    }
+                };
+                match crate::native_ggml_cpu::GroupedMatrixResident::load(binding.clone(), &bytes) {
+                    Ok(resident) => {
+                        grouped_matrix_worker = Some(
+                            crate::native_ggml_cpu::GroupedMatrixRankWorker::new(resident),
+                        );
+                        send_reply(output, &Reply::NativeGroupedMatrixLoaded { binding })?;
+                    }
+                    Err(error) => send_reply(output, &Reply::Refused { error })?,
+                }
             }
             #[cfg(feature = "native-ggml-cpu")]
             Request::LoadNativeGgmlRaw {
@@ -3097,6 +3266,45 @@ fn serve_impl(
                             }),
                         )?;
                         return Err(error);
+                    }
+                }
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::ExecNativeGroupedMatrix {
+                dispatch,
+                attempt,
+                inputs,
+            } => {
+                let Some(worker) = grouped_matrix_worker.as_mut() else {
+                    send_reply(
+                        output,
+                        &refuse("NATIVE_STATE", "grouped matrix is not resident"),
+                    )?;
+                    continue;
+                };
+                let stamp = dispatch.stamp.clone();
+                let event = |event| Reply::Event {
+                    event: WorkerEvent {
+                        stamp: stamp.clone(),
+                        rank,
+                        attempt,
+                        event,
+                    },
+                };
+                send_reply(output, &event(EventKind::Started))?;
+                match worker.execute(&dispatch, &inputs, attempt) {
+                    Ok(result) => {
+                        send_reply(output, &Reply::NativeGgmlResult { output: result })?;
+                        execs += 1;
+                    }
+                    Err(error) => {
+                        send_reply(
+                            output,
+                            &event(EventKind::Failed {
+                                error: error.clone(),
+                            }),
+                        )?;
+                        return Err(error); // An uncertain started matrix attempt is never replayed.
                     }
                 }
             }
@@ -3409,6 +3617,20 @@ fn serve_impl(
             #[cfg(feature = "native-ggml-cpu")]
             Request::ExecNativeGgmlRawF32 { .. } => {
                 let error = Error::new("SESSION_PROTOCOL", "native raw FP32 body was not decoded");
+                send_reply(
+                    output,
+                    &Reply::Refused {
+                        error: error.clone(),
+                    },
+                )?;
+                return Err(error);
+            }
+            #[cfg(feature = "native-ggml-cpu")]
+            Request::ExecNativeGroupedMatrixRawF32 { .. } => {
+                let error = Error::new(
+                    "SESSION_PROTOCOL",
+                    "grouped matrix raw FP32 body was not decoded",
+                );
                 send_reply(
                     output,
                     &Reply::Refused {
@@ -3855,6 +4077,7 @@ impl NativeCollected {
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum NativeBackend {
     Vector,
+    GroupedMatrix,
     #[cfg(feature = "native-scalar-reference")]
     Scalar,
 }
@@ -3865,6 +4088,8 @@ pub struct Session {
     pub traffic: Traffic,
     #[cfg(feature = "native-ggml-cpu")]
     native_backend: Option<NativeBackend>,
+    #[cfg(feature = "native-ggml-cpu")]
+    grouped_matrix_binding: Option<crate::native_ggml_cpu::GroupedMatrixBinding>,
     child: Child,
     stdin: Option<SessionInput>,
     #[cfg(unix)]
@@ -4004,6 +4229,84 @@ impl Session {
             _ => {
                 self.usable = false;
                 Err(invalid("native GGML load reply identity"))
+            }
+        }
+    }
+
+    /// Load a bounded digest-bound GGML grouped-matrix stack into one persistent CPU worker.
+    /// The artifact is sent once per session; this testable raw-frame boundary is not a
+    /// checkpoint loader and is limited to one session message.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn load_grouped_matrix_raw(
+        &mut self,
+        binding: &crate::native_ggml_cpu::GroupedMatrixBinding,
+        bytes: &[u8],
+        timeout: Duration,
+    ) -> Result<()> {
+        if self.native_backend.is_some()
+            || timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GROUPED_MATRIX_CPU)
+            || binding.rank != self.rank
+            || bytes.is_empty()
+            || bytes.len() > MAX_RAW_ARTIFACT_BYTES
+            || sha256::hex(bytes) != binding.sha256
+        {
+            return Err(invalid(
+                "grouped matrix capability, binding, timeout or message size",
+            ));
+        }
+        let request = Request::LoadNativeGroupedMatrixRaw {
+            binding: binding.clone(),
+            artifact_bytes: bytes.len() as u64,
+        };
+        let header = encode(&request)?;
+        if header
+            .len()
+            .checked_add(bytes.len())
+            .is_none_or(|n| n > MAX_MESSAGE_BYTES)
+        {
+            return Err(invalid("grouped matrix load frame size"));
+        }
+        let deadline = Instant::now() + timeout;
+        if let Err(error) = self.write_parts_until(&[&header, bytes], true, deadline) {
+            self.usable = false;
+            return Err(error);
+        }
+        let reply = match self.reply_until(deadline) {
+            Ok(reply) => reply,
+            Err(error) => {
+                self.usable = false;
+                return Err(error);
+            }
+        };
+        match reply {
+            Reply::NativeGroupedMatrixLoaded { binding: returned } if returned == *binding => {
+                self.native_backend = Some(NativeBackend::GroupedMatrix);
+                self.grouped_matrix_binding = Some(binding.clone());
+                self.traffic.weight_bytes_sent = self
+                    .traffic
+                    .weight_bytes_sent
+                    .checked_add(bytes.len() as u64)
+                    .ok_or_else(|| invalid("grouped matrix traffic overflow"))?;
+                self.traffic.loads_transferred = self
+                    .traffic
+                    .loads_transferred
+                    .checked_add(1)
+                    .ok_or_else(|| invalid("grouped matrix load count overflow"))?;
+                Ok(())
+            }
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("grouped matrix load reply identity"))
             }
         }
     }
@@ -4197,6 +4500,9 @@ impl Session {
             Some(NativeBackend::Scalar) => {
                 self.extend_native_scalar_ggml(binding, index, pack_bytes, bytes, timeout)
             }
+            Some(NativeBackend::GroupedMatrix) => {
+                Err(invalid("grouped matrix resident cannot use SC117 append"))
+            }
             None => Err(invalid("native session backend was not confirmed")),
         }
     }
@@ -4291,6 +4597,118 @@ impl Session {
         }
     }
 
+    /// Execute one grouped-matrix rank request through the persistent Session worker.
+    /// The worker returns raw unweighted FP16 values; the coordinator Collector remains
+    /// the only place where route coefficients are applied.
+    #[cfg(feature = "native-ggml-cpu")]
+    fn exec_grouped_matrix_rank(
+        &mut self,
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<(usize, Vec<f32>)>,
+        collector: &mut moe::Collector,
+        deadline: Instant,
+    ) -> Result<usize> {
+        if self.native_backend != Some(NativeBackend::GroupedMatrix)
+            || !self
+                .hello
+                .capabilities
+                .iter()
+                .any(|c| c == CAPABILITY_NATIVE_GROUPED_MATRIX_CPU)
+            || self.grouped_matrix_binding.as_ref().is_none_or(|binding| {
+                binding.rank != self.rank
+                    || binding.model_revision != dispatch.stamp.model_revision
+                    || binding.layer != dispatch.stamp.layer
+                    || binding.epoch != dispatch.stamp.epoch
+                    || binding.rows != dispatch.hidden
+            })
+            || dispatch.rank != self.rank
+            || attempt == 0
+        {
+            return Err(invalid(
+                "grouped matrix capability, binding, rank or attempt",
+            ));
+        }
+        let next_execs = self
+            .traffic
+            .execs
+            .checked_add(1)
+            .ok_or_else(|| invalid("grouped matrix execution count overflow"))?;
+        let next_raw = self
+            .traffic
+            .native_ggml_raw_execs
+            .checked_add(1)
+            .ok_or_else(|| invalid("grouped matrix raw execution count overflow"))?;
+        let (header, body) =
+            native_grouped_matrix_raw_f32_frame(dispatch.clone(), attempt, &inputs)?;
+        if let Err(error) = self.write_parts_until(&[&header, &body], true, deadline) {
+            self.usable = false;
+            return Err(error);
+        }
+        self.traffic.native_ggml_raw_execs = next_raw;
+        self.traffic.execs = next_execs;
+        let started = match self.reply_until(deadline) {
+            Ok(reply) => reply,
+            Err(error) => {
+                self.usable = false;
+                return Err(error);
+            }
+        };
+        if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } } if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
+        {
+            self.usable = false;
+            return Err(invalid("grouped matrix start reply identity"));
+        }
+        let reply = match self.reply_until(deadline) {
+            Ok(reply) => reply,
+            Err(error) => {
+                self.usable = false;
+                return Err(error);
+            }
+        };
+        match reply {
+            Reply::NativeGgmlResult { output }
+                if output.stamp == dispatch.stamp
+                    && output.rank == self.rank
+                    && output.attempt == attempt
+                    && output.columns == dispatch.hidden
+                    && output.rows == dispatch.slots.len() =>
+            {
+                match crate::completion::accept_routed_output(attempt, output, collector) {
+                    Ok(count) if count == dispatch.slots.len() => Ok(count),
+                    Ok(_) => {
+                        self.usable = false;
+                        Err(invalid("grouped matrix result slot count"))
+                    }
+                    Err(error) => {
+                        self.usable = false;
+                        Err(error)
+                    }
+                }
+            }
+            Reply::Event {
+                event:
+                    WorkerEvent {
+                        stamp,
+                        rank,
+                        attempt: n,
+                        event: EventKind::Failed { error },
+                    },
+            } if stamp == dispatch.stamp && rank == self.rank && n == attempt => {
+                self.usable = false;
+                Err(error)
+            }
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("grouped matrix result reply identity"))
+            }
+        }
+    }
+
     /// Execute once and atomically admit this rank's compact unweighted rows.
     /// On any failure the coordinator must discard the entire batch and never
     /// replay an uncertain identity; this method is not a durable replay ledger.
@@ -4309,6 +4727,7 @@ impl Session {
             .capabilities
             .iter()
             .any(|c| c == CAPABILITY_NATIVE_GGML_CPU)
+            || self.native_backend == Some(NativeBackend::GroupedMatrix)
             || dispatch.rank != self.rank
             || attempt == 0
         {
@@ -4425,6 +4844,136 @@ impl Session {
             _ => {
                 self.usable = false;
                 Err(invalid("native GGML result reply identity"))
+            }
+        }
+    }
+
+    /// One native rank wave. On any error no output is returned and every
+    /// participating session is invalidated. The caller must retain and consistently
+    /// reuse the same local durable ledger across coordinator restarts. It is not R53.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_grouped_matrix_batch(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<Vec<Vec<f64>>> {
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || inputs.len() != problem.routes.len()
+            || [&problem.stamp.run_id, &problem.stamp.plan_id]
+                .iter()
+                .any(|value| value.trim().is_empty() || value.len() > 256)
+        {
+            return Err(invalid("grouped matrix batch identity, shape or timeout"));
+        }
+        routing::validate(problem)?;
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.slots.is_empty() {
+            return Err(invalid("grouped matrix batch has no routed slots"));
+        }
+        type GroupedRankWork = (usize, routing::RankDispatch, Vec<(usize, Vec<f32>)>);
+        let mut selected: Vec<GroupedRankWork> = Vec::new();
+        let mut first_binding: Option<crate::native_ggml_cpu::GroupedMatrixBinding> = None;
+        for rank in dispatch
+            .ranks
+            .into_iter()
+            .filter(|rank| !rank.slots.is_empty())
+        {
+            let matches: Vec<_> = sessions
+                .iter()
+                .enumerate()
+                .filter(|(_, session)| session.rank == rank.rank)
+                .collect();
+            if matches.len() != 1 {
+                return Err(invalid(
+                    "grouped matrix participant session missing or duplicate",
+                ));
+            }
+            let (index, session) = matches[0];
+            let binding = session
+                .grouped_matrix_binding
+                .as_ref()
+                .ok_or_else(|| invalid("grouped matrix participant has no resident binding"))?;
+            if !session.usable
+                || session.native_backend != Some(NativeBackend::GroupedMatrix)
+                || !session
+                    .hello
+                    .capabilities
+                    .iter()
+                    .any(|capability| capability == CAPABILITY_NATIVE_GROUPED_MATRIX_CPU)
+                || binding.rank != rank.rank
+                || binding.model_revision != problem.stamp.model_revision
+                || binding.layer != problem.stamp.layer
+                || binding.epoch != problem.stamp.epoch
+                || binding.rows != problem.hidden
+                || binding
+                    .residents
+                    .iter()
+                    .map(|(_, local)| *local)
+                    .collect::<Vec<_>>()
+                    != rank.resident_order
+                || rank.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+                || inputs.iter().any(|row| {
+                    row.len() != binding.columns || row.iter().any(|value| !value.is_finite())
+                })
+            {
+                return Err(invalid(
+                    "grouped matrix binding differs from routing identity or shape",
+                ));
+            }
+            if let Some(first) = first_binding.as_ref() {
+                if binding.model_revision != first.model_revision
+                    || binding.layer != first.layer
+                    || binding.tensor != first.tensor
+                    || binding.ggml_type != first.ggml_type
+                    || binding.epoch != first.epoch
+                    || binding.rows != first.rows
+                    || binding.columns != first.columns
+                {
+                    return Err(invalid("grouped matrix rank bindings are inconsistent"));
+                }
+            } else {
+                first_binding = Some(binding.clone());
+            }
+            let tokens: BTreeSet<_> = rank.slots.iter().map(|entry| entry.slot.token).collect();
+            let rows = tokens
+                .into_iter()
+                .map(|token| (token, inputs[token].clone()))
+                .collect();
+            selected.push((index, rank, rows));
+        }
+        let mut collector = moe::Collector::from_routing(problem)?;
+        claim_identity(&problem.stamp, false)?;
+        let attempt = next_attempt()?;
+        ledger.reserve(&problem.stamp, attempt)?;
+        let deadline = Instant::now() + timeout;
+        let participating: Vec<_> = selected.iter().map(|(index, _, _)| *index).collect();
+        for (index, rank, rows) in selected {
+            if let Err(error) = sessions[index].exec_grouped_matrix_rank(
+                rank,
+                attempt,
+                rows,
+                &mut collector,
+                deadline,
+            ) {
+                for participant in &participating {
+                    sessions[*participant].usable = false;
+                }
+                return Err(error);
+            }
+        }
+        match collector.finish() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for participant in participating {
+                    sessions[participant].usable = false;
+                }
+                Err(error)
             }
         }
     }
@@ -4880,6 +5429,8 @@ impl Session {
             traffic: Traffic::default(),
             #[cfg(feature = "native-ggml-cpu")]
             native_backend: None,
+            #[cfg(feature = "native-ggml-cpu")]
+            grouped_matrix_binding: None,
             child,
             stdin,
             #[cfg(unix)]

@@ -1,0 +1,45 @@
+{
+  "id": "R657",
+  "status": "CPU_SESSION_INTEGRATION_PASS",
+  "base_branch": "r656-ggml-grouped-matrix-fleet-20261101",
+  "base_commit": "69e23c8a19bff4497114dccc85d7251399a62fb8",
+  "branch": "r657-grouped-matrix-session-20261101",
+  "source_reuse": {
+    "project": "llama.cpp/GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "component": "GGML_OP_MUL_MAT_ID CPU grouped projection via existing VoltaFabric native bridge",
+    "adaptation": "Resident grouped matrix provider connected to identified persistent Session/rank-worker requests and existing VoltaFabric FP16/f64 Collector",
+    "donor_source_copied": false
+  },
+  "test": {
+    "command": "VF_GGML_NATIVE_BUILD=$PWD/build CARGO_TARGET_DIR=target cargo test --locked --features native-ggml-cpu --bin vf-rank-session --test native_matrix_session",
+    "result": "4/4 passed in debug and 4/4 passed in release (2 rank-session unit tests, 2 Session subprocess integration tests per profile)",
+    "rustfmt_check": "passed for src/native_ggml_cpu.rs, src/session.rs, tests/native_matrix_session.rs",
+    "clippy": "completed; no new warning in the grouped-matrix coordinator; existing SC117 dead_code and Strata too_many_arguments warnings remain",
+    "host": "PC6 AArch64 CPU"
+  },
+  "verified_behaviors": [
+    "Resident Q8_0 grouped projection remains loaded across two fresh identified Session batches",
+    "Rust Collector applies route coefficients once and returns expected fixture outputs [3.5,2.0] and [7.0,1.0]",
+    "Repeated full Stamp is rejected before another worker request",
+    "Second-rank FP16 overflow returns no batch output and invalidates all participating Sessions"
+  ],
+  "implemented_guards": [
+    "One deadline is shared across a rank wave",
+    "A lost or malformed load acknowledgement invalidates the Session"
+  ],
+  "fixture": "Synthetic Q8_0, 32x32 projection; no model/checkpoint",
+  "limitations": [
+    "Single bounded raw load frame below 16 MiB; no chunked checkpoint loader",
+    "Projection boundary only; not a complete expert FFN, transformer layer, or generation loop",
+    "Local fixture NativeBatchLedger only; production R53 not used",
+    "No GPU, V100, inter-PC transport, production network, performance comparison, or complete generation"
+  ],
+  "model_loaded": false,
+  "generation_executed": false,
+  "gpu_executed": false,
+  "inter_pc_network_used": false,
+  "production_r53_used": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER"
+}

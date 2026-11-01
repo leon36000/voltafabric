@@ -796,6 +796,176 @@ impl GroupedMatrixResident {
     }
 }
 
+/// Persistent single-rank CPU owner for the Session protocol. Unlike the in-process
+/// fleet, this type emits only an unweighted routed FP16 frame; the coordinator owns
+/// batch reservation and Collector reduction.
+pub struct GroupedMatrixRankWorker {
+    resident: GroupedMatrixResident,
+    scope: Option<(String, String)>,
+    attempted: std::collections::BTreeSet<String>,
+    last_attempt: u64,
+    terminal: bool,
+}
+impl GroupedMatrixRankWorker {
+    pub fn new(resident: GroupedMatrixResident) -> Self {
+        Self {
+            resident,
+            scope: None,
+            attempted: std::collections::BTreeSet::new(),
+            last_attempt: 0,
+            terminal: false,
+        }
+    }
+
+    pub fn binding(&self) -> &GroupedMatrixBinding {
+        self.resident.binding()
+    }
+
+    /// Run one already-dispatched rank wave. Any error after this method is called
+    /// consumes the identity and poisons this owner; callers must close the session,
+    /// never retry an uncertain matrix execution.
+    pub fn execute(
+        &mut self,
+        dispatch: &crate::routing::RankDispatch,
+        inputs: &[(usize, Vec<f32>)],
+        attempt: u64,
+    ) -> Result<crate::completion::RoutedRawOutput> {
+        use crate::{completion, invalid};
+        if self.terminal {
+            return Err(crate::Error::new(
+                "BATCH_ABORTED",
+                "grouped matrix rank worker is terminal",
+            ));
+        }
+        let work = (|| -> Result<crate::completion::RoutedRawOutput> {
+            let binding = &self.resident.binding;
+            if attempt == 0
+                || attempt <= self.last_attempt
+                || dispatch.rank != binding.rank
+                || dispatch.hidden != binding.rows
+                || dispatch.slots.is_empty()
+                || dispatch.slots.len() > 512
+                || dispatch
+                    .slots
+                    .len()
+                    .checked_mul(binding.rows)
+                    .is_none_or(|n| n > 16_777_216)
+                || dispatch.stamp.model_revision != binding.model_revision
+                || dispatch.stamp.layer != binding.layer
+                || dispatch.stamp.epoch != binding.epoch
+                || [&dispatch.stamp.run_id, &dispatch.stamp.plan_id]
+                    .iter()
+                    .any(|value| value.trim().is_empty() || value.len() > 256)
+                || binding
+                    .residents
+                    .iter()
+                    .map(|(_, local)| *local)
+                    .collect::<Vec<_>>()
+                    != dispatch.resident_order
+                || dispatch.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+            {
+                return Err(invalid("grouped matrix rank dispatch identity or shape"));
+            }
+            let identity = serde_json::to_string(&dispatch.stamp)
+                .map_err(|_| invalid("grouped matrix rank identity encoding"))?;
+            if self.attempted.len() >= 4096 || self.attempted.contains(&identity) {
+                return Err(crate::Error::new(
+                    "BATCH_REPLAY",
+                    "grouped matrix rank identity was already attempted",
+                ));
+            }
+            if self.scope.as_ref().is_some_and(|scope| {
+                scope.0 != dispatch.stamp.run_id || scope.1 != dispatch.stamp.plan_id
+            }) {
+                return Err(invalid("grouped matrix rank run/plan scope changed"));
+            }
+            let mut token_rows = std::collections::BTreeMap::new();
+            for (token, row) in inputs {
+                if *token >= dispatch.tokens
+                    || row.len() != binding.columns
+                    || row.iter().any(|value| !value.is_finite())
+                    || token_rows.insert(*token, row.as_slice()).is_some()
+                {
+                    return Err(invalid("grouped matrix rank activation identity or shape"));
+                }
+            }
+            let expected_tokens = dispatch
+                .slots
+                .iter()
+                .map(|entry| entry.slot.token)
+                .collect::<std::collections::BTreeSet<_>>();
+            if expected_tokens.len() != inputs.len()
+                || expected_tokens
+                    .iter()
+                    .any(|token| !token_rows.contains_key(token))
+                || dispatch
+                    .slots
+                    .len()
+                    .checked_mul(binding.columns)
+                    .is_none_or(|n| n > 16_777_216)
+            {
+                return Err(invalid("grouped matrix rank activation coverage"));
+            }
+
+            self.attempted.insert(identity);
+            self.last_attempt = attempt;
+            if self.scope.is_none() {
+                self.scope = Some((
+                    dispatch.stamp.run_id.clone(),
+                    dispatch.stamp.plan_id.clone(),
+                ));
+            }
+            let mut flat_inputs = Vec::with_capacity(dispatch.slots.len() * binding.columns);
+            let mut expert_ids = Vec::with_capacity(dispatch.slots.len());
+            for entry in &dispatch.slots {
+                flat_inputs.extend_from_slice(token_rows[&entry.slot.token]);
+                expert_ids.push(
+                    u32::try_from(entry.physical_expert)
+                        .map_err(|_| invalid("grouped matrix physical expert overflow"))?,
+                );
+            }
+            let values = self
+                .resident
+                .inner
+                .forward(&flat_inputs, &expert_ids)
+                .map_err(invalid)?;
+            let expected_values = dispatch.slots.len() * binding.rows;
+            if values.len() != expected_values {
+                return Err(invalid("grouped matrix result shape"));
+            }
+            let fp16_bits = values
+                .iter()
+                .map(|&value| completion::encode_fp16(f64::from(value)))
+                .collect::<Result<Vec<_>>>()?;
+            Ok(completion::RoutedRawOutput {
+                stamp: dispatch.stamp.clone(),
+                rank: dispatch.rank,
+                attempt,
+                rows: dispatch.slots.len(),
+                columns: binding.rows,
+                slots: dispatch
+                    .slots
+                    .iter()
+                    .map(|entry| completion::OutputSlot {
+                        token: entry.slot.token,
+                        slot: entry.slot.slot,
+                        expert: entry.slot.expert,
+                        local: entry.slot.local,
+                    })
+                    .collect(),
+                fp16_bits,
+            })
+        })();
+        if work.is_err() {
+            self.terminal = true;
+        }
+        work
+    }
+}
+
 /// Result of one CPU grouped-projection batch after Collector completion.
 #[derive(Debug, Clone, PartialEq)]
 pub struct GroupedMatrixReceipt {
