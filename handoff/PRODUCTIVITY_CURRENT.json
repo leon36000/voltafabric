@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 10:27:46 UTC",
+  "updated_utc": "2026-11-01 10:28:51 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1284,7 +1284,7 @@
       "scope": "R680 source scans/fallback only; not local C++ build/test evidence"
     }
   ],
-  "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading.",
+  "next_action": "R682: connect the hook through pinned llama_context::process_ubatch on a bounded CPU Qwen2MoE fixture, or establish a small compatible model fixture first; do not replay the terminal R681 receipt.",
   "report": "research/R681/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skills, no automatic relaunch, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
