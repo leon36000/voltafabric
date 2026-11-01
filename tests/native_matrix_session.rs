@@ -850,6 +850,80 @@ fn qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch() {
     );
 }
 
+#[test]
+fn pinned_ggml_qwen2moe_route_ops_feed_the_voltafabric_adapter_in_tensor_slot_order() {
+    use voltafabric::routing::{qwen2moe_routes_from_donor, Qwen2MoEDonorSelection};
+
+    // GGML [experts, tokens] layout; each token has a distinct, untied top two.
+    let logits = [4.0_f32, 1.0, 3.0, 0.0, 5.0, 2.0];
+    let fixture = vf_ggml_native_ffi::qwen2moe_router_fixture(&logits, 3, 2, 2, 0.5).unwrap();
+    assert_eq!(fixture.selected_experts, vec![0, 2, 1, 2]);
+
+    let expected = [
+        0.5 * (4.0_f64.exp() / (4.0_f64.exp() + 1.0_f64.exp() + 3.0_f64.exp())),
+        0.5 * (3.0_f64.exp() / (4.0_f64.exp() + 1.0_f64.exp() + 3.0_f64.exp())),
+        0.5 * (5.0_f64.exp() / (1.0 + 5.0_f64.exp() + 2.0_f64.exp())),
+        0.5 * (2.0_f64.exp() / (1.0 + 5.0_f64.exp() + 2.0_f64.exp())),
+    ];
+    for (&actual, &expected) in fixture.final_weights.iter().zip(&expected) {
+        assert!((f64::from(actual) - expected).abs() < 1e-6);
+    }
+
+    let base = routed_problem(667);
+    let mapped_experts: Vec<i32> = fixture
+        .selected_experts
+        .iter()
+        .map(|&expert| i32::try_from(base.experts[expert as usize]).unwrap())
+        .collect();
+    let imported = qwen2moe_routes_from_donor(
+        Qwen2MoEDonorSelection {
+            stamp: base.stamp.clone(),
+            attempt: 667_003,
+            tokens: 2,
+            top_k: 2,
+            selected_experts: mapped_experts,
+            final_weights: fixture.final_weights.clone(),
+        },
+        base.hidden,
+        base.experts.clone(),
+        base.registry.clone(),
+        base.preferred_owners.clone(),
+        base.resident_order.clone(),
+    )
+    .unwrap();
+    assert_eq!(
+        imported
+            .problem()
+            .routes
+            .iter()
+            .map(|route| route.iter().map(|choice| choice.expert).collect::<Vec<_>>())
+            .collect::<Vec<_>>(),
+        vec![
+            vec![base.experts[0], base.experts[2]],
+            vec![base.experts[1], base.experts[2]]
+        ]
+    );
+    assert_eq!(
+        imported
+            .problem()
+            .routes
+            .iter()
+            .flatten()
+            .map(|choice| choice.weight)
+            .collect::<Vec<_>>(),
+        fixture
+            .final_weights
+            .iter()
+            .copied()
+            .map(f64::from)
+            .collect::<Vec<_>>()
+    );
+    assert!(imported
+        .problem()
+        .routes
+        .iter()
+        .all(|route| { route.iter().map(|choice| choice.weight).sum::<f64>() < 1.0 }));
+}
 
 #[test]
 fn qwen2moe_donor_route_import_preserves_slot_order_scaled_weights_and_attempt() {

@@ -19,6 +19,32 @@ struct GgufContext {
 }
 
 #[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgmlInitParams {
+    mem_size: usize,
+    mem_buffer: *mut c_void,
+    no_alloc: bool,
+}
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgmlContext {
+    _private: [u8; 0],
+}
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgmlTensor {
+    _private: [u8; 0],
+}
+
+#[cfg(target_os = "linux")]
+#[repr(C)]
+struct GgmlGraph {
+    _private: [u8; 0],
+}
+
+#[cfg(target_os = "linux")]
 unsafe extern "C" {
     fn gguf_init_from_file(
         path: *const std::ffi::c_char,
@@ -190,6 +216,53 @@ pub fn gguf_tensor_span(file: &File, name: &str) -> Result<GgufTensorSpan, &'sta
 }
 
 unsafe extern "C" {
+    #[cfg(target_os = "linux")]
+    fn ggml_init(params: GgmlInitParams) -> *mut GgmlContext;
+    #[cfg(target_os = "linux")]
+    fn ggml_free(ctx: *mut GgmlContext);
+    #[cfg(target_os = "linux")]
+    fn ggml_new_tensor_2d(
+        ctx: *mut GgmlContext,
+        tensor_type: i32,
+        ne0: i64,
+        ne1: i64,
+    ) -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_get_data_f32(tensor: *const GgmlTensor) -> *mut f32;
+    #[cfg(target_os = "linux")]
+    fn ggml_get_data(tensor: *const GgmlTensor) -> *mut c_void;
+    #[cfg(target_os = "linux")]
+    fn ggml_soft_max(ctx: *mut GgmlContext, input: *mut GgmlTensor) -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_argsort_top_k(ctx: *mut GgmlContext, input: *mut GgmlTensor, k: i32)
+        -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_reshape_3d(
+        ctx: *mut GgmlContext,
+        input: *mut GgmlTensor,
+        ne0: i64,
+        ne1: i64,
+        ne2: i64,
+    ) -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_get_rows(
+        ctx: *mut GgmlContext,
+        input: *mut GgmlTensor,
+        indices: *mut GgmlTensor,
+    ) -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_scale(ctx: *mut GgmlContext, input: *mut GgmlTensor, scale: f32) -> *mut GgmlTensor;
+    #[cfg(target_os = "linux")]
+    fn ggml_new_graph(ctx: *mut GgmlContext) -> *mut GgmlGraph;
+    #[cfg(target_os = "linux")]
+    fn ggml_build_forward_expand(graph: *mut GgmlGraph, tensor: *mut GgmlTensor);
+    #[cfg(target_os = "linux")]
+    fn ggml_graph_compute_with_ctx(
+        ctx: *mut GgmlContext,
+        graph: *mut GgmlGraph,
+        n_threads: i32,
+    ) -> i32;
+
     #[cfg(feature = "scalar-reference")]
     fn vf_native_scalar_prepare(
         input: *const f32,
@@ -270,6 +343,139 @@ unsafe extern "C" {
         output_len: usize,
     ) -> i32;
     fn vf_native_routed_matrix_destroy(instance: *mut c_void);
+}
+
+#[cfg(target_os = "linux")]
+struct GgmlContextGuard(NonNull<GgmlContext>);
+
+#[cfg(target_os = "linux")]
+impl Drop for GgmlContextGuard {
+    fn drop(&mut self) {
+        // SAFETY: this guard uniquely owns the context returned by ggml_init.
+        unsafe { ggml_free(self.0.as_ptr()) }
+    }
+}
+
+/// Donor-op CPU fixture for Qwen2MoE route tensor layout. This uses the pinned GGML
+/// softmax, argsort_top_k, get_rows, and expert-scale operations, but is not a model
+/// callback and does not attest that any external caller supplied these results.
+#[cfg(target_os = "linux")]
+#[derive(Debug, Clone, PartialEq)]
+pub struct Qwen2MoERouteFixture {
+    pub selected_experts: Vec<i32>,
+    pub final_weights: Vec<f32>,
+}
+
+/// Evaluate the pinned Qwen2MoE route-selection operations for a small CPU fixture.
+/// Input logits use GGML `[experts, tokens]` layout; output slots use `[top_k, tokens]`.
+#[cfg(target_os = "linux")]
+pub fn qwen2moe_router_fixture(
+    logits: &[f32],
+    experts: usize,
+    tokens: usize,
+    top_k: usize,
+    expert_weights_scale: f32,
+) -> Result<Qwen2MoERouteFixture, &'static str> {
+    if !(2..=1024).contains(&experts)
+        || tokens == 0
+        || tokens > 4096
+        || top_k == 0
+        || top_k > 64
+        || top_k > experts
+        || !expert_weights_scale.is_finite()
+        || expert_weights_scale < 0.0
+    {
+        return Err("invalid Qwen2MoE router fixture dimensions or scale");
+    }
+    let count = experts
+        .checked_mul(tokens)
+        .filter(|&n| n <= 262_144)
+        .ok_or("Qwen2MoE router fixture size limit")?;
+    let slots = top_k
+        .checked_mul(tokens)
+        .ok_or("Qwen2MoE router fixture size overflow")?;
+    if logits.len() != count || logits.iter().any(|value| !value.is_finite()) {
+        return Err("invalid Qwen2MoE router fixture logits");
+    }
+
+    let raw_ctx = unsafe {
+        ggml_init(GgmlInitParams {
+            mem_size: 4 * 1024 * 1024,
+            mem_buffer: std::ptr::null_mut(),
+            no_alloc: false,
+        })
+    };
+    let ctx = GgmlContextGuard(NonNull::new(raw_ctx).ok_or("GGML context allocation failed")?);
+    let ctx = ctx.0.as_ptr();
+    let logits_tensor = NonNull::new(unsafe {
+        // GGML_TYPE_F32 has the stable pinned enum value 0.
+        ggml_new_tensor_2d(ctx, 0, experts as i64, tokens as i64)
+    })
+    .ok_or("GGML logits tensor allocation failed")?;
+    let logits_data = NonNull::new(unsafe { ggml_get_data_f32(logits_tensor.as_ptr()) })
+        .ok_or("GGML logits tensor storage missing")?;
+    // SAFETY: GGML allocated `count` F32 values in this tensor and the checked input has
+    // exactly `count` elements; the context guard outlives all graph operations below.
+    unsafe { std::ptr::copy_nonoverlapping(logits.as_ptr(), logits_data.as_ptr(), count) };
+
+    let probs = NonNull::new(unsafe { ggml_soft_max(ctx, logits_tensor.as_ptr()) })
+        .ok_or("GGML softmax node allocation failed")?;
+    let selected = NonNull::new(unsafe { ggml_argsort_top_k(ctx, probs.as_ptr(), top_k as i32) })
+        .ok_or("GGML top-k node allocation failed")?;
+    let probs_3d = NonNull::new(unsafe {
+        ggml_reshape_3d(ctx, probs.as_ptr(), 1, experts as i64, tokens as i64)
+    })
+    .ok_or("GGML probability reshape failed")?;
+    let weights = NonNull::new(unsafe { ggml_get_rows(ctx, probs_3d.as_ptr(), selected.as_ptr()) })
+        .ok_or("GGML route-weight gather failed")?;
+    let weights = if expert_weights_scale != 0.0 && expert_weights_scale != 1.0 {
+        NonNull::new(unsafe { ggml_scale(ctx, weights.as_ptr(), expert_weights_scale) })
+            .ok_or("GGML route-weight scale node allocation failed")?
+    } else {
+        weights
+    };
+    let graph =
+        NonNull::new(unsafe { ggml_new_graph(ctx) }).ok_or("GGML graph allocation failed")?;
+    unsafe { ggml_build_forward_expand(graph.as_ptr(), weights.as_ptr()) };
+    if unsafe { ggml_graph_compute_with_ctx(ctx, graph.as_ptr(), 1) } != 0 {
+        return Err("GGML route fixture graph execution failed");
+    }
+
+    let selected_data = NonNull::new(unsafe { ggml_get_data(selected.as_ptr()) })
+        .ok_or("GGML selected-expert tensor storage missing")?;
+    let weight_data = NonNull::new(unsafe { ggml_get_data_f32(weights.as_ptr()) })
+        .ok_or("GGML final route-weight tensor storage missing")?;
+    // SAFETY: pinned GGML produces top-k I32 indices and top-k F32 gathered weights;
+    // both tensors remain owned by `ctx` until vectors are copied below.
+    let selected_data = selected_data.as_ptr().cast::<i32>();
+    let mut selected_experts = Vec::with_capacity(slots);
+    for token in 0..tokens {
+        // `ggml_argsort_top_k` is a view of the full argsort tensor. In the pinned
+        // implementation, its `ne[0]` is reduced to `top_k` while `nb[1]` retains
+        // the original row pitch (`experts * sizeof(i32)`). Copy each token row
+        // using that source pitch, then pack the public result as [slot, token].
+        let row_start = token
+            .checked_mul(experts)
+            .ok_or("GGML selected-expert row offset overflow")?;
+        // SAFETY: the pinned argsort view points into the full `experts * tokens`
+        // I32 tensor. `top_k <= experts` and `token < tokens` keep this row in bounds.
+        let row = unsafe { std::slice::from_raw_parts(selected_data.add(row_start), top_k) };
+        selected_experts.extend_from_slice(row);
+    }
+    let final_weights = unsafe { std::slice::from_raw_parts(weight_data.as_ptr(), slots).to_vec() };
+    if selected_experts
+        .iter()
+        .any(|&expert| expert < 0 || expert as usize >= experts)
+        || final_weights
+            .iter()
+            .any(|weight| !weight.is_finite() || *weight < 0.0)
+    {
+        return Err("GGML route fixture produced invalid outputs");
+    }
+    Ok(Qwen2MoERouteFixture {
+        selected_experts,
+        final_weights,
+    })
 }
 
 /// Decoded Q8_K activation scoped by the caller to one token and batch.
