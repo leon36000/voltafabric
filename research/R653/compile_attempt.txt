@@ -1,0 +1,6 @@
+Host: aarch64
+Donor: Strata fb58e0dbc8399662c0e47c76578c6e878b14f6cf
+Configure: CMake PASS, CUDA Toolkit 13.0.88, CMAKE_CUDA_ARCHITECTURES=80, STRATA_VOLTAFABRIC_POOL=ON
+Build: cmake --build <build> --target strata --parallel 2
+Result: FAIL at 9%, before src/core/expert_source.cpp and src/program/generate.cpp; src/core/graph.cpp:4:10: fatal error: immintrin.h: No such file or directory
+No model or GPU execution; no binary produced.

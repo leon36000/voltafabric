@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "round": "R653",
+  "status": "EXACT_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_BY_DONOR_PLATFORM",
+  "donor": {
+    "name": "Strata",
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license": "MIT",
+    "source_checkout_clean_before_and_after_generator": true,
+    "generator_patch_sha256": "9dfe17d046858f41bb85fbccde55b8c460cd969b0b42ae799786a874a7b63e2c",
+    "generator_patch_bytes": 21616,
+    "r639_patch_sha256": "2e86bbcb65ad6763cd9c47ec02a85da7ce3147ee50633e974ec5815f2f6bd10a",
+    "r640_patch_sha256": "c8e2848813ebd079a71cfa81a8d31c62214a413e0be50803e0b9619b8481da9b"
+  },
+  "patch_application": {
+    "location": "isolated local clone under scratch",
+    "r639_r640_r641_applied": true,
+    "git_diff_check": "PASS"
+  },
+  "build": {
+    "cmake_configuration": "PASS",
+    "host_architecture": "aarch64",
+    "cuda_toolkit": "13.0.88",
+    "cuda_architecture_requested": 80,
+    "target": "strata",
+    "failure": "Strata-patched/src/core/graph.cpp:4 includes immintrin.h; header is unavailable on this ARM64 host",
+    "progress_at_failure_percent": 9,
+    "callback_translation_units_reached": false,
+    "binary_produced": false
+  },
+  "donor_cuda_minimum_sm": 80,
+  "v100_sm70_target_compatible": false,
+  "model_loaded": false,
+  "generation_executed": false,
+  "gpu_executed": false,
+  "inter_pc_network_used": false,
+  "production_r53_used": false,
+  "run_receipt": "No model request, attempt or ledger claim created",
+  "automatic_relaunch": "STOPPED_BY_OWNER"
+}
