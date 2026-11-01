@@ -856,7 +856,10 @@ impl GroupedMatrixRankWorker {
                 || dispatch.slots.is_empty()
                 || dispatch.slots.len() > 512
                 || inputs.len() != dispatch.slots.len()
-                || dispatch.slots.len().checked_mul(binding.rows)
+                || dispatch
+                    .slots
+                    .len()
+                    .checked_mul(binding.rows)
                     .is_none_or(|n| n > 16_777_216)
                 || dispatch.stamp.model_revision != binding.model_revision
                 || dispatch.stamp.layer != binding.layer
@@ -864,7 +867,11 @@ impl GroupedMatrixRankWorker {
                 || [&dispatch.stamp.run_id, &dispatch.stamp.plan_id]
                     .iter()
                     .any(|value| value.trim().is_empty() || value.len() > 256)
-                || binding.residents.iter().map(|(_, local)| *local).collect::<Vec<_>>()
+                || binding
+                    .residents
+                    .iter()
+                    .map(|(_, local)| *local)
+                    .collect::<Vec<_>>()
                     != dispatch.resident_order
                 || dispatch.slots.iter().any(|entry| {
                     binding.residents.get(entry.physical_expert)
@@ -901,9 +908,12 @@ impl GroupedMatrixRankWorker {
                     || input.values.iter().any(|value| !value.is_finite())
                     || !input_ids.insert((input.token, input.slot))
                 {
-                    return Err(invalid("grouped projection slot identity or activation shape"));
+                    return Err(invalid(
+                        "grouped projection slot identity or activation shape",
+                    ));
                 }
-                total_values = total_values.checked_add(input.values.len())
+                total_values = total_values
+                    .checked_add(input.values.len())
                     .filter(|&n| n <= 16_777_216)
                     .ok_or_else(|| invalid("grouped projection activation budget"))?;
                 flat_inputs.extend_from_slice(&input.values);
@@ -921,22 +931,33 @@ impl GroupedMatrixRankWorker {
                     dispatch.stamp.plan_id.clone(),
                 ));
             }
-            let values = self.resident.inner.forward(&flat_inputs, &expert_ids)
+            let values = self
+                .resident
+                .inner
+                .forward(&flat_inputs, &expert_ids)
                 .map_err(invalid)?;
-            let expected = dispatch.slots.len().checked_mul(binding.rows)
+            let expected = dispatch
+                .slots
+                .len()
+                .checked_mul(binding.rows)
                 .ok_or_else(|| invalid("grouped projection output size overflow"))?;
             if values.len() != expected || values.iter().any(|value| !value.is_finite()) {
                 return Err(invalid("grouped projection output shape or value"));
             }
-            let rows = values.chunks_exact(binding.rows)
+            let rows = values
+                .chunks_exact(binding.rows)
                 .map(|row| row.to_vec())
                 .collect();
-            let slots = dispatch.slots.iter().map(|entry| OutputSlot {
-                token: entry.slot.token,
-                slot: entry.slot.slot,
-                expert: entry.slot.expert,
-                local: entry.slot.local,
-            }).collect();
+            let slots = dispatch
+                .slots
+                .iter()
+                .map(|entry| OutputSlot {
+                    token: entry.slot.token,
+                    slot: entry.slot.slot,
+                    expert: entry.slot.expert,
+                    local: entry.slot.local,
+                })
+                .collect();
             Ok(UnweightedF32Output {
                 stamp: dispatch.stamp.clone(),
                 rank: dispatch.rank,

@@ -16,12 +16,18 @@ The fixture is synthetic GGUF only. It is not a real checkpoint, a complete FFN 
 
 ## Verification state
 
-Pipeline 2251 passed the configured repository scans. Gitleaks passed with the 53 exact, redacted digest false-positive fingerprints classified in [GITLEAKS_TRIAGE.md](GITLEAKS_TRIAGE.md); Semgrep and Trivy jobs also reported success. Semgrep recorded 155 repository findings, so a successful job does not mean the repository has zero findings. The fallback job only reported that scans completed; it did not compile Rust.
+Pipeline 2251 passed the configured repository scans. Gitleaks passed with the 53 exact, redacted digest false-positive fingerprints classified in [GITLEAKS_TRIAGE.md](GITLEAKS_TRIAGE.md); Semgrep and Trivy also reported success. Semgrep recorded 155 repository findings, so a successful job does not mean the repository has zero findings. The fallback job only reported that scans completed; it did not compile Rust.
 
-Pipeline 2252 reran the security jobs successfully, but the branch-scoped Rustfmt job could not start: the runner could not resolve the external Docker image host while pulling `rust:1.90-bookworm`. Formatting and Rust compilation were therefore not verified. The root `crates/ggml-native-ffi/build.rs` also requires already-built pinned static libraries through `VF_GGML_NATIVE_BUILD`; that build is not supplied by the current GitLab CI job.
+Pipeline 2252 reran the security jobs successfully, but its branch-scoped Rustfmt job could not start: the runner could not resolve the external Docker image host while pulling `rust:1.90-bookworm`.
+
+Pipeline 2253 passed the configured Gitleaks, Semgrep, Trivy and fallback jobs. It had no Rust compile/test job. The complete CI result therefore remains scan-only.
+
+Local Rustfmt 1.95.0 formatted the R660 additions in `src/native_ggml_cpu.rs` and `tests/native_matrix_session.rs`. Then `rustfmt --edition 2021 --config skip_children=true --check` succeeded for those files and `src/session.rs`; the command parsed all three changed Rust files but skipped resolving child modules. It is a syntax/style check, not a type-check or build.
+
+Eight entries in R660's `SHA256SUMS` were recalculated with Python's standard `hashlib.sha256` over the exact files read back from GitLab; all eight matched. No value from the Gitleaks report was copied.
 
 No Rust test pass, type-check, model generation, GPU execution, inter-PC transport, performance result, or production R53 reservation is claimed.
 
 ## Next action
 
-Run the new focused CPU test only in an admitted isolated environment that already has the verified pinned GGML static libraries. If that build is unavailable, keep R660 unqualified and make the build reproducible from the pinned donor before composing gate/up activation and down projection stages. Do not add route weighting here; later FFN composition must apply it once at the existing Collector boundary. Real-checkpoint compatibility remains a separate gate.
+Run the focused CPU test only in an admitted isolated environment that already has the verified pinned GGML static libraries. If that build is unavailable, make it reproducible from the pinned donor before composing gate/up activation and down projection stages. Do not add route weighting here; later FFN composition must apply it once at the existing Collector boundary. Real-checkpoint compatibility remains a separate gate.

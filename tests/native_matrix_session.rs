@@ -580,7 +580,9 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
     let mut inputs = Vec::new();
     for (token, routes) in problem.routes.iter().enumerate() {
         for (slot, route) in routes.iter().enumerate() {
-            let local = binding.residents.iter()
+            let local = binding
+                .residents
+                .iter()
                 .find(|(expert, _)| *expert == route.expert)
                 .map(|(_, local)| *local)
                 .unwrap();
@@ -601,13 +603,18 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
     let mut incomplete = inputs.clone();
     incomplete.pop();
     assert!(Session::exec_grouped_projection_batch(
-        &mut sessions, &problem, &incomplete, &ledger, TIMEOUT,
-    ).is_err());
+        &mut sessions,
+        &problem,
+        &incomplete,
+        &ledger,
+        TIMEOUT,
+    )
+    .is_err());
     assert!(sessions[0].is_usable());
 
-    let output = Session::exec_grouped_projection_batch(
-        &mut sessions, &problem, &inputs, &ledger, TIMEOUT,
-    ).unwrap();
+    let output =
+        Session::exec_grouped_projection_batch(&mut sessions, &problem, &inputs, &ledger, TIMEOUT)
+            .unwrap();
     assert_eq!(output.dispatch_hidden, H);
     assert_eq!(output.input_columns, columns);
     assert_eq!(output.output_columns, rows);
@@ -615,9 +622,13 @@ fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outpu
 
     // Independent scalar Q8_0 oracle; route coefficients are intentionally absent.
     for (actual, input) in output.slots.iter().zip(&inputs) {
-        assert_eq!((actual.token, actual.slot, actual.expert, actual.local),
-            (input.token, input.slot, input.expert, input.local));
-        let physical = binding.residents.iter()
+        assert_eq!(
+            (actual.token, actual.slot, actual.expert, actual.local),
+            (input.token, input.slot, input.expert, input.local)
+        );
+        let physical = binding
+            .residents
+            .iter()
             .position(|(expert, _)| *expert == input.expert)
             .unwrap();
         for row in 0..rows {

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T06:26:54Z",
+  "updated_utc": "2026-11-01T06:35:22Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -408,7 +408,7 @@
     {
       "id": "R660",
       "owner": "integrator",
-      "state": "PRIVATE_GITLAB_SOURCE_PUBLISHED_CPU_TEST_PENDING_UNQUALIFIED",
+      "state": "PRIVATE_GITLAB_READBACK_SHA256_VERIFIED_LOCAL_RUSTFMT_PASS_CPU_TEST_PENDING_UNQUALIFIED",
       "branch": "r660-ggml-per-slot-projection-20261101",
       "parent_commit": "dc6a2b21c4408b0392f5b8ca285abea700ad3f3f",
       "source_commit": "5de7fe7a50d46f0e7446651501e04a2e5080ec3e",
@@ -421,8 +421,14 @@
       "security_pipeline_2251": "success; security scans only; fallback job did not compile",
       "security_pipeline_2252": "Gitleaks/Semgrep/Trivy success; branch Rustfmt job failed before execution due external container image DNS resolution",
       "semgrep_findings": 155,
-      "test_limits": "Synthetic rectangular Q8_0 fixture only; code not compiled/type-checked in this round; no checkpoint/generation/GPU/inter-PC/R53 claim.",
-      "next_action": "Obtain an admitted CPU verification environment with the already pinned GGML static libraries, run the focused test and rustfmt; preserve R660 as unqualified until then."
+      "test_limits": "Synthetic Q8_0 only; local rustfmt parses/styles three changed files, but no compile/type-check/test, no real checkpoint/generation/GPU/inter-PC/R53/performance.",
+      "next_action": "Run the focused CPU test only in an admitted isolated environment with the verified pinned GGML static libraries; otherwise make the pinned native build reproducible before composing gate/up and down.",
+      "source_readback_sha256": {
+        "files": 8,
+        "matched": 8
+      },
+      "rustfmt_local": "Rustfmt 1.95.0 formatted additions; --edition 2021 --config skip_children=true --check passed on native_ggml_cpu.rs, session.rs, native_matrix_session.rs; child-module resolution skipped.",
+      "security_pipeline_2253": "success; configured scans/fallback only; no Rust compile/test"
     }
   ],
   "acceptance": [
@@ -490,8 +496,8 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R660_SOURCE_PUBLISHED_CPU_QUALIFICATION_PENDING",
-    "purpose": "Run the focused rectangular per-slot GGML Session test only with the already verified pinned CPU static libraries in an admitted isolated environment. The Rust CI job did not start because the runner could not resolve the external rust image host; do not claim fmt, compilation or test pass. Then compose gate/up and down with the route coefficient applied exactly once at the existing Collector. No real checkpoint, GPU or production-network step until separately admitted."
+    "status": "R660_LOCAL_RUSTFMT_PASS_CPU_QUALIFICATION_PENDING",
+    "purpose": "Run the focused CPU test only in an admitted isolated environment with the verified pinned GGML static libraries; otherwise make the pinned native build reproducible before composing gate/up and down. Route weighting remains unapplied in R660 and belongs exactly once at the existing Collector."
   },
   "report": "research/R660/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
