@@ -866,7 +866,7 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
     assert_eq!(output.dispatch_hidden, H);
     assert_eq!(output.input_columns, 64);
     assert_eq!(output.output_columns, H);
-    assert_eq!(output.slots.len(), problem.routes.iter().map(Vec::len).sum());
+    assert_eq!(output.slots.len(), problem.routes.iter().map(Vec::len).sum::<usize>());
     let gate_codes = [1_u8, 2, 4];
     let up_codes = [2_u8, 3, 5];
     let down_codes = [3_u8, 1, 2];
