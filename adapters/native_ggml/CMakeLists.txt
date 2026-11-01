@@ -37,6 +37,12 @@ target_link_libraries(vf_route_graph_transaction_test PRIVATE vf_native_ggml)
 target_compile_options(vf_route_graph_transaction_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_transaction COMMAND vf_route_graph_transaction_test)
 
+# Capture donor-produced expert IDs and final weights at graph execution time.
+add_executable(vf_route_graph_dynamic_capture_test route_graph_dynamic_capture_test.cpp)
+target_link_libraries(vf_route_graph_dynamic_capture_test PRIVATE vf_native_ggml)
+target_compile_options(vf_route_graph_dynamic_capture_test PRIVATE -Wall -Wextra -Werror)
+add_test(NAME route_graph_dynamic_capture COMMAND vf_route_graph_dynamic_capture_test)
+
 # VFB3 session result enters the GGML graph atomically and is weighted once.
 add_executable(vf_route_graph_vfr3_test route_graph_vfr3_test.cpp)
 target_link_libraries(vf_route_graph_vfr3_test PRIVATE vf_native_ggml Threads::Threads)

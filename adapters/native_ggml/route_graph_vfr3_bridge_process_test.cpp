@@ -39,7 +39,7 @@ using vf::strata_bridge::SessionIdentity;
 
 constexpr size_t kHidden = 2560;
 constexpr uint32_t kLayer = 0;
-constexpr uint64_t kEpoch = 6720261101ULL;
+constexpr uint64_t kEpoch = 6730261102ULL;
 constexpr uint64_t kAttempt = 1;
 constexpr uint64_t kPackBytes = 50'292'326'400ULL;
 constexpr uint64_t kBlobBytes = 2'176'000ULL;
@@ -174,7 +174,20 @@ bool make_graph(RouteGraphTransaction &transaction, const std::vector<float> &in
     std::fill(static_cast<float *>(g.slot_outputs->data),
               static_cast<float *>(g.slot_outputs->data) + kHidden, 0.0f);
     std::copy(input.begin(), input.end(), static_cast<float *>(g.activations->data));
-    g.routed = transaction.append(g.ctx, g.slot_outputs, g.activations);
+    ggml_tensor *router_logits = ggml_new_tensor_2d(g.ctx, GGML_TYPE_F32, 512, 1);
+    if (router_logits == nullptr || router_logits->data == nullptr) return false;
+    auto *logits = static_cast<float *>(router_logits->data);
+    std::fill(logits, logits + 512, -100.0f);
+    logits[8] = 0.0f;
+    ggml_tensor *probabilities = ggml_soft_max(g.ctx, router_logits);
+    ggml_tensor *selected = ggml_argsort_top_k(g.ctx, probabilities, 1);
+    ggml_tensor *probabilities_3d = ggml_reshape_3d(g.ctx, probabilities, 1, 512, 1);
+    ggml_tensor *selected_weights = ggml_get_rows(g.ctx, probabilities_3d, selected);
+    ggml_tensor *final_weights = ggml_scale(g.ctx, selected_weights, 0.25f);
+    if (probabilities == nullptr || selected == nullptr || selected_weights == nullptr ||
+        final_weights == nullptr) return false;
+    g.routed = transaction.append_dynamic(g.ctx, g.slot_outputs, g.activations,
+                                          selected, final_weights);
     if (g.routed == nullptr) return false;
     g.downstream = ggml_map_custom1(g.ctx, g.routed, copy_downstream, 1, &downstream_calls);
     g.graph = ggml_new_graph(g.ctx);
@@ -235,7 +248,7 @@ int run_live_case() {
         return 1;
     }
     std::filesystem::create_directories(temp_root);
-    const std::string temp_template = (temp_root / "r672-process-XXXXXX").string();
+    const std::string temp_template = (temp_root / "r673-process-XXXXXX").string();
     std::vector<char> temp_mutable(temp_template.begin(), temp_template.end());
     temp_mutable.push_back('\0');
     char *made_temp = mkdtemp(temp_mutable.data());
@@ -256,10 +269,10 @@ int run_live_case() {
     }
 
     const std::string suffix = std::to_string(static_cast<unsigned long long>(getpid()));
-    const std::string run_id = "r672-live-coordinator-" + suffix;
-    const std::string model_revision = "r672-synthetic-sc117-" + suffix;
-    const std::string plan_id = "r672-live-plan-" + suffix;
-    const uint64_t batch_id = 672'000'000ULL + static_cast<uint64_t>(getpid());
+    const std::string run_id = "r673-live-coordinator-" + suffix;
+    const std::string model_revision = "r673-synthetic-sc117-" + suffix;
+    const std::string plan_id = "r673-live-plan-" + suffix;
+    const uint64_t batch_id = 673'000'000ULL + static_cast<uint64_t>(getpid());
     std::ostringstream init;
     init << "{\"template\":{\"hidden\":2560,\"experts\":[8],\"routes\":[[{\"expert\":8,\"weight\":0.25}]],"
          << "\"registry\":{\"epoch\":" << kEpoch << ",\"copies\":[{\"expert\":8,\"rank\":0,\"local\":0}]},"
@@ -323,9 +336,7 @@ int run_live_case() {
     batch.slots = 1;
     batch.tokens = 1;
     batch.experts = 512;
-    batch.expert_ids = {8};
     batch.owner_kinds = {-1};
-    batch.weights = {0.25f};
     Vfr3CollectorContext collector_context{&client, {}, 0};
     RouteGraphTransaction transaction(batch, vf::ggml::collect_vfr3, &collector_context);
     std::vector<float> input(kHidden);
@@ -383,7 +394,7 @@ int run_live_case() {
                   << " claims=" << claim_count << "\n";
         return 1;
     }
-    std::cout << "R672 actual coordinator + vf-rank-session + GGML VFR3 transaction PASS"
+    std::cout << "R673 GGML softmax/top-k/gather/scale route through actual coordinator + vf-rank-session PASS"
               << " run=" << run_id << " model=" << model_revision << " plan=" << plan_id
               << " layer=" << kLayer << " batch=" << batch_id << " epoch=" << kEpoch
               << " attempt=" << kAttempt << " sparse_pack_logical_bytes=" << kPackBytes

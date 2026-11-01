@@ -1,0 +1,52 @@
+{
+  "round": "R673",
+  "state": "CPU_DYNAMIC_GGML_ROUTE_CAPTURE_PASS_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "adaptation": {
+    "boundary": "GGML runtime selected-expert IDs and final post-gating weights feed RouteGraphTransaction dynamically",
+    "operations_in_fixture": ["ggml_soft_max", "ggml_argsort_top_k", "ggml_reshape_3d", "ggml_get_rows", "ggml_scale"],
+    "coefficient_applied_by_voltafabric_again": false,
+    "noncontiguous_topk_output_read_by_ggml_strides": true,
+    "invalid_route_rejected_before_collector_and_downstream": true,
+    "replay_refused": true,
+    "qwen2moe_runtime_callback_integrated": false
+  },
+  "local_verification": {
+    "platform": "AArch64 CPU",
+    "cmake_targets_built_with_warnings_as_errors": ["vf_route_graph_transaction_test", "vf_route_graph_vfr3_test", "vf_route_graph_dynamic_capture_test"],
+    "ctest": {
+      "result": "3/3 passed",
+      "tests": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]
+    },
+    "live_coordinator_worker_test": {
+      "result": "PASS",
+      "run_id": "r673-live-coordinator-1601158",
+      "model_revision": "r673-synthetic-sc117-1601158",
+      "plan_id": "r673-live-plan-1601158",
+      "layer": 0,
+      "batch": 674601158,
+      "epoch": 6730261102,
+      "attempt": 1,
+      "logical_sparse_pack_bytes": 50292326400,
+      "expert_payload_bytes": 2176000,
+      "local_claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+      "local_claim_sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
+      "automatic_retry": false
+    },
+    "rust_source_basis": "isolated local snapshot used by the previous coordinator test; not an exact full current GitLab-tip reconstruction"
+  },
+  "not_qualified": {
+    "real_checkpoint_loaded": false,
+    "full_llama_cpp_qwen2moe_callback": false,
+    "complete_generation": false,
+    "independent_math_oracle": false,
+    "gpu": false,
+    "inter_pc_or_rdma": false,
+    "production_r53": false,
+    "performance_comparison": false
+  }
+}

@@ -57,6 +57,11 @@ public:
     // Optional activation source is a graph dependency for VFB3 dispatch. Slot
     // outputs contain raw local-owner results and placeholders for remote owners.
     ggml_tensor *append(ggml_context *ctx, ggml_tensor *slot_outputs, ggml_tensor *activations);
+    // Capture the donor's already-selected route IDs and final post-gating weights
+    // as graph inputs. IDs use [slot, token]; weights use [1, slot, token].
+    ggml_tensor *append_dynamic(ggml_context *ctx, ggml_tensor *slot_outputs,
+                                ggml_tensor *activations, ggml_tensor *selected_experts,
+                                ggml_tensor *final_weights);
     void attach_abort(ggml_cplan &plan);
     bool accepts(ggml_status graph_status) const;
     RouteStatus status() const;
@@ -64,6 +69,9 @@ public:
 private:
     static void compute(ggml_tensor *dst, int ith, int nth, void *userdata);
     static bool abort_after_failed_route(void *userdata);
+    ggml_tensor *append_impl(ggml_context *ctx, ggml_tensor *slot_outputs,
+                             ggml_tensor *activations, ggml_tensor *selected_experts,
+                             ggml_tensor *final_weights, bool dynamic_route_inputs);
 
     RouteBatch batch_;
     Collector collector_ = nullptr;
@@ -72,6 +80,7 @@ private:
     std::vector<float> staging_;
     bool appended_ = false;
     bool requires_activations_ = false;
+    bool dynamic_route_inputs_ = false;
     std::atomic<bool> compute_started_{false};
     std::atomic<RouteStatus> status_{RouteStatus::pending};
 };
