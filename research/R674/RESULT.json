@@ -1,0 +1,40 @@
+{
+  "round": "R674",
+  "state": "PINNED_DONOR_GRAPH_REUSE_CONSTRAINT_VERIFIED_DYNAMIC_ROUTE_REPLAY_REFUSED_CPU_PASS",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "source_trace": {
+    "process_ubatch_reuses_compatible_graph": "src/llama-context.cpp:1353-1406",
+    "graph_reuse_checks_params_and_inputs": "src/llama-graph.cpp:1406-1435",
+    "graph_compute_uses_async_scheduler": "src/llama-context.cpp:2539",
+    "route_transaction_is_single_use": "adapters/native_ggml/route_graph_transaction.cpp:106-110",
+    "cb_eval_failure_gap": "R668"
+  },
+  "test": {
+    "platform": "AArch64 CPU",
+    "build": "vf_route_graph_dynamic_capture_test, C++17 -Wall -Wextra -Werror",
+    "ctest": {
+      "result": "3/3 passed",
+      "tests": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]
+    },
+    "reused_graph_second_invocation": {
+      "input_routes_changed_to": [2, 5, 6, 0],
+      "collector_calls_after_refusal": 1,
+      "downstream_calls_after_refusal": 1,
+      "result": "ABORTED before a second collector or downstream acceptance"
+    }
+  },
+  "donor_callback_integrated": false,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "cuda_graph_qualified": false,
+  "gpu": false,
+  "inter_pc_or_rdma": false,
+  "production_r53": false,
+  "performance_comparison": false,
+  "r673_unknown_receipt_replayed": false,
+  "next_action": "R675: implement a per-invocation llama graph transaction lifecycle with fresh Stamp and host-side status validation before graph results are exposed; only then attach the Qwen2MoE routed aggregate callback."
+}

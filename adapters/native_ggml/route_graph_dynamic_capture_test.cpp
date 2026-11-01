@@ -114,6 +114,7 @@ bool run_case(bool invalid_expert) {
 
     ggml_tensor *selected = nullptr;
     ggml_tensor *final_weights = nullptr;
+    ggml_tensor *router_logits = nullptr;
     if (invalid_expert) {
         selected = ggml_new_tensor_2d(g.ctx, GGML_TYPE_I32, kSlots, kTokens);
         final_weights = ggml_new_tensor_3d(g.ctx, GGML_TYPE_F32, 1, kSlots, kTokens);
@@ -124,18 +125,18 @@ bool run_case(bool invalid_expert) {
         std::memcpy(selected->data, invalid_ids, sizeof(invalid_ids));
         std::memcpy(final_weights->data, weights, sizeof(weights));
     } else {
-        ggml_tensor *logits = ggml_new_tensor_2d(g.ctx, GGML_TYPE_F32, kExperts, kTokens);
-        if (logits == nullptr || logits->data == nullptr) {
+        router_logits = ggml_new_tensor_2d(g.ctx, GGML_TYPE_F32, kExperts, kTokens);
+        if (router_logits == nullptr || router_logits->data == nullptr) {
             std::cerr << "router logits allocation failed\n";
             return false;
         }
-        auto *values = static_cast<float *>(logits->data);
+        auto *values = static_cast<float *>(router_logits->data);
         std::fill(values, values + kExperts * kTokens, -100.0f);
         values[3] = 1.0986123f;
         values[1] = 0.0f;
         values[kExperts + 4] = 0.4054651f;
         values[kExperts + 7] = 0.0f;
-        ggml_tensor *probs = ggml_soft_max(g.ctx, logits);
+        ggml_tensor *probs = ggml_soft_max(g.ctx, router_logits);
         selected = ggml_argsort_top_k(g.ctx, probs, kSlots);
         ggml_tensor *probs_3d = ggml_reshape_3d(g.ctx, probs, 1, kExperts, kTokens);
         ggml_tensor *weights = ggml_get_rows(g.ctx, probs_3d, selected);
@@ -194,9 +195,43 @@ bool run_case(bool invalid_expert) {
     if (std::fabs(out[0] - 0.75f) > 1e-6f || std::fabs(out[1] - 1.25f) > 1e-6f ||
         std::fabs(out[2] - 9.0f) > 1e-6f || std::fabs(out[3] - 14.0f) > 1e-6f) return false;
 
+    // llama.cpp can reuse a graph object while replacing its input tensors. Make
+    // the routes different and verify this single-use transaction does not
+    // accidentally collect the next batch under the previous Stamp.
+    auto *next_logits = static_cast<float *>(router_logits->data);
+    std::fill(next_logits, next_logits + kExperts * kTokens, -100.0f);
+    next_logits[2] = 1.0986123f;
+    next_logits[5] = 0.0f;
+    next_logits[kExperts + 6] = 1.0986123f;
+    next_logits[kExperts + 0] = 0.0f;
+
+    const ggml_status replay = ggml_graph_compute(g.graph, &g.plan);
+    int32_t changed_ids[kSlots * kTokens]{};
+    const auto *selected_bytes = static_cast<const uint8_t *>(selected->data);
+    const auto *changed_weight_bytes = static_cast<const uint8_t *>(final_weights->data);
+    float changed_weights[kSlots * kTokens]{};
+    for (size_t token = 0; token < kTokens; ++token) {
+        for (size_t slot = 0; slot < kSlots; ++slot) {
+            const size_t route = slot + kSlots * token;
+            std::memcpy(&changed_ids[route],
+                        selected_bytes + slot * selected->nb[0] + token * selected->nb[1],
+                        sizeof(int32_t));
+            std::memcpy(&changed_weights[route],
+                        changed_weight_bytes + slot * final_weights->nb[1] + token * final_weights->nb[2],
+                        sizeof(float));
+        }
+    }
+    if (replay != GGML_STATUS_ABORTED || transaction.status() != RouteStatus::invalid_batch ||
+        changed_ids[0] != 2 || changed_ids[1] != 5 || changed_ids[2] != 6 || changed_ids[3] != 0 ||
+        std::fabs(changed_weights[0] - 0.375f) > 1e-6f ||
+        std::fabs(changed_weights[1] - 0.125f) > 1e-6f ||
+        capture.calls != 1 || downstream_calls != 1) {
+        std::cerr << "reused graph did not refuse a fresh dynamic route without a new transaction\n";
+        return false;
+    }
     if (ggml_graph_compute(g.graph, &g.plan) != GGML_STATUS_ABORTED ||
         transaction.status() != RouteStatus::invalid_batch || capture.calls != 1 || downstream_calls != 1) {
-        std::cerr << "dynamic route replay was not rejected\n";
+        std::cerr << "dynamic route repeated replay was not rejected\n";
         return false;
     }
     return true;

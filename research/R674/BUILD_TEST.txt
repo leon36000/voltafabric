@@ -1,0 +1,15 @@
+R674 BUILD AND TEST RECEIPT
+
+Pinned donor: llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT), source blobs read from the sparse clone at that exact HEAD.
+
+Changed code: route_graph_dynamic_capture_test.cpp only, in the isolated Naos adapter copy. The test changes router logits between invocations on one GGML graph, verifies that softmax/top-k/gather/scale produce new route IDs/weights, and verifies that the single-use transaction aborts before a second Collector call or downstream node.
+
+Build:
+  cmake --build ../build-full --target vf_route_graph_dynamic_capture_test -j2
+  Result: target built with C++17 -Wall -Wextra -Werror.
+
+Focused suite:
+  ctest --test-dir ../build-full --output-on-failure -R '^(route_graph_transaction|route_graph_vfr3|route_graph_dynamic_capture)$'
+  Result: 3/3 passed.
+
+The R673 local coordinator/worker process integration test was not rerun; its single-use receipt remains RESERVED_UNKNOWN_NO_REPLAY. No model, GPU, CUDA graph, network, production R53, or performance test was run.
