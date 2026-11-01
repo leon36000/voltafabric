@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:24:29Z",
+  "updated_utc": "2026-11-01T04:30:20Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -255,6 +255,29 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R653",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_BUILD_BLOCKED_BY_DONOR_PLATFORM",
+      "branch": "r653-strata-arch-aarch64-20261101",
+      "parent_commit": "61a687e389773e7a0d9fba66863f6da8f2d40775",
+      "commit": "1d5848a754e947412a8662e287e8429158432195",
+      "path": "research/R653",
+      "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+      "donor_license": "MIT",
+      "generated_r641_patch_sha256": "9dfe17d046858f41bb85fbccde55b8c460cd969b0b42ae799786a874a7b63e2c",
+      "result": "Exact R641 patch regenerated; R639/R640 hashes matched; isolated patch application and diff check passed; CMake config passed; Strata build stopped at 9% on missing immintrin.h for aarch64 before callback translation units.",
+      "v100_cuda_compatible": false,
+      "binary_produced": false,
+      "complete_generation": false,
+      "readback_files_verified": 4,
+      "published_utc": "2026-11-01T04:30:20Z",
+      "readback_verified_utc": "2026-11-01T04:30:20Z",
+      "model_loaded": false,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -285,7 +308,8 @@
     "R649 clean CPU test sends two unique VFB3 batches through one vf-rank-session and checks exact unweighted VFR3 responses plus two durable local claims, but uses synthetic GGML and the same-provider Resident.forward comparator; no checkpoint, donor callback or complete generation is qualified.",
     "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed.",
     "R650 calls the existing launcher's internal _start_bridge/_finish_sessions with one synthetic layer and sparse pack; it does not invoke full launch(), 48 coordinators, the Strata donor binary, a checkpoint or an independent numeric oracle.",
-    "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations."
+    "R651 passed the VoltaFabric C++ PoolFleetOwner callback through 48 real local Rust CPU coordinator/session pairs over two synthetic batches. It does not load the pinned Strata donor or a real checkpoint, and its 96 v3 claims are local RESERVED_UNKNOWN_NO_REPLAY receipts, not production R53 reservations.",
+    "R653 reproduced and applied the exact pinned Strata R639/R640/R641 patches and configured CMake, but compilation fails in Strata src/core/graph.cpp on PC6 aarch64 because immintrin.h is unavailable, before the callback files; pinned Strata CUDA requires SM80+, so it is not a V100 SM70 CUDA target. No source code was copied from Strata in R653."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -300,14 +324,15 @@
     "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
     "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
     "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
-    "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY"
+    "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
+    "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R653_READY_ON_OWNER_REQUEST",
-    "purpose": "R653: compile/adapt the exact pinned Strata expert-source and wire the real generation callback through launcher-managed VoltaFabric sessions using admitted CPU-only fixtures and an independent output oracle; no full checkpoint or hardware run."
+    "status": "R654_READY_ON_OWNER_REQUEST",
+    "purpose": "Inspect the llama.cpp revision pinned by R643 for a compatible CUDA SM70 backend and select one native inference boundary that can be integrated and compiled with an independent CPU oracle; do not run a model or GPU."
   },
-  "report": "research/R651/REPORT.md",
+  "report": "research/R653/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R651/SHA256SUMS",
