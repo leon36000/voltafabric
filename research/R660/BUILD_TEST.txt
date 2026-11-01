@@ -1,0 +1,8 @@
+# R660 build/test record
+
+- Code commit: `5de7fe7a50d46f0e7446651501e04a2e5080ec3e`.
+- Pipeline 2251 passed the configured security scans. Gitleaks, Semgrep, Trivy, and the fallback job returned success. The fallback job only echoed that scans completed; it did not compile or test Rust. Semgrep recorded 155 repository findings.
+- Gitleaks passed with 53 exact fingerprints from the redacted inherited report, classified as SHA-256 digest fields in `GITLEAKS_TRIAGE.md`. The detector was not disabled or broadly allowlisted.
+- Pipeline 2252: security jobs passed. The Rustfmt job failed before starting its container because the runner could not resolve the external Docker image host for `rust:1.90-bookworm`; rustfmt did not run.
+- The focused integration test was added but not executed. The current CI does not supply the pinned GGML static libraries required by `VF_GGML_NATIVE_BUILD`.
+- No compile, type-check, focused test result, model generation, GPU, or inter-PC result is claimed.

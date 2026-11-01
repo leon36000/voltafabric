@@ -9626,7 +9626,7 @@
   "r81_gpu_pending": false,
   "next_hardware_candidate_evidence": null,
   "next_hardware_preflight": "For a newly justified hardware case only: contract, actual identity/charges, real shared pinned lease and fresh consumed namespace; never replay historical cases.",
-  "latest_productivity_report": "research/R640/REPORT.md",
+  "latest_productivity_report": "research/R660/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -9878,7 +9878,7 @@
     "automatic_relaunch": false,
     "next_action": "R647: direct parser-loop refusal path passed. R648 should test the synthetic positive loop with a fresh identity and local worker."
   },
-"r647_vfb3_binary_loop_fail_closed": {
+  "r647_vfb3_binary_loop_fail_closed": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "commit": "40f415a2b1d7cc81b87d8eab0de0029adb7161c2",
     "readback_files_verified": 6,
@@ -9936,7 +9936,7 @@
     "automatic_relaunch": false,
     "next_action": "R652: connect the pinned Strata donor callback to launcher-managed sessions with admitted CPU-only fixtures; no full checkpoint or GPU.",
     "readback_verified_utc": "2026-11-01T04:08:19Z"
-   },
+  },
   "r651_strata_cpp_48_session_fleet": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS_WITH_QUARANTINED_PRELIMINARY_ATTEMPTS",
     "branch": "r651-strata-cpp-48-session-fleet-20261101",
@@ -10047,8 +10047,7 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
-  }
-,
+  },
   "r656_grouped_matrix_fleet": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_GROUPED_MATRIX_CPU_PASS",
     "branch": "r656-ggml-grouped-matrix-fleet-20261101",
@@ -10131,5 +10130,22 @@
     "limits": "Synthetic GGUF only; rectangular dispatch and fused gate/up execution remain unimplemented; no real checkpoint or complete generation.",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
+  },
+  "r660_ggml_per_slot_projection": {
+    "branch": "r660-ggml-per-slot-projection-20261101",
+    "parent_commit": "dc6a2b21c4408b0392f5b8ca285abea700ad3f3f",
+    "source_commit": "5de7fe7a50d46f0e7446651501e04a2e5080ec3e",
+    "report": "research/R660/REPORT.md",
+    "result": "research/R660/RESULT.json",
+    "build_test": "research/R660/BUILD_TEST.txt",
+    "sha256sums": "research/R660/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "status": "PRIVATE_GITLAB_SOURCE_PUBLISHED_CPU_TEST_PENDING_UNQUALIFIED",
+    "test": "Added rectangular synthetic Q8_0 per-slot scalar-oracle Session fixture; not executed.",
+    "limits": "Security scans passed, but CI did not compile Rust. The Rustfmt job failed before execution because the external container image could not be pulled. No real model, complete generation, GPU, inter-PC, production R53 or performance result.",
+    "semgrep_findings": 155,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "Run focused test and formatting in an admitted isolated environment with verified pinned GGML static libraries; then compose gate/up and down with route weighting once in Collector."
   }
 }

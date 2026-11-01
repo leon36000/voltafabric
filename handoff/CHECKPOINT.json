@@ -11641,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "research/R640/REPORT.md",
+  "latest_productivity_report": "research/R660/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -11885,7 +11885,13 @@
     "helper": "src/strata_native_bridge.rs::identity_matches",
     "test": "research/R645/cpu-harness/native_fleet_ggml.rs",
     "test_result": "rustfmt clean; 1/1 PASS with --locked --offline",
-    "identity_axes_tested": ["run_id", "model_revision", "plan_id", "epoch", "layer"],
+    "identity_axes_tested": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "epoch",
+      "layer"
+    ],
     "batch_and_attempt_wire_fields_tested": false,
     "complete_generation": false,
     "gpu_executed": false,
@@ -11921,7 +11927,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R647: direct binary_loop rejection/VFR3/empty-ledger test completed; R648 is a fresh synthetic positive CPU-worker path."
   },
-"r647_vfb3_binary_loop_fail_closed": {
+  "r647_vfb3_binary_loop_fail_closed": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "branch": "r647-vfb3-parser-real-loop-20261101",
     "base_commit": "27feba075b0a4af14cd3747851779397b781f810",
@@ -12047,7 +12053,7 @@
     "published_utc": "2026-11-01T04:08:12Z",
     "next_action": "R652: connect the pinned Strata donor callback to launcher-managed sessions with admitted CPU-only fixtures; no full checkpoint or GPU.",
     "readback_verified_utc": "2026-11-01T04:08:19Z"
-   },
+  },
   "r651_strata_cpp_48_session_fleet": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS_WITH_QUARANTINED_PRELIMINARY_ATTEMPTS",
     "branch": "r651-strata-cpp-48-session-fleet-20261101",
@@ -12158,8 +12164,7 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R656: connect the resident grouped matrix boundary to an identified VoltaFabric CPU Session/owner path, run multiple fresh batches, and verify atomic owner failure. No checkpoint, GPU, or production network."
-  }
-,
+  },
   "r656_grouped_matrix_fleet": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_GROUPED_MATRIX_CPU_PASS",
     "branch": "r656-ggml-grouped-matrix-fleet-20261101",
@@ -12258,5 +12263,29 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
+  },
+  "r660_ggml_per_slot_projection": {
+    "branch": "r660-ggml-per-slot-projection-20261101",
+    "parent_commit": "dc6a2b21c4408b0392f5b8ca285abea700ad3f3f",
+    "code_commit": "5de7fe7a50d46f0e7446651501e04a2e5080ec3e",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Added a separately negotiated FP32 per-slot projection path over resident GGML GroupedMatrix Sessions; output width decoupled from dispatch hidden width; routing coefficients remain unapplied.",
+    "source_readback_verified": false,
+    "test_added": "native_matrix_session::grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outputs",
+    "test": "NOT_EXECUTED",
+    "test_scope": "Synthetic GGUF Q8_0, dispatch/input width 32, output rows 64, per-slot identity, independent scalar oracle, missing-slot preflight.",
+    "test_blocker": "GitLab pipeline has no Rust build/test job with VF_GGML_NATIVE_BUILD static libraries. Branch-scoped rustfmt job failed before container start because external Docker image DNS resolution failed.",
+    "security_pipeline_2251": "success_security_scan_only",
+    "security_pipeline_2252": "security_jobs_success; rustfmt image pull failed before execution",
+    "semgrep_findings": 155,
+    "gitleaks_suppression": "53 exact fingerprints from redacted, verified SHA-256 digest false positives; detector retained.",
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "Run focused CPU test and rustfmt only when an admitted isolated environment with the existing pinned static build is available; then implement gate/up activation and down Collector composition."
   }
 }

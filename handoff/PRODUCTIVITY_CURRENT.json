@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T05:53:34Z",
+  "updated_utc": "2026-11-01T06:26:54Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -404,6 +404,25 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R660",
+      "owner": "integrator",
+      "state": "PRIVATE_GITLAB_SOURCE_PUBLISHED_CPU_TEST_PENDING_UNQUALIFIED",
+      "branch": "r660-ggml-per-slot-projection-20261101",
+      "parent_commit": "dc6a2b21c4408b0392f5b8ca285abea700ad3f3f",
+      "source_commit": "5de7fe7a50d46f0e7446651501e04a2e5080ec3e",
+      "ci_config_commit": "e378081bb980b6d9382a89b98c2f46c692ac27a7",
+      "path": "research/R660",
+      "tests_added": [
+        "native_matrix_session::grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outputs"
+      ],
+      "tests_executed": false,
+      "security_pipeline_2251": "success; security scans only; fallback job did not compile",
+      "security_pipeline_2252": "Gitleaks/Semgrep/Trivy success; branch Rustfmt job failed before execution due external container image DNS resolution",
+      "semgrep_findings": 155,
+      "test_limits": "Synthetic rectangular Q8_0 fixture only; code not compiled/type-checked in this round; no checkpoint/generation/GPU/inter-PC/R53 claim.",
+      "next_action": "Obtain an admitted CPU verification environment with the already pinned GGML static libraries, run the focused test and rustfmt; preserve R660 as unqualified until then."
     }
   ],
   "acceptance": [
@@ -443,9 +462,10 @@
     "R659 resolves a synthetic GGUF carrying the qwen2moe architecture label only; no real Qwen2MoE checkpoint was inspected or loaded.",
     "R659 executes only a square hidden=FFN=32 synthetic Q8_0 stage. The existing Session dispatcher still requires binding.rows == problem.hidden, so the resolved rectangular layout cannot yet run through the current projection Session.",
     "Fused gate/up tensor naming and doubled extent are recognized, but the fused tensor is not split or executed.",
-    "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified."
+    "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified.",
+    "R660 source adds a per-slot rectangular GGML Session projection and a synthetic scalar-oracle fixture, but its Rust test and rustfmt did not execute: the current CI has no pinned GGML static build and the separate rustfmt container image could not be pulled. Do not promote this source until CPU verification succeeds."
   ],
-  "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
+  "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
     "R637",
     "R638",
@@ -465,18 +485,19 @@
     "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE",
     "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE",
     "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS",
-    "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY"
+    "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY",
+    "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R660_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
+    "status": "R660_SOURCE_PUBLISHED_CPU_QUALIFICATION_PENDING",
+    "purpose": "Run the focused rectangular per-slot GGML Session test only with the already verified pinned CPU static libraries in an admitted isolated environment. The Rust CI job did not start because the runner could not resolve the external rust image host; do not claim fmt, compilation or test pass. Then compose gate/up and down with the route coefficient applied exactly once at the existing Collector. No real checkpoint, GPU or production-network step until separately admitted."
   },
-  "report": "research/R659/REPORT.md",
+  "report": "research/R660/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R659/SHA256SUMS",
-    "sha256": "b0f332029c8650e1bbe649710a4cec233252597d52c430444d23fc0e95fb657c",
-    "files": 10
+    "path": "research/R660/SHA256SUMS",
+    "sha256": "2323393704d93f3fbb3ea1fd34033fda8b7c50ea7ef26faaf5a4c918a2a00eca",
+    "files": 8
   }
 }

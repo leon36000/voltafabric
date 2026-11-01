@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "round": "R660",
+  "state": "PRIVATE_SOURCE_PUBLISHED_CPU_TEST_PENDING_UNQUALIFIED",
+  "branch": "r660-ggml-per-slot-projection-20261101",
+  "parent_commit": "dc6a2b21c4408b0392f5b8ca285abea700ad3f3f",
+  "code_commit": "5de7fe7a50d46f0e7446651501e04a2e5080ec3e",
+  "ci_config_commit": "e378081bb980b6d9382a89b98c2f46c692ac27a7",
+  "donor": {
+    "project": "llama.cpp/GGML",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "adaptation": "Identified per-slot FP32 projection over resident GGML GroupedMatrix Sessions; route weight absent; no Collector in the intermediate projection.",
+  "test_added": {
+    "target": "native_matrix_session",
+    "case": "grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outputs",
+    "scope": "Synthetic Q8_0; input/dispatch width 32; output width 64; per-slot identity and unweighted scalar oracle; missing-slot preflight",
+    "executed": false,
+    "reason": "GitLab CI has no pinned GGML static-library build; the branch Rustfmt job failed before execution because the external container image could not be pulled."
+  },
+  "ci": {
+    "pipeline_2251": "success_security_scan_only",
+    "pipeline_2252": "security_jobs_success_rustfmt_image_pull_failed",
+    "semgrep_findings": 155,
+    "gitleaks": "pass_with_53_exact_digest_fingerprint_suppressions",
+    "trivy": "pass"
+  },
+  "limits": [
+    "Synthetic GGUF/Q8_0 only",
+    "Rust source not compiled or type-checked in this wave",
+    "No complete FFN/generation",
+    "No real checkpoint",
+    "No GPU/inter-PC/RDMA/production R53/performance claim"
+  ],
+  "next_action": "Run the focused CPU test with the already verified pinned GGML static build or make that build reproducible; then compose separate gate/up and down stages, leaving route coefficient to ordinary Collector exactly once."
+}
