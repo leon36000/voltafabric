@@ -447,6 +447,19 @@ def _validate_shutdown_reply(session: BridgeSession, config: dict[str, Any], dea
         raise LaunchError(f"layer {session.layer} shutdown identity mismatch")
 
 
+def _strata_child_environment() -> dict[str, str]:
+    """Keep the pinned IQ3_S path off Strata's known-unsafe stage-buffer pinning.
+
+    Strata fb58e0dbc8399662c0e47c76578c6e878b14f6cf documents that
+    STRATA_STAGE_PIN=1 can corrupt IQ3_S after a long prompt. The launcher is
+    bound to the SC117 IQ3 fixture, so do not inherit an opt-in from the shell.
+    This only changes the child environment; it leaves the caller untouched.
+    """
+    env = os.environ.copy()
+    env["STRATA_STAGE_PIN"] = "0"
+    return env
+
+
 def _finish_sessions(sessions: list[BridgeSession], config: dict[str, Any], graceful: bool) -> bool:
     failed = False
     deadline = time.monotonic() + config["shutdown_timeout_ms"] / 1000.0
@@ -514,7 +527,8 @@ def launch(config: dict[str, Any]) -> int:
             "--vf-first-attempt", str(config["first_attempt"]),
             "--vf-timeout-ms", str(config["strata_timeout_ms"]),
         ]
-        strata_child = subprocess.Popen(args, cwd=config["working_directory"], pass_fds=fds, close_fds=True)
+        strata_child = subprocess.Popen(args, cwd=config["working_directory"], pass_fds=fds,
+                                        close_fds=True, env=_strata_child_environment())
         started_generation = True
         try:
             result = strata_child.wait()

@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "round": "R652",
+  "status": "CPU_ENVIRONMENT_GUARD_TEST_PASS",
+  "donor": {
+    "name": "Strata",
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license": "MIT",
+    "source_files_copied": false,
+    "finding": "STRATA_STAGE_PIN=1 forces pinned stage buffers; pinned release notes report IQ3_S corruption after a 4096-token prompt while enabled"
+  },
+  "adaptation": {
+    "file": "adapters/strata_native_bridge/voltafabric_launch.py",
+    "function": "_strata_child_environment",
+    "behavior": "sets STRATA_STAGE_PIN=0 only for the Strata child; preserves other inherited variables and leaves caller environment unchanged"
+  },
+  "test": {
+    "command": "python3 -B research/R652/cpu-harness/test_strata_stage_pin_sanitization.py -v",
+    "passed": 1,
+    "failed": 0,
+    "scope": "real launch() path with mocked bridge startup and intercepted Popen, 48 local socket descriptors"
+  },
+  "syntax_check": {
+    "command": "python3 -m py_compile adapters/strata_native_bridge/voltafabric_launch.py research/R652/cpu-harness/test_strata_stage_pin_sanitization.py",
+    "passed": true
+  },
+  "model_loaded": false,
+  "strata_binary_executed": false,
+  "generation_executed": false,
+  "gpu_executed": false,
+  "inter_pc_network_used": false,
+  "production_r53_used": false,
+  "receipt": "No model request or ledger claim created; unit-level launch boundary only",
+  "automatic_relaunch": "STOPPED_BY_OWNER"
+}
