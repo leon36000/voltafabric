@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:08:12Z",
+  "updated_utc": "2026-11-01T04:08:19Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -204,8 +204,9 @@
       "path": "research/R650",
       "test": "locked/offline native bridge build PASS; Python CPU harness PASS",
       "test_scope": "existing Strata launcher _start_bridge/_finish_sessions with actual Rust vf-strata-native-bridge and vf-rank-session; one synthetic sparse-pack expert; VFB3/VFR3 identity/shape/finiteness and graceful shutdown; one local claim",
-      "readback_files_verified": 4,
-      "published_utc": "2026-11-01T04:08:12Z"
+      "readback_files_verified": 7,
+      "published_utc": "2026-11-01T04:08:12Z",
+      "readback_verified_utc": "2026-11-01T04:08:19Z"
     }
   ],
   "acceptance": [
