@@ -11921,7 +11921,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R647: direct binary_loop rejection/VFR3/empty-ledger test completed; R648 is a fresh synthetic positive CPU-worker path."
   },
-  "r647_vfb3_binary_loop_fail_closed": {
+"r647_vfb3_binary_loop_fail_closed": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
     "branch": "r647-vfb3-parser-real-loop-20261101",
     "base_commit": "27feba075b0a4af14cd3747851779397b781f810",
@@ -11973,6 +11973,41 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:58:19Z",
-    "next_action": "R649: multiple fresh VFB3 batches through one local session, then bounded donor-launcher boundary.",
+    "next_action": "R649 positive two-batch VFB3 CPU session passed with fresh identities; R650 may connect the adapter launcher boundary.",
     "readback_verified_utc": "2026-11-01T04:00:20Z"
+  },
+  "r649_binary_loop_two_batches": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_RECEIPTS_READBACK_VERIFIED_CPU_TEST_PASS",
+    "branch": "r649-multi-batch-session-20261101",
+    "parent_commit": "fa2dd48e9fb118b21d69b01b44f932d4bc9343db",
+    "source_commit": "f37ddf86b8aaaf5fcfca0aa5c5046c89cefc14c1",
+    "report": "research/R649/REPORT.md",
+    "test": "src/strata_native_bridge.rs::identity_tests::binary_loop_runs_two_synthetic_native_cpu_batches_and_closes",
+    "test_result": "rustfmt clean; 1/1 PASS with --locked --offline; 150 tests filtered",
+    "run_id": "r649-multi-batch-binary-loop",
+    "batch_attempts": [
+      {
+        "batch": 9649001,
+        "attempt": 14
+      },
+      {
+        "batch": 9649002,
+        "attempt": 15
+      }
+    ],
+    "clean_ledger_claims": 2,
+    "clean_claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+    "output": "both VFR3 frames bitwise match same-provider Resident.forward; raw unweighted output; shutdown acknowledged",
+    "quarantined_identity_overlap": true,
+    "quarantined_receipts": "research/R649/receipts/quarantined-* and r648-baseline-*",
+    "quarantined_run_must_not_replay": true,
+    "same_provider_comparator": true,
+    "checkpoint_loaded": false,
+    "strata_donor_loaded": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 8,
+    "published_utc": "2026-11-01T04:03:42Z",
+    "next_action": "R650: bounded local CPU launcher-to-bridge lifecycle test with fresh identities."
   }

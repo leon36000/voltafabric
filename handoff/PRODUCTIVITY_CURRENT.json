@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T04:00:20Z",
+  "updated_utc": "2026-11-01T04:03:42Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -179,6 +179,19 @@
       "readback_files_verified": 6,
       "published_utc": "2026-11-01T03:58:19Z",
       "readback_verified_utc": "2026-11-01T04:00:20Z"
+    },
+    {
+      "id": "R649",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_REPORT_RECEIPTS_READBACK_VERIFIED_CPU_TEST_PASS",
+      "branch": "r649-multi-batch-session-20261101",
+      "parent_commit": "fa2dd48e9fb118b21d69b01b44f932d4bc9343db",
+      "source_commit": "f37ddf86b8aaaf5fcfca0aa5c5046c89cefc14c1",
+      "path": "research/R649",
+      "test": "rustfmt clean; locked/offline targeted root-library test 1/1 PASS",
+      "test_scope": "real binary_loop + one local vf-rank-session; two distinct VFB3 batches/attempts, bitwise VFR3 outputs and shutdown, two clean durable claims; same-provider synthetic GGML only",
+      "readback_files_verified": 8,
+      "published_utc": "2026-11-01T04:03:42Z"
     }
   ],
   "acceptance": [
@@ -205,7 +218,9 @@
     "R644 tests a synthetic in-memory layer-0 SC117-format expert through the native GGML resident and Rust Fleet. It confirms one-time FP16/f64 Collector weighting and rejects wrong epoch, plan and replay, but does not read checkpoint spans, exercise the VFB3 socket, call Strata's actual generator callback, or qualify complete generation.",
     "R645 exposes and tests the VFB3 run/model/plan/epoch/layer comparator using a synthetic native-GGML Fleet receipt. Batch/attempt parsing and exact VFB3/VFR3 wire framing, the Strata callback, complete generation, GPU, RDMA and inter-PC execution remain unqualified.",
     "R646 tests the exact VFB3 header/identity parsing helper used by binary_loop, not binary_loop's VFR3 output or actual ticket reservation. No checkpoint, Strata callback, full generation, GPU, RDMA or inter-PC run.",
-    "R648 exercises the real VFB3 binary_loop with one local vf-rank-session and a synthetic GGML resident; its expected result uses the same provider, only one consumed local ledger claim is tested, and no checkpoint, donor callback, full generation, GPU or inter-PC path is qualified."
+    "R648 exercises the real VFB3 binary_loop with one local vf-rank-session and a synthetic GGML resident; its expected result uses the same provider, only one consumed local ledger claim is tested, and no checkpoint, donor callback, full generation, GPU or inter-PC path is qualified.",
+    "R649 clean CPU test sends two unique VFB3 batches through one vf-rank-session and checks exact unweighted VFR3 responses plus two durable local claims, but uses synthetic GGML and the same-provider Resident.forward comparator; no checkpoint, donor callback or complete generation is qualified.",
+    "A preliminary R649 attempt accidentally reserved the R648 run/batch/attempt in a separate test ledger. Its receipts and a second quarantined receipt are preserved in research/R649/receipts; they are excluded from evidence and must not be replayed."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -217,18 +232,19 @@
     "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
     "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY",
     "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY",
-    "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH"
+    "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
+    "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R649_READY_ON_OWNER_REQUEST",
-    "purpose": "Exercise multiple fresh VFB3 batches through one local resident CPU session, checking per-batch identity, atomic errors and one reservation per accepted batch; then connect the tested bridge to the donor launcher boundary. Do not load a full checkpoint or start GPU/inter-PC work."
+    "status": "R650_READY_ON_OWNER_REQUEST",
+    "purpose": "Connect the proven Rust bridge/session boundary to the existing Strata launcher with a bounded local CPU fixture and fresh identities; verify lifecycle and atomic result handoff. No checkpoint load, GPU or inter-PC work."
   },
-  "report": "research/R648/REPORT.md",
+  "report": "research/R649/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R648/SHA256SUMS",
-    "sha256": "cf8f6676ffa8ac0f05221ab43bb18a278b0a2cef9ce901bb4df4a2764df0d035",
-    "files": 2
+    "path": "research/R649/SHA256SUMS",
+    "sha256": "6a8d9a00a6b309fef2fe3b4d64cb104c210ba4d09faca694abbf94572e976f03",
+    "files": 7
   }
 }
