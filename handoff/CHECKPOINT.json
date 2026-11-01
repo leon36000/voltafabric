@@ -12570,5 +12570,40 @@
     "pipeline_2301": "running scans/fallback only",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R681: verify attach/detach ownership and exercise route callback delivery through a live pinned llama_context/process_ubatch CPU fixture before checkpoint loading."
+  },
+  "r681_llama_qwen2moe_live_bridge": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_7_PASS_COORDINATOR_WORKER_PROCESS_PASS",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "9e62855ad0a250bce356d8199d56b55289c67649",
+    "source_commit": "a820d6dcb56958becd20a83205e49f22a72d8b2d",
+    "report": "research/R681/REPORT.md",
+    "result": "research/R681/RESULT.json",
+    "build_test": "research/R681/BUILD_TEST.txt",
+    "sha256sums": "research/R681/SHA256SUMS",
+    "manifest_sha256": "02e7bcc4be83b2fb8667fe410e3dcea1db3d4327c562057796385963cd4a6da9",
+    "readback_files_verified": 8,
+    "pinned_llama_cpp_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "pinned_llama_cpp_license": "MIT",
+    "focused_ctests": "7 passed",
+    "fresh_coordinator_worker_process_test": "PASS once; terminal receipt RESERVED_UNKNOWN_NO_REPLAY",
+    "live_llama_context_attach_detach": "PASS with vocab-only fixture",
+    "llama_context_process_ubatch_callback": "NOT_QUALIFIED",
+    "checkpoint_loaded": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "performance_comparison": false,
+    "pipeline_2304": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R682: connect the hook through pinned llama_context::process_ubatch on a bounded CPU Qwen2MoE fixture, or establish a small compatible model fixture first; do not replay the terminal R681 receipt."
   }
 }
