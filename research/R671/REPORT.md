@@ -28,8 +28,12 @@ Result: **3/3 CTest tests passed** (`native_provider`, `route_graph_transaction`
 
 ## Limits
 
-The VFR3 peer in this new graph test is a small fake AF_UNIX peer implementing the wire protocol. This test does **not** launch `vf-rank-session`; R648/R649's separate local worker evidence does not turn this graph fixture into an actual graph-to-worker integration. No checkpoint, model graph, complete token generation, GPU, inter-PC/RDMA, production R53 reservation, non-Q8_0 quantization path, or performance comparison is qualified. This code is a tested graph/collector boundary, not a complete llama.cpp VoltaFabric runtime.
+The VFR3 peer in this new graph test is a small fake AF_UNIX peer implementing the wire protocol. This test does **not** launch `vf-strata-native-bridge` or `vf-rank-session`; R648/R649's separate local worker evidence does not turn this graph fixture into an actual graph-to-worker integration. No checkpoint, model graph, complete token generation, GPU, inter-PC/RDMA, production R53 reservation, non-Q8_0 quantization path, or performance comparison is qualified. This code is a tested graph/collector boundary, not a complete llama.cpp VoltaFabric runtime.
+
+## Boundary clarification
+
+The C++ `vf::strata_bridge::Client` speaks VFB3/VFR3 to a VoltaFabric native-bridge coordinator over an AF_UNIX stream. `vf-rank-session` is a separate child-side worker protocol. The graph fixture currently replaces the coordinator endpoint with its fake peer; attaching the raw session binary directly to this C++ client would test the wrong protocol boundary.
 
 ## Next step
 
-Replace the fake peer in the graph fixture with a fresh, isolated local `vf-rank-session` process and test identity; do not reuse R648/R649 identities or replay any `UNKNOWN` receipt. Then identify a pinned donor graph capture point that feeds real selected IDs and post-scale weights into this transaction before attempting a checkpoint-backed generation path.
+Replace the fake peer with the actual local `vf-strata-native-bridge` coordinator and its `vf-rank-session` child, using a fresh isolated test identity and ledger; do not reuse R648/R649 identities or replay `UNKNOWN` receipts. Then identify a pinned donor graph capture point that feeds real selected IDs and post-scale weights into this transaction before attempting a checkpoint-backed generation path.

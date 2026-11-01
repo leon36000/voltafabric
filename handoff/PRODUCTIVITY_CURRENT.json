@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 08:26:07 UTC",
+  "updated_utc": "2026-11-01 08:27:00 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -739,9 +739,9 @@
       "test": "AArch64 CMake build with -Wall -Wextra -Werror; CTest 3/3 pass (native_provider, route_graph_transaction, route_graph_vfr3).",
       "test_scope": "Local fake AF_UNIX VFB3/VFR3 peer at the GGML graph boundary; checks exact identity/routes, scalar result, missing-row abort before downstream, shutdown and replay refusal. Not an actual vf-rank-session process.",
       "readback_files_verified": 9,
-      "readback_verified_utc": "2026-11-01 08:26:07 UTC",
+      "readback_verified_utc": "2026-11-01 08:27:00 UTC",
       "sha256_manifest": "research/R671/SHA256SUMS",
-      "sha256_manifest_sha256": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364",
+      "sha256_manifest_sha256": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9",
       "source_readback_sha256": {
         "adapters/native_ggml/CMakeLists.txt": "414ae6aee0343376bb5611ffd614cfb0466783a5416901696ff47793c576231d",
         "adapters/native_ggml/route_graph_transaction.hpp": "57a33ab4166a6076ee1b83629144b377bed4b31f719442db3d317a118a56c0f1",
@@ -750,16 +750,17 @@
         "adapters/native_ggml/session_vfr3_collector.hpp": "870e6452864a1eda828b00181c2e8f2df081066700a96159ba3be7c0e1267279",
         "adapters/native_ggml/session_vfr3_collector.cpp": "6edb283a6d4a348858219214e87b383c0bb3591f56aba4d6f7421c3a16bdc0ae",
         "adapters/native_ggml/route_graph_vfr3_test.cpp": "2f24f5c198a02a4df48815cb14056a8966fbe82595ccb13f430ceaa486927c86",
-        "research/R671/REPORT.md": "c9875ae1b2d1fda4dab8e0a8eb3c6b3bf201862a0b1870defb36808eb7561a6b",
-        "research/R671/SHA256SUMS": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364"
+        "research/R671/REPORT.md": "5c8d5f7188ad9adab3be51cf186ab8ea63247cccf57b91f8e7d0e189b35efd0c",
+        "research/R671/SHA256SUMS": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9"
       },
       "security_pipeline_2278": "running: Gitleaks running; Semgrep and Trivy pending; configured fallback created. Configured jobs are scans/fallback only and do not compile/test this C++ code.",
       "limits": [
-        "The new GGML graph test uses a fake AF_UNIX VFB3/VFR3 peer; it does not launch vf-rank-session. Separate R648/R649 worker evidence is not graph-to-worker integration evidence.",
+        "The new GGML graph test uses a fake AF_UNIX VFB3/VFR3 peer; it does not launch vf-strata-native-bridge or vf-rank-session. Separate R648/R649 worker evidence is not graph-to-worker integration evidence.",
         "No checkpoint, model graph, complete token generation, GPU, inter-PC/RDMA, production R53 reservation, non-Q8_0 quantization path, or performance comparison is qualified."
       ],
       "published_utc": "2026-11-01 08:26:07 UTC",
-      "next_action": "Replace the fake graph-test peer with a fresh isolated local vf-rank-session process and fresh test identity; do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs and post-scale weights from a pinned llama.cpp runtime graph before attempting checkpoint-backed generation."
+      "next_action": "Replace the fake peer with the actual local vf-strata-native-bridge coordinator and its vf-rank-session child, using a fresh isolated test identity and ledger; preserve the VFB3/VFR3 client boundary and do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs/post-scale weights from a pinned llama.cpp runtime graph.",
+      "boundary_clarification": "The C++ vf::strata_bridge::Client speaks VFB3/VFR3 to the VoltaFabric native-bridge coordinator over AF_UNIX. vf-rank-session is a separate child-side worker protocol; the raw session binary is not a direct peer for this client."
     }
   ],
   "acceptance": [
@@ -869,20 +870,20 @@
       "commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
       "status": "running",
       "jobs": {
-        "pc4_gitleaks": "running",
-        "pc4_semgrep": "pending",
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       },
       "scope": "configured scans/fallback only; not C++ compile/test evidence"
     }
   ],
-  "next_action": "Replace the R671 fake graph-test peer with a fresh isolated local vf-rank-session process and fresh test identity; preserve the fail-closed graph boundary and do not replay prior or UNKNOWN receipts. Then identify a pinned llama.cpp runtime capture point for real selected IDs/post-scale weights.",
+  "next_action": "Replace the fake peer with the actual local vf-strata-native-bridge coordinator and its vf-rank-session child, using a fresh isolated test identity and ledger; preserve the VFB3/VFR3 client boundary and do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs/post-scale weights from a pinned llama.cpp runtime graph.",
   "report": "research/R671/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skill-based workflow, automatic relaunch remains stopped, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R671/SHA256SUMS",
-    "sha256": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364",
+    "sha256": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9",
     "files": 8
   }
 }
