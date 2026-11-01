@@ -1,0 +1,33 @@
+{
+  "wave": "R640",
+  "status": "PATCH_GENERATED_SOURCE_REVIEW_ONLY",
+  "branch": "r640-strata-mixed-miss-dispatch-20261101",
+  "base_commit": "8378cf8a82d7a0122ca447f02db126b3f9ada8c6",
+  "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+  "base_patch": "adapters/strata_native_bridge/strata-fb58-cpu-hook.patch",
+  "base_patch_sha256": "2e86bbcb65ad6763cd9c47ec02a85da7ce3147ee50633e974ec5815f2f6bd10a",
+  "generator": "adapters/strata_native_bridge/make_mixed_owner_patch.py",
+  "generator_sha256": "465648a98e3925fa89cf6796eb806e96ca591f2ac530e428989bfe5add7bb7af",
+  "patch": "adapters/strata_native_bridge/strata-fb58-mixed-owner.patch",
+  "patch_sha256": "c8e2848813ebd079a71cfa81a8d31c62214a413e0be50803e0b9619b8481da9b",
+  "changed_donor_files": [
+    "include/strata/core/expert_source.hpp",
+    "src/core/expert_source.cpp"
+  ],
+  "final_owner_map_used": true,
+  "separate_cpu_handled_mask": true,
+  "strata_owner_kinds_preserved": true,
+  "weighted_gate_applied_by_voltafabric": false,
+  "external_owner_failure_drain_added": true,
+  "default_runtime_changed": false,
+  "generator_callback_fields_initialized": false,
+  "donor_modified": false,
+  "compiler_or_tests_run": false,
+  "complete_generation": false,
+  "gpu_executed": false,
+  "inter_pc_worker_used": false,
+  "production_network_used": false,
+  "real_r53_used": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R641: connect the 48-session owner lifetime and launcher identity to the Strata generation context; then qualify the CPU generation path against an independent row oracle."
+}
