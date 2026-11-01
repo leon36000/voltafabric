@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 08:27:00 UTC",
+  "updated_utc": "2026-11-01 08:29:12 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -729,7 +729,7 @@
     {
       "id": "R671",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_SUCCESS",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "5881d625998d8f01dd7d58df184fabe14664c172",
       "source_commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
@@ -737,9 +737,9 @@
       "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
       "adaptation": "Existing RouteGraphTransaction now has VFB3 activation/owner-kind inputs and uses VoltaFabric's existing AF_UNIX Client for VFR3; remote raw rows are merged into placeholders and ordinary FP16-decoded/f64 route weighting is staged atomically.",
       "test": "AArch64 CMake build with -Wall -Wextra -Werror; CTest 3/3 pass (native_provider, route_graph_transaction, route_graph_vfr3).",
-      "test_scope": "Local fake AF_UNIX VFB3/VFR3 peer at the GGML graph boundary; checks exact identity/routes, scalar result, missing-row abort before downstream, shutdown and replay refusal. Not an actual vf-rank-session process.",
-      "readback_files_verified": 9,
-      "readback_verified_utc": "2026-11-01 08:27:00 UTC",
+      "test_scope": "Local fake AF_UNIX VFB3/VFR3 peer at the GGML graph boundary; checks exact identity/routes, scalar result, missing-row abort before downstream, shutdown and replay refusal. No actual native-bridge coordinator or vf-rank-session process.",
+      "readback_files_verified": 10,
+      "readback_verified_utc": "2026-11-01 08:29:12 UTC",
       "sha256_manifest": "research/R671/SHA256SUMS",
       "sha256_manifest_sha256": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9",
       "source_readback_sha256": {
@@ -753,14 +753,15 @@
         "research/R671/REPORT.md": "5c8d5f7188ad9adab3be51cf186ab8ea63247cccf57b91f8e7d0e189b35efd0c",
         "research/R671/SHA256SUMS": "cffaa9db7ab46c7573f73b9bf0ce295c85e51785d12794f15d82c12b90b380b9"
       },
-      "security_pipeline_2278": "running: Gitleaks running; Semgrep and Trivy pending; configured fallback created. Configured jobs are scans/fallback only and do not compile/test this C++ code.",
+      "security_pipeline_2278": "success: Gitleaks, Semgrep, Trivy and configured CPU fallback all passed; configured CI jobs do not compile/test this C++ code.",
       "limits": [
         "The new GGML graph test uses a fake AF_UNIX VFB3/VFR3 peer; it does not launch vf-strata-native-bridge or vf-rank-session. Separate R648/R649 worker evidence is not graph-to-worker integration evidence.",
         "No checkpoint, model graph, complete token generation, GPU, inter-PC/RDMA, production R53 reservation, non-Q8_0 quantization path, or performance comparison is qualified."
       ],
       "published_utc": "2026-11-01 08:26:07 UTC",
       "next_action": "Replace the fake peer with the actual local vf-strata-native-bridge coordinator and its vf-rank-session child, using a fresh isolated test identity and ledger; preserve the VFB3/VFR3 client boundary and do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs/post-scale weights from a pinned llama.cpp runtime graph.",
-      "boundary_clarification": "The C++ vf::strata_bridge::Client speaks VFB3/VFR3 to the VoltaFabric native-bridge coordinator over AF_UNIX. vf-rank-session is a separate child-side worker protocol; the raw session binary is not a direct peer for this client."
+      "boundary_clarification": "The C++ vf::strata_bridge::Client speaks VFB3/VFR3 to the VoltaFabric native-bridge coordinator over AF_UNIX. vf-rank-session is a separate child-side worker protocol; the raw session binary is not a direct peer for this client.",
+      "evidence_correction_commit": "418caa32a67f6a8228b5fd21b2354c5d9cf71915"
     }
   ],
   "acceptance": [
@@ -868,12 +869,12 @@
       "id": "gitlab-pipeline-2278",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
-        "pc4_semgrep": "running",
-        "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       },
       "scope": "configured scans/fallback only; not C++ compile/test evidence"
     }
