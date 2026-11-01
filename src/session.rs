@@ -4500,6 +4500,36 @@ impl Session {
             }
         }
     }
+    /// Preserve an already-reserved attempt while transporting unweighted FP32 slots.
+    /// A failed execution consumes the ticket and must never be retried.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_native_ggml_unweighted_f32_reserved(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[Vec<f32>],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        ticket: crate::native_ledger::Reservation,
+        timeout: Duration,
+    ) -> Result<Vec<Vec<Vec<f64>>>> {
+        let (collector, _) = Self::collect_native_ggml_batch(
+            sessions,
+            problem,
+            inputs,
+            ledger,
+            timeout,
+            true,
+            Some(ticket),
+        )?;
+        match collector.finish_unweighted_slots() {
+            Ok(output) => Ok(output),
+            Err(error) => {
+                for session in sessions {
+                    session.usable = false;
+                }
+                Err(error)
+            }
+        }
+    }
 
     /// Consume an already-durable local reservation. An error consumes it and must never be replayed.
     #[cfg(feature = "native-ggml-cpu")]
