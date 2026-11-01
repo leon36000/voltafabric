@@ -19,7 +19,7 @@ set(GGML_OPENMP OFF CACHE BOOL "" FORCE)
 set(GGML_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GGML_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory("${GGML_SOURCE_DIR}/ggml" ggml EXCLUDE_FROM_ALL)
-add_library(vf_native_ggml STATIC provider.cpp bridge.cpp)
+add_library(vf_native_ggml STATIC provider.cpp bridge.cpp route_graph_transaction.cpp)
 target_compile_features(vf_native_ggml PRIVATE cxx_std_17)
 target_compile_options(vf_native_ggml PRIVATE -Wall -Wextra -Werror)
 target_link_libraries(vf_native_ggml PUBLIC ggml-cpu ggml-base)
@@ -30,7 +30,7 @@ add_test(NAME native_provider COMMAND vf_native_ggml_test)
 
 # CPU-only model-graph transaction fixture: downstream GGML nodes are gated on collector success.
 add_executable(vf_route_graph_transaction_test route_graph_transaction_test.cpp)
-target_link_libraries(vf_route_graph_transaction_test PRIVATE ggml-cpu ggml-base)
+target_link_libraries(vf_route_graph_transaction_test PRIVATE vf_native_ggml)
 target_compile_options(vf_route_graph_transaction_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME route_graph_transaction COMMAND vf_route_graph_transaction_test)
 
