@@ -12304,5 +12304,31 @@
     "pipeline_2282": "success; security scans/fallback only, not build/test",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: reproduce from exact GitLab source readback, then implement and test the dynamic GGML custom op at the pinned Qwen2MoE seam using fresh synthetic CPU fixtures. No complete generation claim."
+  },
+  "r673_dynamic_route_capture": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "d22de1463945c41b96c469b5ac6337df4b4bedb0",
+    "source_commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+    "report": "research/R673/REPORT.md",
+    "result": "research/R673/RESULT.json",
+    "build_test": "research/R673/BUILD_TEST.txt",
+    "sha256sums": "research/R673/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "status": "PRIVATE_GITLAB_READBACK_VERIFIED_CPU_DYNAMIC_ROUTE_CAPTURE_PASS_PIPELINE_2284_RUNNING",
+    "adaptation": "Dynamic GGML IDs and final post-gating weights feed the existing VFB3/VFR3 route transaction and ordinary FP16-decoded/f64 Collector; no donor callback yet.",
+    "test": "AArch64 C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; one direct local coordinator/worker integration run PASS.",
+    "test_scope": "Synthetic Q8_0 and pinned GGML graph ops; invalid route atomic refusal; top-k output read by strides; no real checkpoint, llama runtime callback, complete generation, independent math oracle, GPU, inter-PC, production R53 or perf.",
+    "donor_route_hook_integrated": false,
+    "source_readback_verified": true,
+    "readback_files_verified": 9,
+    "manifest_entries_verified": "8/8 SHA-256",
+    "local_claim_status": "RESERVED_UNKNOWN_NO_REPLAY",
+    "local_claim_sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
+    "pipeline_2284": "running; scans/fallback only, not C++ build/test",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "published_utc": "2026-11-01 09:06:07 UTC",
+    "readback_verified_utc": "2026-11-01 09:06:28 UTC",
+    "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   }
 }

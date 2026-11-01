@@ -1,6 +1,6 @@
 {
   "round": "R673",
-  "state": "CPU_DYNAMIC_GGML_ROUTE_CAPTURE_PASS_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ROUTE_CAPTURE_PASS_SECURITY_PIPELINE_2284_RUNNING",
   "donor": {
     "repository": "ggml-org/llama.cpp",
     "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
@@ -8,7 +8,13 @@
   },
   "adaptation": {
     "boundary": "GGML runtime selected-expert IDs and final post-gating weights feed RouteGraphTransaction dynamically",
-    "operations_in_fixture": ["ggml_soft_max", "ggml_argsort_top_k", "ggml_reshape_3d", "ggml_get_rows", "ggml_scale"],
+    "operations_in_fixture": [
+      "ggml_soft_max",
+      "ggml_argsort_top_k",
+      "ggml_reshape_3d",
+      "ggml_get_rows",
+      "ggml_scale"
+    ],
     "coefficient_applied_by_voltafabric_again": false,
     "noncontiguous_topk_output_read_by_ggml_strides": true,
     "invalid_route_rejected_before_collector_and_downstream": true,
@@ -17,10 +23,18 @@
   },
   "local_verification": {
     "platform": "AArch64 CPU",
-    "cmake_targets_built_with_warnings_as_errors": ["vf_route_graph_transaction_test", "vf_route_graph_vfr3_test", "vf_route_graph_dynamic_capture_test"],
+    "cmake_targets_built_with_warnings_as_errors": [
+      "vf_route_graph_transaction_test",
+      "vf_route_graph_vfr3_test",
+      "vf_route_graph_dynamic_capture_test"
+    ],
     "ctest": {
       "result": "3/3 passed",
-      "tests": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]
+      "tests": [
+        "route_graph_transaction",
+        "route_graph_dynamic_capture",
+        "route_graph_vfr3"
+      ]
     },
     "live_coordinator_worker_test": {
       "result": "PASS",
@@ -48,5 +62,20 @@
     "inter_pc_or_rdma": false,
     "production_r53": false,
     "performance_comparison": false
-  }
+  },
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "parent_commit": "d22de1463945c41b96c469b5ac6337df4b4bedb0",
+  "source_commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+  "published_utc": "2026-11-01T09:06:07Z",
+  "readback_verified_utc": "2026-11-01T09:06:28Z",
+  "source_readback": {
+    "files_verified": 9,
+    "manifest_entries_verified": "8/8 SHA-256 matched exact GitLab readbacks",
+    "manifest": "research/R673/SHA256SUMS"
+  },
+  "security_pipeline_2284": {
+    "status": "running",
+    "scope": "Gitleaks, Semgrep, Trivy and configured fallback only; not C++ build/test"
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER"
 }

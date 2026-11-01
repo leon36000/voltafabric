@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 08:55:28 UTC",
+  "updated_utc": "2026-11-01 09:10:01 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -785,6 +785,27 @@
       "published_utc": "2026-11-01 08:55:28 UTC",
       "readback_verified_utc": "2026-11-01 08:55:28 UTC",
       "next_action": "R673: reproduce the native coordinator/worker build from exact current GitLab source readback, then add a pinned llama.cpp dynamic GGML custom op that consumes selected IDs and post-scale weights and replaces only the routed-expert aggregate. Test first with a fresh synthetic CPU fixture. No full generation claim."
+    },
+    {
+      "id": "R673",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ROUTE_CAPTURE_PASS_PIPELINE_2284_RUNNING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "d22de1463945c41b96c469b5ac6337df4b4bedb0",
+      "source_commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+      "path": "research/R673",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "RouteGraphTransaction prend maintenant les IDs GGML top-k et poids finaux post-gating en tenseurs dynamiques, les lit via strides GGML et les transmet au client VFB3/VFR3 et au Collector ordinaire.",
+      "test": "AArch64 CPU; trois cibles C++17 -Wall -Wextra -Werror compilées, CTest ciblé 3/3 passé; essai de processus déjà exécuté une fois et PASS avec vrai coordinateur natif + enfant vf-rank-session.",
+      "test_scope": "Fixture Q8_0 synthétique; opérations softmax/top-k/reshape/gather/scale; coefficient unique, route invalide rejetée avant collecte/sortie aval, rejeu refusé. Aucun checkpoint réel, callback llama.cpp, génération complète, oracle mathématique indépendant, GPU, inter-PC, R53 de production ou performance.",
+      "readback_files_verified": 9,
+      "manifest_entries_verified": "8/8 SHA-256 exacts depuis GitLab",
+      "manifest_sha256": "05f63dd95147ceb47a49449ee488395aa5aa0ac1f07aad85bf350c8ebacc5ee0",
+      "local_claim_sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
+      "pipeline_2284": "running; configured scans/fallback only, not C++ build/test",
+      "published_utc": "2026-11-01 09:06:07 UTC",
+      "readback_verified_utc": "2026-11-01 09:06:28 UTC",
+      "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
     }
   ],
   "acceptance": [
@@ -861,7 +882,8 @@
     "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
     "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST",
     "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS",
-    "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS"
+    "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS",
+    "R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING"
   ],
   "active_operations": [
     {
@@ -915,14 +937,27 @@
         "pc4_ci_fallback": "success"
       },
       "scope": "configured security scans and fallback only; not C++ build/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2284",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      },
+      "scope": "configured Gitleaks/Semgrep/Trivy/fallback only; not C++ build/test"
     }
   ],
-  "next_action": "R673: reproduce the native coordinator/worker build from exact current GitLab source readback, then add a pinned llama.cpp dynamic GGML custom op that consumes selected IDs and post-scale weights and replaces only the routed-expert aggregate. Test first with a fresh synthetic CPU fixture. No full generation claim.",
-  "report": "research/R672/REPORT.md",
+  "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production.",
+  "report": "research/R673/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skill-based workflow, automatic relaunch remains stopped, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R672/SHA256SUMS",
-    "sha256": "47a495615aed585a2bd1d4f88c93a53609eef420830ac48acb7760e42325eb64",
-    "files": 6
+    "path": "research/R673/SHA256SUMS",
+    "sha256": "05f63dd95147ceb47a49449ee488395aa5aa0ac1f07aad85bf350c8ebacc5ee0",
+    "files": 8
   }
 }

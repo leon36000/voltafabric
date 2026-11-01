@@ -10166,5 +10166,39 @@
     "limits": "The local Rust build snapshot differs from the full current GitLab tip; CI pipeline 2282 passed configured scans/fallback only.",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R673: recreate the native build from exact GitLab source readback, then add the dynamic pinned llama.cpp route custom op and verify with fresh CPU synthetic fixtures."
+  },
+  "r673_dynamic_route_capture": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_CPU_ROUTE_CAPTURE_PASS_PIPELINE_2284_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
+    "objective": "Make GGML computed Qwen2MoE route IDs and final coefficients available to VoltaFabric's existing identified VFB3/VFR3 Collector boundary.",
+    "changes": [
+      "Added append_dynamic with graph dependencies on selected IDs and final post-gating weights.",
+      "Copies tensor values respecting GGML strides, including non-contiguous ggml_argsort_top_k output.",
+      "Validates dynamic routes before collector; invalid route abort is atomic and replay remains refused.",
+      "Process integration passes through the actual local bridge coordinator and rank-session child using synthetic Q8_0."
+    ],
+    "validation": "AArch64 CPU C++17 warnings-as-errors build; focused CTest 3/3 pass; process integration PASS; 8/8 manifest digests and 9 repository files read back verified.",
+    "limitations": [
+      "No llama.cpp build_moe_ffn callback patch yet.",
+      "No real checkpoint/model or complete generation.",
+      "No independent mathematical oracle, GPU, inter-PC/RDMA, production R53, or performance comparison."
+    ],
+    "local_receipt": {
+      "status": "RESERVED_UNKNOWN_NO_REPLAY",
+      "sha256": "df28886f4787444e3a2db6cdcb03b486e428f6660b3beeef7f43c0cd91ab360d",
+      "replay": false
+    },
+    "pipeline_2284": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R674: brancher un callback llama.cpp Qwen2MoE versionné sur cette capture dynamique au point build_moe_ffn; substituer uniquement l’agrégat routed-experts, éviter une seconde multiplication des coefficients et préserver shared expert/résiduel. Construire/vérifier la frontière CPU avant tout checkpoint réel; aucune génération complète, GPU ou réseau de production."
   }
 }
