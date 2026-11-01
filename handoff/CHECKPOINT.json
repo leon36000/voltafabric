@@ -12604,7 +12604,7 @@
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R683: exercise the hook at the pinned donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture; inspect the smallest compatible model path if real donor graph construction requires tensors."
+    "next_action": "R683: exercise the hook at the pinned donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture; inspect the smallest compatible tensor/model path if required."
   },
   "r682_live_process_ubatch_cpu_fixture": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_PROCESS_UBATCH_SYNTHETIC_GRAPH_CTEST_1_PASS",
@@ -12622,11 +12622,11 @@
     "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; CMake registration and focused CTest 1/1 pass; output [5,10] with coefficient once",
     "test_scope": "Live donor process_ubatch dispatches synthetic internal graph and callback; production build_moe_ffn, checkpoint and generation remain unqualified",
     "pipeline_2309": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "running",
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
         "pc4_gitleaks": "success"
       }
     },
@@ -12637,6 +12637,16 @@
     "production_r53_used": false,
     "performance_comparison": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R683: test the production Qwen2MoE build_moe_ffn seam on bounded CPU fixture or identify the minimal tensor/model fixture required."
+    "next_action": "R683: test the production Qwen2MoE build_moe_ffn seam on bounded CPU fixture or identify the minimal tensor/model fixture required.",
+    "artifact_correction_commit": "ac33dccf23a0818e77698838104cd1e57f925bd5",
+    "pipeline_2313": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    }
   }
 }

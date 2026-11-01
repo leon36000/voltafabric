@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 10:45:12 UTC",
+  "updated_utc": "2026-11-01 10:47:55 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -975,7 +975,7 @@
     {
       "id": "R682",
       "owner": "integrator",
-      "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_PROCESS_UBATCH_CTEST_1_PASS_PIPELINE_2309_RUNNING",
+      "state": "SOURCE_AND_MANIFEST_CORRECTED_PRIVATE_GITLAB_READBACK_VERIFIED_7_OF_7_CPU_CTEST_PASS_PIPELINES_RUNNING",
       "branch": "r663-qwen2moe-collector-bridge-20261101",
       "parent_commit": "c8656409930ee8c5e9dd4855871d4be3b13d41d3",
       "source_commit": "7331a3d7f5b84d737bbbd65318eb31163ca92cfc",
@@ -986,8 +986,20 @@
       "test_scope": "Pinned llama_context::process_ubatch executes a synthetic internal Qwen2MoE graph that invokes the hook. Donor production build_moe_ffn graph remains unqualified; no checkpoint, Rust coordinator/worker, complete generation, GPU, inter-PC or performance.",
       "manifest_sha256": "a7aecf0b5b83d014d1f2b7f11dd2632b65b2bff40ed92d48ab589d4053038364",
       "readback_files_verified": 7,
-      "readback_verified_utc": "2026-11-01 10:45:12 UTC",
+      "readback_verified_utc": "2026-11-01 10:47:55 UTC",
       "pipeline_2309": {
+        "status": "success",
+        "jobs": {
+          "pc4_ci_fallback": "success",
+          "pc4_trivy": "success",
+          "pc4_semgrep": "success",
+          "pc4_gitleaks": "success"
+        }
+      },
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "next_action": "R683: exercise the callback at the donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture; if checkpoint tensors are required, document the blocker and smallest compatible model path before downloading or loading anything.",
+      "artifact_correction_commit": "ac33dccf23a0818e77698838104cd1e57f925bd5",
+      "pipeline_2313": {
         "status": "running",
         "jobs": {
           "pc4_ci_fallback": "created",
@@ -995,9 +1007,7 @@
           "pc4_semgrep": "running",
           "pc4_gitleaks": "success"
         }
-      },
-      "automatic_relaunch": "STOPPED_BY_OWNER",
-      "next_action": "R683: exercise the callback at the donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture; if checkpoint tensors are required, document the blocker and smallest compatible model path before downloading or loading anything."
+      }
     }
   ],
   "acceptance": [
@@ -1328,6 +1338,19 @@
       "id": "gitlab-pipeline-2309",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "7331a3d7f5b84d737bbbd65318eb31163ca92cfc",
+      "status": "success",
+      "jobs": {
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      },
+      "scope": "R682 configured security scans/fallback only; local AArch64 CPU CTest is separate evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2313",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "ac33dccf23a0818e77698838104cd1e57f925bd5",
       "status": "running",
       "jobs": {
         "pc4_ci_fallback": "created",
@@ -1335,7 +1358,7 @@
         "pc4_semgrep": "running",
         "pc4_gitleaks": "success"
       },
-      "scope": "R682 configured security scans/fallback only; local AArch64 CPU CTest is separate evidence"
+      "scope": "R682 corrected build record/manifest source scans and fallback only; local CPU CTest remains separate evidence"
     }
   ],
   "next_action": "R683: exercise the route callback at the pinned donor production Qwen2MoE build_moe_ffn seam on a bounded CPU fixture. If donor tensor loading is required, establish and inspect the smallest compatible fixture path first; preserve one coefficient, shared/residual and atomic host publication. No automatic relaunch, checkpoint download, GPU or production network without fresh admission.",
