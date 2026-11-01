@@ -10115,5 +10115,21 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R659: map a compatible checkpoint architecture's expert gate/up/down tensors to these bindings and validate one complete expert FFN stage in identified CPU Sessions against an independent oracle. No full checkpoint, GPU or production network.",
     "test": "Debug and release CPU Session pass; independent scalar projection oracle; no model/GPU/network"
+  },
+  "r659_gguf_moe_ffn_cpu": {
+    "branch": "r659-gguf-moe-ffn-20261101",
+    "parent_commit": "54088cdfca0f6635f6b5e23cd84f7961ac4ccbde",
+    "source_commit": "e272bda3d772387f1c6ed2ee04525409faafb480",
+    "report": "research/R659/REPORT.md",
+    "result": "research/R659/RESULT.json",
+    "build_test": "research/R659/BUILD_TEST.txt",
+    "sha256sums": "research/R659/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_ORACLE_PASS",
+    "test": "Offline focused CPU tests pass: GGUF layout 4/4 and persistent Session integration 5/5; exact independent scalar Q8_0 SwiGLU oracle.",
+    "limits": "Synthetic GGUF only; rectangular dispatch and fused gate/up execution remain unimplemented; no real checkpoint or complete generation.",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
   }
 }

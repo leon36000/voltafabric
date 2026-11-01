@@ -12237,5 +12237,26 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R659: map a compatible checkpoint architecture's expert gate/up/down tensors to these bindings and validate one complete expert FFN stage in identified CPU Sessions against an independent oracle. No full checkpoint, GPU or production network."
+  },
+  "r659_gguf_moe_ffn_cpu": {
+    "branch": "r659-gguf-moe-ffn-20261101",
+    "parent_commit": "54088cdfca0f6635f6b5e23cd84f7961ac4ccbde",
+    "commit": "e272bda3d772387f1c6ed2ee04525409faafb480",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Typed pinned GGUF metadata and strict llama.cpp expert-FFN tensor layout resolver; explicit checkpoint-to-resident expert slices loaded into three identified CPU Sessions.",
+    "test": "gguf_moe_layout 4/4, native_matrix_session 5/5 offline CPU; synthetic scalar Q8_0 SiLU gate/up/down oracle exact; rustfmt passes.",
+    "test_scope": "Synthetic GGUF Q8_0; square 32 hidden/FFN execution, rectangular metadata-only shape case, fused metadata recognition only. No real checkpoint or complete token generation.",
+    "readback_files_verified": 11,
+    "published_utc": "2026-11-01T05:51:57Z",
+    "readback_verified_utc": "2026-11-01T05:52:35Z",
+    "model_loaded": false,
+    "generation_executed": false,
+    "session_path_exercised": true,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T05:29:42Z",
+  "updated_utc": "2026-11-01T05:53:34Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -381,6 +381,29 @@
       "published_utc": "2026-11-01T05:28:37Z",
       "readback_verified_utc": "2026-11-01T05:29:42Z",
       "readback_files_verified": 8
+    },
+    {
+      "id": "R659",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_ORACLE_PASS",
+      "branch": "r659-gguf-moe-ffn-20261101",
+      "parent_commit": "54088cdfca0f6635f6b5e23cd84f7961ac4ccbde",
+      "source_commit": "e272bda3d772387f1c6ed2ee04525409faafb480",
+      "path": "research/R659",
+      "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+      "donor_license": "MIT",
+      "adaptation": "Added pinned GGUF typed metadata/tensor-span access, strict expert-FFN name/shape resolver for separate or fused gate/up plus down, and explicit rank-local expert-slice Session loading. Three CPU Sessions ran a synthetic separate Qwen2Moe gate/up/down SwiGLU stage.",
+      "test": "Offline focused Linux CPU tests: gguf_moe_layout 4/4 and native_matrix_session 5/5 passed; exact match with independent scalar Q8_0 decoder/matvec and FP16 Collector oracle. Changed Rust files pass rustfmt.",
+      "test_scope": "Synthetic one-layer GGUF v3 Q8_0 only; hidden=FFN=32 for execution; rectangular 32x64 layout is metadata-resolved only. Checkpoint experts [1,0] explicitly map to rank residents [(40,0),(3,1)].",
+      "readback_files_verified": 11,
+      "published_utc": "2026-11-01T05:51:57Z",
+      "readback_verified_utc": "2026-11-01T05:52:35Z",
+      "model_loaded": false,
+      "generation_executed": false,
+      "session_path_exercised": true,
+      "gpu_executed": false,
+      "inter_pc_network_used": false,
+      "production_r53_used": false
     }
   ],
   "acceptance": [
@@ -416,7 +439,11 @@
     "R654 introduced GGML grouped expert matrix multiplication for a synchronous CPU Q8_0 fixture; R655 now composes its resident output with the VoltaFabric FP16-decoded f64 Collector in focused CPU tests. A persistent VoltaFabric Session/owner path, checkpoint loading, full generation, other formats, GPU and inter-PC distribution remain unqualified.",
     "R655 verifies a synthetic Q8_0 grouped-matrix-to-Collector path only. It does not exercise the persistent Session/owner runtime, checkpoint loading, full generation, GPU, inter-PC distribution, production R53, other quantization formats, or performance.",
     "R656 integrates pinned GGML grouped projection with VoltaFabric routing and the ordinary Collector through an in-process CPU matrix fleet. Synthetic Q8_0 only; no subprocess Session/RankWorker protocol, checkpoint/model, full generation, GPU, inter-PC distribution, durable shared R53, other formats, or performance is qualified.",
-    "R657 connects only one synthetic Q8_0 grouped projection to persistent CPU Sessions; single-frame load is below 16 MiB. No compatible checkpoint loader, complete expert FFN/token generation, GPU, inter-PC transport, or production R53."
+    "R657 connects only one synthetic Q8_0 grouped projection to persistent CPU Sessions; single-frame load is below 16 MiB. No compatible checkpoint loader, complete expert FFN/token generation, GPU, inter-PC transport, or production R53.",
+    "R659 resolves a synthetic GGUF carrying the qwen2moe architecture label only; no real Qwen2MoE checkpoint was inspected or loaded.",
+    "R659 executes only a square hidden=FFN=32 synthetic Q8_0 stage. The existing Session dispatcher still requires binding.rows == problem.hidden, so the resolved rectangular layout cannot yet run through the current projection Session.",
+    "Fused gate/up tensor naming and doubled extent are recognized, but the fused tensor is not split or executed.",
+    "R659 reuses the pinned llama.cpp/GGML MIT GGUF metadata reader and VoltaFabric CPU Sessions only. It does not invoke llama.cpp generation or newly integrate vLLM, TensorRT-LLM, SGLang, Maya, or DeepInfer runtimes; no full model generation, GPU, inter-PC, RDMA, production R53, or performance is qualified."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
@@ -437,18 +464,19 @@
     "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS",
     "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE",
     "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE",
-    "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS"
+    "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS",
+    "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R659_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Map a compatible checkpoint architecture's expert gate/up/down tensors to the validated GGUF span loader; load one complete FFN stage in identified CPU Sessions and compare with an independent oracle. No full checkpoint, GPU or production network."
+    "status": "R660_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "R660: add an identified per-slot projection path with distinct dispatch hidden width and matrix output width, preserving run/model/plan/layer/batch/epoch/attempt identity and atomic ordinary Collector semantics. Qualify rectangular gate/up/down on CPU against an independent oracle; then adapt a real compatible checkpoint only after verifying its format and resource admission. Split fused gate/up only after a checked half-view loader exists. No GPU or production network."
   },
-  "report": "research/R658/REPORT.md",
-  "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
+  "report": "research/R659/REPORT.md",
+  "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R658/SHA256SUMS",
-    "sha256": "34fcd57379f8157e27d8f489e697be6240aaae607507ec27d00513e49e27b640",
-    "files": 7
+    "path": "research/R659/SHA256SUMS",
+    "sha256": "b0f332029c8650e1bbe649710a4cec233252597d52c430444d23fc0e95fb657c",
+    "files": 10
   }
 }
