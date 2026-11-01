@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 02:39:25 UTC",
+  "updated_utc": "2026-11-01T02:39:43Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -36,7 +36,7 @@
       "parent_commit": "46b1886880a2c6799f7c879ddecb4d4cc9d08b9c",
       "path": "research/R638",
       "commit": "db2fbfc45e9953b6e14fe5842789d44ea08de90f",
-      "published_utc": "2026-11-01 02:39:25 UTC",
+      "published_utc": "2026-11-01T02:39:43Z",
       "readback_files_verified": 20
     }
   ],
@@ -69,7 +69,7 @@
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R638/SHA256SUMS",
-    "sha256": "ed7e70f0e1dedcc1a735d9354188c871d8d4ff173cf9a6837339b5a41592dfac",
+    "sha256": "d1b74367abd69f621c5b71fa1c59979a62f92955e84412dc57529af171fcd4ce",
     "files": 16
   }
 }
