@@ -12640,13 +12640,39 @@
     "next_action": "R683: test the production Qwen2MoE build_moe_ffn seam on bounded CPU fixture or identify the minimal tensor/model fixture required.",
     "artifact_correction_commit": "ac33dccf23a0818e77698838104cd1e57f925bd5",
     "pipeline_2313": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "running",
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
         "pc4_gitleaks": "success"
       }
     }
+  },
+  "r683_qwen2moe_build_moe_ffn_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "28864c61bafc49d03b58c65f0dc5a3e58cd27e60",
+    "source_commit": "df3a19f4c7b224bf49c7d5ab82fefcd980f4dfa5",
+    "report": "research/R683/REPORT.md",
+    "result": "research/R683/RESULT.json",
+    "build_test": "research/R683/BUILD_TEST.txt",
+    "manifest_sha256": "dba5d9844d0c038d52e1ca62cec87951f19048d2998486136a92c6cafbf95509",
+    "readback_files_verified": 7,
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; direct runner PASS; focused CTest 1/1 in 1.69 s; donor output [6,20], route coefficient 0.5 once, collector output [3,10].",
+    "test_scope": "Synthetic graph calls actual donor build_moe_ffn under live process_ubatch; no architecture-level top-k, checkpoint/token loop, Rust coordinator/worker or full generation, GPU, inter-PC or performance.",
+    "pipeline_2316": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "running",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R684: connect the existing tiny synthetic Qwen2MoE GGUF fixture to the donor build_moe_ffn path on CPU; no production checkpoint download."
   }
 }

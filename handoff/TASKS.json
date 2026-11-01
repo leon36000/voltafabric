@@ -10491,11 +10491,11 @@
       "manifest_sha256": "a7aecf0b5b83d014d1f2b7f11dd2632b65b2bff40ed92d48ab589d4053038364",
       "readback_files_verified": 7,
       "pipeline_2309": {
-        "status": "running",
+        "status": "success",
         "jobs": {
-          "pc4_ci_fallback": "created",
-          "pc4_trivy": "pending",
-          "pc4_semgrep": "running",
+          "pc4_ci_fallback": "success",
+          "pc4_trivy": "success",
+          "pc4_semgrep": "success",
           "pc4_gitleaks": "success"
         }
       }
@@ -10518,13 +10518,35 @@
       }
     },
     "pipeline_2313": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "created",
-        "pc4_trivy": "pending",
-        "pc4_semgrep": "running",
+        "pc4_ci_fallback": "success",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
         "pc4_gitleaks": "success"
       }
     }
+  },
+  "r683_qwen2moe_build_moe_ffn_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "df3a19f4c7b224bf49c7d5ab82fefcd980f4dfa5",
+    "objective": "Exercise VoltaFabric's pinned donor route hook after raw output from the production build_moe_ffn implementation.",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; direct runner and focused CTest 1/1 pass; raw donor [6,20], route coefficient 0.5 once, final [3,10].",
+    "limitations": ["Synthetic graph and weights; no real checkpoint, top-k router, shared/residual path, Rust worker, token loop, full generation, GPU, inter-PC or performance."],
+    "readback_files_verified": 7,
+    "pipeline_2316": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "running",
+        "pc4_trivy": "success",
+        "pc4_semgrep": "success",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R684: connect an existing tiny synthetic Qwen2MoE GGUF fixture to the donor build_moe_ffn path on CPU; no production checkpoint download."
   }
 }
