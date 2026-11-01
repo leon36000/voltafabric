@@ -1,1 +1,41 @@
-I3ByYWdtYSBvbmNlCiNpbmNsdWRlIDxjc3RkZGVmPgojaW5jbHVkZSA8Y3N0ZGludD4KI2luY2x1ZGUgPG9wdGlvbmFsPgojaW5jbHVkZSA8c3RyaW5nPgojaW5jbHVkZSA8dmVjdG9yPgoKbmFtZXNwYWNlIHZmOjpzdHJhdGFfYnJpZGdlIHsKLy8gSWRlbnRpdHkgY29waWVkIGZyb20gdGhlIHRydXN0ZWQgcGVyLWxheWVyIEluaXQgdXNlZCB0byBwcmVwYXJlIGEgYmluYXJ5Ci8vIHNvY2tldC4gVkZCMyByZXBlYXRzIGl0IG9uIGV2ZXJ5IHJlcXVlc3Qgc28gdGhlIGNvb3JkaW5hdG9yIGNhbiByZWplY3QgYQovLyBjcm9zcy1ydW4vbW9kZWwvcGxhbi9lcG9jaCBzb2NrZXQgYmVmb3JlIGNsYWltaW5nIHRoZSBiYXRjaC4Kc3RydWN0IFNlc3Npb25JZGVudGl0eSB7CiAgICBzdGQ6OnN0cmluZyBydW5faWQ7CiAgICBzdGQ6OnN0cmluZyBtb2RlbF9yZXZpc2lvbjsKICAgIHN0ZDo6c3RyaW5nIHBsYW5faWQ7CiAgICB1aW50NjRfdCBlcG9jaCA9IDA7Cn07CgovLyBPd25zIG5vIGRlc2NyaXB0b3JzLiBCb3RoIG11c3QgYmUgY29ubmVjdGVkIEFGX1VOSVggc3RyZWFtIHNvY2tldHM7IHRoZXkgbWF5Ci8vIHJlZmVyIHRvIHRoZSBzYW1lIHNvY2tldC4gVGhlIGNhbGxlciBtdXN0IGtlZXAgdGhlbSBhbGl2ZSBhbmQgZXhjaGFuZ2UgSU5JVAovLyBhbmQgdGhlIGJpbmFyeS1yZWFkeSBoYW5kc2hha2UgYmVmb3JlIGNvbnN0cnVjdGluZyB0aGlzIGNsaWVudC4KY2xhc3MgQ2xpZW50IHsKcHVibGljOgogICAgQ2xpZW50KGludCByZWFkX2ZkLCBpbnQgd3JpdGVfZmQsIGludCB0aW1lb3V0X21zLCB1aW50MzJfdCBsYXllcik7CiAgICBDbGllbnQoaW50IHJlYWRfZmQsIGludCB3cml0ZV9mZCwgaW50IHRpbWVvdXRfbXMsIHVpbnQzMl90IGxheWVyLCBTZXNzaW9uSWRlbnRpdHkgaWRlbnRpdHkpOwogICAgdWludDMyX3QgbGF5ZXIoKSBjb25zdCBub2V4Y2VwdCB7IHJldHVybiBsYXllcl87IH0KICAgIGJvb2wgdXNhYmxlKCkgY29uc3Qgbm9leGNlcHQgeyByZXR1cm4gdXNhYmxlXzsgfQogICAgY29uc3QgU2Vzc2lvbklkZW50aXR5KiBzZXNzaW9uX2lkZW50aXR5KCkgY29uc3Qgbm9leGNlcHQgeyByZXR1cm4gaWRlbnRpdHlfID8gJippZGVudGl0eV8gOiBudWxscHRyOyB9CiAgICBib29sIHJ1bih1aW50NjRfdCBiYXRjaCwgdWludDY0X3QgYXR0ZW1wdCwgaW50IHRva2VucywgaW50IHRvcF9rLCBjb25zdCBzdGQ6OnZlY3RvcjxmbG9hdD4mIGlucHV0cywKICAgICAgICAgICAgIGNvbnN0IHN0ZDo6dmVjdG9yPGludDMyX3Q+JiBpZHMsIGNvbnN0IHN0ZDo6dmVjdG9yPGludDMyX3Q+JiBraW5kcywKICAgICAgICAgICAgIHN0ZDo6dmVjdG9yPGZsb2F0PiYgZGVzdGluYXRpb24sIHN0ZDo6c3RyaW5nJiBlcnJvcik7CiAgICBib29sIHNodXRkb3duKHN0ZDo6c3RyaW5nJiBlcnJvcik7CnByaXZhdGU6CiAgICB2b2lkIGluaXRpYWxpemUoKSBub2V4Y2VwdDsKICAgIGJvb2wgdHJhbnNmZXIoYm9vbCB3cml0aW5nLCB1aW50OF90KiBkYXRhLCBzaXplX3Qgc2l6ZSwgaW50NjRfdCBkZWFkbGluZSwgc3RkOjpzdHJpbmcmIGVycm9yKTsKICAgIGludCByZWFkX2ZkXywgd3JpdGVfZmRfLCB0aW1lb3V0X21zXzsKICAgIHVpbnQzMl90IGxheWVyXzsKICAgIHN0ZDo6b3B0aW9uYWw8U2Vzc2lvbklkZW50aXR5PiBpZGVudGl0eV87CiAgICBib29sIHVzYWJsZV87Cn07Cn0K
+#pragma once
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace vf::strata_bridge {
+// Identity copied from the trusted per-layer Init used to prepare a binary
+// socket. VFB3 repeats it on every request so the coordinator can reject a
+// cross-run/model/plan/epoch socket before claiming the batch.
+struct SessionIdentity {
+    std::string run_id;
+    std::string model_revision;
+    std::string plan_id;
+    uint64_t epoch = 0;
+};
+
+// Owns no descriptors. Both must be connected AF_UNIX stream sockets; they may
+// refer to the same socket. The caller must keep them alive and exchange INIT
+// and the binary-ready handshake before constructing this client.
+class Client {
+public:
+    Client(int read_fd, int write_fd, int timeout_ms, uint32_t layer);
+    Client(int read_fd, int write_fd, int timeout_ms, uint32_t layer, SessionIdentity identity);
+    uint32_t layer() const noexcept { return layer_; }
+    bool usable() const noexcept { return usable_; }
+    const SessionIdentity* session_identity() const noexcept { return identity_ ? &*identity_ : nullptr; }
+    bool run(uint64_t batch, uint64_t attempt, int tokens, int top_k, const std::vector<float>& inputs,
+             const std::vector<int32_t>& ids, const std::vector<int32_t>& kinds,
+             std::vector<float>& destination, std::string& error);
+    bool shutdown(std::string& error);
+private:
+    void initialize() noexcept;
+    bool transfer(bool writing, uint8_t* data, size_t size, int64_t deadline, std::string& error);
+    int read_fd_, write_fd_, timeout_ms_;
+    uint32_t layer_;
+    std::optional<SessionIdentity> identity_;
+    bool usable_;
+};
+}

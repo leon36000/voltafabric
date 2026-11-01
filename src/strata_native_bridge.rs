@@ -1,1 +1,624 @@
-Ly8hIFBlcnNpc3RlbnQgbG9jYWwgQ1BVIGNvb3JkaW5hdG9yIGZvciBTdHJhdGEtc3R5bGUgdW53ZWlnaHRlZCBleHBlcnQgc2xvdHMuCi8vISBUaGlzIGlzIG5vdCBhIGxpdmUgZG9ub3IgY2FsbGJhY2ssIEdQVSBzeW5jaHJvbml6YXRpb24gb3IgYSBkaXN0cmlidXRlZCBsZWFzZS4KdXNlIGNyYXRlOjp7CiAgICBpbnZhbGlkLCBtb2UsCiAgICBuYXRpdmVfZ2dtbF9jcHU6OkJpbmRpbmcsCiAgICBuYXRpdmVfbGVkZ2VyOjpOYXRpdmVCYXRjaExlZGdlciwKICAgIHByb2Nlc3MsIHJvdXRpbmcsCiAgICBzZXNzaW9uOjp7RW5kcG9pbnQsIFNlc3Npb259LAogICAgc3RyYXRhX2luZ3Jlc3MsCiAgICBzdHJhdGFfbmF0aXZlX2xheW91dDo6TmF0aXZlTGF5b3V0LAogICAgRXJyb3IsIFJlc3VsdCwKfTsKdXNlIHNlcmRlOjp7RGVzZXJpYWxpemUsIFNlcmlhbGl6ZX07CnVzZSBzdGQ6OnsKICAgIGNvbGxlY3Rpb25zOjp7QlRyZWVNYXAsIEJUcmVlU2V0fSwKICAgIGlvOjp7QnVmUmVhZCwgV3JpdGV9LAogICAgcGF0aDo6UGF0aCwKICAgIHRpbWU6OkR1cmF0aW9uLAp9OwoKI1tkZXJpdmUoRGVidWcsIFNlcmlhbGl6ZSwgRGVzZXJpYWxpemUpXQojW3NlcmRlKGRlbnlfdW5rbm93bl9maWVsZHMpXQpwdWIgc3RydWN0IEluaXQgewogICAgcHViIHRlbXBsYXRlOiByb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIHB1YiBtb2RlbF9leHBlcnRzOiBWZWM8dTMyPiwKICAgIHB1YiBpbmRleDogU3RyaW5nLAogICAgcHViIHBhY2tfcGF0aDogU3RyaW5nLAogICAgcHViIGxlZGdlcl9wYXRoOiBTdHJpbmcsCiAgICBwdWIgZW5kcG9pbnRzOiBWZWM8RW5kcG9pbnQ+LAogICAgcHViIGJpbmRpbmdzOiBWZWM8QmluZGluZz4sCiAgICAvLy8gTGltaXQgb24gdG90YWwgcmVzaWRlbnQgcGF5bG9hZCBieXRlczsgZXhjbHVkZXMgcHJvdG9jb2wgYnVmZmVycyBhbmQgUlNTLgogICAgI1tzZXJkZShkZWZhdWx0KV0KICAgIHB1YiByZXNpZGVudF9wYXlsb2FkX2xpbWl0OiBPcHRpb248dTY0PiwKICAgIHB1YiB0aW1lb3V0X21zOiB1NjQsCn0KI1tkZXJpdmUoRGVidWcsIFNlcmlhbGl6ZSwgRGVzZXJpYWxpemUpXQojW3NlcmRlKHRhZyA9ICJvcCIsIHJlbmFtZV9hbGwgPSAic25ha2VfY2FzZSIsIGRlbnlfdW5rbm93bl9maWVsZHMpXQpwdWIgZW51bSBSZXF1ZXN0IHsKICAgIEVudGVyQmluYXJ5LAogICAgQmF0Y2ggewogICAgICAgIGJhdGNoOiB1NjQsCiAgICAgICAgdG9rZW5zOiB1c2l6ZSwKICAgICAgICB0b3BfazogdXNpemUsCiAgICAgICAgaW5wdXRzOiBWZWM8ZjMyPiwKICAgICAgICBpZHM6IFZlYzxpMzI+LAogICAgICAgIGtpbmRzOiBWZWM8aTMyPiwKICAgIH0sCiAgICBTaHV0ZG93biwKfQojW2Rlcml2ZShEZWJ1ZywgU2VyaWFsaXplLCBEZXNlcmlhbGl6ZSldCiNbc2VyZGUoZGVueV91bmtub3duX2ZpZWxkcyldCnB1YiBzdHJ1Y3QgU2xvdFJvdyB7CiAgICBwdWIgcG9zaXRpb246IHVzaXplLAogICAgcHViIHZhbHVlOiBWZWM8ZjMyPiwKfQojW2Rlcml2ZShEZWJ1ZywgU2VyaWFsaXplLCBEZXNlcmlhbGl6ZSldCiNbc2VyZGUodGFnID0gInN0YXRlIiwgcmVuYW1lX2FsbCA9ICJzbmFrZV9jYXNlIiwgZGVueV91bmtub3duX2ZpZWxkcyldCnB1YiBlbnVtIFJlcGx5IHsKICAgIFJlYWR5IHsgcmFua3M6IFZlYzx1MzI+IH0sCiAgICBCaW5hcnlSZWFkeSwKICAgIENvbXBsZXRlZCB7IGJhdGNoOiB1NjQsIGNwdV9yb3dzOiBWZWM8U2xvdFJvdz4gfSwKICAgIENsb3NlZCwKICAgIEZhaWxlZCB7IGVycm9yOiBFcnJvciB9LAp9CgpzdHJ1Y3QgQ29vcmRpbmF0b3IgewogICAgdGVtcGxhdGU6IHJvdXRpbmc6OlJvdXRpbmdQcm9ibGVtLAogICAgbW9kZWxfZXhwZXJ0czogVmVjPHUzMj4sCiAgICBzZXNzaW9uczogVmVjPFNlc3Npb24+LAogICAgbGVkZ2VyOiBOYXRpdmVCYXRjaExlZGdlciwKICAgIHRpbWVvdXQ6IER1cmF0aW9uLAp9CmltcGwgQ29vcmRpbmF0b3IgewogICAgZm4gb3Blbihpbml0OiBJbml0KSAtPiBSZXN1bHQ8U2VsZj4gewogICAgICAgIHJvdXRpbmc6OnZhbGlkYXRlKCZpbml0LnRlbXBsYXRlKT87CiAgICAgICAgaWYgaW5pdC50ZW1wbGF0ZS5oaWRkZW4gIT0gMjU2MAogICAgICAgICAgICB8fCAhKDEuLj00KS5jb250YWlucygmaW5pdC5lbmRwb2ludHMubGVuKCkpCiAgICAgICAgICAgIHx8IGluaXQuYmluZGluZ3MuaXNfZW1wdHkoKQogICAgICAgICAgICB8fCBpbml0LmJpbmRpbmdzLmxlbigpID4gY3JhdGU6Om5hdGl2ZV9nZ21sX2NwdTo6TUFYX05BVElWRV9FWFBFUlRTCiAgICAgICAgICAgIHx8ICEoMS4uPTYwXzAwMCkuY29udGFpbnMoJmluaXQudGltZW91dF9tcykKICAgICAgICAgICAgfHwgIVBhdGg6Om5ldygmaW5pdC5wYWNrX3BhdGgpLmlzX2Fic29sdXRlKCkKICAgICAgICAgICAgfHwgIVBhdGg6Om5ldygmaW5pdC5sZWRnZXJfcGF0aCkuaXNfYWJzb2x1dGUoKQogICAgICAgIHsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIGluaXQgYm91bmRzIikpOwogICAgICAgIH0KICAgICAgICBsZXQgbW9kZWw6IEJUcmVlU2V0PF8+ID0gaW5pdC5tb2RlbF9leHBlcnRzLml0ZXIoKS5jb3BpZWQoKS5jb2xsZWN0KCk7CiAgICAgICAgaWYgbW9kZWwuaXNfZW1wdHkoKQogICAgICAgICAgICB8fCBtb2RlbC5sZW4oKSAhPSBpbml0Lm1vZGVsX2V4cGVydHMubGVuKCkKICAgICAgICAgICAgfHwgbW9kZWwubGVuKCkgPiAxMDI0CiAgICAgICAgICAgIHx8IGluaXQudGVtcGxhdGUuZXhwZXJ0cy5pdGVyKCkuYW55KHxlfCAhbW9kZWwuY29udGFpbnMoZSkpCiAgICAgICAgewogICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm5hdGl2ZSBicmlkZ2UgbW9kZWwgZXhwZXJ0cyIpKTsKICAgICAgICB9CiAgICAgICAgbGV0IG11dCBlbmRwb2ludHMgPSBCVHJlZU1hcDo6bmV3KCk7CiAgICAgICAgZm9yIGVuZHBvaW50IGluICZpbml0LmVuZHBvaW50cyB7CiAgICAgICAgICAgIGlmIGVuZHBvaW50LmFyZ3YubGVuKCkgIT0gMQogICAgICAgICAgICAgICAgfHwgIVBhdGg6Om5ldygmZW5kcG9pbnQuYXJndlswXSkuaXNfYWJzb2x1dGUoKQogICAgICAgICAgICAgICAgfHwgZW5kcG9pbnRzLmluc2VydChlbmRwb2ludC5yYW5rLCBlbmRwb2ludCkuaXNfc29tZSgpCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibmF0aXZlIGJyaWRnZSByZXF1aXJlcyB1bmlxdWUgbG9jYWwgZXhlY3V0YWJsZXMiKSk7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgaWYgZW5kcG9pbnRzLmxlbigpICE9IGluaXQudGVtcGxhdGUucmVzaWRlbnRfb3JkZXIubGVuKCkgewogICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm5hdGl2ZSBicmlkZ2UgcmFuayBjb3ZlcmFnZSIpKTsKICAgICAgICB9CiAgICAgICAgbGV0IGxlZGdlciA9IE5hdGl2ZUJhdGNoTGVkZ2VyOjpvcGVuKFBhdGg6Om5ldygmaW5pdC5sZWRnZXJfcGF0aCkpPzsKICAgICAgICAvLyBBIEZJRk8gbXVzdCBub3QgaGFuZyBhZG1pc3Npb24gYmVmb3JlIGl0cyB0eXBlIGNhbiBiZSBjaGVja2VkLgogICAgICAgIGxldCBtdXQgb3B0aW9ucyA9IHN0ZDo6ZnM6Ok9wZW5PcHRpb25zOjpuZXcoKTsKICAgICAgICBvcHRpb25zLnJlYWQodHJ1ZSk7CiAgICAgICAgI1tjZmcodW5peCldCiAgICAgICAgewogICAgICAgICAgICB1c2Ugc3RkOjpvczo6dW5peDo6ZnM6Ok9wZW5PcHRpb25zRXh0OwogICAgICAgICAgICBvcHRpb25zLmN1c3RvbV9mbGFncyhsaWJjOjpPX05PTkJMT0NLKTsKICAgICAgICB9CiAgICAgICAgbGV0IG11dCBmaWxlID0gb3B0aW9ucwogICAgICAgICAgICAub3BlbigmaW5pdC5wYWNrX3BhdGgpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBFcnJvcjo6bmV3KCJOQVRJVkVfUEFDS19JTyIsIGUudG9fc3RyaW5nKCkpKT87CiAgICAgICAgbGV0IG1ldGFkYXRhID0gZmlsZQogICAgICAgICAgICAubWV0YWRhdGEoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgRXJyb3I6Om5ldygiTkFUSVZFX1BBQ0tfSU8iLCBlLnRvX3N0cmluZygpKSk/OwogICAgICAgIGlmICFtZXRhZGF0YS5pc19maWxlKCkgewogICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm5hdGl2ZSBwYWNrIG11c3QgYmUgYSByZWd1bGFyIGZpbGUiKSk7CiAgICAgICAgfQogICAgICAgIGxldCBsYXlvdXQgPSBOYXRpdmVMYXlvdXQ6OnBhcnNlX3NjMTE3X3YzKCZpbml0LmluZGV4LCBtZXRhZGF0YS5sZW4oKSk/OwogICAgICAgIGxldCBsaW1pdCA9IGluaXQKICAgICAgICAgICAgLnJlc2lkZW50X3BheWxvYWRfbGltaXQKICAgICAgICAgICAgLnVud3JhcF9vcihjcmF0ZTo6bmF0aXZlX2dnbWxfY3B1OjpERUZBVUxUX05BVElWRV9QQVlMT0FEX0JZVEVTKTsKICAgICAgICBpZiBsaW1pdCA9PSAwIHx8IGxpbWl0ID4gY3JhdGU6Om5hdGl2ZV9nZ21sX2NwdTo6TUFYX05BVElWRV9QQVlMT0FEX0JZVEVTIHsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIHBheWxvYWQgYnVkZ2V0IikpOwogICAgICAgIH0KICAgICAgICBsZXQgdG90YWwgPSBpbml0LmJpbmRpbmdzLml0ZXIoKS50cnlfZm9sZCgwX3U2NCwgfHN1bSwgYmluZGluZ3wgewogICAgICAgICAgICBsZXQgc3BhbiA9IGxheW91dC5leHBlcnQoYmluZGluZy5sYXllciBhcyB1c2l6ZSwgdTY0Ojpmcm9tKGJpbmRpbmcuZXhwZXJ0KSk/OwogICAgICAgICAgICBzdW0uY2hlY2tlZF9hZGQoc3Bhbi5ieXRlcykKICAgICAgICAgICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoIm5hdGl2ZSBicmlkZ2UgcGF5bG9hZCBvdmVyZmxvdyIpKQogICAgICAgIH0pPzsKICAgICAgICBpZiB0b3RhbCA+IGxpbWl0IHsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIHBheWxvYWQgYnVkZ2V0IGV4Y2VlZGVkIikpOwogICAgICAgIH0KICAgICAgICBsZXQgbXV0IGxvYWRzID0gQlRyZWVNYXA6Ojx1MzIsIFZlYzwmQmluZGluZz4+OjpuZXcoKTsKICAgICAgICBmb3IgKCZyYW5rLCBvcmRlcikgaW4gJmluaXQudGVtcGxhdGUucmVzaWRlbnRfb3JkZXIgewogICAgICAgICAgICBpZiAhZW5kcG9pbnRzLmNvbnRhaW5zX2tleSgmcmFuaykKICAgICAgICAgICAgICAgIHx8IG9yZGVyLmlzX2VtcHR5KCkKICAgICAgICAgICAgICAgIHx8IG9yZGVyLmxlbigpID4gY3JhdGU6Om5hdGl2ZV9nZ21sX2NwdTo6TUFYX05BVElWRV9FWFBFUlRTCiAgICAgICAgICAgIHsKICAgICAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibmF0aXZlIGJyaWRnZSByZXNpZGVudCBvcmRlciIpKTsKICAgICAgICAgICAgfQogICAgICAgICAgICBsZXQgbXV0IG93bmVycyA9IFZlYzo6bmV3KCk7CiAgICAgICAgICAgIGZvciAmbG9jYWwgaW4gb3JkZXIgewogICAgICAgICAgICAgICAgbGV0IGZvdW5kOiBWZWM8Xz4gPSBpbml0CiAgICAgICAgICAgICAgICAgICAgLmJpbmRpbmdzCiAgICAgICAgICAgICAgICAgICAgLml0ZXIoKQogICAgICAgICAgICAgICAgICAgIC5maWx0ZXIofGJ8IGIucmFuayA9PSByYW5rICYmIGIubG9jYWwgPT0gbG9jYWwpCiAgICAgICAgICAgICAgICAgICAgLmNvbGxlY3QoKTsKICAgICAgICAgICAgICAgIGlmIGZvdW5kLmxlbigpICE9IDEgewogICAgICAgICAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibmF0aXZlIGJyaWRnZSBiaW5kaW5nIGNvdmVyYWdlIikpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICAgICAgbGV0IGIgPSBmb3VuZFswXTsKICAgICAgICAgICAgICAgIGlmIGIubW9kZWxfcmV2aXNpb24gIT0gaW5pdC50ZW1wbGF0ZS5zdGFtcC5tb2RlbF9yZXZpc2lvbgogICAgICAgICAgICAgICAgICAgIHx8IGIubGF5ZXIgIT0gaW5pdC50ZW1wbGF0ZS5zdGFtcC5sYXllcgogICAgICAgICAgICAgICAgICAgIHx8IGIuZXBvY2ggIT0gaW5pdC50ZW1wbGF0ZS5zdGFtcC5lcG9jaAogICAgICAgICAgICAgICAgICAgIHx8ICFpbml0CiAgICAgICAgICAgICAgICAgICAgICAgIC50ZW1wbGF0ZQogICAgICAgICAgICAgICAgICAgICAgICAucmVnaXN0cnkKICAgICAgICAgICAgICAgICAgICAgICAgLmNvcGllcwogICAgICAgICAgICAgICAgICAgICAgICAuaXRlcigpCiAgICAgICAgICAgICAgICAgICAgICAgIC5hbnkofHJ8IHIucmFuayA9PSByYW5rICYmIHIubG9jYWwgPT0gbG9jYWwgJiYgci5leHBlcnQgPT0gYi5leHBlcnQpCiAgICAgICAgICAgICAgICB7CiAgICAgICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIGJpbmRpbmcgaWRlbnRpdHkiKSk7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICBvd25lcnMucHVzaChiKTsKICAgICAgICAgICAgfQogICAgICAgICAgICBsb2Fkcy5pbnNlcnQocmFuaywgb3duZXJzKTsKICAgICAgICB9CiAgICAgICAgaWYgbG9hZHMudmFsdWVzKCkubWFwKFZlYzo6bGVuKS5zdW06Ojx1c2l6ZT4oKSAhPSBpbml0LmJpbmRpbmdzLmxlbigpIHsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIGV4dHJhIGJpbmRpbmciKSk7CiAgICAgICAgfQogICAgICAgIC8vIFZhbGlkYXRlIHRoZSBjb21wbGV0ZSBiaW5kaW5nIG1hcCBmaXJzdCwgdGhlbiBrZWVwIG9ubHkgb25lIHZlcmlmaWVkCiAgICAgICAgLy8gcGF5bG9hZCBpbiB0aGlzIHByb2Nlc3Mgd2hpbGUgcmVzaWRlbnQgd29ya2VycyByZWNlaXZlIHRoZWlyIHdlaWdodHMuCiAgICAgICAgLy8gU2Vzc2lvbnMgYXJlIG93bmVkIHVudGlsIFJlYWR5OyBlcnJvcnMgZHJvcCwga2lsbCBhbmQgcmVhcCB0aGVtLgogICAgICAgIGxldCB0aW1lb3V0ID0gRHVyYXRpb246OmZyb21fbWlsbGlzKGluaXQudGltZW91dF9tcyk7CiAgICAgICAgbGV0IG11dCBzZXNzaW9ucyA9IFZlYzo6bmV3KCk7CiAgICAgICAgZm9yIChyYW5rLCBvd25lcnMpIGluIGxvYWRzIHsKICAgICAgICAgICAgbGV0IG11dCBzZXNzaW9uID0gU2Vzc2lvbjo6Y29ubmVjdChlbmRwb2ludHNbJnJhbmtdLCB0aW1lb3V0KT87CiAgICAgICAgICAgIGZvciBiaW5kaW5nIGluICZvd25lcnMgewogICAgICAgICAgICAgICAgbGV0IHZlcmlmaWVkID0gbGF5b3V0LnJlYWRfdmVyaWZpZWRfZXhwZXJ0KAogICAgICAgICAgICAgICAgICAgICZtdXQgZmlsZSwKICAgICAgICAgICAgICAgICAgICBiaW5kaW5nLmxheWVyIGFzIHVzaXplLAogICAgICAgICAgICAgICAgICAgIHU2NDo6ZnJvbShiaW5kaW5nLmV4cGVydCksCiAgICAgICAgICAgICAgICAgICAgJmJpbmRpbmcuaW5kZXhfc2hhMjU2LAogICAgICAgICAgICAgICAgICAgICZiaW5kaW5nLmJsb2Jfc2hhMjU2LAogICAgICAgICAgICAgICAgKT87CiAgICAgICAgICAgICAgICBzZXNzaW9uLmxvYWRfbmF0aXZlX2dnbWwoCiAgICAgICAgICAgICAgICAgICAgYmluZGluZywKICAgICAgICAgICAgICAgICAgICAmaW5pdC5pbmRleCwKICAgICAgICAgICAgICAgICAgICBtZXRhZGF0YS5sZW4oKSwKICAgICAgICAgICAgICAgICAgICAmdmVyaWZpZWQuYnl0ZXMsCiAgICAgICAgICAgICAgICAgICAgdGltZW91dCwKICAgICAgICAgICAgICAgICk/OwogICAgICAgICAgICB9CiAgICAgICAgICAgIHNlc3Npb24uc2VhbF9uYXRpdmVfZ2dtbChvd25lcnMubGVuKCksIHRpbWVvdXQpPzsKICAgICAgICAgICAgc2Vzc2lvbnMucHVzaChzZXNzaW9uKTsKICAgICAgICB9CiAgICAgICAgI1tjZmcodW5peCldCiAgICAgICAgewogICAgICAgICAgICB1c2Ugc3RkOjpvczo6dW5peDo6ZnM6Ok1ldGFkYXRhRXh0OwogICAgICAgICAgICBsZXQgYWZ0ZXIgPSBmaWxlCiAgICAgICAgICAgICAgICAubWV0YWRhdGEoKQogICAgICAgICAgICAgICAgLm1hcF9lcnIofGV8IEVycm9yOjpuZXcoIk5BVElWRV9QQUNLX0lPIiwgZS50b19zdHJpbmcoKSkpPzsKICAgICAgICAgICAgaWYgKAogICAgICAgICAgICAgICAgbWV0YWRhdGEuZGV2KCksCiAgICAgICAgICAgICAgICBtZXRhZGF0YS5pbm8oKSwKICAgICAgICAgICAgICAgIG1ldGFkYXRhLmxlbigpLAogICAgICAgICAgICAgICAgbWV0YWRhdGEubXRpbWUoKSwKICAgICAgICAgICAgICAgIG1ldGFkYXRhLm10aW1lX25zZWMoKSwKICAgICAgICAgICAgICAgIG1ldGFkYXRhLmN0aW1lKCksCiAgICAgICAgICAgICAgICBtZXRhZGF0YS5jdGltZV9uc2VjKCksCiAgICAgICAgICAgICkgIT0gKAogICAgICAgICAgICAgICAgYWZ0ZXIuZGV2KCksCiAgICAgICAgICAgICAgICBhZnRlci5pbm8oKSwKICAgICAgICAgICAgICAgIGFmdGVyLmxlbigpLAogICAgICAgICAgICAgICAgYWZ0ZXIubXRpbWUoKSwKICAgICAgICAgICAgICAgIGFmdGVyLm10aW1lX25zZWMoKSwKICAgICAgICAgICAgICAgIGFmdGVyLmN0aW1lKCksCiAgICAgICAgICAgICAgICBhZnRlci5jdGltZV9uc2VjKCksCiAgICAgICAgICAgICkgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgcGFjayBjaGFuZ2VkIGR1cmluZyBhZG1pc3Npb24iKSk7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgT2soU2VsZiB7CiAgICAgICAgICAgIHRlbXBsYXRlOiBpbml0LnRlbXBsYXRlLAogICAgICAgICAgICBtb2RlbF9leHBlcnRzOiBpbml0Lm1vZGVsX2V4cGVydHMsCiAgICAgICAgICAgIHNlc3Npb25zLAogICAgICAgICAgICBsZWRnZXIsCiAgICAgICAgICAgIHRpbWVvdXQsCiAgICAgICAgfSkKICAgIH0KICAgIGZuIGJhdGNoKAogICAgICAgICZtdXQgc2VsZiwKICAgICAgICBiYXRjaDogdTY0LAogICAgICAgIGF0dGVtcHQ6IE9wdGlvbjx1NjQ+LAogICAgICAgIHRva2VuczogdXNpemUsCiAgICAgICAgdG9wX2s6IHVzaXplLAogICAgICAgIGlucHV0czogJltmMzJdLAogICAgICAgIGlkczogJltpMzJdLAogICAgICAgIGtpbmRzOiAmW2kzMl0sCiAgICApIC0+IFJlc3VsdDxWZWM8U2xvdFJvdz4+IHsKICAgICAgICBsZXQgY291bnQgPSB0b2tlbnMKICAgICAgICAgICAgLmNoZWNrZWRfbXVsKHRvcF9rKQogICAgICAgICAgICAuYW5kX3RoZW4ofG58IG4uY2hlY2tlZF9tdWwoMjU2MCkpCiAgICAgICAgICAgIC5maWx0ZXIofG58ICpuIDw9IDFfMDQ4XzU3NikKICAgICAgICAgICAgLm9rX29yX2Vsc2UofHwgaW52YWxpZCgibmF0aXZlIGJyaWRnZSBvdXRwdXQgYm91bmQiKSk/OwogICAgICAgIGxldCBtdXQgdGVtcGxhdGUgPSBzZWxmLnRlbXBsYXRlLmNsb25lKCk7CiAgICAgICAgdGVtcGxhdGUuc3RhbXAuYmF0Y2ggPSBiYXRjaDsKICAgICAgICBsZXQgcGxhbiA9IHN0cmF0YV9pbmdyZXNzOjphZG1pdF9zdHJhdGFfdW53ZWlnaHRlZF9mNjQoCiAgICAgICAgICAgICZ0ZW1wbGF0ZSwKICAgICAgICAgICAgJnRlbXBsYXRlLnN0YW1wLAogICAgICAgICAgICB0ZW1wbGF0ZS5zdGFtcC5sYXllciwKICAgICAgICAgICAgdG9rZW5zLAogICAgICAgICAgICB0b3BfaywKICAgICAgICAgICAgaW5wdXRzLAogICAgICAgICAgICBpZHMsCiAgICAgICAgICAgIGtpbmRzLAogICAgICAgICAgICAmc2VsZi5tb2RlbF9leHBlcnRzLAogICAgICAgICk/OwogICAgICAgIGxldCBtdXQgc3RhZ2VkID0gdmVjIVswLjA7IGNvdW50XTsKICAgICAgICBpZiBsZXQgU29tZShhdHRlbXB0KSA9IGF0dGVtcHQgewogICAgICAgICAgICBpZiBhdHRlbXB0ID09IDAgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJWRkIzIGJhdGNoIGF0dGVtcHQgbXVzdCBiZSBub256ZXJvIikpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIGxldCB0aWNrZXQgPSBzZWxmLmxlZGdlci5yZXNlcnZlX3RpY2tldCgmdGVtcGxhdGUuc3RhbXAsIGF0dGVtcHQpPzsKICAgICAgICAgICAgcGxhbi5leGVjdXRlX25hdGl2ZV9mcDMyX3Jlc2VydmVkKAogICAgICAgICAgICAgICAgJm11dCBzZWxmLnNlc3Npb25zLAogICAgICAgICAgICAgICAgJnNlbGYubGVkZ2VyLAogICAgICAgICAgICAgICAgdGlja2V0LAogICAgICAgICAgICAgICAgc2VsZi50aW1lb3V0LAogICAgICAgICAgICAgICAgJm11dCBzdGFnZWQsCiAgICAgICAgICAgICk/OwogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIHBsYW4uZXhlY3V0ZV9uYXRpdmVfZnAzMigmbXV0IHNlbGYuc2Vzc2lvbnMsICZzZWxmLmxlZGdlciwgc2VsZi50aW1lb3V0LCAmbXV0IHN0YWdlZCk/OwogICAgICAgIH0KICAgICAgICBsZXQgbXV0IHJvd3MgPSBWZWM6Om5ldygpOwogICAgICAgIGZvciAocG9zaXRpb24sICZraW5kKSBpbiBraW5kcy5pdGVyKCkuZW51bWVyYXRlKCkgewogICAgICAgICAgICBpZiBraW5kID09IC0xIHsKICAgICAgICAgICAgICAgIHJvd3MucHVzaChTbG90Um93IHsKICAgICAgICAgICAgICAgICAgICBwb3NpdGlvbiwKICAgICAgICAgICAgICAgICAgICB2YWx1ZTogc3RhZ2VkW3Bvc2l0aW9uICogMjU2MC4uKHBvc2l0aW9uICsgMSkgKiAyNTYwXS50b192ZWMoKSwKICAgICAgICAgICAgICAgIH0pOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgICAgIE9rKHJvd3MpCiAgICB9CiAgICBmbiBjbG9zZShzZWxmKSAtPiBSZXN1bHQ8KCk+IHsKICAgICAgICBmb3Igc2Vzc2lvbiBpbiBzZWxmLnNlc3Npb25zIHsKICAgICAgICAgICAgbGV0IHJlY2VpcHQgPSBzZXNzaW9uLmNsb3NlKHNlbGYudGltZW91dCk7CiAgICAgICAgICAgIGlmIHJlY2VpcHQuZXJyb3IuaXNfc29tZSgpIHx8IHJlY2VpcHQuZXhpdF9jb2RlICE9IFNvbWUoMCkgfHwgcmVjZWlwdC5raWxsZWQgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIHdvcmtlciBjbG9zZSBmYWlsZWQiKSk7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgT2soKCkpCiAgICB9Cn0KZm4gc2VuZChvdXRwdXQ6ICZtdXQgaW1wbCBXcml0ZSwgcmVwbHk6ICZSZXBseSkgLT4gUmVzdWx0PCgpPiB7CiAgICBwcm9jZXNzOjp3cml0ZV9mcmFtZShvdXRwdXQsICZwcm9jZXNzOjplbmNvZGUocmVwbHkpPywgIm5hdGl2ZSBicmlkZ2UgcmVwbHkiKQp9CgpmbiBpZGVudGl0eV9tYXRjaGVzKAogICAgc3RhbXA6ICZtb2U6OlN0YW1wLAogICAgZXBvY2g6IHU2NCwKICAgIGxheWVyOiB1MzIsCiAgICBydW5faWQ6ICZbdThdLAogICAgbW9kZWxfcmV2aXNpb246ICZbdThdLAogICAgcGxhbl9pZDogJlt1OF0sCikgLT4gYm9vbCB7CiAgICBlcG9jaCA9PSBzdGFtcC5lcG9jaAogICAgICAgICYmIGxheWVyID09IHN0YW1wLmxheWVyCiAgICAgICAgJiYgcnVuX2lkID09IHN0YW1wLnJ1bl9pZC5hc19ieXRlcygpCiAgICAgICAgJiYgbW9kZWxfcmV2aXNpb24gPT0gc3RhbXAubW9kZWxfcmV2aXNpb24uYXNfYnl0ZXMoKQogICAgICAgICYmIHBsYW5faWQgPT0gc3RhbXAucGxhbl9pZC5hc19ieXRlcygpCn0KCmZuIHJlcGx5X3YzKAogICAgYmF0Y2g6IHU2NCwKICAgIGF0dGVtcHQ6IHU2NCwKICAgIHN0YXR1czogdTMyLAogICAgcm93czogJltTbG90Um93XSwKICAgIHN0YW1wOiAmbW9lOjpTdGFtcCwKKSAtPiBWZWM8dTg+IHsKICAgIGxldCBydW5faWQgPSBzdGFtcC5ydW5faWQuYXNfYnl0ZXMoKTsKICAgIGxldCBtb2RlbF9yZXZpc2lvbiA9IHN0YW1wLm1vZGVsX3JldmlzaW9uLmFzX2J5dGVzKCk7CiAgICBsZXQgcGxhbl9pZCA9IHN0YW1wLnBsYW5faWQuYXNfYnl0ZXMoKTsKICAgIGxldCBtdXQgb3V0ID0gVmVjOjp3aXRoX2NhcGFjaXR5KAogICAgICAgIDUyICsgcnVuX2lkLmxlbigpICsgbW9kZWxfcmV2aXNpb24ubGVuKCkgKyBwbGFuX2lkLmxlbigpICsgcm93cy5sZW4oKSAqICg0ICsgMjU2MCAqIDQpLAogICAgKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZShiIlZGUjMiKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmc3RhdHVzLnRvX2xlX2J5dGVzKCkpOwogICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCZiYXRjaC50b19sZV9ieXRlcygpKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmKHJvd3MubGVuKCkgYXMgdTMyKS50b19sZV9ieXRlcygpKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmKDI1NjBfdTMyKS50b19sZV9ieXRlcygpKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmc3RhbXAubGF5ZXIudG9fbGVfYnl0ZXMoKSk7CiAgICBvdXQuZXh0ZW5kX2Zyb21fc2xpY2UoJnN0YW1wLmVwb2NoLnRvX2xlX2J5dGVzKCkpOwogICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYocnVuX2lkLmxlbigpIGFzIHUxNikudG9fbGVfYnl0ZXMoKSk7CiAgICBvdXQuZXh0ZW5kX2Zyb21fc2xpY2UoJihtb2RlbF9yZXZpc2lvbi5sZW4oKSBhcyB1MTYpLnRvX2xlX2J5dGVzKCkpOwogICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYocGxhbl9pZC5sZW4oKSBhcyB1MTYpLnRvX2xlX2J5dGVzKCkpOwogICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYwX3UxNi50b19sZV9ieXRlcygpKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmYXR0ZW1wdC50b19sZV9ieXRlcygpKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZShydW5faWQpOwogICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKG1vZGVsX3JldmlzaW9uKTsKICAgIG91dC5leHRlbmRfZnJvbV9zbGljZShwbGFuX2lkKTsKICAgIGZvciByb3cgaW4gcm93cyB7CiAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYocm93LnBvc2l0aW9uIGFzIHUzMikudG9fbGVfYnl0ZXMoKSk7CiAgICAgICAgZm9yIHZhbHVlIGluICZyb3cudmFsdWUgewogICAgICAgICAgICBvdXQuZXh0ZW5kX2Zyb21fc2xpY2UoJnZhbHVlLnRvX2JpdHMoKS50b19sZV9ieXRlcygpKTsKICAgICAgICB9CiAgICB9CiAgICBvdXQKfQoKLy8vIFZGQjEvVjIgcmV0YWluIGNvbXBhdGliaWxpdHk7IFZGQjMgYmluZHMgcnVuL21vZGVsL3BsYW4vZXBvY2gvbGF5ZXIvYmF0Y2gvYXR0ZW1wdCBiZWZvcmUgZGlzcGF0Y2guCmZuIGJpbmFyeV9sb29wKAogICAgbXV0IGNvb3JkaW5hdG9yOiBDb29yZGluYXRvciwKICAgIGlucHV0OiAmbXV0IGltcGwgQnVmUmVhZCwKICAgIG91dHB1dDogJm11dCBpbXBsIFdyaXRlLAopIC0+IFJlc3VsdDwoKT4gewogICAgZm4gdTMyX2F0KGI6ICZbdThdLCBvZmZzZXQ6IHVzaXplKSAtPiB1MzIgewogICAgICAgIHUzMjo6ZnJvbV9sZV9ieXRlcyhiW29mZnNldC4ub2Zmc2V0ICsgNF0udHJ5X2ludG8oKS51bndyYXAoKSkKICAgIH0KICAgIGZuIHUxNl9hdChiOiAmW3U4XSwgb2Zmc2V0OiB1c2l6ZSkgLT4gdTE2IHsKICAgICAgICB1MTY6OmZyb21fbGVfYnl0ZXMoYltvZmZzZXQuLm9mZnNldCArIDJdLnRyeV9pbnRvKCkudW53cmFwKCkpCiAgICB9CiAgICBmbiB1NjRfYXQoYjogJlt1OF0sIG9mZnNldDogdXNpemUpIC0+IHU2NCB7CiAgICAgICAgdTY0Ojpmcm9tX2xlX2J5dGVzKGJbb2Zmc2V0Li5vZmZzZXQgKyA4XS50cnlfaW50bygpLnVud3JhcCgpKQogICAgfQogICAgZm4gcmVwbHkoYmF0Y2g6IHU2NCwgc3RhdHVzOiB1MzIsIHJvd3M6ICZbU2xvdFJvd10sIGxheWVyOiBPcHRpb248dTMyPikgLT4gVmVjPHU4PiB7CiAgICAgICAgbGV0IG11dCBvdXQgPSBWZWM6OndpdGhfY2FwYWNpdHkoMjQgKyByb3dzLmxlbigpICogKDQgKyAyNTYwICogNCkpOwogICAgICAgIG91dC5leHRlbmRfZnJvbV9zbGljZShpZiBsYXllci5pc19zb21lKCkgeyBiIlZGUjIiIH0gZWxzZSB7IGIiVkZSMSIgfSk7CiAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCZzdGF0dXMudG9fbGVfYnl0ZXMoKSk7CiAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCZiYXRjaC50b19sZV9ieXRlcygpKTsKICAgICAgICBvdXQuZXh0ZW5kX2Zyb21fc2xpY2UoJihyb3dzLmxlbigpIGFzIHUzMikudG9fbGVfYnl0ZXMoKSk7CiAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYoMjU2MF91MzIpLnRvX2xlX2J5dGVzKCkpOwogICAgICAgIGlmIGxldCBTb21lKGxheWVyKSA9IGxheWVyIHsKICAgICAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCZsYXllci50b19sZV9ieXRlcygpKTsKICAgICAgICB9CiAgICAgICAgZm9yIHJvdyBpbiByb3dzIHsKICAgICAgICAgICAgb3V0LmV4dGVuZF9mcm9tX3NsaWNlKCYocm93LnBvc2l0aW9uIGFzIHUzMikudG9fbGVfYnl0ZXMoKSk7CiAgICAgICAgICAgIGZvciB2YWx1ZSBpbiAmcm93LnZhbHVlIHsKICAgICAgICAgICAgICAgIG91dC5leHRlbmRfZnJvbV9zbGljZSgmdmFsdWUudG9fYml0cygpLnRvX2xlX2J5dGVzKCkpOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgICAgIG91dAogICAgfQogICAgbGV0IGJvdW5kX3N0YW1wID0gY29vcmRpbmF0b3IudGVtcGxhdGUuc3RhbXAuY2xvbmUoKTsKICAgIGxvb3AgewogICAgICAgIGxldCBtdXQgbWFnaWMgPSBbMF91ODsgNF07CiAgICAgICAgaW5wdXQKICAgICAgICAgICAgLnJlYWRfZXhhY3QoJm11dCBtYWdpYykKICAgICAgICAgICAgLm1hcF9lcnIofGV8IEVycm9yOjpuZXcoIkJSSURHRV9JTyIsIGUudG9fc3RyaW5nKCkpKT87CiAgICAgICAgbGV0IHZlcnNpb24gPSBpZiAmbWFnaWMgPT0gYiJWRkIzIiB7CiAgICAgICAgICAgIDMKICAgICAgICB9IGVsc2UgaWYgJm1hZ2ljID09IGIiVkZCMiIgewogICAgICAgICAgICAyCiAgICAgICAgfSBlbHNlIGlmICZtYWdpYyA9PSBiIlZGQjEiIHsKICAgICAgICAgICAgMQogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibmF0aXZlIGJyaWRnZSBiaW5hcnkgbWFnaWMiKSk7CiAgICAgICAgfTsKICAgICAgICBsZXQgbXV0IGhlYWRlciA9IHZlYyFbMF91ODsgaWYgdmVyc2lvbiA9PSAzIHsgNTIgfSBlbHNlIHsgMjQgfV07CiAgICAgICAgaGVhZGVyWy4uNF0uY29weV9mcm9tX3NsaWNlKCZtYWdpYyk7CiAgICAgICAgaW5wdXQKICAgICAgICAgICAgLnJlYWRfZXhhY3QoJm11dCBoZWFkZXJbNC4uXSkKICAgICAgICAgICAgLm1hcF9lcnIofGV8IEVycm9yOjpuZXcoIkJSSURHRV9JTyIsIGUudG9fc3RyaW5nKCkpKT87CiAgICAgICAgbGV0IGxheWVyID0gKHZlcnNpb24gPj0gMikudGhlbl9zb21lKGJvdW5kX3N0YW1wLmxheWVyKTsKICAgICAgICBsZXQgYmF0Y2ggPSB1NjRfYXQoJmhlYWRlciwgOCk7CiAgICAgICAgbGV0IGF0dGVtcHQgPSAodmVyc2lvbiA9PSAzKS50aGVuKHx8IHU2NF9hdCgmaGVhZGVyLCA0NCkpOwoKICAgICAgICBpZiB2ZXJzaW9uID09IDMgewogICAgICAgICAgICBsZXQgcnVuX2xlbiA9IHVzaXplOjpmcm9tKHUxNl9hdCgmaGVhZGVyLCAzNikpOwogICAgICAgICAgICBsZXQgbW9kZWxfbGVuID0gdXNpemU6OmZyb20odTE2X2F0KCZoZWFkZXIsIDM4KSk7CiAgICAgICAgICAgIGxldCBwbGFuX2xlbiA9IHVzaXplOjpmcm9tKHUxNl9hdCgmaGVhZGVyLCA0MCkpOwogICAgICAgICAgICBpZiAhKDEuLj0yNTYpLmNvbnRhaW5zKCZydW5fbGVuKQogICAgICAgICAgICAgICAgfHwgISgxLi49MjU2KS5jb250YWlucygmbW9kZWxfbGVuKQogICAgICAgICAgICAgICAgfHwgISgxLi49MjU2KS5jb250YWlucygmcGxhbl9sZW4pCiAgICAgICAgICAgICAgICB8fCB1MTZfYXQoJmhlYWRlciwgNDIpICE9IDAKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgcHJvY2Vzczo6d3JpdGVfZnJhbWUoCiAgICAgICAgICAgICAgICAgICAgb3V0cHV0LAogICAgICAgICAgICAgICAgICAgICZyZXBseV92MyhiYXRjaCwgYXR0ZW1wdC51bndyYXBfb3IoMCksIDEsICZbXSwgJmJvdW5kX3N0YW1wKSwKICAgICAgICAgICAgICAgICAgICAiYmluYXJ5IGlkZW50aXR5LWxlbmd0aCByZWplY3Rpb24iLAogICAgICAgICAgICAgICAgKT87CiAgICAgICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm5hdGl2ZSBicmlkZ2UgaWRlbnRpdHkgZmllbGQgYm91bmRzIikpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIGxldCBtdXQgaWRlbnRpdHkgPSB2ZWMhWzBfdTg7IHJ1bl9sZW4gKyBtb2RlbF9sZW4gKyBwbGFuX2xlbl07CiAgICAgICAgICAgIGlucHV0CiAgICAgICAgICAgICAgICAucmVhZF9leGFjdCgmbXV0IGlkZW50aXR5KQogICAgICAgICAgICAgICAgLm1hcF9lcnIofGV8IEVycm9yOjpuZXcoIkJSSURHRV9JTyIsIGUudG9fc3RyaW5nKCkpKT87CiAgICAgICAgICAgIGxldCBydW5fZW5kID0gcnVuX2xlbjsKICAgICAgICAgICAgbGV0IG1vZGVsX2VuZCA9IHJ1bl9lbmQgKyBtb2RlbF9sZW47CiAgICAgICAgICAgIGlmICFpZGVudGl0eV9tYXRjaGVzKAogICAgICAgICAgICAgICAgJmJvdW5kX3N0YW1wLAogICAgICAgICAgICAgICAgdTY0X2F0KCZoZWFkZXIsIDI4KSwKICAgICAgICAgICAgICAgIHUzMl9hdCgmaGVhZGVyLCAyNCksCiAgICAgICAgICAgICAgICAmaWRlbnRpdHlbLi5ydW5fZW5kXSwKICAgICAgICAgICAgICAgICZpZGVudGl0eVtydW5fZW5kLi5tb2RlbF9lbmRdLAogICAgICAgICAgICAgICAgJmlkZW50aXR5W21vZGVsX2VuZC4uXSwKICAgICAgICAgICAgKSB7CiAgICAgICAgICAgICAgICBwcm9jZXNzOjp3cml0ZV9mcmFtZSgKICAgICAgICAgICAgICAgICAgICBvdXRwdXQsCiAgICAgICAgICAgICAgICAgICAgJnJlcGx5X3YzKGJhdGNoLCBhdHRlbXB0LnVud3JhcF9vcigwKSwgMSwgJltdLCAmYm91bmRfc3RhbXApLAogICAgICAgICAgICAgICAgICAgICJiaW5hcnkgaWRlbnRpdHkgcmVqZWN0aW9uIiwKICAgICAgICAgICAgICAgICk/OwogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIHJ1bi9tb2RlbC9wbGFuL2Vwb2NoL2xheWVyIG1pc21hdGNoIikpOwogICAgICAgICAgICB9CiAgICAgICAgfSBlbHNlIGlmIHZlcnNpb24gPT0gMiB7CiAgICAgICAgICAgIGxldCBtdXQgcmVxdWVzdGVkID0gWzBfdTg7IDRdOwogICAgICAgICAgICBpbnB1dAogICAgICAgICAgICAgICAgLnJlYWRfZXhhY3QoJm11dCByZXF1ZXN0ZWQpCiAgICAgICAgICAgICAgICAubWFwX2Vycih8ZXwgRXJyb3I6Om5ldygiQlJJREdFX0lPIiwgZS50b19zdHJpbmcoKSkpPzsKICAgICAgICAgICAgaWYgdTMyOjpmcm9tX2xlX2J5dGVzKHJlcXVlc3RlZCkgIT0gYm91bmRfc3RhbXAubGF5ZXIgewogICAgICAgICAgICAgICAgcHJvY2Vzczo6d3JpdGVfZnJhbWUoCiAgICAgICAgICAgICAgICAgICAgb3V0cHV0LAogICAgICAgICAgICAgICAgICAgICZyZXBseShiYXRjaCwgMSwgJltdLCBsYXllciksCiAgICAgICAgICAgICAgICAgICAgImJpbmFyeSBicmlkZ2UgbGF5ZXIgcmVqZWN0aW9uIiwKICAgICAgICAgICAgICAgICk/OwogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIGxheWVyIG1pc21hdGNoIikpOwogICAgICAgICAgICB9CiAgICAgICAgfQoKICAgICAgICBsZXQgb3AgPSB1MzJfYXQoJmhlYWRlciwgNCk7CiAgICAgICAgbGV0IHRva2VucyA9IHUzMl9hdCgmaGVhZGVyLCAxNikgYXMgdXNpemU7CiAgICAgICAgbGV0IHRvcF9rID0gdTMyX2F0KCZoZWFkZXIsIDIwKSBhcyB1c2l6ZTsKICAgICAgICBpZiBvcCA9PSAyICYmIGJhdGNoID09IDAgJiYgdG9rZW5zID09IDAgJiYgdG9wX2sgPT0gMCB7CiAgICAgICAgICAgIGlmIGF0dGVtcHQuaXNfc29tZV9hbmQofHZhbHVlfCB2YWx1ZSAhPSAwKSB7CiAgICAgICAgICAgICAgICBwcm9jZXNzOjp3cml0ZV9mcmFtZSgKICAgICAgICAgICAgICAgICAgICBvdXRwdXQsCiAgICAgICAgICAgICAgICAgICAgJnJlcGx5X3YzKDAsIGF0dGVtcHQudW53cmFwX29yKDApLCAxLCAmW10sICZib3VuZF9zdGFtcCksCiAgICAgICAgICAgICAgICAgICAgImJpbmFyeSBzaHV0ZG93biBhdHRlbXB0IHJlamVjdGlvbiIsCiAgICAgICAgICAgICAgICApPzsKICAgICAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgiVkZCMyBzaHV0ZG93biBhdHRlbXB0IG11c3QgYmUgemVybyIpKTsKICAgICAgICAgICAgfQogICAgICAgICAgICBjb29yZGluYXRvci5jbG9zZSgpPzsKICAgICAgICAgICAgbGV0IHJlc3BvbnNlID0gaWYgdmVyc2lvbiA9PSAzIHsKICAgICAgICAgICAgICAgIHJlcGx5X3YzKDAsIDAsIDIsICZbXSwgJmJvdW5kX3N0YW1wKQogICAgICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAgICAgcmVwbHkoMCwgMiwgJltdLCBsYXllcikKICAgICAgICAgICAgfTsKICAgICAgICAgICAgcHJvY2Vzczo6d3JpdGVfZnJhbWUob3V0cHV0LCAmcmVzcG9uc2UsICJiaW5hcnkgYnJpZGdlIHNodXRkb3duIik/OwogICAgICAgICAgICByZXR1cm4gT2soKCkpOwogICAgICAgIH0KICAgICAgICBpZiBvcCAhPSAxCiAgICAgICAgICAgIHx8IGF0dGVtcHQuaXNfc29tZV9hbmQofHZhbHVlfCB2YWx1ZSA9PSAwKQogICAgICAgICAgICB8fCAhKDEuLj04KS5jb250YWlucygmdG9rZW5zKQogICAgICAgICAgICB8fCAhKDEuLj02NCkuY29udGFpbnMoJnRvcF9rKQogICAgICAgICAgICB8fCB0b2tlbnMgKiB0b3BfayA+IDEyOAogICAgICAgIHsKICAgICAgICAgICAgbGV0IHJlc3BvbnNlID0gaWYgdmVyc2lvbiA9PSAzIHsKICAgICAgICAgICAgICAgIHJlcGx5X3YzKGJhdGNoLCBhdHRlbXB0LnVud3JhcF9vcigwKSwgMSwgJltdLCAmYm91bmRfc3RhbXApCiAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgICByZXBseShiYXRjaCwgMSwgJltdLCBsYXllcikKICAgICAgICAgICAgfTsKICAgICAgICAgICAgcHJvY2Vzczo6d3JpdGVfZnJhbWUob3V0cHV0LCAmcmVzcG9uc2UsICJiaW5hcnkgYnJpZGdlIHJlamVjdGlvbiIpPzsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIGJpbmFyeSBkaW1lbnNpb25zIG9yIG9wZXJhdGlvbiIpKTsKICAgICAgICB9CiAgICAgICAgbGV0IHNsb3RzID0gdG9rZW5zICogdG9wX2s7CiAgICAgICAgbGV0IGlucHV0X2NvdW50ID0gdG9rZW5zICogMjU2MDsKICAgICAgICBsZXQgbXV0IGJvZHkgPSB2ZWMhWzBfdTg7IChpbnB1dF9jb3VudCArIDIgKiBzbG90cykgKiA0XTsKICAgICAgICBpbnB1dAogICAgICAgICAgICAucmVhZF9leGFjdCgmbXV0IGJvZHkpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBFcnJvcjo6bmV3KCJCUklER0VfSU8iLCBlLnRvX3N0cmluZygpKSk/OwogICAgICAgIGxldCBmbG9hdHMgPSAoMC4uaW5wdXRfY291bnQpCiAgICAgICAgICAgIC5tYXAofGl8IGYzMjo6ZnJvbV9iaXRzKHUzMl9hdCgmYm9keSwgaSAqIDQpKSkKICAgICAgICAgICAgLmNvbGxlY3Q6OjxWZWM8Xz4+KCk7CiAgICAgICAgbGV0IGlkcyA9ICgwLi5zbG90cykKICAgICAgICAgICAgLm1hcCh8aXwgdTMyX2F0KCZib2R5LCAoaW5wdXRfY291bnQgKyBpKSAqIDQpIGFzIGkzMikKICAgICAgICAgICAgLmNvbGxlY3Q6OjxWZWM8Xz4+KCk7CiAgICAgICAgbGV0IGtpbmRzID0gKDAuLnNsb3RzKQogICAgICAgICAgICAubWFwKHxpfCB1MzJfYXQoJmJvZHksIChpbnB1dF9jb3VudCArIHNsb3RzICsgaSkgKiA0KSBhcyBpMzIpCiAgICAgICAgICAgIC5jb2xsZWN0Ojo8VmVjPF8+PigpOwogICAgICAgIG1hdGNoIGNvb3JkaW5hdG9yLmJhdGNoKGJhdGNoLCBhdHRlbXB0LCB0b2tlbnMsIHRvcF9rLCAmZmxvYXRzLCAmaWRzLCAma2luZHMpIHsKICAgICAgICAgICAgT2socm93cykgPT4gewogICAgICAgICAgICAgICAgbGV0IHJlc3BvbnNlID0gaWYgdmVyc2lvbiA9PSAzIHsKICAgICAgICAgICAgICAgICAgICByZXBseV92MyhiYXRjaCwgYXR0ZW1wdC51bndyYXBfb3IoMCksIDAsICZyb3dzLCAmYm91bmRfc3RhbXApCiAgICAgICAgICAgICAgICB9IGVsc2UgewogICAgICAgICAgICAgICAgICAgIHJlcGx5KGJhdGNoLCAwLCAmcm93cywgbGF5ZXIpCiAgICAgICAgICAgICAgICB9OwogICAgICAgICAgICAgICAgcHJvY2Vzczo6d3JpdGVfZnJhbWUob3V0cHV0LCAmcmVzcG9uc2UsICJiaW5hcnkgYnJpZGdlIHJlcGx5Iik/OwogICAgICAgICAgICB9CiAgICAgICAgICAgIEVycihlcnJvcikgPT4gewogICAgICAgICAgICAgICAgbGV0IHJlc3BvbnNlID0gaWYgdmVyc2lvbiA9PSAzIHsKICAgICAgICAgICAgICAgICAgICByZXBseV92MyhiYXRjaCwgYXR0ZW1wdC51bndyYXBfb3IoMCksIDEsICZbXSwgJmJvdW5kX3N0YW1wKQogICAgICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgICAgICByZXBseShiYXRjaCwgMSwgJltdLCBsYXllcikKICAgICAgICAgICAgICAgIH07CiAgICAgICAgICAgICAgICBwcm9jZXNzOjp3cml0ZV9mcmFtZShvdXRwdXQsICZyZXNwb25zZSwgImJpbmFyeSBicmlkZ2UgZmFpbHVyZSIpPzsKICAgICAgICAgICAgICAgIHJldHVybiBFcnIoZXJyb3IpOwogICAgICAgICAgICB9CiAgICAgICAgfQogICAgfQp9Ci8vLyBTZXJ2ZSBvbmUgYm91bmRlZCBsaW5lLWZyYW1lZCBjb252ZXJzYXRpb24uIEFueSBlcnJvciBjbG9zZXMgdGhlIGNvb3JkaW5hdG9yOwovLy8gdGhlIGR1cmFibGUgY2xhaW0gcmVtYWlucyBjb25zdW1lZCBhbmQgbm8gcGFydGlhbCBiYXRjaCByZXBseSBpcyBlbWl0dGVkLgpwdWIgZm4gc2VydmUoaW5wdXQ6ICZtdXQgaW1wbCBCdWZSZWFkLCBvdXRwdXQ6ICZtdXQgaW1wbCBXcml0ZSkgLT4gUmVzdWx0PCgpPiB7CiAgICBsZXQgaW5pdCA9IHByb2Nlc3M6OnJlYWRfbWVzc2FnZTo6PEluaXQ+KGlucHV0KT8KICAgICAgICAub2tfb3JfZWxzZSh8fCBpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIG11c3QgYmVnaW4gd2l0aCBpbml0IikpPzsKICAgIGxldCBtdXQgY29vcmRpbmF0b3IgPSBtYXRjaCBDb29yZGluYXRvcjo6b3Blbihpbml0KSB7CiAgICAgICAgT2sodmFsdWUpID0+IHZhbHVlLAogICAgICAgIEVycihlcnJvcikgPT4gewogICAgICAgICAgICBzZW5kKAogICAgICAgICAgICAgICAgb3V0cHV0LAogICAgICAgICAgICAgICAgJlJlcGx5OjpGYWlsZWQgewogICAgICAgICAgICAgICAgICAgIGVycm9yOiBlcnJvci5jbG9uZSgpLAogICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgKT87CiAgICAgICAgICAgIHJldHVybiBFcnIoZXJyb3IpOwogICAgICAgIH0KICAgIH07CiAgICBzZW5kKAogICAgICAgIG91dHB1dCwKICAgICAgICAmUmVwbHk6OlJlYWR5IHsKICAgICAgICAgICAgcmFua3M6IGNvb3JkaW5hdG9yLnNlc3Npb25zLml0ZXIoKS5tYXAofHN8IHMucmFuaykuY29sbGVjdCgpLAogICAgICAgIH0sCiAgICApPzsKICAgIGxvb3AgewogICAgICAgIG1hdGNoIHByb2Nlc3M6OnJlYWRfbWVzc2FnZTo6PFJlcXVlc3Q+KGlucHV0KT8gewogICAgICAgICAgICBTb21lKFJlcXVlc3Q6OkJhdGNoIHsKICAgICAgICAgICAgICAgIGJhdGNoLAogICAgICAgICAgICAgICAgdG9rZW5zLAogICAgICAgICAgICAgICAgdG9wX2ssCiAgICAgICAgICAgICAgICBpbnB1dHMsCiAgICAgICAgICAgICAgICBpZHMsCiAgICAgICAgICAgICAgICBraW5kcywKICAgICAgICAgICAgfSkgPT4gbWF0Y2ggY29vcmRpbmF0b3IuYmF0Y2goYmF0Y2gsIE5vbmUsIHRva2VucywgdG9wX2ssICZpbnB1dHMsICZpZHMsICZraW5kcykgewogICAgICAgICAgICAgICAgT2soY3B1X3Jvd3MpID0+IHNlbmQob3V0cHV0LCAmUmVwbHk6OkNvbXBsZXRlZCB7IGJhdGNoLCBjcHVfcm93cyB9KT8sCiAgICAgICAgICAgICAgICBFcnIoZXJyb3IpID0+IHsKICAgICAgICAgICAgICAgICAgICBzZW5kKAogICAgICAgICAgICAgICAgICAgICAgICBvdXRwdXQsCiAgICAgICAgICAgICAgICAgICAgICAgICZSZXBseTo6RmFpbGVkIHsKICAgICAgICAgICAgICAgICAgICAgICAgICAgIGVycm9yOiBlcnJvci5jbG9uZSgpLAogICAgICAgICAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgICAgICk/OwogICAgICAgICAgICAgICAgICAgIHJldHVybiBFcnIoZXJyb3IpOwogICAgICAgICAgICAgICAgfQogICAgICAgICAgICB9LAogICAgICAgICAgICBTb21lKFJlcXVlc3Q6OlNodXRkb3duKSA9PiB7CiAgICAgICAgICAgICAgICBjb29yZGluYXRvci5jbG9zZSgpPzsKICAgICAgICAgICAgICAgIHJldHVybiBzZW5kKG91dHB1dCwgJlJlcGx5OjpDbG9zZWQpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIFNvbWUoUmVxdWVzdDo6RW50ZXJCaW5hcnkpID0+IHsKICAgICAgICAgICAgICAgIHNlbmQob3V0cHV0LCAmUmVwbHk6OkJpbmFyeVJlYWR5KT87CiAgICAgICAgICAgICAgICByZXR1cm4gYmluYXJ5X2xvb3AoY29vcmRpbmF0b3IsIGlucHV0LCBvdXRwdXQpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIF8gPT4gcmV0dXJuIEVycihpbnZhbGlkKCJuYXRpdmUgYnJpZGdlIHVuZXhwZWN0ZWQgcmVxdWVzdCBvciBFT0YiKSksCiAgICAgICAgfQogICAgfQp9CnB1YiBmbiBtYWluKCkgLT4gUmVzdWx0PCgpPiB7CiAgICBsZXQgc3RkaW4gPSBzdGQ6OmlvOjpzdGRpbigpOwogICAgbGV0IHN0ZG91dCA9IHN0ZDo6aW86OnN0ZG91dCgpOwogICAgc2VydmUoJm11dCBzdGRpbi5sb2NrKCksICZtdXQgc3Rkb3V0LmxvY2soKSkKfQoKI1tjZmcodGVzdCldCm1vZCBpZGVudGl0eV90ZXN0cyB7CiAgICB1c2Ugc3VwZXI6Oio7CgogICAgI1t0ZXN0XQogICAgZm4gdmZiM19pZGVudGl0eV9jb21wYXJpc29uX2NvdmVyc19hbGxfZXhlY3V0aW9uX2Nvb3JkaW5hdGVzKCkgewogICAgICAgIGxldCBzdGFtcCA9IG1vZTo6U3RhbXAgewogICAgICAgICAgICBydW5faWQ6ICJydW4tYSIuaW50bygpLAogICAgICAgICAgICBtb2RlbF9yZXZpc2lvbjogIm1vZGVsLWIiLmludG8oKSwKICAgICAgICAgICAgcGxhbl9pZDogInBsYW4tYyIuaW50bygpLAogICAgICAgICAgICBsYXllcjogNywKICAgICAgICAgICAgYmF0Y2g6IDkxLAogICAgICAgICAgICBlcG9jaDogMTIsCiAgICAgICAgfTsKICAgICAgICBsZXQgcnVuID0gYiJydW4tYSI7CiAgICAgICAgbGV0IG1vZGVsID0gYiJtb2RlbC1iIjsKICAgICAgICBsZXQgcGxhbiA9IGIicGxhbi1jIjsKICAgICAgICBhc3NlcnQhKGlkZW50aXR5X21hdGNoZXMoJnN0YW1wLCAxMiwgNywgcnVuLCBtb2RlbCwgcGxhbikpOwogICAgICAgIGFzc2VydCEoIWlkZW50aXR5X21hdGNoZXMoJnN0YW1wLCAxMywgNywgcnVuLCBtb2RlbCwgcGxhbikpOwogICAgICAgIGFzc2VydCEoIWlkZW50aXR5X21hdGNoZXMoJnN0YW1wLCAxMiwgOCwgcnVuLCBtb2RlbCwgcGxhbikpOwogICAgICAgIGFzc2VydCEoIWlkZW50aXR5X21hdGNoZXMoJnN0YW1wLCAxMiwgNywgYiJydW4teCIsIG1vZGVsLCBwbGFuKSk7CiAgICAgICAgYXNzZXJ0ISghaWRlbnRpdHlfbWF0Y2hlcygmc3RhbXAsIDEyLCA3LCBydW4sIGIibW9kZWwteCIsIHBsYW4pKTsKICAgICAgICBhc3NlcnQhKCFpZGVudGl0eV9tYXRjaGVzKCZzdGFtcCwgMTIsIDcsIHJ1biwgbW9kZWwsIGIicGxhbi14IikpOwogICAgfQp9Cg==
+//! Persistent local CPU coordinator for Strata-style unweighted expert slots.
+//! This is not a live donor callback, GPU synchronization or a distributed lease.
+use crate::{
+    invalid, moe,
+    native_ggml_cpu::Binding,
+    native_ledger::NativeBatchLedger,
+    process, routing,
+    session::{Endpoint, Session},
+    strata_ingress,
+    strata_native_layout::NativeLayout,
+    Error, Result,
+};
+use serde::{Deserialize, Serialize};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    io::{BufRead, Write},
+    path::Path,
+    time::Duration,
+};
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct Init {
+    pub template: routing::RoutingProblem,
+    pub model_experts: Vec<u32>,
+    pub index: String,
+    pub pack_path: String,
+    pub ledger_path: String,
+    pub endpoints: Vec<Endpoint>,
+    pub bindings: Vec<Binding>,
+    /// Limit on total resident payload bytes; excludes protocol buffers and RSS.
+    #[serde(default)]
+    pub resident_payload_limit: Option<u64>,
+    pub timeout_ms: u64,
+}
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Request {
+    EnterBinary,
+    Batch {
+        batch: u64,
+        tokens: usize,
+        top_k: usize,
+        inputs: Vec<f32>,
+        ids: Vec<i32>,
+        kinds: Vec<i32>,
+    },
+    Shutdown,
+}
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SlotRow {
+    pub position: usize,
+    pub value: Vec<f32>,
+}
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(tag = "state", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Reply {
+    Ready { ranks: Vec<u32> },
+    BinaryReady,
+    Completed { batch: u64, cpu_rows: Vec<SlotRow> },
+    Closed,
+    Failed { error: Error },
+}
+
+struct Coordinator {
+    template: routing::RoutingProblem,
+    model_experts: Vec<u32>,
+    sessions: Vec<Session>,
+    ledger: NativeBatchLedger,
+    timeout: Duration,
+}
+impl Coordinator {
+    fn open(init: Init) -> Result<Self> {
+        routing::validate(&init.template)?;
+        if init.template.hidden != 2560
+            || !(1..=4).contains(&init.endpoints.len())
+            || init.bindings.is_empty()
+            || init.bindings.len() > crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
+            || !(1..=60_000).contains(&init.timeout_ms)
+            || !Path::new(&init.pack_path).is_absolute()
+            || !Path::new(&init.ledger_path).is_absolute()
+        {
+            return Err(invalid("native bridge init bounds"));
+        }
+        let model: BTreeSet<_> = init.model_experts.iter().copied().collect();
+        if model.is_empty()
+            || model.len() != init.model_experts.len()
+            || model.len() > 1024
+            || init.template.experts.iter().any(|e| !model.contains(e))
+        {
+            return Err(invalid("native bridge model experts"));
+        }
+        let mut endpoints = BTreeMap::new();
+        for endpoint in &init.endpoints {
+            if endpoint.argv.len() != 1
+                || !Path::new(&endpoint.argv[0]).is_absolute()
+                || endpoints.insert(endpoint.rank, endpoint).is_some()
+            {
+                return Err(invalid("native bridge requires unique local executables"));
+            }
+        }
+        if endpoints.len() != init.template.resident_order.len() {
+            return Err(invalid("native bridge rank coverage"));
+        }
+        let ledger = NativeBatchLedger::open(Path::new(&init.ledger_path))?;
+        // A FIFO must not hang admission before its type can be checked.
+        let mut options = std::fs::OpenOptions::new();
+        options.read(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.custom_flags(libc::O_NONBLOCK);
+        }
+        let mut file = options
+            .open(&init.pack_path)
+            .map_err(|e| Error::new("NATIVE_PACK_IO", e.to_string()))?;
+        let metadata = file
+            .metadata()
+            .map_err(|e| Error::new("NATIVE_PACK_IO", e.to_string()))?;
+        if !metadata.is_file() {
+            return Err(invalid("native pack must be a regular file"));
+        }
+        let layout = NativeLayout::parse_sc117_v3(&init.index, metadata.len())?;
+        let limit = init
+            .resident_payload_limit
+            .unwrap_or(crate::native_ggml_cpu::DEFAULT_NATIVE_PAYLOAD_BYTES);
+        if limit == 0 || limit > crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES {
+            return Err(invalid("native bridge payload budget"));
+        }
+        let total = init.bindings.iter().try_fold(0_u64, |sum, binding| {
+            let span = layout.expert(binding.layer as usize, u64::from(binding.expert))?;
+            sum.checked_add(span.bytes)
+                .ok_or_else(|| invalid("native bridge payload overflow"))
+        })?;
+        if total > limit {
+            return Err(invalid("native bridge payload budget exceeded"));
+        }
+        let mut loads = BTreeMap::<u32, Vec<&Binding>>::new();
+        for (&rank, order) in &init.template.resident_order {
+            if !endpoints.contains_key(&rank)
+                || order.is_empty()
+                || order.len() > crate::native_ggml_cpu::MAX_NATIVE_EXPERTS
+            {
+                return Err(invalid("native bridge resident order"));
+            }
+            let mut owners = Vec::new();
+            for &local in order {
+                let found: Vec<_> = init
+                    .bindings
+                    .iter()
+                    .filter(|b| b.rank == rank && b.local == local)
+                    .collect();
+                if found.len() != 1 {
+                    return Err(invalid("native bridge binding coverage"));
+                }
+                let b = found[0];
+                if b.model_revision != init.template.stamp.model_revision
+                    || b.layer != init.template.stamp.layer
+                    || b.epoch != init.template.stamp.epoch
+                    || !init
+                        .template
+                        .registry
+                        .copies
+                        .iter()
+                        .any(|r| r.rank == rank && r.local == local && r.expert == b.expert)
+                {
+                    return Err(invalid("native bridge binding identity"));
+                }
+                owners.push(b);
+            }
+            loads.insert(rank, owners);
+        }
+        if loads.values().map(Vec::len).sum::<usize>() != init.bindings.len() {
+            return Err(invalid("native bridge extra binding"));
+        }
+        // Validate the complete binding map first, then keep only one verified
+        // payload in this process while resident workers receive their weights.
+        // Sessions are owned until Ready; errors drop, kill and reap them.
+        let timeout = Duration::from_millis(init.timeout_ms);
+        let mut sessions = Vec::new();
+        for (rank, owners) in loads {
+            let mut session = Session::connect(endpoints[&rank], timeout)?;
+            for binding in &owners {
+                let verified = layout.read_verified_expert(
+                    &mut file,
+                    binding.layer as usize,
+                    u64::from(binding.expert),
+                    &binding.index_sha256,
+                    &binding.blob_sha256,
+                )?;
+                session.load_native_ggml(
+                    binding,
+                    &init.index,
+                    metadata.len(),
+                    &verified.bytes,
+                    timeout,
+                )?;
+            }
+            session.seal_native_ggml(owners.len(), timeout)?;
+            sessions.push(session);
+        }
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::MetadataExt;
+            let after = file
+                .metadata()
+                .map_err(|e| Error::new("NATIVE_PACK_IO", e.to_string()))?;
+            if (
+                metadata.dev(),
+                metadata.ino(),
+                metadata.len(),
+                metadata.mtime(),
+                metadata.mtime_nsec(),
+                metadata.ctime(),
+                metadata.ctime_nsec(),
+            ) != (
+                after.dev(),
+                after.ino(),
+                after.len(),
+                after.mtime(),
+                after.mtime_nsec(),
+                after.ctime(),
+                after.ctime_nsec(),
+            ) {
+                return Err(invalid("native pack changed during admission"));
+            }
+        }
+        Ok(Self {
+            template: init.template,
+            model_experts: init.model_experts,
+            sessions,
+            ledger,
+            timeout,
+        })
+    }
+    fn batch(
+        &mut self,
+        batch: u64,
+        attempt: Option<u64>,
+        tokens: usize,
+        top_k: usize,
+        inputs: &[f32],
+        ids: &[i32],
+        kinds: &[i32],
+    ) -> Result<Vec<SlotRow>> {
+        let count = tokens
+            .checked_mul(top_k)
+            .and_then(|n| n.checked_mul(2560))
+            .filter(|n| *n <= 1_048_576)
+            .ok_or_else(|| invalid("native bridge output bound"))?;
+        let mut template = self.template.clone();
+        template.stamp.batch = batch;
+        let plan = strata_ingress::admit_strata_unweighted_f64(
+            &template,
+            &template.stamp,
+            template.stamp.layer,
+            tokens,
+            top_k,
+            inputs,
+            ids,
+            kinds,
+            &self.model_experts,
+        )?;
+        let mut staged = vec![0.0; count];
+        if let Some(attempt) = attempt {
+            if attempt == 0 {
+                return Err(invalid("VFB3 batch attempt must be nonzero"));
+            }
+            let ticket = self.ledger.reserve_ticket(&template.stamp, attempt)?;
+            plan.execute_native_fp32_reserved(
+                &mut self.sessions,
+                &self.ledger,
+                ticket,
+                self.timeout,
+                &mut staged,
+            )?;
+        } else {
+            plan.execute_native_fp32(&mut self.sessions, &self.ledger, self.timeout, &mut staged)?;
+        }
+        let mut rows = Vec::new();
+        for (position, &kind) in kinds.iter().enumerate() {
+            if kind == -1 {
+                rows.push(SlotRow {
+                    position,
+                    value: staged[position * 2560..(position + 1) * 2560].to_vec(),
+                });
+            }
+        }
+        Ok(rows)
+    }
+    fn close(self) -> Result<()> {
+        for session in self.sessions {
+            let receipt = session.close(self.timeout);
+            if receipt.error.is_some() || receipt.exit_code != Some(0) || receipt.killed {
+                return Err(invalid("native bridge worker close failed"));
+            }
+        }
+        Ok(())
+    }
+}
+fn send(output: &mut impl Write, reply: &Reply) -> Result<()> {
+    process::write_frame(output, &process::encode(reply)?, "native bridge reply")
+}
+
+fn identity_matches(
+    stamp: &moe::Stamp,
+    epoch: u64,
+    layer: u32,
+    run_id: &[u8],
+    model_revision: &[u8],
+    plan_id: &[u8],
+) -> bool {
+    epoch == stamp.epoch
+        && layer == stamp.layer
+        && run_id == stamp.run_id.as_bytes()
+        && model_revision == stamp.model_revision.as_bytes()
+        && plan_id == stamp.plan_id.as_bytes()
+}
+
+fn reply_v3(
+    batch: u64,
+    attempt: u64,
+    status: u32,
+    rows: &[SlotRow],
+    stamp: &moe::Stamp,
+) -> Vec<u8> {
+    let run_id = stamp.run_id.as_bytes();
+    let model_revision = stamp.model_revision.as_bytes();
+    let plan_id = stamp.plan_id.as_bytes();
+    let mut out = Vec::with_capacity(
+        52 + run_id.len() + model_revision.len() + plan_id.len() + rows.len() * (4 + 2560 * 4),
+    );
+    out.extend_from_slice(b"VFR3");
+    out.extend_from_slice(&status.to_le_bytes());
+    out.extend_from_slice(&batch.to_le_bytes());
+    out.extend_from_slice(&(rows.len() as u32).to_le_bytes());
+    out.extend_from_slice(&(2560_u32).to_le_bytes());
+    out.extend_from_slice(&stamp.layer.to_le_bytes());
+    out.extend_from_slice(&stamp.epoch.to_le_bytes());
+    out.extend_from_slice(&(run_id.len() as u16).to_le_bytes());
+    out.extend_from_slice(&(model_revision.len() as u16).to_le_bytes());
+    out.extend_from_slice(&(plan_id.len() as u16).to_le_bytes());
+    out.extend_from_slice(&0_u16.to_le_bytes());
+    out.extend_from_slice(&attempt.to_le_bytes());
+    out.extend_from_slice(run_id);
+    out.extend_from_slice(model_revision);
+    out.extend_from_slice(plan_id);
+    for row in rows {
+        out.extend_from_slice(&(row.position as u32).to_le_bytes());
+        for value in &row.value {
+            out.extend_from_slice(&value.to_bits().to_le_bytes());
+        }
+    }
+    out
+}
+
+/// VFB1/V2 retain compatibility; VFB3 binds run/model/plan/epoch/layer/batch/attempt before dispatch.
+fn binary_loop(
+    mut coordinator: Coordinator,
+    input: &mut impl BufRead,
+    output: &mut impl Write,
+) -> Result<()> {
+    fn u32_at(b: &[u8], offset: usize) -> u32 {
+        u32::from_le_bytes(b[offset..offset + 4].try_into().unwrap())
+    }
+    fn u16_at(b: &[u8], offset: usize) -> u16 {
+        u16::from_le_bytes(b[offset..offset + 2].try_into().unwrap())
+    }
+    fn u64_at(b: &[u8], offset: usize) -> u64 {
+        u64::from_le_bytes(b[offset..offset + 8].try_into().unwrap())
+    }
+    fn reply(batch: u64, status: u32, rows: &[SlotRow], layer: Option<u32>) -> Vec<u8> {
+        let mut out = Vec::with_capacity(24 + rows.len() * (4 + 2560 * 4));
+        out.extend_from_slice(if layer.is_some() { b"VFR2" } else { b"VFR1" });
+        out.extend_from_slice(&status.to_le_bytes());
+        out.extend_from_slice(&batch.to_le_bytes());
+        out.extend_from_slice(&(rows.len() as u32).to_le_bytes());
+        out.extend_from_slice(&(2560_u32).to_le_bytes());
+        if let Some(layer) = layer {
+            out.extend_from_slice(&layer.to_le_bytes());
+        }
+        for row in rows {
+            out.extend_from_slice(&(row.position as u32).to_le_bytes());
+            for value in &row.value {
+                out.extend_from_slice(&value.to_bits().to_le_bytes());
+            }
+        }
+        out
+    }
+    let bound_stamp = coordinator.template.stamp.clone();
+    loop {
+        let mut magic = [0_u8; 4];
+        input
+            .read_exact(&mut magic)
+            .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+        let version = if &magic == b"VFB3" {
+            3
+        } else if &magic == b"VFB2" {
+            2
+        } else if &magic == b"VFB1" {
+            1
+        } else {
+            return Err(invalid("native bridge binary magic"));
+        };
+        let mut header = vec![0_u8; if version == 3 { 52 } else { 24 }];
+        header[..4].copy_from_slice(&magic);
+        input
+            .read_exact(&mut header[4..])
+            .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+        let layer = (version >= 2).then_some(bound_stamp.layer);
+        let batch = u64_at(&header, 8);
+        let attempt = (version == 3).then(|| u64_at(&header, 44));
+
+        if version == 3 {
+            let run_len = usize::from(u16_at(&header, 36));
+            let model_len = usize::from(u16_at(&header, 38));
+            let plan_len = usize::from(u16_at(&header, 40));
+            if !(1..=256).contains(&run_len)
+                || !(1..=256).contains(&model_len)
+                || !(1..=256).contains(&plan_len)
+                || u16_at(&header, 42) != 0
+            {
+                process::write_frame(
+                    output,
+                    &reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp),
+                    "binary identity-length rejection",
+                )?;
+                return Err(invalid("native bridge identity field bounds"));
+            }
+            let mut identity = vec![0_u8; run_len + model_len + plan_len];
+            input
+                .read_exact(&mut identity)
+                .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+            let run_end = run_len;
+            let model_end = run_end + model_len;
+            if !identity_matches(
+                &bound_stamp,
+                u64_at(&header, 28),
+                u32_at(&header, 24),
+                &identity[..run_end],
+                &identity[run_end..model_end],
+                &identity[model_end..],
+            ) {
+                process::write_frame(
+                    output,
+                    &reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp),
+                    "binary identity rejection",
+                )?;
+                return Err(invalid("native bridge run/model/plan/epoch/layer mismatch"));
+            }
+        } else if version == 2 {
+            let mut requested = [0_u8; 4];
+            input
+                .read_exact(&mut requested)
+                .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+            if u32::from_le_bytes(requested) != bound_stamp.layer {
+                process::write_frame(
+                    output,
+                    &reply(batch, 1, &[], layer),
+                    "binary bridge layer rejection",
+                )?;
+                return Err(invalid("native bridge layer mismatch"));
+            }
+        }
+
+        let op = u32_at(&header, 4);
+        let tokens = u32_at(&header, 16) as usize;
+        let top_k = u32_at(&header, 20) as usize;
+        if op == 2 && batch == 0 && tokens == 0 && top_k == 0 {
+            if attempt.is_some_and(|value| value != 0) {
+                process::write_frame(
+                    output,
+                    &reply_v3(0, attempt.unwrap_or(0), 1, &[], &bound_stamp),
+                    "binary shutdown attempt rejection",
+                )?;
+                return Err(invalid("VFB3 shutdown attempt must be zero"));
+            }
+            coordinator.close()?;
+            let response = if version == 3 {
+                reply_v3(0, 0, 2, &[], &bound_stamp)
+            } else {
+                reply(0, 2, &[], layer)
+            };
+            process::write_frame(output, &response, "binary bridge shutdown")?;
+            return Ok(());
+        }
+        if op != 1
+            || attempt.is_some_and(|value| value == 0)
+            || !(1..=8).contains(&tokens)
+            || !(1..=64).contains(&top_k)
+            || tokens * top_k > 128
+        {
+            let response = if version == 3 {
+                reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp)
+            } else {
+                reply(batch, 1, &[], layer)
+            };
+            process::write_frame(output, &response, "binary bridge rejection")?;
+            return Err(invalid("native bridge binary dimensions or operation"));
+        }
+        let slots = tokens * top_k;
+        let input_count = tokens * 2560;
+        let mut body = vec![0_u8; (input_count + 2 * slots) * 4];
+        input
+            .read_exact(&mut body)
+            .map_err(|e| Error::new("BRIDGE_IO", e.to_string()))?;
+        let floats = (0..input_count)
+            .map(|i| f32::from_bits(u32_at(&body, i * 4)))
+            .collect::<Vec<_>>();
+        let ids = (0..slots)
+            .map(|i| u32_at(&body, (input_count + i) * 4) as i32)
+            .collect::<Vec<_>>();
+        let kinds = (0..slots)
+            .map(|i| u32_at(&body, (input_count + slots + i) * 4) as i32)
+            .collect::<Vec<_>>();
+        match coordinator.batch(batch, attempt, tokens, top_k, &floats, &ids, &kinds) {
+            Ok(rows) => {
+                let response = if version == 3 {
+                    reply_v3(batch, attempt.unwrap_or(0), 0, &rows, &bound_stamp)
+                } else {
+                    reply(batch, 0, &rows, layer)
+                };
+                process::write_frame(output, &response, "binary bridge reply")?;
+            }
+            Err(error) => {
+                let response = if version == 3 {
+                    reply_v3(batch, attempt.unwrap_or(0), 1, &[], &bound_stamp)
+                } else {
+                    reply(batch, 1, &[], layer)
+                };
+                process::write_frame(output, &response, "binary bridge failure")?;
+                return Err(error);
+            }
+        }
+    }
+}
+/// Serve one bounded line-framed conversation. Any error closes the coordinator;
+/// the durable claim remains consumed and no partial batch reply is emitted.
+pub fn serve(input: &mut impl BufRead, output: &mut impl Write) -> Result<()> {
+    let init = process::read_message::<Init>(input)?
+        .ok_or_else(|| invalid("native bridge must begin with init"))?;
+    let mut coordinator = match Coordinator::open(init) {
+        Ok(value) => value,
+        Err(error) => {
+            send(
+                output,
+                &Reply::Failed {
+                    error: error.clone(),
+                },
+            )?;
+            return Err(error);
+        }
+    };
+    send(
+        output,
+        &Reply::Ready {
+            ranks: coordinator.sessions.iter().map(|s| s.rank).collect(),
+        },
+    )?;
+    loop {
+        match process::read_message::<Request>(input)? {
+            Some(Request::Batch {
+                batch,
+                tokens,
+                top_k,
+                inputs,
+                ids,
+                kinds,
+            }) => match coordinator.batch(batch, None, tokens, top_k, &inputs, &ids, &kinds) {
+                Ok(cpu_rows) => send(output, &Reply::Completed { batch, cpu_rows })?,
+                Err(error) => {
+                    send(
+                        output,
+                        &Reply::Failed {
+                            error: error.clone(),
+                        },
+                    )?;
+                    return Err(error);
+                }
+            },
+            Some(Request::Shutdown) => {
+                coordinator.close()?;
+                return send(output, &Reply::Closed);
+            }
+            Some(Request::EnterBinary) => {
+                send(output, &Reply::BinaryReady)?;
+                return binary_loop(coordinator, input, output);
+            }
+            _ => return Err(invalid("native bridge unexpected request or EOF")),
+        }
+    }
+}
+pub fn main() -> Result<()> {
+    let stdin = std::io::stdin();
+    let stdout = std::io::stdout();
+    serve(&mut stdin.lock(), &mut stdout.lock())
+}
+
+#[cfg(test)]
+mod identity_tests {
+    use super::*;
+
+    #[test]
+    fn vfb3_identity_comparison_covers_all_execution_coordinates() {
+        let stamp = moe::Stamp {
+            run_id: "run-a".into(),
+            model_revision: "model-b".into(),
+            plan_id: "plan-c".into(),
+            layer: 7,
+            batch: 91,
+            epoch: 12,
+        };
+        let run = b"run-a";
+        let model = b"model-b";
+        let plan = b"plan-c";
+        assert!(identity_matches(&stamp, 12, 7, run, model, plan));
+        assert!(!identity_matches(&stamp, 13, 7, run, model, plan));
+        assert!(!identity_matches(&stamp, 12, 8, run, model, plan));
+        assert!(!identity_matches(&stamp, 12, 7, b"run-x", model, plan));
+        assert!(!identity_matches(&stamp, 12, 7, run, b"model-x", plan));
+        assert!(!identity_matches(&stamp, 12, 7, run, model, b"plan-x"));
+    }
+}

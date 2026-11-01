@@ -1,1 +1,234 @@
-I2luY2x1ZGUgInBpcGVfY2xpZW50LmhwcCIKI2luY2x1ZGUgInBvb2xfaG9vay5ocHAiCgojaW5jbHVkZSA8YWxnb3JpdGhtPgojaW5jbHVkZSA8YXJyYXk+CiNpbmNsdWRlIDxjc3RkaW50PgojaW5jbHVkZSA8Y3N0cmluZz4KI2luY2x1ZGUgPHN0cmluZz4KI2luY2x1ZGUgPHRocmVhZD4KI2luY2x1ZGUgPHV0aWxpdHk+CiNpbmNsdWRlIDx2ZWN0b3I+CiNpbmNsdWRlIDxzeXMvc29ja2V0Lmg+CiNpbmNsdWRlIDx1bmlzdGQuaD4KCm5hbWVzcGFjZSB7CnVzaW5nIG5hbWVzcGFjZSB2Zjo6c3RyYXRhX2JyaWRnZTsKCnVpbnQxNl90IGdldDE2KGNvbnN0IHVpbnQ4X3QqIHApIHsKICAgIHJldHVybiB1aW50MTZfdChwWzBdKSB8IHVpbnQxNl90KHBbMV0pIDw8IDg7Cn0KdWludDMyX3QgZ2V0MzIoY29uc3QgdWludDhfdCogcCkgewogICAgdWludDMyX3QgdmFsdWUgPSAwOwogICAgZm9yIChpbnQgaSA9IDA7IGkgPCA0OyArK2kpIHZhbHVlIHw9IHVpbnQzMl90KHBbaV0pIDw8ICg4ICogaSk7CiAgICByZXR1cm4gdmFsdWU7Cn0KdWludDY0X3QgZ2V0NjQoY29uc3QgdWludDhfdCogcCkgewogICAgdWludDY0X3QgdmFsdWUgPSAwOwogICAgZm9yIChpbnQgaSA9IDA7IGkgPCA4OyArK2kpIHZhbHVlIHw9IHVpbnQ2NF90KHBbaV0pIDw8ICg4ICogaSk7CiAgICByZXR1cm4gdmFsdWU7Cn0Kdm9pZCBwdXQxNihzdGQ6OnZlY3Rvcjx1aW50OF90PiYgb3V0LCB1aW50MTZfdCB2YWx1ZSkgewogICAgZm9yIChpbnQgaSA9IDA7IGkgPCAyOyArK2kpIG91dC5wdXNoX2JhY2sodWludDhfdCh2YWx1ZSA+PiAoOCAqIGkpKSk7Cn0Kdm9pZCBwdXQzMihzdGQ6OnZlY3Rvcjx1aW50OF90PiYgb3V0LCB1aW50MzJfdCB2YWx1ZSkgewogICAgZm9yIChpbnQgaSA9IDA7IGkgPCA0OyArK2kpIG91dC5wdXNoX2JhY2sodWludDhfdCh2YWx1ZSA+PiAoOCAqIGkpKSk7Cn0Kdm9pZCBwdXQ2NChzdGQ6OnZlY3Rvcjx1aW50OF90PiYgb3V0LCB1aW50NjRfdCB2YWx1ZSkgewogICAgZm9yIChpbnQgaSA9IDA7IGkgPCA4OyArK2kpIG91dC5wdXNoX2JhY2sodWludDhfdCh2YWx1ZSA+PiAoOCAqIGkpKSk7Cn0KYm9vbCByZWFkX2V4YWN0KGludCBmZCwgdWludDhfdCogZGF0YSwgc2l6ZV90IHNpemUpIHsKICAgIHdoaWxlIChzaXplKSB7CiAgICAgICAgY29uc3Qgc3NpemVfdCBuID0gcmVjdihmZCwgZGF0YSwgc2l6ZSwgMCk7CiAgICAgICAgaWYgKG4gPD0gMCkgcmV0dXJuIGZhbHNlOwogICAgICAgIGRhdGEgKz0gbjsKICAgICAgICBzaXplIC09IHNpemVfdChuKTsKICAgIH0KICAgIHJldHVybiB0cnVlOwp9CmJvb2wgd3JpdGVfZXhhY3QoaW50IGZkLCBjb25zdCB1aW50OF90KiBkYXRhLCBzaXplX3Qgc2l6ZSkgewogICAgd2hpbGUgKHNpemUpIHsKICAgICAgICBjb25zdCBzc2l6ZV90IG4gPSBzZW5kKGZkLCBkYXRhLCBzaXplLCBNU0dfTk9TSUdOQUwpOwogICAgICAgIGlmIChuIDw9IDApIHJldHVybiBmYWxzZTsKICAgICAgICBkYXRhICs9IG47CiAgICAgICAgc2l6ZSAtPSBzaXplX3Qobik7CiAgICB9CiAgICByZXR1cm4gdHJ1ZTsKfQpzdGQ6OnZlY3Rvcjx1aW50OF90PiBpZGVudGl0eV9ieXRlcyhjb25zdCBTZXNzaW9uSWRlbnRpdHkmIGlkZW50aXR5KSB7CiAgICBzdGQ6OnZlY3Rvcjx1aW50OF90PiBvdXQ7CiAgICBvdXQuaW5zZXJ0KG91dC5lbmQoKSwgaWRlbnRpdHkucnVuX2lkLmJlZ2luKCksIGlkZW50aXR5LnJ1bl9pZC5lbmQoKSk7CiAgICBvdXQuaW5zZXJ0KG91dC5lbmQoKSwgaWRlbnRpdHkubW9kZWxfcmV2aXNpb24uYmVnaW4oKSwgaWRlbnRpdHkubW9kZWxfcmV2aXNpb24uZW5kKCkpOwogICAgb3V0Lmluc2VydChvdXQuZW5kKCksIGlkZW50aXR5LnBsYW5faWQuYmVnaW4oKSwgaWRlbnRpdHkucGxhbl9pZC5lbmQoKSk7CiAgICByZXR1cm4gb3V0Owp9CnN0ZDo6dmVjdG9yPHVpbnQ4X3Q+IHJlcGx5KGNvbnN0IFNlc3Npb25JZGVudGl0eSYgaWRlbnRpdHksIHVpbnQzMl90IGxheWVyLCB1aW50MzJfdCBzdGF0dXMsCiAgICAgICAgICAgICAgICAgICAgICAgICAgIHVpbnQ2NF90IGJhdGNoLCB1aW50NjRfdCBhdHRlbXB0LCBib29sIGluY2x1ZGVfcm93KSB7CiAgICBjb25zdCBhdXRvIGlkcyA9IGlkZW50aXR5X2J5dGVzKGlkZW50aXR5KTsKICAgIHN0ZDo6dmVjdG9yPHVpbnQ4X3Q+IG91dDsKICAgIG91dC5pbnNlcnQob3V0LmVuZCgpLCB7J1YnLCdGJywnUicsJzMnfSk7CiAgICBwdXQzMihvdXQsIHN0YXR1cyk7CiAgICBwdXQ2NChvdXQsIGJhdGNoKTsKICAgIHB1dDMyKG91dCwgaW5jbHVkZV9yb3cgPyAxdSA6IDB1KTsKICAgIHB1dDMyKG91dCwgMjU2MCk7CiAgICBwdXQzMihvdXQsIGxheWVyKTsKICAgIHB1dDY0KG91dCwgaWRlbnRpdHkuZXBvY2gpOwogICAgcHV0MTYob3V0LCB1aW50MTZfdChpZGVudGl0eS5ydW5faWQuc2l6ZSgpKSk7CiAgICBwdXQxNihvdXQsIHVpbnQxNl90KGlkZW50aXR5Lm1vZGVsX3JldmlzaW9uLnNpemUoKSkpOwogICAgcHV0MTYob3V0LCB1aW50MTZfdChpZGVudGl0eS5wbGFuX2lkLnNpemUoKSkpOwogICAgcHV0MTYob3V0LCAwKTsKICAgIHB1dDY0KG91dCwgYXR0ZW1wdCk7CiAgICBvdXQuaW5zZXJ0KG91dC5lbmQoKSwgaWRzLmJlZ2luKCksIGlkcy5lbmQoKSk7CiAgICBpZiAoaW5jbHVkZV9yb3cpIHsKICAgICAgICBwdXQzMihvdXQsIDApOwogICAgICAgIGZvciAoc2l6ZV90IGkgPSAwOyBpIDwgMjU2MDsgKytpKSBwdXQzMihvdXQsIDB4NDA2MDAwMDB1KTsgLy8gMy41ZgogICAgfQogICAgcmV0dXJuIG91dDsKfQpib29sIHJlcXVlc3RfaWRlbnRpdHlfbWF0Y2hlcyhjb25zdCB1aW50OF90KiBoZWFkZXIsIGNvbnN0IFNlc3Npb25JZGVudGl0eSYgaWRlbnRpdHksIHVpbnQzMl90IGxheWVyLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgIHVpbnQ2NF90IGF0dGVtcHQsIGNvbnN0IHVpbnQ4X3QqIGJ5dGVzKSB7CiAgICBpZiAoc3RkOjptZW1jbXAoaGVhZGVyLCAiVkZCMyIsIDQpICE9IDAgfHwgZ2V0MzIoaGVhZGVyICsgMjQpICE9IGxheWVyIHx8CiAgICAgICAgZ2V0NjQoaGVhZGVyICsgMjgpICE9IGlkZW50aXR5LmVwb2NoIHx8IGdldDE2KGhlYWRlciArIDM2KSAhPSBpZGVudGl0eS5ydW5faWQuc2l6ZSgpIHx8CiAgICAgICAgZ2V0MTYoaGVhZGVyICsgMzgpICE9IGlkZW50aXR5Lm1vZGVsX3JldmlzaW9uLnNpemUoKSB8fCBnZXQxNihoZWFkZXIgKyA0MCkgIT0gaWRlbnRpdHkucGxhbl9pZC5zaXplKCkgfHwKICAgICAgICBnZXQxNihoZWFkZXIgKyA0MikgIT0gMCB8fCBnZXQ2NChoZWFkZXIgKyA0NCkgIT0gYXR0ZW1wdCkgcmV0dXJuIGZhbHNlOwogICAgY29uc3QgYXV0byBleHBlY3RlZCA9IGlkZW50aXR5X2J5dGVzKGlkZW50aXR5KTsKICAgIHJldHVybiBleHBlY3RlZC5zaXplKCkgPT0gaWRlbnRpdHkucnVuX2lkLnNpemUoKSArIGlkZW50aXR5Lm1vZGVsX3JldmlzaW9uLnNpemUoKSArIGlkZW50aXR5LnBsYW5faWQuc2l6ZSgpICYmCiAgICAgICAgICAgc3RkOjplcXVhbChleHBlY3RlZC5iZWdpbigpLCBleHBlY3RlZC5lbmQoKSwgYnl0ZXMpOwp9Cn0KCmludCBtYWluKCkgewogICAgU2Vzc2lvbklkZW50aXR5IGlkZW50aXR5eyJydW4tcjYzOCIsICJtb2RlbC1yZXZpc2lvbi03IiwgInBsYW4tcjYzOC1hIiwgMTd9OwogICAgaW50IGZkWzJdID0gey0xLCAtMX07CiAgICBpZiAoc29ja2V0cGFpcihBRl9VTklYLCBTT0NLX1NUUkVBTSwgMCwgZmQpICE9IDApIHJldHVybiAxOwogICAgQ2xpZW50IGNsaWVudChmZFswXSwgZmRbMF0sIDEwMDAsIDQsIGlkZW50aXR5KTsKICAgIGlmICghY2xpZW50LnVzYWJsZSgpKSByZXR1cm4gMjsKCiAgICBib29sIHNlcnZlcl9vayA9IGZhbHNlOwogICAgc3RkOjp0aHJlYWQgcGVlcihbJl0gewogICAgICAgIHVpbnQ4X3QgaGVhZGVyWzUyXXt9OwogICAgICAgIGlmICghcmVhZF9leGFjdChmZFsxXSwgaGVhZGVyLCBzaXplb2YoaGVhZGVyKSkpIHJldHVybjsKICAgICAgICBjb25zdCBzaXplX3QgaWRzX3NpemUgPSBpZGVudGl0eS5ydW5faWQuc2l6ZSgpICsgaWRlbnRpdHkubW9kZWxfcmV2aXNpb24uc2l6ZSgpICsgaWRlbnRpdHkucGxhbl9pZC5zaXplKCk7CiAgICAgICAgc3RkOjp2ZWN0b3I8dWludDhfdD4gaWRzKGlkc19zaXplKTsKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIGlkcy5kYXRhKCksIGlkcy5zaXplKCkpIHx8CiAgICAgICAgICAgICFyZXF1ZXN0X2lkZW50aXR5X21hdGNoZXMoaGVhZGVyLCBpZGVudGl0eSwgNCwgMTksIGlkcy5kYXRhKCkpIHx8CiAgICAgICAgICAgIGdldDMyKGhlYWRlciArIDQpICE9IDEgfHwgZ2V0NjQoaGVhZGVyICsgOCkgIT0gNDIgfHwKICAgICAgICAgICAgZ2V0MzIoaGVhZGVyICsgMTYpICE9IDEgfHwgZ2V0MzIoaGVhZGVyICsgMjApICE9IDEpIHJldHVybjsKICAgICAgICBzdGQ6OmFycmF5PHVpbnQ4X3QsICgyNTYwICsgMikgKiA0PiBib2R5e307CiAgICAgICAgaWYgKCFyZWFkX2V4YWN0KGZkWzFdLCBib2R5LmRhdGEoKSwgYm9keS5zaXplKCkpKSByZXR1cm47CiAgICAgICAgaWYgKGdldDMyKGJvZHkuZGF0YSgpICsgMjU2MCAqIDQpICE9IDUgfHwgZ2V0MzIoYm9keS5kYXRhKCkgKyAyNTYxICogNCkgIT0gdWludDMyX3QoLTEpKSByZXR1cm47CiAgICAgICAgY29uc3QgYXV0byBjb21wbGV0ZWQgPSByZXBseShpZGVudGl0eSwgNCwgMCwgNDIsIDE5LCB0cnVlKTsKICAgICAgICBpZiAoIXdyaXRlX2V4YWN0KGZkWzFdLCBjb21wbGV0ZWQuZGF0YSgpLCBjb21wbGV0ZWQuc2l6ZSgpKSkgcmV0dXJuOwoKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIGhlYWRlciwgc2l6ZW9mKGhlYWRlcikpIHx8IGdldDMyKGhlYWRlciArIDQpICE9IDIgfHwKICAgICAgICAgICAgZ2V0NjQoaGVhZGVyICsgOCkgIT0gMCB8fCAhcmVhZF9leGFjdChmZFsxXSwgaWRzLmRhdGEoKSwgaWRzLnNpemUoKSkgfHwKICAgICAgICAgICAgIXJlcXVlc3RfaWRlbnRpdHlfbWF0Y2hlcyhoZWFkZXIsIGlkZW50aXR5LCA0LCAwLCBpZHMuZGF0YSgpKSkgcmV0dXJuOwogICAgICAgIGNvbnN0IGF1dG8gY2xvc2VkID0gcmVwbHkoaWRlbnRpdHksIDQsIDIsIDAsIDAsIGZhbHNlKTsKICAgICAgICBpZiAoIXdyaXRlX2V4YWN0KGZkWzFdLCBjbG9zZWQuZGF0YSgpLCBjbG9zZWQuc2l6ZSgpKSkgcmV0dXJuOwogICAgICAgIHNlcnZlcl9vayA9IHRydWU7CiAgICB9KTsKCiAgICBzdGQ6OnZlY3RvcjxmbG9hdD4geCgyNTYwLCAwLjI1ZiksIGRlc3RpbmF0aW9uKDI1NjAsIDkuMGYpOwogICAgY29uc3Qgc3RkOjp2ZWN0b3I8aW50MzJfdD4gZXhwZXJ0c3s1fSwga2luZHN7LTF9OwogICAgc3RkOjpzdHJpbmcgZXJyb3I7CiAgICBjb25zdCBib29sIHJ1bl9vayA9IGNsaWVudC5ydW4oNDIsIDE5LCAxLCAxLCB4LCBleHBlcnRzLCBraW5kcywgZGVzdGluYXRpb24sIGVycm9yKTsKICAgIGNvbnN0IGJvb2wgb3V0cHV0X29rID0gc3RkOjphbGxfb2YoZGVzdGluYXRpb24uYmVnaW4oKSwgZGVzdGluYXRpb24uZW5kKCksIFtdKGZsb2F0IHYpIHsgcmV0dXJuIHYgPT0gMy41ZjsgfSk7CiAgICBjb25zdCBib29sIHNodXRkb3duX29rID0gcnVuX29rICYmIGNsaWVudC5zaHV0ZG93bihlcnJvcik7CiAgICBpZiAoIXJ1bl9vaykgKHZvaWQpOjpzaHV0ZG93bihmZFswXSwgU0hVVF9SRFdSKTsKICAgIHBlZXIuam9pbigpOwogICAgY2xvc2UoZmRbMV0pOwogICAgY2xvc2UoZmRbMF0pOwogICAgaWYgKCFydW5fb2sgfHwgIW91dHB1dF9vayB8fCAhc2h1dGRvd25fb2sgfHwgIXNlcnZlcl9vaykgcmV0dXJuIDM7CgogICAgU2Vzc2lvbklkZW50aXR5IGV4cGVjdGVkeyJydW4tcjYzOCIsICJtb2RlbC1yZXZpc2lvbi03IiwgInBsYW4tcjYzOC1hIiwgMTd9OwogICAgU2Vzc2lvbklkZW50aXR5IHdyb25nX3JlcGx5ID0gZXhwZWN0ZWQ7CiAgICB3cm9uZ19yZXBseS5wbGFuX2lkID0gInBsYW4tcjYzOC1iIjsKICAgIGlmIChzb2NrZXRwYWlyKEFGX1VOSVgsIFNPQ0tfU1RSRUFNLCAwLCBmZCkgIT0gMCkgcmV0dXJuIDc7CiAgICBDbGllbnQgbWlzbWF0Y2hlZChmZFswXSwgZmRbMF0sIDEwMDAsIDIsIGV4cGVjdGVkKTsKICAgIHN0ZDo6dGhyZWFkIHdyb25nX3BlZXIoWyZdIHsKICAgICAgICB1aW50OF90IHJlcXVlc3RfaGVhZGVyWzUyXXt9OwogICAgICAgIGlmICghcmVhZF9leGFjdChmZFsxXSwgcmVxdWVzdF9oZWFkZXIsIHNpemVvZihyZXF1ZXN0X2hlYWRlcikpKSByZXR1cm47CiAgICAgICAgc3RkOjphcnJheTx1aW50OF90LCAoMjU2MCArIDIpICogND4gYm9keXt9OwogICAgICAgIGNvbnN0IHNpemVfdCBpZF9zaXplID0gZXhwZWN0ZWQucnVuX2lkLnNpemUoKSArIGV4cGVjdGVkLm1vZGVsX3JldmlzaW9uLnNpemUoKSArIGV4cGVjdGVkLnBsYW5faWQuc2l6ZSgpOwogICAgICAgIHN0ZDo6dmVjdG9yPHVpbnQ4X3Q+IGlkcyhpZF9zaXplKTsKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIGlkcy5kYXRhKCksIGlkcy5zaXplKCkpIHx8ICFyZWFkX2V4YWN0KGZkWzFdLCBib2R5LmRhdGEoKSwgYm9keS5zaXplKCkpKSByZXR1cm47CiAgICAgICAgY29uc3QgYXV0byByZXNwb25zZSA9IHJlcGx5KHdyb25nX3JlcGx5LCAyLCAwLCA3NywgMjksIHRydWUpOwogICAgICAgICh2b2lkKXdyaXRlX2V4YWN0KGZkWzFdLCByZXNwb25zZS5kYXRhKCksIHJlc3BvbnNlLnNpemUoKSk7CiAgICB9KTsKICAgIHN0ZDo6dmVjdG9yPGZsb2F0PiB1bmNoYW5nZWQoMjU2MCwgMTEuMGYpOwogICAgY29uc3QgYm9vbCByZWplY3RlZF9pZGVudGl0eSA9ICFtaXNtYXRjaGVkLnJ1big3NywgMjksIDEsIDEsIHgsIGV4cGVydHMsIGtpbmRzLCB1bmNoYW5nZWQsIGVycm9yKTsKICAgIGNvbnN0IGJvb2wgb3V0cHV0X3VuY2hhbmdlZCA9IHN0ZDo6YWxsX29mKHVuY2hhbmdlZC5iZWdpbigpLCB1bmNoYW5nZWQuZW5kKCksIFtdKGZsb2F0IHYpIHsgcmV0dXJuIHYgPT0gMTEuMGY7IH0pOwogICAgKHZvaWQpOjpzaHV0ZG93bihmZFswXSwgU0hVVF9SRFdSKTsKICAgIHdyb25nX3BlZXIuam9pbigpOwogICAgY2xvc2UoZmRbMV0pOwogICAgY2xvc2UoZmRbMF0pOwogICAgaWYgKCFyZWplY3RlZF9pZGVudGl0eSB8fCAhb3V0cHV0X3VuY2hhbmdlZCkgcmV0dXJuIDQ7CgogICAgaWYgKHNvY2tldHBhaXIoQUZfVU5JWCwgU09DS19TVFJFQU0sIDAsIGZkKSAhPSAwKSByZXR1cm4gODsKICAgIENsaWVudCB3cm9uZ19hdHRlbXB0KGZkWzBdLCBmZFswXSwgMTAwMCwgMiwgZXhwZWN0ZWQpOwogICAgc3RkOjp0aHJlYWQgYXR0ZW1wdF9wZWVyKFsmXSB7CiAgICAgICAgdWludDhfdCByZXF1ZXN0X2hlYWRlcls1Ml17fTsKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIHJlcXVlc3RfaGVhZGVyLCBzaXplb2YocmVxdWVzdF9oZWFkZXIpKSkgcmV0dXJuOwogICAgICAgIGNvbnN0IHNpemVfdCBpZF9zaXplID0gZXhwZWN0ZWQucnVuX2lkLnNpemUoKSArIGV4cGVjdGVkLm1vZGVsX3JldmlzaW9uLnNpemUoKSArIGV4cGVjdGVkLnBsYW5faWQuc2l6ZSgpOwogICAgICAgIHN0ZDo6dmVjdG9yPHVpbnQ4X3Q+IGlkcyhpZF9zaXplKTsKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIGlkcy5kYXRhKCksIGlkcy5zaXplKCkpKSByZXR1cm47CiAgICAgICAgc3RkOjphcnJheTx1aW50OF90LCAoMjU2MCArIDIpICogND4gYm9keXt9OwogICAgICAgIGlmICghcmVhZF9leGFjdChmZFsxXSwgYm9keS5kYXRhKCksIGJvZHkuc2l6ZSgpKSkgcmV0dXJuOwogICAgICAgIGNvbnN0IGF1dG8gcmVzcG9uc2UgPSByZXBseShleHBlY3RlZCwgMiwgMCwgNzgsIDMwLCB0cnVlKTsKICAgICAgICAodm9pZCl3cml0ZV9leGFjdChmZFsxXSwgcmVzcG9uc2UuZGF0YSgpLCByZXNwb25zZS5zaXplKCkpOwogICAgfSk7CiAgICBzdGQ6OnZlY3RvcjxmbG9hdD4gYXR0ZW1wdF91bmNoYW5nZWQoMjU2MCwgMTMuMGYpOwogICAgY29uc3QgYm9vbCByZWplY3RlZF9hdHRlbXB0ID0gIXdyb25nX2F0dGVtcHQucnVuKDc4LCAyOSwgMSwgMSwgeCwgZXhwZXJ0cywga2luZHMsIGF0dGVtcHRfdW5jaGFuZ2VkLCBlcnJvcik7CiAgICBjb25zdCBib29sIGF0dGVtcHRfb3V0cHV0X3VuY2hhbmdlZCA9IHN0ZDo6YWxsX29mKGF0dGVtcHRfdW5jaGFuZ2VkLmJlZ2luKCksIGF0dGVtcHRfdW5jaGFuZ2VkLmVuZCgpLCBbXShmbG9hdCB2KSB7IHJldHVybiB2ID09IDEzLjBmOyB9KTsKICAgICh2b2lkKTo6c2h1dGRvd24oZmRbMF0sIFNIVVRfUkRXUik7CiAgICBhdHRlbXB0X3BlZXIuam9pbigpOwogICAgY2xvc2UoZmRbMV0pOwogICAgY2xvc2UoZmRbMF0pOwogICAgaWYgKCFyZWplY3RlZF9hdHRlbXB0IHx8ICFhdHRlbXB0X291dHB1dF91bmNoYW5nZWQpIHJldHVybiA5OwoKICAgIFNlc3Npb25JZGVudGl0eSBmbGVldF9pZGVudGl0eXsicnVuLXI2MzgiLCAibW9kZWwtcmV2aXNpb24tNyIsICJwbGFuLXI2MzgtYSIsIDE3fTsKICAgIGlmIChzb2NrZXRwYWlyKEFGX1VOSVgsIFNPQ0tfU1RSRUFNLCAwLCBmZCkgIT0gMCkgcmV0dXJuIDEwOwogICAgQ2xpZW50IGZsZWV0X2NsaWVudChmZFswXSwgZmRbMF0sIDEwMDAsIDAsIGZsZWV0X2lkZW50aXR5KTsKICAgIFBvb2xDb250ZXh0IGNvbnRleHR7ZmxlZXRfY2xpZW50LCAwLCA1MDAsIGZhbHNlLCB7fSwge30sIDd9OwogICAgc3RkOjp0aHJlYWQgZmxlZXRfcGVlcihbJl0gewogICAgICAgIGZvciAoY29uc3QgYXV0byYgW2JhdGNoLCBhdHRlbXB0XSA6IHtzdGQ6OnBhaXI8dWludDY0X3QsIHVpbnQ2NF90Pns1MDAsIDd9LCB7NTAxLCA4fX0pIHsKICAgICAgICAgICAgdWludDhfdCByZXF1ZXN0X2hlYWRlcls1Ml17fTsKICAgICAgICAgICAgaWYgKCFyZWFkX2V4YWN0KGZkWzFdLCByZXF1ZXN0X2hlYWRlciwgc2l6ZW9mKHJlcXVlc3RfaGVhZGVyKSkpIHJldHVybjsKICAgICAgICAgICAgY29uc3Qgc2l6ZV90IGlkX3NpemUgPSBmbGVldF9pZGVudGl0eS5ydW5faWQuc2l6ZSgpICsgZmxlZXRfaWRlbnRpdHkubW9kZWxfcmV2aXNpb24uc2l6ZSgpICsgZmxlZXRfaWRlbnRpdHkucGxhbl9pZC5zaXplKCk7CiAgICAgICAgICAgIHN0ZDo6dmVjdG9yPHVpbnQ4X3Q+IGlkcyhpZF9zaXplKTsKICAgICAgICAgICAgc3RkOjphcnJheTx1aW50OF90LCAoMjU2MCArIDIpICogND4gYm9keXt9OwogICAgICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIGlkcy5kYXRhKCksIGlkcy5zaXplKCkpIHx8ICFyZWFkX2V4YWN0KGZkWzFdLCBib2R5LmRhdGEoKSwgYm9keS5zaXplKCkpIHx8CiAgICAgICAgICAgICAgICAhcmVxdWVzdF9pZGVudGl0eV9tYXRjaGVzKHJlcXVlc3RfaGVhZGVyLCBmbGVldF9pZGVudGl0eSwgMCwgYXR0ZW1wdCwgaWRzLmRhdGEoKSkgfHwKICAgICAgICAgICAgICAgIGdldDY0KHJlcXVlc3RfaGVhZGVyICsgOCkgIT0gYmF0Y2gpIHJldHVybjsKICAgICAgICAgICAgY29uc3QgYXV0byByZXNwb25zZSA9IHJlcGx5KGZsZWV0X2lkZW50aXR5LCAwLCAwLCBiYXRjaCwgYXR0ZW1wdCwgdHJ1ZSk7CiAgICAgICAgICAgIGlmICghd3JpdGVfZXhhY3QoZmRbMV0sIHJlc3BvbnNlLmRhdGEoKSwgcmVzcG9uc2Uuc2l6ZSgpKSkgcmV0dXJuOwogICAgICAgIH0KICAgICAgICB1aW50OF90IHNodXRkb3duX2hlYWRlcls1Ml17fTsKICAgICAgICBpZiAoIXJlYWRfZXhhY3QoZmRbMV0sIHNodXRkb3duX2hlYWRlciwgc2l6ZW9mKHNodXRkb3duX2hlYWRlcikpKSByZXR1cm47CiAgICAgICAgY29uc3Qgc2l6ZV90IGlkX3NpemUgPSBmbGVldF9pZGVudGl0eS5ydW5faWQuc2l6ZSgpICsgZmxlZXRfaWRlbnRpdHkubW9kZWxfcmV2aXNpb24uc2l6ZSgpICsgZmxlZXRfaWRlbnRpdHkucGxhbl9pZC5zaXplKCk7CiAgICAgICAgc3RkOjp2ZWN0b3I8dWludDhfdD4gaWRzKGlkX3NpemUpOwogICAgICAgIGlmICghcmVhZF9leGFjdChmZFsxXSwgaWRzLmRhdGEoKSwgaWRzLnNpemUoKSkgfHwKICAgICAgICAgICAgIXJlcXVlc3RfaWRlbnRpdHlfbWF0Y2hlcyhzaHV0ZG93bl9oZWFkZXIsIGZsZWV0X2lkZW50aXR5LCAwLCAwLCBpZHMuZGF0YSgpKSkgcmV0dXJuOwogICAgICAgIGNvbnN0IGF1dG8gY2xvc2VkID0gcmVwbHkoZmxlZXRfaWRlbnRpdHksIDAsIDIsIDAsIDAsIGZhbHNlKTsKICAgICAgICAodm9pZCl3cml0ZV9leGFjdChmZFsxXSwgY2xvc2VkLmRhdGEoKSwgY2xvc2VkLnNpemUoKSk7CiAgICB9KTsKICAgIHN0ZDo6dmVjdG9yPGZsb2F0PiBmbGVldF9pbnB1dCgyNTYwLCAwLjI1ZiksIGZsZWV0X291dHB1dCgyNTYwLCAxMS4wZik7CiAgICBjb25zdCBzdGQ6OnZlY3RvcjxpbnQzMl90PiBmbGVldF9pZHN7NX07CiAgICBjb25zdCBib29sIGZpcnN0X2ZsZWV0X29rID0gcG9vbF9jcHVfb25seSgmY29udGV4dCwgZmxlZXRfaW5wdXQuZGF0YSgpLCBmbGVldF9pZHMuZGF0YSgpLCAxLCAxLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZmxlZXRfb3V0cHV0LmRhdGEoKSwgMCk7CiAgICBjb25zdCBib29sIGZpcnN0X2ZsZWV0X291dHB1dCA9IHN0ZDo6YWxsX29mKGZsZWV0X291dHB1dC5iZWdpbigpLCBmbGVldF9vdXRwdXQuZW5kKCksIFtdKGZsb2F0IHYpIHsgcmV0dXJuIHYgPT0gMy41ZjsgfSk7CiAgICBjb25zdCBib29sIHNlY29uZF9mbGVldF9vayA9IHBvb2xfY3B1X29ubHkoJmNvbnRleHQsIGZsZWV0X2lucHV0LmRhdGEoKSwgZmxlZXRfaWRzLmRhdGEoKSwgMSwgMSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmbGVldF9vdXRwdXQuZGF0YSgpLCAwKTsKICAgIGNvbnN0IGJvb2wgc2Vjb25kX2ZsZWV0X291dHB1dCA9IHN0ZDo6YWxsX29mKGZsZWV0X291dHB1dC5iZWdpbigpLCBmbGVldF9vdXRwdXQuZW5kKCksIFtdKGZsb2F0IHYpIHsgcmV0dXJuIHYgPT0gMy41ZjsgfSk7CiAgICBjb25zdCBib29sIGNvdW50ZXJzX2FkdmFuY2VkID0gY29udGV4dC5uZXh0X2JhdGNoID09IDUwMiAmJiBjb250ZXh0Lm5leHRfYXR0ZW1wdCA9PSA5OwogICAgY29uc3QgYm9vbCBmbGVldF9zaHV0ZG93biA9IGZsZWV0X2NsaWVudC5zaHV0ZG93bihlcnJvcik7CiAgICBpZiAoIWZpcnN0X2ZsZWV0X29rIHx8ICFzZWNvbmRfZmxlZXRfb2sgfHwgIWZpcnN0X2ZsZWV0X291dHB1dCB8fCAhc2Vjb25kX2ZsZWV0X291dHB1dCB8fCAhY291bnRlcnNfYWR2YW5jZWQgfHwgIWZsZWV0X3NodXRkb3duKQogICAgICAgICh2b2lkKTo6c2h1dGRvd24oZmRbMF0sIFNIVVRfUkRXUik7CiAgICBmbGVldF9wZWVyLmpvaW4oKTsKICAgIGNsb3NlKGZkWzFdKTsKICAgIGNsb3NlKGZkWzBdKTsKICAgIHJldHVybiBmaXJzdF9mbGVldF9vayAmJiBzZWNvbmRfZmxlZXRfb2sgJiYgZmlyc3RfZmxlZXRfb3V0cHV0ICYmIHNlY29uZF9mbGVldF9vdXRwdXQgJiYKICAgICAgICAgICAgICAgICAgIGNvdW50ZXJzX2FkdmFuY2VkICYmIGZsZWV0X3NodXRkb3duCiAgICAgICAgICAgICAgID8gMAogICAgICAgICAgICAgICA6IDExOwp9Cg==
+#include "pipe_client.hpp"
+#include "pool_hook.hpp"
+
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstring>
+#include <string>
+#include <thread>
+#include <utility>
+#include <vector>
+#include <sys/socket.h>
+#include <unistd.h>
+
+namespace {
+using namespace vf::strata_bridge;
+
+uint16_t get16(const uint8_t* p) {
+    return uint16_t(p[0]) | uint16_t(p[1]) << 8;
+}
+uint32_t get32(const uint8_t* p) {
+    uint32_t value = 0;
+    for (int i = 0; i < 4; ++i) value |= uint32_t(p[i]) << (8 * i);
+    return value;
+}
+uint64_t get64(const uint8_t* p) {
+    uint64_t value = 0;
+    for (int i = 0; i < 8; ++i) value |= uint64_t(p[i]) << (8 * i);
+    return value;
+}
+void put16(std::vector<uint8_t>& out, uint16_t value) {
+    for (int i = 0; i < 2; ++i) out.push_back(uint8_t(value >> (8 * i)));
+}
+void put32(std::vector<uint8_t>& out, uint32_t value) {
+    for (int i = 0; i < 4; ++i) out.push_back(uint8_t(value >> (8 * i)));
+}
+void put64(std::vector<uint8_t>& out, uint64_t value) {
+    for (int i = 0; i < 8; ++i) out.push_back(uint8_t(value >> (8 * i)));
+}
+bool read_exact(int fd, uint8_t* data, size_t size) {
+    while (size) {
+        const ssize_t n = recv(fd, data, size, 0);
+        if (n <= 0) return false;
+        data += n;
+        size -= size_t(n);
+    }
+    return true;
+}
+bool write_exact(int fd, const uint8_t* data, size_t size) {
+    while (size) {
+        const ssize_t n = send(fd, data, size, MSG_NOSIGNAL);
+        if (n <= 0) return false;
+        data += n;
+        size -= size_t(n);
+    }
+    return true;
+}
+std::vector<uint8_t> identity_bytes(const SessionIdentity& identity) {
+    std::vector<uint8_t> out;
+    out.insert(out.end(), identity.run_id.begin(), identity.run_id.end());
+    out.insert(out.end(), identity.model_revision.begin(), identity.model_revision.end());
+    out.insert(out.end(), identity.plan_id.begin(), identity.plan_id.end());
+    return out;
+}
+std::vector<uint8_t> reply(const SessionIdentity& identity, uint32_t layer, uint32_t status,
+                           uint64_t batch, uint64_t attempt, bool include_row) {
+    const auto ids = identity_bytes(identity);
+    std::vector<uint8_t> out;
+    out.insert(out.end(), {'V','F','R','3'});
+    put32(out, status);
+    put64(out, batch);
+    put32(out, include_row ? 1u : 0u);
+    put32(out, 2560);
+    put32(out, layer);
+    put64(out, identity.epoch);
+    put16(out, uint16_t(identity.run_id.size()));
+    put16(out, uint16_t(identity.model_revision.size()));
+    put16(out, uint16_t(identity.plan_id.size()));
+    put16(out, 0);
+    put64(out, attempt);
+    out.insert(out.end(), ids.begin(), ids.end());
+    if (include_row) {
+        put32(out, 0);
+        for (size_t i = 0; i < 2560; ++i) put32(out, 0x40600000u); // 3.5f
+    }
+    return out;
+}
+bool request_identity_matches(const uint8_t* header, const SessionIdentity& identity, uint32_t layer,
+                             uint64_t attempt, const uint8_t* bytes) {
+    if (std::memcmp(header, "VFB3", 4) != 0 || get32(header + 24) != layer ||
+        get64(header + 28) != identity.epoch || get16(header + 36) != identity.run_id.size() ||
+        get16(header + 38) != identity.model_revision.size() || get16(header + 40) != identity.plan_id.size() ||
+        get16(header + 42) != 0 || get64(header + 44) != attempt) return false;
+    const auto expected = identity_bytes(identity);
+    return expected.size() == identity.run_id.size() + identity.model_revision.size() + identity.plan_id.size() &&
+           std::equal(expected.begin(), expected.end(), bytes);
+}
+}
+
+int main() {
+    SessionIdentity identity{"run-r638", "model-revision-7", "plan-r638-a", 17};
+    int fd[2] = {-1, -1};
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd) != 0) return 1;
+    Client client(fd[0], fd[0], 1000, 4, identity);
+    if (!client.usable()) return 2;
+
+    bool server_ok = false;
+    std::thread peer([&] {
+        uint8_t header[52]{};
+        if (!read_exact(fd[1], header, sizeof(header))) return;
+        const size_t ids_size = identity.run_id.size() + identity.model_revision.size() + identity.plan_id.size();
+        std::vector<uint8_t> ids(ids_size);
+        if (!read_exact(fd[1], ids.data(), ids.size()) ||
+            !request_identity_matches(header, identity, 4, 19, ids.data()) ||
+            get32(header + 4) != 1 || get64(header + 8) != 42 ||
+            get32(header + 16) != 1 || get32(header + 20) != 1) return;
+        std::array<uint8_t, (2560 + 2) * 4> body{};
+        if (!read_exact(fd[1], body.data(), body.size())) return;
+        if (get32(body.data() + 2560 * 4) != 5 || get32(body.data() + 2561 * 4) != uint32_t(-1)) return;
+        const auto completed = reply(identity, 4, 0, 42, 19, true);
+        if (!write_exact(fd[1], completed.data(), completed.size())) return;
+
+        if (!read_exact(fd[1], header, sizeof(header)) || get32(header + 4) != 2 ||
+            get64(header + 8) != 0 || !read_exact(fd[1], ids.data(), ids.size()) ||
+            !request_identity_matches(header, identity, 4, 0, ids.data())) return;
+        const auto closed = reply(identity, 4, 2, 0, 0, false);
+        if (!write_exact(fd[1], closed.data(), closed.size())) return;
+        server_ok = true;
+    });
+
+    std::vector<float> x(2560, 0.25f), destination(2560, 9.0f);
+    const std::vector<int32_t> experts{5}, kinds{-1};
+    std::string error;
+    const bool run_ok = client.run(42, 19, 1, 1, x, experts, kinds, destination, error);
+    const bool output_ok = std::all_of(destination.begin(), destination.end(), [](float v) { return v == 3.5f; });
+    const bool shutdown_ok = run_ok && client.shutdown(error);
+    if (!run_ok) (void)::shutdown(fd[0], SHUT_RDWR);
+    peer.join();
+    close(fd[1]);
+    close(fd[0]);
+    if (!run_ok || !output_ok || !shutdown_ok || !server_ok) return 3;
+
+    SessionIdentity expected{"run-r638", "model-revision-7", "plan-r638-a", 17};
+    SessionIdentity wrong_reply = expected;
+    wrong_reply.plan_id = "plan-r638-b";
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd) != 0) return 7;
+    Client mismatched(fd[0], fd[0], 1000, 2, expected);
+    std::thread wrong_peer([&] {
+        uint8_t request_header[52]{};
+        if (!read_exact(fd[1], request_header, sizeof(request_header))) return;
+        std::array<uint8_t, (2560 + 2) * 4> body{};
+        const size_t id_size = expected.run_id.size() + expected.model_revision.size() + expected.plan_id.size();
+        std::vector<uint8_t> ids(id_size);
+        if (!read_exact(fd[1], ids.data(), ids.size()) || !read_exact(fd[1], body.data(), body.size())) return;
+        const auto response = reply(wrong_reply, 2, 0, 77, 29, true);
+        (void)write_exact(fd[1], response.data(), response.size());
+    });
+    std::vector<float> unchanged(2560, 11.0f);
+    const bool rejected_identity = !mismatched.run(77, 29, 1, 1, x, experts, kinds, unchanged, error);
+    const bool output_unchanged = std::all_of(unchanged.begin(), unchanged.end(), [](float v) { return v == 11.0f; });
+    (void)::shutdown(fd[0], SHUT_RDWR);
+    wrong_peer.join();
+    close(fd[1]);
+    close(fd[0]);
+    if (!rejected_identity || !output_unchanged) return 4;
+
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd) != 0) return 8;
+    Client wrong_attempt(fd[0], fd[0], 1000, 2, expected);
+    std::thread attempt_peer([&] {
+        uint8_t request_header[52]{};
+        if (!read_exact(fd[1], request_header, sizeof(request_header))) return;
+        const size_t id_size = expected.run_id.size() + expected.model_revision.size() + expected.plan_id.size();
+        std::vector<uint8_t> ids(id_size);
+        if (!read_exact(fd[1], ids.data(), ids.size())) return;
+        std::array<uint8_t, (2560 + 2) * 4> body{};
+        if (!read_exact(fd[1], body.data(), body.size())) return;
+        const auto response = reply(expected, 2, 0, 78, 30, true);
+        (void)write_exact(fd[1], response.data(), response.size());
+    });
+    std::vector<float> attempt_unchanged(2560, 13.0f);
+    const bool rejected_attempt = !wrong_attempt.run(78, 29, 1, 1, x, experts, kinds, attempt_unchanged, error);
+    const bool attempt_output_unchanged = std::all_of(attempt_unchanged.begin(), attempt_unchanged.end(), [](float v) { return v == 13.0f; });
+    (void)::shutdown(fd[0], SHUT_RDWR);
+    attempt_peer.join();
+    close(fd[1]);
+    close(fd[0]);
+    if (!rejected_attempt || !attempt_output_unchanged) return 9;
+
+    SessionIdentity fleet_identity{"run-r638", "model-revision-7", "plan-r638-a", 17};
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, fd) != 0) return 10;
+    Client fleet_client(fd[0], fd[0], 1000, 0, fleet_identity);
+    PoolContext context{fleet_client, 0, 500, false, {}, {}, 7};
+    std::thread fleet_peer([&] {
+        for (const auto& [batch, attempt] : {std::pair<uint64_t, uint64_t>{500, 7}, {501, 8}}) {
+            uint8_t request_header[52]{};
+            if (!read_exact(fd[1], request_header, sizeof(request_header))) return;
+            const size_t id_size = fleet_identity.run_id.size() + fleet_identity.model_revision.size() + fleet_identity.plan_id.size();
+            std::vector<uint8_t> ids(id_size);
+            std::array<uint8_t, (2560 + 2) * 4> body{};
+            if (!read_exact(fd[1], ids.data(), ids.size()) || !read_exact(fd[1], body.data(), body.size()) ||
+                !request_identity_matches(request_header, fleet_identity, 0, attempt, ids.data()) ||
+                get64(request_header + 8) != batch) return;
+            const auto response = reply(fleet_identity, 0, 0, batch, attempt, true);
+            if (!write_exact(fd[1], response.data(), response.size())) return;
+        }
+        uint8_t shutdown_header[52]{};
+        if (!read_exact(fd[1], shutdown_header, sizeof(shutdown_header))) return;
+        const size_t id_size = fleet_identity.run_id.size() + fleet_identity.model_revision.size() + fleet_identity.plan_id.size();
+        std::vector<uint8_t> ids(id_size);
+        if (!read_exact(fd[1], ids.data(), ids.size()) ||
+            !request_identity_matches(shutdown_header, fleet_identity, 0, 0, ids.data())) return;
+        const auto closed = reply(fleet_identity, 0, 2, 0, 0, false);
+        (void)write_exact(fd[1], closed.data(), closed.size());
+    });
+    std::vector<float> fleet_input(2560, 0.25f), fleet_output(2560, 11.0f);
+    const std::vector<int32_t> fleet_ids{5};
+    const bool first_fleet_ok = pool_cpu_only(&context, fleet_input.data(), fleet_ids.data(), 1, 1,
+                                              fleet_output.data(), 0);
+    const bool first_fleet_output = std::all_of(fleet_output.begin(), fleet_output.end(), [](float v) { return v == 3.5f; });
+    const bool second_fleet_ok = pool_cpu_only(&context, fleet_input.data(), fleet_ids.data(), 1, 1,
+                                               fleet_output.data(), 0);
+    const bool second_fleet_output = std::all_of(fleet_output.begin(), fleet_output.end(), [](float v) { return v == 3.5f; });
+    const bool counters_advanced = context.next_batch == 502 && context.next_attempt == 9;
+    const bool fleet_shutdown = fleet_client.shutdown(error);
+    if (!first_fleet_ok || !second_fleet_ok || !first_fleet_output || !second_fleet_output || !counters_advanced || !fleet_shutdown)
+        (void)::shutdown(fd[0], SHUT_RDWR);
+    fleet_peer.join();
+    close(fd[1]);
+    close(fd[0]);
+    return first_fleet_ok && second_fleet_ok && first_fleet_output && second_fleet_output &&
+                   counters_advanced && fleet_shutdown
+               ? 0
+               : 11;
+}

@@ -1,1 +1,168 @@
-I2luY2x1ZGUgInBvb2xfaG9vay5ocHAiCiNpbmNsdWRlIDxhbGdvcml0aG0+CiNpbmNsdWRlIDxsaW1pdHM+CiNpbmNsdWRlIDxuZXc+CiNpbmNsdWRlIDxzZXQ+CiNpbmNsdWRlIDx1dGlsaXR5PgojaW5jbHVkZSA8dmVjdG9yPgpuYW1lc3BhY2UgdmY6OnN0cmF0YV9icmlkZ2Ugewpib29sIHBvb2xfY3B1X29ubHkodm9pZCogdXNlcixjb25zdCBmbG9hdCogeCxjb25zdCBpbnQzMl90KiBpZHMsaW50NjRfdCB0b2tlbnMsaW50NjRfdCBrLGZsb2F0KiBvdXQsaW50NjRfdCBsYXllcikgbm9leGNlcHQgewogICAgaWYgKCF1c2VyKSByZXR1cm4gZmFsc2U7CiAgICBhdXRvJiBjdHg9KnN0YXRpY19jYXN0PFBvb2xDb250ZXh0Kj4odXNlcik7CiAgICB0cnkgewogICAgICAgIHN0ZDo6bG9ja19ndWFyZDxzdGQ6Om11dGV4PiBsb2NrKGN0eC5tdXRleCk7CiAgICAgICAgaWYoY3R4LnRlcm1pbmFsKSByZXR1cm4gZmFsc2U7CiAgICAgICAgY3R4LnRlcm1pbmFsPXRydWU7CiAgICAgICAgaWYoIXggfHwgIWlkcyB8fCAhb3V0IHx8IGxheWVyIT1jdHgubGF5ZXIgfHwgbGF5ZXIhPWludDY0X3QoY3R4LmNsaWVudC5sYXllcigpKSB8fCB0b2tlbnM8MSB8fCB0b2tlbnM+OCB8fCBrPDEgfHwgaz42NCB8fCB0b2tlbnMqaz4xMjggfHwgY3R4Lm5leHRfYmF0Y2g9PXN0ZDo6bnVtZXJpY19saW1pdHM8dWludDY0X3Q+OjptYXgoKSB8fCBjdHgubmV4dF9hdHRlbXB0PT0wIHx8IGN0eC5uZXh0X2F0dGVtcHQ9PXN0ZDo6bnVtZXJpY19saW1pdHM8dWludDY0X3Q+OjptYXgoKSkgewogICAgICAgICAgICBjdHgudGVybWluYWw9dHJ1ZTsgY3R4LmVycm9yPSJpbnZhbGlkIG5hdGl2ZSBwb29sIGlucHV0IjsgcmV0dXJuIGZhbHNlOwogICAgICAgIH0KICAgICAgICBjb25zdCBzaXplX3Qgbj1zaXplX3QodG9rZW5zKmspLCB3aWR0aD0yNTYwOwogICAgICAgIHN0ZDo6dmVjdG9yPGZsb2F0PiBpbnB1dCh4LHgrc2l6ZV90KHRva2Vucykqd2lkdGgpLCBzdGFnZWQobip3aWR0aCk7CiAgICAgICAgc3RkOjp2ZWN0b3I8aW50MzJfdD4gZXhwZXJ0KGlkcyxpZHMrbiksIGtpbmRzKG4sLTEpOwogICAgICAgIGlmKCFjdHguY2xpZW50LnJ1bihjdHgubmV4dF9iYXRjaCxjdHgubmV4dF9hdHRlbXB0LGludCh0b2tlbnMpLGludChrKSxpbnB1dCxleHBlcnQsa2luZHMsc3RhZ2VkLGN0eC5lcnJvcikpIHsgY3R4LnRlcm1pbmFsPXRydWU7IHJldHVybiBmYWxzZTsgfQogICAgICAgIHN0ZDo6Y29weShzdGFnZWQuYmVnaW4oKSxzdGFnZWQuZW5kKCksb3V0KTsKICAgICAgICArK2N0eC5uZXh0X2JhdGNoOwogICAgICAgICsrY3R4Lm5leHRfYXR0ZW1wdDsKICAgICAgICBjdHgudGVybWluYWw9ZmFsc2U7CiAgICAgICAgcmV0dXJuIHRydWU7CiAgICB9IGNhdGNoICguLi4pIHsgcmV0dXJuIGZhbHNlOyB9Cn0KYm9vbCBwb29sX2NwdV9ieV9sYXllcih2b2lkKiB1c2VyLGNvbnN0IGZsb2F0KiB4LGNvbnN0IGludDMyX3QqIGlkcyxpbnQ2NF90IHRva2VucyxpbnQ2NF90IGssZmxvYXQqIG91dCxpbnQ2NF90IGxheWVyKSBub2V4Y2VwdCB7CiAgICBpZiAoIXVzZXIpIHJldHVybiBmYWxzZTsKICAgIGF1dG8mIGZsZWV0PSpzdGF0aWNfY2FzdDxQb29sRmxlZXQqPih1c2VyKTsKICAgIHRyeSB7CiAgICAgICAgc3RkOjpsb2NrX2d1YXJkPHN0ZDo6bXV0ZXg+IGxvY2soZmxlZXQubXV0ZXhfKTsKICAgICAgICBpZihmbGVldC50ZXJtaW5hbF8pIHJldHVybiBmYWxzZTsKICAgICAgICBmbGVldC50ZXJtaW5hbF89dHJ1ZTsKICAgICAgICBpZihsYXllcjwwIHx8IGxheWVyPj1pbnQ2NF90KGZsZWV0LmNvbnRleHRzXy5zaXplKCkpKSByZXR1cm4gZmFsc2U7CiAgICAgICAgYXV0byogY3R4PWZsZWV0LmNvbnRleHRzX1tzaXplX3QobGF5ZXIpXTsKICAgICAgICBpZighY3R4IHx8IGN0eC0+bGF5ZXIhPWxheWVyIHx8IGN0eC0+Y2xpZW50LmxheWVyKCkhPXVpbnQzMl90KGxheWVyKSkgcmV0dXJuIGZhbHNlOwogICAgICAgIGlmKCFwb29sX2NwdV9vbmx5KGN0eCx4LGlkcyx0b2tlbnMsayxvdXQsbGF5ZXIpKSByZXR1cm4gZmFsc2U7CiAgICAgICAgZmxlZXQudGVybWluYWxfPWZhbHNlOwogICAgICAgIHJldHVybiB0cnVlOwogICAgfSBjYXRjaCAoLi4uKSB7IHJldHVybiBmYWxzZTsgfQp9CgpQb29sRmxlZXRPd25lcjo6Q29udGV4dHMgUG9vbEZsZWV0T3duZXI6Om1ha2VfY29udGV4dHMoY29uc3QgQ2xpZW50cyYgY2xpZW50cywgdWludDY0X3QgZmlyc3RfYmF0Y2gsIHVpbnQ2NF90IGZpcnN0X2F0dGVtcHQpIHsKICAgIENvbnRleHRzIGNvbnRleHRze307CiAgICBmb3IgKHNpemVfdCBsYXllciA9IDA7IGxheWVyIDwgY2xpZW50cy5zaXplKCk7ICsrbGF5ZXIpIHsKICAgICAgICBjb250ZXh0c1tsYXllcl0ucmVzZXQobmV3IFBvb2xDb250ZXh0eypjbGllbnRzW2xheWVyXSwgc3RhdGljX2Nhc3Q8aW50NjRfdD4obGF5ZXIpLCBmaXJzdF9iYXRjaCwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmYWxzZSwge30sIHt9LCBmaXJzdF9hdHRlbXB0fSk7CiAgICB9CiAgICByZXR1cm4gY29udGV4dHM7Cn0KCnN0ZDo6YXJyYXk8UG9vbENvbnRleHQqLCA0OD4gUG9vbEZsZWV0T3duZXI6OmNvbnRleHRfbWFwKGNvbnN0IENvbnRleHRzJiBjb250ZXh0cykgbm9leGNlcHQgewogICAgc3RkOjphcnJheTxQb29sQ29udGV4dCosIDQ4PiBtYXB7fTsKICAgIGZvciAoc2l6ZV90IGxheWVyID0gMDsgbGF5ZXIgPCBjb250ZXh0cy5zaXplKCk7ICsrbGF5ZXIpIG1hcFtsYXllcl0gPSBjb250ZXh0c1tsYXllcl0uZ2V0KCk7CiAgICByZXR1cm4gbWFwOwp9CgpQb29sRmxlZXRPd25lcjo6UG9vbEZsZWV0T3duZXIoQ2xpZW50cyBjbGllbnRzLCB1aW50NjRfdCBmaXJzdF9iYXRjaCwgdWludDY0X3QgZmlyc3RfYXR0ZW1wdCkKICAgIDogY2xpZW50c18oc3RkOjptb3ZlKGNsaWVudHMpKSwgY29udGV4dHNfKG1ha2VfY29udGV4dHMoY2xpZW50c18sIGZpcnN0X2JhdGNoLCBmaXJzdF9hdHRlbXB0KSksIGZsZWV0Xyhjb250ZXh0X21hcChjb250ZXh0c18pKSB7fQoKc3RkOjp1bmlxdWVfcHRyPFBvb2xGbGVldE93bmVyPiBQb29sRmxlZXRPd25lcjo6Y3JlYXRlKENsaWVudHMgY2xpZW50cywgdWludDY0X3QgZmlyc3RfYmF0Y2gsIHN0ZDo6c3RyaW5nJiBlcnJvciwgdWludDY0X3QgZmlyc3RfYXR0ZW1wdCkgewogICAgZXJyb3IuY2xlYXIoKTsKICAgIGlmIChmaXJzdF9iYXRjaCA9PSBzdGQ6Om51bWVyaWNfbGltaXRzPHVpbnQ2NF90Pjo6bWF4KCkpIHsKICAgICAgICBlcnJvciA9ICJpbml0aWFsIGJhdGNoIGlkIGNhbm5vdCBiZSBhZHZhbmNlZCI7CiAgICAgICAgcmV0dXJuIG51bGxwdHI7CiAgICB9CiAgICBpZiAoZmlyc3RfYXR0ZW1wdCA9PSAwIHx8IGZpcnN0X2F0dGVtcHQgPT0gc3RkOjpudW1lcmljX2xpbWl0czx1aW50NjRfdD46Om1heCgpKSB7CiAgICAgICAgZXJyb3IgPSAiaW5pdGlhbCBhdHRlbXB0IGlkIGNhbm5vdCBiZSB6ZXJvIG9yIGV4aGF1c3RlZCI7CiAgICAgICAgcmV0dXJuIG51bGxwdHI7CiAgICB9CiAgICBjb25zdCBTZXNzaW9uSWRlbnRpdHkqIGV4cGVjdGVkX2lkZW50aXR5ID0gbnVsbHB0cjsKICAgIGZvciAoc2l6ZV90IGxheWVyID0gMDsgbGF5ZXIgPCBjbGllbnRzLnNpemUoKTsgKytsYXllcikgewogICAgICAgIGlmICghY2xpZW50c1tsYXllcl0pIHsKICAgICAgICAgICAgZXJyb3IgPSAibWlzc2luZyBDUFUgc2Vzc2lvbiBmb3IgbGF5ZXIgIiArIHN0ZDo6dG9fc3RyaW5nKGxheWVyKTsKICAgICAgICAgICAgcmV0dXJuIG51bGxwdHI7CiAgICAgICAgfQogICAgICAgIGlmICghY2xpZW50c1tsYXllcl0tPnVzYWJsZSgpIHx8IGNsaWVudHNbbGF5ZXJdLT5sYXllcigpICE9IGxheWVyKSB7CiAgICAgICAgICAgIGVycm9yID0gIkNQVSBzZXNzaW9uIGlzIGludmFsaWQgb3IgbWFwcGVkIHRvIHRoZSB3cm9uZyBsYXllciAiICsgc3RkOjp0b19zdHJpbmcobGF5ZXIpOwogICAgICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgICAgICB9CiAgICAgICAgY29uc3QgYXV0byogaWRlbnRpdHkgPSBjbGllbnRzW2xheWVyXS0+c2Vzc2lvbl9pZGVudGl0eSgpOwogICAgICAgIGlmICghaWRlbnRpdHkpIHsKICAgICAgICAgICAgZXJyb3IgPSAiQ1BVIHNlc3Npb24gbGFja3MgYSBydW4vbW9kZWwvcGxhbi9lcG9jaCBiaW5kaW5nIGF0IGxheWVyICIgKyBzdGQ6OnRvX3N0cmluZyhsYXllcik7CiAgICAgICAgICAgIHJldHVybiBudWxscHRyOwogICAgICAgIH0KICAgICAgICBpZiAoIWV4cGVjdGVkX2lkZW50aXR5KSBleHBlY3RlZF9pZGVudGl0eSA9IGlkZW50aXR5OwogICAgICAgIGVsc2UgaWYgKGlkZW50aXR5LT5ydW5faWQgIT0gZXhwZWN0ZWRfaWRlbnRpdHktPnJ1bl9pZCB8fAogICAgICAgICAgICAgICAgIGlkZW50aXR5LT5tb2RlbF9yZXZpc2lvbiAhPSBleHBlY3RlZF9pZGVudGl0eS0+bW9kZWxfcmV2aXNpb24gfHwKICAgICAgICAgICAgICAgICBpZGVudGl0eS0+cGxhbl9pZCAhPSBleHBlY3RlZF9pZGVudGl0eS0+cGxhbl9pZCB8fCBpZGVudGl0eS0+ZXBvY2ggIT0gZXhwZWN0ZWRfaWRlbnRpdHktPmVwb2NoKSB7CiAgICAgICAgICAgIGVycm9yID0gIkNQVSBzZXNzaW9uIGlkZW50aXR5IG1pc21hdGNoIGF0IGxheWVyICIgKyBzdGQ6OnRvX3N0cmluZyhsYXllcik7CiAgICAgICAgICAgIHJldHVybiBudWxscHRyOwogICAgICAgIH0KICAgIH0KICAgIHRyeSB7CiAgICAgICAgcmV0dXJuIHN0ZDo6dW5pcXVlX3B0cjxQb29sRmxlZXRPd25lcj4obmV3IFBvb2xGbGVldE93bmVyKHN0ZDo6bW92ZShjbGllbnRzKSwgZmlyc3RfYmF0Y2gsIGZpcnN0X2F0dGVtcHQpKTsKICAgIH0gY2F0Y2ggKGNvbnN0IHN0ZDo6YmFkX2FsbG9jJikgewogICAgICAgIGVycm9yID0gImNhbm5vdCBhbGxvY2F0ZSBDUFUgc2Vzc2lvbiBjb250ZXh0cyI7CiAgICAgICAgcmV0dXJuIG51bGxwdHI7CiAgICB9Cn0KCnN0ZDo6dW5pcXVlX3B0cjxQb29sRmxlZXRPd25lcj4gUG9vbEZsZWV0T3duZXI6OmNyZWF0ZV9mcm9tX2Zkcyhjb25zdCBzdGQ6OmFycmF5PGludCwgNDg+JiBmZHMsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGludCB0aW1lb3V0X21zLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTZXNzaW9uSWRlbnRpdHkgaWRlbnRpdHksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHVpbnQ2NF90IGZpcnN0X2JhdGNoLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdGQ6OnN0cmluZyYgZXJyb3IsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHVpbnQ2NF90IGZpcnN0X2F0dGVtcHQpIHsKICAgIGVycm9yLmNsZWFyKCk7CiAgICBpZiAodGltZW91dF9tcyA8IDEgfHwgdGltZW91dF9tcyA+IDYwMDAwIHx8IGlkZW50aXR5LnJ1bl9pZC5lbXB0eSgpIHx8IGlkZW50aXR5LnJ1bl9pZC5zaXplKCkgPiAyNTYgfHwKICAgICAgICBpZGVudGl0eS5tb2RlbF9yZXZpc2lvbi5lbXB0eSgpIHx8IGlkZW50aXR5Lm1vZGVsX3JldmlzaW9uLnNpemUoKSA+IDI1NiB8fAogICAgICAgIGlkZW50aXR5LnBsYW5faWQuZW1wdHkoKSB8fCBpZGVudGl0eS5wbGFuX2lkLnNpemUoKSA+IDI1NiB8fAogICAgICAgIGlkZW50aXR5LnJ1bl9pZC5maW5kKCdcMCcpICE9IHN0ZDo6c3RyaW5nOjpucG9zIHx8IGlkZW50aXR5Lm1vZGVsX3JldmlzaW9uLmZpbmQoJ1wwJykgIT0gc3RkOjpzdHJpbmc6Om5wb3MgfHwKICAgICAgICBpZGVudGl0eS5wbGFuX2lkLmZpbmQoJ1wwJykgIT0gc3RkOjpzdHJpbmc6Om5wb3MpIHsKICAgICAgICBlcnJvciA9ICJpbnZhbGlkIGluaGVyaXRlZCBDUFUgc2Vzc2lvbiBpZGVudGl0eSBvciB0aW1lb3V0IjsKICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgIH0KICAgIGlmIChmaXJzdF9hdHRlbXB0ID09IDAgfHwgZmlyc3RfYXR0ZW1wdCA9PSBzdGQ6Om51bWVyaWNfbGltaXRzPHVpbnQ2NF90Pjo6bWF4KCkpIHsKICAgICAgICBlcnJvciA9ICJpbml0aWFsIGF0dGVtcHQgaWQgY2Fubm90IGJlIHplcm8gb3IgZXhoYXVzdGVkIjsKICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgIH0KICAgIHRyeSB7CiAgICAgICAgc3RkOjpzZXQ8aW50PiB1bmlxdWVfZmRzOwogICAgICAgIGZvciAoaW50IGZkIDogZmRzKSB7CiAgICAgICAgICAgIGlmIChmZCA8IDAgfHwgIXVuaXF1ZV9mZHMuaW5zZXJ0KGZkKS5zZWNvbmQpIHsKICAgICAgICAgICAgICAgIGVycm9yID0gImluaGVyaXRlZCBDUFUgc2Vzc2lvbiBkZXNjcmlwdG9ycyBtdXN0IGJlIHZhbGlkIGFuZCB1bmlxdWUiOwogICAgICAgICAgICAgICAgcmV0dXJuIG51bGxwdHI7CiAgICAgICAgICAgIH0KICAgICAgICB9CiAgICAgICAgQ2xpZW50cyBjbGllbnRze307CiAgICAgICAgZm9yIChzaXplX3QgbGF5ZXIgPSAwOyBsYXllciA8IGZkcy5zaXplKCk7ICsrbGF5ZXIpCiAgICAgICAgICAgIGNsaWVudHNbbGF5ZXJdID0gc3RkOjptYWtlX3VuaXF1ZTxDbGllbnQ+KGZkc1tsYXllcl0sIGZkc1tsYXllcl0sIHRpbWVvdXRfbXMsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RhdGljX2Nhc3Q8dWludDMyX3Q+KGxheWVyKSwgaWRlbnRpdHkpOwogICAgICAgIHJldHVybiBjcmVhdGUoc3RkOjptb3ZlKGNsaWVudHMpLCBmaXJzdF9iYXRjaCwgZXJyb3IsIGZpcnN0X2F0dGVtcHQpOwogICAgfSBjYXRjaCAoY29uc3Qgc3RkOjpiYWRfYWxsb2MmKSB7CiAgICAgICAgZXJyb3IgPSAiY2Fubm90IGFsbG9jYXRlIGluaGVyaXRlZCBDUFUgc2Vzc2lvbiBjbGllbnRzIjsKICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgIH0KfQoKYm9vbCBQb29sRmxlZXRPd25lcjo6c2h1dGRvd25fYWxsKHN0ZDo6c3RyaW5nJiBlcnJvcikgewogICAgZXJyb3IuY2xlYXIoKTsKICAgIHsKICAgICAgICAvLyBEcmFpbiBhIGNhbGxiYWNrIGFscmVhZHkgaW4gZmxpZ2h0LCB0aGVuIHJlamVjdCBmdXR1cmUgY2FsbGJhY2tzIGJlZm9yZQogICAgICAgIC8vIGlzc3Vpbmcgb25lIHRlcm1pbmFsIHJlcXVlc3QgdG8gZWFjaCBpbmRlcGVuZGVudCBsYXllciBzZXNzaW9uLgogICAgICAgIHN0ZDo6bG9ja19ndWFyZDxzdGQ6Om11dGV4PiBsb2NrKGZsZWV0Xy5tdXRleF8pOwogICAgICAgIGlmIChzaHV0ZG93bl9hdHRlbXB0ZWRfKSB7CiAgICAgICAgICAgIGVycm9yID0gInNlc3Npb24gc2h1dGRvd24gYWxyZWFkeSBhdHRlbXB0ZWQiOwogICAgICAgICAgICByZXR1cm4gZmFsc2U7CiAgICAgICAgfQogICAgICAgIHNodXRkb3duX2F0dGVtcHRlZF8gPSB0cnVlOwogICAgICAgIGZsZWV0Xy50ZXJtaW5hbF8gPSB0cnVlOwogICAgfQoKICAgIGJvb2wgYWxsX2Nsb3NlZCA9IHRydWU7CiAgICBmb3IgKHNpemVfdCBsYXllciA9IDA7IGxheWVyIDwgY2xpZW50c18uc2l6ZSgpOyArK2xheWVyKSB7CiAgICAgICAgc3RkOjpzdHJpbmcgbGF5ZXJfZXJyb3I7CiAgICAgICAgaWYgKCFjbGllbnRzX1tsYXllcl0tPnNodXRkb3duKGxheWVyX2Vycm9yKSkgewogICAgICAgICAgICBhbGxfY2xvc2VkID0gZmFsc2U7CiAgICAgICAgICAgIGlmIChlcnJvci5lbXB0eSgpKSBlcnJvciA9ICJsYXllciAiICsgc3RkOjp0b19zdHJpbmcobGF5ZXIpICsgIjogIiArIGxheWVyX2Vycm9yOwogICAgICAgIH0KICAgIH0KICAgIHJldHVybiBhbGxfY2xvc2VkOwp9Cgp9Cg==
+#include "pool_hook.hpp"
+#include <algorithm>
+#include <limits>
+#include <new>
+#include <set>
+#include <utility>
+#include <vector>
+namespace vf::strata_bridge {
+bool pool_cpu_only(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
+    if (!user) return false;
+    auto& ctx=*static_cast<PoolContext*>(user);
+    try {
+        std::lock_guard<std::mutex> lock(ctx.mutex);
+        if(ctx.terminal) return false;
+        ctx.terminal=true;
+        if(!x || !ids || !out || layer!=ctx.layer || layer!=int64_t(ctx.client.layer()) || tokens<1 || tokens>8 || k<1 || k>64 || tokens*k>128 || ctx.next_batch==std::numeric_limits<uint64_t>::max() || ctx.next_attempt==0 || ctx.next_attempt==std::numeric_limits<uint64_t>::max()) {
+            ctx.terminal=true; ctx.error="invalid native pool input"; return false;
+        }
+        const size_t n=size_t(tokens*k), width=2560;
+        std::vector<float> input(x,x+size_t(tokens)*width), staged(n*width);
+        std::vector<int32_t> expert(ids,ids+n), kinds(n,-1);
+        if(!ctx.client.run(ctx.next_batch,ctx.next_attempt,int(tokens),int(k),input,expert,kinds,staged,ctx.error)) { ctx.terminal=true; return false; }
+        std::copy(staged.begin(),staged.end(),out);
+        ++ctx.next_batch;
+        ++ctx.next_attempt;
+        ctx.terminal=false;
+        return true;
+    } catch (...) { return false; }
+}
+bool pool_cpu_by_layer(void* user,const float* x,const int32_t* ids,int64_t tokens,int64_t k,float* out,int64_t layer) noexcept {
+    if (!user) return false;
+    auto& fleet=*static_cast<PoolFleet*>(user);
+    try {
+        std::lock_guard<std::mutex> lock(fleet.mutex_);
+        if(fleet.terminal_) return false;
+        fleet.terminal_=true;
+        if(layer<0 || layer>=int64_t(fleet.contexts_.size())) return false;
+        auto* ctx=fleet.contexts_[size_t(layer)];
+        if(!ctx || ctx->layer!=layer || ctx->client.layer()!=uint32_t(layer)) return false;
+        if(!pool_cpu_only(ctx,x,ids,tokens,k,out,layer)) return false;
+        fleet.terminal_=false;
+        return true;
+    } catch (...) { return false; }
+}
+
+PoolFleetOwner::Contexts PoolFleetOwner::make_contexts(const Clients& clients, uint64_t first_batch, uint64_t first_attempt) {
+    Contexts contexts{};
+    for (size_t layer = 0; layer < clients.size(); ++layer) {
+        contexts[layer].reset(new PoolContext{*clients[layer], static_cast<int64_t>(layer), first_batch,
+                                               false, {}, {}, first_attempt});
+    }
+    return contexts;
+}
+
+std::array<PoolContext*, 48> PoolFleetOwner::context_map(const Contexts& contexts) noexcept {
+    std::array<PoolContext*, 48> map{};
+    for (size_t layer = 0; layer < contexts.size(); ++layer) map[layer] = contexts[layer].get();
+    return map;
+}
+
+PoolFleetOwner::PoolFleetOwner(Clients clients, uint64_t first_batch, uint64_t first_attempt)
+    : clients_(std::move(clients)), contexts_(make_contexts(clients_, first_batch, first_attempt)), fleet_(context_map(contexts_)) {}
+
+std::unique_ptr<PoolFleetOwner> PoolFleetOwner::create(Clients clients, uint64_t first_batch, std::string& error, uint64_t first_attempt) {
+    error.clear();
+    if (first_batch == std::numeric_limits<uint64_t>::max()) {
+        error = "initial batch id cannot be advanced";
+        return nullptr;
+    }
+    if (first_attempt == 0 || first_attempt == std::numeric_limits<uint64_t>::max()) {
+        error = "initial attempt id cannot be zero or exhausted";
+        return nullptr;
+    }
+    const SessionIdentity* expected_identity = nullptr;
+    for (size_t layer = 0; layer < clients.size(); ++layer) {
+        if (!clients[layer]) {
+            error = "missing CPU session for layer " + std::to_string(layer);
+            return nullptr;
+        }
+        if (!clients[layer]->usable() || clients[layer]->layer() != layer) {
+            error = "CPU session is invalid or mapped to the wrong layer " + std::to_string(layer);
+            return nullptr;
+        }
+        const auto* identity = clients[layer]->session_identity();
+        if (!identity) {
+            error = "CPU session lacks a run/model/plan/epoch binding at layer " + std::to_string(layer);
+            return nullptr;
+        }
+        if (!expected_identity) expected_identity = identity;
+        else if (identity->run_id != expected_identity->run_id ||
+                 identity->model_revision != expected_identity->model_revision ||
+                 identity->plan_id != expected_identity->plan_id || identity->epoch != expected_identity->epoch) {
+            error = "CPU session identity mismatch at layer " + std::to_string(layer);
+            return nullptr;
+        }
+    }
+    try {
+        return std::unique_ptr<PoolFleetOwner>(new PoolFleetOwner(std::move(clients), first_batch, first_attempt));
+    } catch (const std::bad_alloc&) {
+        error = "cannot allocate CPU session contexts";
+        return nullptr;
+    }
+}
+
+std::unique_ptr<PoolFleetOwner> PoolFleetOwner::create_from_fds(const std::array<int, 48>& fds,
+                                                               int timeout_ms,
+                                                               SessionIdentity identity,
+                                                               uint64_t first_batch,
+                                                               std::string& error,
+                                                               uint64_t first_attempt) {
+    error.clear();
+    if (timeout_ms < 1 || timeout_ms > 60000 || identity.run_id.empty() || identity.run_id.size() > 256 ||
+        identity.model_revision.empty() || identity.model_revision.size() > 256 ||
+        identity.plan_id.empty() || identity.plan_id.size() > 256 ||
+        identity.run_id.find('\0') != std::string::npos || identity.model_revision.find('\0') != std::string::npos ||
+        identity.plan_id.find('\0') != std::string::npos) {
+        error = "invalid inherited CPU session identity or timeout";
+        return nullptr;
+    }
+    if (first_attempt == 0 || first_attempt == std::numeric_limits<uint64_t>::max()) {
+        error = "initial attempt id cannot be zero or exhausted";
+        return nullptr;
+    }
+    try {
+        std::set<int> unique_fds;
+        for (int fd : fds) {
+            if (fd < 0 || !unique_fds.insert(fd).second) {
+                error = "inherited CPU session descriptors must be valid and unique";
+                return nullptr;
+            }
+        }
+        Clients clients{};
+        for (size_t layer = 0; layer < fds.size(); ++layer)
+            clients[layer] = std::make_unique<Client>(fds[layer], fds[layer], timeout_ms,
+                                                     static_cast<uint32_t>(layer), identity);
+        return create(std::move(clients), first_batch, error, first_attempt);
+    } catch (const std::bad_alloc&) {
+        error = "cannot allocate inherited CPU session clients";
+        return nullptr;
+    }
+}
+
+bool PoolFleetOwner::shutdown_all(std::string& error) {
+    error.clear();
+    {
+        // Drain a callback already in flight, then reject future callbacks before
+        // issuing one terminal request to each independent layer session.
+        std::lock_guard<std::mutex> lock(fleet_.mutex_);
+        if (shutdown_attempted_) {
+            error = "session shutdown already attempted";
+            return false;
+        }
+        shutdown_attempted_ = true;
+        fleet_.terminal_ = true;
+    }
+
+    bool all_closed = true;
+    for (size_t layer = 0; layer < clients_.size(); ++layer) {
+        std::string layer_error;
+        if (!clients_[layer]->shutdown(layer_error)) {
+            all_closed = false;
+            if (error.empty()) error = "layer " + std::to_string(layer) + ": " + layer_error;
+        }
+    }
+    return all_closed;
+}
+
+}

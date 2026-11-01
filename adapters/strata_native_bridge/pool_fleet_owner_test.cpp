@@ -1,1 +1,84 @@
-I2luY2x1ZGUgInBvb2xfaG9vay5ocHAiCgojaW5jbHVkZSA8YXJyYXk+CiNpbmNsdWRlIDxtZW1vcnk+CiNpbmNsdWRlIDxzdHJpbmc+CiNpbmNsdWRlIDxzeXMvc29ja2V0Lmg+CiNpbmNsdWRlIDx1bmlzdGQuaD4KCm5hbWVzcGFjZSB7CnVzaW5nIG5hbWVzcGFjZSB2Zjo6c3RyYXRhX2JyaWRnZTsKc3RydWN0IFNvY2tldFBhaXJzIHsKICAgIHN0ZDo6YXJyYXk8aW50LCA0OD4gY2xpZW50e307CiAgICBzdGQ6OmFycmF5PGludCwgNDg+IHBlZXJ7fTsKICAgIFNvY2tldFBhaXJzKCkgeyBjbGllbnQuZmlsbCgtMSk7IHBlZXIuZmlsbCgtMSk7IH0KICAgIH5Tb2NrZXRQYWlycygpIHsKICAgICAgICBmb3IgKGludCBmZCA6IHBlZXIpIGlmIChmZCA+PSAwKSBjbG9zZShmZCk7CiAgICAgICAgZm9yIChpbnQgZmQgOiBjbGllbnQpIGlmIChmZCA+PSAwKSBjbG9zZShmZCk7CiAgICB9CiAgICBib29sIG1ha2VfcGFpcnMoKSB7CiAgICAgICAgZm9yIChzaXplX3QgbGF5ZXIgPSAwOyBsYXllciA8IGNsaWVudC5zaXplKCk7ICsrbGF5ZXIpIHsKICAgICAgICAgICAgaW50IHBhaXJbMl0gPSB7LTEsIC0xfTsKICAgICAgICAgICAgaWYgKHNvY2tldHBhaXIoQUZfVU5JWCwgU09DS19TVFJFQU0sIDAsIHBhaXIpICE9IDApIHJldHVybiBmYWxzZTsKICAgICAgICAgICAgY2xpZW50W2xheWVyXSA9IHBhaXJbMF07CiAgICAgICAgICAgIHBlZXJbbGF5ZXJdID0gcGFpclsxXTsKICAgICAgICB9CiAgICAgICAgcmV0dXJuIHRydWU7CiAgICB9CiAgICBib29sIG1ha2VfY2xpZW50cyhQb29sRmxlZXRPd25lcjo6Q2xpZW50cyYgY2xpZW50cywgYm9vbCBtaXNtYXRjaF9pZGVudGl0eSA9IGZhbHNlKSB7CiAgICAgICAgaWYgKCFtYWtlX3BhaXJzKCkpIHJldHVybiBmYWxzZTsKICAgICAgICBmb3IgKHNpemVfdCBsYXllciA9IDA7IGxheWVyIDwgY2xpZW50LnNpemUoKTsgKytsYXllcikgewogICAgICAgICAgICBTZXNzaW9uSWRlbnRpdHkgaWRlbnRpdHl7InJ1bi1yNjM4IiwgIm1vZGVsLXI2MzgiLCAicGxhbi1yNjM4IiwgOTF9OwogICAgICAgICAgICBpZiAobWlzbWF0Y2hfaWRlbnRpdHkgJiYgbGF5ZXIgPT0gNykgaWRlbnRpdHkucGxhbl9pZCA9ICJkaWZmZXJlbnQtcGxhbiI7CiAgICAgICAgICAgIGNsaWVudHNbbGF5ZXJdID0gc3RkOjptYWtlX3VuaXF1ZTxDbGllbnQ+KGNsaWVudFtsYXllcl0sIGNsaWVudFtsYXllcl0sIDUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdGF0aWNfY2FzdDx1aW50MzJfdD4obGF5ZXIpLCBpZGVudGl0eSk7CiAgICAgICAgfQogICAgICAgIHJldHVybiB0cnVlOwogICAgfQogICAgdm9pZCBjbG9zZV9wZWVycygpIHsKICAgICAgICBmb3IgKGludCYgZmQgOiBwZWVyKSB7IGlmIChmZCA+PSAwKSBjbG9zZShmZCk7IGZkID0gLTE7IH0KICAgIH0KfTsKfQoKaW50IG1haW4oKSB7CiAgICB1c2luZyBuYW1lc3BhY2UgdmY6OnN0cmF0YV9icmlkZ2U7CiAgICBzdGQ6OnN0cmluZyBlcnJvcjsKCiAgICBTb2NrZXRQYWlycyBiYWRfc29ja2V0czsKICAgIFBvb2xGbGVldE93bmVyOjpDbGllbnRzIGJhZF9jbGllbnRze307CiAgICBpZiAoIWJhZF9zb2NrZXRzLm1ha2VfY2xpZW50cyhiYWRfY2xpZW50cykpIHJldHVybiAxOwogICAgc3RkOjpzd2FwKGJhZF9jbGllbnRzWzBdLCBiYWRfY2xpZW50c1sxXSk7CiAgICBhdXRvIHJlamVjdGVkID0gUG9vbEZsZWV0T3duZXI6OmNyZWF0ZShzdGQ6Om1vdmUoYmFkX2NsaWVudHMpLCA3MCwgZXJyb3IpOwogICAgaWYgKHJlamVjdGVkIHx8IGVycm9yLmZpbmQoIndyb25nIGxheWVyIDAiKSA9PSBzdGQ6OnN0cmluZzo6bnBvcykgcmV0dXJuIDI7CgogICAgU29ja2V0UGFpcnMgbWlzbWF0Y2hfc29ja2V0czsKICAgIFBvb2xGbGVldE93bmVyOjpDbGllbnRzIG1pc21hdGNoX2NsaWVudHN7fTsKICAgIGlmICghbWlzbWF0Y2hfc29ja2V0cy5tYWtlX2NsaWVudHMobWlzbWF0Y2hfY2xpZW50cywgdHJ1ZSkpIHJldHVybiAzOwogICAgYXV0byBtaXNtYXRjaCA9IFBvb2xGbGVldE93bmVyOjpjcmVhdGUoc3RkOjptb3ZlKG1pc21hdGNoX2NsaWVudHMpLCA3MCwgZXJyb3IpOwogICAgaWYgKG1pc21hdGNoIHx8IGVycm9yLmZpbmQoImlkZW50aXR5IG1pc21hdGNoIGF0IGxheWVyIDciKSA9PSBzdGQ6OnN0cmluZzo6bnBvcykgcmV0dXJuIDQ7CgogICAgU29ja2V0UGFpcnMgc29ja2V0czsKICAgIGlmICghc29ja2V0cy5tYWtlX3BhaXJzKCkpIHJldHVybiA1OwogICAgU2Vzc2lvbklkZW50aXR5IGlkZW50aXR5eyJydW4tcjYzOCIsICJtb2RlbC1yNjM4IiwgInBsYW4tcjYzOCIsIDkxfTsKICAgIGF1dG8gb3duZXIgPSBQb29sRmxlZXRPd25lcjo6Y3JlYXRlX2Zyb21fZmRzKHNvY2tldHMuY2xpZW50LCA1LCBpZGVudGl0eSwgNzAsIGVycm9yKTsKICAgIGlmICghb3duZXIgfHwgIWVycm9yLmVtcHR5KCkpIHJldHVybiA2OwogICAgaWYgKG93bmVyLT5jYWxsYmFja191c2VyKCkgIT0gc3RhdGljX2Nhc3Q8dm9pZCo+KCZvd25lci0+ZmxlZXQoKSkpIHJldHVybiA3OwoKICAgIGF1dG8gemVyb19hdHRlbXB0ID0gUG9vbEZsZWV0T3duZXI6OmNyZWF0ZV9mcm9tX2Zkcyhzb2NrZXRzLmNsaWVudCwgNSwgaWRlbnRpdHksIDcwLCBlcnJvciwgMCk7CiAgICBpZiAoemVyb19hdHRlbXB0IHx8IGVycm9yLmZpbmQoImF0dGVtcHQgaWQiKSA9PSBzdGQ6OnN0cmluZzo6bnBvcykgcmV0dXJuIDEzOwoKICAgIGF1dG8gZHVwbGljYXRlX2ZkcyA9IHNvY2tldHMuY2xpZW50OwogICAgZHVwbGljYXRlX2Zkc1sxXSA9IGR1cGxpY2F0ZV9mZHNbMF07CiAgICBhdXRvIGR1cGxpY2F0ZSA9IFBvb2xGbGVldE93bmVyOjpjcmVhdGVfZnJvbV9mZHMoZHVwbGljYXRlX2ZkcywgNSwgaWRlbnRpdHksIDcwLCBlcnJvcik7CiAgICBpZiAoZHVwbGljYXRlIHx8IGVycm9yLmZpbmQoImRlc2NyaXB0b3JzIG11c3QgYmUgdmFsaWQgYW5kIHVuaXF1ZSIpID09IHN0ZDo6c3RyaW5nOjpucG9zKSByZXR1cm4gODsKCiAgICBmbG9hdCBkZXN0aW5hdGlvbiA9IDE3LjBmOwogICAgaWYgKHBvb2xfY3B1X2J5X2xheWVyKG93bmVyLT5jYWxsYmFja191c2VyKCksIG51bGxwdHIsIG51bGxwdHIsIDEsIDEsICZkZXN0aW5hdGlvbiwgNDgpKSByZXR1cm4gOTsKICAgIGlmIChkZXN0aW5hdGlvbiAhPSAxNy4wZikgcmV0dXJuIDEwOwoKICAgIHNvY2tldHMuY2xvc2VfcGVlcnMoKTsKICAgIGlmIChvd25lci0+c2h1dGRvd25fYWxsKGVycm9yKSkgcmV0dXJuIDExOwogICAgaWYgKG93bmVyLT5zaHV0ZG93bl9hbGwoZXJyb3IpIHx8IGVycm9yICE9ICJzZXNzaW9uIHNodXRkb3duIGFscmVhZHkgYXR0ZW1wdGVkIikgcmV0dXJuIDEyOwogICAgcmV0dXJuIDA7Cn0K
+#include "pool_hook.hpp"
+
+#include <array>
+#include <memory>
+#include <string>
+#include <sys/socket.h>
+#include <unistd.h>
+
+namespace {
+using namespace vf::strata_bridge;
+struct SocketPairs {
+    std::array<int, 48> client{};
+    std::array<int, 48> peer{};
+    SocketPairs() { client.fill(-1); peer.fill(-1); }
+    ~SocketPairs() {
+        for (int fd : peer) if (fd >= 0) close(fd);
+        for (int fd : client) if (fd >= 0) close(fd);
+    }
+    bool make_pairs() {
+        for (size_t layer = 0; layer < client.size(); ++layer) {
+            int pair[2] = {-1, -1};
+            if (socketpair(AF_UNIX, SOCK_STREAM, 0, pair) != 0) return false;
+            client[layer] = pair[0];
+            peer[layer] = pair[1];
+        }
+        return true;
+    }
+    bool make_clients(PoolFleetOwner::Clients& clients, bool mismatch_identity = false) {
+        if (!make_pairs()) return false;
+        for (size_t layer = 0; layer < client.size(); ++layer) {
+            SessionIdentity identity{"run-r638", "model-r638", "plan-r638", 91};
+            if (mismatch_identity && layer == 7) identity.plan_id = "different-plan";
+            clients[layer] = std::make_unique<Client>(client[layer], client[layer], 5,
+                                                       static_cast<uint32_t>(layer), identity);
+        }
+        return true;
+    }
+    void close_peers() {
+        for (int& fd : peer) { if (fd >= 0) close(fd); fd = -1; }
+    }
+};
+}
+
+int main() {
+    using namespace vf::strata_bridge;
+    std::string error;
+
+    SocketPairs bad_sockets;
+    PoolFleetOwner::Clients bad_clients{};
+    if (!bad_sockets.make_clients(bad_clients)) return 1;
+    std::swap(bad_clients[0], bad_clients[1]);
+    auto rejected = PoolFleetOwner::create(std::move(bad_clients), 70, error);
+    if (rejected || error.find("wrong layer 0") == std::string::npos) return 2;
+
+    SocketPairs mismatch_sockets;
+    PoolFleetOwner::Clients mismatch_clients{};
+    if (!mismatch_sockets.make_clients(mismatch_clients, true)) return 3;
+    auto mismatch = PoolFleetOwner::create(std::move(mismatch_clients), 70, error);
+    if (mismatch || error.find("identity mismatch at layer 7") == std::string::npos) return 4;
+
+    SocketPairs sockets;
+    if (!sockets.make_pairs()) return 5;
+    SessionIdentity identity{"run-r638", "model-r638", "plan-r638", 91};
+    auto owner = PoolFleetOwner::create_from_fds(sockets.client, 5, identity, 70, error);
+    if (!owner || !error.empty()) return 6;
+    if (owner->callback_user() != static_cast<void*>(&owner->fleet())) return 7;
+
+    auto zero_attempt = PoolFleetOwner::create_from_fds(sockets.client, 5, identity, 70, error, 0);
+    if (zero_attempt || error.find("attempt id") == std::string::npos) return 13;
+
+    auto duplicate_fds = sockets.client;
+    duplicate_fds[1] = duplicate_fds[0];
+    auto duplicate = PoolFleetOwner::create_from_fds(duplicate_fds, 5, identity, 70, error);
+    if (duplicate || error.find("descriptors must be valid and unique") == std::string::npos) return 8;
+
+    float destination = 17.0f;
+    if (pool_cpu_by_layer(owner->callback_user(), nullptr, nullptr, 1, 1, &destination, 48)) return 9;
+    if (destination != 17.0f) return 10;
+
+    sockets.close_peers();
+    if (owner->shutdown_all(error)) return 11;
+    if (owner->shutdown_all(error) || error != "session shutdown already attempted") return 12;
+    return 0;
+}

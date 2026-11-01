@@ -1,1 +1,643 @@
-Ly8hIENQVSBhZG1pc3Npb24gb2YgYSBjb21wbGV0ZSBTdHJhdGEtc3R5bGUgcG9vbCBiYXRjaCBpbnRvIFZvbHRhRmFicmljIHJvdXRpbmcuCi8vIQovLyEgVGhlIG11bHRpLXRva2VuIFN0cmF0YSBjYWxsYmFjayBkb2VzIG5vdCBleHBvc2UgY29lZmZpY2llbnRzLiBXZWlnaHRlZAovLyEgYWRtaXNzaW9uIHJlcXVpcmVzIGFjdHVhbCBnYXRlIHdlaWdodHM7IHRoZSBleHBsaWNpdCB1bndlaWdodGVkIHBhdGggZG9lcyBub3QuCi8vISBUaGlzIG1vZHVsZQovLyEgbmVpdGhlciBob29rcyBTdHJhdGEgbm9yIHJlc2VydmVzIGEgc2Vzc2lvbiwgc3RhcnRzIGEgd29ya2VyLCBvciBhc3NpZ25zIGFuCi8vISBhdHRlbXB0LiBJdCByZWZ1c2VzIG5lZ2F0aXZlIGV4cGVydCBJRHMuIFRoZSBGUDE2IHBhdGggcmVmdXNlcyBpbmV4YWN0Ci8vISBjb252ZXJzaW9uOyB0aGUgc2VwYXJhdGUgRlA2NCBwYXRoIHByZXNlcnZlcyBmaW5pdGUgRlAzMiBhY3RpdmF0aW9ucy4KdXNlIGNyYXRlOjp7Y29tcGxldGlvbiwgaW52YWxpZCwgbW9lLCBwcm9jZXNzLCByb3V0aW5nLCBzZXNzaW9uLCBFcnJvciwgUmVzdWx0fTsKdXNlIHN0ZDo6ewogICAgY29sbGVjdGlvbnM6OntCVHJlZU1hcCwgQlRyZWVTZXR9LAogICAgdGltZTo6RHVyYXRpb24sCn07CgojW2Rlcml2ZShEZWJ1ZywgQ2xvbmUpXQpwdWIgc3RydWN0IEFkbWl0dGVkUG9vbEJhdGNoIHsKICAgIHB1YiByb3V0aW5nOiByb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIHB1YiBpbnB1dHNfZnAxNl9iaXRzOiBWZWM8VmVjPHUxNj4+LAp9CgojW2Rlcml2ZShEZWJ1ZywgQ2xvbmUpXQpwdWIgc3RydWN0IEFkbWl0dGVkRjY0UG9vbEJhdGNoIHsKICAgIHB1YiByb3V0aW5nOiByb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIHB1YiBpbnB1dHM6IFZlYzxWZWM8ZjY0Pj4sCn0KCi8vLyBBIGNhbGxlci1zdXBwbGllZCBvd25lcnNoaXAgZGVjaXNpb247IHRoZSBjYWxsZXIgbXVzdCBiaW5kIGl0IHRvIHRoZSBhY3R1YWwKLy8vIGRvbm9yIHBsYW4gYW5kIG11c3Qgbm90IGNvbmN1cnJlbnRseSB3cml0ZSB0aGUgc2FtZSBkZXN0aW5hdGlvbiByb3dzLgpwdWIgc3RydWN0IE1peGVkUG9vbEJhdGNoIHsKICAgIG1pc3NlczogT3B0aW9uPEFkbWl0dGVkRjY0UG9vbEJhdGNoPiwKICAgIHBvc2l0aW9uczogVmVjPHVzaXplPiwKICAgIG91dHB1dF92YWx1ZXM6IHVzaXplLAogICAgaGlkZGVuOiB1c2l6ZSwKfQoKLy8vIEEgY29tcGxldGVkIGF0dGVtcHQgb3IgYSBuby13b3JrIHJlc3VsdDsgZXJyb3JzIGFmdGVyIGRpc3BhdGNoIHJldGFpbiByZWNlaXB0cy4KI1tkZXJpdmUoRGVidWcpXQpwdWIgc3RydWN0IE1peGVkRXhlY3V0aW9uUmVwb3J0IHsKICAgIHB1YiBhdHRlbXB0OiBPcHRpb248dTY0PiwKICAgIHB1YiByZWNlaXB0czogVmVjPHNlc3Npb246OkV4ZWNSZWNlaXB0PiwKICAgIHB1YiBlcnJvcjogT3B0aW9uPEVycm9yPiwKfQoKaW1wbCBNaXhlZFBvb2xCYXRjaCB7CiAgICAvLy8gQ29uc3VtZSB0aGlzIHBsYW4sIHZhbGlkYXRlIHRoZSBkZXN0aW5hdGlvbiBiZWZvcmUgZGlzcGF0Y2gsIGFuZCB3cml0ZQogICAgLy8vIG9ubHkgYWZ0ZXIgZXZlcnkgd29ya2VyIGFuZCBldmVyeSBjb252ZXJzaW9uIGhhcyBzdWNjZWVkZWQuIEFuIGVycm9yIGFmdGVyCiAgICAvLy8gZGlzcGF0Y2ggcmV0YWlucyB0aGUgYXR0ZW1wdCBhbmQgcmVjZWlwdHMsIGFuZCBpcyBuZXZlciByZXRyaWVkIGhlcmUuCiAgICBwdWIgZm4gZXhlY3V0ZSgKICAgICAgICBzZWxmLAogICAgICAgIHNlc3Npb25zOiAmbXV0IFtzZXNzaW9uOjpTZXNzaW9uXSwKICAgICAgICBhcnRpZmFjdHM6ICZbc2Vzc2lvbjo6Q29tcHJlc3NlZEFydGlmYWN0XSwKICAgICAgICBmYXVsdHM6ICZCVHJlZU1hcDx1MzIsIHByb2Nlc3M6OkZhdWx0PiwKICAgICAgICB0aW1lb3V0OiBEdXJhdGlvbiwKICAgICAgICBvdXRwdXQ6ICZtdXQgW2YzMl0sCiAgICApIC0+IFJlc3VsdDxNaXhlZEV4ZWN1dGlvblJlcG9ydD4gewogICAgICAgIGlmIG91dHB1dC5sZW4oKSAhPSBzZWxmLm91dHB1dF92YWx1ZXMgewogICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm1peGVkIHBvb2wgb3V0cHV0IHNoYXBlIG1pc21hdGNoIikpOwogICAgICAgIH0KICAgICAgICBsZXQgU29tZShtaXNzZXMpID0gc2VsZi5taXNzZXMuYXNfcmVmKCkgZWxzZSB7CiAgICAgICAgICAgIGlmICFmYXVsdHMuaXNfZW1wdHkoKSB7CiAgICAgICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoImZhdWx0IG9uIGFuIGFsbC1leHRlcm5hbCBwb29sIGJhdGNoIikpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIHJldHVybiBPayhNaXhlZEV4ZWN1dGlvblJlcG9ydCB7CiAgICAgICAgICAgICAgICBhdHRlbXB0OiBOb25lLAogICAgICAgICAgICAgICAgcmVjZWlwdHM6IFZlYzo6bmV3KCksCiAgICAgICAgICAgICAgICBlcnJvcjogTm9uZSwKICAgICAgICAgICAgfSk7CiAgICAgICAgfTsKICAgICAgICBsZXQgcmVwb3J0ID0gc2Vzc2lvbjo6cnVuX2NvbXByZXNzZWRfYmF0Y2hfdW53ZWlnaHRlZCgKICAgICAgICAgICAgc2Vzc2lvbnMsCiAgICAgICAgICAgIGFydGlmYWN0cywKICAgICAgICAgICAgJm1pc3Nlcy5yb3V0aW5nLAogICAgICAgICAgICAmbWlzc2VzLmlucHV0cywKICAgICAgICAgICAgZmF1bHRzLAogICAgICAgICAgICB0aW1lb3V0LAogICAgICAgICk/OwogICAgICAgIGxldCBtdXQgZXJyb3IgPSByZXBvcnQuZXJyb3I7CiAgICAgICAgaWYgZXJyb3IuaXNfbm9uZSgpIHsKICAgICAgICAgICAgZXJyb3IgPSBtYXRjaCByZXBvcnQub3V0cHV0IHsKICAgICAgICAgICAgICAgIFNvbWUocm93cykgPT4gc2VsZi53cml0ZV9taXNzZXMoJnJvd3MsIG91dHB1dCkuZXJyKCksCiAgICAgICAgICAgICAgICBOb25lID0+IFNvbWUoRXJyb3I6Om5ldygKICAgICAgICAgICAgICAgICAgICAiQkFUQ0hfSU5DT01QTEVURSIsCiAgICAgICAgICAgICAgICAgICAgInN1Y2Nlc3NmdWwgYmF0Y2ggbGFja2VkIG91dHB1dCIsCiAgICAgICAgICAgICAgICApKSwKICAgICAgICAgICAgfTsKICAgICAgICB9CiAgICAgICAgT2soTWl4ZWRFeGVjdXRpb25SZXBvcnQgewogICAgICAgICAgICBhdHRlbXB0OiBTb21lKHJlcG9ydC5hdHRlbXB0KSwKICAgICAgICAgICAgcmVjZWlwdHM6IHJlcG9ydC5yZWNlaXB0cywKICAgICAgICAgICAgZXJyb3IsCiAgICAgICAgfSkKICAgIH0KICAgIHB1YiBmbiBtaXNzZXMoJnNlbGYpIC0+IE9wdGlvbjwmQWRtaXR0ZWRGNjRQb29sQmF0Y2g+IHsKICAgICAgICBzZWxmLm1pc3Nlcy5hc19yZWYoKQogICAgfQoKICAgIC8vLyBPbmx5IG1pc3Mgcm93cyBhcmUgd3JpdHRlbjsgZXh0ZXJuYWxseSBvd25lZCByb3dzIGFyZSBsZWZ0IHVudG91Y2hlZC4KICAgIC8vLyBBbGwgY29udmVydGVkIHZhbHVlcyBhcmUgc3RhZ2VkIGJlZm9yZSBhbnkgZGVzdGluYXRpb24gcm93IGlzIHdyaXR0ZW4uCiAgICBwdWIgZm4gd3JpdGVfbWlzc2VzKCZzZWxmLCByb3dzOiAmW1ZlYzxWZWM8ZjY0Pj5dLCBvdXRwdXQ6ICZtdXQgW2YzMl0pIC0+IFJlc3VsdDwoKT4gewogICAgICAgIGlmIG91dHB1dC5sZW4oKSAhPSBzZWxmLm91dHB1dF92YWx1ZXMKICAgICAgICAgICAgfHwgcm93cy5sZW4oKSAhPSBzZWxmLnBvc2l0aW9ucy5sZW4oKQogICAgICAgICAgICB8fCByb3dzCiAgICAgICAgICAgICAgICAuaXRlcigpCiAgICAgICAgICAgICAgICAuYW55KHx0b2tlbnwgdG9rZW4ubGVuKCkgIT0gMSB8fCB0b2tlblswXS5sZW4oKSAhPSBzZWxmLmhpZGRlbikKICAgICAgICB7CiAgICAgICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibWl4ZWQgcG9vbCByZXN1bHQgc2hhcGUgbWlzbWF0Y2giKSk7CiAgICAgICAgfQogICAgICAgIGxldCBtdXQgdmFsdWVzID0gVmVjOjp3aXRoX2NhcGFjaXR5KHNlbGYucG9zaXRpb25zLmxlbigpICogc2VsZi5oaWRkZW4pOwogICAgICAgIGZvciAmdmFsdWUgaW4gcm93cy5pdGVyKCkuZmxhdHRlbigpLmZsYXR0ZW4oKSB7CiAgICAgICAgICAgIGxldCByb3VuZGVkID0gdmFsdWUgYXMgZjMyOwogICAgICAgICAgICBpZiAhdmFsdWUuaXNfZmluaXRlKCkgfHwgIXJvdW5kZWQuaXNfZmluaXRlKCkgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJtaXhlZCBwb29sIHJlc3VsdCBpcyBub24tZmluaXRlIG9yIG92ZXJmbG93cyBGUDMyIikpOwogICAgICAgICAgICB9CiAgICAgICAgICAgIHZhbHVlcy5wdXNoKHJvdW5kZWQpOwogICAgICAgIH0KICAgICAgICBmb3IgKGksICZwb3NpdGlvbikgaW4gc2VsZi5wb3NpdGlvbnMuaXRlcigpLmVudW1lcmF0ZSgpIHsKICAgICAgICAgICAgb3V0cHV0W3Bvc2l0aW9uICogc2VsZi5oaWRkZW4uLihwb3NpdGlvbiArIDEpICogc2VsZi5oaWRkZW5dCiAgICAgICAgICAgICAgICAuY29weV9mcm9tX3NsaWNlKCZ2YWx1ZXNbaSAqIHNlbGYuaGlkZGVuLi4oaSArIDEpICogc2VsZi5oaWRkZW5dKTsKICAgICAgICB9CiAgICAgICAgT2soKCkpCiAgICB9Cn0KCi8vLyBGbGF0dGVuIG5vbi1leHRlcm5hbCByb3V0ZXMgaW50byBvbmUtc2xvdCB0b2tlbnMuIFRoZSBvd25lcnNoaXAgbWFzayBpcyBub3QKLy8vIGV2aWRlbmNlIG9mIGEgcmVhbCBHUFUgcGxhbjogdGhhdCBtdXN0IGJlIHZlcmlmaWVkIGJ5IHRoZSBpbnRlZ3JhdGluZyBjYWxsZXIuCiNbYWxsb3coY2xpcHB5Ojp0b29fbWFueV9hcmd1bWVudHMpXQpwdWIgZm4gYWRtaXRfbWl4ZWRfcG9vbF9mNjQoCiAgICB0ZW1wbGF0ZTogJnJvdXRpbmc6OlJvdXRpbmdQcm9ibGVtLAogICAgZXhwZWN0ZWRfc3RhbXA6ICZtb2U6OlN0YW1wLAogICAgbGF5ZXI6IHUzMiwKICAgIHRva2VuczogdXNpemUsCiAgICB0b3BfazogdXNpemUsCiAgICBpbnB1dHM6ICZbZjMyXSwKICAgIGlkczogJltpMzJdLAogICAgd2VpZ2h0czogJltmMzJdLAogICAgZXh0ZXJuYWxseV9vd25lZDogJltib29sXSwKKSAtPiBSZXN1bHQ8TWl4ZWRQb29sQmF0Y2g+IHsKICAgIGFkbWl0X21peGVkX3Bvb2xfd2l0aF9tb2RlbF9leHBlcnRzX2Y2NCgKICAgICAgICB0ZW1wbGF0ZSwKICAgICAgICBleHBlY3RlZF9zdGFtcCwKICAgICAgICBsYXllciwKICAgICAgICB0b2tlbnMsCiAgICAgICAgdG9wX2ssCiAgICAgICAgaW5wdXRzLAogICAgICAgIGlkcywKICAgICAgICB3ZWlnaHRzLAogICAgICAgIGV4dGVybmFsbHlfb3duZWQsCiAgICAgICAgJnRlbXBsYXRlLmV4cGVydHMsCiAgICApCn0KCi8vLyBUaGUgbW9kZWwgZXhwZXJ0IHNldCBpbmNsdWRlcyBleHRlcm5hbGx5IGhvc3RlZCBleHBlcnRzOyBvbmx5IG1pc3MgZXhwZXJ0cwovLy8gbXVzdCBhcHBlYXIgaW4gdGhlIFZvbHRhRmFicmljIHJlc2lkZW50IHJlZ2lzdHJ5LiBUaGUgc2V0IGFuZCBvd25lcnNoaXAgbWFzawovLy8gbXVzdCBiZSBib3VuZCB0byB0aGUgYWN0dWFsIG1vZGVsIGFuZCBleGVjdXRpb24gcGxhbiBieSB0aGUgY2FsbGVyLgojW2FsbG93KGNsaXBweTo6dG9vX21hbnlfYXJndW1lbnRzKV0KcHViIGZuIGFkbWl0X21peGVkX3Bvb2xfd2l0aF9tb2RlbF9leHBlcnRzX2Y2NCgKICAgIHRlbXBsYXRlOiAmcm91dGluZzo6Um91dGluZ1Byb2JsZW0sCiAgICBleHBlY3RlZF9zdGFtcDogJm1vZTo6U3RhbXAsCiAgICBsYXllcjogdTMyLAogICAgdG9rZW5zOiB1c2l6ZSwKICAgIHRvcF9rOiB1c2l6ZSwKICAgIGlucHV0czogJltmMzJdLAogICAgaWRzOiAmW2kzMl0sCiAgICB3ZWlnaHRzOiAmW2YzMl0sCiAgICBleHRlcm5hbGx5X293bmVkOiAmW2Jvb2xdLAogICAgbW9kZWxfZXhwZXJ0czogJlt1MzJdLAopIC0+IFJlc3VsdDxNaXhlZFBvb2xCYXRjaD4gewogICAgdmFsaWRhdGVfcG9vbF9zaGFwZSgKICAgICAgICB0ZW1wbGF0ZSwKICAgICAgICBleHBlY3RlZF9zdGFtcCwKICAgICAgICBsYXllciwKICAgICAgICB0b2tlbnMsCiAgICAgICAgdG9wX2ssCiAgICAgICAgaW5wdXRzLAogICAgICAgIGlkcywKICAgICAgICB3ZWlnaHRzLAogICAgKT87CiAgICBsZXQgZXhwZXJ0czogQlRyZWVTZXQ8Xz4gPSBtb2RlbF9leHBlcnRzLml0ZXIoKS5jb3BpZWQoKS5jb2xsZWN0KCk7CiAgICBpZiBleHBlcnRzLmlzX2VtcHR5KCkKICAgICAgICB8fCBleHBlcnRzLmxlbigpID4gMTAyNAogICAgICAgIHx8IGV4cGVydHMubGVuKCkgIT0gbW9kZWxfZXhwZXJ0cy5sZW4oKQogICAgICAgIHx8IHRlbXBsYXRlLmV4cGVydHMuaXRlcigpLmFueSh8ZXwgIWV4cGVydHMuY29udGFpbnMoZSkpCiAgICB7CiAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJpbnZhbGlkIG1vZGVsIGV4cGVydCBzZXQiKSk7CiAgICB9CiAgICBmb3IgKGlkc19yb3csIHdlaWdodHNfcm93KSBpbiBpZHMuY2h1bmtzX2V4YWN0KHRvcF9rKS56aXAod2VpZ2h0cy5jaHVua3NfZXhhY3QodG9wX2spKSB7CiAgICAgICAgbGV0IG11dCB1c2VkID0gQlRyZWVTZXQ6Om5ldygpOwogICAgICAgIGZvciAoJmlkLCAmd2VpZ2h0KSBpbiBpZHNfcm93Lml0ZXIoKS56aXAod2VpZ2h0c19yb3cpIHsKICAgICAgICAgICAgbGV0IGV4cGVydCA9IHUzMjo6dHJ5X2Zyb20oaWQpLm1hcF9lcnIofF98IGludmFsaWQoIm5lZ2F0aXZlIHBvb2wgZXhwZXJ0IElEIikpPzsKICAgICAgICAgICAgaWYgIWV4cGVydHMuY29udGFpbnMoJmV4cGVydCkKICAgICAgICAgICAgICAgIHx8ICF1c2VkLmluc2VydChleHBlcnQpCiAgICAgICAgICAgICAgICB8fCAhd2VpZ2h0LmlzX2Zpbml0ZSgpCiAgICAgICAgICAgICAgICB8fCB3ZWlnaHQgPCAwLjAKICAgICAgICAgICAgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKAogICAgICAgICAgICAgICAgICAgICJ1bmtub3duL2R1cGxpY2F0ZSBleHBlcnQgb3IgaW52YWxpZCByb3V0aW5nIHdlaWdodCIsCiAgICAgICAgICAgICAgICApKTsKICAgICAgICAgICAgfQogICAgICAgIH0KICAgIH0KICAgIGlmIGV4dGVybmFsbHlfb3duZWQubGVuKCkgIT0gaWRzLmxlbigpIHx8IGlucHV0cy5pdGVyKCkuYW55KHx4fCAheC5pc19maW5pdGUoKSkgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibWl4ZWQgcG9vbCBtYXNrIG9yIGFjdGl2YXRpb24gaW52YWxpZCIpKTsKICAgIH0KICAgIGxldCBvdXRwdXRfdmFsdWVzID0gaWRzCiAgICAgICAgLmxlbigpCiAgICAgICAgLmNoZWNrZWRfbXVsKHRlbXBsYXRlLmhpZGRlbikKICAgICAgICAuZmlsdGVyKHwmbnwgbiA8PSAxNl83NzdfMjE2KQogICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoIm1peGVkIHBvb2wgb3V0cHV0IGV4Y2VlZHMgYm91bmQiKSk/OwogICAgbGV0IHBvc2l0aW9uczogVmVjPHVzaXplPiA9IGV4dGVybmFsbHlfb3duZWQKICAgICAgICAuaXRlcigpCiAgICAgICAgLmVudW1lcmF0ZSgpCiAgICAgICAgLmZpbHRlcl9tYXAofChpLCAmZXh0ZXJuYWwpfCAoIWV4dGVybmFsKS50aGVuX3NvbWUoaSkpCiAgICAgICAgLmNvbGxlY3QoKTsKICAgIGlmIHBvc2l0aW9ucy5sZW4oKSA+IDQwOTYKICAgICAgICB8fCBwb3NpdGlvbnMKICAgICAgICAgICAgLmxlbigpCiAgICAgICAgICAgIC5jaGVja2VkX211bCh0ZW1wbGF0ZS5oaWRkZW4pCiAgICAgICAgICAgIC5pc19ub25lX29yKHxufCBuID4gMTZfNzc3XzIxNikKICAgIHsKICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm1peGVkIHBvb2wgbWlzc2VzIGV4Y2VlZCBib3VuZGVkIHNlc3Npb24gY2FwYWNpdHkiKSk7CiAgICB9CiAgICBsZXQgbWlzc2VzID0gaWYgcG9zaXRpb25zLmlzX2VtcHR5KCkgewogICAgICAgIE5vbmUKICAgIH0gZWxzZSB7CiAgICAgICAgbGV0IG11dCBjb21wYWN0ID0gdGVtcGxhdGUuY2xvbmUoKTsKICAgICAgICBjb21wYWN0LnJvdXRlcyA9IHBvc2l0aW9ucwogICAgICAgICAgICAuaXRlcigpCiAgICAgICAgICAgIC5tYXAofCZpfCB7CiAgICAgICAgICAgICAgICB2ZWMhW21vZTo6Q2hvaWNlIHsKICAgICAgICAgICAgICAgICAgICBleHBlcnQ6IGlkc1tpXSBhcyB1MzIsCiAgICAgICAgICAgICAgICAgICAgd2VpZ2h0OiBmNjQ6OmZyb20od2VpZ2h0c1tpXSksCiAgICAgICAgICAgICAgICB9XQogICAgICAgICAgICB9KQogICAgICAgICAgICAuY29sbGVjdCgpOwogICAgICAgIHJvdXRpbmc6OnZhbGlkYXRlKCZjb21wYWN0KT87CiAgICAgICAgbGV0IHJvd3MgPSBwb3NpdGlvbnMKICAgICAgICAgICAgLml0ZXIoKQogICAgICAgICAgICAubWFwKHwmaXwgewogICAgICAgICAgICAgICAgbGV0IHN0YXJ0ID0gKGkgLyB0b3BfaykgKiB0ZW1wbGF0ZS5oaWRkZW47CiAgICAgICAgICAgICAgICBpbnB1dHNbc3RhcnQuLnN0YXJ0ICsgdGVtcGxhdGUuaGlkZGVuXQogICAgICAgICAgICAgICAgICAgIC5pdGVyKCkKICAgICAgICAgICAgICAgICAgICAubWFwKHwmdnwgZjY0Ojpmcm9tKHYpKQogICAgICAgICAgICAgICAgICAgIC5jb2xsZWN0KCkKICAgICAgICAgICAgfSkKICAgICAgICAgICAgLmNvbGxlY3QoKTsKICAgICAgICBTb21lKEFkbWl0dGVkRjY0UG9vbEJhdGNoIHsKICAgICAgICAgICAgcm91dGluZzogY29tcGFjdCwKICAgICAgICAgICAgaW5wdXRzOiByb3dzLAogICAgICAgIH0pCiAgICB9OwogICAgT2soTWl4ZWRQb29sQmF0Y2ggewogICAgICAgIG1pc3NlcywKICAgICAgICBwb3NpdGlvbnMsCiAgICAgICAgb3V0cHV0X3ZhbHVlcywKICAgICAgICBoaWRkZW46IHRlbXBsYXRlLmhpZGRlbiwKICAgIH0pCn0KCi8vLyBBZG1pdCB0aGUgZmluYWwgcGVyLWVudHJ5IGBraW5kYCBkZWNpc2lvbnMgb2YgdGhlIHBpbm5lZCBTdHJhdGEgZG9ub3I6Ci8vLyAtMSBpcyBDUFUsIDAgaXMgVlJBTSwgMSBpcyBQQ0llLCBhbmQgMiBpcyBhIHBlZXIvaGVscGVyLiBUaGUgY2FsbGVyIG11c3QKLy8vIGNhcHR1cmUgdGhpcyBvbmx5IGFmdGVyIGFsbCBwZWVyL2hlbHBlciBkZWNpc2lvbnMsIGJpbmQgaXQgdG8gdGhlIGJhdGNoLAovLy8gYW5kIGNvb3JkaW5hdGUgZXh0ZXJuYWxseSBvd25lZCByb3dzLiBUaGlzIGRvZXMgbm90IHZlcmlmeSB0aGF0IHByb3ZlbmFuY2UuCiNbYWxsb3coY2xpcHB5Ojp0b29fbWFueV9hcmd1bWVudHMpXQpwdWIgZm4gYWRtaXRfc3RyYXRhX2tpbmRfZjY0KAogICAgdGVtcGxhdGU6ICZyb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIGV4cGVjdGVkX3N0YW1wOiAmbW9lOjpTdGFtcCwKICAgIGxheWVyOiB1MzIsCiAgICB0b2tlbnM6IHVzaXplLAogICAgdG9wX2s6IHVzaXplLAogICAgaW5wdXRzOiAmW2YzMl0sCiAgICBpZHM6ICZbaTMyXSwKICAgIHdlaWdodHM6ICZbZjMyXSwKICAgIGtpbmRzOiAmW2kzMl0sCiAgICBtb2RlbF9leHBlcnRzOiAmW3UzMl0sCikgLT4gUmVzdWx0PE1peGVkUG9vbEJhdGNoPiB7CiAgICBpZiBraW5kcy5sZW4oKSA+IDI2Ml8xNDQgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgiU3RyYXRhIGtpbmQgY291bnQgZXhjZWVkcyBib3VuZCIpKTsKICAgIH0KICAgIGxldCBleHRlcm5hbDogVmVjPGJvb2w+ID0ga2luZHMKICAgICAgICAuaXRlcigpCiAgICAgICAgLm1hcCh8JmtpbmR8IG1hdGNoIGtpbmQgewogICAgICAgICAgICAtMSA9PiBPayhmYWxzZSksCiAgICAgICAgICAgIDAuLj0yID0+IE9rKHRydWUpLAogICAgICAgICAgICBfID0+IEVycihpbnZhbGlkKCJ1bnN1cHBvcnRlZCBTdHJhdGEgb3duZXJzaGlwIGtpbmQiKSksCiAgICAgICAgfSkKICAgICAgICAuY29sbGVjdDo6PFJlc3VsdDxfPj4oKT87CiAgICBhZG1pdF9taXhlZF9wb29sX3dpdGhfbW9kZWxfZXhwZXJ0c19mNjQoCiAgICAgICAgdGVtcGxhdGUsCiAgICAgICAgZXhwZWN0ZWRfc3RhbXAsCiAgICAgICAgbGF5ZXIsCiAgICAgICAgdG9rZW5zLAogICAgICAgIHRvcF9rLAogICAgICAgIGlucHV0cywKICAgICAgICBpZHMsCiAgICAgICAgd2VpZ2h0cywKICAgICAgICAmZXh0ZXJuYWwsCiAgICAgICAgbW9kZWxfZXhwZXJ0cywKICAgICkKfQoKLy8vIEEgU3RyYXRhLXNwZWNpZmljIHVud2VpZ2h0ZWQgcGxhbi4gSXRzIGludGVybmFsIHVuaXQgcm91dGluZyBjb2VmZmljaWVudHMKLy8vIGFyZSBpbnRlbnRpb25hbGx5IG5vdCBleHBvc2VkIHRvIGNhbGxlcnMgYXMgbW9kZWwgY29lZmZpY2llbnRzLgpwdWIgc3RydWN0IFN0cmF0YVVud2VpZ2h0ZWRCYXRjaChNaXhlZFBvb2xCYXRjaCk7CgppbXBsIFN0cmF0YVVud2VpZ2h0ZWRCYXRjaCB7CiAgICBwdWIgZm4gbWlzc19jb3VudCgmc2VsZikgLT4gdXNpemUgewogICAgICAgIHNlbGYuMC5wb3NpdGlvbnMubGVuKCkKICAgIH0KCiAgICAvLy8gUmVzb2x2ZSBDUFUtb3duZWQgcm93cyB0aHJvdWdoIG5hdGl2ZSBHR01MIHNlc3Npb25zIHdpdGhvdXQgYXBwbHlpbmcKICAgIC8vLyBnYXRlIHdlaWdodHMuIEV4dGVybmFsIHJvd3MgcmVtYWluIHRoZSBjYWxsZXIncyByZXNwb25zaWJpbGl0eS4KICAgICNbY2ZnKGZlYXR1cmUgPSAibmF0aXZlLWdnbWwtY3B1IildCiAgICBwdWIgZm4gZXhlY3V0ZV9uYXRpdmUoCiAgICAgICAgc2VsZiwKICAgICAgICBzZXNzaW9uczogJm11dCBbc2Vzc2lvbjo6U2Vzc2lvbl0sCiAgICAgICAgbGVkZ2VyOiAmY3JhdGU6Om5hdGl2ZV9sZWRnZXI6Ok5hdGl2ZUJhdGNoTGVkZ2VyLAogICAgICAgIHRpbWVvdXQ6IER1cmF0aW9uLAogICAgICAgIG91dHB1dDogJm11dCBbZjMyXSwKICAgICkgLT4gUmVzdWx0PCgpPiB7CiAgICAgICAgc2VsZi5leGVjdXRlX25hdGl2ZV9jb250cmFjdChzZXNzaW9ucywgbGVkZ2VyLCB0aW1lb3V0LCBvdXRwdXQsIGZhbHNlLCBOb25lKQogICAgfQoKICAgIC8vLyBQcmVzZXJ2ZSB1bndlaWdodGVkIHByb3ZpZGVyIEZQMzIgcm93czsgbm8gQ29sbGVjdG9yIHJlZHVjdGlvbiBpcyBzZWxlY3RlZC4KICAgICNbY2ZnKGZlYXR1cmUgPSAibmF0aXZlLWdnbWwtY3B1IildCiAgICBwdWIgZm4gZXhlY3V0ZV9uYXRpdmVfZnAzMigKICAgICAgICBzZWxmLAogICAgICAgIHNlc3Npb25zOiAmbXV0IFtzZXNzaW9uOjpTZXNzaW9uXSwKICAgICAgICBsZWRnZXI6ICZjcmF0ZTo6bmF0aXZlX2xlZGdlcjo6TmF0aXZlQmF0Y2hMZWRnZXIsCiAgICAgICAgdGltZW91dDogRHVyYXRpb24sCiAgICAgICAgb3V0cHV0OiAmbXV0IFtmMzJdLAogICAgKSAtPiBSZXN1bHQ8KCk+IHsKICAgICAgICBzZWxmLmV4ZWN1dGVfbmF0aXZlX2NvbnRyYWN0KHNlc3Npb25zLCBsZWRnZXIsIHRpbWVvdXQsIG91dHB1dCwgdHJ1ZSwgTm9uZSkKICAgIH0KCiAgICAvLy8gUHJlc2VydmUgYSBjYWxsZXItc2VsZWN0ZWQgYXR0ZW1wdCBpZGVudGl0eSBpbiB0aGUgbG9jYWwgZHVyYWJsZSBsZWRnZXIuCiAgICAjW2NmZyhmZWF0dXJlID0gIm5hdGl2ZS1nZ21sLWNwdSIpXQogICAgcHViIGZuIGV4ZWN1dGVfbmF0aXZlX2ZwMzJfcmVzZXJ2ZWQoCiAgICAgICAgc2VsZiwKICAgICAgICBzZXNzaW9uczogJm11dCBbc2Vzc2lvbjo6U2Vzc2lvbl0sCiAgICAgICAgbGVkZ2VyOiAmY3JhdGU6Om5hdGl2ZV9sZWRnZXI6Ok5hdGl2ZUJhdGNoTGVkZ2VyLAogICAgICAgIHRpY2tldDogY3JhdGU6Om5hdGl2ZV9sZWRnZXI6OlJlc2VydmF0aW9uLAogICAgICAgIHRpbWVvdXQ6IER1cmF0aW9uLAogICAgICAgIG91dHB1dDogJm11dCBbZjMyXSwKICAgICkgLT4gUmVzdWx0PCgpPiB7CiAgICAgICAgc2VsZi5leGVjdXRlX25hdGl2ZV9jb250cmFjdChzZXNzaW9ucywgbGVkZ2VyLCB0aW1lb3V0LCBvdXRwdXQsIHRydWUsIFNvbWUodGlja2V0KSkKICAgIH0KCiAgICAjW2NmZyhmZWF0dXJlID0gIm5hdGl2ZS1nZ21sLWNwdSIpXQogICAgZm4gZXhlY3V0ZV9uYXRpdmVfY29udHJhY3QoCiAgICAgICAgc2VsZiwKICAgICAgICBzZXNzaW9uczogJm11dCBbc2Vzc2lvbjo6U2Vzc2lvbl0sCiAgICAgICAgbGVkZ2VyOiAmY3JhdGU6Om5hdGl2ZV9sZWRnZXI6Ok5hdGl2ZUJhdGNoTGVkZ2VyLAogICAgICAgIHRpbWVvdXQ6IER1cmF0aW9uLAogICAgICAgIG91dHB1dDogJm11dCBbZjMyXSwKICAgICAgICB1bndlaWdodGVkX2YzMjogYm9vbCwKICAgICAgICB0aWNrZXQ6IE9wdGlvbjxjcmF0ZTo6bmF0aXZlX2xlZGdlcjo6UmVzZXJ2YXRpb24+LAogICAgKSAtPiBSZXN1bHQ8KCk+IHsKICAgICAgICBpZiBvdXRwdXQubGVuKCkgIT0gc2VsZi4wLm91dHB1dF92YWx1ZXMgewogICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm1peGVkIHBvb2wgb3V0cHV0IHNoYXBlIG1pc21hdGNoIikpOwogICAgICAgIH0KICAgICAgICBsZXQgU29tZShtaXNzZXMpID0gc2VsZi4wLm1pc3Nlcy5hc19yZWYoKSBlbHNlIHsKICAgICAgICAgICAgcmV0dXJuIE9rKCgpKTsKICAgICAgICB9OwogICAgICAgIGxldCBtdXQgaW5wdXRzID0gVmVjOjp3aXRoX2NhcGFjaXR5KG1pc3Nlcy5pbnB1dHMubGVuKCkpOwogICAgICAgIGZvciByb3cgaW4gJm1pc3Nlcy5pbnB1dHMgewogICAgICAgICAgICBsZXQgbXV0IHZhbHVlcyA9IFZlYzo6d2l0aF9jYXBhY2l0eShyb3cubGVuKCkpOwogICAgICAgICAgICBmb3IgJnYgaW4gcm93IHsKICAgICAgICAgICAgICAgIGxldCB4ID0gdiBhcyBmMzI7CiAgICAgICAgICAgICAgICBpZiAhdi5pc19maW5pdGUoKSB8fCAheC5pc19maW5pdGUoKSB8fCBmNjQ6OmZyb20oeCkudG9fYml0cygpICE9IHYudG9fYml0cygpIHsKICAgICAgICAgICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoIm5hdGl2ZSBpbnB1dCBpcyBub3QgZXhhY3QgZmluaXRlIEZQMzIiKSk7CiAgICAgICAgICAgICAgICB9CiAgICAgICAgICAgICAgICB2YWx1ZXMucHVzaCh4KTsKICAgICAgICAgICAgfQogICAgICAgICAgICBpbnB1dHMucHVzaCh2YWx1ZXMpOwogICAgICAgIH0KICAgICAgICBsZXQgcm93cyA9IGlmIHVud2VpZ2h0ZWRfZjMyIHsKICAgICAgICAgICAgaWYgbGV0IFNvbWUodGlja2V0KSA9IHRpY2tldCB7CiAgICAgICAgICAgICAgICBzZXNzaW9uOjpTZXNzaW9uOjpleGVjX25hdGl2ZV9nZ21sX3Vud2VpZ2h0ZWRfZjMyX3Jlc2VydmVkKAogICAgICAgICAgICAgICAgICAgIHNlc3Npb25zLAogICAgICAgICAgICAgICAgICAgICZtaXNzZXMucm91dGluZywKICAgICAgICAgICAgICAgICAgICAmaW5wdXRzLAogICAgICAgICAgICAgICAgICAgIGxlZGdlciwKICAgICAgICAgICAgICAgICAgICB0aWNrZXQsCiAgICAgICAgICAgICAgICAgICAgdGltZW91dCwKICAgICAgICAgICAgICAgICk/CiAgICAgICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgICAgICBzZXNzaW9uOjpTZXNzaW9uOjpleGVjX25hdGl2ZV9nZ21sX3Vud2VpZ2h0ZWRfZjMyKAogICAgICAgICAgICAgICAgICAgIHNlc3Npb25zLAogICAgICAgICAgICAgICAgICAgICZtaXNzZXMucm91dGluZywKICAgICAgICAgICAgICAgICAgICAmaW5wdXRzLAogICAgICAgICAgICAgICAgICAgIGxlZGdlciwKICAgICAgICAgICAgICAgICAgICB0aW1lb3V0LAogICAgICAgICAgICAgICAgKT8KICAgICAgICAgICAgfQogICAgICAgIH0gZWxzZSB7CiAgICAgICAgICAgIGlmIHRpY2tldC5pc19zb21lKCkgewogICAgICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKAogICAgICAgICAgICAgICAgICAgICJyZXNlcnZlZCB0aWNrZXQgcmVxdWlyZXMgdW53ZWlnaHRlZCBGUDMyIHRyYW5zcG9ydCIsCiAgICAgICAgICAgICAgICApKTsKICAgICAgICAgICAgfQogICAgICAgICAgICBzZXNzaW9uOjpTZXNzaW9uOjpleGVjX25hdGl2ZV9nZ21sX3Vud2VpZ2h0ZWQoCiAgICAgICAgICAgICAgICBzZXNzaW9ucywKICAgICAgICAgICAgICAgICZtaXNzZXMucm91dGluZywKICAgICAgICAgICAgICAgICZpbnB1dHMsCiAgICAgICAgICAgICAgICBsZWRnZXIsCiAgICAgICAgICAgICAgICB0aW1lb3V0LAogICAgICAgICAgICApPwogICAgICAgIH07CiAgICAgICAgc2VsZi4wLndyaXRlX21pc3Nlcygmcm93cywgb3V0cHV0KQogICAgfQoKICAgIHB1YiBmbiBleGVjdXRlKAogICAgICAgIHNlbGYsCiAgICAgICAgc2Vzc2lvbnM6ICZtdXQgW3Nlc3Npb246OlNlc3Npb25dLAogICAgICAgIGFydGlmYWN0czogJltzZXNzaW9uOjpDb21wcmVzc2VkQXJ0aWZhY3RdLAogICAgICAgIGZhdWx0czogJkJUcmVlTWFwPHUzMiwgcHJvY2Vzczo6RmF1bHQ+LAogICAgICAgIHRpbWVvdXQ6IER1cmF0aW9uLAogICAgICAgIG91dHB1dDogJm11dCBbZjMyXSwKICAgICkgLT4gUmVzdWx0PE1peGVkRXhlY3V0aW9uUmVwb3J0PiB7CiAgICAgICAgc2VsZi4wLmV4ZWN1dGUoc2Vzc2lvbnMsIGFydGlmYWN0cywgZmF1bHRzLCB0aW1lb3V0LCBvdXRwdXQpCiAgICB9Cn0KCi8vLyBBZG1pdCBhIFN0cmF0YS1zdHlsZSBjYWxsYmFjayB3aXRob3V0IGdhdGUgY29lZmZpY2llbnRzIGZvciB0aGUgdW53ZWlnaHRlZAovLy8gYE1peGVkUG9vbEJhdGNoOjpleGVjdXRlYCBjb250cmFjdC4gVGhlIGludGVybmFsIHVuaXQgY29lZmZpY2llbnRzIGFyZSBvbmx5Ci8vLyByb3V0aW5nIHBsYWNlaG9sZGVyczogdGhleSBhcmUgbm90IFN0cmF0YSBnYXRlIHdlaWdodHMgYW5kIG11c3QgbmV2ZXIgYmUKLy8vIHVzZWQgdG8gcmVkdWNlIG91dHB1dHMuIFRoZSBkb25vciBhcHBsaWVzIGl0cyBvd24gd2VpZ2h0cyBsYXRlciwgZXhhY3RseSBvbmNlLgovLy8gVGhlIG93bmVyc2hpcCBkZWNpc2lvbnMgbXVzdCBzdGlsbCBiZSBzdXBwbGllZCBhbmQgYm91bmQgYnkgdGhlIGNhbGxlci4KI1thbGxvdyhjbGlwcHk6OnRvb19tYW55X2FyZ3VtZW50cyldCnB1YiBmbiBhZG1pdF9zdHJhdGFfdW53ZWlnaHRlZF9mNjQoCiAgICB0ZW1wbGF0ZTogJnJvdXRpbmc6OlJvdXRpbmdQcm9ibGVtLAogICAgZXhwZWN0ZWRfc3RhbXA6ICZtb2U6OlN0YW1wLAogICAgbGF5ZXI6IHUzMiwKICAgIHRva2VuczogdXNpemUsCiAgICB0b3BfazogdXNpemUsCiAgICBpbnB1dHM6ICZbZjMyXSwKICAgIGlkczogJltpMzJdLAogICAga2luZHM6ICZbaTMyXSwKICAgIG1vZGVsX2V4cGVydHM6ICZbdTMyXSwKKSAtPiBSZXN1bHQ8U3RyYXRhVW53ZWlnaHRlZEJhdGNoPiB7CiAgICBpZiBpZHMubGVuKCkgPiAyNjJfMTQ0IHsKICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoInBvb2wgc2xvdCBjb3VudCBleGNlZWRzIGJvdW5kIikpOwogICAgfQogICAgbGV0IHBsYWNlaG9sZGVycyA9IHZlYyFbMS4wX2YzMjsgaWRzLmxlbigpXTsKICAgIGFkbWl0X3N0cmF0YV9raW5kX2Y2NCgKICAgICAgICB0ZW1wbGF0ZSwKICAgICAgICBleHBlY3RlZF9zdGFtcCwKICAgICAgICBsYXllciwKICAgICAgICB0b2tlbnMsCiAgICAgICAgdG9wX2ssCiAgICAgICAgaW5wdXRzLAogICAgICAgIGlkcywKICAgICAgICAmcGxhY2Vob2xkZXJzLAogICAgICAgIGtpbmRzLAogICAgICAgIG1vZGVsX2V4cGVydHMsCiAgICApCiAgICAubWFwKFN0cmF0YVVud2VpZ2h0ZWRCYXRjaCkKfQoKLy8vIENvbnZlcnQgY29tcGxldGUsIHVud2VpZ2h0ZWQgU2Vzc2lvbiByZXN1bHRzIHRvIGEgdG9rZW4vc2xvdC1tYWpvciBGUDMyCi8vLyBidWZmZXIuIENvbnZlcnNpb24gcm91bmRzIHRvIG5lYXJlc3QgRlAzMiwgcmVqZWN0cyBub24tZmluaXRlIG9yIG92ZXJmbG93aW5nCi8vLyB2YWx1ZXMsIGFuZCBjb21taXRzIG9ubHkgYWZ0ZXIgZXZlcnkgc2hhcGUgYW5kIHZhbHVlIGhhcyBiZWVuIGNoZWNrZWQuIFRoZQovLy8gY2FsbGVyIGlzIHJlc3BvbnNpYmxlIGZvciBhcHBseWluZyBlYWNoIHJvdXRpbmcgY29lZmZpY2llbnQgb25jZS4KcHViIGZuIHdyaXRlX3Vud2VpZ2h0ZWRfZjMyKAogICAgcm91dGluZzogJnJvdXRpbmc6OlJvdXRpbmdQcm9ibGVtLAogICAgcm93czogJltWZWM8VmVjPGY2ND4+XSwKICAgIG91dHB1dDogJm11dCBbZjMyXSwKKSAtPiBSZXN1bHQ8KCk+IHsKICAgIHJvdXRpbmc6OnZhbGlkYXRlKHJvdXRpbmcpPzsKICAgIGxldCB0b2tlbnMgPSByb3V0aW5nLnJvdXRlcy5sZW4oKTsKICAgIGxldCB0b3BfayA9IHJvdXRpbmcucm91dGVzLmZpcnN0KCkubWFwX29yKDAsIFZlYzo6bGVuKTsKICAgIGlmIHRva2VucyA9PSAwIHx8IHRvcF9rID09IDAgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgiZW1wdHkgcG9vbCBvdXRwdXQiKSk7CiAgICB9CiAgICBsZXQgY291bnQgPSB0b2tlbnMKICAgICAgICAuY2hlY2tlZF9tdWwodG9wX2spCiAgICAgICAgLmFuZF90aGVuKHxufCBuLmNoZWNrZWRfbXVsKHJvdXRpbmcuaGlkZGVuKSkKICAgICAgICAuZmlsdGVyKHwmbnwgbiA8PSAxNl83NzdfMjE2KQogICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoInBvb2wgb3V0cHV0IGV4Y2VlZHMgYm91bmQiKSk/OwogICAgaWYgcm93cy5sZW4oKSAhPSB0b2tlbnMKICAgICAgICB8fCBvdXRwdXQubGVuKCkgIT0gY291bnQKICAgICAgICB8fCByb3dzLml0ZXIoKS5hbnkofHRva2VufCB7CiAgICAgICAgICAgIHRva2VuLmxlbigpICE9IHRvcF9rIHx8IHRva2VuLml0ZXIoKS5hbnkofHJvd3wgcm93LmxlbigpICE9IHJvdXRpbmcuaGlkZGVuKQogICAgICAgIH0pCiAgICB7CiAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJwb29sIG91dHB1dCBzaGFwZSBtaXNtYXRjaCIpKTsKICAgIH0KICAgIGxldCBtdXQgY29udmVydGVkID0gVmVjOjp3aXRoX2NhcGFjaXR5KGNvdW50KTsKICAgIGZvciAmdmFsdWUgaW4gcm93cy5pdGVyKCkuZmxhdHRlbigpLmZsYXR0ZW4oKSB7CiAgICAgICAgbGV0IHJvdW5kZWQgPSB2YWx1ZSBhcyBmMzI7CiAgICAgICAgaWYgIXZhbHVlLmlzX2Zpbml0ZSgpIHx8ICFyb3VuZGVkLmlzX2Zpbml0ZSgpIHsKICAgICAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJwb29sIG91dHB1dCBpcyBub24tZmluaXRlIG9yIG92ZXJmbG93cyBGUDMyIikpOwogICAgICAgIH0KICAgICAgICBjb252ZXJ0ZWQucHVzaChyb3VuZGVkKTsKICAgIH0KICAgIG91dHB1dC5jb3B5X2Zyb21fc2xpY2UoJmNvbnZlcnRlZCk7CiAgICBPaygoKSkKfQoKLy8vIFZhbGlkYXRlIHRoZSBjb21wbGV0ZSBiYXRjaCBiZWZvcmUgcmV0dXJuaW5nIGRhdGEgdG8gYSBTZXNzaW9uIGNhbGxlci4KI1thbGxvdyhjbGlwcHk6OnRvb19tYW55X2FyZ3VtZW50cyldCnB1YiBmbiBhZG1pdF9wb29sX2JhdGNoKAogICAgdGVtcGxhdGU6ICZyb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIGV4cGVjdGVkX3N0YW1wOiAmbW9lOjpTdGFtcCwKICAgIGxheWVyOiB1MzIsCiAgICB0b2tlbnM6IHVzaXplLAogICAgdG9wX2s6IHVzaXplLAogICAgaW5wdXRzOiAmW2YzMl0sCiAgICBpZHM6ICZbaTMyXSwKICAgIHdlaWdodHM6ICZbZjMyXSwKKSAtPiBSZXN1bHQ8QWRtaXR0ZWRQb29sQmF0Y2g+IHsKICAgIGxldCByb3V0aW5nID0gdmFsaWRhdGVfcG9vbCgKICAgICAgICB0ZW1wbGF0ZSwKICAgICAgICBleHBlY3RlZF9zdGFtcCwKICAgICAgICBsYXllciwKICAgICAgICB0b2tlbnMsCiAgICAgICAgdG9wX2ssCiAgICAgICAgaW5wdXRzLAogICAgICAgIGlkcywKICAgICAgICB3ZWlnaHRzLAogICAgKT87CiAgICBsZXQgbXV0IGVuY29kZWQgPSBWZWM6OndpdGhfY2FwYWNpdHkodG9rZW5zKTsKICAgIGZvciByb3cgaW4gaW5wdXRzLmNodW5rc19leGFjdCh0ZW1wbGF0ZS5oaWRkZW4pIHsKICAgICAgICBsZXQgbXV0IGJpdHMgPSBWZWM6OndpdGhfY2FwYWNpdHkodGVtcGxhdGUuaGlkZGVuKTsKICAgICAgICBmb3IgJnZhbHVlIGluIHJvdyB7CiAgICAgICAgICAgIGxldCBoYWxmID0gY29tcGxldGlvbjo6ZW5jb2RlX2ZwMTYoZjY0Ojpmcm9tKHZhbHVlKSk/OwogICAgICAgICAgICBsZXQgZGVjb2RlZCA9IGNvbXBsZXRpb246OmRlY29kZV9mcDE2KGhhbGYpPyBhcyBmMzI7CiAgICAgICAgICAgIGlmIGRlY29kZWQudG9fYml0cygpICE9IHZhbHVlLnRvX2JpdHMoKSB7CiAgICAgICAgICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoCiAgICAgICAgICAgICAgICAgICAgInBvb2wgYWN0aXZhdGlvbiBpcyBub3QgZXhhY3RseSByZXByZXNlbnRhYmxlIGluIEZQMTYiLAogICAgICAgICAgICAgICAgKSk7CiAgICAgICAgICAgIH0KICAgICAgICAgICAgYml0cy5wdXNoKGhhbGYpOwogICAgICAgIH0KICAgICAgICBlbmNvZGVkLnB1c2goYml0cyk7CiAgICB9CiAgICBPayhBZG1pdHRlZFBvb2xCYXRjaCB7CiAgICAgICAgcm91dGluZywKICAgICAgICBpbnB1dHNfZnAxNl9iaXRzOiBlbmNvZGVkLAogICAgfSkKfQoKLy8vIEFkbWl0IGZpbml0ZSBGUDMyIGFjdGl2YXRpb25zIGV4YWN0bHkgZm9yIHRoZSBDUFUgRlA2NCBTZXNzaW9uIGNvbnRyYWN0LgojW2FsbG93KGNsaXBweTo6dG9vX21hbnlfYXJndW1lbnRzKV0KcHViIGZuIGFkbWl0X3Bvb2xfYmF0Y2hfZjY0KAogICAgdGVtcGxhdGU6ICZyb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIGV4cGVjdGVkX3N0YW1wOiAmbW9lOjpTdGFtcCwKICAgIGxheWVyOiB1MzIsCiAgICB0b2tlbnM6IHVzaXplLAogICAgdG9wX2s6IHVzaXplLAogICAgaW5wdXRzOiAmW2YzMl0sCiAgICBpZHM6ICZbaTMyXSwKICAgIHdlaWdodHM6ICZbZjMyXSwKKSAtPiBSZXN1bHQ8QWRtaXR0ZWRGNjRQb29sQmF0Y2g+IHsKICAgIGxldCByb3V0aW5nID0gdmFsaWRhdGVfcG9vbCgKICAgICAgICB0ZW1wbGF0ZSwKICAgICAgICBleHBlY3RlZF9zdGFtcCwKICAgICAgICBsYXllciwKICAgICAgICB0b2tlbnMsCiAgICAgICAgdG9wX2ssCiAgICAgICAgaW5wdXRzLAogICAgICAgIGlkcywKICAgICAgICB3ZWlnaHRzLAogICAgKT87CiAgICBpZiBpbnB1dHMuaXRlcigpLmFueSh8dmFsdWV8ICF2YWx1ZS5pc19maW5pdGUoKSkgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgibm9uLWZpbml0ZSBwb29sIGFjdGl2YXRpb24iKSk7CiAgICB9CiAgICBsZXQgaW5wdXRzID0gaW5wdXRzCiAgICAgICAgLmNodW5rc19leGFjdCh0ZW1wbGF0ZS5oaWRkZW4pCiAgICAgICAgLm1hcCh8cm93fCByb3cuaXRlcigpLm1hcCh8JnZhbHVlfCBmNjQ6OmZyb20odmFsdWUpKS5jb2xsZWN0KCkpCiAgICAgICAgLmNvbGxlY3QoKTsKICAgIE9rKEFkbWl0dGVkRjY0UG9vbEJhdGNoIHsgcm91dGluZywgaW5wdXRzIH0pCn0KCiNbYWxsb3coY2xpcHB5Ojp0b29fbWFueV9hcmd1bWVudHMpXQpmbiB2YWxpZGF0ZV9wb29sKAogICAgdGVtcGxhdGU6ICZyb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIGV4cGVjdGVkX3N0YW1wOiAmbW9lOjpTdGFtcCwKICAgIGxheWVyOiB1MzIsCiAgICB0b2tlbnM6IHVzaXplLAogICAgdG9wX2s6IHVzaXplLAogICAgaW5wdXRzOiAmW2YzMl0sCiAgICBpZHM6ICZbaTMyXSwKICAgIHdlaWdodHM6ICZbZjMyXSwKKSAtPiBSZXN1bHQ8cm91dGluZzo6Um91dGluZ1Byb2JsZW0+IHsKICAgIHZhbGlkYXRlX3Bvb2xfc2hhcGUoCiAgICAgICAgdGVtcGxhdGUsCiAgICAgICAgZXhwZWN0ZWRfc3RhbXAsCiAgICAgICAgbGF5ZXIsCiAgICAgICAgdG9rZW5zLAogICAgICAgIHRvcF9rLAogICAgICAgIGlucHV0cywKICAgICAgICBpZHMsCiAgICAgICAgd2VpZ2h0cywKICAgICk/OwogICAgbGV0IG11dCByb3V0aW5nID0gdGVtcGxhdGUuY2xvbmUoKTsKICAgIHJvdXRpbmcucm91dGVzLmNsZWFyKCk7CiAgICBmb3IgKGlkX3Jvdywgd2VpZ2h0X3JvdykgaW4gaWRzLmNodW5rc19leGFjdCh0b3BfaykuemlwKHdlaWdodHMuY2h1bmtzX2V4YWN0KHRvcF9rKSkgewogICAgICAgIGxldCBtdXQgcm91dGUgPSBWZWM6OndpdGhfY2FwYWNpdHkodG9wX2spOwogICAgICAgIGZvciAoJmlkLCAmd2VpZ2h0KSBpbiBpZF9yb3cuaXRlcigpLnppcCh3ZWlnaHRfcm93KSB7CiAgICAgICAgICAgIGxldCBleHBlcnQgPSB1MzI6OnRyeV9mcm9tKGlkKS5tYXBfZXJyKHxffCBpbnZhbGlkKCJuZWdhdGl2ZSBwb29sIGV4cGVydCBJRCIpKT87CiAgICAgICAgICAgIHJvdXRlLnB1c2gobW9lOjpDaG9pY2UgewogICAgICAgICAgICAgICAgZXhwZXJ0LAogICAgICAgICAgICAgICAgd2VpZ2h0OiBmNjQ6OmZyb20od2VpZ2h0KSwKICAgICAgICAgICAgfSk7CiAgICAgICAgfQogICAgICAgIHJvdXRpbmcucm91dGVzLnB1c2gocm91dGUpOwogICAgfQogICAgcm91dGluZzo6dmFsaWRhdGUoJnJvdXRpbmcpPzsKICAgIE9rKHJvdXRpbmcpCn0KCiNbYWxsb3coY2xpcHB5Ojp0b29fbWFueV9hcmd1bWVudHMpXQpmbiB2YWxpZGF0ZV9wb29sX3NoYXBlKAogICAgdGVtcGxhdGU6ICZyb3V0aW5nOjpSb3V0aW5nUHJvYmxlbSwKICAgIGV4cGVjdGVkX3N0YW1wOiAmbW9lOjpTdGFtcCwKICAgIGxheWVyOiB1MzIsCiAgICB0b2tlbnM6IHVzaXplLAogICAgdG9wX2s6IHVzaXplLAogICAgaW5wdXRzOiAmW2YzMl0sCiAgICBpZHM6ICZbaTMyXSwKICAgIHdlaWdodHM6ICZbZjMyXSwKKSAtPiBSZXN1bHQ8KCk+IHsKICAgIHJvdXRpbmc6OnZhbGlkYXRlKHRlbXBsYXRlKT87CiAgICBpZiB0ZW1wbGF0ZS5zdGFtcCAhPSAqZXhwZWN0ZWRfc3RhbXAgfHwgbGF5ZXIgIT0gZXhwZWN0ZWRfc3RhbXAubGF5ZXIgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgic3RhbGUgcG9vbCBpZGVudGl0eSBvciBsYXllciIpKTsKICAgIH0KICAgIGlmIHRva2VucyA9PSAwIHx8IHRva2VucyA+IDQwOTYgfHwgdG9wX2sgPT0gMCB8fCB0b3BfayA+IDY0IHsKICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoInBvb2wgZGltZW5zaW9ucyBvdXRzaWRlIGNvbnRyYWN0IikpOwogICAgfQogICAgbGV0IGFjdGl2YXRpb25zID0gdG9rZW5zCiAgICAgICAgLmNoZWNrZWRfbXVsKHRlbXBsYXRlLmhpZGRlbikKICAgICAgICAuZmlsdGVyKHwmbnwgbiA8PSAxNl83NzdfMjE2KQogICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoInBvb2wgYWN0aXZhdGlvbiBjb3VudCBleGNlZWRzIGJvdW5kIikpPzsKICAgIGxldCBzbG90cyA9IHRva2VucwogICAgICAgIC5jaGVja2VkX211bCh0b3BfaykKICAgICAgICAuZmlsdGVyKHwmbnwgbiA8PSAyNjJfMTQ0KQogICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoInBvb2wgc2xvdCBjb3VudCBleGNlZWRzIGJvdW5kIikpPzsKICAgIGlmIGlucHV0cy5sZW4oKSAhPSBhY3RpdmF0aW9ucyB8fCBpZHMubGVuKCkgIT0gc2xvdHMgfHwgd2VpZ2h0cy5sZW4oKSAhPSBzbG90cyB7CiAgICAgICAgcmV0dXJuIEVycihpbnZhbGlkKCJwb29sIGlucHV0IHNoYXBlIG1pc21hdGNoIikpOwogICAgfQogICAgT2soKCkpCn0K
+//! CPU admission of a complete Strata-style pool batch into VoltaFabric routing.
+//!
+//! The multi-token Strata callback does not expose coefficients. Weighted
+//! admission requires actual gate weights; the explicit unweighted path does not.
+//! This module
+//! neither hooks Strata nor reserves a session, starts a worker, or assigns an
+//! attempt. It refuses negative expert IDs. The FP16 path refuses inexact
+//! conversion; the separate FP64 path preserves finite FP32 activations.
+use crate::{completion, invalid, moe, process, routing, session, Error, Result};
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    time::Duration,
+};
+
+#[derive(Debug, Clone)]
+pub struct AdmittedPoolBatch {
+    pub routing: routing::RoutingProblem,
+    pub inputs_fp16_bits: Vec<Vec<u16>>,
+}
+
+#[derive(Debug, Clone)]
+pub struct AdmittedF64PoolBatch {
+    pub routing: routing::RoutingProblem,
+    pub inputs: Vec<Vec<f64>>,
+}
+
+/// A caller-supplied ownership decision; the caller must bind it to the actual
+/// donor plan and must not concurrently write the same destination rows.
+pub struct MixedPoolBatch {
+    misses: Option<AdmittedF64PoolBatch>,
+    positions: Vec<usize>,
+    output_values: usize,
+    hidden: usize,
+}
+
+/// A completed attempt or a no-work result; errors after dispatch retain receipts.
+#[derive(Debug)]
+pub struct MixedExecutionReport {
+    pub attempt: Option<u64>,
+    pub receipts: Vec<session::ExecReceipt>,
+    pub error: Option<Error>,
+}
+
+impl MixedPoolBatch {
+    /// Consume this plan, validate the destination before dispatch, and write
+    /// only after every worker and every conversion has succeeded. An error after
+    /// dispatch retains the attempt and receipts, and is never retried here.
+    pub fn execute(
+        self,
+        sessions: &mut [session::Session],
+        artifacts: &[session::CompressedArtifact],
+        faults: &BTreeMap<u32, process::Fault>,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<MixedExecutionReport> {
+        if output.len() != self.output_values {
+            return Err(invalid("mixed pool output shape mismatch"));
+        }
+        let Some(misses) = self.misses.as_ref() else {
+            if !faults.is_empty() {
+                return Err(invalid("fault on an all-external pool batch"));
+            }
+            return Ok(MixedExecutionReport {
+                attempt: None,
+                receipts: Vec::new(),
+                error: None,
+            });
+        };
+        let report = session::run_compressed_batch_unweighted(
+            sessions,
+            artifacts,
+            &misses.routing,
+            &misses.inputs,
+            faults,
+            timeout,
+        )?;
+        let mut error = report.error;
+        if error.is_none() {
+            error = match report.output {
+                Some(rows) => self.write_misses(&rows, output).err(),
+                None => Some(Error::new(
+                    "BATCH_INCOMPLETE",
+                    "successful batch lacked output",
+                )),
+            };
+        }
+        Ok(MixedExecutionReport {
+            attempt: Some(report.attempt),
+            receipts: report.receipts,
+            error,
+        })
+    }
+    pub fn misses(&self) -> Option<&AdmittedF64PoolBatch> {
+        self.misses.as_ref()
+    }
+
+    /// Only miss rows are written; externally owned rows are left untouched.
+    /// All converted values are staged before any destination row is written.
+    pub fn write_misses(&self, rows: &[Vec<Vec<f64>>], output: &mut [f32]) -> Result<()> {
+        if output.len() != self.output_values
+            || rows.len() != self.positions.len()
+            || rows
+                .iter()
+                .any(|token| token.len() != 1 || token[0].len() != self.hidden)
+        {
+            return Err(invalid("mixed pool result shape mismatch"));
+        }
+        let mut values = Vec::with_capacity(self.positions.len() * self.hidden);
+        for &value in rows.iter().flatten().flatten() {
+            let rounded = value as f32;
+            if !value.is_finite() || !rounded.is_finite() {
+                return Err(invalid("mixed pool result is non-finite or overflows FP32"));
+            }
+            values.push(rounded);
+        }
+        for (i, &position) in self.positions.iter().enumerate() {
+            output[position * self.hidden..(position + 1) * self.hidden]
+                .copy_from_slice(&values[i * self.hidden..(i + 1) * self.hidden]);
+        }
+        Ok(())
+    }
+}
+
+/// Flatten non-external routes into one-slot tokens. The ownership mask is not
+/// evidence of a real GPU plan: that must be verified by the integrating caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_mixed_pool_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    externally_owned: &[bool],
+) -> Result<MixedPoolBatch> {
+    admit_mixed_pool_with_model_experts_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+        externally_owned,
+        &template.experts,
+    )
+}
+
+/// The model expert set includes externally hosted experts; only miss experts
+/// must appear in the VoltaFabric resident registry. The set and ownership mask
+/// must be bound to the actual model and execution plan by the caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_mixed_pool_with_model_experts_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    externally_owned: &[bool],
+    model_experts: &[u32],
+) -> Result<MixedPoolBatch> {
+    validate_pool_shape(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    let experts: BTreeSet<_> = model_experts.iter().copied().collect();
+    if experts.is_empty()
+        || experts.len() > 1024
+        || experts.len() != model_experts.len()
+        || template.experts.iter().any(|e| !experts.contains(e))
+    {
+        return Err(invalid("invalid model expert set"));
+    }
+    for (ids_row, weights_row) in ids.chunks_exact(top_k).zip(weights.chunks_exact(top_k)) {
+        let mut used = BTreeSet::new();
+        for (&id, &weight) in ids_row.iter().zip(weights_row) {
+            let expert = u32::try_from(id).map_err(|_| invalid("negative pool expert ID"))?;
+            if !experts.contains(&expert)
+                || !used.insert(expert)
+                || !weight.is_finite()
+                || weight < 0.0
+            {
+                return Err(invalid(
+                    "unknown/duplicate expert or invalid routing weight",
+                ));
+            }
+        }
+    }
+    if externally_owned.len() != ids.len() || inputs.iter().any(|x| !x.is_finite()) {
+        return Err(invalid("mixed pool mask or activation invalid"));
+    }
+    let output_values = ids
+        .len()
+        .checked_mul(template.hidden)
+        .filter(|&n| n <= 16_777_216)
+        .ok_or_else(|| invalid("mixed pool output exceeds bound"))?;
+    let positions: Vec<usize> = externally_owned
+        .iter()
+        .enumerate()
+        .filter_map(|(i, &external)| (!external).then_some(i))
+        .collect();
+    if positions.len() > 4096
+        || positions
+            .len()
+            .checked_mul(template.hidden)
+            .is_none_or(|n| n > 16_777_216)
+    {
+        return Err(invalid("mixed pool misses exceed bounded session capacity"));
+    }
+    let misses = if positions.is_empty() {
+        None
+    } else {
+        let mut compact = template.clone();
+        compact.routes = positions
+            .iter()
+            .map(|&i| {
+                vec![moe::Choice {
+                    expert: ids[i] as u32,
+                    weight: f64::from(weights[i]),
+                }]
+            })
+            .collect();
+        routing::validate(&compact)?;
+        let rows = positions
+            .iter()
+            .map(|&i| {
+                let start = (i / top_k) * template.hidden;
+                inputs[start..start + template.hidden]
+                    .iter()
+                    .map(|&v| f64::from(v))
+                    .collect()
+            })
+            .collect();
+        Some(AdmittedF64PoolBatch {
+            routing: compact,
+            inputs: rows,
+        })
+    };
+    Ok(MixedPoolBatch {
+        misses,
+        positions,
+        output_values,
+        hidden: template.hidden,
+    })
+}
+
+/// Admit the final per-entry `kind` decisions of the pinned Strata donor:
+/// -1 is CPU, 0 is VRAM, 1 is PCIe, and 2 is a peer/helper. The caller must
+/// capture this only after all peer/helper decisions, bind it to the batch,
+/// and coordinate externally owned rows. This does not verify that provenance.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_strata_kind_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+    kinds: &[i32],
+    model_experts: &[u32],
+) -> Result<MixedPoolBatch> {
+    if kinds.len() > 262_144 {
+        return Err(invalid("Strata kind count exceeds bound"));
+    }
+    let external: Vec<bool> = kinds
+        .iter()
+        .map(|&kind| match kind {
+            -1 => Ok(false),
+            0..=2 => Ok(true),
+            _ => Err(invalid("unsupported Strata ownership kind")),
+        })
+        .collect::<Result<_>>()?;
+    admit_mixed_pool_with_model_experts_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+        &external,
+        model_experts,
+    )
+}
+
+/// A Strata-specific unweighted plan. Its internal unit routing coefficients
+/// are intentionally not exposed to callers as model coefficients.
+pub struct StrataUnweightedBatch(MixedPoolBatch);
+
+impl StrataUnweightedBatch {
+    pub fn miss_count(&self) -> usize {
+        self.0.positions.len()
+    }
+
+    /// Resolve CPU-owned rows through native GGML sessions without applying
+    /// gate weights. External rows remain the caller's responsibility.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn execute_native(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<()> {
+        self.execute_native_contract(sessions, ledger, timeout, output, false, None)
+    }
+
+    /// Preserve unweighted provider FP32 rows; no Collector reduction is selected.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn execute_native_fp32(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<()> {
+        self.execute_native_contract(sessions, ledger, timeout, output, true, None)
+    }
+
+    /// Preserve a caller-selected attempt identity in the local durable ledger.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn execute_native_fp32_reserved(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        ticket: crate::native_ledger::Reservation,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<()> {
+        self.execute_native_contract(sessions, ledger, timeout, output, true, Some(ticket))
+    }
+
+    #[cfg(feature = "native-ggml-cpu")]
+    fn execute_native_contract(
+        self,
+        sessions: &mut [session::Session],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+        output: &mut [f32],
+        unweighted_f32: bool,
+        ticket: Option<crate::native_ledger::Reservation>,
+    ) -> Result<()> {
+        if output.len() != self.0.output_values {
+            return Err(invalid("mixed pool output shape mismatch"));
+        }
+        let Some(misses) = self.0.misses.as_ref() else {
+            return Ok(());
+        };
+        let mut inputs = Vec::with_capacity(misses.inputs.len());
+        for row in &misses.inputs {
+            let mut values = Vec::with_capacity(row.len());
+            for &v in row {
+                let x = v as f32;
+                if !v.is_finite() || !x.is_finite() || f64::from(x).to_bits() != v.to_bits() {
+                    return Err(invalid("native input is not exact finite FP32"));
+                }
+                values.push(x);
+            }
+            inputs.push(values);
+        }
+        let rows = if unweighted_f32 {
+            if let Some(ticket) = ticket {
+                session::Session::exec_native_ggml_unweighted_f32_reserved(
+                    sessions,
+                    &misses.routing,
+                    &inputs,
+                    ledger,
+                    ticket,
+                    timeout,
+                )?
+            } else {
+                session::Session::exec_native_ggml_unweighted_f32(
+                    sessions,
+                    &misses.routing,
+                    &inputs,
+                    ledger,
+                    timeout,
+                )?
+            }
+        } else {
+            if ticket.is_some() {
+                return Err(invalid(
+                    "reserved ticket requires unweighted FP32 transport",
+                ));
+            }
+            session::Session::exec_native_ggml_unweighted(
+                sessions,
+                &misses.routing,
+                &inputs,
+                ledger,
+                timeout,
+            )?
+        };
+        self.0.write_misses(&rows, output)
+    }
+
+    pub fn execute(
+        self,
+        sessions: &mut [session::Session],
+        artifacts: &[session::CompressedArtifact],
+        faults: &BTreeMap<u32, process::Fault>,
+        timeout: Duration,
+        output: &mut [f32],
+    ) -> Result<MixedExecutionReport> {
+        self.0.execute(sessions, artifacts, faults, timeout, output)
+    }
+}
+
+/// Admit a Strata-style callback without gate coefficients for the unweighted
+/// `MixedPoolBatch::execute` contract. The internal unit coefficients are only
+/// routing placeholders: they are not Strata gate weights and must never be
+/// used to reduce outputs. The donor applies its own weights later, exactly once.
+/// The ownership decisions must still be supplied and bound by the caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_strata_unweighted_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    kinds: &[i32],
+    model_experts: &[u32],
+) -> Result<StrataUnweightedBatch> {
+    if ids.len() > 262_144 {
+        return Err(invalid("pool slot count exceeds bound"));
+    }
+    let placeholders = vec![1.0_f32; ids.len()];
+    admit_strata_kind_f64(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        &placeholders,
+        kinds,
+        model_experts,
+    )
+    .map(StrataUnweightedBatch)
+}
+
+/// Convert complete, unweighted Session results to a token/slot-major FP32
+/// buffer. Conversion rounds to nearest FP32, rejects non-finite or overflowing
+/// values, and commits only after every shape and value has been checked. The
+/// caller is responsible for applying each routing coefficient once.
+pub fn write_unweighted_f32(
+    routing: &routing::RoutingProblem,
+    rows: &[Vec<Vec<f64>>],
+    output: &mut [f32],
+) -> Result<()> {
+    routing::validate(routing)?;
+    let tokens = routing.routes.len();
+    let top_k = routing.routes.first().map_or(0, Vec::len);
+    if tokens == 0 || top_k == 0 {
+        return Err(invalid("empty pool output"));
+    }
+    let count = tokens
+        .checked_mul(top_k)
+        .and_then(|n| n.checked_mul(routing.hidden))
+        .filter(|&n| n <= 16_777_216)
+        .ok_or_else(|| invalid("pool output exceeds bound"))?;
+    if rows.len() != tokens
+        || output.len() != count
+        || rows.iter().any(|token| {
+            token.len() != top_k || token.iter().any(|row| row.len() != routing.hidden)
+        })
+    {
+        return Err(invalid("pool output shape mismatch"));
+    }
+    let mut converted = Vec::with_capacity(count);
+    for &value in rows.iter().flatten().flatten() {
+        let rounded = value as f32;
+        if !value.is_finite() || !rounded.is_finite() {
+            return Err(invalid("pool output is non-finite or overflows FP32"));
+        }
+        converted.push(rounded);
+    }
+    output.copy_from_slice(&converted);
+    Ok(())
+}
+
+/// Validate the complete batch before returning data to a Session caller.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_pool_batch(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+) -> Result<AdmittedPoolBatch> {
+    let routing = validate_pool(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    let mut encoded = Vec::with_capacity(tokens);
+    for row in inputs.chunks_exact(template.hidden) {
+        let mut bits = Vec::with_capacity(template.hidden);
+        for &value in row {
+            let half = completion::encode_fp16(f64::from(value))?;
+            let decoded = completion::decode_fp16(half)? as f32;
+            if decoded.to_bits() != value.to_bits() {
+                return Err(invalid(
+                    "pool activation is not exactly representable in FP16",
+                ));
+            }
+            bits.push(half);
+        }
+        encoded.push(bits);
+    }
+    Ok(AdmittedPoolBatch {
+        routing,
+        inputs_fp16_bits: encoded,
+    })
+}
+
+/// Admit finite FP32 activations exactly for the CPU FP64 Session contract.
+#[allow(clippy::too_many_arguments)]
+pub fn admit_pool_batch_f64(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+) -> Result<AdmittedF64PoolBatch> {
+    let routing = validate_pool(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    if inputs.iter().any(|value| !value.is_finite()) {
+        return Err(invalid("non-finite pool activation"));
+    }
+    let inputs = inputs
+        .chunks_exact(template.hidden)
+        .map(|row| row.iter().map(|&value| f64::from(value)).collect())
+        .collect();
+    Ok(AdmittedF64PoolBatch { routing, inputs })
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_pool(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+) -> Result<routing::RoutingProblem> {
+    validate_pool_shape(
+        template,
+        expected_stamp,
+        layer,
+        tokens,
+        top_k,
+        inputs,
+        ids,
+        weights,
+    )?;
+    let mut routing = template.clone();
+    routing.routes.clear();
+    for (id_row, weight_row) in ids.chunks_exact(top_k).zip(weights.chunks_exact(top_k)) {
+        let mut route = Vec::with_capacity(top_k);
+        for (&id, &weight) in id_row.iter().zip(weight_row) {
+            let expert = u32::try_from(id).map_err(|_| invalid("negative pool expert ID"))?;
+            route.push(moe::Choice {
+                expert,
+                weight: f64::from(weight),
+            });
+        }
+        routing.routes.push(route);
+    }
+    routing::validate(&routing)?;
+    Ok(routing)
+}
+
+#[allow(clippy::too_many_arguments)]
+fn validate_pool_shape(
+    template: &routing::RoutingProblem,
+    expected_stamp: &moe::Stamp,
+    layer: u32,
+    tokens: usize,
+    top_k: usize,
+    inputs: &[f32],
+    ids: &[i32],
+    weights: &[f32],
+) -> Result<()> {
+    routing::validate(template)?;
+    if template.stamp != *expected_stamp || layer != expected_stamp.layer {
+        return Err(invalid("stale pool identity or layer"));
+    }
+    if tokens == 0 || tokens > 4096 || top_k == 0 || top_k > 64 {
+        return Err(invalid("pool dimensions outside contract"));
+    }
+    let activations = tokens
+        .checked_mul(template.hidden)
+        .filter(|&n| n <= 16_777_216)
+        .ok_or_else(|| invalid("pool activation count exceeds bound"))?;
+    let slots = tokens
+        .checked_mul(top_k)
+        .filter(|&n| n <= 262_144)
+        .ok_or_else(|| invalid("pool slot count exceeds bound"))?;
+    if inputs.len() != activations || ids.len() != slots || weights.len() != slots {
+        return Err(invalid("pool input shape mismatch"));
+    }
+    Ok(())
+}
