@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T05:15:09Z",
+  "updated_utc": "2026-11-01T05:29:42Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -369,6 +369,18 @@
       "gpu_executed": false,
       "inter_pc_network_used": false,
       "production_r53_used": false
+    },
+    {
+      "id": "R658",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_PASS",
+      "branch": "r658-gguf-span-session-20261101",
+      "parent_commit": "8a859c9c3605bbd18ec1f77bc8424218753f4ce6",
+      "source_commit": "075eadd4302c32b6b3e8a47d80b10d20abbd77bb",
+      "path": "research/R658",
+      "published_utc": "2026-11-01T05:28:37Z",
+      "readback_verified_utc": "2026-11-01T05:29:42Z",
+      "readback_files_verified": 8
     }
   ],
   "acceptance": [
@@ -424,18 +436,19 @@
     "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY",
     "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS",
     "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE",
-    "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE"
+    "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE",
+    "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R658_READY_ON_OWNER_REQUEST",
-    "purpose": "Implement a bounded checkpoint-span loader into resident GGML matrices and connect one compatible expert FFN stage to identified CPU Sessions; validate with a small fixture and an independent projection oracle. No full checkpoint, GPU, or production network."
+    "status": "R659_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Map a compatible checkpoint architecture's expert gate/up/down tensors to the validated GGUF span loader; load one complete FFN stage in identified CPU Sessions and compare with an independent oracle. No full checkpoint, GPU or production network."
   },
-  "report": "research/R657/REPORT.md",
+  "report": "research/R658/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R657/SHA256SUMS",
-    "sha256": "db2ccc2062caf766fbf40a5278f351c218e3da06faecfd6b94922ba9963791c3",
-    "files": 6
+    "path": "research/R658/SHA256SUMS",
+    "sha256": "34fcd57379f8157e27d8f489e697be6240aaae607507ec27d00513e49e27b640",
+    "files": 7
   }
 }

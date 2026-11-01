@@ -12211,5 +12211,31 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R658: add a bounded checkpoint-span loader and connect one compatible expert FFN stage to identified CPU Sessions; use a small fixture and independent projection oracle. No full checkpoint/GPU/production network."
+  },
+  "r658_gguf_tensor_span_session": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_PASS",
+    "branch": "r658-gguf-span-session-20261101",
+    "parent_commit": "8a859c9c3605bbd18ec1f77bc8424218753f4ce6",
+    "source_commit": "075eadd4302c32b6b3e8a47d80b10d20abbd77bb",
+    "report": "research/R658/REPORT.md",
+    "result": "research/R658/RESULT.json",
+    "build_test": "research/R658/BUILD_TEST.txt",
+    "sha256sums": "research/R658/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Pinned GGUF metadata API resolves one planned tensor span; 1 MiB streaming fills an identified resident CPU grouped-matrix Session. Existing VoltaFabric routing and FP16-decoded/f64 Collector remain in control.",
+    "test_result": "Debug and release each pass 2 vf-rank-session unit tests and 4 native_matrix_session integration tests; 16,816,128-byte GGUF span exceeds the 16 MiB raw frame. CTest passes; changed Rust files pass rustfmt; scoped Clippy passes with two pre-existing warnings outside this change.",
+    "test_scope": "Synthetic GGUF v3 Q8_0 tensor; independent scalar one-hot projection oracle on routed Session output; short-source rejection closes Session; no model generation.",
+    "source_readback_files_verified": 8,
+    "published_utc": "2026-11-01T05:28:37Z",
+    "readback_verified_utc": "2026-11-01T05:29:42Z",
+    "model_loaded": false,
+    "generation_executed": false,
+    "session_path_exercised": true,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R659: map a compatible checkpoint architecture's expert gate/up/down tensors to these bindings and validate one complete expert FFN stage in identified CPU Sessions against an independent oracle. No full checkpoint, GPU or production network."
   }
 }
