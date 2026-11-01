@@ -10074,6 +10074,19 @@
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R657: wire grouped matrix provider into an identified VoltaFabric Session/RankWorker CPU request path, retaining resident weights, complete Stamp/attempt checks, and terminal UNKNOWN handling. No checkpoint, GPU, or production network."
+  },
+  "r657_grouped_matrix_session": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_DEBUG_RELEASE_CPU_PASS",
+    "branch": "r657-grouped-matrix-session-20261101",
+    "parent_commit": "69e23c8a19bff4497114dccc85d7251399a62fb8",
+    "source_commit": "9f3bcb3386afb5f7165e2eb4bd55014c8a16da2f",
+    "report": "research/R657/REPORT.md",
+    "result": "research/R657/RESULT.json",
+    "build_test": "research/R657/BUILD_TEST.txt",
+    "sha256sums": "research/R657/SHA256SUMS",
+    "test": "Focused Session integration and rank-session unit tests pass 4/4 debug and 4/4 release; rustfmt passes; scoped clippy completes with two pre-existing warnings.",
+    "readback_files_verified": 7,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R658: add a bounded checkpoint-span loader and connect one compatible expert FFN stage to identified CPU Sessions; use a small fixture and independent projection oracle. No full checkpoint/GPU/production network."
   }
-
 }
