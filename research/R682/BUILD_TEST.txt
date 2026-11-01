@@ -17,7 +17,7 @@ Runner contract:
 
 Observed:
 - CPU-only CMake configure passed.
-- Focused CTest: 1/1 passed in 1.61 s.
+- Focused CTest: 1/1 passed in 1.61 s on the local configuration and 1/1 passed in 1.57 s with the exact updated branch CMakeLists mirror.
 - Test output: live llama_context::process_ubatch CPU hook pass; one dynamic route, one weight application, output [5,10].
 - No network worker, receipt, checkpoint, model weights, GPU or performance run.
 
