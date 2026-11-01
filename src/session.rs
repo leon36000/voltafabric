@@ -142,12 +142,99 @@ pub struct GroupedProjectionSlotOutput {
 #[derive(Debug, Clone, PartialEq)]
 pub struct GroupedProjectionBatchOutput {
     pub stamp: moe::Stamp,
+    /// Exact resident tensor name, retained to bind model-specific composition.
+    pub tensor: String,
     pub attempt: u64,
     pub dispatch_hidden: usize,
     pub input_columns: usize,
     pub output_columns: usize,
     /// Ordered by (token, route slot), before any route weighting or reduction.
     pub slots: Vec<GroupedProjectionSlotOutput>,
+}
+
+/// Compose the separate Qwen2MoE gate/up projections into inputs for its down projection.
+/// Caller must pass the exact outputs from the same routed batch and attempt. This helper
+/// returns unweighted per-slot rows; it does not invoke the down Sessions or Collector.
+#[cfg(feature = "native-ggml-cpu")]
+pub fn qwen2moe_gate_up_to_down_inputs(
+    gate: &GroupedProjectionBatchOutput,
+    up: &GroupedProjectionBatchOutput,
+    swiglu_limit: Option<f32>,
+) -> Result<Vec<crate::native_ggml_cpu::GroupedProjectionInput>> {
+    use crate::native_ggml_cpu::GroupedProjectionInput;
+
+    const MAX_SLOTS: usize = 512;
+    const MAX_VALUES: usize = 16_777_216;
+    const CLAMP_EPSILON: f32 = 1e-6;
+
+    if !gate.tensor.ends_with("ffn_gate_exps.weight")
+        || !up.tensor.ends_with("ffn_up_exps.weight")
+        || gate.stamp != up.stamp
+        || gate.attempt == 0
+        || gate.attempt != up.attempt
+        || gate.dispatch_hidden == 0
+        || gate.dispatch_hidden != gate.input_columns
+        || gate.dispatch_hidden != up.dispatch_hidden
+        || gate.input_columns != up.input_columns
+        || gate.output_columns == 0
+        || gate.output_columns > 10_240
+        || gate.output_columns != up.output_columns
+        || gate.slots.is_empty()
+        || gate.slots.len() > MAX_SLOTS
+        || gate.slots.len() != up.slots.len()
+        || swiglu_limit.is_some_and(|limit| !limit.is_finite() || limit < 0.0)
+        || gate
+            .slots
+            .len()
+            .checked_mul(gate.output_columns)
+            .is_none_or(|values| values > MAX_VALUES)
+        || [&gate.stamp.run_id, &gate.stamp.model_revision, &gate.stamp.plan_id]
+            .iter()
+            .any(|value| value.trim().is_empty() || value.len() > 256)
+        || gate.stamp.epoch == 0
+    {
+        return Err(invalid("Qwen2MoE gate/up projection identity, role or shape"));
+    }
+
+    let clamp = swiglu_limit.filter(|limit| *limit > CLAMP_EPSILON);
+    let mut previous = None;
+    let mut result = Vec::with_capacity(gate.slots.len());
+    for (gate_slot, up_slot) in gate.slots.iter().zip(&up.slots) {
+        let identity = (gate_slot.token, gate_slot.slot);
+        if previous.is_some_and(|last| last >= identity)
+            || (gate_slot.token, gate_slot.slot, gate_slot.expert, gate_slot.rank, gate_slot.local)
+                != (up_slot.token, up_slot.slot, up_slot.expert, up_slot.rank, up_slot.local)
+            || gate_slot.values.len() != gate.output_columns
+            || up_slot.values.len() != gate.output_columns
+            || gate_slot.values.iter().chain(&up_slot.values).any(|value| !value.is_finite())
+        {
+            return Err(invalid("Qwen2MoE gate/up slot identity or values"));
+        }
+        previous = Some(identity);
+
+        let mut values = Vec::with_capacity(gate.output_columns);
+        for (&gate_value, &up_value) in gate_slot.values.iter().zip(&up_slot.values) {
+            let mut gate_activation = gate_value / (1.0 + (-gate_value).exp());
+            let mut up_value = up_value;
+            if let Some(limit) = clamp {
+                up_value = up_value.clamp(-limit, limit);
+                gate_activation = gate_activation.min(limit);
+            }
+            let value = gate_activation * up_value;
+            if !value.is_finite() {
+                return Err(invalid("Qwen2MoE SwiGLU FP32 overflow"));
+            }
+            values.push(value);
+        }
+        result.push(GroupedProjectionInput {
+            token: gate_slot.token,
+            slot: gate_slot.slot,
+            expert: gate_slot.expert,
+            local: gate_slot.local,
+            values,
+        });
+    }
+    Ok(result)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -5574,6 +5661,7 @@ impl Session {
         }
         Ok(GroupedProjectionBatchOutput {
             stamp: problem.stamp.clone(),
+            tensor: binding.tensor.clone(),
             attempt,
             dispatch_hidden: problem.hidden,
             input_columns: binding.columns,

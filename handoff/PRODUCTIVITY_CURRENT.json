@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T06:40:02Z",
+  "updated_utc": "2026-11-01T06:56:42Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -429,6 +429,32 @@
       },
       "rustfmt_local": "rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0; --edition 2021 --config skip_children=true --check passed on native_ggml_cpu.rs, session.rs, native_matrix_session.rs; child-module resolution skipped.",
       "security_pipeline_2253": "success; configured scans/fallback only; no Rust compile/test"
+    },
+    {
+      "id": "R661",
+      "owner": "integrator",
+      "state": "PRIVATE_GITLAB_SOURCE_CHANGE_READBACK_PENDING_TEST_UNEXECUTED",
+      "branch": "r661-qwen2moe-swiglu-20261101",
+      "parent_commit": "abeb0080ee3c032b998f958a271079167b54ca74",
+      "path": "research/R661",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "changes": [
+        "GroupedProjectionBatchOutput now retains exact resident tensor name.",
+        "Qwen2MoE gate/up SwiGLU helper validates role, full stamp/attempt, per-slot identity/order, shape and finite values; outputs remain unweighted."
+      ],
+      "tests_added": [
+        "qwen2moe_gate_up_preserves_slot_identity_and_builds_unweighted_down_inputs",
+        "qwen2moe_gate_up_rejects_wrong_tensor_role_and_misaligned_batch"
+      ],
+      "tests_executed": false,
+      "upstream_evidence": [
+        "Pinned qwen2moe.cpp uses separate ffn_gate_exps, ffn_up_exps, ffn_down_exps.",
+        "Pinned llama-graph.cpp applies selected expert weights after down for Qwen2MoE."
+      ],
+      "eliminated_path": "Three calls to exec_grouped_projection_batch with one Stamp are rejected by claim_identity; synthetic per-projection stamps break layer batch identity.",
+      "test_limits": "Tests added but not executed; pipeline scan jobs will not count as Rust compile/test. No checkpoint, full generation, GPU/inter-PC, R53 or performance claim.",
+      "next_action": "Implement one compound Session coordinator for gate/up/down with one claim/reservation, same attempt, all-stage preflight, atomic output refusal and one Collector weighting. Then type-check and run the focused CPU tests against the exact branch.",
+      "published_parent_pipeline": "R660 pipeline 2255 success; configured scans only."
     }
   ],
   "acceptance": [
@@ -495,11 +521,8 @@
     "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING"
   ],
   "active_operations": [],
-  "next_action": {
-    "status": "R660_LOCAL_RUSTFMT_PASS_CPU_QUALIFICATION_PENDING",
-    "purpose": "Run the focused CPU test only in an admitted isolated environment with the verified pinned GGML static libraries; otherwise make the pinned native build reproducible before composing gate/up and down. Route weighting remains unapplied in R660 and belongs exactly once at the existing Collector."
-  },
-  "report": "research/R660/REPORT.md",
+  "next_action": "Implement the compound Qwen2MoE gate/up/down Session coordinator as one identity and attempt; preserve unweighted rows until the existing Collector. The R660 local static GGML build is available, but the local VoltaFabric checkout is stale/dirty R367, so validate from the exact R661 source when a clean isolated source view is available.",
+  "report": "research/R661/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R660/SHA256SUMS",
