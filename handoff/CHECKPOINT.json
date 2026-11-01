@@ -1998,6 +1998,7 @@
     "transport_receipt": ".work/a142-rank-partial-layer-r8/evidence/A142_PROFILE_TRANSPORT_RECEIPT_R8.json"
   },
   "a142_r8_preparation_failure": {
+
     "receipt": ".work/a142-rank-partial-layer-r8/evidence/A142_R8_PREPARATION_R1_FAILURE.json",
     "status": "CPU_PREPARATION_R1_FAILED_BUILD_DEPENDENCY_ORDER_FIXED_AND_R2_PASS"
   },
@@ -3998,6 +3999,7 @@
     "a55_earlier_run": "evidence/continuation_a81_pcie_x4/runs/a81-h1-a55-full-20261019/receipt.json",
     "a55_earlier_run_classification": "UNKNOWN_DO_NOT_REPLAY",
     "a55_new_run": "evidence/continuation_a81_pcie_x4/runs/a81-h1-a55-canary-r2-20261018T2248/REMOTE_RESULT_RECOVERY.json",
+
     "a55_new_run_classification": "CONFIRMED_PRE_GPU_FAILURE_NO_KERNEL",
     "a56_cpu_gate": "PENDING_X86_FULL_PASS",
     "a56_gpu_kernel": "PENDING",
@@ -5998,6 +6000,7 @@
       },
       {
         "attempt": 1,
+
         "rank": 9,
         "replay_allowed": false,
         "started": true,
@@ -7998,6 +8001,7 @@
                   "/usr/bin/strace": "f47342683309e807bca57d6d89b82f94a9b39aa614e9c28c2b67cefbc35eee58"
                 },
                 "lease": "/tmp/vf-lab-GPU-819a4547-5ff3-130b-ea3b-1d1a837b1c77.lease",
+
                 "mode": "gpu",
                 "namespace": "r53-r57-pc6-pc3-diagnostic-20261026-gpu-a",
                 "receipt": "/home/pc3/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/r57-gpu-stderr-diagnostic-20261026/result/guard.json",
@@ -9998,6 +10002,7 @@
     "canonical_functional_source_changed": false,
     "canonical_files": 370,
     "canonical_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
+
     "material_invocations": 1,
     "native_owner_instances": 2,
     "native_forwards": 16,
@@ -11998,6 +12003,7 @@
       },
       {
         "batch": 9649002,
+
         "attempt": 15
       }
     ],
@@ -12650,7 +12656,7 @@
     }
   },
   "r683_qwen2moe_build_moe_ffn_cpu": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_RUNNING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_SUCCESS",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "parent_commit": "28864c61bafc49d03b58c65f0dc5a3e58cd27e60",
     "source_commit": "df3a19f4c7b224bf49c7d5ab82fefcd980f4dfa5",
@@ -12664,15 +12670,43 @@
     "test": "AArch64 CPU C++17 -Wall -Wextra -Werror; direct runner PASS; focused CTest 1/1 in 1.69 s; donor output [6,20], route coefficient 0.5 once, collector output [3,10].",
     "test_scope": "Synthetic graph calls actual donor build_moe_ffn under live process_ubatch; no architecture-level top-k, checkpoint/token loop, Rust coordinator/worker or full generation, GPU, inter-PC or performance.",
     "pipeline_2316": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "running",
+        "pc4_ci_fallback": "success",
         "pc4_trivy": "success",
         "pc4_semgrep": "success",
         "pc4_gitleaks": "success"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R684: connect the existing tiny synthetic Qwen2MoE GGUF fixture to the donor build_moe_ffn path on CPU; no production checkpoint download."
+    "next_action": "R685: use the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture through the pinned donor build_moe_ffn path on CPU; preserve single route weighting and atomic refusal. No checkpoint download, GPU or production network."
+  },
+  "r684_qwen2moe_gguf_build_moe_ffn_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_7_OF_7_CPU_CTEST_1_PASS_PIPELINE_2321_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "16eb5029c0bd430a36e09b145c41dc8403ac7ee0",
+    "source_commit": "290e03b518d291c8a2749b205b8c0843731b2792",
+    "report": "research/R684/REPORT.md",
+    "result": "research/R684/RESULT.json",
+    "build_test": "research/R684/BUILD_TEST.txt",
+    "sha256sums": "research/R684/SHA256SUMS",
+    "manifest_sha256": "599bde22f3f2b8a127557361b433ebb7b802f7b772efe1a875e17bfc70b8126e",
+    "readback_files_verified": 7,
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "fixture": "Generated 544-byte Qwen2MoE GGUF v3; two F32 tensors [2,2,2], parsed metadata and physical spans validated.",
+    "test": "C++17 -Wall -Wextra -Werror; direct runner PASS; CTest registration probe 1/1 PASS. Raw [6,20], coefficient 0.5 once, output [3,10]; failed collector returns null/FAILED with no publication.",
+    "test_scope": "Synthetic F32 width-2 only; not R659 Q8_0 fixture, architecture top-k/gate-up, production checkpoint, full generation, GPU or inter-PC.",
+    "pipeline_2321": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R685: use the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture through the pinned donor build_moe_ffn path on CPU; preserve single route weighting and atomic refusal. No checkpoint download, GPU or production network."
   }
 }

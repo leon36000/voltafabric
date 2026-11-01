@@ -1998,6 +1998,7 @@
         "pair": 4,
         "q1_gbps": 60.42,
         "q4_gbps": 60.43
+
       }
     ],
     "per_trial_rx_write_requests": 4096,
@@ -3998,6 +3999,7 @@
     "predeclared_paired_screen_pass": false,
     "recomputed_from": "A142_PROFILE_REMOTE_RECEIPT_R17.json latency_samples"
   },
+
   "performance_review_r18": {
     "baseline_median_ms": 26.041594,
     "candidate_median_ms": 26.055339500000002,
@@ -5998,6 +6000,7 @@
             "3581428": false,
             "3581431": false,
             "3581433": false
+
           },
           "remote": {
             "active_owned_groups": [],
@@ -7998,6 +8001,7 @@
     "trace_records": 152,
     "trace_bytes": 9728,
     "Runtime_copy_calls": 76,
+
     "Runtime_copy_argument_sums": {
       "baseline": {
         "weight_h2d": 18800640,
@@ -9998,6 +10002,7 @@
     "next_action": "R654 inspect the pinned llama.cpp CUDA backend for SM70 and integrate/compile a compatible boundary with an independent CPU oracle.",
     "id": "r653_strata_callback_build"
   },
+
   "r654_ggml_mul_mat_id": {
     "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ORACLE_PASS",
     "branch": "r654-ggml-mul-mat-id-20261101",
@@ -10528,7 +10533,7 @@
     }
   },
   "r683_qwen2moe_build_moe_ffn_cpu": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_RUNNING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_1_PASS_PIPELINE_2316_SUCCESS",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "df3a19f4c7b224bf49c7d5ab82fefcd980f4dfa5",
     "objective": "Exercise VoltaFabric's pinned donor route hook after raw output from the production build_moe_ffn implementation.",
@@ -10538,15 +10543,42 @@
     "limitations": ["Synthetic graph and weights; no real checkpoint, top-k router, shared/residual path, Rust worker, token loop, full generation, GPU, inter-PC or performance."],
     "readback_files_verified": 7,
     "pipeline_2316": {
-      "status": "running",
+      "status": "success",
       "jobs": {
-        "pc4_ci_fallback": "running",
+        "pc4_ci_fallback": "success",
         "pc4_trivy": "success",
         "pc4_semgrep": "success",
         "pc4_gitleaks": "success"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R684: connect an existing tiny synthetic Qwen2MoE GGUF fixture to the donor build_moe_ffn path on CPU; no production checkpoint download."
+    "next_action": "R685: use the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture through the pinned donor build_moe_ffn path on CPU; preserve single route weighting and atomic refusal. No checkpoint download, GPU or production network."
+  },
+  "r684_qwen2moe_gguf_build_moe_ffn_cpu": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_7_OF_7_CPU_CTEST_1_PASS_PIPELINE_2321_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "16eb5029c0bd430a36e09b145c41dc8403ac7ee0",
+    "source_commit": "290e03b518d291c8a2749b205b8c0843731b2792",
+    "objective": "Exercise GGUF v3 writing/parsing and tensor-span validation before passing parser-loaded expert tensors through pinned donor build_moe_ffn in live process_ubatch.",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "test": "C++17 -Wall -Wextra -Werror; direct CPU runner and CTest 1/1 pass; raw [6,20], final [3,10], collector rejection leaves no graph output.",
+    "limitations": [
+      "Fixture is generated F32 width=2; it does not use R659's Q8_0 width-32 fixture.",
+      "Selected expert/logits are direct synthetic graph inputs; Qwen2MoE top-k and gate/up/SwiGLU composition are unqualified.",
+      "No production checkpoint, full generation, Rust coordinator/worker, GPU, inter-PC/RDMA, production R53 or performance."
+    ],
+    "readback_files_verified": 7,
+    "pipeline_2321": {
+      "status": "running",
+      "jobs": {
+        "pc4_ci_fallback": "created",
+        "pc4_trivy": "pending",
+        "pc4_semgrep": "running",
+        "pc4_gitleaks": "success"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R685: use the existing R659 runtime-generated Q8_0 GGUF gate/up/down fixture through the pinned donor build_moe_ffn path on CPU; preserve single route weighting and atomic refusal. No checkpoint download, GPU or production network."
   }
 }
