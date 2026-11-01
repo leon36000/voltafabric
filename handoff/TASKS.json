@@ -9889,7 +9889,20 @@
     "test": "rustfmt --edition 2021 --check; cargo test --locked --offline --features native-ggml-cpu --lib strata_native_bridge::identity_tests::binary_loop_rejects_identity_mismatch_before_body_or_claim; 1/1 PASS.",
     "limits": "Synthetic CPU parser-path test only; no success dispatch, worker, checkpoint, Strata callback, complete generation, GPU, RDMA, inter-PC or production network. Eight compile-only fixture placeholders exist only in local isolated .runs snapshot and were not published.",
     "automatic_relaunch": false,
-    "next_action": "R648: test a positive synthetic binary_loop batch with one local CPU worker, fresh run identity and dedicated ledger.",
+    "next_action": "R648 positive VFB3 path passed. R649: test multiple fresh VFB3 batches through one local CPU session with per-batch identity and reservations.",
     "readback_verified_utc": "2026-11-01T03:54:16Z"
+  },
+  "r648_native_binary_loop_local_worker": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_TEST_PASS",
+    "commit": "3d0c87bdb2a446706b79f0b92241bf59f1d51ea5",
+    "readback_files_verified": 3,
+    "published_utc": "2026-11-01T03:58:19Z",
+    "owner": "Codex integrator",
+    "branch": "r648-native-binary-loop-local-worker-20261101",
+    "scope": "Exercise the real VFB3 binary_loop using one local vf-rank-session child with a synthetic native GGML resident; verify full unweighted VFR3 batch and shutdown, and exact durable claim.",
+    "test": "rustfmt --check; cargo build --locked --offline --features native-ggml-cpu --bin vf-rank-session; targeted root lib unit test 1/1 PASS.",
+    "limits": "One local CPU rank, synthetic format blob, same-provider Resident.forward comparator; no checkpoint, Strata donor, full generation, GPU, RDMA or inter-PC. Ledger claim is consumed and must not be replayed. Eight compile-only fixture stubs remain local under isolated .runs and were not published.",
+    "diagnosis": "vf-rank-worker is one-shot and closed before HELLO; no claim was created. vf-rank-session is the persistent process for Session::connect.",
+    "automatic_relaunch": false,
+    "next_action": "R649: multiple fresh batches through one local resident session and donor launcher integration."
   }
-}

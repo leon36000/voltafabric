@@ -11947,7 +11947,31 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 6,
     "published_utc": "2026-11-01T03:53:03Z",
-    "next_action": "R648: exercise the synthetic positive binary_loop path with one isolated CPU worker and fresh identity/ledger.",
+    "next_action": "R648: successful local binary_loop batch with synthetic GGML resident and vf-rank-session; R649 may test several fresh batches and donor-launcher connection.",
     "readback_verified_utc": "2026-11-01T03:54:16Z"
+  },
+  "r648_native_binary_loop_local_worker": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_CPU_TEST_PASS",
+    "branch": "r648-native-binary-loop-local-worker-20261101",
+    "base_commit": "a317e64405a88cb261b60145685f26b10af5c370",
+    "source_commit": "3d0c87bdb2a446706b79f0b92241bf59f1d51ea5",
+    "report": "research/R648/REPORT.md",
+    "test": "src/strata_native_bridge.rs::identity_tests::binary_loop_runs_one_synthetic_native_cpu_batch_and_closes",
+    "test_result": "rustfmt clean; vf-rank-session build pass; 1/1 targeted test pass --locked --offline",
+    "worker": "local vf-rank-session subprocess, rank 0, synthetic SC117-format GGML resident",
+    "vfb3_batch_and_shutdown": true,
+    "vfr3_output_matches_resident": true,
+    "coefficient_applied_by_bridge": false,
+    "ledger_claims": 1,
+    "ledger_status": "RESERVED_UNKNOWN_NO_REPLAY",
+    "wrong_one_shot_worker_refused_before_claim": true,
+    "compile_time_fixture_stubs_local_unpublished": 8,
+    "checkpoint_loaded": false,
+    "strata_donor_loaded": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "readback_files_verified": 3,
+    "published_utc": "2026-11-01T03:58:19Z",
+    "next_action": "R649: multiple fresh VFB3 batches through one local session, then bounded donor-launcher boundary."
   }
-}
