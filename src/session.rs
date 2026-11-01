@@ -72,6 +72,8 @@ pub const CAPABILITY_ENGRAM_ROW_IDS_VARINT: &str = "cpu_engram_row_ids_varint_v1
 pub const CAPABILITY_NATIVE_GGML_CPU: &str = "cpu_strata_sc117_ggml_fp16_v1";
 #[cfg(feature = "native-ggml-cpu")]
 pub const CAPABILITY_NATIVE_GROUPED_MATRIX_CPU: &str = "cpu_ggml_grouped_matrix_session_fp16_v1";
+#[cfg(feature = "native-ggml-cpu")]
+pub const CAPABILITY_NATIVE_GROUPED_PROJECTION_CPU: &str = "cpu_ggml_grouped_projection_session_f32_v1";
 #[cfg(feature = "native-scalar-reference")]
 pub const CAPABILITY_NATIVE_SCALAR_GGML_CPU: &str = "cpu_strata_sc117_scalar_reference_fp16_v1";
 #[cfg(feature = "native-scalar-reference")]
@@ -112,6 +114,40 @@ pub struct ServerHello {
 pub struct RawTokenInputMeta {
     pub token: usize,
     pub values: u64,
+}
+
+#[cfg(feature = "native-ggml-cpu")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RawProjectionInputMeta {
+    token: usize,
+    slot: usize,
+    expert: u32,
+    local: u32,
+    values: u64,
+}
+
+#[cfg(feature = "native-ggml-cpu")]
+#[derive(Debug, Clone, PartialEq)]
+pub struct GroupedProjectionSlotOutput {
+    pub token: usize,
+    pub slot: usize,
+    pub expert: u32,
+    pub rank: u32,
+    pub local: u32,
+    pub values: Vec<f32>,
+}
+
+#[cfg(feature = "native-ggml-cpu")]
+#[derive(Debug, Clone, PartialEq)]
+pub struct GroupedProjectionBatchOutput {
+    pub stamp: moe::Stamp,
+    pub attempt: u64,
+    pub dispatch_hidden: usize,
+    pub input_columns: usize,
+    pub output_columns: usize,
+    /// Ordered by (token, route slot), before any route weighting or reduction.
+    pub slots: Vec<GroupedProjectionSlotOutput>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -215,11 +251,21 @@ pub enum Request {
         inputs: Vec<RawTokenInputMeta>,
         activation_bytes: u64,
     },
+    /// Bounded raw FP32 per-slot projection activations follow the identity header.
+    #[cfg(feature = "native-ggml-cpu")]
+    ExecNativeGroupedProjectionRawF32 {
+        dispatch: routing::RankDispatch,
+        attempt: u64,
+        inputs: Vec<RawProjectionInputMeta>,
+        activation_bytes: u64,
+    },
     #[cfg(feature = "native-ggml-cpu")]
     ExecNativeGroupedMatrix {
         dispatch: routing::RankDispatch,
         attempt: u64,
         inputs: Vec<(usize, Vec<f32>)>,
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        projection_inputs: Option<Vec<crate::native_ggml_cpu::GroupedProjectionInput>>,
     },
     Load {
         artifact_sha256: String,
@@ -1944,6 +1990,104 @@ fn native_raw_f32_frame(
 }
 
 #[cfg(feature = "native-ggml-cpu")]
+fn native_grouped_projection_raw_f32_frame(
+    dispatch: routing::RankDispatch,
+    attempt: u64,
+    inputs: &[crate::native_ggml_cpu::GroupedProjectionInput],
+) -> Result<(Vec<u8>, Vec<u8>)> {
+    if inputs.is_empty()
+        || inputs.len() > 4096
+        || inputs.iter().any(|input| {
+            input.values.is_empty()
+                || input.values.len() > 65536
+                || input.values.iter().any(|value| !value.is_finite())
+        })
+    {
+        return Err(invalid("grouped projection raw FP32 input metadata or values"));
+    }
+    let count = inputs.iter().try_fold(0usize, |n, input| {
+        n.checked_add(input.values.len())
+    }).and_then(|n| n.checked_mul(4))
+      .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES)
+      .ok_or_else(|| invalid("grouped projection raw FP32 input size"))?;
+    let metadata = inputs.iter().map(|input| RawProjectionInputMeta {
+        token: input.token,
+        slot: input.slot,
+        expert: input.expert,
+        local: input.local,
+        values: input.values.len() as u64,
+    }).collect();
+    let header = encode(&Request::ExecNativeGroupedProjectionRawF32 {
+        dispatch,
+        attempt,
+        inputs: metadata,
+        activation_bytes: count as u64,
+    })?;
+    if header.len().checked_add(count).is_none_or(|n| n > MAX_MESSAGE_BYTES) {
+        return Err(invalid("grouped projection raw FP32 frame size"));
+    }
+    let mut body = Vec::new();
+    body.try_reserve_exact(count).map_err(|_| invalid("grouped projection raw FP32 allocation"))?;
+    for input in inputs {
+        for value in &input.values {
+            body.extend_from_slice(&value.to_le_bytes());
+        }
+    }
+    Ok((header, body))
+}
+
+#[cfg(feature = "native-ggml-cpu")]
+fn read_native_projection_raw_f32(
+    input: &mut impl BufRead,
+    header_bytes: usize,
+    declared: u64,
+    metadata: Vec<RawProjectionInputMeta>,
+) -> Result<Vec<crate::native_ggml_cpu::GroupedProjectionInput>> {
+    use std::collections::BTreeSet;
+    if metadata.is_empty() || metadata.len() > 4096 || metadata.iter().any(|m| m.values == 0 || m.values > 65536) {
+        return Err(invalid("grouped projection raw FP32 metadata"));
+    }
+    let mut identities = BTreeSet::new();
+    if metadata.iter().any(|m| !identities.insert((m.token, m.slot))) {
+        return Err(invalid("grouped projection raw FP32 duplicate slot"));
+    }
+    let count = metadata.iter().try_fold(0u64, |n, m| n.checked_add(m.values))
+        .and_then(|n| n.checked_mul(4))
+        .filter(|&n| n <= MAX_RAW_ACTIVATION_BYTES as u64)
+        .ok_or_else(|| invalid("grouped projection raw FP32 input size"))?;
+    if count != declared {
+        return Err(invalid("grouped projection raw FP32 byte count"));
+    }
+    let body = read_raw_body(input, header_bytes, declared, true)?;
+    let mut offset = 0usize;
+    let mut rows = Vec::with_capacity(metadata.len());
+    for meta in metadata {
+        let len = usize::try_from(meta.values).map_err(|_| invalid("grouped projection row size"))?;
+        let row_bytes = len.checked_mul(4).ok_or_else(|| invalid("grouped projection row size"))?;
+        let end = offset.checked_add(row_bytes).ok_or_else(|| invalid("grouped projection row bounds"))?;
+        let raw = body.get(offset..end).ok_or_else(|| invalid("grouped projection raw body bounds"))?;
+        let values = raw.chunks_exact(4).map(|chunk| {
+            f32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]])
+        }).collect::<Vec<_>>();
+        if values.iter().any(|value| !value.is_finite()) {
+            return Err(invalid("grouped projection raw FP32 non-finite activation"));
+        }
+        rows.push(crate::native_ggml_cpu::GroupedProjectionInput {
+            token: meta.token,
+            slot: meta.slot,
+            expert: meta.expert,
+            local: meta.local,
+            values,
+        });
+        offset = end;
+    }
+    if offset != body.len() {
+        return Err(invalid("grouped projection raw body trailing bytes"));
+    }
+    Ok(rows)
+}
+
+#[cfg(feature = "native-ggml-cpu")]
 fn native_grouped_matrix_raw_f32_frame(
     dispatch: routing::RankDispatch,
     attempt: u64,
@@ -2780,6 +2924,34 @@ fn serve_impl(
                         dispatch,
                         attempt,
                         inputs,
+                        projection_inputs: None,
+                    }
+                }
+
+                #[cfg(feature = "native-ggml-cpu")]
+                Request::ExecNativeGroupedProjectionRawF32 {
+                    dispatch,
+                    attempt,
+                    inputs,
+                    activation_bytes,
+                } => {
+                    let projection_inputs = match read_native_projection_raw_f32(
+                        input,
+                        header_bytes,
+                        activation_bytes,
+                        inputs,
+                    ) {
+                        Ok(inputs) => inputs,
+                        Err(error) => {
+                            send_reply(output, &Reply::Refused { error: error.clone() })?;
+                            return Err(error); // Unknown body boundary; never reuse this stream.
+                        }
+                    };
+                    Request::ExecNativeGroupedMatrix {
+                        dispatch,
+                        attempt,
+                        inputs: Vec::new(),
+                        projection_inputs: Some(projection_inputs),
                     }
                 }
                 Request::ExecRaw {
@@ -2925,6 +3097,9 @@ fn serve_impl(
                         hello
                             .capabilities
                             .push(CAPABILITY_NATIVE_GROUPED_MATRIX_CPU.into());
+                        hello
+                            .capabilities
+                            .push(CAPABILITY_NATIVE_GROUPED_PROJECTION_CPU.into());
                     }
                     if let Some(provider) = executor.as_ref() {
                         hello.capabilities = vec![
@@ -3333,6 +3508,7 @@ fn serve_impl(
                 dispatch,
                 attempt,
                 inputs,
+                projection_inputs,
             } => {
                 let Some(worker) = grouped_matrix_worker.as_mut() else {
                     send_reply(
@@ -3341,6 +3517,10 @@ fn serve_impl(
                     )?;
                     continue;
                 };
+                if projection_inputs.is_some() && !inputs.is_empty() {
+                    send_reply(output, &refuse("INVALID_INPUT", "mixed grouped projection inputs"))?;
+                    continue;
+                }
                 let stamp = dispatch.stamp.clone();
                 let event = |event| Reply::Event {
                     event: WorkerEvent {
@@ -3351,19 +3531,33 @@ fn serve_impl(
                     },
                 };
                 send_reply(output, &event(EventKind::Started))?;
-                match worker.execute(&dispatch, &inputs, attempt) {
-                    Ok(result) => {
-                        send_reply(output, &Reply::NativeGgmlResult { output: result })?;
-                        execs += 1;
+                if let Some(projection_inputs) = projection_inputs {
+                    match worker.execute_projection(&dispatch, &projection_inputs, attempt) {
+                        Ok(result) => {
+                            send_reply(output, &Reply::NativeGgmlUnweightedF32 { output: result })?;
+                            execs += 1;
+                        }
+                        Err(error) => {
+                            send_reply(
+                                output,
+                                &event(EventKind::Failed { error: error.clone() }),
+                            )?;
+                            return Err(error); // A started projection attempt is never replayed.
+                        }
                     }
-                    Err(error) => {
-                        send_reply(
-                            output,
-                            &event(EventKind::Failed {
-                                error: error.clone(),
-                            }),
-                        )?;
-                        return Err(error); // An uncertain started matrix attempt is never replayed.
+                } else {
+                    match worker.execute(&dispatch, &inputs, attempt) {
+                        Ok(result) => {
+                            send_reply(output, &Reply::NativeGgmlResult { output: result })?;
+                            execs += 1;
+                        }
+                        Err(error) => {
+                            send_reply(
+                                output,
+                                &event(EventKind::Failed { error: error.clone() }),
+                            )?;
+                            return Err(error); // An uncertain started matrix attempt is never replayed.
+                        }
                     }
                 }
             }
@@ -3685,7 +3879,8 @@ fn serve_impl(
                 return Err(error);
             }
             #[cfg(feature = "native-ggml-cpu")]
-            Request::ExecNativeGroupedMatrixRawF32 { .. } => {
+            Request::ExecNativeGroupedMatrixRawF32 { .. }
+            | Request::ExecNativeGroupedProjectionRawF32 { .. } => {
                 let error = Error::new(
                     "SESSION_PROTOCOL",
                     "grouped matrix raw FP32 body was not decoded",
@@ -4859,6 +5054,107 @@ impl Session {
         }
     }
 
+    /// Execute a per-slot rectangular projection and return unweighted FP32 rows.
+    /// This intermediate path does not call the Collector or apply route coefficients.
+    #[cfg(feature = "native-ggml-cpu")]
+    fn exec_grouped_projection_rank(
+        &mut self,
+        dispatch: routing::RankDispatch,
+        inputs: Vec<crate::native_ggml_cpu::GroupedProjectionInput>,
+        attempt: u64,
+        input_columns: usize,
+        output_columns: usize,
+        deadline: Instant,
+    ) -> Result<crate::native_ggml_cpu::UnweightedF32Output> {
+        if !self.usable
+            || self.native_backend != Some(NativeBackend::GroupedMatrix)
+            || !self.hello.capabilities.iter().any(|c| c == CAPABILITY_NATIVE_GROUPED_PROJECTION_CPU)
+            || self.grouped_matrix_binding.as_ref().is_none_or(|binding| {
+                binding.rank != self.rank
+                    || binding.model_revision != dispatch.stamp.model_revision
+                    || binding.layer != dispatch.stamp.layer
+                    || binding.epoch != dispatch.stamp.epoch
+                    || binding.columns != input_columns
+                    || binding.rows != output_columns
+            })
+            || dispatch.rank != self.rank
+            || attempt == 0
+        {
+            return Err(invalid("grouped projection capability, binding, rank or attempt"));
+        }
+        let next_execs = self.traffic.execs.checked_add(1)
+            .ok_or_else(|| invalid("grouped projection execution count overflow"))?;
+        let next_raw = self.traffic.native_ggml_raw_execs.checked_add(1)
+            .ok_or_else(|| invalid("grouped projection raw execution count overflow"))?;
+        let (header, body) = native_grouped_projection_raw_f32_frame(
+            dispatch.clone(),
+            attempt,
+            &inputs,
+        )?;
+        if let Err(error) = self.write_parts_until(&[&header, &body], true, deadline) {
+            self.usable = false;
+            return Err(error);
+        }
+        self.traffic.native_ggml_raw_execs = next_raw;
+        self.traffic.execs = next_execs;
+        let started = match self.reply_until(deadline) {
+            Ok(reply) => reply,
+            Err(error) => {
+                self.usable = false;
+                return Err(error);
+            }
+        };
+        if !matches!(started, Reply::Event { event: WorkerEvent { ref stamp, rank, attempt: n, event: EventKind::Started } }
+            if *stamp == dispatch.stamp && rank == self.rank && n == attempt)
+        {
+            self.usable = false;
+            return Err(invalid("grouped projection start reply identity"));
+        }
+        let reply = match self.reply_until(deadline) {
+            Ok(reply) => reply,
+            Err(error) => {
+                self.usable = false;
+                return Err(error);
+            }
+        };
+        match reply {
+            Reply::NativeGgmlUnweightedF32 { output }
+                if output.stamp == dispatch.stamp
+                    && output.rank == self.rank
+                    && output.attempt == attempt
+                    && output.slots.len() == dispatch.slots.len()
+                    && output.rows.len() == dispatch.slots.len()
+                    && output.rows.iter().all(|row| {
+                        row.len() == output_columns && row.iter().all(|value| value.is_finite())
+                    })
+                    && output.slots.iter().zip(&dispatch.slots).all(|(slot, entry)| {
+                        slot.token == entry.slot.token
+                            && slot.slot == entry.slot.slot
+                            && slot.expert == entry.slot.expert
+                            && slot.local == entry.slot.local
+                    }) => Ok(output),
+            Reply::Event {
+                event: WorkerEvent {
+                    stamp,
+                    rank,
+                    attempt: n,
+                    event: EventKind::Failed { error },
+                },
+            } if stamp == dispatch.stamp && rank == self.rank && n == attempt => {
+                self.usable = false;
+                Err(error)
+            }
+            Reply::Refused { error } => {
+                self.usable = false;
+                Err(error)
+            }
+            _ => {
+                self.usable = false;
+                Err(invalid("grouped projection result reply identity or shape"))
+            }
+        }
+    }
+
     /// Execute one grouped-matrix rank request through the persistent Session worker.
     /// The worker returns raw unweighted FP16 values; the coordinator Collector remains
     /// the only place where route coefficients are applied.
@@ -5108,6 +5404,182 @@ impl Session {
                 Err(invalid("native GGML result reply identity"))
             }
         }
+    }
+
+    /// Execute one rectangular, resident GGML projection with per-route-slot inputs.
+    /// The result is staged atomically in route-slot order and remains unweighted FP32.
+    /// The caller must reserve the external R53 identity before calling this experimental
+    /// local-ledger adapter; this method's ledger is process-local and is not R53.
+    #[cfg(feature = "native-ggml-cpu")]
+    pub fn exec_grouped_projection_batch(
+        sessions: &mut [Session],
+        problem: &routing::RoutingProblem,
+        inputs: &[crate::native_ggml_cpu::GroupedProjectionInput],
+        ledger: &crate::native_ledger::NativeBatchLedger,
+        timeout: Duration,
+    ) -> Result<GroupedProjectionBatchOutput> {
+        if timeout.is_zero()
+            || timeout > Duration::from_secs(60)
+            || inputs.is_empty()
+            || [&problem.stamp.run_id, &problem.stamp.plan_id]
+                .iter()
+                .any(|value| value.trim().is_empty() || value.len() > 256)
+        {
+            return Err(invalid("grouped projection batch identity, shape or timeout"));
+        }
+        routing::validate(problem)?;
+        let dispatch = routing::dispatch(problem)?;
+        if dispatch.slots.is_empty() || inputs.len() != dispatch.slots.len() {
+            return Err(invalid("grouped projection batch slot coverage"));
+        }
+        let mut provided = BTreeMap::new();
+        for input in inputs {
+            if input.values.is_empty()
+                || input.values.len() > 65536
+                || input.values.iter().any(|value| !value.is_finite())
+                || provided.insert((input.token, input.slot), input.clone()).is_some()
+            {
+                return Err(invalid("grouped projection input identity, duplicate or value"));
+            }
+        }
+        type ProjectionRankWork = (
+            usize,
+            routing::RankDispatch,
+            Vec<crate::native_ggml_cpu::GroupedProjectionInput>,
+        );
+        let mut selected: Vec<ProjectionRankWork> = Vec::new();
+        let mut first_binding: Option<crate::native_ggml_cpu::GroupedMatrixBinding> = None;
+        let mut resident_payload_bytes = 0u64;
+        let mut activation_bytes = 0usize;
+        for rank in dispatch.ranks.into_iter().filter(|rank| !rank.slots.is_empty()) {
+            let matches: Vec<_> = sessions.iter().enumerate()
+                .filter(|(_, session)| session.rank == rank.rank)
+                .collect();
+            if matches.len() != 1 {
+                return Err(invalid("grouped projection participant session missing or duplicate"));
+            }
+            let (index, session) = matches[0];
+            let binding = session.grouped_matrix_binding.as_ref()
+                .ok_or_else(|| invalid("grouped projection participant has no resident binding"))?;
+            resident_payload_bytes = resident_payload_bytes
+                .checked_add(session.traffic.weight_bytes_sent)
+                .filter(|&bytes| bytes <= crate::native_ggml_cpu::MAX_NATIVE_PAYLOAD_BYTES)
+                .ok_or_else(|| invalid("grouped projection Sessions exceed resident payload budget"))?;
+            if !session.usable
+                || session.native_backend != Some(NativeBackend::GroupedMatrix)
+                || !session.hello.capabilities.iter()
+                    .any(|capability| capability == CAPABILITY_NATIVE_GROUPED_PROJECTION_CPU)
+                || binding.rank != rank.rank
+                || binding.model_revision != problem.stamp.model_revision
+                || binding.layer != problem.stamp.layer
+                || binding.epoch != problem.stamp.epoch
+                || binding.rows == 0
+                || binding.columns == 0
+                || binding.residents.iter().map(|(_, local)| *local).collect::<Vec<_>>()
+                    != rank.resident_order
+                || rank.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+            {
+                return Err(invalid("grouped projection binding differs from routing identity"));
+            }
+            if let Some(first) = first_binding.as_ref() {
+                if binding.model_revision != first.model_revision
+                    || binding.layer != first.layer
+                    || binding.tensor != first.tensor
+                    || binding.ggml_type != first.ggml_type
+                    || binding.epoch != first.epoch
+                    || binding.rows != first.rows
+                    || binding.columns != first.columns
+                {
+                    return Err(invalid("grouped projection rank bindings are inconsistent"));
+                }
+            } else {
+                first_binding = Some(binding.clone());
+            }
+            let mut rank_inputs = Vec::with_capacity(rank.slots.len());
+            for entry in &rank.slots {
+                let input = provided.remove(&(entry.slot.token, entry.slot.slot))
+                    .ok_or_else(|| invalid("grouped projection slot input is missing"))?;
+                if input.expert != entry.slot.expert
+                    || input.local != entry.slot.local
+                    || input.values.len() != binding.columns
+                {
+                    return Err(invalid("grouped projection slot binding or activation shape"));
+                }
+                activation_bytes = activation_bytes.checked_add(input.values.len().checked_mul(4)
+                    .ok_or_else(|| invalid("grouped projection activation size overflow"))?)
+                    .filter(|&bytes| bytes <= MAX_RAW_ACTIVATION_BYTES)
+                    .ok_or_else(|| invalid("grouped projection batch activation budget"))?;
+                rank_inputs.push(input);
+            }
+            selected.push((index, rank, rank_inputs));
+        }
+        if !provided.is_empty() || selected.is_empty() {
+            return Err(invalid("grouped projection has unmatched slot inputs"));
+        }
+        let binding = first_binding.ok_or_else(|| invalid("grouped projection has no resident binding"))?;
+        let mut output_slots = Vec::with_capacity(dispatch.slots.len());
+        claim_identity(&problem.stamp, false)?;
+        let attempt = next_attempt()?;
+        ledger.reserve(&problem.stamp, attempt)?;
+        let deadline = Instant::now() + timeout;
+        let participating: Vec<_> = selected.iter().map(|(index, _, _)| *index).collect();
+        for (index, rank, rank_inputs) in selected {
+            match sessions[index].exec_grouped_projection_rank(
+                rank,
+                rank_inputs,
+                attempt,
+                binding.columns,
+                binding.rows,
+                deadline,
+            ) {
+                Ok(output) => {
+                    for (slot, values) in output.slots.into_iter().zip(output.rows) {
+                        output_slots.push(GroupedProjectionSlotOutput {
+                            token: slot.token,
+                            slot: slot.slot,
+                            expert: slot.expert,
+                            rank: output.rank,
+                            local: slot.local,
+                            values,
+                        });
+                    }
+                }
+                Err(error) => {
+                    for participant in &participating {
+                        sessions[*participant].usable = false;
+                    }
+                    return Err(error);
+                }
+            }
+        }
+        if output_slots.len() != dispatch.slots.len() {
+            for participant in &participating {
+                sessions[*participant].usable = false;
+            }
+            return Err(invalid("grouped projection output coverage"));
+        }
+        output_slots.sort_by_key(|slot| (slot.token, slot.slot));
+        if output_slots.windows(2).any(|pair| (pair[0].token, pair[0].slot) >= (pair[1].token, pair[1].slot))
+            || output_slots.iter().any(|slot| {
+                slot.values.len() != binding.rows || slot.values.iter().any(|value| !value.is_finite())
+            })
+        {
+            for participant in &participating {
+                sessions[*participant].usable = false;
+            }
+            return Err(invalid("grouped projection output order or shape"));
+        }
+        Ok(GroupedProjectionBatchOutput {
+            stamp: problem.stamp.clone(),
+            attempt,
+            dispatch_hidden: problem.hidden,
+            input_columns: binding.columns,
+            output_columns: binding.rows,
+            slots: output_slots,
+        })
     }
 
     /// One native rank wave. On any error no output is returned and every

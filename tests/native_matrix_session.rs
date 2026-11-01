@@ -544,3 +544,93 @@ fn grouped_ggml_session_failure_discards_all_rank_outputs_and_poisons_workers() 
         let _ = session.close_input(TIMEOUT);
     }
 }
+
+
+#[test]
+fn grouped_ggml_per_slot_projection_keeps_rectangular_shape_and_unweighted_outputs() {
+    use voltafabric::native_ggml_cpu::GroupedProjectionInput;
+
+    let rows = 64;
+    let columns = H;
+    let mut weights = Vec::new();
+    for code in [1_u8, 2, 4] {
+        weights.extend(stack(rows, [0x00, 0x3c], code));
+    }
+    let binding = binding_shape(
+        7,
+        &[(3, 1), (18, 2), (40, 0)],
+        &weights,
+        "r659-session-model",
+        5,
+        rows,
+        columns,
+    );
+    let checkpoint = gguf_fixture(
+        "rectangular-projection",
+        &binding.tensor,
+        [columns as u64, rows as u64, 3],
+        &weights,
+    );
+    let mut session = Session::connect(&endpoint(7), TIMEOUT).unwrap();
+    session
+        .load_grouped_matrix_gguf_tensor(&binding, &checkpoint, &binding.tensor, TIMEOUT)
+        .unwrap();
+    let mut sessions = vec![session];
+    let problem = routed_problem(91);
+    let mut inputs = Vec::new();
+    for (token, routes) in problem.routes.iter().enumerate() {
+        for (slot, route) in routes.iter().enumerate() {
+            let local = binding.residents.iter()
+                .find(|(expert, _)| *expert == route.expert)
+                .map(|(_, local)| *local)
+                .unwrap();
+            let mut values = vec![0.0_f32; columns];
+            values[0] = (token * 3 + slot + 2) as f32;
+            inputs.push(GroupedProjectionInput {
+                token,
+                slot,
+                expert: route.expert,
+                local,
+                values,
+            });
+        }
+    }
+
+    // Preflight rejects incomplete slot coverage before the worker starts or identity is consumed.
+    let ledger = ledger("rectangular-projection");
+    let mut incomplete = inputs.clone();
+    incomplete.pop();
+    assert!(Session::exec_grouped_projection_batch(
+        &mut sessions, &problem, &incomplete, &ledger, TIMEOUT,
+    ).is_err());
+    assert!(sessions[0].is_usable());
+
+    let output = Session::exec_grouped_projection_batch(
+        &mut sessions, &problem, &inputs, &ledger, TIMEOUT,
+    ).unwrap();
+    assert_eq!(output.dispatch_hidden, H);
+    assert_eq!(output.input_columns, columns);
+    assert_eq!(output.output_columns, rows);
+    assert_eq!(output.slots.len(), inputs.len());
+
+    // Independent scalar Q8_0 oracle; route coefficients are intentionally absent.
+    for (actual, input) in output.slots.iter().zip(&inputs) {
+        assert_eq!((actual.token, actual.slot, actual.expert, actual.local),
+            (input.token, input.slot, input.expert, input.local));
+        let physical = binding.residents.iter()
+            .position(|(expert, _)| *expert == input.expert)
+            .unwrap();
+        for row in 0..rows {
+            let offset = physical * rows * Q8_0_ROW_BYTES + row * Q8_0_ROW_BYTES;
+            let scale = u16::from_le_bytes([weights[offset], weights[offset + 1]]);
+            let quant = weights[offset + 2] as i8;
+            let expected = f64::from(input.values[0])
+                * voltafabric::completion::decode_fp16(scale).unwrap()
+                * f64::from(quant);
+            assert_eq!(actual.values[row], expected as f32);
+        }
+    }
+    // The first route weight is 0.25; this intermediate result stays unweighted.
+    assert_eq!(output.slots[0].values[0], 4.0);
+    let _ = sessions.pop().unwrap().close(TIMEOUT);
+}

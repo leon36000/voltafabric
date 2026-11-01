@@ -745,6 +745,18 @@ pub struct GroupedMatrixBinding {
     pub residents: Vec<(u32, u32)>, // (expert, local), in physical stack order
     pub sha256: String,
 }
+/// Per-route-slot input for one resident GGML projection. Routing weight is
+/// deliberately absent; the caller owns route weighting and downstream collection.
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct GroupedProjectionInput {
+    pub token: usize,
+    pub slot: usize,
+    pub expert: u32,
+    pub local: u32,
+    pub values: Vec<f32>,
+}
+
 
 /// A digest-checked, CPU-resident GGML matrix stack owned by one rank.
 pub struct GroupedMatrixResident {
@@ -819,6 +831,124 @@ impl GroupedMatrixRankWorker {
 
     pub fn binding(&self) -> &GroupedMatrixBinding {
         self.resident.binding()
+    }
+
+    /// Execute a rectangular projection with activation rows addressed by routed slot.
+    /// Output rows remain unweighted FP32; no Collector or route coefficient is applied.
+    pub fn execute_projection(
+        &mut self,
+        dispatch: &crate::routing::RankDispatch,
+        inputs: &[GroupedProjectionInput],
+        attempt: u64,
+    ) -> Result<UnweightedF32Output> {
+        use crate::{completion::OutputSlot, invalid};
+        if self.terminal {
+            return Err(crate::Error::new(
+                "BATCH_ABORTED",
+                "grouped matrix rank worker is terminal",
+            ));
+        }
+        let work = (|| -> Result<UnweightedF32Output> {
+            let binding = &self.resident.binding;
+            if attempt == 0
+                || attempt <= self.last_attempt
+                || dispatch.rank != binding.rank
+                || dispatch.slots.is_empty()
+                || dispatch.slots.len() > 512
+                || inputs.len() != dispatch.slots.len()
+                || dispatch.slots.len().checked_mul(binding.rows)
+                    .is_none_or(|n| n > 16_777_216)
+                || dispatch.stamp.model_revision != binding.model_revision
+                || dispatch.stamp.layer != binding.layer
+                || dispatch.stamp.epoch != binding.epoch
+                || [&dispatch.stamp.run_id, &dispatch.stamp.plan_id]
+                    .iter()
+                    .any(|value| value.trim().is_empty() || value.len() > 256)
+                || binding.residents.iter().map(|(_, local)| *local).collect::<Vec<_>>()
+                    != dispatch.resident_order
+                || dispatch.slots.iter().any(|entry| {
+                    binding.residents.get(entry.physical_expert)
+                        != Some(&(entry.slot.expert, entry.slot.local))
+                })
+            {
+                return Err(invalid("grouped projection dispatch identity or shape"));
+            }
+            let identity = serde_json::to_string(&dispatch.stamp)
+                .map_err(|_| invalid("grouped projection identity encoding"))?;
+            if self.attempted.len() >= 4096 || self.attempted.contains(&identity) {
+                return Err(crate::Error::new(
+                    "BATCH_REPLAY",
+                    "grouped projection identity was already attempted",
+                ));
+            }
+            if self.scope.as_ref().is_some_and(|scope| {
+                scope.0 != dispatch.stamp.run_id || scope.1 != dispatch.stamp.plan_id
+            }) {
+                return Err(invalid("grouped projection run/plan scope changed"));
+            }
+
+            let mut total_values = 0usize;
+            let mut input_ids = std::collections::BTreeSet::new();
+            let mut flat_inputs = Vec::new();
+            let mut expert_ids = Vec::new();
+            for (entry, input) in dispatch.slots.iter().zip(inputs) {
+                if input.token != entry.slot.token
+                    || input.slot != entry.slot.slot
+                    || input.expert != entry.slot.expert
+                    || input.local != entry.slot.local
+                    || input.values.len() != binding.columns
+                    || input.values.is_empty()
+                    || input.values.iter().any(|value| !value.is_finite())
+                    || !input_ids.insert((input.token, input.slot))
+                {
+                    return Err(invalid("grouped projection slot identity or activation shape"));
+                }
+                total_values = total_values.checked_add(input.values.len())
+                    .filter(|&n| n <= 16_777_216)
+                    .ok_or_else(|| invalid("grouped projection activation budget"))?;
+                flat_inputs.extend_from_slice(&input.values);
+                expert_ids.push(
+                    u32::try_from(entry.physical_expert)
+                        .map_err(|_| invalid("grouped projection physical expert overflow"))?,
+                );
+            }
+
+            self.attempted.insert(identity);
+            self.last_attempt = attempt;
+            if self.scope.is_none() {
+                self.scope = Some((
+                    dispatch.stamp.run_id.clone(),
+                    dispatch.stamp.plan_id.clone(),
+                ));
+            }
+            let values = self.resident.inner.forward(&flat_inputs, &expert_ids)
+                .map_err(invalid)?;
+            let expected = dispatch.slots.len().checked_mul(binding.rows)
+                .ok_or_else(|| invalid("grouped projection output size overflow"))?;
+            if values.len() != expected || values.iter().any(|value| !value.is_finite()) {
+                return Err(invalid("grouped projection output shape or value"));
+            }
+            let rows = values.chunks_exact(binding.rows)
+                .map(|row| row.to_vec())
+                .collect();
+            let slots = dispatch.slots.iter().map(|entry| OutputSlot {
+                token: entry.slot.token,
+                slot: entry.slot.slot,
+                expert: entry.slot.expert,
+                local: entry.slot.local,
+            }).collect();
+            Ok(UnweightedF32Output {
+                stamp: dispatch.stamp.clone(),
+                rank: dispatch.rank,
+                attempt,
+                slots,
+                rows,
+            })
+        })();
+        if work.is_err() {
+            self.terminal = true;
+        }
+        work
     }
 
     /// Run one already-dispatched rank wave. Any error after this method is called
