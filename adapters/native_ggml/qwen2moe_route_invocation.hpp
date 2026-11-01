@@ -29,6 +29,7 @@ public:
     // output must not be published, even if GGML itself reported success.
     bool accepts(ggml_status graph_status);
     bool graph_reuse_allowed() const;
+    bool ready() const { return !invalid_ && host_gate_ != nullptr; }
     size_t registered_layers() const { return transactions_.size(); }
 
 private:

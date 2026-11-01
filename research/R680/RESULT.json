@@ -1,0 +1,35 @@
+{
+  "round": "R680",
+  "status": "CPU_CALLBACK_BRIDGE_FIXTURE_PASS_REAL_LLAMA_CONTEXT_RUNTIME_PENDING",
+  "donor": "ggml-org/llama.cpp",
+  "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "donor_license": "MIT",
+  "depends_on": ["R678 Qwen2MoERouteInvocation", "R679 llama.cpp Qwen2MoE route-hook patch"],
+  "files": [
+    "adapters/native_ggml/CMakeLists.txt",
+    "adapters/native_ggml/qwen2moe_route_invocation.hpp",
+    "adapters/native_ggml/qwen2moe_llama_route_bridge.hpp",
+    "adapters/native_ggml/qwen2moe_llama_route_bridge.cpp",
+    "adapters/native_ggml/qwen2moe_llama_route_bridge_test.cpp"
+  ],
+  "llama_incremental_patch": "llama.cpp-r680.patch",
+  "llama_incremental_patch_scope": "Adds only get_vf_route_hooks() after the setter added by R679",
+  "bridge_cpu_build": "PASS AArch64 C++17 -Wall -Wextra -Werror",
+  "focused_ctests": {
+    "passed": 6,
+    "skipped": 1,
+    "skip_reason": "process-level VFR3 bridge fixture paths were not provided"
+  },
+  "independent_fixture_output": [17.4, 19.4],
+  "identity_fields_checked": ["run", "model", "plan", "layer", "epoch", "batch", "attempt"],
+  "missing_layer_host_refusal": true,
+  "pinned_llama_library_rebuild_after_incremental_getter": "PASS",
+  "donor_diff_check": "PASS",
+  "actual_llama_context_callback_runtime": false,
+  "rust_session_wired": false,
+  "checkpoint_generation": false,
+  "gpu_cuda_graph_or_inter_pc": false,
+  "production_r53_or_performance": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next": "R681: exercise hook attach/detach and real process_ubatch callback delivery through a pinned donor CPU runtime fixture before checkpoint loading"
+}

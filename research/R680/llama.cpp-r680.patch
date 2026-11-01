@@ -1,0 +1,11 @@
+diff --git a/src/llama-context.h b/src/llama-context.h
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -116,6 +116,7 @@
+     // Internal opt-in hook. The hook object and its userdata must outlive the
+     // llama_context. Currently accepted only for Qwen2MoE graphs.
+     void set_vf_route_hooks(const llm_vf_route_hooks * hooks) { vf_route_hooks = hooks; }
++    const llm_vf_route_hooks * get_vf_route_hooks() const { return vf_route_hooks; }
+ 
+     void set_embeddings (bool value);
+     void set_embeddings_nextn(bool value, bool masked);

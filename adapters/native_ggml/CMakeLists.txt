@@ -49,6 +49,48 @@ target_link_libraries(vf_qwen2moe_route_invocation_test PRIVATE vf_native_ggml)
 target_compile_options(vf_qwen2moe_route_invocation_test PRIVATE -Wall -Wextra -Werror)
 add_test(NAME qwen2moe_route_invocation COMMAND vf_qwen2moe_route_invocation_test)
 
+# Optional callback bridge into the pinned llama.cpp internal Qwen2MoE seam.
+# This compiles only against a separately patched donor worktree; VoltaFabric
+# does not vendor or install llama.cpp as its engine.
+option(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE "Build CPU fixture for pinned llama.cpp route hooks" OFF)
+if(VF_BUILD_LLAMA_QWEN2MOE_BRIDGE)
+  if(NOT VF_LLAMA_SOURCE_DIR OR NOT EXISTS "${VF_LLAMA_SOURCE_DIR}/.git")
+    message(FATAL_ERROR "VF_LLAMA_SOURCE_DIR must name the isolated pinned llama.cpp worktree")
+  endif()
+  execute_process(COMMAND git -C "${VF_LLAMA_SOURCE_DIR}" rev-parse HEAD
+    OUTPUT_VARIABLE vf_llama_revision OUTPUT_STRIP_TRAILING_WHITESPACE RESULT_VARIABLE vf_llama_status)
+  if(NOT vf_llama_status EQUAL 0 OR
+     NOT vf_llama_revision STREQUAL "3cf03257f219afbe7334045ff7c6a06ac68c627d")
+    message(FATAL_ERROR "unexpected llama.cpp source revision")
+  endif()
+  execute_process(COMMAND git -C "${VF_LLAMA_SOURCE_DIR}" status --porcelain -- ggml
+    OUTPUT_VARIABLE vf_llama_ggml_dirty RESULT_VARIABLE vf_llama_status)
+  if(NOT vf_llama_status EQUAL 0 OR NOT vf_llama_ggml_dirty STREQUAL "")
+    message(FATAL_ERROR "llama.cpp GGML dependency modifications are not admitted")
+  endif()
+  file(READ "${VF_LLAMA_SOURCE_DIR}/src/llama-context.h" vf_llama_context_header)
+  file(READ "${VF_LLAMA_SOURCE_DIR}/src/llama-graph.h" vf_llama_graph_header)
+  string(FIND "${vf_llama_context_header}" "get_vf_route_hooks() const" vf_llama_getter_pos)
+  string(FIND "${vf_llama_graph_header}" "struct llm_vf_route_hooks" vf_llama_hooks_pos)
+  if(vf_llama_getter_pos EQUAL -1 OR vf_llama_hooks_pos EQUAL -1)
+    message(FATAL_ERROR "llama.cpp worktree lacks the R679 route-hook adaptation")
+  endif()
+
+  add_library(vf_qwen2moe_llama_route_bridge STATIC qwen2moe_llama_route_bridge.cpp)
+  target_compile_features(vf_qwen2moe_llama_route_bridge PUBLIC cxx_std_17)
+  target_compile_options(vf_qwen2moe_llama_route_bridge PRIVATE -Wall -Wextra -Werror)
+  target_include_directories(vf_qwen2moe_llama_route_bridge PUBLIC
+    "${CMAKE_CURRENT_SOURCE_DIR}"
+    "${VF_LLAMA_SOURCE_DIR}/src"
+    "${VF_LLAMA_SOURCE_DIR}/include")
+  target_link_libraries(vf_qwen2moe_llama_route_bridge PUBLIC vf_native_ggml)
+
+  add_executable(vf_qwen2moe_llama_route_bridge_test qwen2moe_llama_route_bridge_test.cpp)
+  target_compile_options(vf_qwen2moe_llama_route_bridge_test PRIVATE -Wall -Wextra -Werror)
+  target_link_libraries(vf_qwen2moe_llama_route_bridge_test PRIVATE vf_qwen2moe_llama_route_bridge)
+  add_test(NAME qwen2moe_llama_route_bridge COMMAND vf_qwen2moe_llama_route_bridge_test)
+endif()
+
 # VFB3 session result enters the GGML graph atomically and is weighted once.
 add_executable(vf_route_graph_vfr3_test route_graph_vfr3_test.cpp)
 target_link_libraries(vf_route_graph_vfr3_test PRIVATE vf_native_ggml Threads::Threads)

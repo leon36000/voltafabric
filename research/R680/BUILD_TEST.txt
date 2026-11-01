@@ -1,0 +1,26 @@
+Build environment: AArch64 Linux, CPU only
+Pinned GGML/llama.cpp revision: 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+Pinned llama.cpp tree: R679 patch plus the one-line R680 getter patch
+
+Bridge configure:
+cmake -S adapters/native_ggml -B adapters/build-r680 \
+  -DGGML_SOURCE_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-ggml-3cf03257 \
+  -DVF_LLAMA_SOURCE_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/llama-vf-route-r679 \
+  -DVF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON \
+  -DGGML_CUDA=OFF -DGGML_VULKAN=OFF -DGGML_METAL=OFF \
+  -DGGML_BUILD_TESTS=OFF -DGGML_BUILD_EXAMPLES=OFF
+Build target: vf_qwen2moe_llama_route_bridge_test, exit 0
+
+Focused CTest result:
+6 passed, 0 failed, 1 skipped.
+Passed: native_provider, route_graph_transaction, route_graph_dynamic_capture,
+        qwen2moe_route_invocation, qwen2moe_llama_route_bridge, route_graph_vfr3.
+Skipped: route_graph_vfr3_bridge_process (external process fixture paths absent).
+
+Separate pinned donor rebuild after R680 getter:
+cmake --build .runs/llama-vf-route-r679-build --target llama -j2
+Result: Built target llama, exit 0.
+git diff --check in pinned llama.cpp worktree: pass.
+
+The GitLab pipeline runs repository-configured scans/fallback only; it is not
+evidence for this local C++ build or CTest result.
