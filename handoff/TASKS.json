@@ -10289,7 +10289,7 @@
     "updated_utc": "2026-11-01 09:21:59 UTC"
   },
   "r676_host_invocation_gate": {
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_HOST_INVOCATION_GATE_CPU_CTEST_3_PASS_PIPELINE_2291_PENDING",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_DYNAMIC_OWNER_PROJECTION_CPU_CTEST_3_PASS_PIPELINE_2293_RUNNING",
     "branch": "r663-qwen2moe-collector-bridge-20261101",
     "source_commit": "dab94350f7fa6be4640ba5d019f37518c585a643",
     "objective": "Provide an explicit host contract for one-shot expert-route transactions on llama.cpp reusable graph architecture.",
@@ -10304,18 +10304,48 @@
     ],
     "manifest_sha256": "3026fd6fb4b5a082d6cf8d37c37e381ccf5aa7d6aef3f5f3230104ebe21f8cdf",
     "pipeline_2291": {
-      "status": "pending",
+      "status": "success",
       "jobs": {
-        "pc4_gitleaks": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       }
     },
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "readback_files_verified": 6,
     "readback_verified_utc": "2026-11-01 09:25:36 UTC",
-    "next_action": "R677: integrate the barrier into the exact pinned llama.cpp Qwen2MoE path while preserving shared/residual and one-time weighting."
+    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
+  },
+  "r677_dynamic_owner_projection": {
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_DYNAMIC_OWNER_PROJECTION_CPU_CTEST_3_PASS_PIPELINE_2293_RUNNING",
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "source_commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
+    "objective": "Resolve each dynamic Qwen2MoE selected expert ID to its owner before the VoltaFabric Collector, preserving route slot order and single coefficient application.",
+    "changes": [
+      "Added per-expert owner projection for dynamic top-k IDs, evaluated before Collector dispatch.",
+      "Rejects out-of-range expert IDs, malformed owner tables and ambiguous route/per-expert owner mappings before any Collector call.",
+      "Preserves the donor's final route coefficients unchanged for the Collector."
+    ],
+    "validation": "AArch64 CPU C++17 -Wall -Wextra -Werror; CTest route_graph_transaction, route_graph_dynamic_capture and route_graph_vfr3: 3/3 PASS; independent FP64 output [0.75,1.25,7.5,12.5]; 7 exact file readbacks.",
+    "limitations": [
+      "Synthetic Q8_0 fixture only; this does not yet integrate the pinned llama.cpp callback.",
+      "No real checkpoint/model or full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance comparison.",
+      "R677 pipeline 2293 scans are still running/pending and are not C++ build/test evidence."
+    ],
+    "manifest_sha256": "8b3fdec782ef04309d13fb06d12c1dff4a4fae499124c1a002d4002b1ae69253",
+    "readback_files_verified": 7,
+    "readback_verified_utc": "2026-11-01 09:36:45 UTC",
+    "pipeline_2293": {
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
   }
-
 }

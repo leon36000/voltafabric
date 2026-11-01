@@ -12421,12 +12421,12 @@
     "test_result": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; 6 GitLab files read back exactly.",
     "test_scope": "Synthetic Q8_0 route only; no llama callback, real model/checkpoint, full generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
     "pipeline_2291": {
-      "status": "pending",
+      "status": "success",
       "jobs": {
-        "pc4_gitleaks": "pending",
-        "pc4_semgrep": "pending",
-        "pc4_trivy": "pending",
-        "pc4_ci_fallback": "created"
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       }
     },
     "manifest_sha256": "3026fd6fb4b5a082d6cf8d37c37e381ccf5aa7d6aef3f5f3230104ebe21f8cdf",
@@ -12438,7 +12438,41 @@
     "inter_pc_network_used": false,
     "production_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R677: apply host barrier and fresh transaction lifecycle in exact pinned llama.cpp Qwen2MoE path."
+    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
+  },
+  "r677_dynamic_owner_projection": {
+    "branch": "r663-qwen2moe-collector-bridge-20261101",
+    "parent_commit": "25de83bf6eb00a9c6fc1d79281803433435ae348",
+    "source_commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
+    "report": "research/R677/REPORT.md",
+    "result": "research/R677/RESULT.json",
+    "build_test": "research/R677/BUILD_TEST.txt",
+    "sha256sums": "research/R677/SHA256SUMS",
+    "donor_revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "adaptation": "Resolves owner_kind dynamically from selected expert IDs immediately before Collector dispatch; preserves slot-major order and final coefficients unchanged; rejects malformed IDs/maps before Collector.",
+    "test_result": "AArch64 CPU C++17 -Wall -Wextra -Werror; focused CTest 3/3 pass; independent FP64 fixture output [0.75,1.25,7.5,12.5]; 7 exact GitLab file readbacks.",
+    "test_scope": "Synthetic Q8_0 routing fixture only; no llama.cpp runtime callback integration, real checkpoint/model, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
+    "manifest_sha256": "8b3fdec782ef04309d13fb06d12c1dff4a4fae499124c1a002d4002b1ae69253",
+    "readback_files_verified": 7,
+    "readback_verified_utc": "2026-11-01 09:36:45 UTC",
+    "callback_integrated": false,
+    "model_loaded": false,
+    "generation_executed": false,
+    "gpu_executed": false,
+    "inter_pc_network_used": false,
+    "production_r53_used": false,
+    "performance_comparison": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "pipeline_2293": {
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "running",
+        "pc4_trivy": "pending",
+        "pc4_ci_fallback": "created"
+      }
+    },
+    "next_action": "R678: integrate fresh per-layer RouteGraphTransaction creation at the pinned Qwen2MoE graph hook and validate host invocation completion in process_ubatch; preserve shared/residual and single coefficient application."
   }
-
 }
