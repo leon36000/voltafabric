@@ -26,7 +26,7 @@
     "gitleaks": "pass_with_53_exact_digest_fingerprint_suppressions",
     "trivy": "pass",
     "pipeline_2253": "success_security_scan_only",
-    "local_rustfmt": "rustfmt 1.95.0; three changed Rust files parsed/style-checked with skip_children=true"
+    "local_rustfmt": "rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0; --edition 2021 --config skip_children=true; three changed Rust files checked"
   },
   "limits": [
     "Synthetic GGUF/Q8_0 only",

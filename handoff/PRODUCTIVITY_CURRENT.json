@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T06:35:22Z",
+  "updated_utc": "2026-11-01T06:40:02Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -427,7 +427,7 @@
         "files": 8,
         "matched": 8
       },
-      "rustfmt_local": "Rustfmt 1.95.0 formatted additions; --edition 2021 --config skip_children=true --check passed on native_ggml_cpu.rs, session.rs, native_matrix_session.rs; child-module resolution skipped.",
+      "rustfmt_local": "rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0; --edition 2021 --config skip_children=true --check passed on native_ggml_cpu.rs, session.rs, native_matrix_session.rs; child-module resolution skipped.",
       "security_pipeline_2253": "success; configured scans/fallback only; no Rust compile/test"
     }
   ],

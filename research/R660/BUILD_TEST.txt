@@ -5,7 +5,7 @@
 - Gitleaks passed with 53 exact fingerprints from the redacted inherited report, classified as SHA-256 digest fields in `GITLEAKS_TRIAGE.md`. The detector was not disabled or broadly allowlisted.
 - Pipeline 2252: security jobs passed. The Rustfmt job failed before starting its container because the runner could not resolve the external Docker image host for `rust:1.90-bookworm`.
 - Pipeline 2253 passed the configured Gitleaks, Semgrep, Trivy, and fallback jobs. It contains no Rust compile/test job.
-- Local Rustfmt 1.95.0 formatted the R660 additions. `rustfmt --edition 2021 --config skip_children=true --check` then passed for `src/native_ggml_cpu.rs`, `src/session.rs`, and `tests/native_matrix_session.rs`. Child-module resolution was skipped; this does not establish type correctness.
+- Local rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0 formatted the R660 additions. `rustfmt --edition 2021 --config skip_children=true --check` then passed for `src/native_ggml_cpu.rs`, `src/session.rs`, and `tests/native_matrix_session.rs`. Child-module resolution was skipped; this does not establish type correctness.
 - All eight entries in `SHA256SUMS` matched hashes recalculated from exact GitLab readbacks using Python 3.12 `hashlib.sha256`.
 - The focused integration test remains unexecuted. Current CI does not supply the pinned GGML static libraries required by `VF_GGML_NATIVE_BUILD`.
 - No Rust compile, type-check, focused test, model generation, GPU, or inter-PC result is claimed.

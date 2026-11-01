@@ -22,7 +22,7 @@ Pipeline 2252 reran the security jobs successfully, but its branch-scoped Rustfm
 
 Pipeline 2253 passed the configured Gitleaks, Semgrep, Trivy and fallback jobs. It had no Rust compile/test job. The complete CI result therefore remains scan-only.
 
-Local Rustfmt 1.95.0 formatted the R660 additions in `src/native_ggml_cpu.rs` and `tests/native_matrix_session.rs`. Then `rustfmt --edition 2021 --config skip_children=true --check` succeeded for those files and `src/session.rs`; the command parsed all three changed Rust files but skipped resolving child modules. It is a syntax/style check, not a type-check or build.
+Local rustfmt 1.9.0-stable (59807616e1 2026-04-14), bundled with rustc 1.95.0 formatted the R660 additions in `src/native_ggml_cpu.rs` and `tests/native_matrix_session.rs`. Then `rustfmt --edition 2021 --config skip_children=true --check` succeeded for those files and `src/session.rs`; the command parsed all three changed Rust files but skipped resolving child modules. It is a syntax/style check, not a type-check or build.
 
 Eight entries in R660's `SHA256SUMS` were recalculated with Python's standard `hashlib.sha256` over the exact files read back from GitLab; all eight matched. No value from the Gitleaks report was copied.
 
