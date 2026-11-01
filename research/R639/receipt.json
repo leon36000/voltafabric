@@ -1,0 +1,42 @@
+{
+  "run_id": "R639-strata-mixed-cpu-miss-20261101",
+  "created_utc": "2026-11-01T02:45:59Z",
+  "base_branch": "r638-vfb3-session-identity-20261031",
+  "base_commit": "d51b77da9ed7386e64ccee67d63351ff723dc6c4",
+  "branch": "r639-strata-mixed-cpu-miss-20261101",
+  "donor": {
+    "name": "Strata",
+    "revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+    "license": "MIT",
+    "source_read_only": true
+  },
+  "change": {
+    "adapter": "pool_cpu_misses_by_layer",
+    "ownership_kinds": {
+      "-1": "VoltaFabric CPU miss",
+      "0": "Strata VRAM",
+      "1": "Strata PCIe",
+      "2": "Strata peer/helper"
+    },
+    "writes_only_cpu_miss_rows": true,
+    "all_external_batch_consumes_ticket": false,
+    "gate_coefficients_applied_by_adapter": false,
+    "actual_donor_dispatch_wired": false
+  },
+  "evidence": {
+    "basis": "Static source inspection of pinned expert_pool_dispatch_multi ownership assignment, CPU fallback filter, VFB3 client row coverage, and Rust Strata unweighted ingress kinds.",
+    "compiler_or_tests_run": false,
+    "real_checkpoint_read": false,
+    "generation_invocations": 0,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R640: wire the mixed hook into the exact pinned donor after final kind assignment, preserve external rows, and then verify only the CPU path with an independent oracle.",
+  "publication": {
+    "readback_pending": true,
+    "main_merge": false
+  }
+}
