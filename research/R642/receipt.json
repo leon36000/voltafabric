@@ -1,0 +1,45 @@
+{
+  "base_branch": "r641-strata-token-decode-voltafabric-20261101",
+  "base_commit": "70beeca4bd1d67644ad623042a3227affb083c45",
+  "commands": [
+    "python3 -m py_compile .runs/r642-staging-20261101/voltafabric_launch.py .runs/r642-staging-20261101/test_voltafabric_launch.py",
+    "PYTHONPATH=.runs/r642-staging-20261101 VF_STRATA_LAUNCH_TEST_TMP_ROOT=.runs/r642-staging-20261101/tmp python3 -m unittest discover -s .runs/r642-staging-20261101 -p test_voltafabric_launch.py -v"
+  ],
+  "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
+  "files": {
+    "launcher": {
+      "bytes": 27807,
+      "path": "voltafabric_launch.py",
+      "sha256": "8d39de21d157226cf9d2972b556c625467ab13d103a3601bb2520ebc0c1f674c"
+    },
+    "report": {
+      "bytes": 3225,
+      "path": "REPORT.md",
+      "sha256": "586eb6997d0cee966a964ebe6cc8a63fd1170cabb873bf4d1c873b5b6788379c"
+    },
+    "test": {
+      "bytes": 7582,
+      "path": "test_voltafabric_launch.py",
+      "sha256": "144b1fce50099f980a79f7d9fb31f40fe6850f15ff430de73b3608a8ee7d2dda"
+    }
+  },
+  "gpu_executed": false,
+  "inter_pc_worker_used": false,
+  "model_generation": false,
+  "production_network_used": false,
+  "real_checkpoint_loaded": false,
+  "real_r53_used": false,
+  "real_rust_bridge_built_or_run": false,
+  "real_strata_built_or_run": false,
+  "recorded_utc": "2026-11-01T03:21:03Z",
+  "round": "R642",
+  "status": "CPU_LAUNCHER_FIXTURE_TESTS_PASS_SOURCE_REVIEW_ONLY",
+  "tests": {
+    "failed": 0,
+    "fixture_fake_coordinators": 48,
+    "fixture_fake_strata": true,
+    "fixture_pack_bytes": 64,
+    "passed": 2
+  },
+  "unknown_replayed": false
+}

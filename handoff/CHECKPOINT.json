@@ -11843,5 +11843,32 @@
     "real_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R642: implement a trusted local launcher/session initializer that binds checkpoint and plan identity to all 48 VFB3 streams; then perform bounded CPU build/oracle qualification on an owner-requested turn."
+  },
+  "r642_strata_local_launcher": {
+    "status": "CPU_TESTS_PASS_PRIVATE_GITLAB_PUBLISH_PENDING",
+    "branch": "r642-strata-local-48-session-launcher-20261101",
+    "base_branch": "r641-strata-token-decode-voltafabric-20261101",
+    "base_commit": "70beeca4bd1d67644ad623042a3227affb083c45",
+    "launcher": "adapters/strata_native_bridge/voltafabric_launch.py",
+    "test": "adapters/strata_native_bridge/test_voltafabric_launch.py",
+    "report": "research/R642/REPORT.md",
+    "receipt": "research/R642/receipt.json",
+    "sha256sums": "research/R642/SHA256SUMS",
+    "launcher_sha256": "8d39de21d157226cf9d2972b556c625467ab13d103a3601bb2520ebc0c1f674c",
+    "test_sha256": "144b1fce50099f980a79f7d9fb31f40fe6850f15ff430de73b3608a8ee7d2dda",
+    "passed": 2,
+    "failed": 0,
+    "fake_coordinators": 48,
+    "fake_strata": true,
+    "real_rust_bridge_built_or_run": false,
+    "real_strata_built_or_run": false,
+    "real_checkpoint_loaded": false,
+    "complete_generation": false,
+    "gpu_executed": false,
+    "inter_pc_worker_used": false,
+    "production_network_used": false,
+    "real_r53_used": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R643: bounded CPU build and protocol qualification against the real Rust bridge and pinned Strata adapter; no full-checkpoint or hardware work."
   }
 }

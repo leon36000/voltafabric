@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:11:33Z",
+  "updated_utc": "2026-11-01T03:21:48Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -72,6 +72,17 @@
       "path": "research/R641",
       "readback_files_verified": 9,
       "commit": "a72bc96b82c872acb611c6d0cb20827691b3e7ea"
+    },
+    {
+      "id": "R642",
+      "owner": "integrator",
+      "state": "CPU_TESTS_PASS_PRIVATE_GITLAB_PUBLISH_PENDING",
+      "branch": "r642-strata-local-48-session-launcher-20261101",
+      "parent_commit": "70beeca4bd1d67644ad623042a3227affb083c45",
+      "path": "research/R642",
+      "launcher": "adapters/strata_native_bridge/voltafabric_launch.py",
+      "test": "adapters/strata_native_bridge/test_voltafabric_launch.py",
+      "test_result": "2 passed; fake 48 coordinators and fake Strata; no actual donor or Rust bridge"
     }
   ],
   "acceptance": [
@@ -91,23 +102,25 @@
     "R639 adds a mixed-owner CPU-miss callback for Strata kinds -1..2, but the pinned donor dispatch does not call it; no compiler/tests or generation ran for this wave.",
     "R640 adds an incremental opt-in mixed-owner dispatch patch for pinned Strata, but the generator does not initialize its callback fields; no donor build/tests or generation ran.",
     "R641 adds an opt-in pinned Strata normal single-token decode callback and owns the PoolFleetOwner for the generator lifetime; it requires 48 inherited initialized AF_UNIX streams and caller-supplied identity. The launcher/session initializer and checkpoint-to-identity binding remain unimplemented.",
-    "R641 was reviewed as generated patch text and patch-application readback only. No compiler, tests, independent output oracle, complete generation, GPU, inter-PC worker, production network or shared R53 admission is claimed."
+    "R641 was reviewed as generated patch text and patch-application readback only. No compiler, tests, independent output oracle, complete generation, GPU, inter-PC worker, production network or shared R53 admission is claimed.",
+    "R642 adds a local launcher and passes 2 CPU fixture tests with fake bridge/Strata children. The real Rust bridge and pinned Strata binary were not built or run; no model/checkpoint, numerical output oracle, GPU, RDMA, inter-PC worker, production network, shared R53 reservation, or generation is qualified."
   ],
   "automatic_continuation": "No scheduled or automatic relaunch. Continue only within an active owner-requested turn; pause when the owner requests it.",
   "last_verified_results": [
     "R637",
-    "R638"
+    "R638",
+    "R642_CPU_LAUNCHER_FIXTURE_ONLY"
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R642_READY_ON_NEXT_OWNER_REQUEST",
-    "purpose": "Integrate a trusted local launcher/session initializer that binds the checkpoint and plan to all 48 VFB3 streams; then perform bounded CPU build/oracle qualification. No automatic relaunch or hardware/network work."
+    "status": "R643_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Build and exercise the actual Rust bridge and pinned Strata adapter in a bounded CPU-only fixture; check real VFB3 startup/shutdown and output ownership. Do not load the full checkpoint, start GPU/network work, replay UNKNOWN, or enable automatic relaunch."
   },
-  "report": "research/R641/REPORT.md",
+  "report": "research/R642/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R641/SHA256SUMS",
-    "sha256": "a36599a3fa27414a559c8f72dd703aa632eb42a6641d6e5b5a5d72f790409753",
-    "files": 5
+    "path": "research/R642/SHA256SUMS",
+    "sha256": "53ae442f8662f187b93cf7aa933ef60a271df1a9c433970f11395dc8452c887f",
+    "files": 4
   }
 }
