@@ -9866,7 +9866,10 @@
     "next_action": "R646: test VFB3 framing/parser and VFR3 response in-process, retaining batch/attempt identity and refusal-before-dispatch checks."
   },
   "r646_vfb3_wire_identity_parser": {
-    "status": "CPU_TEST_PASS_PENDING_GITLAB_READBACK",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS",
+    "commit": "a3ffb25bad5f1b06a67659c3b206daccfc499915",
+    "readback_files_verified": 9,
+    "published_utc": "2026-11-01T03:48:21Z",
     "owner": "Codex integrator",
     "branch": "r646-vfb3-wire-fields-20261101",
     "scope": "Extract the fixed VFB3 identity header parser as a production helper, used by binary_loop and tested from a synthetic Fleet receipt.",

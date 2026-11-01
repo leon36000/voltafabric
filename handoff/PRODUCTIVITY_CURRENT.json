@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:48:06Z",
+  "updated_utc": "2026-11-01T03:48:21Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -142,12 +142,15 @@
     {
       "id": "R646",
       "owner": "integrator",
-      "state": "CPU_VFB3_FIELDS_TESTED_PUBLISHED_PRIVATE_GITLAB_PENDING_READBACK",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_INTEGRATION_TEST",
       "branch": "r646-vfb3-wire-fields-20261101",
       "parent_commit": "211b559c25c7faba64a16cbc5ff3d07dd0e9c9ee",
       "path": "research/R646",
       "test": "1/1 PASS with rustfmt and --locked --offline",
-      "test_scope": "native GGML Resident -> Rust Fleet receipt -> exact VFB3 identity parser helper; synthetic CPU; no binary_loop/socket/checkpoint/Strata callback"
+      "test_scope": "native GGML Resident -> Rust Fleet receipt -> exact VFB3 identity parser helper; synthetic CPU; no binary_loop/socket/checkpoint/Strata callback",
+      "commit": "a3ffb25bad5f1b06a67659c3b206daccfc499915",
+      "readback_files_verified": 9,
+      "published_utc": "2026-11-01T03:48:21Z"
     }
   ],
   "acceptance": [

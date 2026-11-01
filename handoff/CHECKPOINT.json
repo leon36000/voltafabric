@@ -11893,7 +11893,10 @@
     "next_action": "R646: exercise the exact VFB3 parser/VFR3 reply path in-process with a bounded synthetic request."
   },
   "r646_vfb3_wire_identity_parser": {
-    "status": "CPU_TEST_PASS_PENDING_GITLAB_READBACK; BINARY_LOOP_UNTESTED",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS; BINARY_LOOP_UNTESTED",
+    "source_commit": "a3ffb25bad5f1b06a67659c3b206daccfc499915",
+    "readback_files_verified": 9,
+    "published_utc": "2026-11-01T03:48:21Z",
     "branch": "r646-vfb3-wire-fields-20261101",
     "base_commit": "211b559c25c7faba64a16cbc5ff3d07dd0e9c9ee",
     "report": "research/R646/REPORT.md",
