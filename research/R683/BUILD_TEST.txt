@@ -1,0 +1,24 @@
+R683 CPU build/test record
+Date: 2026-11-01
+Architecture: AArch64 CPU. CUDA, Vulkan, Metal, OpenMP, native tuning disabled.
+Donor: llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT), isolated patched R679/R680 worktree; GGML dependency unchanged.
+
+CTest configuration:
+- VF_BUILD_LLAMA_QWEN2MOE_BRIDGE=ON
+- VF_BUILD_LLAMA_QWEN2MOE_BUILD_MOE_FFN_TEST=ON
+- VF_LLAMA_SOURCE_DIR points to the isolated pinned donor.
+- VF_LLAMA_LIBRARY points to its built libllama.so.0.4.1.
+- Registered test: qwen2moe_llama_build_moe_ffn.
+
+Runner:
+- Rechecks donor revision, clean ggml dependency and expected donor shared libraries.
+- Compiles qwen2moe_llama_build_moe_ffn_test.cpp with C++17, -Wall, -Wextra, -Werror.
+- Places executable under VF_TEST_OUTPUT_DIR and runs against pinned donor libraries.
+
+Observed:
+- Direct runner passed.
+- CMake configure passed with the exact updated branch CMakeLists mirror.
+- Focused CTest: 1/1 passed in 1.69 s.
+- Actual donor build_moe_ffn returned raw expert output [6,20]; collector received route coefficient 0.5 once and returned [3,10].
+
+Scope: synthetic activations, logits, selected expert and expert matrices. No model/checkpoint, architecture-level top-k, shared/residual graph, Rust worker, full generation, GPU or network.

@@ -1,0 +1,36 @@
+{
+  "round": "R683",
+  "status": "CPU_DONOR_BUILD_MOE_FFN_PROCESS_UBATCH_CTEST_PASS",
+  "branch": "r663-qwen2moe-collector-bridge-20261101",
+  "donor": {
+    "project": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "change": {
+    "test": "adapters/native_ggml/qwen2moe_llama_build_moe_ffn_test.cpp",
+    "runner": "adapters/native_ggml/run_qwen2moe_build_moe_ffn_test.sh",
+    "cmake_option": "VF_BUILD_LLAMA_QWEN2MOE_BUILD_MOE_FFN_TEST",
+    "test_name": "qwen2moe_llama_build_moe_ffn"
+  },
+  "validation": {
+    "architecture": "AArch64 CPU",
+    "compile": "C++17 -Wall -Wextra -Werror PASS",
+    "cmake_configure_cpu_only": "PASS",
+    "ctest": "1/1 PASS",
+    "donor_build_moe_ffn_raw_output": [6.0, 20.0],
+    "selected_expert": 1,
+    "owner_kind": 0,
+    "route_weight": 0.5,
+    "collector_output": [3.0, 10.0],
+    "hook_calls": 1,
+    "receipt_replayed": false
+  },
+  "limitations": [
+    "Synthetic internal model/graph calls donor build_moe_ffn; architecture-level top-k and full Qwen2MoE layer graph are unqualified.",
+    "No checkpoint, tokenizer, token loop, Rust coordinator/worker, or complete generation.",
+    "No GPU/CUDA graph, inter-PC/RDMA, production R53, or performance comparison."
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R684: identify and inspect an already available compatible small Qwen2MoE checkpoint fixture and loading path before any model/token-loop integration."
+}
