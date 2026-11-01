@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 08:13:30 UTC",
+  "updated_utc": "2026-11-01 08:26:07 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -725,6 +725,41 @@
       "test": "vf_native_ggml static library build with -Wall -Wextra -Werror; 1/1 targeted CTest pass",
       "test_scope": "pinned GGML CPU graph; synthetic callback; failure-before-downstream and single-use replay refusal; no real Rust Session/checkpoint/model/GPU/network",
       "published_utc": "2026-11-01 08:13:30 UTC"
+    },
+    {
+      "id": "R671",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_CTEST_3_PASS_PIPELINE_RUNNING",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "5881d625998d8f01dd7d58df184fabe14664c172",
+      "source_commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
+      "path": "research/R671",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "adaptation": "Existing RouteGraphTransaction now has VFB3 activation/owner-kind inputs and uses VoltaFabric's existing AF_UNIX Client for VFR3; remote raw rows are merged into placeholders and ordinary FP16-decoded/f64 route weighting is staged atomically.",
+      "test": "AArch64 CMake build with -Wall -Wextra -Werror; CTest 3/3 pass (native_provider, route_graph_transaction, route_graph_vfr3).",
+      "test_scope": "Local fake AF_UNIX VFB3/VFR3 peer at the GGML graph boundary; checks exact identity/routes, scalar result, missing-row abort before downstream, shutdown and replay refusal. Not an actual vf-rank-session process.",
+      "readback_files_verified": 9,
+      "readback_verified_utc": "2026-11-01 08:26:07 UTC",
+      "sha256_manifest": "research/R671/SHA256SUMS",
+      "sha256_manifest_sha256": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364",
+      "source_readback_sha256": {
+        "adapters/native_ggml/CMakeLists.txt": "414ae6aee0343376bb5611ffd614cfb0466783a5416901696ff47793c576231d",
+        "adapters/native_ggml/route_graph_transaction.hpp": "57a33ab4166a6076ee1b83629144b377bed4b31f719442db3d317a118a56c0f1",
+        "adapters/native_ggml/route_graph_transaction.cpp": "123cf67b411077e75c01079163434666e79fc22c0b48b5f3c0994cae626e097b",
+        "adapters/native_ggml/route_graph_transaction_test.cpp": "0a46ec4393c2b8b47da9fe1daf0437624fea50c55c3308b8a2e9467dc14fb1eb",
+        "adapters/native_ggml/session_vfr3_collector.hpp": "870e6452864a1eda828b00181c2e8f2df081066700a96159ba3be7c0e1267279",
+        "adapters/native_ggml/session_vfr3_collector.cpp": "6edb283a6d4a348858219214e87b383c0bb3591f56aba4d6f7421c3a16bdc0ae",
+        "adapters/native_ggml/route_graph_vfr3_test.cpp": "2f24f5c198a02a4df48815cb14056a8966fbe82595ccb13f430ceaa486927c86",
+        "research/R671/REPORT.md": "c9875ae1b2d1fda4dab8e0a8eb3c6b3bf201862a0b1870defb36808eb7561a6b",
+        "research/R671/SHA256SUMS": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364"
+      },
+      "security_pipeline_2278": "running: Gitleaks running; Semgrep and Trivy pending; configured fallback created. Configured jobs are scans/fallback only and do not compile/test this C++ code.",
+      "limits": [
+        "The new GGML graph test uses a fake AF_UNIX VFB3/VFR3 peer; it does not launch vf-rank-session. Separate R648/R649 worker evidence is not graph-to-worker integration evidence.",
+        "No checkpoint, model graph, complete token generation, GPU, inter-PC/RDMA, production R53 reservation, non-Q8_0 quantization path, or performance comparison is qualified."
+      ],
+      "published_utc": "2026-11-01 08:26:07 UTC",
+      "next_action": "Replace the fake graph-test peer with a fresh isolated local vf-rank-session process and fresh test identity; do not reuse R648/R649 identities or replay UNKNOWN receipts. Then capture real selected IDs and post-scale weights from a pinned llama.cpp runtime graph before attempting checkpoint-backed generation."
     }
   ],
   "acceptance": [
@@ -768,7 +803,8 @@
     "R660 source adds a per-slot rectangular GGML Session projection and a synthetic scalar-oracle fixture, but its Rust test and rustfmt did not execute: the current CI has no pinned GGML static build and the separate rustfmt container image could not be pulled. Do not promote this source until CPU verification succeeds.",
     "R666 imports synthetic donor-shaped Qwen2MoE route tensors into an identified CPU Session and verifies slot order, final weights, attempt propagation, malformed-input refusal, and FP16/f64 Collector behavior. The pinned llama.cpp graph callback, real checkpoint, complete generation, external R53, GPU, inter-PC/RDMA, other formats and performance remain unqualified.",
     "R668: pinned llama.cpp cb_eval can break graph execution yet return GGML_STATUS_SUCCESS; do not use it to abort for remote expert dispatch because a partial graph may be treated as a successful batch.",
-    "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance."
+    "R670 packages a reusable GGML CPU graph transaction boundary, but its collector callback is synthetic; it does not call vf-rank-session or the Rust FP16/f64 Collector, and it does not qualify a model graph, checkpoint, generation, GPU, network/RDMA, production R53, or performance.",
+    "R671 connects the GGML transaction to the existing VFB3/VFR3 Client, but the graph fixture uses a fake AF_UNIX peer; it does not yet exercise an actual vf-rank-session child or a model/checkpoint graph."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -797,19 +833,20 @@
     "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC",
     "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED",
     "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
-    "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST"
+    "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST",
+    "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS"
   ],
   "active_operations": [
     {
       "id": "gitlab-pipeline-2275",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "f5beaba1eed602a333e23182500204f5e814e4f0",
-      "status": "running",
+      "status": "success",
       "jobs": {
         "pc4_gitleaks": "success",
         "pc4_semgrep": "success",
-        "pc4_trivy": "running",
-        "pc4_ci_fallback": "created"
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
       },
       "scope": "configured scans/fallback only; not Rust compile/test evidence"
     },
@@ -817,22 +854,35 @@
       "id": "gitlab-pipeline-2276",
       "ref": "r663-qwen2moe-collector-bridge-20261101",
       "commit": "0bff5ef06393259180443dc5af60fb208c029c5f",
-      "status": "pending",
+      "status": "success",
       "jobs": {
-        "pc4_gitleaks": "pending",
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "configured scans/fallback only; not Rust compile/test evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2278",
+      "ref": "r663-qwen2moe-collector-bridge-20261101",
+      "commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
+      "status": "running",
+      "jobs": {
+        "pc4_gitleaks": "running",
         "pc4_semgrep": "pending",
         "pc4_trivy": "pending",
         "pc4_ci_fallback": "created"
       },
-      "scope": "configured scans/fallback only; not Rust compile/test evidence"
+      "scope": "configured scans/fallback only; not C++ compile/test evidence"
     }
   ],
-  "next_action": "Connect RouteGraphTransaction's single-use collector callback to the existing local vf-rank-session VFR3 response and verify exact identity, missing-result rejection, and no downstream decode on failure; keep the test CPU-only.",
-  "report": "research/R670/REPORT.md",
+  "next_action": "Replace the R671 fake graph-test peer with a fresh isolated local vf-rank-session process and fresh test identity; preserve the fail-closed graph boundary and do not replay prior or UNKNOWN receipts. Then identify a pinned llama.cpp runtime capture point for real selected IDs/post-scale weights.",
+  "report": "research/R671/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source work only; no skill-based workflow, automatic relaunch remains stopped, and GPU/production-network work remains suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R670/SHA256SUMS",
-    "sha256": "58bd860bf024816cd9faf791a8a8a21f62630ef31ae3d73c6ee61ce2c7b238fa",
-    "files": 5
+    "path": "research/R671/SHA256SUMS",
+    "sha256": "d5ca5b0d4f1b568dfb5874ebee5fa02f640d48403fc5e586e6719c09a572f364",
+    "files": 8
   }
 }
