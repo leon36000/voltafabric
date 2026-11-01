@@ -1,0 +1,11 @@
+r660_rustfmt:
+  stage: test
+  image: rust:1.90-bookworm
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "r660-ggml-per-slot-projection-20261101"'
+      when: on_success
+    - when: never
+  timeout: 10m
+  script:
+    - rustup component add rustfmt
+    - rustfmt --edition 2021 --check src/native_ggml_cpu.rs src/session.rs tests/native_matrix_session.rs
