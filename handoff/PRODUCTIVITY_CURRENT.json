@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:21:48Z",
+  "updated_utc": "2026-11-01T03:22:46Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -76,13 +76,16 @@
     {
       "id": "R642",
       "owner": "integrator",
-      "state": "CPU_TESTS_PASS_PRIVATE_GITLAB_PUBLISH_PENDING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_FIXTURE_ONLY",
       "branch": "r642-strata-local-48-session-launcher-20261101",
       "parent_commit": "70beeca4bd1d67644ad623042a3227affb083c45",
       "path": "research/R642",
       "launcher": "adapters/strata_native_bridge/voltafabric_launch.py",
       "test": "adapters/strata_native_bridge/test_voltafabric_launch.py",
-      "test_result": "2 passed; fake 48 coordinators and fake Strata; no actual donor or Rust bridge"
+      "test_result": "2 passed; fake 48 coordinators and fake Strata; no actual donor or Rust bridge",
+      "commit": "a19ab47b67e7973100ec1375eba77bdf8d709e50",
+      "readback_files_verified": 8,
+      "published_utc": "2026-11-01T03:22:46Z"
     }
   ],
   "acceptance": [
