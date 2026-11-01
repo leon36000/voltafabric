@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T07:10:53Z",
+  "updated_utc": "2026-11-01T07:15:27Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -474,7 +474,7 @@
     {
       "id": "R662",
       "owner": "integrator",
-      "state": "PRIVATE_GITLAB_SOURCE_COMMITTED_READBACK_SHA256_PENDING_TEST_UNEXECUTED",
+      "state": "PRIVATE_GITLAB_READBACK_SHA256_VERIFIED_CPU_TEST_UNEXECUTED",
       "branch": "r662-qwen2moe-atomic-ffn-20261101",
       "path": "research/R662",
       "parent_commit": "78921b7512d8dab4abc0253890644d6699612201",
@@ -494,10 +494,35 @@
       "sha256_manifest_sha256": "750c222ae319652b7bf88ac9415df1f82ba5ed02f1ff87562c4a700e0047e29c",
       "source_readback_sha256": {
         "files": 3,
-        "matched": 0,
-        "expected_from_exact_source_readback": true
+        "matched": 3,
+        "manifest": "research/R662/SHA256SUMS",
+        "manifest_sha256": "750c222ae319652b7bf88ac9415df1f82ba5ed02f1ff87562c4a700e0047e29c"
       },
-      "next_action": "Independently read back exact committed source and verify SHA256SUMS; then obtain an exact-branch CPU compile/test path. Scan-only CI is not test evidence."
+      "next_action": "Continue exact-branch CPU source integration; obtain a reproducible Rust compile/test environment before claiming execution.",
+      "readback_files_verified": 3,
+      "readback_verified_utc": "2026-11-01 07:15:27 UTC",
+      "scan_pipeline_2261": "running at readback; Gitleaks passed, Semgrep/Trivy pending, fallback queued; none is Rust compile/test evidence"
+    },
+    {
+      "id": "R663",
+      "owner": "integrator",
+      "state": "PRIVATE_GITLAB_COMMIT_SHA_READBACK_PENDING_CPU_TEST_UNEXECUTED",
+      "branch": "r663-qwen2moe-collector-bridge-20261101",
+      "parent_commit": "97ed91c4a9b91650a6c16de0ff2e5a972d323f52",
+      "path": "research/R663",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "changes": [
+        "Adds a validated bridge from complete unweighted Qwen2MoE FP32 down rows into the existing VoltaFabric FP64 Collector.",
+        "Checks full Stamp, attempt, exact tensor role, shape, complete ordered route slots, expert/rank/local bindings and finiteness before Collector mutation.",
+        "Uses Collector::accept and finish so route coefficients are applied once in the established reduction order."
+      ],
+      "tests_added": [
+        "qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_preflights_all_stages now verifies stale-Stamp rejection and weighted scalar Collector oracle"
+      ],
+      "tests_executed": false,
+      "test_limits": "Synthetic Q8_0 CPU fixture only; not executed. Public result structs do not attest numerical producer. No real model, complete generation, external R53 reservation, GPU or inter-PC path.",
+      "readback_sha256": "pending",
+      "next_action": "Verify exact R663 source/report/test readbacks and hashes; then locate a CPU compile/test environment for the exact private branch."
     }
   ],
   "acceptance": [
@@ -564,12 +589,12 @@
     "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING"
   ],
   "active_operations": [],
-  "next_action": "Verify R662 exact source readbacks and hashes, then locate exact-branch CPU compile/test environment; keep complete generation and hardware claims gated.",
-  "report": "research/R662/REPORT.md",
+  "next_action": "Verify R663 exact committed source/test/report readbacks and checksum manifest, then locate an exact-branch CPU compile/test environment. Continue wiring a complete model layer chain; keep hardware/production claims gated.",
+  "report": "research/R663/REPORT.md",
   "operating_mode": "No automatic relaunch; bounded owner-requested CPU/source work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
-    "path": "research/R662/SHA256SUMS",
-    "sha256": "750c222ae319652b7bf88ac9415df1f82ba5ed02f1ff87562c4a700e0047e29c",
+    "path": "research/R663/SHA256SUMS",
+    "sha256": "pending",
     "files": 5
   }
 }

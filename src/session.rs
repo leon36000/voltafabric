@@ -161,6 +161,58 @@ struct PreparedQwen2MoEProjectionStage {
     selected: Vec<(usize, routing::RankDispatch)>,
 }
 
+/// Validate a completed Qwen2MoE down projection and finish it through VoltaFabric's
+/// ordinary FP64 Collector. Input slot rows are unweighted FP32; Collector applies
+/// each original routing coefficient exactly once in token/slot order. This checks
+/// identities and shape, not the provenance of caller-constructed output structs.
+#[cfg(feature = "native-ggml-cpu")]
+pub fn collect_qwen2moe_ffn_output(
+    problem: &routing::RoutingProblem,
+    output: &GroupedProjectionBatchOutput,
+) -> Result<Vec<Vec<f64>>> {
+    routing::validate(problem)?;
+    let expected_tensor = format!("blk.{}.ffn_down_exps.weight", problem.stamp.layer);
+    if output.stamp != problem.stamp
+        || output.attempt == 0
+        || output.tensor != expected_tensor
+        || output.dispatch_hidden != problem.hidden
+        || output.output_columns != problem.hidden
+        || !(1..=10_240).contains(&output.input_columns)
+        || output.slots.is_empty()
+    {
+        return Err(invalid("Qwen2MoE down result identity or shape"));
+    }
+    let dispatch = routing::dispatch(problem)?;
+    if output.slots.len() != dispatch.slots.len() {
+        return Err(invalid("Qwen2MoE down result slot coverage"));
+    }
+    for (actual, expected) in output.slots.iter().zip(&dispatch.slots) {
+        if actual.token != expected.token
+            || actual.slot != expected.slot
+            || actual.expert != expected.expert
+            || actual.rank != expected.rank
+            || actual.local != expected.local
+            || actual.values.len() != problem.hidden
+            || actual.values.iter().any(|value| !value.is_finite())
+        {
+            return Err(invalid("Qwen2MoE down result order, route or value"));
+        }
+    }
+    let mut collector = moe::Collector::from_routing(problem)?;
+    for slot in &output.slots {
+        collector.accept(moe::Completion {
+            stamp: output.stamp.clone(),
+            token: slot.token,
+            slot: slot.slot,
+            expert: slot.expert,
+            rank: slot.rank,
+            local: slot.local,
+            value: slot.values.iter().copied().map(f64::from).collect(),
+        })?;
+    }
+    collector.finish()
+}
+
 /// Compose the separate Qwen2MoE gate/up projections into inputs for its down projection.
 /// Caller must pass the exact outputs from the same routed batch and attempt. This helper
 /// returns unweighted per-slot rows; it does not invoke the down Sessions or Collector.

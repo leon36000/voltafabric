@@ -884,6 +884,31 @@ fn qwen2moe_compound_ffn_uses_one_identity_and_returns_unweighted_down_rows_and_
             assert!((f64::from(value) - expected * f64::from(route.weight)).abs() > 1e-3);
         }
     }
+    let mut stale_problem = problem.clone();
+    stale_problem.stamp.batch = stale_problem.stamp.batch.checked_add(1).unwrap();
+    assert!(voltafabric::session::collect_qwen2moe_ffn_output(&stale_problem, &output).is_err());
+    let collected =
+        voltafabric::session::collect_qwen2moe_ffn_output(&problem, &output).unwrap();
+    let mut weighted_oracle = vec![vec![0.0_f64; H]; problem.routes.len()];
+    for actual in &output.slots {
+        let route = &problem.routes[actual.token][actual.slot];
+        let physical = residents.iter().position(|(expert, _)| *expert == actual.expert).unwrap();
+        let input = f64::from(hidden[actual.token][0]);
+        let gate_value = input * f64::from(gate_codes[physical]);
+        let up_value = input * f64::from(up_codes[physical]);
+        let unweighted = gate_value / (1.0 + (-gate_value).exp()) * up_value
+            * f64::from(down_codes[physical]) * 2.0;
+        for expected in &mut weighted_oracle[actual.token] {
+            *expected += route.weight * unweighted;
+        }
+    }
+    assert_eq!(collected.len(), weighted_oracle.len());
+    for (actual, expected) in collected.iter().zip(&weighted_oracle) {
+        assert_eq!(actual.len(), H);
+        for (&value, &oracle) in actual.iter().zip(expected) {
+            assert!((value - oracle).abs() <= 1e-4 * oracle.abs().max(1.0));
+        }
+    }
     let replay = Session::exec_qwen2moe_ffn_batch(
         &mut gate, &mut up, &mut down, &problem, &hidden, &ledger, TIMEOUT, None,
     ).unwrap_err();
