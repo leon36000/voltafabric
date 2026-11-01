@@ -1,1 +1,23 @@
-ewogICJyb3VuZCI6ICJSNjc5IiwKICAic3RhdHVzIjogIkRPTk9SX1BBVENIX0NQVV9MSUJSQVJZX0JVSUxEX1BBU1NfUlVOVElNRV9CUklER0VfUEVORElORyIsCiAgImRvbm9yIjogImdnbWwtb3JnL2xsYW1hLmNwcCIsCiAgImRvbm9yX2NvbW1pdCI6ICIzY2YwMzI1N2YyMTlhZmJlNzMzNDA0NWZmN2M2YTA2YWM2OGM2MjdkIiwKICAiZG9ub3JfbGljZW5zZSI6ICJNSVQiLAogICJwYXRjaCI6ICJsbGFtYS5jcHAtcjY3OS5wYXRjaCIsCiAgIm1vZGlmaWVkX2Rvbm9yX2ZpbGVzIjogWwogICAgInNyYy9sbGFtYS1jb250ZXh0LmNwcCIsCiAgICAic3JjL2xsYW1hLWNvbnRleHQuaCIsCiAgICAic3JjL2xsYW1hLWdyYXBoLmNwcCIsCiAgICAic3JjL2xsYW1hLWdyYXBoLmgiCiAgXSwKICAiZ2l0X2RpZmZfY2hlY2siOiAiUEFTUyIsCiAgImNtYWtlX3RhcmdldCI6ICJsbGFtYSIsCiAgImNtYWtlX2J1aWxkIjogIlBBU1MiLAogICJidWlsZF9hcmNoIjogIkFBcmNoNjQgQ1BVIiwKICAicnVudGltZV9pbnRlZ3JhdGlvbl90ZXN0IjogZmFsc2UsCiAgInZvbHRhZmFicmljX3J1c3RfYnJpZGdlX3dpcmVkIjogZmFsc2UsCiAgImNoZWNrcG9pbnRfZ2VuZXJhdGlvbiI6IGZhbHNlLAogICJjdWRhX29yX2ludGVyX3BjX3Rlc3QiOiBmYWxzZSwKICAibmV4dCI6ICJSNjgwOiBicmlkZ2UgbGxtX3ZmX3JvdXRlX2hvb2tzIHRvIFF3ZW4yTW9FUm91dGVJbnZvY2F0aW9uIHdpdGggZnVsbCBpZGVudGl0eSBhbmQgYWRkIGEgZG9ub3Itc2lkZSBydW50aW1lIGZpeHR1cmUgYmVmb3JlIGF0dGVtcHRpbmcgY2hlY2twb2ludCBnZW5lcmF0aW9uIgp9Cg==
+{
+  "round": "R679",
+  "status": "DONOR_PATCH_CPU_LIBRARY_BUILD_PASS_RUNTIME_BRIDGE_PENDING",
+  "donor": "ggml-org/llama.cpp",
+  "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+  "donor_license": "MIT",
+  "patch": "llama.cpp-r679.patch",
+  "modified_donor_files": [
+    "src/llama-context.cpp",
+    "src/llama-context.h",
+    "src/llama-graph.cpp",
+    "src/llama-graph.h"
+  ],
+  "git_diff_check": "PASS",
+  "cmake_target": "llama",
+  "cmake_build": "PASS",
+  "build_arch": "AArch64 CPU",
+  "runtime_integration_test": false,
+  "voltafabric_rust_bridge_wired": false,
+  "checkpoint_generation": false,
+  "cuda_or_inter_pc_test": false,
+  "next": "R680: bridge llm_vf_route_hooks to Qwen2MoERouteInvocation with full identity and add a donor-side runtime fixture before attempting checkpoint generation"
+}

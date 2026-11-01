@@ -1,1 +1,6 @@
-WyAxMiVdIEJ1aWx0IHRhcmdldCBnZ21sLWJhc2UKWyAzNSVdIEJ1aWx0IHRhcmdldCBnZ21sLWNwdQpbIDQxJV0gQnVpbHQgdGFyZ2V0IGdnbWwKWzEwMCVdIEJ1aWx0IHRhcmdldCBsbGFtYQoKQlVJTERfRVhJVD0wCg==
+[ 12%] Built target ggml-base
+[ 35%] Built target ggml-cpu
+[ 41%] Built target ggml
+[100%] Built target llama
+
+BUILD_EXIT=0

@@ -1,1 +1,220 @@
-ZGlmZiAtLWdpdCBhL3NyYy9sbGFtYS1jb250ZXh0LmNwcCBiL3NyYy9sbGFtYS1jb250ZXh0LmNwcAppbmRleCBlZjUzNzI4Li4wNjY2NDA4IDEwMDY0NAotLS0gYS9zcmMvbGxhbWEtY29udGV4dC5jcHAKKysrIGIvc3JjL2xsYW1hLWNvbnRleHQuY3BwCkBAIC0xMzQ3LDE0ICsxMzQ3LDI2IEBAIGxsbV9ncmFwaF9yZXN1bHQgKiBsbGFtYV9jb250ZXh0Ojpwcm9jZXNzX3ViYXRjaChjb25zdCBsbGFtYV91YmF0Y2ggJiB1YmF0Y2gsIGxsCiAgICAgICAgIHJldHVybiBudWxscHRyOwogICAgIH0KIAorICAgIGNvbnN0IGJvb2wgdmZfcm91dGVfYWN0aXZlID0gdmZfcm91dGVfaG9va3MgIT0gbnVsbHB0cjsKKyAgICBpZiAodmZfcm91dGVfYWN0aXZlICYmCisgICAgICAgIChtb2RlbC5hcmNoICE9IExMTV9BUkNIX1FXRU4yTU9FIHx8IHZmX3JvdXRlX2hvb2tzLT5iZWdpbiA9PSBudWxscHRyIHx8CisgICAgICAgICB2Zl9yb3V0ZV9ob29rcy0+YXBwZW5kX3F3ZW4ybW9lID09IG51bGxwdHIgfHwgdmZfcm91dGVfaG9va3MtPmZpbmlzaCA9PSBudWxscHRyIHx8CisgICAgICAgICB2Zl9yb3V0ZV9ob29rcy0+YWJvcnQgPT0gbnVsbHB0ciB8fAorICAgICAgICAgIXZmX3JvdXRlX2hvb2tzLT5iZWdpbih2Zl9yb3V0ZV9ob29rcy0+dXNlcmRhdGEsIHViYXRjaCwgZ3R5cGUsCisgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHN0YXRpY19jYXN0PHVpbnQzMl90Pihtb2RlbC5ocGFyYW1zLm5fbGF5ZXIoKSkpKSkgeworICAgICAgICBpZiAodmZfcm91dGVfaG9va3MtPmFib3J0ICE9IG51bGxwdHIpIHZmX3JvdXRlX2hvb2tzLT5hYm9ydCh2Zl9yb3V0ZV9ob29rcy0+dXNlcmRhdGEpOworICAgICAgICByZXQgPSBHR01MX1NUQVRVU19GQUlMRUQ7CisgICAgICAgIHJldHVybiBudWxscHRyOworICAgIH0KKwogICAgIGF1dG8gKiByZXMgPSBnZXRfZ2ZfcmVzX3ByZXYoKTsKICAgICBhdXRvICogZ2YgID0gcmVzLT5nZXRfZ2YoKTsKIAogICAgIC8vIHRoZSBuZXcgZ3JhcGggcGFyYW1ldGVycwogICAgIC8vIGluIG9yZGVyIHRvIGNvcnJlY3RseSByZXVzZSBhIGdyYXBoLCBpdCdzIGZ1bGwgdG9wb2xvZ3kgaGFzIHRvIGJlIHVuaXF1ZWx5IGRldGVybWluZWQgYnkgdGhlc2UgcGFyYW1ldGVycwotICAgIGNvbnN0IGF1dG8gZ3BhcmFtcyA9IGdyYXBoX3BhcmFtcyhyZXMsIHViYXRjaCwgbWN0eCwgZ3R5cGUpOworICAgIGNvbnN0IGF1dG8gZ3BhcmFtcyA9IGdyYXBoX3BhcmFtcyhyZXMsIHViYXRjaCwgbWN0eCwgZ3R5cGUsIHZmX3JvdXRlX2FjdGl2ZSk7CiAKLSAgICBpZiAoIWdyYXBoX3JldXNlX2Rpc2FibGUgJiYgZ2ZfcmVzX3ByZXZfYWN0aXZlID09IHJlcyAmJiByZXMtPmNhbl9yZXVzZShncGFyYW1zKSkgeworICAgIGlmICghdmZfcm91dGVfYWN0aXZlICYmICFncmFwaF9yZXVzZV9kaXNhYmxlICYmIGdmX3Jlc19wcmV2X2FjdGl2ZSA9PSByZXMgJiYgcmVzLT5jYW5fcmV1c2UoZ3BhcmFtcykpIHsKICAgICAgICAgLy9MTEFNQV9MT0dfREVCVUcoIiVzOiByZXVzaW5nIHByZXZpb3VzIGdyYXBoXG4iLCBfX2Z1bmNfXyk7CiAKICAgICAgICAgLy8gd2l0aCBwaXBlbGluZSBwYXJhbGxlbGlzbSwgdGhlIHByZXZpb3VzIGdyYXBoX2NvbXB1dGVfYXN5bmMgbWF5IHN0aWxsIGJlIHJ1bm5pbmcKQEAgLTEzODAsMTIgKzEzOTIsMTQgQEAgbGxtX2dyYXBoX3Jlc3VsdCAqIGxsYW1hX2NvbnRleHQ6OnByb2Nlc3NfdWJhdGNoKGNvbnN0IGxsYW1hX3ViYXRjaCAmIHViYXRjaCwgbGwKIAogICAgICAgICBpZiAoIWdmKSB7CiAgICAgICAgICAgICBMTEFNQV9MT0dfRVJST1IoIiVzOiBmYWlsZWQgdG8gaW5pdGlhbGl6ZSBncmFwaFxuIiwgX19mdW5jX18pOworICAgICAgICAgICAgaWYgKHZmX3JvdXRlX2FjdGl2ZSkgdmZfcm91dGVfaG9va3MtPmFib3J0KHZmX3JvdXRlX2hvb2tzLT51c2VyZGF0YSk7CiAgICAgICAgICAgICByZXQgPSBHR01MX1NUQVRVU19GQUlMRUQ7CiAgICAgICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgICAgICAgfQogCiAgICAgICAgIGlmICghZ2dtbF9iYWNrZW5kX3NjaGVkX2FsbG9jX2dyYXBoKHNjaGVkLmdldCgpLCBnZikpIHsKICAgICAgICAgICAgIExMQU1BX0xPR19FUlJPUigiJXM6IGZhaWxlZCB0byBhbGxvY2F0ZSBncmFwaFxuIiwgX19mdW5jX18pOworICAgICAgICAgICAgaWYgKHZmX3JvdXRlX2FjdGl2ZSkgdmZfcm91dGVfaG9va3MtPmFib3J0KHZmX3JvdXRlX2hvb2tzLT51c2VyZGF0YSk7CiAgICAgICAgICAgICByZXQgPSBHR01MX1NUQVRVU19BTExPQ19GQUlMRUQ7CiAgICAgICAgICAgICByZXR1cm4gbnVsbHB0cjsKICAgICAgICAgfQpAQCAtMTQwNiwxMCArMTQyMCwxOCBAQCBsbG1fZ3JhcGhfcmVzdWx0ICogbGxhbWFfY29udGV4dDo6cHJvY2Vzc191YmF0Y2goY29uc3QgbGxhbWFfdWJhdGNoICYgdWJhdGNoLCBsbAogICAgIGNvbnN0IGF1dG8gc3RhdHVzID0gZ3JhcGhfY29tcHV0ZShyZXMtPmdldF9nZigpLCB1YmF0Y2gubl90b2tlbnMgPiAxKTsKICAgICBpZiAoc3RhdHVzICE9IEdHTUxfU1RBVFVTX1NVQ0NFU1MpIHsKICAgICAgICAgTExBTUFfTE9HX0VSUk9SKCIlczogZmFpbGVkIHRvIGNvbXB1dGUgZ3JhcGgsIGNvbXB1dGUgc3RhdHVzOiAlZFxuIiwgX19mdW5jX18sIHN0YXR1cyk7CisgICAgICAgIGlmICh2Zl9yb3V0ZV9hY3RpdmUpIHZmX3JvdXRlX2hvb2tzLT5hYm9ydCh2Zl9yb3V0ZV9ob29rcy0+dXNlcmRhdGEpOwogICAgICAgICByZXQgPSBzdGF0dXM7CiAgICAgICAgIHJldHVybiBudWxscHRyOwogICAgIH0KIAorICAgIGlmICh2Zl9yb3V0ZV9hY3RpdmUgJiYgIXZmX3JvdXRlX2hvb2tzLT5maW5pc2godmZfcm91dGVfaG9va3MtPnVzZXJkYXRhLCB0cnVlKSkgeworICAgICAgICB2Zl9yb3V0ZV9ob29rcy0+YWJvcnQodmZfcm91dGVfaG9va3MtPnVzZXJkYXRhKTsKKyAgICAgICAgTExBTUFfTE9HX0VSUk9SKCIlczogVm9sdGFGYWJyaWMgUXdlbjJNb0Ugcm91dGUgaW52b2NhdGlvbiBpbmNvbXBsZXRlXG4iLCBfX2Z1bmNfXyk7CisgICAgICAgIHJldCA9IEdHTUxfU1RBVFVTX0ZBSUxFRDsKKyAgICAgICAgcmV0dXJuIG51bGxwdHI7CisgICAgfQorCiAgICAgcmV0ID0gR0dNTF9TVEFUVVNfU1VDQ0VTUzsKIAogICAgIHJldHVybiByZXM7CkBAIC0yNDk3LDcgKzI1MTksOCBAQCBsbG1fZ3JhcGhfcGFyYW1zIGxsYW1hX2NvbnRleHQ6OmdyYXBoX3BhcmFtcygKICAgICAgICAgICAgICAgICAgICAgICAgIGxsbV9ncmFwaF9yZXN1bHQgKiByZXMsCiAgICAgICAgICAgICAgICAgICAgICAgY29uc3QgbGxhbWFfdWJhdGNoICYgdWJhdGNoLAogICAgICAgICAgICAgY29uc3QgbGxhbWFfbWVtb3J5X2NvbnRleHRfaSAqIG1jdHgsCi0gICAgICAgICAgICAgICAgICAgICAgICAgIGxsbV9ncmFwaF90eXBlICAgZ3R5cGUpIGNvbnN0IHsKKyAgICAgICAgICAgICAgICAgICAgICAgICAgbGxtX2dyYXBoX3R5cGUgICBndHlwZSwKKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYm9vbCAgICAgICB1c2VfdmZfcm91dGVfaG9va3MpIGNvbnN0IHsKICAgICByZXR1cm4gewogICAgICAgICAvKi5hcmNoICAgICAgICA9Ki8gbW9kZWwuYXJjaCwKICAgICAgICAgLyouaHBhcmFtcyAgICAgPSovIG1vZGVsLmhwYXJhbXMsCkBAIC0yNTEzLDYgKzI1MzYsNyBAQCBsbG1fZ3JhcGhfcGFyYW1zIGxsYW1hX2NvbnRleHQ6OmdyYXBoX3BhcmFtcygKICAgICAgICAgLyouc2FtcGxlcnMgICAgPSovIHNhbXBsaW5nLnNhbXBsZXJzLAogICAgICAgICAvKi5uX291dHB1dHMgICA9Ki8gbl9vdXRwdXRzLAogICAgICAgICAvKi5jYiAgICAgICAgICA9Ki8gZ3JhcGhfZ2V0X2NiKCksCisgICAgICAgIC8qLnZmX3JvdXRlX2hvb2tzID0qLyB1c2VfdmZfcm91dGVfaG9va3MgPyB2Zl9yb3V0ZV9ob29rcyA6IG51bGxwdHIsCiAgICAgICAgIC8qLnJlcyAgICAgICAgID0qLyByZXMsCiAgICAgfTsKIH0KZGlmZiAtLWdpdCBhL3NyYy9sbGFtYS1jb250ZXh0LmggYi9zcmMvbGxhbWEtY29udGV4dC5oCmluZGV4IGI3YTlkYjUuLjk3MDM2YzMgMTAwNjQ0Ci0tLSBhL3NyYy9sbGFtYS1jb250ZXh0LmgKKysrIGIvc3JjL2xsYW1hLWNvbnRleHQuaApAQCAtMTEzLDYgKzExMywxMCBAQCBzdHJ1Y3QgbGxhbWFfY29udGV4dCB7CiAKICAgICB2b2lkIHNldF9hYm9ydF9jYWxsYmFjayhib29sICgqYWJvcnRfY2FsbGJhY2spKHZvaWQgKiBkYXRhKSwgdm9pZCAqIGFib3J0X2NhbGxiYWNrX2RhdGEpOwogCisgICAgLy8gSW50ZXJuYWwgb3B0LWluIGhvb2suIFRoZSBob29rIG9iamVjdCBhbmQgaXRzIHVzZXJkYXRhIG11c3Qgb3V0bGl2ZSB0aGUKKyAgICAvLyBsbGFtYV9jb250ZXh0LiBDdXJyZW50bHkgYWNjZXB0ZWQgb25seSBmb3IgUXdlbjJNb0UgZ3JhcGhzLgorICAgIHZvaWQgc2V0X3ZmX3JvdXRlX2hvb2tzKGNvbnN0IGxsbV92Zl9yb3V0ZV9ob29rcyAqIGhvb2tzKSB7IHZmX3JvdXRlX2hvb2tzID0gaG9va3M7IH0KKwogICAgIHZvaWQgc2V0X2VtYmVkZGluZ3MgKGJvb2wgdmFsdWUpOwogICAgIHZvaWQgc2V0X2VtYmVkZGluZ3NfbmV4dG4oYm9vbCB2YWx1ZSwgYm9vbCBtYXNrZWQpOwogICAgIHZvaWQgc2V0X2VtYmVkZGluZ3NfbGF5ZXJfaW5wKHVpbnQzMl90IGxpZCwgYm9vbCBlbmFibGUpOwpAQCAtMjYxLDcgKzI2NSw4IEBAIHByaXZhdGU6CiAgICAgICAgICAgICAgICAgICAgICAgICBsbG1fZ3JhcGhfcmVzdWx0ICogcmVzLAogICAgICAgICAgICAgICAgICAgICAgIGNvbnN0IGxsYW1hX3ViYXRjaCAmIHViYXRjaCwKICAgICAgICAgICAgIGNvbnN0IGxsYW1hX21lbW9yeV9jb250ZXh0X2kgKiBtY3R4LAotICAgICAgICAgICAgICAgICAgICAgICAgICBsbG1fZ3JhcGhfdHlwZSAgIGd0eXBlKSBjb25zdDsKKyAgICAgICAgICAgICAgICAgICAgICAgICAgbGxtX2dyYXBoX3R5cGUgICBndHlwZSwKKyAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgYm9vbCAgICAgICB1c2VfdmZfcm91dGVfaG9va3MgPSBmYWxzZSkgY29uc3Q7CiAKICAgICBsbG1fZ3JhcGhfY2IgZ3JhcGhfZ2V0X2NiKCkgY29uc3Q7CiAKQEAgLTM2MCw2ICszNjUsOCBAQCBwcml2YXRlOgogICAgIGdnbWxfYWJvcnRfY2FsbGJhY2sgYWJvcnRfY2FsbGJhY2sgICAgICA9IG51bGxwdHI7CiAgICAgdm9pZCAqICAgICAgICAgICAgICBhYm9ydF9jYWxsYmFja19kYXRhID0gbnVsbHB0cjsKIAorICAgIGNvbnN0IGxsbV92Zl9yb3V0ZV9ob29rcyAqIHZmX3JvdXRlX2hvb2tzID0gbnVsbHB0cjsKKwogICAgIHN0ZDo6dmVjdG9yPHN0ZDo6cGFpcjxnZ21sX2JhY2tlbmRfdCwgZ2dtbF9iYWNrZW5kX3NldF9uX3RocmVhZHNfdD4+IHNldF9uX3RocmVhZHNfZm5zOwogCiAgICAgLy8gcG9pbnRlcnMgYW5kIGJ1ZmZlciB0eXBlcyB1c2VkIGZvciB0aGUgY29tcHV0ZSBidWZmZXIgb2YgZWFjaCBiYWNrZW5kCmRpZmYgLS1naXQgYS9zcmMvbGxhbWEtZ3JhcGguY3BwIGIvc3JjL2xsYW1hLWdyYXBoLmNwcAppbmRleCBmZDQyOTBjLi43OWNiZDA2IDEwMDY0NAotLS0gYS9zcmMvbGxhbWEtZ3JhcGguY3BwCisrKyBiL3NyYy9sbGFtYS1ncmFwaC5jcHAKQEAgLTE0OTEsNiArMTQ5MSw3IEBAIGxsbV9ncmFwaF9jb250ZXh0OjpsbG1fZ3JhcGhfY29udGV4dChjb25zdCBsbG1fZ3JhcGhfcGFyYW1zICYgcGFyYW1zKSA6CiAgICAgY3Jvc3MgICAgICAgICAgICAocGFyYW1zLmNyb3NzKSwKICAgICBzYW1wbGVycyAgICAgICAgIChwYXJhbXMuc2FtcGxlcnMpLAogICAgIGNiX2Z1bmMgICAgICAgICAgKHBhcmFtcy5jYiksCisgICAgdmZfcm91dGVfaG9va3MgICAocGFyYW1zLnZmX3JvdXRlX2hvb2tzKSwKICAgICByZXMgICAgICAgICAgICAgIChwYXJhbXMucmVzKSwKICAgICBjdHgwICAgICAgICAgICAgIChyZXMtPmdldF9jdHgoKSksCiAgICAgZ2YgICAgICAgICAgICAgICAocmVzLT5nZXRfZ2YoKSkgewpAQCAtMjAxNyw2ICsyMDE4LDcgQEAgZ2dtbF90ZW5zb3IgKiBsbG1fZ3JhcGhfY29udGV4dDo6YnVpbGRfbW9lX2ZmbigKICAgICAgICAgIGdnbWxfdGVuc29yICogc2VsZWN0ZWRfZXhwZXJ0c19pbikgY29uc3QgewogICAgIGNvbnN0IGludDY0X3Qgbl9lbWJkICAgPSBjdXItPm5lWzBdOwogICAgIGNvbnN0IGludDY0X3Qgbl90b2tlbnMgPSBjdXItPm5lWzFdOworICAgIGdnbWxfdGVuc29yICogY29uc3Qgcm91dGVfYWN0aXZhdGlvbnMgPSBjdXI7CiAgICAgY29uc3QgYm9vbCB3ZWlnaHRfYmVmb3JlX2ZmbiA9IGFyY2ggPT0gTExNX0FSQ0hfTExBTUE0OyAvLyBmb3IgbGxhbWE0LCB3ZSBhcHBseSB0aGUgc2lnbW9pZC1lZCB3ZWlnaHRzIGJlZm9yZSB0aGUgRkZOCiAKICAgICBnZ21sX3RlbnNvciAqIGxvZ2l0cyA9IG51bGxwdHI7CkBAIC0yMzEzLDYgKzIzMTUsMjkgQEAgZ2dtbF90ZW5zb3IgKiBsbG1fZ3JhcGhfY29udGV4dDo6YnVpbGRfbW9lX2ZmbigKICAgICAgICAgY2IoZXhwZXJ0cywgImZmbl9tb2VfZG93bl9iaWFzZWQiLCBpbCk7CiAgICAgfQogCisgICAgLy8gUXdlbjJNb0UgZXhwb3NlcyB0aGUgcm91dGVkIHBhdGggaGVyZSBhcyByYXcgcGVyLWV4cGVydCBvdXRwdXRzLiBPbmx5IHRoZQorICAgIC8vIHJvdXRlZCBhZ2dyZWdhdGUgaXMgcmVwbGFjZWFibGU6IHNoYXJlZCBleHBlcnQgYW5kIHJlc2lkdWFsIHJlbWFpbiBpbiB0aGUKKyAgICAvLyBtb2RlbC1zcGVjaWZpYyBncmFwaCwgYW5kIFZvbHRhRmFicmljIHJlY2VpdmVzIGZpbmFsIHdlaWdodHMgZXhhY3RseSBvbmNlLgorICAgIGlmIChhcmNoID09IExMTV9BUkNIX1FXRU4yTU9FICYmIHZmX3JvdXRlX2hvb2tzICE9IG51bGxwdHIgJiYKKyAgICAgICAgdmZfcm91dGVfaG9va3MtPmFwcGVuZF9xd2VuMm1vZSAhPSBudWxscHRyKSB7CisgICAgICAgIGdnbWxfdGVuc29yICogcm91dGVkID0gdmZfcm91dGVfaG9va3MtPmFwcGVuZF9xd2VuMm1vZSgKKyAgICAgICAgICAgIHZmX3JvdXRlX2hvb2tzLT51c2VyZGF0YSwgY3R4MCwgaWwsIHJvdXRlX2FjdGl2YXRpb25zLAorICAgICAgICAgICAgc2VsZWN0ZWRfZXhwZXJ0cywgd2VpZ2h0cywgZXhwZXJ0cyk7CisgICAgICAgIGlmIChyb3V0ZWQgIT0gbnVsbHB0ciAmJiByb3V0ZWQtPnR5cGUgPT0gR0dNTF9UWVBFX0YzMiAmJgorICAgICAgICAgICAgcm91dGVkLT5uZVswXSA9PSBuX2VtYmQgJiYgcm91dGVkLT5uZVsxXSA9PSBuX3Rva2VucyAmJgorICAgICAgICAgICAgcm91dGVkLT5uZVsyXSA9PSAxICYmIHJvdXRlZC0+bmVbM10gPT0gMSkgeworICAgICAgICAgICAgZ2dtbF9idWlsZF9mb3J3YXJkX2V4cGFuZChnZiwgcm91dGVkKTsKKyAgICAgICAgICAgIGNiKHJvdXRlZCwgImZmbl9tb2Vfb3V0IiwgaWwpOworICAgICAgICAgICAgcmV0dXJuIHJvdXRlZDsKKyAgICAgICAgfQorICAgICAgICAvLyBDb250aW51ZSBncmFwaCBjb25zdHJ1Y3Rpb24gd2l0aCB0aGUgZG9ub3IncyBsb2NhbCBwYXRoIG9ubHkgc28gaXQKKyAgICAgICAgLy8gcmVtYWlucyB3ZWxsLWZvcm1lZC4gcHJvY2Vzc191YmF0Y2ggd2lsbCByZWZ1c2UgdGhlIGhvc3QgcmVzdWx0IGFmdGVyCisgICAgICAgIC8vIGZpbmlzaCgpIG9ic2VydmVzIHRoZSBzdGlja3kgYWJvcnQgZnJvbSB0aGlzIGludm9jYXRpb24uCisgICAgICAgIGlmICh2Zl9yb3V0ZV9ob29rcy0+YWJvcnQgIT0gbnVsbHB0cikgeworICAgICAgICAgICAgdmZfcm91dGVfaG9va3MtPmFib3J0KHZmX3JvdXRlX2hvb2tzLT51c2VyZGF0YSk7CisgICAgICAgIH0KKyAgICB9CisKICAgICBpZiAoIXdlaWdodF9iZWZvcmVfZmZuKSB7CiAgICAgICAgIGV4cGVydHMgPSBnZ21sX211bChjdHgwLCBleHBlcnRzLCB3ZWlnaHRzKTsKICAgICAgICAgY2IoZXhwZXJ0cywgImZmbl9tb2Vfd2VpZ2h0ZWQiLCBpbCk7CmRpZmYgLS1naXQgYS9zcmMvbGxhbWEtZ3JhcGguaCBiL3NyYy9sbGFtYS1ncmFwaC5oCmluZGV4IGNjNDExMDYuLjQzNmRiMDAgMTAwNjQ0Ci0tLSBhL3NyYy9sbGFtYS1ncmFwaC5oCisrKyBiL3NyYy9sbGFtYS1ncmFwaC5oCkBAIC03NjcsNiArNzY3LDIwIEBAIHB1YmxpYzoKIC8vIGNhbGxiYWNrIHRoYXQgYWxsb3dzIHVzIHRvIGFwcGx5IGN1c3RvbSBsb2dpYyB0byBlYWNoIHRlbnNvciAoZS5nLiBnZ21sLWFsbG9jLCBvZmZsb2FkaW5nLCBldGMuKQogdXNpbmcgbGxtX2dyYXBoX2NiID0gc3RkOjpmdW5jdGlvbjx2b2lkKGNvbnN0IGxsYW1hX3ViYXRjaCAmIHViYXRjaCwgZ2dtbF90ZW5zb3IgKiBjdXIsIGNvbnN0IGNoYXIgKiBuYW1lLCBpbnQgaWwpPjsKIAorLy8gT3B0LWluIGhvc3QgYnJpZGdlIGZvciBWb2x0YUZhYnJpYydzIHNpbmdsZS11c2UgUXdlbjJNb0Ugcm91dGVkLWV4cGVydCBwYXRoLgorLy8gVGhlIG93bmVyIHN1cHBsaWVzIHRoZSBjb21wbGV0ZSBydW4vbW9kZWwvcGxhbi9iYXRjaCBpZGVudGl0eSBpbiB1c2VyZGF0YS4KKy8vIGFib3J0KCkgbXVzdCBiZSBpZGVtcG90ZW50OyBhIGZhbHNlIGFwcGVuZC9maW5pc2ggcmVzdWx0IHByZXZlbnRzIGhvc3Qgb3V0cHV0Lgorc3RydWN0IGxsbV92Zl9yb3V0ZV9ob29rcyB7CisgICAgdm9pZCAqIHVzZXJkYXRhID0gbnVsbHB0cjsKKyAgICBib29sICgqYmVnaW4pKHZvaWQgKiB1c2VyZGF0YSwgY29uc3QgbGxhbWFfdWJhdGNoICYgdWJhdGNoLAorICAgICAgICAgICAgICAgICAgbGxtX2dyYXBoX3R5cGUgZ3JhcGhfdHlwZSwgdWludDMyX3QgZXhwZWN0ZWRfbGF5ZXJzKSA9IG51bGxwdHI7CisgICAgZ2dtbF90ZW5zb3IgKiAoKmFwcGVuZF9xd2VuMm1vZSkodm9pZCAqIHVzZXJkYXRhLCBnZ21sX2NvbnRleHQgKiBjdHgsIGludDMyX3QgbGF5ZXIsCisgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZ2dtbF90ZW5zb3IgKiBhY3RpdmF0aW9ucywgZ2dtbF90ZW5zb3IgKiBzZWxlY3RlZF9leHBlcnRzLAorICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGdnbWxfdGVuc29yICogZmluYWxfd2VpZ2h0cywgZ2dtbF90ZW5zb3IgKiByYXdfZXhwZXJ0X291dHB1dHMpID0gbnVsbHB0cjsKKyAgICBib29sICgqZmluaXNoKSh2b2lkICogdXNlcmRhdGEsIGJvb2wgZ2dtbF9zdWNjZXNzKSA9IG51bGxwdHI7CisgICAgdm9pZCAoKmFib3J0KSh2b2lkICogdXNlcmRhdGEpID0gbnVsbHB0cjsKK307CisKIGNsYXNzIGxsbV9ncmFwaF9yZXN1bHQ7CiAKIHN0cnVjdCBsbG1fZ3JhcGhfcGFyYW1zIHsKQEAgLTgwOCw2ICs4MjIsOCBAQCBzdHJ1Y3QgbGxtX2dyYXBoX3BhcmFtcyB7CiAKICAgICBsbG1fZ3JhcGhfY2IgY2I7CiAKKyAgICBjb25zdCBsbG1fdmZfcm91dGVfaG9va3MgKiB2Zl9yb3V0ZV9ob29rcyA9IG51bGxwdHI7CisKICAgICBsbG1fZ3JhcGhfcmVzdWx0ICogcmVzOwogCiAgICAgLy8gcmV0dXJuIHRydWUgaWYgdGhlICJvdGhlciIgcGFyYW1zIHdvdWxkIHJlc3VsdCBpbiBhIGdyYXBoIHdpdGggdGhlIHNhbWUgdG9wb2xvZ3kgYXMgd2l0aCB0aGUgY3VycmVudCBwYXJhbXMKQEAgLTg3OCw2ICs4OTQsNyBAQCBzdHJ1Y3QgbGxtX2dyYXBoX3BhcmFtcyB7CiAgICAgICAgICAgICBjcGFyYW1zLmNhdXNhbF9hdHRuICAgICAgICAgICAgID09IG90aGVyLmNwYXJhbXMuY2F1c2FsX2F0dG4gICAgICAgICAgICAgJiYKICAgICAgICAgICAgIGFyY2ggID09IG90aGVyLmFyY2ggICYmCiAgICAgICAgICAgICBndHlwZSA9PSBvdGhlci5ndHlwZSAmJgorICAgICAgICAgICAgdmZfcm91dGVfaG9va3MgPT0gb3RoZXIudmZfcm91dGVfaG9va3MgJiYKICAgICAgICAgICAgIGN2ZWMgID09IG90aGVyLmN2ZWMgICYmCiAgICAgICAgICAgICBsb3JhcyA9PSBvdGhlci5sb3JhcyAmJgogICAgICAgICAgICAgY3Jvc3MgPT0gb3RoZXIuY3Jvc3M7CkBAIC0xMDMxLDYgKzEwNDgsOCBAQCBzdHJ1Y3QgbGxtX2dyYXBoX2NvbnRleHQgewogCiAgICAgY29uc3QgbGxtX2dyYXBoX2NiICYgY2JfZnVuYzsKIAorICAgIGNvbnN0IGxsbV92Zl9yb3V0ZV9ob29rcyAqIHZmX3JvdXRlX2hvb2tzOworCiAgICAgbGxtX2dyYXBoX3Jlc3VsdCAqIHJlczsKIAogICAgIGdnbWxfY29udGV4dCAqIGN0eDAgPSBudWxscHRyOwo=
+diff --git a/src/llama-context.cpp b/src/llama-context.cpp
+index ef53728..0666408 100644
+--- a/src/llama-context.cpp
++++ b/src/llama-context.cpp
+@@ -1347,14 +1347,26 @@ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, ll
+         return nullptr;
+     }
+ 
++    const bool vf_route_active = vf_route_hooks != nullptr;
++    if (vf_route_active &&
++        (model.arch != LLM_ARCH_QWEN2MOE || vf_route_hooks->begin == nullptr ||
++         vf_route_hooks->append_qwen2moe == nullptr || vf_route_hooks->finish == nullptr ||
++         vf_route_hooks->abort == nullptr ||
++         !vf_route_hooks->begin(vf_route_hooks->userdata, ubatch, gtype,
++                                static_cast<uint32_t>(model.hparams.n_layer())))) {
++        if (vf_route_hooks->abort != nullptr) vf_route_hooks->abort(vf_route_hooks->userdata);
++        ret = GGML_STATUS_FAILED;
++        return nullptr;
++    }
++
+     auto * res = get_gf_res_prev();
+     auto * gf  = res->get_gf();
+ 
+     // the new graph parameters
+     // in order to correctly reuse a graph, it's full topology has to be uniquely determined by these parameters
+-    const auto gparams = graph_params(res, ubatch, mctx, gtype);
++    const auto gparams = graph_params(res, ubatch, mctx, gtype, vf_route_active);
+ 
+-    if (!graph_reuse_disable && gf_res_prev_active == res && res->can_reuse(gparams)) {
++    if (!vf_route_active && !graph_reuse_disable && gf_res_prev_active == res && res->can_reuse(gparams)) {
+         //LLAMA_LOG_DEBUG("%s: reusing previous graph\n", __func__);
+ 
+         // with pipeline parallelism, the previous graph_compute_async may still be running
+@@ -1380,12 +1392,14 @@ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, ll
+ 
+         if (!gf) {
+             LLAMA_LOG_ERROR("%s: failed to initialize graph\n", __func__);
++            if (vf_route_active) vf_route_hooks->abort(vf_route_hooks->userdata);
+             ret = GGML_STATUS_FAILED;
+             return nullptr;
+         }
+ 
+         if (!ggml_backend_sched_alloc_graph(sched.get(), gf)) {
+             LLAMA_LOG_ERROR("%s: failed to allocate graph\n", __func__);
++            if (vf_route_active) vf_route_hooks->abort(vf_route_hooks->userdata);
+             ret = GGML_STATUS_ALLOC_FAILED;
+             return nullptr;
+         }
+@@ -1406,10 +1420,18 @@ llm_graph_result * llama_context::process_ubatch(const llama_ubatch & ubatch, ll
+     const auto status = graph_compute(res->get_gf(), ubatch.n_tokens > 1);
+     if (status != GGML_STATUS_SUCCESS) {
+         LLAMA_LOG_ERROR("%s: failed to compute graph, compute status: %d\n", __func__, status);
++        if (vf_route_active) vf_route_hooks->abort(vf_route_hooks->userdata);
+         ret = status;
+         return nullptr;
+     }
+ 
++    if (vf_route_active && !vf_route_hooks->finish(vf_route_hooks->userdata, true)) {
++        vf_route_hooks->abort(vf_route_hooks->userdata);
++        LLAMA_LOG_ERROR("%s: VoltaFabric Qwen2MoE route invocation incomplete\n", __func__);
++        ret = GGML_STATUS_FAILED;
++        return nullptr;
++    }
++
+     ret = GGML_STATUS_SUCCESS;
+ 
+     return res;
+@@ -2497,7 +2519,8 @@ llm_graph_params llama_context::graph_params(
+                         llm_graph_result * res,
+                       const llama_ubatch & ubatch,
+             const llama_memory_context_i * mctx,
+-                          llm_graph_type   gtype) const {
++                          llm_graph_type   gtype,
++                                bool       use_vf_route_hooks) const {
+     return {
+         /*.arch        =*/ model.arch,
+         /*.hparams     =*/ model.hparams,
+@@ -2513,6 +2536,7 @@ llm_graph_params llama_context::graph_params(
+         /*.samplers    =*/ sampling.samplers,
+         /*.n_outputs   =*/ n_outputs,
+         /*.cb          =*/ graph_get_cb(),
++        /*.vf_route_hooks =*/ use_vf_route_hooks ? vf_route_hooks : nullptr,
+         /*.res         =*/ res,
+     };
+ }
+diff --git a/src/llama-context.h b/src/llama-context.h
+index b7a9db5..97036c3 100644
+--- a/src/llama-context.h
++++ b/src/llama-context.h
+@@ -113,6 +113,10 @@ struct llama_context {
+ 
+     void set_abort_callback(bool (*abort_callback)(void * data), void * abort_callback_data);
+ 
++    // Internal opt-in hook. The hook object and its userdata must outlive the
++    // llama_context. Currently accepted only for Qwen2MoE graphs.
++    void set_vf_route_hooks(const llm_vf_route_hooks * hooks) { vf_route_hooks = hooks; }
++
+     void set_embeddings (bool value);
+     void set_embeddings_nextn(bool value, bool masked);
+     void set_embeddings_layer_inp(uint32_t lid, bool enable);
+@@ -261,7 +265,8 @@ private:
+                         llm_graph_result * res,
+                       const llama_ubatch & ubatch,
+             const llama_memory_context_i * mctx,
+-                          llm_graph_type   gtype) const;
++                          llm_graph_type   gtype,
++                                bool       use_vf_route_hooks = false) const;
+ 
+     llm_graph_cb graph_get_cb() const;
+ 
+@@ -360,6 +365,8 @@ private:
+     ggml_abort_callback abort_callback      = nullptr;
+     void *              abort_callback_data = nullptr;
+ 
++    const llm_vf_route_hooks * vf_route_hooks = nullptr;
++
+     std::vector<std::pair<ggml_backend_t, ggml_backend_set_n_threads_t>> set_n_threads_fns;
+ 
+     // pointers and buffer types used for the compute buffer of each backend
+diff --git a/src/llama-graph.cpp b/src/llama-graph.cpp
+index fd4290c..79cbd06 100644
+--- a/src/llama-graph.cpp
++++ b/src/llama-graph.cpp
+@@ -1491,6 +1491,7 @@ llm_graph_context::llm_graph_context(const llm_graph_params & params) :
+     cross            (params.cross),
+     samplers         (params.samplers),
+     cb_func          (params.cb),
++    vf_route_hooks   (params.vf_route_hooks),
+     res              (params.res),
+     ctx0             (res->get_ctx()),
+     gf               (res->get_gf()) {
+@@ -2017,6 +2018,7 @@ ggml_tensor * llm_graph_context::build_moe_ffn(
+          ggml_tensor * selected_experts_in) const {
+     const int64_t n_embd   = cur->ne[0];
+     const int64_t n_tokens = cur->ne[1];
++    ggml_tensor * const route_activations = cur;
+     const bool weight_before_ffn = arch == LLM_ARCH_LLAMA4; // for llama4, we apply the sigmoid-ed weights before the FFN
+ 
+     ggml_tensor * logits = nullptr;
+@@ -2313,6 +2315,29 @@ ggml_tensor * llm_graph_context::build_moe_ffn(
+         cb(experts, "ffn_moe_down_biased", il);
+     }
+ 
++    // Qwen2MoE exposes the routed path here as raw per-expert outputs. Only the
++    // routed aggregate is replaceable: shared expert and residual remain in the
++    // model-specific graph, and VoltaFabric receives final weights exactly once.
++    if (arch == LLM_ARCH_QWEN2MOE && vf_route_hooks != nullptr &&
++        vf_route_hooks->append_qwen2moe != nullptr) {
++        ggml_tensor * routed = vf_route_hooks->append_qwen2moe(
++            vf_route_hooks->userdata, ctx0, il, route_activations,
++            selected_experts, weights, experts);
++        if (routed != nullptr && routed->type == GGML_TYPE_F32 &&
++            routed->ne[0] == n_embd && routed->ne[1] == n_tokens &&
++            routed->ne[2] == 1 && routed->ne[3] == 1) {
++            ggml_build_forward_expand(gf, routed);
++            cb(routed, "ffn_moe_out", il);
++            return routed;
++        }
++        // Continue graph construction with the donor's local path only so it
++        // remains well-formed. process_ubatch will refuse the host result after
++        // finish() observes the sticky abort from this invocation.
++        if (vf_route_hooks->abort != nullptr) {
++            vf_route_hooks->abort(vf_route_hooks->userdata);
++        }
++    }
++
+     if (!weight_before_ffn) {
+         experts = ggml_mul(ctx0, experts, weights);
+         cb(experts, "ffn_moe_weighted", il);
+diff --git a/src/llama-graph.h b/src/llama-graph.h
+index cc41106..436db00 100644
+--- a/src/llama-graph.h
++++ b/src/llama-graph.h
+@@ -767,6 +767,20 @@ public:
+ // callback that allows us to apply custom logic to each tensor (e.g. ggml-alloc, offloading, etc.)
+ using llm_graph_cb = std::function<void(const llama_ubatch & ubatch, ggml_tensor * cur, const char * name, int il)>;
+ 
++// Opt-in host bridge for VoltaFabric's single-use Qwen2MoE routed-expert path.
++// The owner supplies the complete run/model/plan/batch identity in userdata.
++// abort() must be idempotent; a false append/finish result prevents host output.
++struct llm_vf_route_hooks {
++    void * userdata = nullptr;
++    bool (*begin)(void * userdata, const llama_ubatch & ubatch,
++                  llm_graph_type graph_type, uint32_t expected_layers) = nullptr;
++    ggml_tensor * (*append_qwen2moe)(void * userdata, ggml_context * ctx, int32_t layer,
++                                     ggml_tensor * activations, ggml_tensor * selected_experts,
++                                     ggml_tensor * final_weights, ggml_tensor * raw_expert_outputs) = nullptr;
++    bool (*finish)(void * userdata, bool ggml_success) = nullptr;
++    void (*abort)(void * userdata) = nullptr;
++};
++
+ class llm_graph_result;
+ 
+ struct llm_graph_params {
+@@ -808,6 +822,8 @@ struct llm_graph_params {
+ 
+     llm_graph_cb cb;
+ 
++    const llm_vf_route_hooks * vf_route_hooks = nullptr;
++
+     llm_graph_result * res;
+ 
+     // return true if the "other" params would result in a graph with the same topology as with the current params
+@@ -878,6 +894,7 @@ struct llm_graph_params {
+             cparams.causal_attn             == other.cparams.causal_attn             &&
+             arch  == other.arch  &&
+             gtype == other.gtype &&
++            vf_route_hooks == other.vf_route_hooks &&
+             cvec  == other.cvec  &&
+             loras == other.loras &&
+             cross == other.cross;
+@@ -1031,6 +1048,8 @@ struct llm_graph_context {
+ 
+     const llm_graph_cb & cb_func;
+ 
++    const llm_vf_route_hooks * vf_route_hooks;
++
+     llm_graph_result * res;
+ 
+     ggml_context * ctx0 = nullptr;
