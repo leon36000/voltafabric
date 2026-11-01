@@ -1,0 +1,44 @@
+{
+  "round": "R675",
+  "state": "FRESH_GRAPH_AND_STAMP_CPU_CONTRACT_PASS",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "revision": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT"
+  },
+  "adaptation": "Rebuild routed GGML graph and create a fresh identified RouteGraphTransaction for each invocation; host accepts output only after graph status and transaction readiness agree.",
+  "fixture": {
+    "first_transaction_replay": "ABORTED before Collector/downstream acceptance",
+    "fresh_identity": {
+      "run": "r674-rebuilt-graph",
+      "model": "qwen2moe-route-fixture",
+      "plan": "r674-fresh-stamp",
+      "layer": 4,
+      "epoch": 6740000001,
+      "batch": 6740001,
+      "attempt": 1
+    },
+    "routes": [2, 5, 6, 0],
+    "post_gating_weights": [0.375, 0.125, 0.375, 0.125],
+    "collector_calls": 1,
+    "downstream_calls": 1,
+    "output": [0.75, 1.25, 7.5, 12.5],
+    "independent_scalar_oracle": "FP64 weighted sum exact within 1e-6"
+  },
+  "build": "AArch64 CPU C++17 -Wall -Wextra -Werror",
+  "ctest": {
+    "passed": 3,
+    "total": 3,
+    "tests": ["route_graph_transaction", "route_graph_dynamic_capture", "route_graph_vfr3"]
+  },
+  "donor_callback_integrated": false,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "cuda_graph_qualified": false,
+  "inter_pc_or_rdma": false,
+  "production_r53": false,
+  "performance_comparison": false,
+  "r673_unknown_receipt_replayed": false,
+  "next_action": "R676: wire fresh per-invocation transaction creation and host status validation into the pinned llama.cpp Qwen2MoE callback; replace only the routed aggregate and preserve shared/residual and one-time coefficients."
+}

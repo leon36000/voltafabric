@@ -1,0 +1,15 @@
+R675 BUILD AND TEST RECEIPT
+
+Changed source: adapters/native_ggml/route_graph_dynamic_capture_test.cpp (isolated Naos adapter copy).
+
+Build:
+  cmake --build ../build-full --target vf_route_graph_dynamic_capture_test -j2
+  Result: pass; target uses C++17 -Wall -Wextra -Werror.
+
+Focused suite:
+  ctest --test-dir ../build-full --output-on-failure -R '^(route_graph_transaction|route_graph_vfr3|route_graph_dynamic_capture)$'
+  Result: 3/3 passed.
+
+The dynamic test now verifies both sides of the lifecycle: stale transaction on a reused graph refuses a changed route before a second Collector/downstream call; a separately rebuilt graph with a fresh full Stamp and transaction accepts the new route once and matches the scalar FP64 weighted output [0.75, 1.25, 7.5, 12.5].
+
+CPU fixture only. No llama.cpp callback, model/checkpoint, GPU, CUDA graph, inter-PC network, production R53, or performance measurement. R673 process receipt remains RESERVED_UNKNOWN_NO_REPLAY and was not rerun.

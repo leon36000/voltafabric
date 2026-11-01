@@ -69,6 +69,42 @@ void copy_downstream(ggml_tensor *dst, const ggml_tensor *src, int ith, int nth,
     ++calls;
 }
 
+struct FreshCapture {
+    size_t calls = 0;
+};
+
+RouteStatus capture_fresh_invocation(const RouteBatch &batch, const float *, size_t,
+                                     const float *slot_outputs, size_t slot_output_count,
+                                     float *output, size_t output_count, void *userdata) {
+    auto &capture = *static_cast<FreshCapture *>(userdata);
+    if (batch.identity.run != "r674-rebuilt-graph" ||
+        batch.identity.model != "qwen2moe-route-fixture" ||
+        batch.identity.plan != "r674-fresh-stamp" || batch.identity.layer != 4 ||
+        batch.identity.epoch != 6740000001ULL || batch.identity.batch != 6740001ULL ||
+        batch.identity.attempt != 1 || slot_outputs == nullptr || slot_output_count != 8 ||
+        output == nullptr || output_count != 4 ||
+        batch.expert_ids != std::vector<int32_t>{2, 5, 6, 0} || batch.weights.size() != 4 ||
+        std::fabs(batch.weights[0] - 0.375f) > 1e-6f ||
+        std::fabs(batch.weights[1] - 0.125f) > 1e-6f ||
+        std::fabs(batch.weights[2] - 0.375f) > 1e-6f ||
+        std::fabs(batch.weights[3] - 0.125f) > 1e-6f) {
+        return RouteStatus::invalid_batch;
+    }
+    ++capture.calls;
+    for (size_t token = 0; token < batch.tokens; ++token) {
+        for (size_t hidden = 0; hidden < batch.hidden; ++hidden) {
+            double sum = 0.0;
+            for (size_t slot = 0; slot < batch.slots; ++slot) {
+                const size_t route = slot + batch.slots * token;
+                const size_t input = hidden + batch.hidden * route;
+                sum += static_cast<double>(batch.weights[route]) * slot_outputs[input];
+            }
+            output[hidden + batch.hidden * token] = static_cast<float>(sum);
+        }
+    }
+    return RouteStatus::ready;
+}
+
 struct Graph {
     ggml_context *ctx = nullptr;
     ggml_cgraph *graph = nullptr;
@@ -236,10 +272,65 @@ bool run_case(bool invalid_expert) {
     }
     return true;
 }
+
+bool run_fresh_invocation() {
+    RouteBatch batch;
+    batch.identity = BatchIdentity{"r674-rebuilt-graph", "qwen2moe-route-fixture",
+                                   "r674-fresh-stamp", 4, 6740000001ULL, 6740001ULL, 1};
+    batch.hidden = kHidden;
+    batch.slots = kSlots;
+    batch.tokens = kTokens;
+    batch.experts = kExperts;
+    batch.owner_kinds = {0, 0, 0, 0};
+
+    FreshCapture capture;
+    RouteGraphTransaction transaction(batch, capture_fresh_invocation, &capture);
+    size_t downstream_calls = 0;
+    Graph g;
+    ggml_init_params params{};
+    params.mem_size = 1U << 20;
+    g.ctx = ggml_init(params);
+    if (g.ctx == nullptr) return false;
+
+    ggml_tensor *slot_outputs = ggml_new_tensor_3d(g.ctx, GGML_TYPE_F32, kHidden, kSlots, kTokens);
+    ggml_tensor *activations = ggml_new_tensor_2d(g.ctx, GGML_TYPE_F32, kHidden, kTokens);
+    ggml_tensor *selected = ggml_new_tensor_2d(g.ctx, GGML_TYPE_I32, kSlots, kTokens);
+    ggml_tensor *weights = ggml_new_tensor_3d(g.ctx, GGML_TYPE_F32, 1, kSlots, kTokens);
+    if (slot_outputs == nullptr || activations == nullptr || selected == nullptr || weights == nullptr ||
+        slot_outputs->data == nullptr || activations->data == nullptr || selected->data == nullptr ||
+        weights->data == nullptr) return false;
+
+    const float raw_slots[] = {1.0f, 2.0f, 3.0f, 4.0f, 10.0f, 20.0f, 30.0f, 40.0f};
+    const float activation_values[] = {0.5f, 1.0f, 2.0f, 3.0f};
+    const int32_t route_ids[] = {2, 5, 6, 0};
+    const float route_weights[] = {0.375f, 0.125f, 0.375f, 0.125f};
+    std::memcpy(slot_outputs->data, raw_slots, sizeof(raw_slots));
+    std::memcpy(activations->data, activation_values, sizeof(activation_values));
+    std::memcpy(selected->data, route_ids, sizeof(route_ids));
+    std::memcpy(weights->data, route_weights, sizeof(route_weights));
+
+    ggml_tensor *routed = transaction.append_dynamic(g.ctx, slot_outputs, activations, selected, weights);
+    g.downstream = routed == nullptr
+        ? nullptr : ggml_map_custom1(g.ctx, routed, copy_downstream, 1, &downstream_calls);
+    g.graph = ggml_new_graph(g.ctx);
+    if (g.downstream == nullptr || g.graph == nullptr) return false;
+    ggml_build_forward_expand(g.graph, g.downstream);
+    g.plan = ggml_graph_plan(g.graph, 1, nullptr);
+    g.work.resize(g.plan.work_size);
+    g.plan.work_data = g.work.empty() ? nullptr : g.work.data();
+    transaction.attach_abort(g.plan);
+
+    const ggml_status status = ggml_graph_compute(g.graph, &g.plan);
+    const auto *out = static_cast<const float *>(g.downstream->data);
+    return transaction.accepts(status) && transaction.status() == RouteStatus::ready &&
+           capture.calls == 1 && downstream_calls == 1 &&
+           std::fabs(out[0] - 0.75f) <= 1e-6f && std::fabs(out[1] - 1.25f) <= 1e-6f &&
+           std::fabs(out[2] - 7.5f) <= 1e-6f && std::fabs(out[3] - 12.5f) <= 1e-6f;
+}
 } // namespace
 
 int main() {
-    if (!run_case(false) || !run_case(true)) return 1;
-    std::cout << "dynamic GGML route capture: pinned softmax/top-k/gather/scale inputs, single weighting, atomic invalid-ID rejection, replay refusal passed\n";
+    if (!run_case(false) || !run_case(true) || !run_fresh_invocation()) return 1;
+    std::cout << "dynamic GGML route capture: pinned softmax/top-k/gather/scale inputs, single weighting, atomic invalid-ID rejection, replay refusal, and fresh-graph/new-Stamp invocation passed\n";
     return 0;
 }
