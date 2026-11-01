@@ -1,6 +1,6 @@
 {
   "wave": "R641",
-  "status": "PATCH_GENERATED_STATIC_REVIEW_ONLY_GITLAB_READBACK_PENDING",
+  "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_REVIEW_ONLY",
   "branch": "r641-strata-token-decode-voltafabric-20261101",
   "base_branch": "r640-strata-mixed-miss-dispatch-20261101",
   "base_commit": "2bf3271f2840e6a2437f2223bc53befbe78d5f90",
@@ -24,7 +24,14 @@
   "linux_native_cuda_only": true,
   "single_token_decode_callback_installed": true,
   "48_inherited_session_fds_required": true,
-  "identity_fields_required": ["run_id", "model_revision", "plan_id", "epoch", "first_batch", "first_attempt"],
+  "identity_fields_required": [
+    "run_id",
+    "model_revision",
+    "plan_id",
+    "epoch",
+    "first_batch",
+    "first_attempt"
+  ],
   "identity_matches_checkpoint_hash": false,
   "launcher_initializes_sessions": false,
   "coefficients_applied_once_by_existing_strata_combine": true,
@@ -40,5 +47,9 @@
   "production_network_used": false,
   "real_r53_used": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R642: integrate a trusted local launcher/session initializer that binds the checkpoint and plan to all 48 VFB3 streams; then request and perform bounded CPU build/oracle qualification before any hardware work."
+  "next_action": "R642: integrate a trusted local launcher/session initializer that binds the checkpoint and plan to all 48 VFB3 streams; then request and perform bounded CPU build/oracle qualification before any hardware work.",
+  "source_commit": "a72bc96b82c872acb611c6d0cb20827691b3e7ea",
+  "readback_files_verified": 9,
+  "payload_files_hash_matched": true,
+  "handoff_r641_entries_read_back": true
 }

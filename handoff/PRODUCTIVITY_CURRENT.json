@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01T03:10:00Z",
+  "updated_utc": "2026-11-01T03:11:33Z",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -66,11 +66,12 @@
     {
       "id": "R641",
       "owner": "integrator",
-      "state": "PATCH_PUBLISHED_PRIVATE_GITLAB_READBACK_PENDING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_REVIEW_ONLY",
       "branch": "r641-strata-token-decode-voltafabric-20261101",
       "parent_commit": "2bf3271f2840e6a2437f2223bc53befbe78d5f90",
       "path": "research/R641",
-      "readback_files_verified": 0
+      "readback_files_verified": 9,
+      "commit": "a72bc96b82c872acb611c6d0cb20827691b3e7ea"
     }
   ],
   "acceptance": [
@@ -99,14 +100,14 @@
   ],
   "active_operations": [],
   "next_action": {
-    "status": "R641_GITLAB_READBACK_IN_PROGRESS",
-    "purpose": "Read back every R641 source/report/receipt and handoff file from the private branch; then leave the next launcher integration for a separately owner-requested bounded step. No automatic relaunch or hardware work."
+    "status": "R642_READY_ON_NEXT_OWNER_REQUEST",
+    "purpose": "Integrate a trusted local launcher/session initializer that binds the checkpoint and plan to all 48 VFB3 streams; then perform bounded CPU build/oracle qualification. No automatic relaunch or hardware/network work."
   },
   "report": "research/R641/REPORT.md",
   "operating_mode": "No automatic relaunch; owner-requested bounded source/CPU work only. GPU and production network remain suspended without fresh admissions.",
   "wave_manifest": {
     "path": "research/R641/SHA256SUMS",
-    "sha256": "1c2237bbeb8e9eb6d2bd4ed887d21582f9c4c0011467eb3494347a3e759784eb",
+    "sha256": "a36599a3fa27414a559c8f72dd703aa632eb42a6641d6e5b5a5d72f790409753",
     "files": 5
   }
 }

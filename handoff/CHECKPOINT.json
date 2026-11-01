@@ -11820,8 +11820,10 @@
     "next_action": "R641 on the active owner-requested turn: wire owner lifetime and launcher identity into generation context, then qualify CPU output with an independent oracle."
   },
   "r641_strata_token_decode_generator": {
-    "status": "PATCH_PUBLISHED_READBACK_PENDING_SOURCE_REVIEW_ONLY",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_REVIEW_ONLY",
     "branch": "r641-strata-token-decode-voltafabric-20261101",
+    "source_commit": "a72bc96b82c872acb611c6d0cb20827691b3e7ea",
+    "readback_files_verified": 9,
     "base_branch": "r640-strata-mixed-miss-dispatch-20261101",
     "base_commit": "2bf3271f2840e6a2437f2223bc53befbe78d5f90",
     "donor_revision": "fb58e0dbc8399662c0e47c76578c6e878b14f6cf",
@@ -11840,6 +11842,6 @@
     "production_network_used": false,
     "real_r53_used": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R642: implement a trusted local launcher/session initializer that binds checkpoint and plan identity to all 48 VFB3 streams; then perform bounded CPU build/oracle qualification when owner-requested."
+    "next_action": "R642: implement a trusted local launcher/session initializer that binds checkpoint and plan identity to all 48 VFB3 streams; then perform bounded CPU build/oracle qualification on an owner-requested turn."
   }
 }
