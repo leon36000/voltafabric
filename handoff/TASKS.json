@@ -12189,7 +12189,7 @@
   "r743_cpu_planner_concurrent_scenarios": {
     "id": "R743",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_2621_SUCCESS_RECEIPT_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
     "branch": "r743-cpu-planner-concurrent-scenarios-20261102",
     "branch_base_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
     "initial_artifact_commit": "3aefc412576f7ff46b1e131a3457533f72541a41",
@@ -12235,8 +12235,25 @@
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "active_operations": [],
-    "receipt_pending": true,
-    "next_action": "R744: continue with a bounded CPU seam from indexed checkpoint tensors through resident owners and the existing Session, rejecting incomplete tensors atomically; no GPU or full-generation claim.",
-    "task_scope": "Bounded CPU planner adaptation; analytical makespan only, no hardware/performance inference."
+    "receipt_pending": false,
+    "next_action": "R744: continue the bounded CPU checkpoint-index -> resident owner -> Session path with complete tensor authentication and atomic refusal of partial inputs; no GPU, actual checkpoint payload or complete-generation claim.",
+    "task_scope": "Bounded CPU planner adaptation; analytical makespan only, no hardware/performance inference.",
+    "receipt_commit": "bae0c556a6b25b8a816b39735d5232f358c7492a",
+    "receipt_pipeline_id": 2622,
+    "receipt_pipeline_status": "success",
+    "receipt_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "receipt_artifacts_exact": true,
+    "receipt_artifacts_verified": [
+      "research/R743/REPORT.md",
+      "research/R743/RESULT.json",
+      "research/R743/SHA256SUMS"
+    ],
+    "receipt_handoff_records_present": true,
+    "updated_utc": "2026-11-02 21:30:07 UTC"
   }
 }
