@@ -3,7 +3,7 @@
   "status": "CPU_SYNTHETIC_DEEPSEEK_GATE_TO_MEMORY_ADVICE_PASS",
   "branch": "r705-deepseek-gate-memory-advice-20261102",
   "parent_commit": "a9a3c13aa68cc9332d511538206c5dc376608d1d",
-  "source_commit": "PENDING",
+  "source_commit": "8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1",
   "component": "DeepSeekV41RouteBatch to existing VoltaFabric memory-aware placement advice",
   "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
   "adaptation": "Thin bridge to planner::plan_routing_advisory_with_memory; no donor code copied in R705",
@@ -40,5 +40,15 @@
   "production_network": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER; work only in the current owner-requested turn",
-  "next_action": "R706: advance from route and memory advice toward a Session execution boundary using only already-coherent payloads and exact full identities. Keep DeepSeek dispatch refused until the real gate, all six expert payload profiles, resident ownership, and memory admission are available; no checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+  "next_action": "R706: advance from route and memory advice toward a Session execution boundary using only already-coherent payloads and exact full identities. Keep DeepSeek dispatch refused until the real gate, all six expert payload profiles, resident ownership, and memory admission are available; no checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+  "source_readback_exact": true,
+  "source_readback_sha256": "6e656dcaf78df477b90b7430fc4ef06a445890a4d0d67bc360bac74161ed72f9",
+  "test_readback_sha256": "0d416d0963ceee4c06832c0ea645d41d9def676e89988acd7e29ff7a7d4f283f",
+  "readback_exact": true,
+  "readback_files_verified": 6,
+  "pipeline_id": 2434,
+  "pipeline_status_at_receipt": "pending",
+  "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2434",
+  "publication_commit": "8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1"
 }

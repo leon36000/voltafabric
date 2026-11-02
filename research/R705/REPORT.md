@@ -24,3 +24,7 @@ Le test de liaison utilise un gate Safetensors synthétique, une topologie à un
 Cette tranche réutilise la frontière existante du planificateur VoltaFabric, y compris ses contrôles de budget, le dispatch validé et la conservation exacte des coefficients. Le code de gate reste l’adaptation CPU des sémantiques épinglées du donneur DeepSeek V4.1 Flash (`314113f8a7dadb388215396ba5fbee2c610a04d6`); R705 ne copie pas de nouveau code tiers. Aucun composant externe n’est supposé transférer ses garanties au moteur.
 
 La preuve ne qualifie ni génération complète, ni checkpoint réel, ni Session, GPU ou transport inter-PC. L’inventaire R703 sur les fichiers suivis n’a trouvé aucun payload de gate réel et les experts sélectionnés 379–382 manquent. DeepSeek reste en refus atomique jusqu’à présence de tous les tenseurs, six profils, propriété résidente et admission mémoire réelle. Pas de téléchargement large, GPU, réseau de production ou rejeu UNKNOWN.
+## Publication GitLab
+
+Le code et les six fichiers R705 ont été publiés au commit `8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1`; relecture exacte des sources gate/test et des quatre fichiers R705. SHA-256 source gate `6e656dcaf78df477b90b7430fc4ef06a445890a4d0d67bc360bac74161ed72f9`; test `0d416d0963ceee4c06832c0ea645d41d9def676e89988acd7e29ff7a7d4f283f`. Le pipeline 2434 est `pending` au relevé; il porte les scans configurés et le fallback, pas la compilation Rust ni le test CPU local. Aucun retry.
+

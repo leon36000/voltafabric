@@ -2127,22 +2127,22 @@
   "active_operation": null,
   "active_operations": [
     {
-      "id": "R704_PIPELINE_2421",
-      "state": "RUNNING",
-      "branch": "r704-deepseek-gate-route-identity-20261102",
-      "commit": "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
-      "pipeline_id": 2421,
-      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2421",
-      "scope": "configured scans only; older source commit with duplicate helper; no retry"
-    },
-    {
       "id": "R704_PIPELINE_2427",
-      "state": "PENDING",
+      "state": "RUNNING",
       "branch": "r704-deepseek-gate-route-identity-20261102",
       "commit": "02ba5eb8c91cfc8118d1ab3a6aecfdacac80003f",
       "pipeline_id": 2427,
       "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2427",
       "scope": "configured scans/fallback only; not Rust compilation"
+    },
+    {
+      "id": "R705_PIPELINE_2434",
+      "state": "PENDING",
+      "branch": "r705-deepseek-gate-memory-advice-20261102",
+      "commit": "8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1",
+      "pipeline_id": 2434,
+      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2434",
+      "scope": "configured scans/fallback only; not Rust compilation or local CPU tests"
     }
   ],
   "active_phase": "R698_PUBLISHED_CPU_REAL_EXPERT_TWO_SESSION_READBACK_EXACT_PIPELINE_PENDING",
@@ -3856,7 +3856,7 @@
   "measured_forwards": 64,
   "measured_pairs": 32,
   "native_agent_cost_usd": null,
-  "next_action": "R705: continue the CPU generation path using coherent already-tracked weights and full identities. Keep DeepSeek dispatch refused until the real gate payload, all six selected expert profiles, resident ownership, and memory admission exist. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+  "next_action": "R706: advance from route and memory advice toward a Session execution boundary using only coherent payloads and exact full identities. Keep DeepSeek dispatch refused until real gate bytes, all six selected expert payload profiles, resident ownership and memory admission exist; no checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
   "next_command": "NONE until snapshot is prepared and GitLab authentication exists.",
   "next_command_expected_result": "Read-only filenames of actual native-pack loader; no engine execution, no payload/model/GPU. Store bounded receipt.",
   "next_cpu_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
@@ -3864,7 +3864,7 @@
   "next_hardware_command": "NONE: no new hardware case admitted; R81 budget1/1 exhausted.",
   "next_required_work": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
   "next_task": "R699",
-  "next_updated_utc": "2026-11-02 08:37:56 UTC",
+  "next_updated_utc": "2026-11-02 08:45:59 UTC",
   "no_processes_left_after_tests": true,
   "numerical_acceptance_gap": null,
   "optimization_lab_20261023": {
@@ -7071,8 +7071,8 @@
   "torch_cuda_kernel_count_instrumented": false,
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
-  "updated_at_utc": "2026-11-02 08:37:56 UTC",
-  "updated_utc": "2026-11-02 08:37:56 UTC",
+  "updated_at_utc": "2026-11-02 08:45:59 UTC",
+  "updated_utc": "2026-11-02 08:45:59 UTC",
   "warmup_pairs": 4,
   "workers_running": [],
   "write_set": [
@@ -11153,13 +11153,13 @@
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "R705: continue the CPU generation path using coherent already-tracked weights and full identities. Keep DeepSeek dispatch refused until the real gate payload, all six selected expert profiles, resident ownership, and memory admission exist. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+    "next_action": "R705 published: gate route now reaches the existing memory-aware planner by advisory only; keep DeepSeek execution refused until real gate bytes, all six selected expert profiles, resident ownership and memory admission are available.",
     "task": "Inventory tracked gate/expert checkpoint artifacts and harden the bounded Safetensors reader with CPU-only fail-closed cases."
   },
   "r704_deepseek_gate_route_identity": {
     "id": "R704",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_TEST_PASS_PIPELINE_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TEST_PASS_PIPELINE_RUNNING",
     "branch": "r704-deepseek-gate-route-identity-20261102",
     "parent_commit": "bcaa7ee42752abfa597d1333fd1e20f9021d7a3c",
     "initial_source_commit": "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
@@ -11189,35 +11189,77 @@
     "inter_pc_network": false,
     "unknown_replayed": false,
     "pipeline_id": 2427,
-    "pipeline_status": "pending",
+    "pipeline_status": "running",
     "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
     "pipelines": [
       {
         "id": 2417,
         "status": "success",
-        "scope": "R703 configured scans/fallback; CPU tests are local evidence"
+        "scope": "R703 configured scans/fallback only"
       },
       {
         "id": 2421,
         "commit": "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
-        "status": "running",
-        "note": "first R704 commit with duplicated final helper; no retry"
+        "status": "success",
+        "note": "first R704 source commit; contained duplicated trailing helper; scans only"
       },
       {
         "id": 2426,
         "commit": "8b6519ba41f7a4f872612541a32ce8f05e4220a3",
         "status": "canceled",
-        "note": "cause not established; no retry"
+        "note": "cancellation cause unestablished; no retry"
       },
       {
         "id": 2427,
         "commit": "02ba5eb8c91cfc8118d1ab3a6aecfdacac80003f",
-        "status": "pending",
+        "status": "running",
         "scope": "configured scans/fallback only"
+      },
+      {
+        "id": 2428,
+        "commit": "a9a3c13aa68cc9332d511538206c5dc376608d1d",
+        "status": "skipped",
+        "note": "handoff-only commit with skip-ci"
       }
     ],
     "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
-    "next_action": "R705: continue the CPU generation path using coherent already-tracked weights and full identities. Keep DeepSeek dispatch refused until the real gate payload, all six selected expert profiles, resident ownership, and memory admission exist. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+    "next_action": "R705 published: gate route now reaches the existing memory-aware planner by advisory only; keep DeepSeek execution refused until real gate bytes, all six selected expert profiles, resident ownership and memory admission are available.",
     "published_utc": "2026-11-02 08:37:56 UTC"
+  },
+  "r705_deepseek_gate_memory_advice": {
+    "id": "R705",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_CPU_TEST_PASS_PIPELINE_PENDING",
+    "branch": "r705-deepseek-gate-memory-advice-20261102",
+    "parent_commit": "a9a3c13aa68cc9332d511538206c5dc376608d1d",
+    "source_commit": "8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1",
+    "commit": "8d28f0c91d534624d192ed0a89f6c5d5c2bd6af1",
+    "path": "research/R705",
+    "code_files": [
+      "src/deepseek_v41_gate.rs",
+      "tests/r702_deepseek_gate_projection.rs"
+    ],
+    "report": "research/R705/REPORT.md",
+    "build_test": "research/R705/BUILD_TEST.txt",
+    "result": "research/R705/RESULT.json",
+    "manifest": "research/R705/SHA256SUMS",
+    "manifest_sha256": "8ec80caa858eb71257de9776146a3581fec81319b880ad036324318b4160a60b",
+    "manifest_files": 5,
+    "readback_exact": true,
+    "readback_files_verified": 6,
+    "local_cpu_tests": "4 passed; scoped Clippy -D warnings, rustfmt and diff check passed",
+    "pipeline_id": 2434,
+    "pipeline_status": "pending",
+    "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2434",
+    "real_checkpoint_loaded": false,
+    "session_dispatch": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_network": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
+    "next_action": "R706: advance from route and memory advice toward a Session execution boundary using only coherent payloads and exact full identities. Keep DeepSeek dispatch refused until real gate bytes, all six selected expert payload profiles, resident ownership and memory admission exist; no checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+    "published_utc": "2026-11-02 08:45:59 UTC"
   }
 }
