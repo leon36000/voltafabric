@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "id": "R698",
-  "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_SUCCESS",
   "branch": "r698-deepseek-real-mxfp4-session-20261102",
   "parent_branch": "r697-llama-route-memory-advisory-20261102",
   "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
@@ -114,6 +114,7 @@
   "readback_exact": true,
   "readback_files_verified": 7,
   "pipeline_id": 2384,
-  "pipeline_status": "running",
-  "pipeline_scope": "configured Gitleaks/Semgrep/Trivy/CI fallback scans only; not Rust/C++ compilation or local CPU evidence"
+  "pipeline_status": "success",
+  "pipeline_scope": "configured Gitleaks/Semgrep/Trivy/CI fallback scans only; not Rust/C++ compilation or local CPU evidence",
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
 }

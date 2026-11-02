@@ -1472,13 +1472,13 @@
     {
       "id": "R698",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_SUCCESS",
       "branch": "r698-deepseek-real-mxfp4-session-20261102",
       "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
       "commit": "033ac7cb90c1189febc48700b4c261e071d49487",
       "path": "research/R698",
       "readback_files_verified": 7,
-      "manifest_sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+      "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
       "local_test": "1 passed; real layer-0 experts 0 and 383; two persistent CPU sessions; one token; output [1,5120]",
       "route_coefficients": [
         0.375,
@@ -1487,9 +1487,10 @@
       "route_from_model_gate": false,
       "max_abs_error_upper_bound": 0.0005,
       "pipeline_id": 2384,
-      "pipeline_status": "running",
+      "pipeline_status": "success",
       "pipeline_scope": "configured security scans/CI fallback only; not Rust/C++ compilation or local CPU evidence",
-      "published_utc": "2026-11-02 06:34:31 UTC"
+      "published_utc": "2026-11-02 06:34:31 UTC",
+      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
     }
   ],
   "acceptance": [
@@ -2042,14 +2043,14 @@
   },
   "r698_result": {
     "id": "R698",
-    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_SUCCESS",
     "branch": "r698-deepseek-real-mxfp4-session-20261102",
     "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
     "source_commit": "033ac7cb90c1189febc48700b4c261e071d49487",
     "path": "research/R698",
     "readback_exact": true,
     "readback_files_verified": 7,
-    "manifest_sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+    "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
     "manifest_files": 4,
     "model": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6",
     "license": "MIT",
@@ -2070,9 +2071,10 @@
     "production_r53": false,
     "performance_claim": false,
     "pipeline_id": 2384,
-    "pipeline_status": "running",
+    "pipeline_status": "success",
     "pipeline_scope": "configured security scans/CI fallback only; not compilation or local CPU test",
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "replay_allowed": false
+    "replay_allowed": false,
+    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
   }
 }

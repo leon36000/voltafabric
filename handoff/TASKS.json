@@ -10938,25 +10938,26 @@
   },
   "r698_deepseek_real_mxfp4_session": {
     "task": "Connect pinned DeepSeek-V4.1 expert slices to two persistent local VoltaFabric MXFP4 Sessions and the FP32-preweighted Collector.",
-    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_SUCCESS",
     "branch": "r698-deepseek-real-mxfp4-session-20261102",
     "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
     "source_commit": "033ac7cb90c1189febc48700b4c261e071d49487",
     "report": "research/R698/REPORT.md",
     "result": "research/R698/RESULT.json",
     "manifest": "research/R698/SHA256SUMS",
-    "manifest_sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+    "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
     "readback_files_verified": 7,
     "test_result": "1 passed; two actual MXFP4 K32 expert fragments, two local CPU sessions, one token, [1,5120] output",
     "route_from_model_gate": false,
     "pipeline_id": 2384,
-    "pipeline_status": "running",
+    "pipeline_status": "success",
     "full_generation": false,
     "complete_checkpoint": false,
     "gpu": false,
     "inter_pc_worker": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "R699: connect the existing per-rank memory advisory to native DeepSeek MXFP4 K32 dispatch. Use only the pinned layer-0 expert fragments already present and the R694-R697 planner; preserve the model gate as the sole route authority, full VFB3 identity, weight residency, and atomic refusal if any requested expert or byte budget is missing. CPU-only with a fresh identity; no full checkpoint download, GPU, inter-PC or production network, cleanup, UNKNOWN replay, or automatic relaunch."
+    "next_action": "R699: connect the existing per-rank memory advisory to native DeepSeek MXFP4 K32 dispatch. Use only the pinned layer-0 expert fragments already present and the R694-R697 planner; preserve the model gate as the sole route authority, full VFB3 identity, weight residency, and atomic refusal if any requested expert or byte budget is missing. CPU-only with a fresh identity; no full checkpoint download, GPU, inter-PC or production network, cleanup, UNKNOWN replay, or automatic relaunch.",
+    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
   }
 }
