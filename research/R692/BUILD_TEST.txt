@@ -1,0 +1,40 @@
+R692 focused build/test record
+==============================
+
+Donor:
+  llama.cpp / GGML commit 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+
+Build:
+  g++ -std=c++17 -Wall -Wextra -Werror -O2
+  Includes: pinned donor ggml/include
+  Link: pinned libggml-base.so.0.24.0
+  Result: pass
+
+Shell:
+  bash -n adapters/native_ggml/r692/run_r692_gguf_checkpoint_inventory_test.sh
+  Result: pass
+
+Runtime:
+  Existing synthetic input:
+    r691-source-qwen2moe-4experts.gguf (13,536 bytes)
+  Observed:
+    GGUF v3
+    architecture qwen2moe
+    tensors 3
+    type histogram {"q8_0": 3}
+    embedding_length 32
+    block_count 1
+    expert_count 4
+    tokenizer metadata null
+    general.license metadata null
+    compatibility_assessment NOT_ATTEMPTED
+  Result: pass; no tensor weights allocated or read
+
+Negative case:
+  Input: literal malformed bytes "not-a-GGUF"
+  Result: parser rejected with status 3; stdout JSON empty
+
+Runner:
+  exit code 0
+  Output/log root kept below .runs/r692-gguf-inventory-20261102/output
+  No GPU, model download, host hardware change, or production network.

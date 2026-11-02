@@ -1,0 +1,63 @@
+{
+  "round": "R692",
+  "status": "PASS_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_LIMITED",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "component": "GGUF metadata parser API",
+    "copied_upstream_source": false
+  },
+  "implementation": {
+    "source": "adapters/native_ggml/r692/r692_gguf_checkpoint_inventory.cpp",
+    "runner": "adapters/native_ggml/r692/run_r692_gguf_checkpoint_inventory_test.sh",
+    "opens_gguf_no_alloc": true,
+    "reports_version_size_tensor_count_quant_histogram_architecture_tokenizer_and_license_metadata": true,
+    "compatibility_claim": false,
+    "license_authority_claim": false
+  },
+  "fixture": {
+    "source": "retained R691 generated GGUF",
+    "architecture": "qwen2moe",
+    "gguf_version": 3,
+    "file_bytes": 13536,
+    "tensor_count": 3,
+    "tensor_types": {
+      "q8_0": 3
+    },
+    "embedding_length": 32,
+    "block_count": 1,
+    "expert_count": 4,
+    "tokenizer_metadata": null,
+    "license_metadata": null,
+    "trained_checkpoint": false
+  },
+  "failure_case": {
+    "input": "malformed GGUF",
+    "status": 3,
+    "json_output_published": false
+  },
+  "verification": {
+    "cpu_only": true,
+    "weights_loaded": false,
+    "cpp17_wall_wextra_werror": "pass",
+    "shell_syntax": "pass",
+    "synthetic_fixture_assertions": "pass",
+    "malformed_input_atomic_output_check": "pass",
+    "runner_exit_code": 0,
+    "gpu": false,
+    "production_network": false
+  },
+  "inventory_limits": {
+    "local_real_checkpoint_candidate_verified": false,
+    "pc4_noninteractive_ssh_probes": {
+      "aliases": ["pc4", "pc4-lan", "pc4-ts"],
+      "exit_code": 255,
+      "stderr_retained": false,
+      "absence_conclusion": false
+    },
+    "historical_r689_inventory": "limited; not a fresh global absence proof"
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R693: run metadata-only inventory on an already-present owner-admitted real GGUF when its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative model license before choosing a checkpoint-backed CPU layer. No download or GPU."
+}
