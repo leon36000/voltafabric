@@ -13566,5 +13566,26 @@
     "published_utc": "2026-11-02 09:42:53 UTC",
     "readback_verified_utc": "2026-11-02 09:42:53 UTC",
     "next_action": "R710: connect route-selected expert IDs to the checked index/header plan and bounded selective Safetensors reader; admit only exact resident payloads with per-payload integrity evidence. No full-shard/model download, GPU, production network, UNKNOWN replay, or automatic relaunch."
+  },
+  "r710_deepseek_route_expert_selective_read": {
+    "id": "R710",
+    "state": "SOURCE_AND_EVIDENCE_PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_PIPELINE_RUNNING",
+    "branch": "r710-deepseek-route-expert-selective-read-20261102",
+    "source_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
+    "evidence_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
+    "manifest_sha256": "88587ef6db783c5468f84882b0091f75e7ff62614bf8e9bf9dc528b178bd10aa",
+    "readback_exact": true,
+    "readback_files_verified": 5,
+    "local_cpu_tests": "3 debug + 3 release pass; scoped Clippy -D warnings, rustfmt and diff check pass",
+    "pipeline_id": 2463,
+    "pipeline_status": "running",
+    "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+    "full_generation": false,
+    "real_checkpoint_payload_read": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R711: build one resident MXFP4 expert owner from the six per-payload-verified tensors without copying a shard; preserve VFB3 identity and atomically refuse if any payload digest or exact memory admission is missing. CPU-only; no real checkpoint reads beyond existing admitted artifacts, GPU, production network, UNKNOWN replay, deletion or automatic relaunch."
   }
 }

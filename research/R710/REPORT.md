@@ -22,3 +22,7 @@ Les octets de poids du modèle réel n'ont pas été lus. Les SHA‑256 des payl
 ## Réutilisation et suite
 
 Réutilisé : le lecteur borné `checkpoint::read_named_tensors`, les types Safetensors existants et le plan exact R709. Aucun code de moteur tiers n'est copié dans cette tranche; DeepSeek sert de référence de format sous MIT à la révision épinglée. Prochaine tranche : construire un owner résident par rang à partir des six tenseurs vérifiés sans matérialiser un shard, puis tester le transfert atomique vers le contrat de Session existant. Le dispatch demeure refusé tant qu'il manque un des six experts, ses digests authentifiés ou son admission mémoire.
+
+## Publication GitLab privé
+
+La source, le rapport, le journal de tests, le reçu et SHA256SUMS sont relus exactement sur la branche `r710-deepseek-route-expert-selective-read-20261102` au commit `ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1`; les cinq fichiers correspondent localement. Le premier commit `965fb660997ff1ad2848d25e64bf79f39efa96ce` avait stocké leurs chaînes Base64 comme texte; le commit correctif `ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1` a rétabli le texte source exact sans réécrire l’histoire. Le pipeline GitLab 2463 est en cours et ne remplace pas les tests Rust locaux.

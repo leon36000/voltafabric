@@ -1,10 +1,10 @@
 {
   "id": "R710",
-  "state": "LOCAL_CPU_DEBUG_RELEASE_PASS_PENDING_GITLAB_PUBLICATION",
+  "state": "SOURCE_AND_EVIDENCE_PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_PIPELINE_RUNNING",
   "branch": "r710-deepseek-route-expert-selective-read-20261102",
   "base_commit": "6fd52ce3b40fec7887ae217151fa2b97ccc79e64",
-  "source_commit": null,
-  "evidence_commit": null,
+  "source_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
+  "evidence_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
   "code_files": [
     "src/deepseek_v41.rs"
   ],
@@ -17,7 +17,14 @@
   "diff_check": "PASS",
   "source_sha256": "10e22d747502f5957e333bb2f0696d417a2feaa65f74dfa9087b21522b4ce693",
   "source_git_blob": "d3b6c88f55146beaa2f437c523959db8c8a440df",
-  "route_fixture": [0, 383, 382, 381, 380, 379],
+  "route_fixture": [
+    0,
+    383,
+    382,
+    381,
+    380,
+    379
+  ],
   "expert_read_per_call": 1,
   "selected_tensors_per_expert": 6,
   "one_expert_payload_bytes": 18800640,
@@ -36,8 +43,14 @@
   "inter_pc_transport": false,
   "production_r53_used": false,
   "unknown_replayed": false,
-  "pipeline_id": null,
-  "pipeline_status": "not_started",
+  "pipeline_id": 2463,
+  "pipeline_status": "running",
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R711: construct one resident MXFP4 expert owner from the six verified payload tensors without copying a shard; preserve route/rank identities and atomic refusal if any digest, expert, or memory admission is missing."
+  "next_action": "R711: construct one resident MXFP4 expert owner from the six verified payload tensors without copying a shard; preserve route/rank identities and atomic refusal if any digest, expert, or memory admission is missing.",
+  "initial_encoded_commit": "965fb660997ff1ad2848d25e64bf79f39efa96ce",
+  "encoding_correction_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
+  "readback_exact": true,
+  "readback_files_verified": 5,
+  "pipeline_scope": "configured scans and fallback only; not Rust compilation or the local CPU tests",
+  "pipeline_observed_utc": "2026-11-02 09:57:59 UTC"
 }
