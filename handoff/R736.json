@@ -1,7 +1,7 @@
 {
   "id": "R736",
   "date": "2026-11-02",
-  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
   "active_operations": [],
   "summary": "Added a bounded, indexed DeepSeek pure-window attention output projection and its attention-branch HC residual join. The KV candidate cache commits only after the complete sublayer succeeds.",
@@ -35,11 +35,22 @@
   "unknown_replayed": false,
   "manifest": "research/R736/SHA256SUMS",
   "manifest_sha256": "d912a6d1e663243e39d6a1e0122f40e9e3bf691da1aba18a3612515c26f490e0",
-  "receipt_pending": true,
+  "receipt_pending": false,
   "next_action": "R737: connect R736 attention to the existing pinned gate, VoltaFabric expert owners and FFN path for one identified full layer, and define an independent numeric oracle before extending to compressed-KV attention.",
   "source_commit": "95a5df4d212ceb129f419a331e1b63871b3da085",
   "source_pipeline_id": 2584,
   "source_pipeline_status": "success",
   "source_readback": "Exact readback verified for all 11 R736 source/report/result/manifest/handoff files at 95a5df4d212ceb129f419a331e1b63871b3da085",
-  "receipt_pipeline_pending": true
+  "receipt_pipeline_pending": false,
+  "receipt_commit": "ed2b9d58235432c06f4cfcc6bee796aa6bba488d",
+  "receipt_pipeline_id": 2585,
+  "receipt_pipeline_status": "success",
+  "receipt_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "receipt_readback": "Exact JSON readback verified for research/R736/RESULT.json and handoff/R736.json at ed2b9d58235432c06f4cfcc6bee796aa6bba488d",
+  "published_utc": "2026-11-02 18:38:54 UTC"
 }

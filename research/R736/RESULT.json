@@ -1,7 +1,7 @@
 {
   "id": "R736",
   "date": "2026-11-02",
-  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "parent_branch": "r735-deepseek-window-rope-20261102",
   "parent_commit": "20ab446be96a55eb0a6347fb58ccc89444358f9e",
   "target_branch": "r736-deepseek-window-output-20261102",
@@ -78,7 +78,20 @@
     },
     "source_readback_exact": true,
     "source_readback_files_verified": 11,
-    "receipt_pending": true,
-    "receipt_pipeline_pending": true
-  }
+    "receipt_pending": false,
+    "receipt_pipeline_pending": false,
+    "receipt_commit": "ed2b9d58235432c06f4cfcc6bee796aa6bba488d",
+    "receipt_pipeline_id": 2585,
+    "receipt_pipeline_status": "success",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "receipt_readback_exact": true,
+    "receipt_readback_files_verified": 2,
+    "receipt_readback_at_commit": "ed2b9d58235432c06f4cfcc6bee796aa6bba488d"
+  },
+  "published_utc": "2026-11-02 18:38:54 UTC"
 }
