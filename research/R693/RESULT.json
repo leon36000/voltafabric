@@ -1,8 +1,11 @@
 {
   "id": "R693",
-  "state": "LOCAL_CPU_TWO_LAYER_PUBLIC_DECODE_PASS_PENDING_PRIVATE_GITLAB_READBACK",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_TWO_LAYER_SYNTHETIC_PASS",
   "base_branch": "r692-gguf-metadata-inventory-20261102",
   "base_commit": "fbd39f2b5896d5b9c37cc922ed0261b56fe0dae1",
+  "branch": "r693-qwen2moe-two-layer-public-decode-20261102",
+  "source_commit": "e6130a32ca39d7614b845c7ddacfa741aab02608",
+  "readback_files_verified": 11,
   "donor": {
     "repository": "ggml-org/llama.cpp",
     "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
