@@ -391,3 +391,66 @@ fn deepseek_gate_batch_flows_through_memory_advice_without_changing_route_identi
     );
     assert_eq!(batch.problem().registry.epoch, registry_before.epoch);
 }
+
+#[test]
+fn deepseek_gate_batch_enters_mxfp4_session_with_exact_attempt_and_route() {
+    let (shard, spec) = fixture();
+    let gate = DeepSeekV41Gate::load(&mut std::io::Cursor::new(&shard), &spec).unwrap();
+    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
+    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
+        *value = (1u32 << bit) as f32;
+    }
+    let experts = [0, 383, 382, 381, 380, 379];
+    let stamp = voltafabric::moe::Stamp {
+        run_id: "r706-deepseek-session-adapter".to_owned(),
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        plan_id: "r706-one-token-cpu".to_owned(),
+        layer: 0,
+        batch: 19,
+        epoch: 23,
+    };
+    let route = gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            stamp.clone(),
+            41,
+            voltafabric::moe::Registry {
+                epoch: stamp.epoch,
+                copies: experts
+                    .iter()
+                    .enumerate()
+                    .map(|(local, &expert)| voltafabric::moe::Replica {
+                        expert,
+                        rank: 4,
+                        local: local as u32,
+                    })
+                    .collect(),
+            },
+            BTreeMap::new(),
+            BTreeMap::from([(4, (0..6).collect())]),
+        )
+        .unwrap();
+    let input = voltafabric::session::mxfp4::TokenInput {
+        token: 0,
+        value_bits: hidden.iter().map(|value| value.to_bits()).collect(),
+    };
+    let session_batch = route.into_mxfp4_session_batch(vec![input.clone()]).unwrap();
+    assert_eq!(session_batch.attempt, 41);
+    assert_eq!(session_batch.problem.stamp, stamp);
+    assert_eq!(session_batch.inputs[0].value_bits, input.value_bits);
+    assert_eq!(
+        session_batch.problem.routes[0]
+            .iter()
+            .map(|choice| (choice.expert, choice.weight.to_bits()))
+            .collect::<Vec<_>>(),
+        route.problem().routes[0]
+            .iter()
+            .map(|choice| (choice.expert, choice.weight.to_bits()))
+            .collect::<Vec<_>>()
+    );
+    let mut inexact = input;
+    inexact.value_bits[0] = 0x3f80_0001;
+    assert!(route.into_mxfp4_session_batch(vec![inexact]).is_err());
+    assert!(route.into_mxfp4_session_batch(Vec::new()).is_err());
+}

@@ -221,6 +221,39 @@ impl DeepSeekV41RouteBatch {
         self.attempt
     }
 
+    /// Build the existing one-token MXFP4 Session input without changing routes,
+    /// coefficients, stamp, or attempt. The Session wire accepts exact BF16 values;
+    /// callers must supply those bits explicitly rather than relying on a cast here.
+    pub fn into_mxfp4_session_batch(
+        &self,
+        inputs: Vec<crate::session::mxfp4::TokenInput>,
+    ) -> Result<crate::session::mxfp4::Batch> {
+        if self.attempt == 0
+            || self.problem.routes.len() != 1
+            || inputs.len() != 1
+            || inputs[0].token != 0
+            || inputs[0].value_bits.len() != self.problem.hidden
+        {
+            return Err(invalid(
+                "DeepSeek MXFP4 Session requires one routed token and one full-width activation",
+            ));
+        }
+        for &bits in &inputs[0].value_bits {
+            let value = f32::from_bits(bits);
+            if crate::deepseek_v41::cast_bf16_rne_reference(value)?.to_bits() != bits {
+                return Err(invalid(
+                    "DeepSeek MXFP4 Session activation must already be exactly BF16",
+                ));
+            }
+        }
+        Ok(crate::session::mxfp4::Batch {
+            problem: self.problem.clone(),
+            attempt: self.attempt,
+            inputs,
+            faults: BTreeMap::new(),
+        })
+    }
+
     /// Bind this validated route to VoltaFabric's existing route-aware memory planner.
     /// This returns advisory placement only: it does not load, move, or dispatch weights.
     /// The stored attempt and gate coefficients pass through unchanged.

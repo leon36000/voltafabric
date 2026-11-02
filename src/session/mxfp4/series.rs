@@ -30,6 +30,8 @@ pub struct WorkerSource {
 #[serde(deny_unknown_fields)]
 pub struct Batch {
     pub problem: routing::RoutingProblem,
+    /// Nonzero identity for this exact routed execution; never inferred from batch order.
+    pub attempt: u64,
     pub inputs: Vec<TokenInput>,
     #[serde(default)]
     pub faults: BTreeMap<u32, Fault>,
@@ -55,6 +57,7 @@ fn serial_startup() -> usize {
 #[derive(Debug, Serialize)]
 pub struct BatchReport {
     pub stamp: moe::Stamp,
+    pub attempt: u64,
     pub contract: arithmetic::Contract,
     pub output_bits: Option<Vec<Vec<u32>>>,
     pub receipts: Vec<ExecReceipt>,
@@ -82,6 +85,18 @@ fn compact(batch: &Batch, d: &routing::RankDispatch) -> Vec<TokenInput> {
         .filter(|row| needed.contains(&row.token))
         .cloned()
         .collect()
+}
+
+fn validate_batch_attempts(attempts: impl IntoIterator<Item = u64>) -> Result<()> {
+    let mut seen = BTreeSet::new();
+    for attempt in attempts {
+        if attempt == 0 || !seen.insert(attempt) {
+            return Err(invalid(
+                "MXFP4 series requires unique nonzero execution attempts",
+            ));
+        }
+    }
+    Ok(())
 }
 
 type StartupResult = (u32, Option<Session>, Result<LoadReceipt>);
@@ -173,6 +188,7 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
     if attempts_left()? < input.batches.len() {
         return Err(invalid("MXFP4 series exceeds attempt guard budget"));
     }
+    validate_batch_attempts(input.batches.iter().map(|batch| batch.attempt))?;
     let mut artifacts: BTreeMap<u32, Artifact> = BTreeMap::new();
     let mut admitted_paths: BTreeMap<&str, u32> = BTreeMap::new();
     let mut artifact_bytes = 0_usize;
@@ -311,13 +327,14 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
         // LOAD has acknowledged ownership in every worker. Later EXECs use only
         // session bindings, so the client need not retain compressed payload copies.
         drop(artifacts);
-        for (index, batch) in input.batches.iter().enumerate() {
+        for batch in &input.batches {
             claim_identity(&batch.problem.stamp, false)?;
             let start = Instant::now();
             let deadline = start + timeout;
             let mut collector = arithmetic::Collector::new(&batch.problem)?;
             let mut result = BatchReport {
                 stamp: batch.problem.stamp.clone(),
+                attempt: batch.attempt,
                 contract: collector.contract().clone(),
                 output_bits: None,
                 receipts: Vec::new(),
@@ -335,7 +352,7 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
                 match worker.start_preweighted_fp32_until(
                     &batch.problem,
                     &collector,
-                    index as u64 + 1,
+                    batch.attempt,
                     compact(batch, rank),
                     fault,
                     deadline,
@@ -398,4 +415,17 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
     }
     report.ok = report.error.is_none();
     Ok(report)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::validate_batch_attempts;
+
+    #[test]
+    fn mxfp4_batch_attempts_are_explicit_nonzero_and_unique() {
+        assert!(validate_batch_attempts([41, 42, 9001]).is_ok());
+        assert!(validate_batch_attempts([]).is_ok());
+        assert!(validate_batch_attempts([0]).is_err());
+        assert!(validate_batch_attempts([41, 41]).is_err());
+    }
 }
