@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-01 12:11:45 UTC",
+  "updated_utc": "2026-11-02 03:20:22 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1172,6 +1172,40 @@
       "readback_files_verified": 10,
       "pipeline_id": 2330,
       "pipeline_status": "success"
+    },
+    {
+      "id": "R689",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_12_OF_12_CPU_FIXTURE_PASS_PIPELINE_PENDING",
+      "branch": "r689-qwen2moe-fp32-live-session-20261101",
+      "parent_commit": "bc78d8a19c841933ce09baf6a33a230e09843db2",
+      "source_commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
+      "text_normalization_commits": [
+        "d109e704d731e5720b03cee4de5be1ae3ac3637f",
+        "da7a64a2f6a6321aed43579b81392cc22f86aa0a"
+      ],
+      "commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
+      "path": "research/R689",
+      "published_utc": "2026-11-02 03:20:22 UTC",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "reused": "Pinned llama.cpp/GGML Qwen2MoE build_moe_ffn graph and route hook; no upstream source copied.",
+      "adaptation": "Distinct attempt-bound Qwen2MoE post-down weighted FP32 slot sum; resident Rust Session slice lookup; complete route validation; atomic publication after all slots; route coefficient applied once.",
+      "arithmetic_contract": "qwen2moe_ffn_postdown_preweighted_fp32_slot_sum_v1, distinct from R9/MXFP4 preweighted FP32 and ordinary FP16-decode/f64 Collector.",
+      "test": "cargo test --offline --test preweighted_fp32: 14 passed; fresh CPU C++ runner rerun exit 0; donor/VF graph, independent Q8_0/FP32 oracle and captured slot order max_abs=0; duplicate completed identity and injected provider failure withhold output.",
+      "test_scope": "Synthetic one-layer, one-token, top-2 Q8_0 GGUF fixture, hidden/FFN 32; no production checkpoint, full generation, CUDA, inter-PC worker, RDMA or performance claim.",
+      "readback_files_verified": 12,
+      "manifest_path": "research/R689/SHA256SUMS",
+      "manifest_sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
+      "pipeline_id": 2352,
+      "pipeline_status": "pending",
+      "text_encoding_correction": "Initial base64-encoded API payloads were stored literally. R689 source bundle and hashes were rewritten as raw UTF-8 text, then every manifest entry was re-read and verified.",
+      "checkpoint_inventory": {
+        "pc6": "Inspected paths contained only small synthetic Qwen fixtures; no real Qwen2MoE checkpoint located.",
+        "pc1": "Inspected paths contained no real Qwen2MoE/GLM checkpoint; only Project_Maya_20261020/data/glm5-synth.gguf (~11.7 MB), synthetic. This does not prove global absence.",
+        "pc4": "SSH inventory unavailable (access denied); no absence conclusion."
+      },
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only."
     }
   ],
   "acceptance": [
@@ -1268,7 +1302,8 @@
     "R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.",
     "R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.",
     "R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED",
-    "R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success."
+    "R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.",
+    "R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network."
   ],
   "active_operations": [
     {
@@ -1608,15 +1643,36 @@
         "pc4_gitleaks": "success"
       },
       "scope": "R688 source scan/fallback pipeline; separate local CPU C++/Rust integration test is recorded in research/R688."
+    },
+    {
+      "id": "gitlab-pipeline-2352",
+      "ref": "r689-qwen2moe-fp32-live-session-20261101",
+      "commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
+      "status": "running",
+      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
+    },
+    {
+      "id": "gitlab-pipeline-2351",
+      "ref": "r689-qwen2moe-fp32-live-session-20261101",
+      "commit": "d109e704d731e5720b03cee4de5be1ae3ac3637f",
+      "status": "running",
+      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
+    },
+    {
+      "id": "gitlab-pipeline-2350",
+      "ref": "r689-qwen2moe-fp32-live-session-20261101",
+      "commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
+      "status": "success",
+      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
     }
   ],
-  "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network.",
+  "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only.",
   "report": "research/R688/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source development on private GitLab. Superpowers absent; no skills used. Automatic relaunch remains stopped; no production checkpoint, GPU, production network, cleanup or formatting.",
   "wave_manifest": {
-    "path": "research/R688/SHA256SUMS",
-    "sha256": "2a33c03ac8fbfa67e362c792acd885a3cf28f5e4da182a0317f5d6752a3d2944",
-    "files": 9
+    "path": "research/R689/SHA256SUMS",
+    "sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
+    "files": 12
   },
   "r688_result": {
     "state": "CPU_HOST_INTEGRATION_PASS_SYNTHETIC_FIXTURE_ONLY",
@@ -1653,5 +1709,33 @@
       }
     },
     "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network."
+  },
+  "r689_result": {
+    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_12_OF_12_CPU_FIXTURE_PASS_PIPELINE_PENDING",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "contract": "qwen2moe_ffn_postdown_preweighted_fp32_slot_sum_v1, distinct from R9/MXFP4 preweighted FP32 and ordinary FP16-decode/f64 Collector.",
+    "synthetic_fixture": true,
+    "route_coefficients_applied_once": true,
+    "atomic_failure_refusal": true,
+    "attempt_bound": true,
+    "local_cpu_tests": "14 Rust unit tests passed; direct pinned-donor CPU graph runner exit 0, max_abs 0 on three comparisons",
+    "gpu_run": false,
+    "production_network": false,
+    "readback_files_verified": 12,
+    "manifest_sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
+    "gitlab_source_commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
+    "gitlab_final_commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
+    "gitlab_pipeline": {
+      "id": 2352,
+      "sha": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
+      "status": "pending"
+    },
+    "checkpoint_inventory": {
+      "pc6": "Inspected paths contained only small synthetic Qwen fixtures; no real Qwen2MoE checkpoint located.",
+      "pc1": "Inspected paths contained no real Qwen2MoE/GLM checkpoint; only Project_Maya_20261020/data/glm5-synth.gguf (~11.7 MB), synthetic. This does not prove global absence.",
+      "pc4": "SSH inventory unavailable (access denied); no absence conclusion."
+    },
+    "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only."
   }
 }
