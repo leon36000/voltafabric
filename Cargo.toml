@@ -7,6 +7,9 @@ publish = false
 
 [dependencies]
 num-bigint = "=0.4.6"
+deepseek-recipe-core = { version = "=0.2.0", optional = true }
+deepseek-recipe-encoding = { version = "=0.2.0", optional = true }
+tokenizers = { version = "=0.23.2", optional = true }
 vf-qpn2-ffi = { path = "crates/qpn2-ffi", optional = true }
 vf-ggml-native-ffi = { path = "crates/ggml-native-ffi", optional = true }
 safetensors = { version = "=0.8.0", default-features = false, features = ["alloc", "std"] }
@@ -18,6 +21,7 @@ c-abi-validation = ["dep:vf-qpn2-ffi"]
 native-ggml-cpu = ["dep:vf-ggml-native-ffi"]
 native-scalar-reference = ["native-ggml-cpu", "vf-ggml-native-ffi/scalar-reference"]
 ple-cpu-qualification = ["native-ggml-cpu"]
+deepseek-v41-recipe = ["dep:deepseek-recipe-core", "dep:deepseek-recipe-encoding", "dep:tokenizers"]
 
 [lib]
 name = "voltafabric"
@@ -383,3 +387,4 @@ required-features = ["native-ggml-cpu"]
 name = "vf-sc117-qsa-eviction-fault-check"
 path = "src/bin/vf-sc117-qsa-eviction-fault-check.rs"
 required-features = ["native-ggml-cpu"]
+

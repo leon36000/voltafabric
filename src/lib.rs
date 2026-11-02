@@ -60,6 +60,8 @@ pub mod deepseek_v41_attention;
 pub mod deepseek_v41_attention_output;
 pub mod deepseek_v41_gate;
 pub mod deepseek_v41_projection;
+#[cfg(feature = "deepseek-v41-recipe")]
+pub mod deepseek_v41_prompt;
 pub mod deepseek_v41_rope;
 pub mod deepseek_v41_window_block;
 pub mod engram;

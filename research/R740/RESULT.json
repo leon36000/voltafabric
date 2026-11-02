@@ -1,0 +1,75 @@
+{
+  "id": "R740",
+  "state": "SOURCE_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+  "branch": "r740-deepseek-recipe-prompt-boundary-20261102",
+  "parent_commit": "2533b5c2ee094de4cb13810fcb79e0c948d44fd4",
+  "source_commit": "PENDING",
+  "source_pipeline_id": null,
+  "source_pipeline_status": "not_started",
+  "receipt_commit": null,
+  "receipt_pipeline_id": null,
+  "receipt_pipeline_status": "not_started",
+  "code_files": [
+    "Cargo.toml",
+    "Cargo.lock",
+    "src/lib.rs",
+    "src/deepseek_v41_prompt.rs"
+  ],
+  "research_files": [
+    "research/R740/REPORT.md",
+    "research/R740/ARXIV-PRIORITIES.md"
+  ],
+  "manifest": "research/R740/SHA256SUMS",
+  "adapted_boundary": "Optional source-pinned DeepSeek V4.1 Recipe prompt/token encoding for exactly one plain user turn, with tokenizer size/SHA admission and context reservation rejection.",
+  "donor_components_reused": [
+    {
+      "name": "deepseek-recipe-core",
+      "version": "0.2.0",
+      "license": "MIT",
+      "mode": "dependency; no donor code copied"
+    },
+    {
+      "name": "deepseek-recipe-encoding",
+      "version": "0.2.0",
+      "license": "MIT",
+      "mode": "dependency; no donor code copied"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.23.2",
+      "license": "Apache-2.0",
+      "mode": "optional tokenizer dependency"
+    }
+  ],
+  "optional_feature": "deepseek-v41-recipe",
+  "locked_package_delta_vs_r739": 176,
+  "pinned_model": "deepseek-ai/DeepSeek-V4.1-Flash@314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "tokenizer_artifact": {
+    "path": "tokenizer.json",
+    "bytes": 6367257,
+    "sha256": "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b",
+    "embedded_or_committed": false
+  },
+  "local_verification": {
+    "rustfmt": "PASS",
+    "cargo_check_default": "PASS in scoped scratch crate",
+    "cargo_check_feature": "PASS in scoped scratch crate",
+    "clippy_feature_warnings_denied": "PASS in scoped scratch crate",
+    "tests_added_or_run": false,
+    "full_workspace_build": false
+  },
+  "limitations": {
+    "complete_generation": false,
+    "tokenizer_runtime_execution": false,
+    "reference_prompt_parity": false,
+    "output_decoding_or_stop_parser": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "next_action": "R741: independently qualify token IDs for the admitted one-user-turn prompt against the official pinned reference; only then add bounded output token decoding and stop handling."
+}

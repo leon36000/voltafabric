@@ -1,0 +1,19 @@
+# Targeted arXiv survey for VoltaFabric
+
+Date: 2026-11-02. This is a targeted survey of MoE placement/communication and KV-memory work, not an exhaustive search of all arXiv. It records design ideas to evaluate; it does not qualify the papers' reported speedups on VoltaFabric hardware. No paper code was copied in R740.
+
+| Work | Useful idea | Fit and limits for VoltaFabric |
+|---|---|---|
+| [ThunderEP, arXiv:2609.40093](https://arxiv.org/abs/2609.40093) | PCIe-aware expert-parallel exchange; reduces relay hops and synchronization polling, using DMA engines for transfer. | High-value transport lead for PCIe-connected GPUs. Evaluation reports RTX 4090/5090; no V100 result. Adapt only after the actual PCIE path and completion protocol are measured. Do not transplant its event loop or assume those GPU results transfer. |
+| [Aurora, arXiv:2410.17043](https://arxiv.org/abs/2410.17043) | Joint expert placement and token-send ordering under heterogeneous communication cost. | Candidate for an offline placement/dispatch cost model from a verified topology matrix. Any runtime route must remain the checkpoint gate's route and coefficient. |
+| [MoETuner, arXiv:2502.06643](https://arxiv.org/abs/2502.06643) | Integer-program placement jointly accounts for expert load, communication and compute; uses cross-layer routing correlation. | Candidate offline planner only. Use observed route statistics as estimates, never to modify the gate or claim a measured benefit before evaluation. |
+| [MoE-Infinity, arXiv:2401.14361](https://arxiv.org/abs/2401.14361) | Request-level activation traces guide expert cache replacement and prefetch. | Relevant to future staging decisions. Prediction may request prefetch but cannot bypass current ownership, residency, budget or atomic admission checks. |
+| [ExpertFlow, arXiv:2410.17954](https://arxiv.org/abs/2410.17954) | Predictive routing-path and token scheduling for expert offload. | Conceptually relevant to prefetch, but no code/license was admitted or copied in this pass. Any proposed reuse needs a separate license and correctness review. |
+| [KVPR, arXiv:2411.17089](https://arxiv.org/abs/2411.17089) | Overlaps partial KV recomputation with transfer of the remainder from CPU memory. | Consider only if KV offload is selected and a measured PCIe bottleneck justifies recomputation. It is not a current R740 change. |
+| [PagedAttention, arXiv:2309.06180](https://arxiv.org/abs/2309.06180) | Page/block-based KV allocation and indirection reduce fragmentation and permit flexible cache management. | Useful allocator design reference, but VoltaFabric must preserve cache generation identities, atomic updates, and stale-attempt rejection. Not copied in R740. |
+| [Tutel, arXiv:2206.03382](https://arxiv.org/abs/2206.03382) | Adapts MoE parallelism and pipelining to runtime workload. | Useful as a design reference for plan selection; evaluation emphasizes large A100 clusters and does not establish fit for the V100/PC4/PC6 fleet. |
+| [Dynamic KV Cache Placement, arXiv:2508.13231](https://arxiv.org/abs/2508.13231) | Models KV placement over heterogeneous memory tiers to exploit aggregate bandwidth under capacity constraints. | Use as a cost-model reference only after memory capacities, bandwidth and topology are freshly verified. No claimed local memory tier is inferred from this paper. |
+
+## Priority extracted
+
+The strongest next implementation candidate is a CPU-only **offline placement planner** that consumes the existing owner registry, gate-derived route counts, and a topology/cost table containing only verified values. It must preserve unique `(expert, rank)` ownership, emit a plan for review, and never rewrite gate routes or coefficients. This reuses planning ideas from Aurora/MoETuner while retaining VoltaFabric's ownership and route contracts. Keep transfer algorithms and cache migration out of that tranche until a separate contract and measured topology exist.
