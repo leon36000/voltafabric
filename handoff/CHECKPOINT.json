@@ -12935,5 +12935,51 @@
     "production_r53": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch."
+  },
+  "r692_gguf_metadata_inventory": {
+    "state": "CPU_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_PASS_LIMITED",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "source_commit": "0d5098eb95807b476526c2e3ec6a388fb8788c74",
+    "branch": "r692-gguf-metadata-inventory-20261102",
+    "parent_commit": "4a6670f3f08e6833d1aa4b48ae285e695fa4a9bd",
+    "report": "research/R692/REPORT.md",
+    "result": "research/R692/RESULT.json",
+    "build_test": "research/R692/BUILD_TEST.txt",
+    "manifest": "research/R692/SHA256SUMS",
+    "manifest_sha256": "5821f7094fc3ec268f8d2b6a4f5b25ff918f5099f46b22246b04c0f0435032da",
+    "readback_files_verified": 6,
+    "local_cpu_pass": true,
+    "weights_loaded": false,
+    "synthetic_fixture": {
+      "architecture": "qwen2moe",
+      "gguf_version": 3,
+      "file_bytes": 13536,
+      "tensor_count": 3,
+      "tensor_types": {
+        "q8_0": 3
+      },
+      "embedding_length": 32,
+      "block_count": 1,
+      "expert_count": 4,
+      "tokenizer_metadata": null,
+      "license_metadata": null
+    },
+    "malformed_input": {
+      "status": 3,
+      "json_output_published": false
+    },
+    "test_scope": "Metadata-only CPU pass on the R691 synthetic four-expert source GGUF; no trained checkpoint and no tensor weights loaded.",
+    "compatibility_assessment": "NOT_ATTEMPTED",
+    "license_verification_required": true,
+    "pc4_probe_exit_code": 255,
+    "pc4_absence_conclusion": false,
+    "pipeline_id": 2360,
+    "pipeline_status": "running",
+    "pipeline_scope": "configured security scans/fallback only; not local C++ test evidence",
+    "gpu": false,
+    "production_network": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch."
   }
 }
