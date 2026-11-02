@@ -14248,5 +14248,22 @@
     "receipt_readback_files_verified": 5,
     "receipt_reconciled_utc": "2026-11-02 18:09:29 UTC"
   },
-  "current_operation": null
+  "r740_deepseek_recipe_prompt_boundary": {
+    "id": "R740",
+    "branch": "r740-deepseek-recipe-prompt-boundary-20261102",
+    "source_commit": "3381700ba4804f0271cdce68d514b89fd83295fc",
+    "source_pipeline_id": 2599,
+    "source_pipeline_status": "success",
+    "source_readback_exact": true,
+    "source_readback_files_verified": 8,
+    "source_manifest_sha256": "a748ba8ae110435378824de511683c4906d98b695605ae70f5627a55f1c57d55",
+    "manifest_sha256": "43dc663f1bcff2ea55cb0024b2132ee13615c22626ff9229b8e661bf995ac441",
+    "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R741: independently qualify token IDs for the admitted one-user-turn prompt against the official pinned reference; only then add bounded output token decoding and stop handling."
+  },
+  "current_operation": {"id":"R740","state":"receipt_commit_published_pipeline_pending","branch":"r740-deepseek-recipe-prompt-boundary-20261102","unknown_replayed":false}
 }

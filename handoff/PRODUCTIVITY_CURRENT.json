@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 18:09:29 UTC",
+  "updated_utc": "2026-11-02 20:10:18 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -4503,5 +4503,58 @@
     "receipt_readback_exact": true,
     "receipt_readback_files_verified": 5,
     "receipt_reconciled_utc": "2026-11-02 18:09:29 UTC"
+  },
+  "r740_deepseek_recipe_prompt_boundary": {
+    "id": "R740",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+    "branch": "r740-deepseek-recipe-prompt-boundary-20261102",
+    "parent_commit": "2533b5c2ee094de4cb13810fcb79e0c948d44fd4",
+    "source_commit": "3381700ba4804f0271cdce68d514b89fd83295fc",
+    "source_pipeline_id": 2599,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_verified_files": 8,
+    "source_manifest_sha256": "a748ba8ae110435378824de511683c4906d98b695605ae70f5627a55f1c57d55",
+    "receipt_commit": "PENDING",
+    "receipt_pipeline_id": null,
+    "receipt_pipeline_status": "pending",
+    "path": "research/R740",
+    "report": "research/R740/REPORT.md",
+    "arxiv_priorities": "research/R740/ARXIV-PRIORITIES.md",
+    "result": "research/R740/RESULT.json",
+    "manifest": "research/R740/SHA256SUMS",
+    "manifest_sha256": "43dc663f1bcff2ea55cb0024b2132ee13615c22626ff9229b8e661bf995ac441",
+    "manifest_file_count": 7,
+    "adapted_boundary": "Optional source-pinned DeepSeek V4.1 Recipe prompt encoding for exactly one plain user turn, with tokenizer size/SHA admission and context reservation rejection.",
+    "donor_components": [
+      "deepseek-recipe-core 0.2.0 MIT",
+      "deepseek-recipe-encoding 0.2.0 MIT",
+      "tokenizers 0.23.2 Apache-2.0"
+    ],
+    "donor_code_copied": false,
+    "optional_feature": "deepseek-v41-recipe",
+    "locked_package_delta_vs_r739": 176,
+    "local_verification": "rustfmt; scoped cargo check default/feature and Clippy -D warnings pass; no tests added or run; not a full workspace build.",
+    "tokenizer_sha256": "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b",
+    "complete_generation": false,
+    "tokenizer_runtime_execution": false,
+    "reference_prompt_parity": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_pending": true,
+    "published_utc": "2026-11-02T20:10:18Z",
+    "next_action": "R741: independently qualify token IDs for the admitted one-user-turn prompt against the official pinned reference; only then add bounded output token decoding and stop handling."
   }
 }

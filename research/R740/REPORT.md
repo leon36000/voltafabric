@@ -2,6 +2,8 @@
 
 Date: 2026-11-02
 
+GitLab source commit: `3381700ba4804f0271cdce68d514b89fd83295fc` on private branch `r740-deepseek-recipe-prompt-boundary-20261102`. Pipeline #2599 passed Gitleaks, Semgrep, Trivy and the security fallback; the eight source/report/manifest files were read back exactly from GitLab.
+
 ## Decision
 
 Integrate DeepSeek's own prompt-rendering and token-encoding crates as an **optional** VoltaFabric feature. The wrapper accepts tokenizer bytes from its caller, checks the exact tokenizer artifact pinned to the selected model revision, encodes one plain-text user turn, and rejects a prompt whose completion reservation would exceed the caller's context limit.

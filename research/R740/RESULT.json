@@ -1,11 +1,19 @@
 {
   "id": "R740",
-  "state": "SOURCE_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PENDING",
   "branch": "r740-deepseek-recipe-prompt-boundary-20261102",
   "parent_commit": "2533b5c2ee094de4cb13810fcb79e0c948d44fd4",
-  "source_commit": "PENDING",
-  "source_pipeline_id": null,
-  "source_pipeline_status": "not_started",
+  "source_commit": "3381700ba4804f0271cdce68d514b89fd83295fc",
+  "source_pipeline_id": 2599,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_verified_files": 8,
   "receipt_commit": null,
   "receipt_pipeline_id": null,
   "receipt_pipeline_status": "not_started",
@@ -20,6 +28,7 @@
     "research/R740/ARXIV-PRIORITIES.md"
   ],
   "manifest": "research/R740/SHA256SUMS",
+  "source_manifest_sha256": "a748ba8ae110435378824de511683c4906d98b695605ae70f5627a55f1c57d55",
   "adapted_boundary": "Optional source-pinned DeepSeek V4.1 Recipe prompt/token encoding for exactly one plain user turn, with tokenizer size/SHA admission and context reservation rejection.",
   "donor_components_reused": [
     {
