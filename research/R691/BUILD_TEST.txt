@@ -1,0 +1,39 @@
+R691 final source build/test
+============================
+
+Base GitLab branch and commit:
+  r690-llama-cpu-logits-token-sampler-20261102
+  39b916df2d65a7559bc39e439a8144fb66c29e4d
+
+Pinned donor:
+  llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+  local R679 hook patch in src/llama-context.cpp/.h and src/llama-graph.cpp/.h
+
+Command:
+  CXX=g++ VF_LLAMA_SOURCE_DIR=<pinned-R679-checkout> \
+  VF_LLAMA_LIBRARY=<pinned-CPU-libllama.so> \
+  VF_GGML_NATIVE_BUILD=<R655-CPU-build> \
+  VF_VOLTA_REPO=<R655-exact-source-snapshot> \
+  VF_TEST_OUTPUT_DIR=<R691-run-output> \
+  bash adapters/native_ggml/r691/run_r691_public_decode_test.sh
+
+Result, exit 0:
+  donor_tokens=3,3,3
+  voltafabric_tokens=3,3,3
+  max_abs_logit_error=0
+  route experts per step=40,3; donor top-2 softmax weight sum=0.127954
+  atomic reject decode status=-3; output empty; no logits read or sampling
+
+The script compiled the R691 loader offline in release mode, the existing Rust
+rank-session worker in debug mode, and the C++ fixture with C++17
+-Wall -Wextra -Werror. `rustfmt --check`, `bash -n`, and scoped Clippy
+(`--release --no-deps -- -D warnings`) passed. The root VoltaFabric crate emitted two
+existing warnings outside R691 (private interface in session.rs and unused captured
+QSA fields in sc117_layer_chain.rs).
+
+The run executed only local CPU child sessions. It did not use the GPU, a production
+network, a production R53 lease, or a model download. Durable claim files remain
+RESERVED_UNKNOWN_NO_REPLAY by design; successful completion is recorded by this
+runner result. Earlier uncertain claims are listed in RESULT.json and were not
+replayed.
+Final run: r691-public-decode-v7, plan r691-routed-layer-plan-v7, batches 901/902/903, attempts 9001/9002/9003.

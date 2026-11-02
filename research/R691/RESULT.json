@@ -1,0 +1,81 @@
+{
+  "round": "R691",
+  "status": "PASS_SYNTHETIC_PUBLIC_LLAMA_DECODE_CPU_LIMITED",
+  "base_branch": "r690-llama-cpu-logits-token-sampler-20261102",
+  "base_commit": "39b916df2d65a7559bc39e439a8144fb66c29e4d",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "local_r679_hook_patch": true,
+    "local_donor_files_modified": [
+      "src/llama-context.cpp",
+      "src/llama-context.h",
+      "src/llama-graph.cpp",
+      "src/llama-graph.h"
+    ]
+  },
+  "fixture": {
+    "architecture": "qwen2moe",
+    "layers": 1,
+    "hidden": 32,
+    "experts": 41,
+    "top_k": 2,
+    "vocab_ids": 4,
+    "expert_weight_type": "Q8_0",
+    "resident_experts": [40, 3],
+    "checkpoint_expert_order": [1, 0],
+    "tokenizer": "no_vocab/direct_token_ids",
+    "execution": "public llama_decode CPU; 3 generated tokens"
+  },
+  "result": {
+    "donor_tokens": [3, 3, 3],
+    "voltafabric_tokens": [3, 3, 3],
+    "max_abs_logit_error": 0,
+    "route_oracle": "41-way softmax recomputed from synthetic gate tensor and routed activation",
+    "selected_experts_each_step": [40, 3],
+    "selected_weight_sum": 0.127954,
+    "coefficients_applied_once": true,
+    "atomic_reject_decode_status": -3,
+    "reject_output_published": false,
+    "logits_read_after_reject": false,
+    "token_sampled_after_reject": false
+  },
+  "verification": {
+    "cpu_only": true,
+    "gpu": false,
+    "inter_pc_network": false,
+    "production_r53": false,
+    "runner_exit_code": 0,
+    "cpp17_wall_wextra_werror": "pass",
+    "rustfmt_check": "pass",
+    "shell_syntax": "pass",
+    "scoped_clippy_no_deps_deny_warnings": "pass",
+    "inherited_voltafabric_build_warnings": [
+      "private_interfaces in src/session.rs",
+      "dead_code fields in src/sc117_layer_chain.rs"
+    ]
+  },
+  "ledger": {
+    "final_run_id": "r691-public-decode-v7",
+    "final_plan_id": "r691-routed-layer-plan-v7",
+    "completed_batch_attempts": [
+      [901, 9001],
+      [902, 9002],
+      [903, 9003]
+    ],
+    "reserved_unknown_no_replay": [
+      ["r691-public-decode", 300, 3000],
+      ["r691-public-decode-v3", 501, 5001]
+    ],
+    "reject_created_claim": false
+  },
+  "limits": [
+    "synthetic one-layer model only",
+    "no trained checkpoint or text tokenizer",
+    "no full-model compatibility claim",
+    "no GPU, inter-PC, RDMA, or performance qualification"
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R692: inventory already-present owner-admitted checkpoints and select a compatible CPU-only layer for a checkpoint-backed source; no download or GPU."
+}
