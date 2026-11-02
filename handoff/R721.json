@@ -1,0 +1,34 @@
+{
+  "id": "R721",
+  "owner": "integrator",
+  "state": "SOURCE_COMMIT_PENDING",
+  "branch": "r721-vllm-sglang-checkpoint-index-20261102",
+  "parent_commit": "3eaffa82e49934ee28c0b4f915215691c804f323",
+  "path": "research/R721",
+  "code_files": [
+    "src/checkpoint.rs",
+    "tests/r721_indexed_safetensors.rs"
+  ],
+  "adapted_boundary": "bounded Hugging Face Safetensors weight_map to safe shard resolution, using existing per-tensor Safetensors validation",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "local_tests": {
+    "debug": "5/5 pass",
+    "release": "5/5 pass",
+    "clippy": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "limits": {
+    "complete_generation": false,
+    "connected_to_model_generation_entrypoint": false,
+    "real_checkpoint": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "next_action": "R722: connect indexed selected-tensor loading to a pinned model/checkpoint manifest and one synthetic selected-expert layer; run it through the existing CPU Session path and an independent tensor oracle without changing routing, coefficients, or format contracts."
+}

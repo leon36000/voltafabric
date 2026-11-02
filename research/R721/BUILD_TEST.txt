@@ -1,0 +1,22 @@
+R721 local CPU verification (no model or GPU):
+
+CARGO_BUILD_JOBS=1 cargo test --locked --offline --test r721_indexed_safetensors
+  PASS: 5 passed, 0 failed (debug)
+
+CARGO_BUILD_JOBS=1 cargo test --locked --offline --release --test r721_indexed_safetensors
+  PASS: 5 passed, 0 failed (release)
+
+CARGO_BUILD_JOBS=1 cargo clippy --locked --offline --test r721_indexed_safetensors -- -D warnings
+  PASS
+
+cargo fmt --check
+  PASS
+
+git diff --check
+  PASS
+
+Coverage: selected tensors across two shards; unrelated tensors skipped; invalid
+second-shard digest returns Err without a partial aggregate; missing shard;
+wrong index digest; symlink shard; aggregate payload cap. Synthetic F32 scalar
+payloads only. These results do not qualify a real checkpoint, quantization
+format, full generation, GPU, inter-PC transport, or performance.

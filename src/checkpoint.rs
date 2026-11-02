@@ -11,10 +11,13 @@ use std::{
     fmt,
     fs::File,
     io::{Read, Seek, SeekFrom},
-    path::PathBuf,
+    path::{Path, PathBuf},
 };
 pub const MAX_HEADER_BYTES: u64 = 8 * 1024 * 1024;
 pub const MAX_NAMED_TENSOR_PAYLOAD_BYTES: u64 = 64 * 1024 * 1024;
+pub const MAX_SAFETENSORS_INDEX_BYTES: usize = 8 * 1024 * 1024;
+pub const MAX_SAFETENSORS_INDEX_TENSORS: usize = 131_072;
+pub const MAX_SAFETENSORS_INDEX_SHARDS: usize = 2_048;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Selection {
@@ -220,6 +223,180 @@ pub struct NamedTensorImport {
     pub tensors: BTreeMap<String, NamedTensor>,
 }
 
+#[derive(Debug)]
+pub struct IndexedNamedTensorImport {
+    /// Validated checkpoint layout used for the import. The index identifies
+    /// shard locations only; per-tensor hashes authenticate selected payloads.
+    pub plan: IndexedSafetensorsPlan,
+    /// Aggregate of all selected tensors, returned only after every shard has
+    /// passed validation and remained unchanged during its read.
+    pub file_bytes: u64,
+    pub header_bytes: u64,
+    pub io_bytes: u64,
+    pub tensors: BTreeMap<String, NamedTensor>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct IndexedSafetensorsPlan {
+    /// Source shard selected for each requested tensor, keyed by tensor name.
+    pub tensor_to_shard: BTreeMap<String, String>,
+    /// Requested names grouped by source shard in stable lexical order.
+    pub tensors_by_shard: BTreeMap<String, Vec<String>>,
+    /// Metadata values from the index. These identify a checkpoint layout; they
+    /// do not authenticate its weights or establish a model revision.
+    pub tensor_count: usize,
+    pub total_size_bytes: Option<u64>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct HuggingFaceSafetensorsIndex {
+    #[serde(default)]
+    metadata: Option<HuggingFaceSafetensorsIndexMetadata>,
+    weight_map: UniqueSafetensorsWeightMap,
+}
+
+struct UniqueSafetensorsWeightMap(BTreeMap<String, String>);
+
+impl<'de> Deserialize<'de> for UniqueSafetensorsWeightMap {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> std::result::Result<Self, D::Error> {
+        struct Check;
+        impl<'de> Visitor<'de> for Check {
+            type Value = UniqueSafetensorsWeightMap;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a bounded Safetensors tensor-to-shard map with unique keys")
+            }
+
+            fn visit_map<M: MapAccess<'de>>(
+                self,
+                mut map: M,
+            ) -> std::result::Result<Self::Value, M::Error> {
+                let mut entries = BTreeMap::new();
+                while let Some(name) = map.next_key::<String>()? {
+                    if entries.len() >= MAX_SAFETENSORS_INDEX_TENSORS || entries.contains_key(&name)
+                    {
+                        return Err(serde::de::Error::custom(
+                            "duplicate tensor name or Safetensors index tensor cap exceeded",
+                        ));
+                    }
+                    let shard = map.next_value::<String>()?;
+                    entries.insert(name, shard);
+                }
+                Ok(UniqueSafetensorsWeightMap(entries))
+            }
+        }
+        deserializer.deserialize_map(Check)
+    }
+}
+
+#[derive(Deserialize)]
+struct HuggingFaceSafetensorsIndexMetadata {
+    #[serde(default, rename = "total_size")]
+    total_size_bytes: Option<u64>,
+}
+
+fn valid_index_tensor_name(name: &str) -> bool {
+    !name.is_empty() && name.len() <= 512 && name.bytes().all(|byte| (b'!'..=b'~').contains(&byte))
+}
+
+fn valid_safetensors_shard_basename(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 255
+        && name != "."
+        && name != ".."
+        && name.ends_with(".safetensors")
+        && name
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
+}
+
+/// Resolve a small, explicit tensor selection through a Hugging Face
+/// `model.safetensors.index.json` weight map. The caller supplies the expected
+/// index digest from a trusted, pinned manifest. This routine reads metadata
+/// only: it performs no checkpoint or tensor I/O and does not convert formats.
+/// All index entries and requested names are validated before a plan is returned.
+pub fn plan_indexed_safetensors_shards(
+    index_bytes: &[u8],
+    expected_index_sha256: &str,
+    selected_tensor_names: &[String],
+) -> Result<IndexedSafetensorsPlan> {
+    if index_bytes.is_empty()
+        || index_bytes.len() > MAX_SAFETENSORS_INDEX_BYTES
+        || !crate::sha256::is_hex_digest(expected_index_sha256)
+        || crate::sha256::hex(index_bytes) != expected_index_sha256
+    {
+        return Err(invalid(
+            "Safetensors index is empty, oversized, or has a wrong digest",
+        ));
+    }
+    if selected_tensor_names.is_empty() || selected_tensor_names.len() > 64 {
+        return Err(invalid(
+            "indexed tensor selection must contain between 1 and 64 names",
+        ));
+    }
+    let index: HuggingFaceSafetensorsIndex = serde_json::from_slice(index_bytes)
+        .map_err(|error| invalid(format!("invalid Safetensors weight index: {error}")))?;
+    if index.weight_map.0.is_empty() || index.weight_map.0.len() > MAX_SAFETENSORS_INDEX_TENSORS {
+        return Err(invalid(
+            "Safetensors weight index has an invalid tensor count",
+        ));
+    }
+    if index
+        .metadata
+        .as_ref()
+        .and_then(|metadata| metadata.total_size_bytes)
+        == Some(0)
+    {
+        return Err(invalid("Safetensors index total_size must be positive"));
+    }
+
+    let mut shard_names = BTreeSet::new();
+    for (tensor_name, shard_name) in &index.weight_map.0 {
+        if !valid_index_tensor_name(tensor_name) || !valid_safetensors_shard_basename(shard_name) {
+            return Err(invalid(
+                "Safetensors index contains an invalid tensor name or shard basename",
+            ));
+        }
+        shard_names.insert(shard_name.as_str());
+    }
+    if shard_names.len() > MAX_SAFETENSORS_INDEX_SHARDS {
+        return Err(invalid("Safetensors index has too many source shards"));
+    }
+
+    let mut tensor_to_shard = BTreeMap::new();
+    let mut tensors_by_shard: BTreeMap<String, Vec<String>> = BTreeMap::new();
+    for name in selected_tensor_names {
+        if !valid_index_tensor_name(name) || tensor_to_shard.contains_key(name) {
+            return Err(invalid(
+                "indexed tensor selection contains an invalid or duplicate name",
+            ));
+        }
+        let shard = index
+            .weight_map
+            .0
+            .get(name)
+            .ok_or_else(|| invalid(format!("Safetensors index is missing tensor {name}")))?;
+        tensor_to_shard.insert(name.clone(), shard.clone());
+        tensors_by_shard
+            .entry(shard.clone())
+            .or_default()
+            .push(name.clone());
+    }
+    for names in tensors_by_shard.values_mut() {
+        names.sort();
+    }
+
+    Ok(IndexedSafetensorsPlan {
+        tensor_to_shard,
+        tensors_by_shard,
+        tensor_count: index.weight_map.0.len(),
+        total_size_bytes: index
+            .metadata
+            .and_then(|metadata| metadata.total_size_bytes),
+    })
+}
+
 /// Read an explicit, small set of tensors from a potentially very large shard.
 /// All names/shapes/types/lengths and the total byte cap are preflighted before
 /// payload reads. Any read/hash failure returns no partial import.
@@ -324,6 +501,155 @@ pub fn read_named_tensors<R: Read + Seek>(
         );
     }
     Ok(NamedTensorImport {
+        file_bytes,
+        header_bytes,
+        io_bytes,
+        tensors,
+    })
+}
+
+/// Resolve and read a small set of named tensors from an indexed, sharded
+/// Safetensors checkpoint. The index digest must come from the caller's pinned
+/// manifest; each requested tensor also carries an expected payload digest.
+/// Shards must be regular files directly inside `root`; symlink shards are
+/// refused. Selected payloads are staged locally and returned only when every
+/// requested tensor from every shard validates, so callers never observe a
+/// partial import. The index and shard metadata do not authenticate a model
+/// revision or establish that its formats are compatible with VoltaFabric.
+pub fn read_indexed_named_tensors(
+    root: &Path,
+    index_bytes: &[u8],
+    expected_index_sha256: &str,
+    selected: &[NamedTensorSpec],
+    max_payload_bytes: u64,
+) -> Result<IndexedNamedTensorImport> {
+    if selected.is_empty() || selected.len() > 64 {
+        return Err(invalid("selected tensor count must be between 1 and 64"));
+    }
+    if max_payload_bytes == 0 || max_payload_bytes > MAX_NAMED_TENSOR_PAYLOAD_BYTES {
+        return Err(invalid("selected tensors exceed the payload byte cap"));
+    }
+
+    // Validate the complete request and byte budget before opening any shard.
+    let mut requested_names = Vec::with_capacity(selected.len());
+    let mut request_by_name = BTreeMap::new();
+    let mut total_payload_bytes = 0u64;
+    for item in selected {
+        if item.name.is_empty()
+            || item.name.len() > 512
+            || !valid_index_tensor_name(&item.name)
+            || request_by_name.insert(item.name.as_str(), item).is_some()
+            || item.shape.is_empty()
+            || item.shape.len() > 8
+            || item.shape.contains(&0)
+            || item.bytes == 0
+            || !crate::sha256::is_hex_digest(&item.sha256)
+        {
+            return Err(invalid("selected tensor specification is invalid"));
+        }
+        total_payload_bytes = total_payload_bytes
+            .checked_add(item.bytes)
+            .ok_or_else(|| invalid("selected tensor byte count overflow"))?;
+        requested_names.push(item.name.clone());
+    }
+    if total_payload_bytes > max_payload_bytes {
+        return Err(invalid("selected tensors exceed the payload byte cap"));
+    }
+
+    let plan =
+        plan_indexed_safetensors_shards(index_bytes, expected_index_sha256, &requested_names)?;
+    let canonical_root = std::fs::canonicalize(root).map_err(io)?;
+    if !std::fs::metadata(&canonical_root).map_err(io)?.is_dir() {
+        return Err(invalid("Safetensors shard root must be a directory"));
+    }
+
+    let mut file_bytes = 0u64;
+    let mut header_bytes = 0u64;
+    let mut io_bytes = 0u64;
+    let mut tensors = BTreeMap::new();
+    for (shard_name, tensor_names) in &plan.tensors_by_shard {
+        // The planner restricted names to safe basenames. These checks also
+        // bind each source to this root and close the final-component symlink
+        // race on Unix with O_NOFOLLOW below.
+        let shard_path = canonical_root.join(shard_name);
+        let path_metadata = std::fs::symlink_metadata(&shard_path).map_err(io)?;
+        if !path_metadata.file_type().is_file() {
+            return Err(invalid(
+                "indexed Safetensors shard must be a regular non-symlink file",
+            ));
+        }
+        let canonical_shard = std::fs::canonicalize(&shard_path).map_err(io)?;
+        if canonical_shard.parent() != Some(canonical_root.as_path())
+            || canonical_shard.file_name().and_then(|name| name.to_str())
+                != Some(shard_name.as_str())
+        {
+            return Err(invalid(
+                "indexed Safetensors shard resolves outside its root",
+            ));
+        }
+
+        let mut options = std::fs::OpenOptions::new();
+        options.read(true);
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::OpenOptionsExt;
+            options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
+        }
+        let mut shard_file = options.open(&shard_path).map_err(io)?;
+        let before = shard_file.metadata().map_err(io)?;
+        if !before.is_file()
+            || before.len() != path_metadata.len()
+            || before.modified().map_err(io)? != path_metadata.modified().map_err(io)?
+        {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "indexed Safetensors shard changed while it was opened",
+            ));
+        }
+
+        let shard_specs = tensor_names
+            .iter()
+            .map(|name| {
+                request_by_name
+                    .get(name.as_str())
+                    .map(|spec| (*spec).clone())
+                    .ok_or_else(|| invalid("planned tensor has no request specification"))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        let imported = read_named_tensors(&mut shard_file, &shard_specs, max_payload_bytes)?;
+        let after = shard_file.metadata().map_err(io)?;
+        if before.len() != after.len()
+            || before.modified().map_err(io)? != after.modified().map_err(io)?
+        {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "indexed Safetensors shard changed during import",
+            ));
+        }
+
+        file_bytes = file_bytes
+            .checked_add(imported.file_bytes)
+            .ok_or_else(|| invalid("indexed shard byte count overflow"))?;
+        header_bytes = header_bytes
+            .checked_add(imported.header_bytes)
+            .ok_or_else(|| invalid("indexed header byte count overflow"))?;
+        io_bytes = io_bytes
+            .checked_add(imported.io_bytes)
+            .ok_or_else(|| invalid("indexed I/O byte count overflow"))?;
+        for (name, tensor) in imported.tensors {
+            if tensors.insert(name, tensor).is_some() {
+                return Err(invalid("duplicate selected tensor across indexed shards"));
+            }
+        }
+    }
+
+    if tensors.len() != selected.len() {
+        return Err(invalid(
+            "indexed import did not return every selected tensor",
+        ));
+    }
+    Ok(IndexedNamedTensorImport {
+        plan,
         file_bytes,
         header_bytes,
         io_bytes,
