@@ -1,0 +1,13 @@
+R707 local CPU validation.
+
+Worktree: `/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification`, detached R699 base with pre-existing later-wave files preserved.
+
+1. `CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r699_deepseek_memory_admission six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_start` — PASS, 1/1 debug.
+2. Same targeted test with `--release` — PASS, 1/1 release.
+3. `CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --lib -- -D warnings` — PASS.
+4. `rustfmt --edition 2021 --check src/session/mxfp4/series.rs tests/r699_deepseek_memory_admission.rs` — PASS.
+5. `git diff --check -- src/session/mxfp4/series.rs tests/r699_deepseek_memory_admission.rs` — PASS.
+
+The test loads the known expert-0 MXFP4 fixture, constructs a synthetic six-choice route with separate rank-local bindings, omits five ranks, and verifies `run_series` rejects during preflight. The nonexistent endpoint path was never reached. No Session worker, model checkpoint, GPU, production network, or R53 ledger was used.
+
+The GitLab pipeline for code commit `e5a040b2a785b5c9f2efb0aeae1c8aa997e91cc4` was running when this receipt was written; it is configured scans/fallback only and cannot substitute for these local tests.

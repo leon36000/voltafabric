@@ -1,0 +1,32 @@
+{
+  "id": "R707",
+  "state": "SOURCE_PUBLISHED_READBACK_EXACT_CPU_TESTS_DEBUG_RELEASE_PASS_PIPELINE_RUNNING",
+  "branch": "r707-deepseek-six-expert-atomic-admission-20261102",
+  "parent_commit": "6a305860030a67096f3841a7ef41828e697dc1d4",
+  "source_commit": "e5a040b2a785b5c9f2efb0aeae1c8aa997e91cc4",
+  "paths": [
+    "src/session/mxfp4/series.rs",
+    "tests/r699_deepseek_memory_admission.rs"
+  ],
+  "readback_exact_files": 2,
+  "test": "six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_start",
+  "debug_tests_passed": 1,
+  "release_tests_passed": 1,
+  "clippy": "PASS -D warnings",
+  "rustfmt": "PASS",
+  "diff_check": "PASS",
+  "pipeline_id": 2448,
+  "pipeline_status_at_report": "running",
+  "pipeline_status_current": "running",
+  "pipeline_scope": "configured scans/fallback only; not Rust compilation or CPU tests",
+  "full_six_expert_admission": false,
+  "missing_rank_refused_before_worker_start": true,
+  "real_checkpoint_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_network": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R708: map the pinned DeepSeek expert names/shards into a bounded exact-resident inventory and preserve atomic refusal when any expected payload is absent; source-only and no model download."
+}
