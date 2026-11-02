@@ -29,6 +29,8 @@ use std::{
     path::Path,
 };
 
+pub mod hc;
+
 pub const ROUTED_EXPERTS: usize = 384;
 pub const TOP_K: usize = 6;
 pub const GATE_TEMPERATURE: f32 = 1.0;
@@ -390,13 +392,14 @@ impl DeepSeekV41ResidualStream {
     }
 }
 
-/// `post` and `comb` outputs of the pinned HC mix operator, bound to one exact token.
-/// Coefficients are supplied by the caller; learned projection and Sinkhorn remain
-/// a separate boundary.
+/// `post` and `comb` outputs of the pinned HC mix operator, bound to one exact token
+/// and sublayer. The branch tag prevents attention coefficients from being applied
+/// to the routed FFN result accepted by `deepseek_hc_post_reference`.
 #[derive(Debug, Clone)]
 pub struct DeepSeekV41HcPostCoefficients {
     stamp: crate::moe::Stamp,
     attempt: u64,
+    branch: hc::HcProjectionBranch,
     post: Vec<f32>,
     comb: Vec<Vec<f32>>,
 }
@@ -405,6 +408,7 @@ impl DeepSeekV41HcPostCoefficients {
     pub fn new(
         stamp: crate::moe::Stamp,
         attempt: u64,
+        branch: hc::HcProjectionBranch,
         post: Vec<f32>,
         comb: Vec<Vec<f32>>,
     ) -> Result<Self> {
@@ -425,9 +429,22 @@ impl DeepSeekV41HcPostCoefficients {
         Ok(Self {
             stamp,
             attempt,
+            branch,
             post,
             comb,
         })
+    }
+
+    pub fn branch(&self) -> hc::HcProjectionBranch {
+        self.branch
+    }
+
+    pub fn post(&self) -> &[f32] {
+        &self.post
+    }
+
+    pub fn comb(&self) -> &[Vec<f32>] {
+        &self.comb
     }
 }
 
@@ -459,6 +476,7 @@ pub fn deepseek_hc_post_reference(
         || stamp != &coefficients.stamp
         || sublayer.attempt() != residual.attempt()
         || sublayer.attempt() != coefficients.attempt
+        || coefficients.branch != hc::HcProjectionBranch::Ffn
         || sublayer.output_bf16_f32.len() != HIDDEN_SIZE
         || sublayer.output_bf16_f32.iter().any(|value| {
             !value.is_finite()
@@ -2402,8 +2420,8 @@ fn softplus_fp32(value: f32) -> f32 {
 #[cfg(test)]
 mod r730_hc_post_tests {
     use super::{
-        deepseek_hc_post_reference, DeepSeekV41HcPostCoefficients, DeepSeekV41MoeTokenOutput,
-        DeepSeekV41ResidualStream, HIDDEN_SIZE, PINNED_MODEL_REVISION,
+        deepseek_hc_post_reference, hc::HcProjectionBranch, DeepSeekV41HcPostCoefficients,
+        DeepSeekV41MoeTokenOutput, DeepSeekV41ResidualStream, HIDDEN_SIZE, PINNED_MODEL_REVISION,
     };
 
     fn stamp() -> crate::moe::Stamp {
@@ -2464,9 +2482,14 @@ mod r730_hc_post_tests {
         };
         let residual_stream =
             DeepSeekV41ResidualStream::new(stamp.clone(), attempt, residual.clone()).unwrap();
-        let mixes =
-            DeepSeekV41HcPostCoefficients::new(stamp.clone(), attempt, post.clone(), comb.clone())
-                .unwrap();
+        let mixes = DeepSeekV41HcPostCoefficients::new(
+            stamp.clone(),
+            attempt,
+            HcProjectionBranch::Ffn,
+            post.clone(),
+            comb.clone(),
+        )
+        .unwrap();
 
         let output = deepseek_hc_post_reference(&sublayer, &residual_stream, &mixes).unwrap();
         assert_eq!(output.stamp(), &stamp);
@@ -2505,8 +2528,14 @@ mod r730_hc_post_tests {
             output_bf16_f32: x,
         };
         let residual = DeepSeekV41ResidualStream::new(stamp.clone(), 9, residual).unwrap();
-        let coefficients =
-            DeepSeekV41HcPostCoefficients::new(stamp, 9, vec![1.0; 4], comb).unwrap();
+        let coefficients = DeepSeekV41HcPostCoefficients::new(
+            stamp,
+            9,
+            HcProjectionBranch::Ffn,
+            vec![1.0; 4],
+            comb,
+        )
+        .unwrap();
 
         let output = deepseek_hc_post_reference(&sublayer, &residual, &coefficients).unwrap();
         assert_eq!(output.copies_bf16_f32()[0][0].to_bits(), 1.0f32.to_bits());
@@ -2527,6 +2556,7 @@ mod r730_hc_post_tests {
         assert!(DeepSeekV41HcPostCoefficients::new(
             stamp.clone(),
             7,
+            HcProjectionBranch::Ffn,
             vec![1.0; 3],
             vec![vec![1.0; 4]; 4]
         )
@@ -2534,6 +2564,7 @@ mod r730_hc_post_tests {
         assert!(DeepSeekV41HcPostCoefficients::new(
             stamp.clone(),
             7,
+            HcProjectionBranch::Ffn,
             vec![f32::NAN; 4],
             vec![vec![1.0; 4]; 4]
         )
@@ -2546,13 +2577,32 @@ mod r730_hc_post_tests {
         };
         let mut other = stamp.clone();
         other.plan_id.push_str("-mismatch");
-        let wrong_mix =
-            DeepSeekV41HcPostCoefficients::new(other, 7, vec![1.0; 4], vec![vec![0.25; 4]; 4])
-                .unwrap();
+        let wrong_mix = DeepSeekV41HcPostCoefficients::new(
+            other,
+            7,
+            HcProjectionBranch::Ffn,
+            vec![1.0; 4],
+            vec![vec![0.25; 4]; 4],
+        )
+        .unwrap();
         assert!(deepseek_hc_post_reference(&sublayer, &residual, &wrong_mix).is_err());
-        let wrong_attempt =
-            DeepSeekV41HcPostCoefficients::new(stamp, 8, vec![1.0; 4], vec![vec![0.25; 4]; 4])
-                .unwrap();
+        let wrong_attempt = DeepSeekV41HcPostCoefficients::new(
+            stamp,
+            8,
+            HcProjectionBranch::Ffn,
+            vec![1.0; 4],
+            vec![vec![0.25; 4]; 4],
+        )
+        .unwrap();
         assert!(deepseek_hc_post_reference(&sublayer, &residual, &wrong_attempt).is_err());
+        let attention_coefficients = DeepSeekV41HcPostCoefficients::new(
+            sublayer.stamp().clone(),
+            sublayer.attempt(),
+            HcProjectionBranch::Attention,
+            vec![1.0; 4],
+            vec![vec![0.25; 4]; 4],
+        )
+        .unwrap();
+        assert!(deepseek_hc_post_reference(&sublayer, &residual, &attention_coefficients).is_err());
     }
 }

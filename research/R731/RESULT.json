@@ -1,0 +1,78 @@
+{
+  "id": "R731",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "parent_branch": "r730-deepseek-hc-post-20261102",
+  "parent_commit": "4ab1cbd27d21c1c23f947b3f8bf84d5511706edc",
+  "source_files": [
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_gate/hc.rs",
+    "tests/r712_deepseek_session_owner.rs",
+    "tests/r731_deepseek_hc_projection.rs"
+  ],
+  "adapted_boundary": "Pinned indexed HC attention/FFN projection tensors -> FP32 CPU scalar HC mixes -> pre/post/comb split and Sinkhorn -> identity- and branch-bound HC-pre/post coefficients.",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "source_files": [
+      "evidence/continuation_a97_model_metadata/upstream_314113f8/model.py",
+      "evidence/continuation_a97_model_metadata/upstream_314113f8/kernel.py"
+    ],
+    "code_copied": false
+  },
+  "source_metadata": {
+    "official_index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+    "official_header_sha256": "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449",
+    "branch_shapes": {
+      "projection_f32": [24, 20480],
+      "base_f32": [24],
+      "scale_f32": [3]
+    },
+    "selected_resident_bytes": 1966188,
+    "test_payloads_are_synthetic": true
+  },
+  "reused_voltafabric": [
+    "R721 indexed Safetensors named-tensor reader and atomic selected-payload validation",
+    "R730 token Stamp, residual stream and HC-post path",
+    "R250 BF16 HC-pre reference",
+    "R712 grouped CPU Session and routed owner integration"
+  ],
+  "new_dependencies": false,
+  "verification": {
+    "r731_debug": "PASS 1/1",
+    "r731_release": "PASS 1/1",
+    "r730_hc_post_unit": "PASS 3/3",
+    "r712_debug": "PASS 12/12, 124.60 s",
+    "r712_release": "PASS 12/12, 7.72 s",
+    "clippy_test_and_lib_warnings_denied": "PASS",
+    "rustfmt": "PASS",
+    "diff_check": "PASS"
+  },
+  "oracle": "Independent F64 projection and HC split/softmax/Sinkhorn equations; f64 HC-pre sum then BF16 RNE. No PyTorch runtime was installed or available.",
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "publication_pipeline": "PENDING",
+  "exact_readback": "PENDING",
+  "real_checkpoint_payload": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "route_or_coefficients_changed": false,
+  "limitations": [
+    "Synthetic HC tensor payloads; model checkpoint weights not loaded",
+    "CPU scalar reduction order is not PyTorch/TileLang bitwise parity",
+    "Attention/GDN and full FFN composition are not qualified",
+    "No complete autoregressive generation",
+    "No GPU/inter-PC/R53/performance qualification"
+  ],
+  "next_action": "R732: connect identity-bound HC attention/FFN outputs to the existing normalized routed-expert and shared-expert CPU path, then continue toward a one-token decode. No automatic relaunch.",
+  "manifest": "research/R731/SHA256SUMS",
+  "manifest_sha256": "9633956036fe2b8e3a2371856d50f7b94d36a36d18566b438fc2924159f40163",
+  "manifest_file_count": 6,
+  "branch": "r731-deepseek-hc-projection-20261102",
+  "source_commit": "PENDING",
+  "published_utc": "PENDING"
+}

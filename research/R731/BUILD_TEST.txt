@@ -1,0 +1,25 @@
+R731 local CPU build and verification
+
+Commands:
+  rustfmt --edition 2021 src/deepseek_v41_gate.rs src/deepseek_v41_gate/hc.rs tests/r712_deepseek_session_owner.rs tests/r731_deepseek_hc_projection.rs
+  cargo test --locked --test r731_deepseek_hc_projection -- --nocapture
+  cargo test --locked --lib r730_hc_post_tests
+  cargo test --locked --test r712_deepseek_session_owner
+  cargo test --locked --release --test r712_deepseek_session_owner
+  git diff --check
+  rustfmt --edition 2021 --check src/deepseek_v41_gate.rs src/deepseek_v41_gate/hc.rs tests/r712_deepseek_session_owner.rs tests/r731_deepseek_hc_projection.rs
+  cargo clippy --locked --test r731_deepseek_hc_projection -- -D warnings
+  cargo clippy --locked --lib -- -D warnings
+  cargo test --locked --release --test r731_deepseek_hc_projection
+
+Results:
+  r731 debug integration: PASS 1/1 (4.20 s)
+  R730 HC-post unit tests: PASS 3/3
+  R712 debug integration: PASS 12/12 (124.60 s)
+  R712 release integration: PASS 12/12 (7.72 s)
+  R731 release integration: PASS 1/1 (0.27 s)
+  targeted Clippy test/lib with warnings denied: PASS
+  rustfmt check: PASS
+  git diff --check: PASS
+
+Fixture: pinned public index/header metadata plus synthetic F32 HC tensors in a sparse source shard. No model weights were downloaded or loaded. No PyTorch runtime, CUDA, GPU, network or UNKNOWN operation was used.

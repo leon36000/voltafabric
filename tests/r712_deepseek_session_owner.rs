@@ -18,12 +18,13 @@ use voltafabric::deepseek_v41::{
     PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
-    combine_pinned_moe_route_with_shared, deepseek_hc_post_reference, DeepSeekV41Gate,
-    DeepSeekV41HcPostCoefficients, DeepSeekV41IndexedMoeLayer, DeepSeekV41ResidualStream,
-    FfnNormTensorSpec, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource,
-    SharedExpertTensorHashes, SharedExpertTensorSpec, TokenKind, GATE_PAYLOAD_BYTES,
-    GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, PINNED_RMS_NORM_EPSILON,
-    RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE, SHARED_EXPERT_INTERMEDIATE_SIZE,
+    combine_pinned_moe_route_with_shared, deepseek_hc_post_reference, hc::HcProjectionBranch,
+    DeepSeekV41Gate, DeepSeekV41HcPostCoefficients, DeepSeekV41IndexedMoeLayer,
+    DeepSeekV41ResidualStream, FfnNormTensorSpec, GateShardSpec, GateTensorHashes,
+    PinnedMxfp4PayloadSource, SharedExpertTensorHashes, SharedExpertTensorSpec, TokenKind,
+    GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION,
+    PINNED_RMS_NORM_EPSILON, RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE,
+    SHARED_EXPERT_INTERMEDIATE_SIZE,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -1301,6 +1302,7 @@ fn completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once() {
     let hc_coefficients = DeepSeekV41HcPostCoefficients::new(
         route_stamp.clone(),
         route_attempt,
+        HcProjectionBranch::Ffn,
         hc_post.clone(),
         hc_comb.clone(),
     )

@@ -1,0 +1,20 @@
+{
+  "id": "R731",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "parent_commit": "4ab1cbd27d21c1c23f947b3f8bf84d5511706edc",
+  "branch": "r731-deepseek-hc-projection-20261102",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "result": "Indexed HC projection/base/scale plus FP32 scalar projection, coefficient split/Sinkhorn and identity-bound HC-pre pass a separate f64 CPU oracle for attention and FFN branches.",
+  "source_readback": "PENDING",
+  "pipeline": "PENDING",
+  "receipt_pending": true,
+  "real_checkpoint_payload": false,
+  "complete_generation": false,
+  "gpu": false,
+  "unknown_replayed": false,
+  "manifest": "research/R731/SHA256SUMS",
+  "manifest_sha256": "9633956036fe2b8e3a2371856d50f7b94d36a36d18566b438fc2924159f40163",
+  "next_action": "After publishing and exact readback, R732 will connect identity-bound HC attention/FFN outputs to the existing normalized routed-expert and shared-expert CPU path, then continue toward a one-token decode. No automatic relaunch."
+}
