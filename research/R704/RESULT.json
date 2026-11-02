@@ -1,0 +1,38 @@
+{
+  "round": "R704",
+  "status": "CPU_SYNTHETIC_GATE_TO_IDENTITY_BOUND_VOLTAFABRIC_ROUTE_PASS",
+  "branch": "r704-deepseek-gate-route-identity-20261102",
+  "parent_commit": "bcaa7ee42752abfa597d1333fd1e20f9021d7a3c",
+  "component": "DeepSeek V4.1 Flash gate adapter to VoltaFabric RoutingProblem",
+  "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "adapted_apis": [
+    "VoltaFabric RoutingProblem",
+    "VoltaFabric routing::validate"
+  ],
+  "route_contract": {
+    "top_k": 6,
+    "one_token_batch": true,
+    "route_coefficients_rescaled": false,
+    "route_scale_applied_once": true,
+    "full_stamp_bound": ["run_id", "model_revision", "plan_id", "layer", "batch", "epoch"],
+    "attempt_nonzero_and_carried": true,
+    "registry_rank_local_order_validated": true
+  },
+  "tests": {
+    "focused_cpu_tests_passed": 3,
+    "clippy_warnings_as_errors": "pass",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "fixture": "synthetic Safetensors gate rows producing logits 0..383",
+  "real_checkpoint_loaded": false,
+  "memory_planner_invoked": false,
+  "session_dispatch": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_network": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "Continue the CPU generation path using only coherent already-tracked weights and current identities; keep DeepSeek dispatch refused until real gate bytes, all six expert payload profiles, resident ownership, and memory admission are available."
+}

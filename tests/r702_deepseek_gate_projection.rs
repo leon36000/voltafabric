@@ -1,4 +1,5 @@
 use safetensors::tensor::{serialize, Dtype, TensorView};
+use std::collections::BTreeMap;
 use voltafabric::deepseek_v41_gate::{
     DeepSeekV41Gate, GateShardSpec, GateTensorHashes, TokenKind, GATE_BIAS_BYTES,
     GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, ROUTED_EXPERTS,
@@ -126,6 +127,94 @@ fn selected_gate_projection_routes_against_the_independent_decimal_oracle() {
         image.iter().map(|choice| choice.expert).collect::<Vec<_>>(),
         [1, 383, 382, 381, 380, 379]
     );
+}
+
+#[test]
+fn gate_route_becomes_a_full_identity_bound_voltafabric_batch_without_rescaling() {
+    let (shard, spec) = fixture();
+    let gate = DeepSeekV41Gate::load(&mut std::io::Cursor::new(&shard), &spec).unwrap();
+    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
+    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
+        *value = (1u32 << bit) as f32;
+    }
+    let experts = [0, 383, 382, 381, 380, 379];
+    let registry = voltafabric::moe::Registry {
+        epoch: 13,
+        copies: experts
+            .iter()
+            .enumerate()
+            .map(|(local, &expert)| voltafabric::moe::Replica {
+                expert,
+                rank: 4,
+                local: local as u32,
+            })
+            .collect(),
+    };
+    let stamp = voltafabric::moe::Stamp {
+        run_id: "r704-deepseek-gate-route".to_owned(),
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        plan_id: "r704-one-token-cpu-route".to_owned(),
+        layer: 0,
+        batch: 7,
+        epoch: 13,
+    };
+    let batch = gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            stamp.clone(),
+            29,
+            registry,
+            BTreeMap::new(),
+            BTreeMap::from([(4, (0..6).collect())]),
+        )
+        .unwrap();
+    assert_eq!(batch.attempt(), 29);
+    assert_eq!(batch.problem().stamp.run_id, stamp.run_id);
+    assert_eq!(batch.problem().stamp.model_revision, stamp.model_revision);
+    assert_eq!(batch.problem().stamp.plan_id, stamp.plan_id);
+    assert_eq!(batch.problem().stamp.layer, stamp.layer);
+    assert_eq!(batch.problem().stamp.batch, stamp.batch);
+    assert_eq!(batch.problem().stamp.epoch, stamp.epoch);
+    assert_eq!(batch.problem().routes[0].len(), 6);
+    assert_eq!(
+        batch.problem().routes[0]
+            .iter()
+            .map(|choice| choice.expert)
+            .collect::<Vec<_>>(),
+        experts
+    );
+    let total = batch.problem().routes[0]
+        .iter()
+        .map(|choice| choice.weight)
+        .sum::<f64>();
+    assert!((total - f64::from(ROUTE_SCALE)).abs() < 2.0e-7);
+    voltafabric::routing::validate(batch.problem()).unwrap();
+
+    let mut wrong_layer = stamp.clone();
+    wrong_layer.layer = 1;
+    assert!(gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            wrong_layer,
+            29,
+            batch.problem().registry.clone(),
+            BTreeMap::new(),
+            batch.problem().resident_order.clone(),
+        )
+        .is_err());
+    assert!(gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            stamp,
+            0,
+            batch.problem().registry.clone(),
+            BTreeMap::new(),
+            batch.problem().resident_order.clone(),
+        )
+        .is_err());
 }
 
 #[test]

@@ -23,7 +23,10 @@ use crate::checkpoint::{self, NamedTensorSpec};
 use crate::moe::Choice;
 use crate::{invalid, Error, Result};
 use safetensors::tensor::Dtype;
-use std::io::{Read, Seek};
+use std::{
+    collections::BTreeMap,
+    io::{Read, Seek},
+};
 
 pub const ROUTED_EXPERTS: usize = 384;
 pub const TOP_K: usize = 6;
@@ -200,6 +203,25 @@ pub struct GateLoadReceipt {
     pub tensors: Vec<GateTensorReceipt>,
 }
 
+/// A one-token gate decision bound to VoltaFabric's route identity and attempt.
+/// The route problem is private so the validated stamp cannot be replaced after
+/// construction; its already-scaled coefficients are carried through unchanged.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41RouteBatch {
+    problem: crate::routing::RoutingProblem,
+    attempt: u64,
+}
+
+impl DeepSeekV41RouteBatch {
+    pub fn problem(&self) -> &crate::routing::RoutingProblem {
+        &self.problem
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+}
+
 /// Resident CPU projection weights and the pinned selector. This deliberately
 /// loads only layer gate weight and biases, never the whole Safetensors shard.
 #[derive(Debug)]
@@ -331,6 +353,45 @@ impl DeepSeekV41Gate {
         self.router.route(&logits, kind)
     }
 
+    /// Bind one model-gated token to the validated VoltaFabric routing boundary.
+    /// The gate's normalized and scaled coefficients are not recomputed here.
+    #[allow(clippy::too_many_arguments)]
+    pub fn prepare_route_batch(
+        &self,
+        hidden: &[f32],
+        kind: TokenKind,
+        stamp: crate::moe::Stamp,
+        attempt: u64,
+        registry: crate::moe::Registry,
+        preferred_owners: BTreeMap<u32, u32>,
+        resident_order: BTreeMap<u32, Vec<u32>>,
+    ) -> Result<DeepSeekV41RouteBatch> {
+        if attempt == 0
+            || stamp.model_revision != self.receipt.model_revision
+            || stamp.layer != self.receipt.layer
+        {
+            return Err(invalid(
+                "DeepSeek route attempt, model revision or layer identity differs",
+            ));
+        }
+        let route = self.route(hidden, kind)?;
+        if route.len() != TOP_K {
+            return Err(invalid("DeepSeek gate did not produce the pinned top-k"));
+        }
+        let experts = route.iter().map(|choice| choice.expert).collect();
+        let problem = crate::routing::RoutingProblem {
+            hidden: HIDDEN_SIZE,
+            experts,
+            routes: vec![route],
+            registry,
+            stamp,
+            preferred_owners,
+            resident_order,
+        };
+        crate::routing::validate(&problem)?;
+        Ok(DeepSeekV41RouteBatch { problem, attempt })
+    }
+
     pub fn project(&self, hidden: &[f32]) -> Result<Vec<f32>> {
         if hidden.len() != HIDDEN_SIZE {
             return Err(invalid("DeepSeek gate hidden state has wrong width"));
@@ -398,6 +459,16 @@ fn validate_vector(name: &str, values: &[f32]) -> Result<()> {
         ));
     }
     Ok(())
+}
+
+/// PyTorch `F.softplus` defaults to threshold 20; preserve that FP32 branch.
+fn softplus_fp32(value: f32) -> f32 {
+    if value > SOFTPLUS_THRESHOLD {
+        value
+    } else {
+        value.exp().ln_1p()
+    }
+}
 }
 
 /// PyTorch `F.softplus` defaults to threshold 20; preserve that FP32 branch.
