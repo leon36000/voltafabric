@@ -5,7 +5,10 @@
 //! Inputs are the 384 FP32 outputs of the router linear projection, before the
 //! model's gate temperature. The projection itself and loading of its checkpoint
 //! tensors remain outside this module. The pinned defaults are temperature 1.0,
-//! sqrt-softplus scoring, top-6, normalized selected weights, and route scale 1.5.
+//! sqrt-softplus scoring, top-6, and normalized selected weights. The route scale
+//! is an explicit constructor input. Upstream config names `routed_scaling_factor`
+//! (1.5), while the reference `ModelArgs` demo default says `route_scale=1.0`; the
+//! loader mapping must be established by the caller rather than assumed here.
 //! Selection bias affects expert choice only. Image tokens use the separate
 //! `bias_vl` vector. The shared expert is not represented by these routed choices
 //! and must be executed by the layer separately. This covers the primary
@@ -37,15 +40,20 @@ pub enum TokenKind {
 pub struct RouterBiases {
     text: Box<[f32]>,
     image: Box<[f32]>,
+    route_scale: f32,
 }
 
 impl RouterBiases {
-    pub fn new(text: Vec<f32>, image: Vec<f32>) -> Result<Self> {
+    pub fn new(text: Vec<f32>, image: Vec<f32>, route_scale: f32) -> Result<Self> {
         validate_vector("text correction bias", &text)?;
         validate_vector("image correction bias", &image)?;
+        if !route_scale.is_finite() || route_scale <= 0.0 {
+            return Err(invalid("DeepSeek route scale must be finite and positive"));
+        }
         Ok(Self {
             text: text.into_boxed_slice(),
             image: image.into_boxed_slice(),
+            route_scale,
         })
     }
 
@@ -53,7 +61,7 @@ impl RouterBiases {
     ///
     /// Returned choices are in descending corrected-score order, matching the
     /// pinned `topk(..., sorted=True)` boundary when no relevant ties exist. Each
-    /// coefficient already includes normalization and the pinned route scale; a
+    /// coefficient already includes normalization and the supplied route scale; a
     /// downstream executor must apply it exactly once.
     pub fn route(&self, router_logits: &[f32], kind: TokenKind) -> Result<Vec<Choice>> {
         validate_vector("router logits", router_logits)?;
@@ -113,7 +121,7 @@ impl RouterBiases {
             .take(TOP_K)
             .map(|candidate| {
                 let normalized = candidate.score / denominator;
-                let weighted = normalized * ROUTE_SCALE;
+                let weighted = normalized * self.route_scale;
                 if !weighted.is_finite() || weighted < 0.0 {
                     return Err(Error::new(
                         "NUMERICAL_OVERFLOW",

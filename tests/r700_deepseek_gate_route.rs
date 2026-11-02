@@ -1,7 +1,7 @@
 use voltafabric::deepseek_v41_gate::{RouterBiases, TokenKind, ROUTED_EXPERTS, ROUTE_SCALE, TOP_K};
 
 fn biases(text: Vec<f32>, image: Vec<f32>) -> RouterBiases {
-    RouterBiases::new(text, image).expect("valid pinned gate biases")
+    RouterBiases::new(text, image, ROUTE_SCALE).expect("valid pinned gate biases")
 }
 
 fn expected_score(logit: f64) -> f64 {
@@ -41,6 +41,18 @@ fn selected_bias_changes_membership_but_coefficients_use_unbiased_scores() {
 }
 
 #[test]
+fn caller_supplied_route_scale_is_applied_once() {
+    let logits: Vec<f32> = (0..ROUTED_EXPERTS).map(|i| i as f32).collect();
+    let gate =
+        RouterBiases::new(vec![0.0; ROUTED_EXPERTS], vec![0.0; ROUTED_EXPERTS], 2.25).unwrap();
+
+    let route = gate.route(&logits, TokenKind::Text).unwrap();
+    let total = route.iter().map(|choice| choice.weight).sum::<f64>();
+    assert!((total - 2.25).abs() < 3.0e-7);
+    assert_eq!(route.len(), TOP_K);
+}
+
+#[test]
 fn topk_is_sorted_and_rejects_ties_that_make_routing_backend_dependent() {
     let logits: Vec<f32> = (0..ROUTED_EXPERTS).map(|i| i as f32).collect();
     let mut text_bias = vec![0.0; ROUTED_EXPERTS];
@@ -62,10 +74,21 @@ fn topk_is_sorted_and_rejects_ties_that_make_routing_backend_dependent() {
 
 #[test]
 fn gate_rejects_wrong_shapes_nonfinite_values_and_missing_model_inputs() {
-    assert!(RouterBiases::new(vec![0.0; ROUTED_EXPERTS - 1], vec![0.0; ROUTED_EXPERTS]).is_err());
+    assert!(RouterBiases::new(
+        vec![0.0; ROUTED_EXPERTS - 1],
+        vec![0.0; ROUTED_EXPERTS],
+        ROUTE_SCALE,
+    )
+    .is_err());
     let mut invalid_bias = vec![0.0; ROUTED_EXPERTS];
     invalid_bias[7] = f32::NAN;
-    assert!(RouterBiases::new(vec![0.0; ROUTED_EXPERTS], invalid_bias).is_err());
+    assert!(RouterBiases::new(vec![0.0; ROUTED_EXPERTS], invalid_bias, ROUTE_SCALE).is_err());
+    assert!(RouterBiases::new(
+        vec![0.0; ROUTED_EXPERTS],
+        vec![0.0; ROUTED_EXPERTS],
+        f32::NAN,
+    )
+    .is_err());
 
     let gate = biases(vec![0.0; ROUTED_EXPERTS], vec![0.0; ROUTED_EXPERTS]);
     assert!(gate

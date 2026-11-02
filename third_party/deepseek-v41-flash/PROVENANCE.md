@@ -35,6 +35,11 @@
   1.0; gate linear -> temperature -> sqrt-softplus; text/image correction bias
   chooses experts only; normalization adds 1e-20; route scale applied once;
   DSpark layers use their separate 128/3 configuration). The config also sets
+  `routed_scaling_factor=1.5`, while the pinned `ModelArgs` demo default is
+  `route_scale=1.0`; no mapping between these differently named fields was found
+  in the inspected source. The adapter therefore requires an explicit route-scale
+  argument and does not silently select either value as a loader policy. The
+  config also sets
   `swiglu_limit` 10.0, `expert_dtype` fp4, and `scale_fmt` ue8m0. `Linear` FP4 layout: weight
   `[out, in//2]` float4_e2m1fn_x2, scale `[out, in//32]` float8_e8m0fnu;
   `Expert.forward` clamps and routing weight), one shard safetensors header
@@ -42,7 +47,9 @@
 - Adaptation: no donor code is copied or vendored. Rust implements MXFP4 K32
   decoding and activation references in `src/deepseek_v41.rs`, plus the primary
   text/image routed-gate score, correction-bias selection, top-6 normalization
-  and route-scale boundary in `src/deepseek_v41_gate.rs`. Gate input is already
+  and explicit caller-supplied route-scale boundary in `src/deepseek_v41_gate.rs`.
+  `ROUTE_SCALE=1.5` is a fixture reference to the config value, not evidence that
+  the upstream loader maps it to `ModelArgs.route_scale`. Gate input is already
   projected FP32 logits; this does not load gate weights, compute the projection,
   implement DSpark's 128/3 auxiliary gate, reproduce the PyTorch reduction bit for
   bit, or provide a GPU kernel or complete model.
