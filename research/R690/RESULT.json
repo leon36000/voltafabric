@@ -1,1 +1,51 @@
-ewogICJyb3VuZCI6ICJSNjkwIiwKICAic3RhdGUiOiAiQ1BVX1NZTlRIRVRJQ19MT0dJVFNfVE9fU0FNUExFUl9TRUFNX1BBU1NfTElNSVRFRCIsCiAgImRvbm9yIjogewogICAgInJlcG9zaXRvcnkiOiAiZ2dtbC1vcmcvbGxhbWEuY3BwIiwKICAgICJjb21taXQiOiAiM2NmMDMyNTdmMjE5YWZiZTczMzQwNDVmZjdjNmEwNmFjNjhjNjI3ZCIsCiAgICAibGljZW5zZSI6ICJNSVQiLAogICAgIm1vZGlmaWVkX3Vwc3RyZWFtX2ZpbGVzX2NvcGllZCI6IGZhbHNlCiAgfSwKICAicmV1c2VkIjogWwogICAgIlF3ZW4yTW9FIGJ1aWxkX21vZV9mZm4gZ3JhcGgiLAogICAgImludGVybmFsIHByb2Nlc3NfdWJhdGNoIGdyYXBoIGV4ZWN1dGlvbiBzZWFtIiwKICAgICJHR01MIGdnbWxfbXVsX21hdCBvdXRwdXQgaGVhZCIsCiAgICAibGxtX2dyYXBoX3Jlc3VsdDo6Z2V0X2xvZ2l0cyIsCiAgICAicHVibGljIGxsYW1hX3NhbXBsZXJfaW5pdF9ncmVlZHkvbGxhbWFfc2FtcGxlcl9hcHBseS9sbGFtYV9zYW1wbGVyX2FjY2VwdCIKICBdLAogICJmaXh0dXJlIjogewogICAgInN5bnRoZXRpYyI6IHRydWUsCiAgICAiaGlkZGVuX3dpZHRoIjogMzIsCiAgICAidm9jYWJ1bGFyeV93aWR0aCI6IDQsCiAgICAidG9rZW5zIjogMSwKICAgICJsYXllcnMiOiAxLAogICAgInRvcF9rIjogMiwKICAgICJleHBlcnRfZm9ybWF0IjogIlE4XzAiLAogICAgInJvdXRlX2NoZWNrcG9pbnRfdG9fcmVzaWRlbnQiOiAiWzEsMF0gLT4gWzQwLDNdIiwKICAgICJyb3V0ZV93ZWlnaHRzX2FwcGxpZWRfb25jZSI6IHRydWUKICB9LAogICJ2ZXJpZmljYXRpb24iOiB7CiAgICAicnVubmVyX2V4aXRfY29kZSI6IDAsCiAgICAiZG9ub3JfdnNfdm9sdGFmYWJyaWNfbG9naXRzX21heF9hYnMiOiAwLjAsCiAgICAiZG9ub3JfdnNfc2NhbGFyX2xtX2hlYWRfbWF4X2FicyI6IDAuMCwKICAgICJzYW1wbGVyX3Rva2Vuc19kb25vcl92b2x0YWZhYnJpY19zY2FsYXIiOiBbMywgMywgM10sCiAgICAicmVmdXNhbF93aXRoaGVsZF9sb2dpdHMiOiB0cnVlLAogICAgInJlZnVzYWxfc2VsZWN0ZWRfbm9fdG9rZW4iOiB0cnVlLAogICAgImR1cGxpY2F0ZV9pZGVudGl0eV93aXRoaGVsZF9sb2dpdHMiOiB0cnVlLAogICAgImdwdSI6IGZhbHNlLAogICAgInByb2R1Y3Rpb25fbmV0d29yayI6IGZhbHNlLAogICAgInBlcmZvcm1hbmNlX2NvbXBhcmlzb24iOiBmYWxzZQogIH0sCiAgImxpbWl0cyI6IFsKICAgICJOb3QgcHVibGljIGxsYW1hX2RlY29kZSIsCiAgICAiTm8gcmVhbCB0b2tlbiBlbWJlZGRpbmdzLCBhdHRlbnRpb24sIEtWLCB0b2tlbml6ZXIsIG9yIHByb2R1Y3Rpb24gY2hlY2twb2ludCIsCiAgICAiTm90IGZ1bGwgZ2VuZXJhdGlvbiIsCiAgICAiTm8gR1BVLCBpbnRlci1QQywgb3IgUkRNQSBxdWFsaWZpY2F0aW9uIgogIF0sCiAgImFkZGl0aW9uYWxfbWFudWFsX2ludm9jYXRpb24iOiB7CiAgICAic3RhdHVzIjogIlVOS05PV05fTk9fUkVQTEFZIiwKICAgICJyZWFzb25fY29udGV4dCI6ICJEaXJlY3QgaW52b2NhdGlvbiBvbWl0dGVkIFZGX1RFU1RfT1VUUFVUX0RJUjsgZXhpdCBjb2RlIDEgYW5kIGVtcHR5IGxvZzsgZXhjbHVkZWQgZnJvbSBwYXNzIiwKICAgICJsb2NhbF9zeW50aGV0aWNfcmVjZWlwdHMiOiAiUkVTRVJWRURfVU5LTk9XTl9OT19SRVBMQVk7IHByZXNlcnZlZCIKICB9Cn0K
+{
+  "round": "R690",
+  "state": "CPU_SYNTHETIC_LOGITS_TO_SAMPLER_SEAM_PASS_LIMITED",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "modified_upstream_files_copied": false
+  },
+  "reused": [
+    "Qwen2MoE build_moe_ffn graph",
+    "internal process_ubatch graph execution seam",
+    "GGML ggml_mul_mat output head",
+    "llm_graph_result::get_logits",
+    "public llama_sampler_init_greedy/llama_sampler_apply/llama_sampler_accept"
+  ],
+  "fixture": {
+    "synthetic": true,
+    "hidden_width": 32,
+    "vocabulary_width": 4,
+    "tokens": 1,
+    "layers": 1,
+    "top_k": 2,
+    "expert_format": "Q8_0",
+    "route_checkpoint_to_resident": "[1,0] -> [40,3]",
+    "route_weights_applied_once": true
+  },
+  "verification": {
+    "runner_exit_code": 0,
+    "donor_vs_voltafabric_logits_max_abs": 0.0,
+    "donor_vs_scalar_lm_head_max_abs": 0.0,
+    "sampler_tokens_donor_voltafabric_scalar": [3, 3, 3],
+    "refusal_withheld_logits": true,
+    "refusal_selected_no_token": true,
+    "duplicate_identity_withheld_logits": true,
+    "gpu": false,
+    "production_network": false,
+    "performance_comparison": false
+  },
+  "limits": [
+    "Not public llama_decode",
+    "No real token embeddings, attention, KV, tokenizer, or production checkpoint",
+    "Not full generation",
+    "No GPU, inter-PC, or RDMA qualification"
+  ],
+  "additional_manual_invocation": {
+    "status": "UNKNOWN_NO_REPLAY",
+    "reason_context": "Direct invocation omitted VF_TEST_OUTPUT_DIR; exit code 1 and empty log; excluded from pass",
+    "local_synthetic_receipts": "RESERVED_UNKNOWN_NO_REPLAY; preserved"
+  }
+}

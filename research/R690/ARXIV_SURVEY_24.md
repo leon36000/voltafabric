@@ -1,1 +1,119 @@
-IyBSNjkwIOKAlCAyNC1wYXBlciBhclhpdiBzdXJ2ZXkgZm9yIFZvbHRhRmFicmljCgojIyBTY29wZSBhbmQgbWV0aG9kCgpUaGlzIGlzIGEgYm91bmRlZCBzdXJ2ZXkgcHJvZHVjZWQgYnkgb25lIEdQVC02IEx1bmEgcmVzZWFyY2ggYWdlbnQsIGZvbGxvd2VkIGJ5CnByaW1hcnktcGFnZSBjaGVja3MgZm9yIHRoZSBzaG9ydGxpc3RlZCByZWNvcmRzLiBTZWFyY2hlcyBjb3ZlcmVkIGFyWGl2IGNhdGVnb3JpZXMKY3MuREMsIGNzLkxHLCBjcy5BSSwgYW5kIGNzLk5JICgyMDIz4oCTMjAyNikgd2l0aCB0ZXJtcyBmb3IgTW9FL2V4cGVydCBwYXJhbGxlbGlzbSwKZXhwZXJ0IHBsYWNlbWVudCBhbmQgbG9hZCBiYWxhbmNlLCBDUFXigJNHUFUgY29vcGVyYXRpb24sIFBDSWUvUkRNQS9vdmVybGFwLApxdWFudGl6YXRpb24sIGFuZCBLVi9zZXJ2aW5nLiBUaGUgMjQgcmVjb3JkcyBiZWxvdyBhcmUgc2VsZWN0ZWQgZm9yIGEgcGxhdXNpYmxlCmVuZ2luZWVyaW5nIHRyYW5zZmVyIHRvIFZvbHRhRmFicmljOyB0aGlzIGlzIG5vdCBhbiBleGhhdXN0aXZlIHJldmlldyBvZiBhbGwgYXJYaXYuClBhcGVyIG1ldGFkYXRhIGFuZCBjbGFpbXMgYXJlIG5vdCBhIGxpY2Vuc2UgYXVkaXQgb2YgbGlua2VkIGltcGxlbWVudGF0aW9ucy4KCiMjIENvbW11bmljYXRpb24sIHRvcG9sb2d5LCBhbmQgZXhwZXJ0IG93bmVyc2hpcAoKMS4gW1RodW5kZXJFUCwgYXJYaXY6MjYwOS40MDA5M10oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI2MDkuNDAwOTMpIOKAlCBQQ0llIGV4cGVydAogICBwYXJhbGxlbGlzbSB1c2luZyBETUEgZW5naW5lcyBhbmQgZmV3ZXIgcmVsYXkgaG9wcy9wb2xscy4gQ2FuZGlkYXRlOiBtb2RlbCBleGFjdAogICBjb3BpZXMsIHN0YWdpbmcsIG92ZXJsYXAsIGFuZCBjb21wbGV0aW9uIGNvc3RzIGZvciBWb2x0YUZhYnJpYyBidWZmZXJzLiBJdHMgUlRYCiAgIDQwOTAvNTA5MCBtZWFzdXJlbWVudHMgZG8gbm90IHF1YWxpZnkgVjEwMDsgbm8gcnNvY2tldCBoYW5kbGVzIGluIFBPU0lYCiAgIHBvbGwvZXBvbGwvcHBvbGwuCjIuIFtWYXJpb1BhdGgsIGFyWGl2OjI2MDkuMzQzNDBdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNjA5LjM0MzQwKSDigJQgb2ZmbGluZSwKICAgdG9wb2xvZ3ktYXdhcmUgY2hhbm5lbCBjYXRhbG9nIHdpdGggb25saW5lIGRlbWFuZC1hd2FyZSBhbGwtdG8tYWxsIHNlbGVjdGlvbi4KICAgQ2FuZGlkYXRlOiBDUFUtb25seSBzaW11bGF0b3IgZmVkIGJ5IHZlcmlmaWVkIFZvbHRhRmFicmljIHRvcG9sb2d5IGFuZCByb3V0ZXM7CiAgIGV4dGVybmFsIHBsYXRmb3JtIHJlc3VsdHMgZG8gbm90IGVzdGFibGlzaCBvdXIgdG9wb2xvZ3kuCjMuIFtVQ0NMLUVQLCBhclhpdjoyNTEyLjE5ODQ5XShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjUxMi4xOTg0OSkg4oCUIGNvbXBhY3Qgcm91dGluZwogICBjb21tYW5kcywgQ1BVIHByb3hpZXMsIGFuZCBvcmRlcmluZy9jb21wbGV0aW9uIGNvbmNlcm5zIGZvciBleHBlcnQgY29tbXVuaWNhdGlvbi4KICAgQ2FuZGlkYXRlOiB0aWdodGVuIENQVSBicmlkZ2Ugc2VxdWVuY2UsIGlkZW50aXR5LCBjb21wbGV0aW9uLCBhbmQgb3JkZXJpbmcgY2hlY2tzLgogICBJdCBkb2VzIG5vdCBxdWFsaWZ5IFZvbHRhRmFicmljIHByb2R1Y3Rpb24gUkRNQS4KNC4gW0RpcmVjdG9yLCBhclhpdjoyNjA3LjA4NzgyXShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjYwNy4wODc4Mikg4oCUIHByZWRpY3RpdmUgZXhwZXJ0CiAgIHBsYWNlbWVudCB3aXRoIGNhcGFjaXR5IGFuZCBtaWdyYXRpb24gY29zdHMuIENhbmRpZGF0ZTogb2ZmbGluZSBjb3N0IGVzdGltYXRlIG9uCiAgIGFkbWl0dGVkIHRyYWNlcyBvbmx5OyBwcmVkaWN0aW9ucyBjYW5ub3QgcmVwbGFjZSBnYXRlLXNlbGVjdGVkIGV4cGVydCByb3V0ZXMuCjUuIFtFeHBlcnQgQ291cGxpbmcsIGFyWGl2OjI2MTAuMDkzNzJdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNjEwLjA5MzcyKSDigJQgZXhwbG9pdHMKICAgY29ycmVsYXRlZCBleHBlcnQgYWN0aXZhdGlvbnMgZm9yIHBsYWNlbWVudC4gQ2FuZGlkYXRlOiBtZWFzdXJlIGNvLWFjdGl2YXRpb24gYW5kCiAgIHBsYWNlbWVudCBjb3N0IHdpdGhvdXQgdG9rZW4gc2h1ZmZsaW5nLiBJdHMgdHJhaW5pbmcvTUkzMDBYIHNldHRpbmcgZGlmZmVycy4KNi4gW1NlbWFudGljIFBhcmFsbGVsaXNtLCBhclhpdjoyNTAzLjA0Mzk4XShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjUwMy4wNDM5OCkg4oCUCiAgIGNvb3JkaW5hdGVzIHNlbWFudGljIHBsYWNlbWVudCBhbmQgZGF0YSBwYXJhbGxlbGlzbS4gQ2FuZGlkYXRlOiBDUFUgcGxhY2VtZW50CiAgIHNvbHZlciBjb25zdHJhaW5lZCBieSB0aGUgVm9sdGFGYWJyaWMgb3duZXIgcmVnaXN0cnk7IGRvIG5vdCBjaGFuZ2Ugcm91dGUgbWVhbmluZy4KCiMjIEhldGVyb2dlbmVvdXMgZXhwZXJ0IGV4ZWN1dGlvbiBhbmQgdHJhbnNmZXIKCjcuIFtBY2hpZXZpbmcgQ2xvdWQtR3JhZGUgU0xPcyBmb3IgTG9jYWwgTW9FLCBhclhpdjoyNjA2LjEwNDkzXShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjYwNi4xMDQ5MykKICAg4oCUIHN0cmVhbWluZyBtb2RlbCBsb2FkaW5nIGFuZCBDUFUvR1BVIG92ZXJsYXAuIENhbmRpZGF0ZTogcmVhc29uIGFib3V0IGJ1ZmZlcgogICBsaWZldGltZSBhbmQgZGVwZW5kZW5jaWVzIGluIENQVSBjb2RlIGJlZm9yZSBtYWtpbmcgaGFyZHdhcmUgY2xhaW1zLgo4LiBbQWRhcHRpdmUgRXhwZXJ0IEFzc2lnbm1lbnQsIGFyWGl2OjI2MTAuMjMwMDZdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNjEwLjIzMDA2KQogICDigJQgY2hvb3NlcyBDUFUgZXhlY3V0aW9uIHZlcnN1cyB0cmFuc2Zlci1wbHVzLUdQVSBmb3IgZXhwZXJ0IG1pc3Nlcy4gQ2FuZGlkYXRlOgogICBjb21wYXJlIG1lYXN1cmVkIGxvY2FsIGNvc3RzIG9ubHk7IGRvIG5vdCBpbmZlciBWMTAwIGNyb3Nzb3ZlciBmcm9tIHBhcGVyIHJlc3VsdHMuCjkuIFtBVFNJbmZlciwgYXJYaXY6MjYwNy4xMDE4M10oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI2MDcuMTAxODMpIOKAlCB0ZW5zb3ItZ3JhbnVsYXJpdHkKICAgcGxhY2VtZW50IGFuZCBkeW5hbWljIHRyYW5zZmVyLiBDYW5kaWRhdGU6IHJldmlzaXQgb25seSBpZiBtZWFzdXJlbWVudHMganVzdGlmeQogICB0aGUgYWRkZWQgdHJhbnNmZXIvc3RhdGUgY29tcGxleGl0eS4KMTAuIFtFZmZpY2llbnQgQ1BVLUdQVSBDb2xsYWJvcmF0aXZlIE1vRSBJbmZlcmVuY2UsIGFyWGl2OjI1MTIuMTY0NzNdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNTEyLjE2NDczKQogICAg4oCUIEdQVSBleHBlcnQgY2FjaGluZyBhbmQgQ1BVIGZhbGxiYWNrLiBDYW5kaWRhdGU6IGRldGVybWluaXN0aWMgY2FjaGUgaGl0L21pc3MKICAgIGZpeHR1cmUgd2l0aCBleGFjdCByZXNpZGVudC1ieXRlIGFuZCBvd25lciBhY2NvdW50aW5nOyBsaW5rZWQtY29kZSBsaWNlbnNlIGFuZAogICAgY29tcGF0aWJpbGl0eSByZW1haW4gdW5jaGVja2VkLgoxMS4gW0hldGVHZW4sIGFyWGl2OjI0MDMuMDExNjRdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNDAzLjAxMTY0KSDigJQgQ1BVL0dQVQogICAgY29sbGFib3JhdGlvbiBhbmQgb3ZlcmxhcC4gQ2FuZGlkYXRlOiBtb2RlbCBkZXBlbmRlbmNpZXMgYW5kIENQVSB3b3JrOyBkbyBub3QKICAgIHRyYW5zZmVyIHNwZWVkIGNsYWltcyB0byB0aGlzIGhhcmR3YXJlLgoxMi4gW09ELU1vRSwgYXJYaXY6MjUxMi4wMzkyN10oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI1MTIuMDM5MjcpIOKAlCBwcmVkaWN0cyBmdXR1cmUKICAgIGxheWVyIGV4cGVydCBtaXNzZXMuIENhbmRpZGF0ZTogb2ZmbGluZSBtaXNzL2J5dGUgYW5hbHlzaXMgb25seTsgcHJlZGljdGlvbiBpcyBub3QKICAgIHJvdXRlIHRydXRoIGFuZCBjYW5ub3QgYXV0aG9yaXplIG91dHB1dCBmcm9tIGFuIHVuc2VsZWN0ZWQgZXhwZXJ0LgoxMy4gW1NTRCBPZmZsb2FkaW5nIGZvciBMTE0gSW5mZXJlbmNlIElzIEhhcm1mdWwgaW4gRW5lcmd5IEVmZmljaWVuY3ksIGFyWGl2OjI1MDguMDY5NzhdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNTA4LjA2OTc4KQogICAg4oCUIHJlcG9ydHMgZW5lcmd5IGNvc3RzIG9mIFNTRC1iYWNrZWQgaW5mZXJlbmNlLiBDYW5kaWRhdGU6IHJlamVjdCBTU0QgYXMgYSBob3QKICAgIGV4cGVydCBwb29sIGFic2VudCBsb2NhbCBldmlkZW5jZTsgcHJlc2VydmUgc3RvcmFnZSBmb3IgY29sZCByZWNvdmVyeSwgbm90IGFuCiAgICBhc3N1bWVkIGxvdy1sYXRlbmN5IHRpZXIuCgojIyBOdW1lcmljIGZvcm1hdHMgYW5kIGRlY29kZXIgYm91bmRhcmllcwoKMTQuIFtCcmlkZ2luZyB0aGUgR2FwIEJldHdlZW4gUHJvbWlzZSBhbmQgUGVyZm9ybWFuY2UgZm9yIE1pY3Jvc2NhbGluZyBGUDQgUXVhbnRpemF0aW9uLAogICAgYXJYaXY6MjUwOS4yMzIwMl0oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI1MDkuMjMyMDIpIOKAlCBpbnRyb2R1Y2VzIE1SLUdQVFEgYW5kCiAgICBzdHVkaWVzIG1pY3Jvc2NhbGluZyBGUDQgcXVhbGl0eS9wZXJmb3JtYW5jZS4gQ2FuZGlkYXRlOiB1c2UgYXMgYSBxdWFudGl6YXRpb24KICAgIG1ldGhvZG9sb2d5IHJlZmVyZW5jZSBvbmx5LiBJdCBkb2VzIG5vdCB2YWxpZGF0ZSBWMTAwIGtlcm5lbHMgb3IgVm9sdGFGYWJyaWMncwogICAgZm9ybWF0czsga2VlcCBRUE4yL05WRlA0IEsxNiwgUjEzL01YRlA0IEszMiwgYW5kIElRMyBzZXBhcmF0ZS4KMTUuIFtQYWdlZEF0dGVudGlvbiwgYXJYaXY6MjMwOS4wNjE4MF0oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzIzMDkuMDYxODApIOKAlCBLViBibG9jawogICAgbWFuYWdlbWVudCBhbmQgc2hhcmluZy4gQ2FuZGlkYXRlOiBib3Jyb3cgYmxvY2svcmVmY291bnQgaW52YXJpYW50cyBvbmx5IGFmdGVyIGEKICAgIHJlYWwgZGVjb2RlciBhbmQgS1YgaW1wbGVtZW50YXRpb24gZXhpc3QuCjE2LiBbU0dMYW5nLCBhclhpdjoyMzEyLjA3MTA0XShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjMxMi4wNzEwNCkg4oCUIFJhZGl4QXR0ZW50aW9uIGFuZAogICAgc3RydWN0dXJlZCBnZW5lcmF0aW9uLiBDYW5kaWRhdGU6IHByZWZpeC9jYWNoZSBzY2hlZHVsaW5nIGxhdGVyLCBhZnRlciBleGFjdAogICAgdG9rZW5pemVyIGFuZCBLViBpZGVudGl0eSBjb250cmFjdHMgZXhpc3QuCjE3LiBbRmxhc2hBdHRlbnRpb24tMiwgYXJYaXY6MjMwNy4wODY5MV0oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzIzMDcuMDg2OTEpIOKAlCBhdHRlbnRpb24KICAgIElPLWF3YXJlIHRpbGluZyBhbmQgd29yayBwYXJ0aXRpb25pbmcuIENhbmRpZGF0ZTogaW1wbGVtZW50YXRpb24gcmVmZXJlbmNlIGZvciBhCiAgICBmdXR1cmUgYWRtaXR0ZWQgYXR0ZW50aW9uIGtlcm5lbDsgbm8gR1BVIG1lYXN1cmVtZW50IGlzIGF1dGhvcml6ZWQgYnkgdGhpcyBDUFUKICAgIHRyYW5jaGUuCgojIyBLViBjYXBhY2l0eSwgYWRtaXNzaW9uLCBhbmQgc2NoZWR1bGluZwoKMTguIFtUaGUgS1YgQ2FjaGUgSXMgdGhlIE5ldyBNZW1vcnkgV2FsbCwgYXJYaXY6MjYwOS4zMDg1NF0oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI2MDkuMzA4NTQpCiAgICDigJQgYW5hbHl6ZXMgbWVtb3J5IGRlbWFuZCBmcm9tIEtWIHN0YXRlLiBDYW5kaWRhdGU6IGFkZCBjb250ZXh0IGxlbmd0aCBhbmQgS1YgYnl0ZXMKICAgIHRvIGxhdGVyIGNhcGFjaXR5IG1vZGVscyByYXRoZXIgdGhhbiBjb25zaWRlcmluZyB3ZWlnaHRzIGFsb25lLgoxOS4gW1doZW4gdGhlIEtWIENhY2hlIElzIFNsb3dlciBUaGFuIHRoZSBHUFUsIGFyWGl2OjI2MTAuMjE1MDBdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNjEwLjIxNTAwKQogICAg4oCUIHN0dWRpZXMgcmVtb3RlIEtWIHZlcnN1cyByZWNvbXB1dGF0aW9uIGluIGEgR0xNLTUuMy9CMzAwIHNjZW5hcmlvLiBDYW5kaWRhdGU6CiAgICBjb21wdXRlIGEgbG9jYWwgYnJlYWstZXZlbiBtb2RlbCBvbmx5IGFmdGVyIGRlY29kZS9LViBhbmQgdHJhbnNmZXIgY29zdHMgY2FuIGJlCiAgICBtZWFzdXJlZDsgcmVwb3J0ZWQgaGFyZHdhcmUgbnVtYmVycyBkbyBub3QgdHJhbnNmZXIuCjIwLiBbS1ZMZWFybiwgYXJYaXY6MjYxMC4yODYzN10oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI2MTAuMjg2MzcpIOKAlCBjYWNoZSByZXRlbnRpb24KICAgIGFuZCBhZG1pc3Npb24gZGVjaXNpb25zLiBDYW5kaWRhdGU6IENQVSBhZG1pc3Npb24gbW9kZWwgYWZ0ZXIgYSBjb2hlcmVudCBsb2NhbCBLVgogICAgY29udHJhY3QgZXhpc3RzLgoyMS4gW1NtYXJ0R2VuLCBhclhpdjoyNjA3LjI4MTUwXShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjYwNy4yODE1MCkg4oCUIHByb2FjdGl2ZSwKICAgIHBhcnRpYWwgS1Ygc3RyYXRlZ2llcy4gQ2FuZGlkYXRlOiBkZWZlciB1bnRpbCB0aGUgY29tcGxldGUgZGVjb2RlL2NhY2hlIHBhdGggaGFzCiAgICBzdGFibGUgb3duZXJzaGlwIGFuZCBjb3JyZWN0bmVzcyBldmlkZW5jZS4KMjIuIFtPbmxpbmUgU2NoZWR1bGluZyBmb3IgTExNIEluZmVyZW5jZSB3aXRoIEtWIENhY2hlIENvbnN0cmFpbnRzLAogICAgYXJYaXY6MjUwMi4wNzExNV0oaHR0cHM6Ly9hcnhpdi5vcmcvYWJzLzI1MDIuMDcxMTUpIOKAlCBzY2hlZHVsaW5nIHN1YmplY3QgdG8gS1YKICAgIGNhcGFjaXR5LiBDYW5kaWRhdGU6IGxhdGVyIENQVSBiYXRjaC1hZG1pc3Npb24gb3JhY2xlIHdpdGggZXhwbGljaXQgY2FwYWNpdHkKICAgIGxpbWl0cy4KMjMuIFtQcmVibGUsIGFyWGl2OjI0MDcuMDAwMjNdKGh0dHBzOi8vYXJ4aXYub3JnL2Ficy8yNDA3LjAwMDIzKSDigJQgcHJlZml4LWF3YXJlCiAgICByZXF1ZXN0IHNjaGVkdWxpbmcuIENhbmRpZGF0ZTogZGVmZXIgdW50aWwgdG9rZW5pemVyLCBwcmVmaXggaWRlbnRpdHksIGFuZCBLVgogICAgc2VtYW50aWNzIGFyZSBpbXBsZW1lbnRlZC4KMjQuIFtEZWVwU2Vlay1WNC4xLUZsYXNoLCBhclhpdjoyNjA5LjE5OTY5XShodHRwczovL2FyeGl2Lm9yZy9hYnMvMjYwOS4xOTk2OSkg4oCUCiAgICBtb2RlbC9hcmNoaXRlY3R1cmUgcGFwZXIgcmVsZXZhbnQgdG8gYSB0YXJnZXQgbW9kZWwuIENhbmRpZGF0ZTogaW5zcGVjdCBleGFjdAogICAgY2hlY2twb2ludCByZXZpc2lvbiwgYXJjaGl0ZWN0dXJlLCB0ZW5zb3IgZm9ybWF0cywgbGljZW5zZSwgYW5kIG1lbW9yeSBhZG1pc3Npb24KICAgIGJlZm9yZSBjb25zaWRlcmluZyBpdC4gVGhlIHBhcGVyIGFsb25lIGRvZXMgbm90IGFkbWl0IGEgY29tcGF0aWJsZSBjaGVja3BvaW50IG9yCiAgICBwcm92ZSBpdCBmaXRzIHRoZSBhdmFpbGFibGUgZGV2aWNlcy4KCiMjIEltbWVkaWF0ZSBlbmdpbmVlcmluZyBvcmRlcgoKVGhlIG1vc3QgZGlyZWN0bHkgYWN0aW9uYWJsZSBpdGVtcyBhcmUgdGhlIFVDQ0wtRVAgb3JkZXJpbmcvaWRlbnRpdHkgaWRlYXMgZm9yIHRoZQpDUFUgYnJpZGdlIGFuZCB0b3BvbG9neS9jb3B5LWNvdW50IG1vZGVsaW5nIGZyb20gVmFyaW9QYXRoIGFuZCBUaHVuZGVyRVAuIFRoZXkgY2FuCmZpcnN0IGJlIHRyYW5zbGF0ZWQgaW50byBDUFUvYW5hbHl0aWMgY2hlY2tzIHdpdGhvdXQgR1BVIG9yIHByb2R1Y3Rpb24tbmV0d29yawphZG1pc3Npb24uIEV4cGVydCBwbGFjZW1lbnQgcGFwZXJzIGFyZSBzZWNvbmRhcnk6IGVzdGltYXRlIGNvc3QgZnJvbSBhY3R1YWwgcm91dGVzLApidXQgbmV2ZXIgbGV0IHByZWRpY3Rpb24gcmV3cml0ZSBhIGdhdGUtc2VsZWN0ZWQgcm91dGUgb3IgdGhlIFJ1c3Qgb3duZXIgcmVnaXN0cnkuCktWIGFuZCBhdHRlbnRpb24gcGFwZXJzIHN0YXkgZG93bnN0cmVhbSBvZiBhIHJlYWwgZGVjb2Rlci9LViBwYXRoLiBGb3IgZXZlcnkgZG9ub3IsCmluc3BlY3QgdGhlIGltcGxlbWVudGF0aW9uIHJldmlzaW9uIGFuZCBzb2Z0d2FyZSBsaWNlbnNlIGJlZm9yZSBjb3B5aW5nIGNvZGU7IGEKcGFwZXIgY2l0YXRpb24gb3IgYXJYaXYgbGljZW5zZSBkb2VzIG5vdCBzZXR0bGUgcmVwb3NpdG9yeSBjb2RlIHJpZ2h0cy4K
+# R690 — 24-paper arXiv survey for VoltaFabric
+
+## Scope and method
+
+This is a bounded survey produced by one GPT-6 Luna research agent, followed by
+primary-page checks for the shortlisted records. Searches covered arXiv categories
+cs.DC, cs.LG, cs.AI, and cs.NI (2023–2026) with terms for MoE/expert parallelism,
+expert placement and load balance, CPU–GPU cooperation, PCIe/RDMA/overlap,
+quantization, and KV/serving. The 24 records below are selected for a plausible
+engineering transfer to VoltaFabric; this is not an exhaustive review of all arXiv.
+Paper metadata and claims are not a license audit of linked implementations.
+
+## Communication, topology, and expert ownership
+
+1. [ThunderEP, arXiv:2609.40093](https://arxiv.org/abs/2609.40093) — PCIe expert
+   parallelism using DMA engines and fewer relay hops/polls. Candidate: model exact
+   copies, staging, overlap, and completion costs for VoltaFabric buffers. Its RTX
+   4090/5090 measurements do not qualify V100; no rsocket handles in POSIX
+   poll/epoll/ppoll.
+2. [VarioPath, arXiv:2609.34340](https://arxiv.org/abs/2609.34340) — offline,
+   topology-aware channel catalog with online demand-aware all-to-all selection.
+   Candidate: CPU-only simulator fed by verified VoltaFabric topology and routes;
+   external platform results do not establish our topology.
+3. [UCCL-EP, arXiv:2512.19849](https://arxiv.org/abs/2512.19849) — compact routing
+   commands, CPU proxies, and ordering/completion concerns for expert communication.
+   Candidate: tighten CPU bridge sequence, identity, completion, and ordering checks.
+   It does not qualify VoltaFabric production RDMA.
+4. [Director, arXiv:2607.08782](https://arxiv.org/abs/2607.08782) — predictive expert
+   placement with capacity and migration costs. Candidate: offline cost estimate on
+   admitted traces only; predictions cannot replace gate-selected expert routes.
+5. [Expert Coupling, arXiv:2610.09372](https://arxiv.org/abs/2610.09372) — exploits
+   correlated expert activations for placement. Candidate: measure co-activation and
+   placement cost without token shuffling. Its training/MI300X setting differs.
+6. [Semantic Parallelism, arXiv:2503.04398](https://arxiv.org/abs/2503.04398) —
+   coordinates semantic placement and data parallelism. Candidate: CPU placement
+   solver constrained by the VoltaFabric owner registry; do not change route meaning.
+
+## Heterogeneous expert execution and transfer
+
+7. [Achieving Cloud-Grade SLOs for Local MoE, arXiv:2606.10493](https://arxiv.org/abs/2606.10493)
+   — streaming model loading and CPU/GPU overlap. Candidate: reason about buffer
+   lifetime and dependencies in CPU code before making hardware claims.
+8. [Adaptive Expert Assignment, arXiv:2610.23006](https://arxiv.org/abs/2610.23006)
+   — chooses CPU execution versus transfer-plus-GPU for expert misses. Candidate:
+   compare measured local costs only; do not infer V100 crossover from paper results.
+9. [ATSInfer, arXiv:2607.10183](https://arxiv.org/abs/2607.10183) — tensor-granularity
+   placement and dynamic transfer. Candidate: revisit only if measurements justify
+   the added transfer/state complexity.
+10. [Efficient CPU-GPU Collaborative MoE Inference, arXiv:2512.16473](https://arxiv.org/abs/2512.16473)
+    — GPU expert caching and CPU fallback. Candidate: deterministic cache hit/miss
+    fixture with exact resident-byte and owner accounting; linked-code license and
+    compatibility remain unchecked.
+11. [HeteGen, arXiv:2403.01164](https://arxiv.org/abs/2403.01164) — CPU/GPU
+    collaboration and overlap. Candidate: model dependencies and CPU work; do not
+    transfer speed claims to this hardware.
+12. [OD-MoE, arXiv:2512.03927](https://arxiv.org/abs/2512.03927) — predicts future
+    layer expert misses. Candidate: offline miss/byte analysis only; prediction is not
+    route truth and cannot authorize output from an unselected expert.
+13. [SSD Offloading for LLM Inference Is Harmful in Energy Efficiency, arXiv:2508.06978](https://arxiv.org/abs/2508.06978)
+    — reports energy costs of SSD-backed inference. Candidate: reject SSD as a hot
+    expert pool absent local evidence; preserve storage for cold recovery, not an
+    assumed low-latency tier.
+
+## Numeric formats and decoder boundaries
+
+14. [Bridging the Gap Between Promise and Performance for Microscaling FP4 Quantization,
+    arXiv:2509.23202](https://arxiv.org/abs/2509.23202) — introduces MR-GPTQ and
+    studies microscaling FP4 quality/performance. Candidate: use as a quantization
+    methodology reference only. It does not validate V100 kernels or VoltaFabric's
+    formats; keep QPN2/NVFP4 K16, R13/MXFP4 K32, and IQ3 separate.
+15. [PagedAttention, arXiv:2309.06180](https://arxiv.org/abs/2309.06180) — KV block
+    management and sharing. Candidate: borrow block/refcount invariants only after a
+    real decoder and KV implementation exist.
+16. [SGLang, arXiv:2312.07104](https://arxiv.org/abs/2312.07104) — RadixAttention and
+    structured generation. Candidate: prefix/cache scheduling later, after exact
+    tokenizer and KV identity contracts exist.
+17. [FlashAttention-2, arXiv:2307.08691](https://arxiv.org/abs/2307.08691) — attention
+    IO-aware tiling and work partitioning. Candidate: implementation reference for a
+    future admitted attention kernel; no GPU measurement is authorized by this CPU
+    tranche.
+
+## KV capacity, admission, and scheduling
+
+18. [The KV Cache Is the New Memory Wall, arXiv:2609.30854](https://arxiv.org/abs/2609.30854)
+    — analyzes memory demand from KV state. Candidate: add context length and KV bytes
+    to later capacity models rather than considering weights alone.
+19. [When the KV Cache Is Slower Than the GPU, arXiv:2610.21500](https://arxiv.org/abs/2610.21500)
+    — studies remote KV versus recomputation in a GLM-5.3/B300 scenario. Candidate:
+    compute a local break-even model only after decode/KV and transfer costs can be
+    measured; reported hardware numbers do not transfer.
+20. [KVLearn, arXiv:2610.28637](https://arxiv.org/abs/2610.28637) — cache retention
+    and admission decisions. Candidate: CPU admission model after a coherent local KV
+    contract exists.
+21. [SmartGen, arXiv:2607.28150](https://arxiv.org/abs/2607.28150) — proactive,
+    partial KV strategies. Candidate: defer until the complete decode/cache path has
+    stable ownership and correctness evidence.
+22. [Online Scheduling for LLM Inference with KV Cache Constraints,
+    arXiv:2502.07115](https://arxiv.org/abs/2502.07115) — scheduling subject to KV
+    capacity. Candidate: later CPU batch-admission oracle with explicit capacity
+    limits.
+23. [Preble, arXiv:2407.00023](https://arxiv.org/abs/2407.00023) — prefix-aware
+    request scheduling. Candidate: defer until tokenizer, prefix identity, and KV
+    semantics are implemented.
+24. [DeepSeek-V4.1-Flash, arXiv:2609.19969](https://arxiv.org/abs/2609.19969) —
+    model/architecture paper relevant to a target model. Candidate: inspect exact
+    checkpoint revision, architecture, tensor formats, license, and memory admission
+    before considering it. The paper alone does not admit a compatible checkpoint or
+    prove it fits the available devices.
+
+## Immediate engineering order
+
+The most directly actionable items are the UCCL-EP ordering/identity ideas for the
+CPU bridge and topology/copy-count modeling from VarioPath and ThunderEP. They can
+first be translated into CPU/analytic checks without GPU or production-network
+admission. Expert placement papers are secondary: estimate cost from actual routes,
+but never let prediction rewrite a gate-selected route or the Rust owner registry.
+KV and attention papers stay downstream of a real decoder/KV path. For every donor,
+inspect the implementation revision and software license before copying code; a
+paper citation or arXiv license does not settle repository code rights.
