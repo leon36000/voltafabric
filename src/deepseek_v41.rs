@@ -18,8 +18,8 @@
 //! ```
 use crate::quant::decode_fp4;
 use crate::{invalid, Error, Result};
-use safetensors::tensor::{Dtype, SafeTensors, TensorView};
-use serde::Serialize;
+use safetensors::tensor::{Dtype, Metadata, SafeTensors, TensorView};
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::Read;
 use std::ops::Range;
@@ -800,6 +800,39 @@ pub enum Mxfp4ExpertNamespace {
     Mtp,
 }
 
+const MAX_PINNED_EXPERT_INDEX_BYTES: usize = 8 * 1024 * 1024;
+const MAX_EXPERTS_PER_PAYLOAD_PLAN: usize = 6;
+const PINNED_EXPERT_INDEX_SHA256: &str =
+    "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8";
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Mxfp4TensorPayloadRange {
+    pub expert: u32,
+    pub name: String,
+    pub dtype: &'static str,
+    pub shape: Vec<usize>,
+    /// Absolute, half-open byte range in the original Safetensors file.
+    pub file_offset_start: u64,
+    pub file_offset_end: u64,
+}
+
+/// A metadata-only read plan for at most six experts from one pinned shard.
+/// It names the exact six MXFP4 tensors per expert and their source byte ranges;
+/// it does not fetch or authenticate those payload bytes.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Mxfp4ExpertPayloadPlan {
+    pub model_revision: String,
+    pub namespace: Mxfp4ExpertNamespace,
+    pub layer: u32,
+    pub experts: Vec<u32>,
+    pub source_shard: String,
+    pub source_shard_bytes: u64,
+    pub header_bytes: u64,
+    pub data_start_bytes: u64,
+    pub selected_payload_bytes: u64,
+    pub tensors: Vec<Mxfp4TensorPayloadRange>,
+}
+
 /// One immutable, compressed DeepSeek expert. The Safetensors `Vec` is moved into a
 /// shared owner once; each code/scale plane stores only a checked byte range into it.
 /// This is a host-side resident format owner and CPU reference, not a service kernel.
@@ -1141,6 +1174,292 @@ fn parse_expert_tensor_name(name: &str) -> Result<Option<ParsedExpertTensorName>
         projection,
         plane,
     }))
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PinnedExpertIndex {
+    metadata: PinnedExpertIndexMetadata,
+    weight_map: BTreeMap<String, String>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct PinnedExpertIndexMetadata {
+    total_size: u64,
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct PinnedExpertPayloadRequest<'a> {
+    pub index_bytes: &'a [u8],
+    pub header_bytes: &'a [u8],
+    pub expected_header_sha256: &'a str,
+    pub header_shard_name: &'a str,
+    pub source_shard_bytes: u64,
+    pub max_source_shard_bytes: u64,
+    pub namespace: Mxfp4ExpertNamespace,
+    pub layer: u32,
+    pub experts: &'a [u32],
+}
+
+fn pinned_shard_basename(name: &str) -> bool {
+    let Some(stem) = name
+        .strip_prefix("model-")
+        .and_then(|value| value.strip_suffix(".safetensors"))
+    else {
+        return false;
+    };
+    let Some((ordinal, count)) = stem.split_once("-of-") else {
+        return false;
+    };
+    ordinal.len() == 5
+        && ordinal.bytes().all(|byte| byte.is_ascii_digit())
+        && ordinal
+            .parse::<u8>()
+            .is_ok_and(|value| (1..=48).contains(&value))
+        && count == "00048"
+}
+
+/// Build a bounded, metadata-only range plan from the exact pinned full-checkpoint
+/// index and the matching Safetensors header. The caller must supply the independently
+/// recorded header digest, shard identity, full file length, and resource ceiling.
+/// No checkpoint payload is read here; use the returned ranges only with an admitted,
+/// hash-checked source and keep the existing atomic refusal for absent resident experts.
+pub fn plan_pinned_mxfp4_expert_payloads(
+    request: PinnedExpertPayloadRequest<'_>,
+) -> Result<Mxfp4ExpertPayloadPlan> {
+    let PinnedExpertPayloadRequest {
+        index_bytes,
+        header_bytes,
+        expected_header_sha256,
+        header_shard_name,
+        source_shard_bytes,
+        max_source_shard_bytes,
+        namespace,
+        layer,
+        experts,
+    } = request;
+    if index_bytes.is_empty() || index_bytes.len() > MAX_PINNED_EXPERT_INDEX_BYTES {
+        return Err(invalid(
+            "pinned expert index exceeds its 8 MiB metadata bound",
+        ));
+    }
+    if crate::sha256::hex(index_bytes) != PINNED_EXPERT_INDEX_SHA256 {
+        return Err(invalid(
+            "DeepSeek expert index differs from the pinned revision",
+        ));
+    }
+    if header_bytes.is_empty()
+        || header_bytes.len() > MAX_PINNED_EXPERT_INDEX_BYTES
+        || !crate::sha256::is_hex_digest(expected_header_sha256)
+        || crate::sha256::hex(header_bytes) != expected_header_sha256
+    {
+        return Err(invalid(
+            "pinned Safetensors header is empty, oversized, or has a wrong digest",
+        ));
+    }
+    if !pinned_shard_basename(header_shard_name)
+        || max_source_shard_bytes == 0
+        || source_shard_bytes == 0
+        || source_shard_bytes > max_source_shard_bytes
+    {
+        return Err(invalid(
+            "DeepSeek expert shard identity or caller byte ceiling is invalid",
+        ));
+    }
+    if experts.is_empty() || experts.len() > MAX_EXPERTS_PER_PAYLOAD_PLAN {
+        return Err(invalid(
+            "expert payload plan must contain between one and six experts",
+        ));
+    }
+    let (max_layers, max_experts) = match namespace {
+        Mxfp4ExpertNamespace::Backbone => (40, 384),
+        Mxfp4ExpertNamespace::Mtp => (3, 128),
+    };
+    if layer >= max_layers {
+        return Err(invalid(
+            "expert payload plan layer is outside the pinned namespace",
+        ));
+    }
+    let mut unique_experts = BTreeSet::new();
+    if experts
+        .iter()
+        .any(|&expert| expert >= max_experts || !unique_experts.insert(expert))
+    {
+        return Err(invalid(
+            "expert payload plan has duplicate or out-of-range expert IDs",
+        ));
+    }
+
+    let index: PinnedExpertIndex = serde_json::from_slice(index_bytes)
+        .map_err(|error| invalid(format!("invalid pinned DeepSeek expert index: {error}")))?;
+    if index.weight_map.len() != 96_085 || index.metadata.total_size != 510_286_023_000 {
+        return Err(invalid(
+            "pinned DeepSeek expert index metadata differs from its revision",
+        ));
+    }
+    let metadata: Metadata = serde_json::from_slice(header_bytes)
+        .map_err(|error| invalid(format!("invalid pinned Safetensors header: {error}")))?;
+    let header_len = u64::try_from(header_bytes.len())
+        .map_err(|_| invalid("Safetensors header length does not fit u64"))?;
+    let data_start_bytes = header_len
+        .checked_add(8)
+        .ok_or_else(|| invalid("Safetensors data-start offset overflow"))?;
+    let data_len = u64::try_from(metadata.data_len())
+        .map_err(|_| invalid("Safetensors data length does not fit u64"))?;
+    if data_start_bytes
+        .checked_add(data_len)
+        .filter(|&length| length == source_shard_bytes)
+        .is_none()
+    {
+        return Err(invalid(
+            "Safetensors header does not cover the exact source shard length",
+        ));
+    }
+
+    let root = match namespace {
+        Mxfp4ExpertNamespace::Backbone => "layers",
+        Mxfp4ExpertNamespace::Mtp => "mtp",
+    };
+    let mut source_shard: Option<String> = None;
+    let mut tensors = Vec::with_capacity(experts.len() * 6);
+    let mut selected_payload_bytes = 0_u64;
+    for &expert in experts {
+        let prefix = format!("{root}.{layer}.ffn.experts.{expert}");
+        let expected = [
+            (
+                format!("{prefix}.w1.weight"),
+                Dtype::I8,
+                vec![2304, 2560],
+                "I8",
+            ),
+            (
+                format!("{prefix}.w1.scale"),
+                Dtype::F8_E8M0,
+                vec![2304, 160],
+                "F8_E8M0",
+            ),
+            (
+                format!("{prefix}.w2.weight"),
+                Dtype::I8,
+                vec![5120, 1152],
+                "I8",
+            ),
+            (
+                format!("{prefix}.w2.scale"),
+                Dtype::F8_E8M0,
+                vec![5120, 72],
+                "F8_E8M0",
+            ),
+            (
+                format!("{prefix}.w3.weight"),
+                Dtype::I8,
+                vec![2304, 2560],
+                "I8",
+            ),
+            (
+                format!("{prefix}.w3.scale"),
+                Dtype::F8_E8M0,
+                vec![2304, 160],
+                "F8_E8M0",
+            ),
+        ];
+        for (name, expected_dtype, expected_shape, dtype_label) in expected {
+            let shard = index
+                .weight_map
+                .get(&name)
+                .ok_or_else(|| invalid(format!("pinned index is missing expert tensor {name}")))?;
+            if !pinned_shard_basename(shard)
+                || source_shard
+                    .as_ref()
+                    .is_some_and(|expected| expected != shard)
+            {
+                return Err(invalid(
+                    "selected expert tensor names do not share one safe pinned shard",
+                ));
+            }
+            source_shard.get_or_insert_with(|| shard.clone());
+
+            let info = metadata.info(&name).ok_or_else(|| {
+                invalid(format!(
+                    "selected tensor is absent from shard header: {name}"
+                ))
+            })?;
+            if shard != header_shard_name
+                || info.dtype != expected_dtype
+                || info.shape != expected_shape
+            {
+                return Err(invalid(format!(
+                    "pinned index/header tensor identity, dtype, or shape differs: {name}"
+                )));
+            }
+            let relative_start = u64::try_from(info.data_offsets.0)
+                .map_err(|_| invalid("Safetensors tensor offset does not fit u64"))?;
+            let relative_end = u64::try_from(info.data_offsets.1)
+                .map_err(|_| invalid("Safetensors tensor end does not fit u64"))?;
+            let expected_len = expected_shape
+                .iter()
+                .try_fold(1_u64, |product, &dimension| {
+                    product.checked_mul(u64::try_from(dimension).ok()?)
+                });
+            let Some(expected_len) = expected_len else {
+                return Err(invalid("selected tensor byte length overflow"));
+            };
+            if relative_start >= relative_end
+                || relative_end > data_len
+                || relative_end - relative_start != expected_len
+            {
+                return Err(invalid(format!(
+                    "selected tensor range is outside the bounded source shard: {name}"
+                )));
+            }
+            selected_payload_bytes = selected_payload_bytes
+                .checked_add(expected_len)
+                .ok_or_else(|| invalid("selected expert payload byte count overflow"))?;
+            tensors.push(Mxfp4TensorPayloadRange {
+                expert,
+                name,
+                dtype: dtype_label,
+                shape: expected_shape,
+                file_offset_start: data_start_bytes
+                    .checked_add(relative_start)
+                    .ok_or_else(|| invalid("absolute tensor start offset overflow"))?,
+                file_offset_end: data_start_bytes
+                    .checked_add(relative_end)
+                    .ok_or_else(|| invalid("absolute tensor end offset overflow"))?,
+            });
+        }
+    }
+
+    let mut ordered_ranges = tensors
+        .iter()
+        .map(|tensor| (tensor.file_offset_start, tensor.file_offset_end))
+        .collect::<Vec<_>>();
+    ordered_ranges.sort_unstable();
+    if ordered_ranges.windows(2).any(|pair| pair[0].1 > pair[1].0) {
+        return Err(invalid(
+            "selected expert tensor ranges overlap in the source shard",
+        ));
+    }
+
+    let source_shard = source_shard.ok_or_else(|| invalid("expert payload plan is empty"))?;
+    if source_shard != header_shard_name {
+        return Err(invalid(
+            "pinned index selected a different Safetensors shard",
+        ));
+    }
+    Ok(Mxfp4ExpertPayloadPlan {
+        model_revision: REVISION.to_owned(),
+        namespace,
+        layer,
+        experts: experts.to_vec(),
+        source_shard,
+        source_shard_bytes,
+        header_bytes: header_len,
+        data_start_bytes,
+        selected_payload_bytes,
+        tensors,
+    })
 }
 
 impl Mxfp4Expert {
@@ -1954,6 +2273,97 @@ mod a105_full_pinned_expert_index_tests {
                 "MTP layer {layer} expert identity coverage"
             );
         }
+    }
+}
+
+#[cfg(test)]
+mod a147_pinned_expert_payload_plan_tests {
+    use super::{
+        plan_pinned_mxfp4_expert_payloads, Mxfp4ExpertNamespace, PinnedExpertPayloadRequest,
+        PINNED_EXPERT_INDEX_SHA256,
+    };
+
+    const HEADER_SHA256: &str = "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449";
+    const SHARD_BYTES: u64 = 7_389_759_032;
+    const TOP6: [u32; 6] = [0, 383, 382, 381, 380, 379];
+
+    fn plan(experts: &[u32], header_sha256: &str) -> crate::Result<super::Mxfp4ExpertPayloadPlan> {
+        let index = include_bytes!(
+            "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+        );
+        let header = include_bytes!(
+            "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+        );
+        plan_pinned_mxfp4_expert_payloads(PinnedExpertPayloadRequest {
+            index_bytes: index,
+            header_bytes: header,
+            expected_header_sha256: header_sha256,
+            header_shard_name: "model-00003-of-00048.safetensors",
+            source_shard_bytes: SHARD_BYTES,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+            namespace: Mxfp4ExpertNamespace::Backbone,
+            layer: 0,
+            experts,
+        })
+    }
+
+    #[test]
+    fn top6_maps_exact_six_tensor_ranges_per_expert_to_one_official_shard() {
+        let plan = plan(&TOP6, HEADER_SHA256).unwrap();
+        assert_eq!(plan.model_revision, super::REVISION);
+        assert_eq!(plan.namespace, Mxfp4ExpertNamespace::Backbone);
+        assert_eq!(plan.layer, 0);
+        assert_eq!(plan.experts, TOP6);
+        assert_eq!(plan.source_shard, "model-00003-of-00048.safetensors");
+        assert_eq!(plan.source_shard_bytes, SHARD_BYTES);
+        assert_eq!(plan.header_bytes, 258_136);
+        assert_eq!(plan.data_start_bytes, 258_144);
+        assert_eq!(plan.tensors.len(), 36);
+        assert_eq!(plan.selected_payload_bytes, 112_803_840);
+
+        for &expert in &TOP6 {
+            let tensors = plan
+                .tensors
+                .iter()
+                .filter(|tensor| tensor.expert == expert)
+                .collect::<Vec<_>>();
+            assert_eq!(tensors.len(), 6);
+            let prefix = format!("layers.0.ffn.experts.{expert}");
+            assert_eq!(
+                tensors
+                    .iter()
+                    .map(|tensor| tensor.name.clone())
+                    .collect::<Vec<_>>(),
+                vec![
+                    format!("{prefix}.w1.weight"),
+                    format!("{prefix}.w1.scale"),
+                    format!("{prefix}.w2.weight"),
+                    format!("{prefix}.w2.scale"),
+                    format!("{prefix}.w3.weight"),
+                    format!("{prefix}.w3.scale"),
+                ]
+            );
+            assert!(tensors.iter().all(|tensor| {
+                tensor.file_offset_start < tensor.file_offset_end
+                    && tensor.file_offset_end <= SHARD_BYTES
+            }));
+        }
+    }
+
+    #[test]
+    fn payload_plan_fails_closed_on_duplicate_ids_and_unpinned_metadata() {
+        assert!(plan(&[0, 0], HEADER_SHA256).is_err());
+        assert!(plan(&[384], HEADER_SHA256).is_err());
+        assert!(plan(
+            &[0],
+            "0000000000000000000000000000000000000000000000000000000000000000"
+        )
+        .is_err());
+
+        let index = include_bytes!(
+            "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+        );
+        assert_eq!(crate::sha256::hex(index), PINNED_EXPERT_INDEX_SHA256);
     }
 }
 
