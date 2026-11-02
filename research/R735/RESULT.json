@@ -1,0 +1,73 @@
+{
+  "id": "R735",
+  "date": "2026-11-02",
+  "state": "LOCAL_BUILD_CHECKED_PRIVATE_GITLAB_PENDING",
+  "parent_branch": "r734-deepseek-attention-projection-20261102",
+  "parent_commit": "4c5645c252357fb532502b0dab4946cfd20ecccc",
+  "source_files": [
+    "src/deepseek_v41_rope.rs",
+    "src/lib.rs"
+  ],
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "config_sha256": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879",
+    "code_copied": false
+  },
+  "profile": {
+    "layer_scope": "backbone layers with pinned compress_ratio=0 only",
+    "qk_rope_head_dim": 64,
+    "head_dim": 512,
+    "query_heads": 64,
+    "window_size": 128,
+    "rope_theta": 10000,
+    "max_position_embeddings": 1048576,
+    "yarn_applied": false,
+    "reason": "pinned donor model.py disables YaRN and selects rope_theta for compress_ratio=0 window layers"
+  },
+  "configuration_mapping": "The adapter reads the exact pinned HF config explicitly. The retained inference snapshot has ModelArgs.rope_head_dim default 32 and no HF-config-to-ModelArgs loader; actual donor runtime mapping remains unqualified.",
+  "adapted_boundary": "R734 exact-BF16 pre-RoPE Q/KV -> adjacent-complex-pair rotation of final 64 dimensions -> Stamp/attempt/position-bound BF16 post-RoPE values -> R733 atomic window cache append/attention.",
+  "reused_voltafabric": [
+    "BF16 RNE conversion",
+    "Stamp/run/model/plan/layer/batch/epoch and attempt identity",
+    "R733 fail-closed atomic KV window cache"
+  ],
+  "reused_external": "Pinned DeepSeek model.py semantics adapted; local Qwen split-half RoPE is deliberately not reused because it has a different pairing convention.",
+  "new_dependencies": false,
+  "verification": {
+    "cargo_check": "PASS",
+    "rustfmt": "PASS",
+    "clippy_warnings_denied": "PASS",
+    "tests_added_or_run": false
+  },
+  "oracle": "No numerical RoPE oracle was run; no donor/Torch/CUDA parity claim.",
+  "real_checkpoint_payload": false,
+  "complete_attention_pass": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "private_gitlab": {
+    "branch": "r735-deepseek-window-rope-20261102",
+    "source_commit": "PENDING",
+    "source_pipeline_id": null,
+    "source_pipeline_status": "PENDING",
+    "source_readback_exact": false,
+    "source_readback_files_verified": 0
+  },
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "limitations": [
+    "Runtime mapping from HF config to the donor's ModelArgs is not present in the retained source snapshot",
+    "No numeric oracle/test of rotation or composition",
+    "Attention sink and output projection weights/payload not admitted",
+    "No full layer, token logits, sampler or generation"
+  ],
+  "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation.",
+  "manifest": "research/R735/SHA256SUMS",
+  "manifest_sha256": "6b1b7f88490dcfd3fed157db82a2c0095d4d46b18fbf13ffcc9ad63d0c3d5e06",
+  "manifest_file_count": 4
+}

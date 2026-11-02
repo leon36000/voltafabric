@@ -59,4 +59,5 @@ pub mod deepseek_v41;
 pub mod deepseek_v41_attention;
 pub mod deepseek_v41_gate;
 pub mod deepseek_v41_projection;
+pub mod deepseek_v41_rope;
 pub mod engram;

@@ -1,0 +1,13 @@
+R735 build/static checks (not a test receipt)
+
+Commands:
+  cargo check --locked --lib
+  cargo fmt --all -- --check
+  cargo clippy --locked --lib -- -D warnings
+
+Results:
+  cargo check: PASS
+  rustfmt workspace check: PASS
+  Clippy warnings denied: PASS
+
+No tests or numerical RoPE oracle were run in this tranche. The RoPE transformation is source-adapted and config-pinned, not yet numerically validated against the donor or Torch/CUDA. No checkpoint payload, GPU or production service was accessed.
