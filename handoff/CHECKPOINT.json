@@ -5686,7 +5686,7 @@
   "last_review": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/project-deep-audit-r82-20261027/REPORT.md",
   "last_test": "research/R721/BUILD_TEST.txt",
   "last_test_result": "Five synthetic indexed-shard CPU tests pass in debug and release; scoped Clippy -D warnings, rustfmt and diff-check pass. GitLab source readback 6/6 exact; source pipeline 2546 gitleaks, Semgrep, Trivy and fallback all success. Semgrep found 0 results in R721 files among 155 repository findings; 5 parser errors remain elsewhere. No real checkpoint, complete generation, GPU, production R53 or inter-PC transport.",
-  "last_updated": "2026-11-02 12:18:48 UTC",
+  "last_updated": "2026-11-02 13:52:34 UTC",
   "latest_failure_receipt": ".work/a129-deepseek-layer-adapter-r1/evidence/a129-deepseek-layer-adapter-sm70-20261020-r1/GPU_RECEIPT.json",
   "latest_native_budget_observation": {
     "observed_utc": "2026-10-27T22:47:57.802538+00:00",
@@ -5711,7 +5711,7 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
+  "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation.",
   "next_command": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
   "next_command_expected_result": "One synthetic sharded selected-expert layer loaded through the pinned index into the existing CPU Session path, matching an independent oracle; any missing/invalid shard yields no owner output.",
   "next_cpu_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
@@ -5729,7 +5729,7 @@
   ],
   "next_required_work": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
   "next_task": "R722",
-  "next_updated_utc": "2026-11-02 13:27:38 UTC",
+  "next_updated_utc": "2026-11-02 13:52:34 UTC",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
     "active_operation": null,
@@ -9079,8 +9079,8 @@
   "title": "R64 — deux experts réels sur RTX 5080 et V100, coordonnés par PC6 via SSH",
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
-  "updated_at_utc": "2026-11-02T13:27:38Z",
-  "updated_utc": "2026-11-02 13:27:38 UTC",
+  "updated_at_utc": "2026-11-02T13:52:34Z",
+  "updated_utc": "2026-11-02 13:52:34 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -13681,6 +13681,55 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "published_utc": "2026-11-02T13:27:38Z",
     "readback_verified_utc": "2026-11-02T13:27:38Z",
-    "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch."
+    "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
+    "receipt_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+    "receipt_pipeline_id": 2547,
+    "receipt_pipeline_status": "success",
+    "receipt_readback_exact": true
+  },
+  "r722": {
+    "id": "R722",
+    "owner": "integrator",
+    "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_SOURCE_READBACK_EXACT_CPU_DEBUG_RELEASE_PASS",
+    "branch": "r722-deepseek-indexed-session-20261102",
+    "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+    "source_commit": "196c6cfcdaa231087070687166d59c391f2bbb78",
+    "path": "research/R722",
+    "code_files": [
+      "src/checkpoint.rs",
+      "src/deepseek_v41.rs",
+      "tests/r712_deepseek_session_owner.rs"
+    ],
+    "report": "research/R722/REPORT.md",
+    "result": "research/R722/RESULT.json",
+    "manifest": "research/R722/SHA256SUMS",
+    "manifest_sha256": "1366b9e362623b5201cc49c513faa53bef0270226ea35ecb97c280d4f3edf14a",
+    "manifest_file_count": 7,
+    "adapted_boundary": "Pinned DeepSeek expert index and shard metadata now reach the existing Rust indexed Safetensors reader, resident owner, CPU Session and independent FP64 MXFP4 oracle.",
+    "donor_code_copied": false,
+    "new_dependencies": false,
+    "local_cpu_tests": "focused indexed reader and complete six-expert CPU Session/oracle fixture pass in debug and release; scoped Clippy, rustfmt and diff-check pass",
+    "test_scope": "committed pinned index/header with synthetic sparse-shard tensor payloads; CPU only",
+    "source_pipeline_id": 2548,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_files_verified": 7,
+    "receipt_readback_pending": true,
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "published_utc": "2026-11-02T13:51:29Z",
+    "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation."
   }
 }

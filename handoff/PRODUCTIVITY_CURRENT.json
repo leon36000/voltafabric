@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 13:27:38 UTC",
+  "updated_utc": "2026-11-02 13:52:34 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -2155,6 +2155,20 @@
       "published_utc": "2026-11-02T13:27:38Z",
       "readback_verified_utc": "2026-11-02T13:27:38Z",
       "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch."
+    },
+    {
+      "id": "R722",
+      "owner": "integrator",
+      "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_SOURCE_READBACK_EXACT_CPU_DEBUG_RELEASE_PASS",
+      "branch": "r722-deepseek-indexed-session-20261102",
+      "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+      "source_commit": "196c6cfcdaa231087070687166d59c391f2bbb78",
+      "path": "research/R722",
+      "source_pipeline_id": 2548,
+      "source_pipeline_status": "success",
+      "source_readback_files_verified": 7,
+      "manifest_sha256": "1366b9e362623b5201cc49c513faa53bef0270226ea35ecb97c280d4f3edf14a",
+      "published_utc": "2026-11-02T13:51:29Z"
     }
   ],
   "acceptance": [
@@ -2211,7 +2225,7 @@
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": "R637,R638,R642_CPU_LAUNCHER_FIXTURE_ONLY,R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY,R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY,R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH,R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML,R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY,R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY,R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM,R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY,R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS,R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE,R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE,R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS,R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY,R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING,R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0,R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1,R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC,R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED,R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC,R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST,R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS,R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS,R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING,R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS,R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS,R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS,R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS,R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING,R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING,R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING,R680_LLAMA_HOOK_CALLBACK_BRIDGE_CPU_CTEST_6_PASS_1_SKIP_TWO_LAYER_ORACLE_IDENTITY_CHECK; PINNED_LLAMA_LIBRARY_REBUILD_PASS; GITLAB_READBACK_10_FILES_EXACT; PIPELINE_2301_RUNNING,R682_LIVE_LLAMA_CONTEXT_PROCESS_UBATCH_SYNTHETIC_QWEN2MOE_GRAPH_CPU_CTEST_1_PASS_EXACT_READBACK_7_OF_7; DONOR_BUILD_MOE_FFN_AND_GENERATION_NOT_QUALIFIED,R683_DONOR_BUILD_MOE_FFN_CALLBACK_CPU_CTEST_1_PASS_RAW_6_20_WEIGHT_0_5_ONCE_OUTPUT_3_10_GITLAB_READBACK_7_OF_7; PIPELINE_2316_RUNNING,R684_GGUF_V3_F32_DONOR_PARSER_AND_LIVE_BUILD_MOE_FFN_CPU_PASS_RAW_6_20_WEIGHT_ONCE_OUTPUT_3_10_COLLECTOR_REFUSAL_NO_PUBLICATION_GITLAB_READBACK_7_OF_7,R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.,R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.,R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED,R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.,R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.,R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation.,R691_PUBLIC_LLAMA_DECODE_CPU_SYNTHETIC_QWEN2MOE_PASS; donor/VF tokens 3,3,3; logits max_abs=0; exact GitLab readback 10/10; no real checkpoint/full-generation/GPU claim.,R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim.,GITLAB_PIPELINES_2358_AND_2360_CONFIGURED_SCANS_AND_FALLBACK_SUCCESS; local CPU tests remain separate evidence.,R693_QWEN2MOE_PUBLIC_DECODE_CPU_SYNTHETIC_TWO_LAYER,R694_ROUTE_BOUND_ADVISORY_PLACEMENT_CPU_SYNTHETIC,R695_PER_RANK_KV_AND_LOAD_ENVELOPE_CPU_SYNTHETIC,R696_ATOMIC_REPLACEMENT_RESIDENT_WEIGHT_PEAK_CPU_SYNTHETIC;R697_PUBLIC_LLAMA_DECODE_MEMORY_ADVISORY_CPU_SYNTHETIC_PASS_READBACK_EXACT_11_FILES;TOKENS_3_3_3_LOGIT_MAX_ABS_0;LATE_REFUSAL_ATOMIC_NO_SAMPLE;PIPELINE_2382_PENDING\nR697 GitLab pipeline 2382: success on configured scans/fallback only. R698: exact GitLab readback of 7 files at commit 033ac7cb90c1189febc48700b4c261e071d49487; CPU test passed on two real DeepSeek MXFP4 K32 layer-0 experts through two local Sessions and the FP32-preweighted Collector. R698 pipeline 2384 remains running; it is not compile/test evidence.;R700_DEEPSEEK_GATE_CPU_6_TESTS_PASS_TOP6_MISSING_PROFILES_REFUSED_PIPELINE_2400_SUCCESS;R701_PYTHON_DECIMAL_60D_ORACLE_MATCHES_RUST_GATE_ROUTE_1_PASS_READBACK_6_OF_6_PIPELINE_2404_RUNNING;R704_GATE_ROUTE_IDENTITY_CPU_SYNTHETIC_ONLY_SOURCE_REPAIR_EXACT_READBACK_3_TESTS_PASS_PIPELINE_2427_PENDING;R705_SYNTHETIC_DEEPSEEK_GATE_TO_MEMORY_ADVICE_PASS_ROUTE_IDENTITY_AND_COEFFICIENT_BITS_PRESERVED_4_TESTS_PASS_PIPELINE_2434_PENDING;R707_EXPLICIT_MXFP4_PRECHECK_BEFORE_FIRST_SESSION_MISSING_FIVE_EXPERTS_REFUSED_DEBUG_RELEASE_1_1;R708_ROUTE_BINDING_PREFLIGHT_BEFORE_ARTIFACT_OPEN_MISSING_RANKS_REFUSED_CPU_DEBUG_RELEASE_PASS;R713_ROUTE_BOUND_TOP6_ATOMIC_PREFLIGHT_AND_SIX_LOCAL_CPU_SESSION_LOADS_DEBUG_RELEASE_PASS_SYNTHETIC_ONLY_NO_EXEC; R715 grouped top-6 CPU route passed and pipeline 2526 succeeded; R716 gate-to-grouped route passed and pipeline 2529 succeeded; R717 gate-bound 36-range metadata plan read back exactly, pipeline 2531 succeeded; no real checkpoint payloads, generation, GPU or production network.; R717 exact source/readback plus pipeline 2531 scans success; R718 corrected text publication exact-readback of 7 files, pipeline 2538 scans success, route-wide six-owner CPU fixture debug/release pass; real checkpoint/generation/GPU still unqualified.; R720 DSX MIT-pinned primary-rank advice; local CPU debug/release 4/4, Clippy/fmt/diff pass; exact source commit readback 6/6; private pipeline 2544 success (configured scans/fallback only); synthetic topology, no host measurement/GPU/checkpoint/full generation.,R721_INDEXED_SAFETENSORS_MULTI_SHARD_CPU_ONLY",
   "active_operations": [],
-  "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
+  "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation.",
   "report": "research/R709/REPORT.md",
   "operating_mode": "Owner-requested source development on private GitLab during active turns. No skills used; Superpowers absent. Automatic relaunch remains stopped. No real model, GPU, production network or cleanup.",
   "wave_manifest": {
@@ -3470,6 +3484,55 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "published_utc": "2026-11-02T13:27:38Z",
     "readback_verified_utc": "2026-11-02T13:27:38Z",
-    "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch."
+    "next_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
+    "receipt_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+    "receipt_pipeline_id": 2547,
+    "receipt_pipeline_status": "success",
+    "receipt_readback_exact": true
+  },
+  "r722_deepseek_indexed_session": {
+    "id": "R722",
+    "owner": "integrator",
+    "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_SOURCE_READBACK_EXACT_CPU_DEBUG_RELEASE_PASS",
+    "branch": "r722-deepseek-indexed-session-20261102",
+    "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+    "source_commit": "196c6cfcdaa231087070687166d59c391f2bbb78",
+    "path": "research/R722",
+    "code_files": [
+      "src/checkpoint.rs",
+      "src/deepseek_v41.rs",
+      "tests/r712_deepseek_session_owner.rs"
+    ],
+    "report": "research/R722/REPORT.md",
+    "result": "research/R722/RESULT.json",
+    "manifest": "research/R722/SHA256SUMS",
+    "manifest_sha256": "1366b9e362623b5201cc49c513faa53bef0270226ea35ecb97c280d4f3edf14a",
+    "manifest_file_count": 7,
+    "adapted_boundary": "Pinned DeepSeek expert index and shard metadata now reach the existing Rust indexed Safetensors reader, resident owner, CPU Session and independent FP64 MXFP4 oracle.",
+    "donor_code_copied": false,
+    "new_dependencies": false,
+    "local_cpu_tests": "focused indexed reader and complete six-expert CPU Session/oracle fixture pass in debug and release; scoped Clippy, rustfmt and diff-check pass",
+    "test_scope": "committed pinned index/header with synthetic sparse-shard tensor payloads; CPU only",
+    "source_pipeline_id": 2548,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_files_verified": 7,
+    "receipt_readback_pending": true,
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "published_utc": "2026-11-02T13:51:29Z",
+    "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation."
   }
 }

@@ -1,0 +1,46 @@
+{
+  "id": "R722",
+  "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_EXACT_READBACK_CPU_FIXTURE_PASS",
+  "branch": "r722-deepseek-indexed-session-20261102",
+  "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+  "source_commit": "196c6cfcdaa231087070687166d59c391f2bbb78",
+  "source_pipeline": {
+    "id": 2548,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    }
+  },
+  "source_readback": {
+    "verified_files": 7,
+    "total_files": 7,
+    "all_manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "local_cpu_verification": {
+    "indexed_reader_debug": "1/1 pass",
+    "indexed_reader_release": "1/1 pass",
+    "route_session_oracle_debug": "1/1 pass",
+    "route_session_oracle_release": "1/1 pass",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "scope": {
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "receipt_commit_sha": "recorded by subsequent branch verification; not self-referenced here",
+  "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation.",
+  "verified_utc": "2026-11-02T13:52:34Z"
+}

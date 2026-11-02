@@ -1,7 +1,7 @@
 {
   "id": "R722",
   "owner": "integrator",
-  "state": "SOURCE_AND_EVIDENCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_2548_SUCCESS_CPU_DEBUG_RELEASE_PASS",
   "branch": "r722-deepseek-indexed-session-20261102",
   "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
   "path": "research/R722",
@@ -34,5 +34,25 @@
     "automatic_relaunch": "STOPPED_BY_OWNER"
   },
   "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation.",
-  "prepared_utc": "2026-11-02T13:46:54Z"
+  "source_commit": "196c6cfcdaa231087070687166d59c391f2bbb78",
+  "source_pipeline_id": 2548,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback": {
+    "verified_files": 7,
+    "total_files": 7,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "manifest_sha256": null,
+  "manifest_file_count": 7,
+  "published_utc": "2026-11-02T13:51:29Z",
+  "readback_verified_utc": "2026-11-02T13:51:29Z",
+  "manifest_sha256_note": "The final manifest digest is recorded in the root handoffs to avoid a self-referential digest.",
+  "result": "research/R722/RESULT.json"
 }
