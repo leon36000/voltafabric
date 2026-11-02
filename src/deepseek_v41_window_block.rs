@@ -1,1 +1,217 @@
-Ly8hIE9uZS10b2tlbiBjb21wb3NpdGlvbiBvZiB0aGUgcGlubmVkIHB1cmUtd2luZG93IGF0dGVudGlvbiBhbmQgcm91dGVkIEZGTiBwYXRocy4KLy8hCi8vISBBZG1pdHRlZCByZXNpZGVudCB3ZWlnaHRzIGVudGVyIHRocm91Z2ggZXhpc3RpbmcgVm9sdGFGYWJyaWMgb2JqZWN0czsgdGhlIHJvdXRlCi8vISBleGVjdXRvciBpcyBhbiBleHBsaWNpdCBvbmUtc2hvdCB0cnVzdCBib3VuZGFyeSB0byByYW5rIFNlc3Npb25zLiBUaGlzIG1vZHVsZQovLyEgbmVpdGhlciByZWFkcyBtb2RlbCBwYXlsb2FkcyBub3IgcmV0cmllcyBhbiBhbWJpZ3VvdXMgcm91dGUuIEl0IGtlZXBzIGEgY2FuZGlkYXRlCi8vISBLViBjYWNoZSBwcml2YXRlIHVudGlsIHRoZSBjb21wbGV0ZSBhdHRlbnRpb24rRkZOIGJsb2NrIGFuZCBib3RoIEhDIGpvaW5zIHN1Y2NlZWQuCgp1c2UgY3JhdGU6OmRlZXBzZWVrX3Y0MTo6UGlubmVkTXhmcDRSb3V0ZUV4ZWN1dGlvblJlY2VpcHQ7CnVzZSBjcmF0ZTo6ZGVlcHNlZWtfdjQxX2F0dGVudGlvbjo6RGVlcFNlZWtWNDFXaW5kb3dDYWNoZTsKdXNlIGNyYXRlOjpkZWVwc2Vla192NDFfYXR0ZW50aW9uX291dHB1dDo6ewogICAgRGVlcFNlZWtWNDFBdHRlbnRpb25MYXllck91dHB1dCwgRGVlcFNlZWtWNDFBdHRlbnRpb25PdXRwdXRQcm9qZWN0aW9uLAp9Owp1c2UgY3JhdGU6OmRlZXBzZWVrX3Y0MV9nYXRlOjp7CiAgICBjb21iaW5lX3Bpbm5lZF9tb2Vfcm91dGVfd2l0aF9zaGFyZWQsIGhjOjpEZWVwU2Vla1Y0MUhjUHJvamVjdGlvbiwgRGVlcFNlZWtWNDFJbmRleGVkTW9lTGF5ZXIsCiAgICBEZWVwU2Vla1Y0MUluZGV4ZWRNb2VUb2tlblBsYW4sIERlZXBTZWVrVjQxTW9lVG9rZW5PdXRwdXQsIERlZXBTZWVrVjQxUmVzaWR1YWxTdHJlYW0sCiAgICBUb2tlbktpbmQsIFBJTk5FRF9NT0RFTF9SRVZJU0lPTiwKfTsKdXNlIGNyYXRlOjpkZWVwc2Vla192NDFfcHJvamVjdGlvbjo6RGVlcFNlZWtWNDFBdHRlbnRpb25Qcm9qZWN0aW9uOwp1c2UgY3JhdGU6OmRlZXBzZWVrX3Y0MV9yb3BlOjpEZWVwU2Vla1Y0MVdpbmRvd1JvcGVDb25maWc7CnVzZSBjcmF0ZTo6e2ludmFsaWQsIFJlc3VsdH07CnVzZSBzdGQ6OmNvbGxlY3Rpb25zOjpCVHJlZU1hcDsKCi8vLyBJbnB1dHMgd2hvc2UgaW1tdXRhYmxlIHdlaWdodHMgYW5kIGNoZWNrcG9pbnQgaWRlbnRpdGllcyB3ZXJlIGFkbWl0dGVkIGVhcmxpZXIuCi8vLyBUaGUgRkZOIHJvdXRlIHJlZ2lzdHJ5IGFuZCBvd25lciBwb2xpY3kgYXJlIG1vdmVkIGludG8gdGhlIGdhdGUtY3JlYXRlZCBwbGFuLgpwdWIgc3RydWN0IERlZXBTZWVrVjQxV2luZG93QmxvY2tSZXF1ZXN0PCdyZXF1ZXN0LCAnc291cmNlPiB7CiAgICBwdWIgcmVzaWR1YWw6ICYncmVxdWVzdCBEZWVwU2Vla1Y0MVJlc2lkdWFsU3RyZWFtLAogICAgcHViIGF0dGVudGlvbl9oYzogJidyZXF1ZXN0IERlZXBTZWVrVjQxSGNQcm9qZWN0aW9uLAogICAgcHViIGZmbl9oYzogJidyZXF1ZXN0IERlZXBTZWVrVjQxSGNQcm9qZWN0aW9uLAogICAgcHViIGF0dGVudGlvbl9xa3Y6ICYncmVxdWVzdCBEZWVwU2Vla1Y0MUF0dGVudGlvblByb2plY3Rpb24sCiAgICBwdWIgYXR0ZW50aW9uX291dHB1dDogJidyZXF1ZXN0IERlZXBTZWVrVjQxQXR0ZW50aW9uT3V0cHV0UHJvamVjdGlvbiwKICAgIHB1YiByb3BlOiAmJ3JlcXVlc3QgRGVlcFNlZWtWNDFXaW5kb3dSb3BlQ29uZmlnLAogICAgcHViIGNhY2hlOiAmJ3JlcXVlc3QgbXV0IERlZXBTZWVrVjQxV2luZG93Q2FjaGUsCiAgICBwdWIgcG9zaXRpb246IHU2NCwKICAgIHB1YiBmZm5fbGF5ZXI6ICYncmVxdWVzdCBEZWVwU2Vla1Y0MUluZGV4ZWRNb2VMYXllcjwnc291cmNlPiwKICAgIHB1YiB0b2tlbl9raW5kOiBUb2tlbktpbmQsCiAgICBwdWIgcmVnaXN0cnk6IGNyYXRlOjptb2U6OlJlZ2lzdHJ5LAogICAgcHViIHByZWZlcnJlZF9vd25lcnM6IEJUcmVlTWFwPHUzMiwgdTMyPiwKICAgIHB1YiByZXNpZGVudF9vcmRlcjogQlRyZWVNYXA8dTMyLCBWZWM8dTMyPj4sCiAgICBwdWIgbWF4X3RvdGFsX3NlbGVjdGVkX3BheWxvYWRfYnl0ZXM6IHU2NCwKfQoKLy8vIENvbXBsZXRlZCBvdXRwdXQgb2Ygb25lIHB1cmUtd2luZG93IHRyYW5zZm9ybWVyIGJsb2NrLgojW2Rlcml2ZShEZWJ1ZyldCnB1YiBzdHJ1Y3QgRGVlcFNlZWtWNDFXaW5kb3dCbG9ja091dHB1dCB7CiAgICBhdHRlbnRpb246IERlZXBTZWVrVjQxQXR0ZW50aW9uTGF5ZXJPdXRwdXQsCiAgICByb3V0ZTogUGlubmVkTXhmcDRSb3V0ZUV4ZWN1dGlvblJlY2VpcHQsCiAgICBtb2U6IERlZXBTZWVrVjQxTW9lVG9rZW5PdXRwdXQsCiAgICByZXNpZHVhbDogRGVlcFNlZWtWNDFSZXNpZHVhbFN0cmVhbSwKfQoKaW1wbCBEZWVwU2Vla1Y0MVdpbmRvd0Jsb2NrT3V0cHV0IHsKICAgIHB1YiBmbiBhdHRlbnRpb24oJnNlbGYpIC0+ICZEZWVwU2Vla1Y0MUF0dGVudGlvbkxheWVyT3V0cHV0IHsKICAgICAgICAmc2VsZi5hdHRlbnRpb24KICAgIH0KCiAgICBwdWIgZm4gcm91dGUoJnNlbGYpIC0+ICZQaW5uZWRNeGZwNFJvdXRlRXhlY3V0aW9uUmVjZWlwdCB7CiAgICAgICAgJnNlbGYucm91dGUKICAgIH0KCiAgICBwdWIgZm4gbW9lKCZzZWxmKSAtPiAmRGVlcFNlZWtWNDFNb2VUb2tlbk91dHB1dCB7CiAgICAgICAgJnNlbGYubW9lCiAgICB9CgogICAgcHViIGZuIHJlc2lkdWFsKCZzZWxmKSAtPiAmRGVlcFNlZWtWNDFSZXNpZHVhbFN0cmVhbSB7CiAgICAgICAgJnNlbGYucmVzaWR1YWwKICAgIH0KCiAgICBwdWIgZm4gbmV4dF9wb3NpdGlvbigmc2VsZikgLT4gdTY0IHsKICAgICAgICBzZWxmLmF0dGVudGlvbi5uZXh0X3Bvc2l0aW9uKCkKICAgIH0KfQoKLy8vIENvbXBvc2Ugb25lIGF0dGVudGlvbitGRk4gYmxvY2sgZm9yIGEgc2luZ2xlIGlkZW50aWZpZWQgdG9rZW4uCi8vLwovLy8gYGV4ZWN1dGVfcm91dGVfb25jZWAgcmVjZWl2ZXMgdGhlIGFscmVhZHkgZ2F0ZS1zZWxlY3RlZCwgaWRlbnRpdHktYm91bmQgcGxhbi4KLy8vIFRoZSBjYWxsZXIgbXVzdCBleGVjdXRlIHRoYXQgZXhhY3Qgcm91dGUgb25jZSBhZ2FpbnN0IHJlc2lkZW50IHJhbmsgb3duZXJzIGFuZAovLy8gcmV0dXJuIGl0cyB0ZXJtaW5hbCByZWNlaXB0LiBJdCBtdXN0IG5vdCByZWxvYWQgd2VpZ2h0cyBvbiB0aGUgdG9rZW4gcGF0aCBvciByZXRyeQovLy8gYWZ0ZXIgYW4gVU5LTk9XTi4gUmVzaWRlbmN5IGlzIGFuIGV4ZWN1dG9yIHByZWNvbmRpdGlvbjsgdGhpcyBjbG9zdXJlIHNpZ25hdHVyZQovLy8gZG9lcyBub3QgaW5kZXBlbmRlbnRseSBhdHRlc3QgaXQuIFRoZSByb3V0ZSdzIGV4aXN0aW5nIEZQMzItcHJld2VpZ2h0ZWQgQ29sbGVjdG9yCi8vLyByZW1haW5zIHRoZSBzb2xlIHBsYWNlIHdoZXJlIHRoZSBzaXggcm91dGUgY29lZmZpY2llbnRzIGFyZSBhcHBsaWVkLgovLy8KLy8vIEFsbCBsb2NhbCBub3JtYWxpemF0aW9uLCBwcm9qZWN0aW9ucywgdGhlIHNoYXJlZCBleHBlcnQsIGlkZW50aXRpZXMgYW5kIGJ1ZGdldHMKLy8vIGFyZSBjaGVja2VkIGJlZm9yZSB0aGUgY2FsbGVyJ3MgY2FjaGUgaXMgY2hhbmdlZC4gQW4gQWJvcnRlZC9Vbmtub3duIHJlY2VpcHQgb3IKLy8vIGFueSBvdGhlciBlcnJvciB3aXRoaG9sZHMgZXZlcnkgYmxvY2sgb3V0cHV0IGFuZCBsZWF2ZXMgdGhlIG9yaWdpbmFsIEtWIHBvc2l0aW9uCi8vLyB1bnRvdWNoZWQuIFRoZSByb3V0ZSBleGVjdXRvciBpdHNlbGYgcmVtYWlucyByZXNwb25zaWJsZSBmb3IgaXRzIFNlc3Npb24gbGVhc2VzCi8vLyBhbmQgZm9yIHByZXNlcnZpbmcgdGhlIHRlcm1pbmFsIFVOS05PV04gcmVjZWlwdC4KcHViIGZuIGZvcndhcmRfdG9rZW5fd2l0aF9yb3V0ZTwncmVxdWVzdCwgJ3NvdXJjZSwgRj4oCiAgICByZXF1ZXN0OiBEZWVwU2Vla1Y0MVdpbmRvd0Jsb2NrUmVxdWVzdDwncmVxdWVzdCwgJ3NvdXJjZT4sCiAgICBleGVjdXRlX3JvdXRlX29uY2U6IEYsCikgLT4gUmVzdWx0PERlZXBTZWVrVjQxV2luZG93QmxvY2tPdXRwdXQ+CndoZXJlCiAgICBGOiBGbk9uY2UoJkRlZXBTZWVrVjQxSW5kZXhlZE1vZVRva2VuUGxhbikgLT4gUmVzdWx0PFBpbm5lZE14ZnA0Um91dGVFeGVjdXRpb25SZWNlaXB0PiwKewogICAgbGV0IHN0YW1wID0gcmVxdWVzdC5yZXNpZHVhbC5zdGFtcCgpOwogICAgbGV0IGF0dGVtcHQgPSByZXF1ZXN0LnJlc2lkdWFsLmF0dGVtcHQoKTsKICAgIGlmIHN0YW1wLm1vZGVsX3JldmlzaW9uICE9IFBJTk5FRF9NT0RFTF9SRVZJU0lPTgogICAgICAgIHx8IHN0YW1wLmxheWVyID49IDQwCiAgICAgICAgfHwgYXR0ZW1wdCA9PSAwCiAgICAgICAgfHwgcmVxdWVzdC5wb3NpdGlvbiAhPSByZXF1ZXN0LmNhY2hlLm5leHRfcG9zaXRpb24oKQogICAgICAgIHx8IHJlcXVlc3QubWF4X3RvdGFsX3NlbGVjdGVkX3BheWxvYWRfYnl0ZXMgPT0gMAogICAgICAgIHx8IHJlcXVlc3QuYXR0ZW50aW9uX2hjLnJlY2VpcHQoKS5tb2RlbF9yZXZpc2lvbiAhPSBQSU5ORURfTU9ERUxfUkVWSVNJT04KICAgICAgICB8fCByZXF1ZXN0LmF0dGVudGlvbl9oYy5yZWNlaXB0KCkubGF5ZXIgIT0gc3RhbXAubGF5ZXIKICAgICAgICB8fCByZXF1ZXN0LmF0dGVudGlvbl9oYy5yZWNlaXB0KCkuYnJhbmNoCiAgICAgICAgICAgICE9IGNyYXRlOjpkZWVwc2Vla192NDFfZ2F0ZTo6aGM6OkhjUHJvamVjdGlvbkJyYW5jaDo6QXR0ZW50aW9uCiAgICAgICAgfHwgcmVxdWVzdC5hdHRlbnRpb25faGMucmVjZWlwdCgpLmluZGV4X3NoYTI1NgogICAgICAgICAgICAhPSBjcmF0ZTo6ZGVlcHNlZWtfdjQxOjpQSU5ORURfRVhQRVJUX0lOREVYX1NIQTI1NgogICAgICAgIHx8IHJlcXVlc3QuZmZuX2hjLnJlY2VpcHQoKS5tb2RlbF9yZXZpc2lvbiAhPSBQSU5ORURfTU9ERUxfUkVWSVNJT04KICAgICAgICB8fCByZXF1ZXN0LmZmbl9oYy5yZWNlaXB0KCkubGF5ZXIgIT0gc3RhbXAubGF5ZXIKICAgICAgICB8fCByZXF1ZXN0LmZmbl9oYy5yZWNlaXB0KCkuYnJhbmNoICE9IGNyYXRlOjpkZWVwc2Vla192NDFfZ2F0ZTo6aGM6OkhjUHJvamVjdGlvbkJyYW5jaDo6RmZuCiAgICAgICAgfHwgcmVxdWVzdC5mZm5faGMucmVjZWlwdCgpLmluZGV4X3NoYTI1NiAhPSBjcmF0ZTo6ZGVlcHNlZWtfdjQxOjpQSU5ORURfRVhQRVJUX0lOREVYX1NIQTI1NgogICAgICAgIHx8IHJlcXVlc3QuZmZuX2xheWVyLmdhdGVfcmVjZWlwdCgpLm1vZGVsX3JldmlzaW9uICE9IFBJTk5FRF9NT0RFTF9SRVZJU0lPTgogICAgICAgIHx8IHJlcXVlc3QuZmZuX2xheWVyLmdhdGVfcmVjZWlwdCgpLmxheWVyICE9IHN0YW1wLmxheWVyCiAgICAgICAgfHwgcmVxdWVzdC5mZm5fbGF5ZXIuZmZuX25vcm1fcmVjZWlwdCgpLmlzX25vbmUoKQogICAgICAgIHx8IHJlcXVlc3QuZmZuX2xheWVyLnNoYXJlZF9leHBlcnRfcmVjZWlwdCgpLmlzX25vbmUoKQogICAgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgKICAgICAgICAgICAgIkRlZXBTZWVrIHdpbmRvdyBibG9jayBpbnB1dHMgYXJlIG5vdCBvbmUgYWRtaXR0ZWQgcHVyZS13aW5kb3cgbGF5ZXIgYW5kIHRva2VuIiwKICAgICAgICApKTsKICAgIH0KICAgIGxldCBxa3ZfcmVjZWlwdCA9IHJlcXVlc3QKICAgICAgICAuYXR0ZW50aW9uX3FrdgogICAgICAgIC5yZWNlaXB0KCkKICAgICAgICAub2tfb3JfZWxzZSh8fCBpbnZhbGlkKCJEZWVwU2VlayBibG9jayBRS1Ygd2VpZ2h0cyBhcmUgbm90IGluZGV4LWxvYWRlZCIpKT87CiAgICBpZiBxa3ZfcmVjZWlwdC5tb2RlbF9yZXZpc2lvbiAhPSBQSU5ORURfTU9ERUxfUkVWSVNJT04KICAgICAgICB8fCBxa3ZfcmVjZWlwdC5sYXllciAhPSBzdGFtcC5sYXllcgogICAgICAgIHx8IHFrdl9yZWNlaXB0LmluZGV4X3NoYTI1NiAhPSBjcmF0ZTo6ZGVlcHNlZWtfdjQxOjpQSU5ORURfRVhQRVJUX0lOREVYX1NIQTI1NgogICAgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgKICAgICAgICAgICAgIkRlZXBTZWVrIGJsb2NrIFFLViByZWNlaXB0IGRpZmZlcnMgZnJvbSBpdHMgcGlubmVkIGxheWVyIGFuZCBpbmRleCIsCiAgICAgICAgKSk7CiAgICB9CgogICAgLy8gU3RhZ2Ugb25seSB0aGUgbmV3IEtWIHJvdy4gVGhlIG9yaWdpbmFsIHJpbmcgcmVtYWlucyB1bnRvdWNoZWQgdW50aWwgRkZOLAogICAgLy8gcm91dGVkIFNlc3Npb24gcmVzdWx0cyBhbmQgYm90aCBIQyBqb2lucyBoYXZlIGFsbCBjb21wbGV0ZWQuCiAgICBsZXQgaW5pdGlhbF9wb3NpdGlvbiA9IHJlcXVlc3QuY2FjaGUubmV4dF9wb3NpdGlvbigpOwogICAgbGV0IGV4cGVjdGVkX25leHRfcG9zaXRpb24gPSBpbml0aWFsX3Bvc2l0aW9uCiAgICAgICAgLmNoZWNrZWRfYWRkKDEpCiAgICAgICAgLm9rX29yX2Vsc2UofHwgaW52YWxpZCgiRGVlcFNlZWsgYmxvY2sgcG9zaXRpb24gb3ZlcmZsb3ciKSk/OwogICAgbGV0IGF0dGVudGlvbl9taXhlcyA9IHJlcXVlc3QuYXR0ZW50aW9uX2hjLnByb2plY3QocmVxdWVzdC5yZXNpZHVhbCk/OwogICAgbGV0IChhdHRlbnRpb24sIGNhY2hlX3VwZGF0ZSkgPSByZXF1ZXN0LmF0dGVudGlvbl9vdXRwdXQuZm9yd2FyZF90b2tlbl9zdGFnZWQoCiAgICAgICAgcmVxdWVzdC5yZXNpZHVhbCwKICAgICAgICAmYXR0ZW50aW9uX21peGVzLAogICAgICAgIHJlcXVlc3QuYXR0ZW50aW9uX3FrdiwKICAgICAgICByZXF1ZXN0LnJvcGUsCiAgICAgICAgcmVxdWVzdC5jYWNoZSwKICAgICAgICByZXF1ZXN0LnBvc2l0aW9uLAogICAgKT87CgogICAgbGV0IGZmbl9taXhlcyA9IHJlcXVlc3QuZmZuX2hjLnByb2plY3QoYXR0ZW50aW9uLnJlc2lkdWFsKCkpPzsKICAgIGxldCBwbGFuID0gcmVxdWVzdC5mZm5fbGF5ZXIucHJlcGFyZV9mZm5fdG9rZW5fZnJvbV9oYygKICAgICAgICBjcmF0ZTo6ZGVlcHNlZWtfdjQxX2dhdGU6OkRlZXBTZWVrVjQxSW5kZXhlZEhjRmZuVG9rZW5SZXF1ZXN0IHsKICAgICAgICAgICAgbWl4ZXM6ICZmZm5fbWl4ZXMsCiAgICAgICAgICAgIHJlc2lkdWFsOiBhdHRlbnRpb24ucmVzaWR1YWwoKSwKICAgICAgICAgICAgdG9rZW5fa2luZDogcmVxdWVzdC50b2tlbl9raW5kLAogICAgICAgICAgICByZWdpc3RyeTogcmVxdWVzdC5yZWdpc3RyeSwKICAgICAgICAgICAgcHJlZmVycmVkX293bmVyczogcmVxdWVzdC5wcmVmZXJyZWRfb3duZXJzLAogICAgICAgICAgICByZXNpZGVudF9vcmRlcjogcmVxdWVzdC5yZXNpZGVudF9vcmRlciwKICAgICAgICAgICAgbWF4X3RvdGFsX3NlbGVjdGVkX3BheWxvYWRfYnl0ZXM6IHJlcXVlc3QubWF4X3RvdGFsX3NlbGVjdGVkX3BheWxvYWRfYnl0ZXMsCiAgICAgICAgfSwKICAgICk/OwoKICAgIC8vIFJ1biBhbGwgcmVzaWRlbnQgbG9jYWwgd29yayBiZWZvcmUgY29uc3VtaW5nIGEgU2Vzc2lvbiByb3V0ZS4gSW4gcGFydGljdWxhciwKICAgIC8vIHRoZSBzaGFyZWQgZXhwZXJ0IHJlbWFpbnMgc2VwYXJhdGUgZnJvbSByb3V0ZWQgY2hvaWNlcyBhbmQgaXMgYWRkZWQgZXhhY3RseQogICAgLy8gb25jZSBvbmx5IGFmdGVyIHRoZSByb3V0ZSBDb2xsZWN0b3IgaGFzIGNvbXBsZXRlZC4KICAgIGxldCBzaGFyZWQgPSByZXF1ZXN0LmZmbl9sYXllci5leGVjdXRlX3NoYXJlZF9yZWZlcmVuY2UoJnBsYW4pPzsKICAgIGxldCByb3V0ZSA9IGV4ZWN1dGVfcm91dGVfb25jZSgmcGxhbik/OwogICAgbGV0IHByb2JsZW0gPSBwbGFuLmJhdGNoKCkucHJvYmxlbSgpOwogICAgbGV0IGV4cGVjdGVkX2ZpbmdlcnByaW50ID0KICAgICAgICBjcmF0ZTo6ZGVlcHNlZWtfdjQxOjpwaW5uZWRfdG9wNl9yb3V0ZV9maW5nZXJwcmludChwcm9ibGVtLCBwbGFuLmJhdGNoKCkuYXR0ZW1wdCgpKT87CiAgICBpZiByb3V0ZS5zdGFtcCgpICE9ICZwcm9ibGVtLnN0YW1wCiAgICAgICAgfHwgcm91dGUuYXR0ZW1wdCgpICE9IHBsYW4uYmF0Y2goKS5hdHRlbXB0KCkKICAgICAgICB8fCByb3V0ZS5yb3V0ZV9leHBlcnRzKCkgIT0gcHJvYmxlbS5leHBlcnRzCiAgICAgICAgfHwgcm91dGUucm91dGVfZmluZ2VycHJpbnQoKSAhPSBleHBlY3RlZF9maW5nZXJwcmludAogICAgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgKICAgICAgICAgICAgIkRlZXBTZWVrIHJvdXRlIGV4ZWN1dG9yIHJldHVybmVkIGEgcmVjZWlwdCBmb3IgYW5vdGhlciBwbGFuIG9yIHRva2VuIiwKICAgICAgICApKTsKICAgIH0KICAgIGxldCBtb2UgPSBjb21iaW5lX3Bpbm5lZF9tb2Vfcm91dGVfd2l0aF9zaGFyZWQoJnJvdXRlLCAmc2hhcmVkKT87CiAgICBsZXQgZmluYWxfcmVzaWR1YWwgPSBmZm5fbWl4ZXMuYXBwbHlfZmZuX3Bvc3QoJm1vZSwgYXR0ZW50aW9uLnJlc2lkdWFsKCkpPzsKICAgIGlmIGF0dGVudGlvbi5uZXh0X3Bvc2l0aW9uKCkgIT0gZXhwZWN0ZWRfbmV4dF9wb3NpdGlvbgogICAgICAgIHx8IGNhY2hlX3VwZGF0ZS5leHBlY3RlZF9wb3NpdGlvbigpICE9IGluaXRpYWxfcG9zaXRpb24KICAgICAgICB8fCBjYWNoZV91cGRhdGUubmV4dF9wb3NpdGlvbigpICE9IGV4cGVjdGVkX25leHRfcG9zaXRpb24KICAgICAgICB8fCBmaW5hbF9yZXNpZHVhbC5zdGFtcCgpICE9IHN0YW1wCiAgICAgICAgfHwgZmluYWxfcmVzaWR1YWwuYXR0ZW1wdCgpICE9IGF0dGVtcHQKICAgIHsKICAgICAgICByZXR1cm4gRXJyKGludmFsaWQoCiAgICAgICAgICAgICJEZWVwU2VlayBjb21wbGV0ZSBibG9jayBvdXRwdXQgY2hhbmdlZCB0b2tlbiBpZGVudGl0eSBvciBLViBwb3NpdGlvbiIsCiAgICAgICAgKSk7CiAgICB9CgogICAgcmVxdWVzdC5jYWNoZS5jb21taXRfcHJlcGFyZWQoY2FjaGVfdXBkYXRlKT87CiAgICBPayhEZWVwU2Vla1Y0MVdpbmRvd0Jsb2NrT3V0cHV0IHsKICAgICAgICBhdHRlbnRpb24sCiAgICAgICAgcm91dGUsCiAgICAgICAgbW9lLAogICAgICAgIHJlc2lkdWFsOiBmaW5hbF9yZXNpZHVhbCwKICAgIH0pCn0KCi8vLyBFeGVjdXRlIG9uZSB0b2tlbiB1c2luZyB0aGUgYWxyZWFkeS1sb2FkZWQgU2Vzc2lvbnMgZm9yIGl0cyBsYXllciBhbmQgc2VsZWN0ZWQgcmFua3MuCi8vLyBUaGlzIGFkYXB0ZXIgaXNzdWVzIEVYRUMgb25seTsgU2Vzc2lvbiBwcmVmbGlnaHQgcmVmdXNlcyBhIG1pc3Npbmcvc3RhbGUgb3duZXIgYmVmb3JlCi8vLyBhbnkgcmFuayByZWNlaXZlcyBieXRlcy4gQWJvcnRlZCBhbmQgVU5LTk9XTiByb3V0ZXMgcmVtYWluIHRlcm1pbmFsIGFuZCBkbyBub3QgY29tbWl0IEtWLgpwdWIgZm4gZm9yd2FyZF90b2tlbl93aXRoX3Nlc3Npb25zPCdyZXF1ZXN0LCAnc291cmNlPigKICAgIHJlcXVlc3Q6IERlZXBTZWVrVjQxV2luZG93QmxvY2tSZXF1ZXN0PCdyZXF1ZXN0LCAnc291cmNlPiwKICAgIHNlc3Npb25zX2J5X2xheWVyOiAmbXV0IEJUcmVlTWFwPHUzMiwgQlRyZWVNYXA8dTMyLCBjcmF0ZTo6c2Vzc2lvbjo6U2Vzc2lvbj4+LAogICAgdGltZW91dDogc3RkOjp0aW1lOjpEdXJhdGlvbiwKKSAtPiBSZXN1bHQ8RGVlcFNlZWtWNDFXaW5kb3dCbG9ja091dHB1dD4gewogICAgaWYgdGltZW91dC5pc196ZXJvKCkgewogICAgICAgIHJldHVybiBFcnIoaW52YWxpZCgiRGVlcFNlZWsgU2Vzc2lvbiBibG9jayB0aW1lb3V0IG11c3QgYmUgbm9uemVybyIpKTsKICAgIH0KICAgIGxldCBsYXllciA9IHJlcXVlc3QucmVzaWR1YWwuc3RhbXAoKS5sYXllcjsKICAgIGxldCBzZXNzaW9ucyA9IHNlc3Npb25zX2J5X2xheWVyCiAgICAgICAgLmdldF9tdXQoJmxheWVyKQogICAgICAgIC5va19vcl9lbHNlKHx8IGludmFsaWQoIkRlZXBTZWVrIGJsb2NrIGhhcyBubyBwZXJzaXN0ZW50IFNlc3Npb24gc2V0IGZvciBpdHMgbGF5ZXIiKSk/OwogICAgZm9yd2FyZF90b2tlbl93aXRoX3JvdXRlKHJlcXVlc3QsIHxwbGFufCBwbGFuLmV4ZWN1dGVfcHJlbG9hZGVkX214ZnA0KHNlc3Npb25zLCB0aW1lb3V0KSkKfQo=
+//! One-token composition of the pinned pure-window attention and routed FFN paths.
+//!
+//! Admitted resident weights enter through existing VoltaFabric objects; the route
+//! executor is an explicit one-shot trust boundary to rank Sessions. This module
+//! neither reads model payloads nor retries an ambiguous route. It keeps a candidate
+//! KV cache private until the complete attention+FFN block and both HC joins succeed.
+
+use crate::deepseek_v41::PinnedMxfp4RouteExecutionReceipt;
+use crate::deepseek_v41_attention::DeepSeekV41WindowCache;
+use crate::deepseek_v41_attention_output::{
+    DeepSeekV41AttentionLayerOutput, DeepSeekV41AttentionOutputProjection,
+};
+use crate::deepseek_v41_gate::{
+    combine_pinned_moe_route_with_shared, hc::DeepSeekV41HcProjection, DeepSeekV41IndexedMoeLayer,
+    DeepSeekV41IndexedMoeTokenPlan, DeepSeekV41MoeTokenOutput, DeepSeekV41ResidualStream,
+    TokenKind, PINNED_MODEL_REVISION,
+};
+use crate::deepseek_v41_projection::DeepSeekV41AttentionProjection;
+use crate::deepseek_v41_rope::DeepSeekV41WindowRopeConfig;
+use crate::{invalid, Result};
+use std::collections::BTreeMap;
+
+/// Inputs whose immutable weights and checkpoint identities were admitted earlier.
+/// The FFN route registry and owner policy are moved into the gate-created plan.
+pub struct DeepSeekV41WindowBlockRequest<'request, 'source> {
+    pub residual: &'request DeepSeekV41ResidualStream,
+    pub attention_hc: &'request DeepSeekV41HcProjection,
+    pub ffn_hc: &'request DeepSeekV41HcProjection,
+    pub attention_qkv: &'request DeepSeekV41AttentionProjection,
+    pub attention_output: &'request DeepSeekV41AttentionOutputProjection,
+    pub rope: &'request DeepSeekV41WindowRopeConfig,
+    pub cache: &'request mut DeepSeekV41WindowCache,
+    pub position: u64,
+    pub ffn_layer: &'request DeepSeekV41IndexedMoeLayer<'source>,
+    pub token_kind: TokenKind,
+    pub registry: crate::moe::Registry,
+    pub preferred_owners: BTreeMap<u32, u32>,
+    pub resident_order: BTreeMap<u32, Vec<u32>>,
+    pub max_total_selected_payload_bytes: u64,
+}
+
+/// Completed output of one pure-window transformer block.
+#[derive(Debug)]
+pub struct DeepSeekV41WindowBlockOutput {
+    attention: DeepSeekV41AttentionLayerOutput,
+    route: PinnedMxfp4RouteExecutionReceipt,
+    moe: DeepSeekV41MoeTokenOutput,
+    residual: DeepSeekV41ResidualStream,
+}
+
+impl DeepSeekV41WindowBlockOutput {
+    pub fn attention(&self) -> &DeepSeekV41AttentionLayerOutput {
+        &self.attention
+    }
+
+    pub fn route(&self) -> &PinnedMxfp4RouteExecutionReceipt {
+        &self.route
+    }
+
+    pub fn moe(&self) -> &DeepSeekV41MoeTokenOutput {
+        &self.moe
+    }
+
+    pub fn residual(&self) -> &DeepSeekV41ResidualStream {
+        &self.residual
+    }
+
+    pub fn next_position(&self) -> u64 {
+        self.attention.next_position()
+    }
+}
+
+/// Compose one attention+FFN block for a single identified token.
+///
+/// `execute_route_once` receives the already gate-selected, identity-bound plan.
+/// The caller must execute that exact route once against resident rank owners and
+/// return its terminal receipt. It must not reload weights on the token path or retry
+/// after an UNKNOWN. Residency is an executor precondition; this closure signature
+/// does not independently attest it. The route's existing FP32-preweighted Collector
+/// remains the sole place where the six route coefficients are applied.
+///
+/// All local normalization, projections, the shared expert, identities and budgets
+/// are checked before the caller's cache is changed. An Aborted/Unknown receipt or
+/// any other error withholds every block output and leaves the original KV position
+/// untouched. The route executor itself remains responsible for its Session leases
+/// and for preserving the terminal UNKNOWN receipt.
+pub fn forward_token_with_route<'request, 'source, F>(
+    request: DeepSeekV41WindowBlockRequest<'request, 'source>,
+    execute_route_once: F,
+) -> Result<DeepSeekV41WindowBlockOutput>
+where
+    F: FnOnce(&DeepSeekV41IndexedMoeTokenPlan) -> Result<PinnedMxfp4RouteExecutionReceipt>,
+{
+    let stamp = request.residual.stamp();
+    let attempt = request.residual.attempt();
+    if stamp.model_revision != PINNED_MODEL_REVISION
+        || stamp.layer >= 40
+        || attempt == 0
+        || request.position != request.cache.next_position()
+        || request.max_total_selected_payload_bytes == 0
+        || request.attention_hc.receipt().model_revision != PINNED_MODEL_REVISION
+        || request.attention_hc.receipt().layer != stamp.layer
+        || request.attention_hc.receipt().branch
+            != crate::deepseek_v41_gate::hc::HcProjectionBranch::Attention
+        || request.attention_hc.receipt().index_sha256
+            != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+        || request.ffn_hc.receipt().model_revision != PINNED_MODEL_REVISION
+        || request.ffn_hc.receipt().layer != stamp.layer
+        || request.ffn_hc.receipt().branch != crate::deepseek_v41_gate::hc::HcProjectionBranch::Ffn
+        || request.ffn_hc.receipt().index_sha256 != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+        || request.ffn_layer.gate_receipt().model_revision != PINNED_MODEL_REVISION
+        || request.ffn_layer.gate_receipt().layer != stamp.layer
+        || request.ffn_layer.ffn_norm_receipt().is_none()
+        || request.ffn_layer.shared_expert_receipt().is_none()
+    {
+        return Err(invalid(
+            "DeepSeek window block inputs are not one admitted pure-window layer and token",
+        ));
+    }
+    let qkv_receipt = request
+        .attention_qkv
+        .receipt()
+        .ok_or_else(|| invalid("DeepSeek block QKV weights are not index-loaded"))?;
+    if qkv_receipt.model_revision != PINNED_MODEL_REVISION
+        || qkv_receipt.layer != stamp.layer
+        || qkv_receipt.index_sha256 != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+    {
+        return Err(invalid(
+            "DeepSeek block QKV receipt differs from its pinned layer and index",
+        ));
+    }
+
+    // Stage only the new KV row. The original ring remains untouched until FFN,
+    // routed Session results and both HC joins have all completed.
+    let initial_position = request.cache.next_position();
+    let expected_next_position = initial_position
+        .checked_add(1)
+        .ok_or_else(|| invalid("DeepSeek block position overflow"))?;
+    let attention_mixes = request.attention_hc.project(request.residual)?;
+    let (attention, cache_update) = request.attention_output.forward_token_staged(
+        request.residual,
+        &attention_mixes,
+        request.attention_qkv,
+        request.rope,
+        request.cache,
+        request.position,
+    )?;
+
+    let ffn_mixes = request.ffn_hc.project(attention.residual())?;
+    let plan = request.ffn_layer.prepare_ffn_token_from_hc(
+        crate::deepseek_v41_gate::DeepSeekV41IndexedHcFfnTokenRequest {
+            mixes: &ffn_mixes,
+            residual: attention.residual(),
+            token_kind: request.token_kind,
+            registry: request.registry,
+            preferred_owners: request.preferred_owners,
+            resident_order: request.resident_order,
+            max_total_selected_payload_bytes: request.max_total_selected_payload_bytes,
+        },
+    )?;
+
+    // Run all resident local work before consuming a Session route. In particular,
+    // the shared expert remains separate from routed choices and is added exactly
+    // once only after the route Collector has completed.
+    let shared = request.ffn_layer.execute_shared_reference(&plan)?;
+    let route = execute_route_once(&plan)?;
+    let problem = plan.batch().problem();
+    let expected_fingerprint =
+        crate::deepseek_v41::pinned_top6_route_fingerprint(problem, plan.batch().attempt())?;
+    if route.stamp() != &problem.stamp
+        || route.attempt() != plan.batch().attempt()
+        || route.route_experts() != problem.experts
+        || route.route_fingerprint() != expected_fingerprint
+    {
+        return Err(invalid(
+            "DeepSeek route executor returned a receipt for another plan or token",
+        ));
+    }
+    let moe = combine_pinned_moe_route_with_shared(&route, &shared)?;
+    let final_residual = ffn_mixes.apply_ffn_post(&moe, attention.residual())?;
+    if attention.next_position() != expected_next_position
+        || cache_update.expected_position() != initial_position
+        || cache_update.next_position() != expected_next_position
+        || final_residual.stamp() != stamp
+        || final_residual.attempt() != attempt
+    {
+        return Err(invalid(
+            "DeepSeek complete block output changed token identity or KV position",
+        ));
+    }
+
+    request.cache.commit_prepared(cache_update)?;
+    Ok(DeepSeekV41WindowBlockOutput {
+        attention,
+        route,
+        moe,
+        residual: final_residual,
+    })
+}
+
+/// Execute one token using the already-loaded Sessions for its layer and selected ranks.
+/// This adapter issues EXEC only; Session preflight refuses a missing/stale owner before
+/// any rank receives bytes. Aborted and UNKNOWN routes remain terminal and do not commit KV.
+pub fn forward_token_with_sessions<'request, 'source>(
+    request: DeepSeekV41WindowBlockRequest<'request, 'source>,
+    sessions_by_layer: &mut BTreeMap<u32, BTreeMap<u32, crate::session::Session>>,
+    timeout: std::time::Duration,
+) -> Result<DeepSeekV41WindowBlockOutput> {
+    if timeout.is_zero() {
+        return Err(invalid("DeepSeek Session block timeout must be nonzero"));
+    }
+    let layer = request.residual.stamp().layer;
+    let sessions = sessions_by_layer
+        .get_mut(&layer)
+        .ok_or_else(|| invalid("DeepSeek block has no persistent Session set for its layer"))?;
+    forward_token_with_route(request, |plan| plan.execute_preloaded_mxfp4(sessions, timeout))
+}
