@@ -99,9 +99,22 @@ fn validate_batch_attempts(attempts: impl IntoIterator<Item = u64>) -> Result<()
     Ok(())
 }
 
-/// Validate every routed batch against the complete set of loaded resident
-/// artifacts before the first Session::connect or worker LOAD can occur.
-fn preflight_execution(input: &SeriesInput, artifacts: &BTreeMap<u32, Artifact>) -> Result<()> {
+/// Validate all route identities against declared rank bindings before opening
+/// even one artifact path. This avoids loading a partial expert set when a route
+/// already names a rank with no resident owner.
+fn preflight_bindings(input: &SeriesInput) -> Result<BTreeSet<u32>> {
+    let mut sources = BTreeMap::new();
+    for worker in &input.workers {
+        worker.producer.validate()?;
+        if worker.endpoint.rank != worker.binding.rank
+            || worker.endpoint.argv.is_empty()
+            || sources.insert(worker.endpoint.rank, worker).is_some()
+        {
+            return Err(invalid(
+                "MXFP4 series has duplicate/foreign/empty worker endpoints",
+            ));
+        }
+    }
     let mut identities = BTreeSet::new();
     let mut participants = BTreeSet::new();
     for batch in &input.batches {
@@ -130,10 +143,10 @@ fn preflight_execution(input: &SeriesInput, artifacts: &BTreeMap<u32, Artifact>)
         }
         let dispatch = routing::dispatch(&batch.problem)?;
         for rank in dispatch.ranks.iter().filter(|rank| !rank.slots.is_empty()) {
-            let artifact = artifacts
+            let source = sources
                 .get(&rank.rank)
                 .ok_or_else(|| invalid("missing MXFP4 rank endpoint"))?;
-            artifact.validate_dispatch(rank)?;
+            super::validate_binding(&source.binding, rank.hidden, rank)?;
             checked_inputs(rank, compact(batch, rank))?;
             participants.insert(rank.rank);
         }
@@ -148,10 +161,34 @@ fn preflight_execution(input: &SeriesInput, artifacts: &BTreeMap<u32, Artifact>)
             check_fault(fault)?;
         }
     }
-    if participants != artifacts.keys().copied().collect() {
+    if participants != sources.keys().copied().collect() {
         return Err(invalid(
             "MXFP4 series endpoints must match its participating ranks",
         ));
+    }
+    Ok(participants)
+}
+
+/// After all route bindings pass and files are loaded, verify that every payload
+/// matches the metadata that admitted it. Still no Session has been connected.
+fn preflight_artifacts(
+    input: &SeriesInput,
+    artifacts: &BTreeMap<u32, Artifact>,
+    participants: &BTreeSet<u32>,
+) -> Result<()> {
+    if participants != &artifacts.keys().copied().collect() {
+        return Err(invalid(
+            "MXFP4 series artifacts must match its participating ranks",
+        ));
+    }
+    for batch in &input.batches {
+        let dispatch = routing::dispatch(&batch.problem)?;
+        for rank in dispatch.ranks.iter().filter(|rank| !rank.slots.is_empty()) {
+            let artifact = artifacts
+                .get(&rank.rank)
+                .ok_or_else(|| invalid("missing MXFP4 rank artifact"))?;
+            artifact.validate_dispatch(rank)?;
+        }
     }
     Ok(())
 }
@@ -246,6 +283,7 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
         return Err(invalid("MXFP4 series exceeds attempt guard budget"));
     }
     validate_batch_attempts(input.batches.iter().map(|batch| batch.attempt))?;
+    let participants = preflight_bindings(&input)?;
     let mut artifacts: BTreeMap<u32, Artifact> = BTreeMap::new();
     let mut admitted_paths: BTreeMap<&str, u32> = BTreeMap::new();
     let mut artifact_bytes = 0_usize;
@@ -287,7 +325,7 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
         };
         artifacts.insert(worker.endpoint.rank, artifact);
     }
-    preflight_execution(&input, &artifacts)?;
+    preflight_artifacts(&input, &artifacts, &participants)?;
     let timeout = Duration::from_millis(input.timeout_ms);
     let mut sessions = BTreeMap::new();
     let mut report = Report {

@@ -476,7 +476,7 @@ fn six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_sta
     assert_eq!(gate_route.len(), TOP_K);
 
     // Make the exact six gate choices require six rank-local residents. Only the
-    // pinned expert-0 artifact is supplied below; the other five ranks are absent.
+    // expert-0 binding is declared; the other five rank endpoints are absent.
     let locals = [EXPERT0_LOCAL, 4, 5, 6, 7, 8];
     let mut route = problem(0.375, 0.375);
     route.experts = gate_route.iter().map(|choice| choice.expert).collect();
@@ -497,10 +497,6 @@ fn six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_sta
         .collect();
     voltafabric::routing::validate(&route).expect("complete six-expert route identity");
 
-    let artifact_path = format!(
-        "{}/fixtures/deepseek_v41_layer0_expert0_314113f8.safetensors",
-        env!("CARGO_MANIFEST_DIR")
-    );
     let attempt = 906;
     let outcome = mxfp4::run_series(mxfp4::SeriesInput {
         workers: vec![mxfp4::WorkerSource {
@@ -509,7 +505,7 @@ fn six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_sta
                 argv: vec!["/must-not-be-started-r707".into()],
             },
             binding: binding(0, EXPERT0_LOCAL, EXPERT0_RANK, EXPERT0_SHA256),
-            artifact_path,
+            artifact_path: "/must-not-be-opened-r708.safetensors".into(),
             producer: Default::default(),
             prefer_bf16_activations: false,
         }],
