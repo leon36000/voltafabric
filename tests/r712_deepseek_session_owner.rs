@@ -18,13 +18,17 @@ use voltafabric::deepseek_v41::{
     PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
-    combine_pinned_moe_route_with_shared, deepseek_hc_post_reference, hc::HcProjectionBranch,
-    DeepSeekV41Gate, DeepSeekV41HcPostCoefficients, DeepSeekV41IndexedMoeLayer,
-    DeepSeekV41ResidualStream, FfnNormTensorSpec, GateShardSpec, GateTensorHashes,
-    PinnedMxfp4PayloadSource, SharedExpertTensorHashes, SharedExpertTensorSpec, TokenKind,
-    GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION,
-    PINNED_RMS_NORM_EPSILON, RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE,
-    SHARED_EXPERT_INTERMEDIATE_SIZE,
+    combine_pinned_moe_route_with_shared,
+    hc::{
+        DeepSeekV41HcProjection, HcProjectionBranch, HcProjectionSpec, HcProjectionTensorHashes,
+        HC_INPUT_WIDTH, HC_MIX_COUNT, HC_PROJECTION_PAYLOAD_BYTES, PINNED_HC_NORMALIZATION_EPSILON,
+        PINNED_HC_SINKHORN_EPSILON, PINNED_HC_SINKHORN_ITERATIONS,
+    },
+    DeepSeekV41Gate, DeepSeekV41IndexedMoeLayer, DeepSeekV41ResidualStream, FfnNormTensorSpec,
+    GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource, SharedExpertTensorHashes,
+    SharedExpertTensorSpec, TokenKind, GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE,
+    PINNED_MODEL_REVISION, PINNED_RMS_NORM_EPSILON, RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS,
+    ROUTE_SCALE, SHARED_EXPERT_INTERMEDIATE_SIZE,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -493,6 +497,73 @@ fn indexed_residents_for_route(
     (temp, residents)
 }
 
+fn write_hc_projection_payloads(
+    shard: &mut File,
+    header: &serde_json::Value,
+    data_start: u64,
+    branch: HcProjectionBranch,
+    multiplier: f32,
+) -> HcProjectionSpec {
+    let (prefix, branch_scale) = match branch {
+        HcProjectionBranch::Attention => ("hc_attn", [0.75, -0.5, 0.25]),
+        HcProjectionBranch::Ffn => ("hc_ffn", [0.5, -0.25, 0.375]),
+    };
+    let weights = (0..HC_MIX_COUNT * HC_INPUT_WIDTH)
+        .map(|index| {
+            let row = index / HC_INPUT_WIDTH;
+            let column = index % HC_INPUT_WIDTH;
+            let code = (row * 37 + column * 13 + (row * column) % 11) % 19;
+            (code as f32 - 9.0) / 8192.0 * multiplier
+        })
+        .collect::<Vec<_>>();
+    let base = (0..HC_MIX_COUNT)
+        .map(|index| {
+            (index as f32 - 11.5) / 16.0
+                + if branch == HcProjectionBranch::Ffn {
+                    0.125
+                } else {
+                    0.0
+                }
+        })
+        .collect::<Vec<_>>();
+    let scale = branch_scale.to_vec();
+    let encode = |values: &[f32]| {
+        values
+            .iter()
+            .flat_map(|value| value.to_le_bytes())
+            .collect::<Vec<_>>()
+    };
+    let weight_payload = encode(&weights);
+    let base_payload = encode(&base);
+    let scale_payload = encode(&scale);
+    let mut tensor_hash = |name: String, payload: &[u8]| {
+        let offsets = header[name.as_str()]["data_offsets"].as_array().unwrap();
+        let start = data_start + offsets[0].as_u64().unwrap();
+        let end = data_start + offsets[1].as_u64().unwrap();
+        assert_eq!(end - start, payload.len() as u64, "wrong bytes for {name}");
+        shard.seek(SeekFrom::Start(start)).unwrap();
+        shard.write_all(payload).unwrap();
+        voltafabric::sha256::hex(payload)
+    };
+    let weight_hash = tensor_hash(format!("layers.0.{prefix}_fn"), &weight_payload);
+    let base_hash = tensor_hash(format!("layers.0.{prefix}_base"), &base_payload);
+    let scale_hash = tensor_hash(format!("layers.0.{prefix}_scale"), &scale_payload);
+    HcProjectionSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        branch,
+        normalization_epsilon: PINNED_HC_NORMALIZATION_EPSILON,
+        sinkhorn_epsilon: PINNED_HC_SINKHORN_EPSILON,
+        sinkhorn_iterations: PINNED_HC_SINKHORN_ITERATIONS,
+        tensor_sha256: HcProjectionTensorHashes {
+            weight: weight_hash,
+            base: base_hash,
+            scale: scale_hash,
+        },
+        max_payload_bytes: HC_PROJECTION_PAYLOAD_BYTES,
+    }
+}
+
 fn indexed_gate_route_payloads(
     include_shared: bool,
 ) -> (
@@ -501,6 +572,8 @@ fn indexed_gate_route_payloads(
     voltafabric::deepseek_v41_gate::DeepSeekV41RoutePayloadReads,
     Vec<f32>,
     Option<voltafabric::deepseek_v41_gate::DeepSeekV41SharedTokenOutput>,
+    voltafabric::deepseek_v41_gate::hc::DeepSeekV41HcMixes,
+    DeepSeekV41ResidualStream,
 ) {
     let index = include_bytes!(
         "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
@@ -529,9 +602,15 @@ fn indexed_gate_route_payloads(
         }
     }
     let mut text_bias_values = vec![0.0f32; ROUTED_EXPERTS];
-    // Keep expert 0 in the synthetic top-6 after the normalized activation
-    // changes the scale of the bit-plane gate logits.
-    text_bias_values[0] = 10_000.0;
+    // Pin the synthetic top-6 while the HC projection changes the routed row.
+    // The distinct biases resolve gate ordering; route coefficients still come
+    // from the gate scores and are applied once by the normal Collector path.
+    for (expert, bias) in TOP6
+        .into_iter()
+        .zip([10_000.0, 9_000.0, 8_000.0, 7_000.0, 6_000.0, 5_000.0])
+    {
+        text_bias_values[expert as usize] = bias;
+    }
     let image_bias_values = vec![0.0f32; ROUTED_EXPERTS];
     let encode = |values: &[f32]| {
         values
@@ -595,6 +674,20 @@ fn indexed_gate_route_payloads(
             }
         }
     }
+    let ffn_hc_spec = write_hc_projection_payloads(
+        &mut shard,
+        &header_value,
+        data_start,
+        HcProjectionBranch::Ffn,
+        1.0,
+    );
+    let attention_hc_spec = write_hc_projection_payloads(
+        &mut shard,
+        &header_value,
+        data_start,
+        HcProjectionBranch::Attention,
+        -0.5,
+    );
     drop(shard);
 
     let gate_spec = GateShardSpec {
@@ -646,6 +739,11 @@ fn indexed_gate_route_payloads(
         expected_header_sha256: HEADER_SHA256,
         max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
     };
+    let ffn_hc_projection =
+        DeepSeekV41HcProjection::load_indexed(temp.path(), gate_source, &ffn_hc_spec).unwrap();
+    let attention_hc_projection =
+        DeepSeekV41HcProjection::load_indexed(temp.path(), gate_source, &attention_hc_spec)
+            .unwrap();
     let layer = match shared_spec.as_ref() {
         Some(spec) => DeepSeekV41IndexedMoeLayer::load_with_ffn_norm_and_shared_expert(
             temp.path(),
@@ -664,10 +762,6 @@ fn indexed_gate_route_payloads(
         ),
     }
     .unwrap();
-    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
-    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
-        *value = (1u32 << bit) as f32;
-    }
     let stamp = Stamp {
         run_id: "r716-gate-to-grouped-session".to_owned(),
         model_revision: REVISION.to_owned(),
@@ -676,6 +770,19 @@ fn indexed_gate_route_payloads(
         batch: 9,
         epoch: 13,
     };
+    let residual_copies = (0..4)
+        .map(|copy| {
+            (0..HIDDEN_SIZE)
+                .map(|hidden| {
+                    let code = (copy * 17 + hidden * 7 + hidden % 13) % 23;
+                    independent_bf16_rne((code as f32 - 11.0) / 64.0)
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    let hc_residual = DeepSeekV41ResidualStream::new(stamp.clone(), 29, residual_copies).unwrap();
+    let hc_mixes = ffn_hc_projection.project(&hc_residual).unwrap();
+    let attention_mixes = attention_hc_projection.project(&hc_residual).unwrap();
     let registry = Registry {
         epoch: stamp.epoch,
         copies: TOP6
@@ -688,22 +795,58 @@ fn indexed_gate_route_payloads(
             })
             .collect(),
     };
-    let token_plan = layer
-        .prepare_ffn_token(
-            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedFfnTokenRequest {
-                hidden: &hidden,
+    let resident_order = BTreeMap::from([
+        (4, vec![0, 1]),
+        (5, vec![0]),
+        (6, vec![0]),
+        (7, vec![0]),
+        (8, vec![0]),
+    ]);
+    assert!(layer
+        .prepare_ffn_token_from_hc(
+            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedHcFfnTokenRequest {
+                mixes: &attention_mixes,
+                residual: &hc_residual,
                 token_kind: TokenKind::Text,
-                stamp: stamp.clone(),
-                attempt: 29,
                 registry: registry.clone(),
                 preferred_owners: BTreeMap::new(),
-                resident_order: BTreeMap::from([
-                    (4, vec![0, 1]),
-                    (5, vec![0]),
-                    (6, vec![0]),
-                    (7, vec![0]),
-                    (8, vec![0]),
-                ]),
+                resident_order: resident_order.clone(),
+                max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
+            },
+        )
+        .is_err());
+    let wrong_stamp = Stamp {
+        batch: stamp.batch + 1,
+        ..stamp.clone()
+    };
+    let wrong_residual = DeepSeekV41ResidualStream::new(
+        wrong_stamp,
+        hc_residual.attempt(),
+        hc_residual.copies_bf16_f32().to_vec(),
+    )
+    .unwrap();
+    assert!(layer
+        .prepare_ffn_token_from_hc(
+            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedHcFfnTokenRequest {
+                mixes: &hc_mixes,
+                residual: &wrong_residual,
+                token_kind: TokenKind::Text,
+                registry: registry.clone(),
+                preferred_owners: BTreeMap::new(),
+                resident_order: resident_order.clone(),
+                max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
+            },
+        )
+        .is_err());
+    let token_plan = layer
+        .prepare_ffn_token_from_hc(
+            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedHcFfnTokenRequest {
+                mixes: &hc_mixes,
+                residual: &hc_residual,
+                token_kind: TokenKind::Text,
+                registry: registry.clone(),
+                preferred_owners: BTreeMap::new(),
+                resident_order: resident_order.clone(),
                 max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
             },
         )
@@ -729,13 +872,7 @@ fn indexed_gate_route_payloads(
                 attempt: 29,
                 registry,
                 preferred_owners: BTreeMap::new(),
-                resident_order: BTreeMap::from([
-                    (4, vec![0, 1]),
-                    (5, vec![0]),
-                    (6, vec![0]),
-                    (7, vec![0]),
-                    (8, vec![0]),
-                ]),
+                resident_order,
                 max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
             },
         )
@@ -783,7 +920,15 @@ fn indexed_gate_route_payloads(
     assert_eq!(reads.attempt(), batch.attempt());
     assert_eq!(reads.route_fingerprint(), plan.route_fingerprint());
     assert_eq!(reads.reads().len(), TOP6.len());
-    (temp, batch, reads, activation, shared_output)
+    (
+        temp,
+        batch,
+        reads,
+        activation,
+        shared_output,
+        hc_mixes,
+        hc_residual,
+    )
 }
 
 #[test]
@@ -1146,7 +1291,8 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
 
 #[test]
 fn completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once() {
-    let (_checkpoint, batch, reads, input, shared_output) = indexed_gate_route_payloads(true);
+    let (_checkpoint, batch, reads, input, shared_output, hc_mixes, hc_residual) =
+        indexed_gate_route_payloads(true);
     let route = batch.problem();
     let route_stamp = route.stamp.clone();
     let route_attempt = batch.attempt();
@@ -1273,49 +1419,20 @@ fn completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once() {
         );
     }
 
-    let hc_residual_values = (0..4)
-        .map(|copy| {
-            input
-                .iter()
-                .map(|&value| {
-                    voltafabric::deepseek_v41::cast_bf16_rne_reference(
-                        value * ((copy + 1) as f32 / 4.0),
-                    )
-                    .unwrap()
-                })
-                .collect::<Vec<_>>()
-        })
-        .collect::<Vec<_>>();
-    let hc_residual = DeepSeekV41ResidualStream::new(
-        route_stamp.clone(),
-        route_attempt,
-        hc_residual_values.clone(),
-    )
-    .unwrap();
-    let hc_post = vec![0.75, 1.0, 0.875, 1.25];
-    let hc_comb = vec![
-        vec![0.5, 0.25, 0.125, 0.125],
-        vec![0.125, 0.5, 0.25, 0.125],
-        vec![0.25, 0.125, 0.5, 0.125],
-        vec![0.125, 0.125, 0.25, 0.5],
-    ];
-    let hc_coefficients = DeepSeekV41HcPostCoefficients::new(
-        route_stamp.clone(),
-        route_attempt,
-        HcProjectionBranch::Ffn,
-        hc_post.clone(),
-        hc_comb.clone(),
-    )
-    .unwrap();
-    let hc_output = deepseek_hc_post_reference(&combined, &hc_residual, &hc_coefficients).unwrap();
+    assert_eq!(hc_mixes.branch(), HcProjectionBranch::Ffn);
+    assert_eq!(hc_mixes.stamp(), &route_stamp);
+    assert_eq!(hc_mixes.attempt(), route_attempt);
+    let hc_output = hc_mixes.apply_ffn_post(&combined, &hc_residual).unwrap();
     assert_eq!(hc_output.stamp(), &route_stamp);
     assert_eq!(hc_output.attempt(), route_attempt);
     assert_eq!(hc_output.copies_bf16_f32().len(), 4);
+    let hc_post = hc_mixes.post_coefficients().post();
+    let hc_comb = hc_mixes.post_coefficients().comb();
     for destination in 0..4 {
         for hidden in 0..HIDDEN_SIZE {
             let residual_mix = (0..4).fold(0.0f64, |sum, source| {
                 sum + f64::from(hc_comb[destination][source])
-                    * f64::from(hc_residual_values[source][hidden])
+                    * f64::from(hc_residual.copies_bf16_f32()[source][hidden])
             });
             let expected = independent_bf16_rne(
                 (f64::from(hc_post[destination]) * f64::from(combined.output_bf16_f32()[hidden])

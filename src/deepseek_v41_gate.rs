@@ -1300,6 +1300,19 @@ pub struct DeepSeekV41IndexedFfnTokenRequest<'a> {
     pub max_total_selected_payload_bytes: u64,
 }
 
+/// One FFN token whose activation is produced by the identity-bound HC projection.
+/// Identity and activation are taken from `mixes` and `residual`; callers cannot
+/// accidentally route a different row under a copied stamp or attempt number.
+pub struct DeepSeekV41IndexedHcFfnTokenRequest<'a> {
+    pub mixes: &'a hc::DeepSeekV41HcMixes,
+    pub residual: &'a DeepSeekV41ResidualStream,
+    pub token_kind: TokenKind,
+    pub registry: crate::moe::Registry,
+    pub preferred_owners: BTreeMap<u32, u32>,
+    pub resident_order: BTreeMap<u32, Vec<u32>>,
+    pub max_total_selected_payload_bytes: u64,
+}
+
 /// Route and selected source ranges produced together by one resident indexed gate.
 /// The route remains private so callers cannot swap in expert IDs or coefficient bits.
 #[derive(Debug)]
@@ -2316,6 +2329,40 @@ impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
             token_kind: request.token_kind,
             stamp: request.stamp,
             attempt: request.attempt,
+            registry: request.registry,
+            preferred_owners: request.preferred_owners,
+            resident_order: request.resident_order,
+            max_total_selected_payload_bytes: request.max_total_selected_payload_bytes,
+        })
+    }
+
+    /// Connect the pinned FFN HC projection to this layer's existing normalized
+    /// gate and selected-expert plan. The HC branch, layer, run, model, plan,
+    /// batch, epoch and attempt come from the bound mixes; the residual stream
+    /// must carry the identical stamp/attempt. `ffn_norm` then runs once through
+    /// `prepare_ffn_token`, and the selected route remains the only coefficient
+    /// source for the existing grouped MXFP4 Collector.
+    pub fn prepare_ffn_token_from_hc(
+        &self,
+        request: DeepSeekV41IndexedHcFfnTokenRequest<'_>,
+    ) -> Result<DeepSeekV41IndexedMoeTokenPlan> {
+        let mixes = request.mixes;
+        if mixes.branch() != hc::HcProjectionBranch::Ffn
+            || mixes.stamp() != request.residual.stamp()
+            || mixes.attempt() != request.residual.attempt()
+            || mixes.stamp().layer != self.gate.receipt().layer
+            || mixes.stamp().model_revision != PINNED_MODEL_REVISION
+        {
+            return Err(invalid(
+                "DeepSeek HC FFN mixes, residual and indexed layer do not share one token identity",
+            ));
+        }
+        let hidden = mixes.apply_pre(request.residual)?;
+        self.prepare_ffn_token(DeepSeekV41IndexedFfnTokenRequest {
+            hidden: &hidden,
+            token_kind: request.token_kind,
+            stamp: mixes.stamp().clone(),
+            attempt: mixes.attempt(),
             registry: request.registry,
             preferred_owners: request.preferred_owners,
             resident_order: request.resident_order,

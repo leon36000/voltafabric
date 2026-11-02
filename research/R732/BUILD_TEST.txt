@@ -1,0 +1,26 @@
+R732 local CPU verification
+Date: 2026-11-02
+Workspace: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification
+
+Changed code targets
+- src/deepseek_v41_gate.rs
+- src/deepseek_v41_gate/hc.rs
+- tests/r712_deepseek_session_owner.rs
+
+Commands/results
+- rustfmt --edition 2021 src/deepseek_v41_gate.rs src/deepseek_v41_gate/hc.rs tests/r712_deepseek_session_owner.rs — PASS
+- cargo test --locked --test r712_deepseek_session_owner completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once -- --nocapture — PASS, debug 1/1, 96.91 s
+- cargo test --locked --release --test r712_deepseek_session_owner completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once -- --nocapture — PASS, release 1/1, 6.05 s
+- cargo clippy --locked --test r712_deepseek_session_owner -- -D warnings — PASS
+- cargo clippy --locked --lib -- -D warnings — PASS
+- rustfmt --edition 2021 --check src/deepseek_v41_gate.rs src/deepseek_v41_gate/hc.rs tests/r712_deepseek_session_owner.rs — PASS
+- Initial debug attempt — FAIL in fixture setup: the HC-derived synthetic activation selected experts outside the prebuilt registry. The fixture now assigns distinct correction biases to its intended top-6 while still deriving coefficients through the gate; the corrected debug and release runs above pass.
+
+CI/readback parent
+- R731 source commit: ff771291bc7530504996215d46ecb7900bcbfa16
+- Source pipeline #2570: SUCCESS, all configured jobs successful
+- Exact source readback: 7/7 (six manifest members plus SHA256SUMS)
+- R731 receipt commit: f12139a2b46dcabeb5c7164f85ac33e3bc973f4f
+- Receipt pipeline #2571: RUNNING at the time these local R732 checks completed
+
+Test data is synthetic. No real checkpoint tensor payload, GPU, model download, production network, R53 production reservation, benchmark, or UNKNOWN replay was used.

@@ -6,7 +6,8 @@
 
 use super::{
     checkpoint, invalid, validate_hc_identity, DeepSeekV41HcPostCoefficients,
-    DeepSeekV41ResidualStream, PinnedGateIndexSource, PINNED_MODEL_REVISION,
+    DeepSeekV41MoeTokenOutput, DeepSeekV41ResidualStream, PinnedGateIndexSource,
+    PINNED_MODEL_REVISION,
 };
 use crate::{deepseek_v41, Error, Result};
 use safetensors::tensor::Dtype;
@@ -148,6 +149,24 @@ impl DeepSeekV41HcMixes {
             .flat_map(|copy| copy.iter().copied())
             .collect::<Vec<_>>();
         deepseek_v41::deepseek_hc_pre_reference(&flattened, &self.pre_mix, super::HIDDEN_SIZE)
+    }
+
+    /// Apply this exact FFN branch's post/comb mixes to the completed routed-plus-
+    /// shared FFN result. Keeping this operation on the projection receipt prevents
+    /// callers from pairing post coefficients from another HC pass or sublayer.
+    pub fn apply_ffn_post(
+        &self,
+        sublayer: &DeepSeekV41MoeTokenOutput,
+        residual: &DeepSeekV41ResidualStream,
+    ) -> Result<DeepSeekV41ResidualStream> {
+        if self.branch != HcProjectionBranch::Ffn
+            || self.post_coefficients.branch() != HcProjectionBranch::Ffn
+        {
+            return Err(invalid(
+                "DeepSeek HC projection is not the FFN branch required by the routed MoE post",
+            ));
+        }
+        super::deepseek_hc_post_reference(sublayer, residual, &self.post_coefficients)
     }
 }
 

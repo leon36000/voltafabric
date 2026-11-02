@@ -1,0 +1,61 @@
+{
+  "id": "R732",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "parent_branch": "r731-deepseek-hc-projection-20261102",
+  "parent_commit": "f12139a2b46dcabeb5c7164f85ac33e3bc973f4f",
+  "source_files": [
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_gate/hc.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "adapted_boundary": "Identity-bound HC FFN mixes and residual -> HC-pre -> resident ffn_norm -> pinned gate/top-6 -> grouped CPU MXFP4 Sessions/Collector -> shared E4M3/E8M0 join -> same-pass HC-post and four-copy BF16 residual.",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "code_copied": false
+  },
+  "reused_voltafabric": [
+    "R712-R719 grouped MXFP4 CPU Session owner and FP32-preweighted Collector path",
+    "R721-R726 indexed Safetensors gate, selected expert and ffn_norm loading",
+    "R727-R730 shared FP8 reference, atomic join and HC-post",
+    "R731 indexed HC projection, HC-pre and identity/branch-bound mixes"
+  ],
+  "new_dependencies": false,
+  "fixture": "Official pinned index/header with synthetic HC, gate, ffn_norm, six MXFP4 experts and shared E4M3/E8M0 tensors in a sparse shard; the route receipt is produced by five live CPU Sessions.",
+  "verification": {
+    "r712_integrated_debug": "PASS 1/1, 96.91 s",
+    "r712_integrated_release": "PASS 1/1, 6.05 s",
+    "clippy_test_and_lib_warnings_denied": "PASS",
+    "rustfmt": "PASS",
+    "whitespace_scan": "PASS"
+  },
+  "oracle": "Existing independent resident MXFP4 route oracle; independent shared-sum BF16 RNE and f64 HC-post formula. R731 separately verifies HC projection/Sinkhorn against f64. No PyTorch/TileLang backend comparison.",
+  "source_pipeline": "PENDING",
+  "source_readback": "PENDING",
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "real_checkpoint_payload": false,
+  "complete_generation": false,
+  "attention_gdn": false,
+  "one_token_decode": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "route_or_coefficients_changed": false,
+  "limitations": [
+    "All selected tensors in the integrated fixture are synthetic",
+    "Only the FFN sublayer for one token is composed; attention/GDN is not connected",
+    "No tokenizer, output head, sampling step or autoregressive generation",
+    "No real checkpoint payload, PyTorch parity, GPU, inter-PC, production R53 or performance proof"
+  ],
+  "next_action": "R733: identify the smallest compatible, already-admitted DeepSeek attention/GDN block inputs and connect one source-pinned attention pass to the same residual identity; then evaluate a one-token decode path. No checkpoint download or GPU without fresh admission.",
+  "manifest": "research/R732/SHA256SUMS",
+  "manifest_sha256": "de1dfa716416357ee5fafa1160811a18215d0677a6387550b4fb84e85ebfd1d9",
+  "manifest_file_count": 5,
+  "branch": "r732-deepseek-hc-ffn-session-20261102",
+  "source_commit": "PENDING",
+  "published_utc": "PENDING"
+}

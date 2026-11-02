@@ -1,0 +1,23 @@
+{
+  "id": "R732",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "parent_commit": "f12139a2b46dcabeb5c7164f85ac33e3bc973f4f",
+  "branch": "r732-deepseek-hc-ffn-session-20261102",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "result": "The same identity-bound HC FFN projection now supplies HC-pre, one normalized top-6 route, shared join and HC-post across five CPU Sessions; the resulting four BF16 residual copies pass the independent formula.",
+  "verified": "Targeted R712 integration test passes debug/release; scoped Clippy with warnings denied, rustfmt and whitespace scan pass.",
+  "source_readback": "PENDING",
+  "pipeline": "PENDING",
+  "receipt_pending": true,
+  "real_checkpoint_payload": false,
+  "complete_generation": false,
+  "attention_gdn": false,
+  "one_token_decode": false,
+  "gpu": false,
+  "unknown_replayed": false,
+  "manifest": "research/R732/SHA256SUMS",
+  "manifest_sha256": "de1dfa716416357ee5fafa1160811a18215d0677a6387550b4fb84e85ebfd1d9",
+  "next_action": "Connect the smallest already-admitted DeepSeek attention/GDN block to the same residual identity, then continue toward one-token decode. No automatic relaunch."
+}
