@@ -1,0 +1,29 @@
+{
+  "id": "R706",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_CPU_CHECKS_PASS_PIPELINE_RUNNING",
+  "branch": "r706-deepseek-mxfp4-session-attempt-20261102",
+  "parent_commit": "66faf01f62356902fe4c5e99a96bf29ae2320c02",
+  "source_commit": "158eecd91e2bb7d2c1f32de5e13ad43aabffe129",
+  "paths": [
+    "src/deepseek_v41_gate.rs",
+    "src/session/mxfp4/series.rs",
+    "tests/r702_deepseek_gate_projection.rs"
+  ],
+  "readback_exact_files": 3,
+  "unit_tests_passed": 1,
+  "integration_tests_passed": 5,
+  "clippy": "PASS -D warnings",
+  "rustfmt": "PASS",
+  "diff_check": "PASS",
+  "pipeline_id": 2440,
+  "pipeline_status_at_report": "running",
+  "pipeline_scope": "configured scans and fallback only; not Rust compilation/tests",
+  "session_worker_started": false,
+  "real_checkpoint_loaded": false,
+  "full_generation": false,
+  "gpu": false,
+  "inter_pc_network": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R707: qualify the complete six-expert Session admission from exact resident bindings, with an atomic missing-expert refusal before any worker starts; continue to block DeepSeek execution until real gate bytes and experts 379-382 are available."
+}

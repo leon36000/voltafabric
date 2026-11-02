@@ -1,0 +1,19 @@
+Local CPU-only validation for R706.
+
+Worktree: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification
+Base checkout: detached R699 worktree, with existing uncommitted/untracked later-wave sources preserved.
+
+Commands and results:
+
+1. `rustfmt --edition 2021 --check src/session/mxfp4/series.rs src/deepseek_v41_gate.rs tests/r702_deepseek_gate_projection.rs`
+   PASS
+2. `CARGO_BUILD_JOBS=1 cargo test --offline --locked --lib mxfp4::series::tests::mxfp4_batch_attempts_are_explicit_nonzero_and_unique`
+   PASS: 1 passed
+3. `CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r702_deepseek_gate_projection`
+   PASS: 5 passed
+4. `CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --lib -- -D warnings`
+   PASS
+5. `git diff --check`
+   PASS
+
+No GPU, checkpoint, worker, production network or replay was used. The local `src/session/mxfp4.rs` is not byte-identical to R705; R706 does not edit it. This limits the validation claim to the available CPU worktree plus source readback and API inspection, not a clean checkout of the complete R705 branch. GitLab pipeline #2440 was running at publication time and is configured for scans/fallback only.
