@@ -1,0 +1,19 @@
+Environment: Rust 1.90.0 / Cargo 1.90.0; offline locked dependency graph; one build job.
+
+Command:
+CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r702_deepseek_gate_projection
+Result: 4 passed, 0 failed (three gate/oracle/import tests plus the new gate-to-memory-advice integration test).
+
+Command:
+CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --test r702_deepseek_gate_projection -- -D warnings
+Result: passed.
+
+Command:
+rustfmt --edition 2021 --check src/deepseek_v41_gate.rs tests/r702_deepseek_gate_projection.rs
+Result: passed.
+
+Command:
+git diff --check
+Result: passed.
+
+Scope: CPU synthetic gate fixture; one synthetic topology rank; six synthetic expert profiles and memory envelopes. No real checkpoint, model generation, Session dispatch, GPU, RDMA, or inter-PC transport.

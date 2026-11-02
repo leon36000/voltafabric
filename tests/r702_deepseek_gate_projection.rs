@@ -5,6 +5,12 @@ use voltafabric::deepseek_v41_gate::{
     GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, ROUTED_EXPERTS,
     ROUTE_SCALE,
 };
+use voltafabric::{
+    cost::{CostOrigin, CostProvenance},
+    planner::{ExpertProfile, PerRankMemoryEnvelope, PlacementProblem, WirePolicy},
+    topology::{Device, Origin, Topology},
+    traffic::WireFormat,
+};
 
 fn fixture() -> (Vec<u8>, GateShardSpec) {
     fixture_with_weight_layout(Dtype::BF16, vec![ROUTED_EXPERTS, HIDDEN_SIZE])
@@ -243,4 +249,145 @@ fn projection_import_fails_closed_on_revision_hash_shape_and_budget() {
     let mut short_budget = spec;
     short_budget.max_payload_bytes = GATE_PAYLOAD_BYTES - 1;
     assert!(DeepSeekV41Gate::load(&mut std::io::Cursor::new(&shard), &short_budget).is_err());
+}
+
+#[test]
+fn deepseek_gate_batch_flows_through_memory_advice_without_changing_route_identity() {
+    let (shard, spec) = fixture();
+    let gate = DeepSeekV41Gate::load(&mut std::io::Cursor::new(&shard), &spec).unwrap();
+    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
+    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
+        *value = (1u32 << bit) as f32;
+    }
+    let selected = [0, 383, 382, 381, 380, 379];
+    let stamp = voltafabric::moe::Stamp {
+        run_id: "r705-memory-advisory".into(),
+        model_revision: PINNED_MODEL_REVISION.into(),
+        plan_id: "r705-synthetic-plan".into(),
+        layer: 0,
+        batch: 8,
+        epoch: 13,
+    };
+    let registry = voltafabric::moe::Registry {
+        epoch: stamp.epoch,
+        copies: selected
+            .iter()
+            .enumerate()
+            .map(|(local, &expert)| voltafabric::moe::Replica {
+                expert,
+                rank: 4,
+                local: local as u32,
+            })
+            .collect(),
+    };
+    let batch = gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            stamp.clone(),
+            31,
+            registry,
+            BTreeMap::new(),
+            BTreeMap::from([(4, (0..6).collect())]),
+        )
+        .unwrap();
+    let route_before = batch.problem().routes[0]
+        .iter()
+        .map(|choice| (choice.expert, choice.weight.to_bits()))
+        .collect::<Vec<_>>();
+    let registry_before = batch.problem().registry.clone();
+    let weights = route_before
+        .iter()
+        .map(|(_, weight_bits)| format!("{weight_bits:016x}"))
+        .collect::<Vec<_>>();
+    let base = PlacementProblem {
+        topology: Topology {
+            schema_version: 1,
+            origin: Origin::Synthetic,
+            source_note: "R705 deterministic CPU fixture; not a hardware measurement".into(),
+            devices: vec![Device {
+                rank: 4,
+                host: "cpu-fixture".into(),
+                capacity_bytes: 1_000_000,
+                reserved_bytes: 8_192,
+            }],
+            links: vec![],
+        },
+        experts: selected
+            .iter()
+            .map(|&id| ExpertProfile {
+                id,
+                resident_bytes: 2_048,
+                compute_us: 1.0,
+                cost_provenance: CostProvenance {
+                    origin: CostOrigin::Synthetic,
+                    source: Some("R705 deterministic fixture; not a hardware measurement".into()),
+                },
+            })
+            .collect(),
+        demands: vec![],
+        hidden: HIDDEN_SIZE as u64,
+        wire: WireFormat::default(),
+        max_iterations: 0,
+        wire_policy: WirePolicy::Adaptive,
+        max_work_units: 1_000_000,
+    };
+    let envelope = PerRankMemoryEnvelope {
+        rank: 4,
+        resident_expert_bytes: 512,
+        kv_bytes: 1_024,
+        recurrent_bytes: 256,
+        workspace_bytes: 512,
+        graph_bytes: 1_024,
+        communication_bytes: 128,
+        safety_margin_bytes: 1_024,
+        load_temporary_bytes: 512,
+    };
+
+    let advice = batch
+        .plan_memory_advisory(&base, 4, std::slice::from_ref(&envelope))
+        .unwrap();
+    assert_eq!(advice.routed.stamp, stamp);
+    assert_eq!(advice.routed.attempt, 31);
+    assert_eq!(advice.routed.source_rank, 4);
+    assert_eq!(
+        advice.routed.route_experts_by_token,
+        vec![selected.to_vec()]
+    );
+    assert_eq!(advice.routed.route_weight_bits_hex_by_token, vec![weights]);
+    assert_eq!(advice.ranks.len(), 1);
+    assert!(advice.ranks[0].loading_peak_bytes <= advice.ranks[0].capacity_bytes);
+    assert_eq!(
+        batch.problem().routes[0]
+            .iter()
+            .map(|choice| (choice.expert, choice.weight.to_bits()))
+            .collect::<Vec<_>>(),
+        route_before
+    );
+    assert_eq!(batch.problem().registry.epoch, registry_before.epoch);
+    assert_eq!(
+        batch.problem().registry.copies.len(),
+        registry_before.copies.len()
+    );
+
+    let wrong_rank = PerRankMemoryEnvelope {
+        rank: 5,
+        ..envelope.clone()
+    };
+    assert!(batch.plan_memory_advisory(&base, 4, &[wrong_rank]).is_err());
+    let over_budget = PerRankMemoryEnvelope {
+        kv_bytes: u64::MAX,
+        ..envelope
+    };
+    assert!(batch
+        .plan_memory_advisory(&base, 4, &[over_budget])
+        .is_err());
+    assert_eq!(
+        batch.problem().routes[0]
+            .iter()
+            .map(|choice| (choice.expert, choice.weight.to_bits()))
+            .collect::<Vec<_>>(),
+        route_before
+    );
+    assert_eq!(batch.problem().registry.epoch, registry_before.epoch);
 }

@@ -1,0 +1,44 @@
+{
+  "round": "R705",
+  "status": "CPU_SYNTHETIC_DEEPSEEK_GATE_TO_MEMORY_ADVICE_PASS",
+  "branch": "r705-deepseek-gate-memory-advice-20261102",
+  "parent_commit": "a9a3c13aa68cc9332d511538206c5dc376608d1d",
+  "source_commit": "PENDING",
+  "component": "DeepSeekV41RouteBatch to existing VoltaFabric memory-aware placement advice",
+  "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "adaptation": "Thin bridge to planner::plan_routing_advisory_with_memory; no donor code copied in R705",
+  "route_contract": {
+    "attempt_carried": true,
+    "stamp_preserved": true,
+    "route_coefficients_recomputed": false,
+    "exact_f64_weight_bits_checked": true,
+    "input_registry_and_routes_mutated": false
+  },
+  "memory_contract": {
+    "one_envelope_per_rank_required": true,
+    "rank_mismatch_rejected": true,
+    "over_budget_rejected": true,
+    "steady_and_loading_peaks_checked": true,
+    "placement_advisory_only": true
+  },
+  "test": {
+    "target": "r702_deepseek_gate_projection",
+    "passed": 4,
+    "failed": 0,
+    "clippy_warnings_as_errors": "pass",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "fixture": "synthetic Safetensors gate, logits 0..383, synthetic six expert profiles and one-rank topology",
+  "real_checkpoint_loaded": false,
+  "weights_resident": false,
+  "session_dispatch": false,
+  "complete_generation": false,
+  "gpu": false,
+  "rdma": false,
+  "inter_pc_transport": false,
+  "production_network": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER; work only in the current owner-requested turn",
+  "next_action": "R706: advance from route and memory advice toward a Session execution boundary using only already-coherent payloads and exact full identities. Keep DeepSeek dispatch refused until the real gate, all six expert payload profiles, resident ownership, and memory admission are available; no checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+}

@@ -220,6 +220,24 @@ impl DeepSeekV41RouteBatch {
     pub fn attempt(&self) -> u64 {
         self.attempt
     }
+
+    /// Bind this validated route to VoltaFabric's existing route-aware memory planner.
+    /// This returns advisory placement only: it does not load, move, or dispatch weights.
+    /// The stored attempt and gate coefficients pass through unchanged.
+    pub fn plan_memory_advisory(
+        &self,
+        base: &crate::planner::PlacementProblem,
+        source_rank: u32,
+        envelopes: &[crate::planner::PerRankMemoryEnvelope],
+    ) -> Result<crate::planner::RoutedPlacementMemoryAdvice> {
+        crate::planner::plan_routing_advisory_with_memory(
+            base,
+            &self.problem,
+            self.attempt,
+            source_rank,
+            envelopes,
+        )
+    }
 }
 
 /// Resident CPU projection weights and the pinned selector. This deliberately
