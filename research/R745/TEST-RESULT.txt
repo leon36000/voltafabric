@@ -1,0 +1,21 @@
+R745 CPU targeted verification
+
+Command (debug):
+cargo test --offline --manifest-path .runs/r745-work/research/R745/cpu-harness/Cargo.toml --features deepseek-v41-stream
+Result: 18 passed, 0 failed, 3 ignored. The ignored tests require the exact external tokenizer fixture VF_DEEPSEEK_V41_TOKENIZER_JSON.
+
+Command (release):
+cargo test --release --offline --manifest-path .runs/r745-work/research/R745/cpu-harness/Cargo.toml --features deepseek-v41-stream
+Result: 18 passed, 0 failed, 3 ignored.
+
+Command (clippy):
+cargo clippy --offline --manifest-path .runs/r745-work/research/R745/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets
+Result: exit 0. Two warnings remain for unused test SHA-256 byte-counter helpers in the inherited isolated harness.
+
+Command (format):
+rustfmt --edition 2021 --check --config skip_children=true .runs/r745-work/root-src/lib.rs .runs/r745-work/src/deepseek_v41_head.rs .runs/r745-work/src/deepseek_v41_sampler.rs .runs/r745-work/research/R745/cpu-harness/src/lib.rs
+Result: exit 0.
+
+Oracle: 97 deterministic full-vocabulary FP32 rows were flattened and scanned independently, then compared against per-range local argmax records accepted in reverse rank order. All selected token IDs and scores matched, including injected ties and -infinity masks.
+
+Scope: CPU only, small synthetic vocabularies; no actual model logits, checkpoint, serialization, authenticated transport, worker process, GPU, inter-PC traffic, production R53, full crate build or performance measurement.

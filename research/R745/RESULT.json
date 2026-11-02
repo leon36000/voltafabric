@@ -1,0 +1,69 @@
+{
+  "id": "R745",
+  "title": "CPU reduction of vocabulary-sharded DeepSeek V4.1 greedy logits",
+  "status": "SOURCE_PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
+  "upstream": {
+    "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "license_sha256": "f2c6c602815669d292889e5be8c802f2ed950653b77999b1584e8e6aed25d040",
+    "config_sha256": "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879",
+    "pinned_vocab_size": 129280,
+    "source": "inference/model.py ParallelHead.forward",
+    "adapted_behavior": "rank-local FP32 vocabulary logits are reduced to one (score, global token_id) pair per rank before global greedy selection",
+    "source_code_copied": false
+  },
+  "implementation": {
+    "files": [
+      "src/deepseek_v41_head.rs",
+      "src/deepseek_v41_sampler.rs",
+      "src/lib.rs"
+    ],
+    "partition_admission": "complete contiguous [0,vocab_size) coverage, unique ranks, tokenizer digest and canonical plan SHA256",
+    "partial_identity": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "layer",
+      "batch",
+      "epoch",
+      "attempt",
+      "token_index",
+      "tokenizer_sha256",
+      "vocabulary_plan_sha256",
+      "rank"
+    ],
+    "reduction": "local FP32 argmax emits at most one pair per rank; coordinator rejects duplicates, wrong range/identity, invalid scores and missing ranks atomically",
+    "tie_policy": "highest FP32 score, then lowest global token ID, independent of arrival/rank order",
+    "source_code_copied": false,
+    "routes_or_coefficients_changed": false,
+    "weights_or_owners_changed": false
+  },
+  "verification": {
+    "debug_feature_stream": "18 passed, 0 failed, 3 ignored",
+    "release_feature_stream": "18 passed, 0 failed, 3 ignored",
+    "independent_flat_oracle_cases": 97,
+    "rustfmt_check": "pass",
+    "clippy": "exit 0; two existing unused SHA test-counter warnings remain",
+    "pinned_tokenizer_fixture": false,
+    "full_repository_build": false,
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false
+  },
+  "publication": {
+    "branch": "r745-vocab-shard-greedy-20261102",
+    "parent_commit": "153a57ab9d550cf2be41cd99f40d225a563eee5d",
+    "source_commit": "a8069e854421fdf056a2bf44c68cd4f2ed73480b",
+    "pipeline_id": null,
+    "pipeline_status": "running",
+    "exact_readback": true,
+    "readback_files_verified": 4,
+    "source_pipeline_id": 2631
+  },
+  "next_action": "Define an authenticated, versioned partial transport and wire it to compatible resident checkpoint LM-head shards; retain atomic completeness and defer hardware/network admission."
+}

@@ -12320,5 +12320,48 @@
       "research/R744/SHA256SUMS"
     ],
     "receipt_handoff_records_present": true
+  },
+  "r745_deepseek_v41_vocab_greedy": {
+    "id": "R745",
+    "owner": "integrator",
+    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
+    "branch": "r745-vocab-shard-greedy-20261102",
+    "parent_commit": "153a57ab9d550cf2be41cd99f40d225a563eee5d",
+    "source_commit": "a8069e854421fdf056a2bf44c68cd4f2ed73480b",
+    "source_pipeline_id": 2631,
+    "source_pipeline_status": "running",
+    "path": "research/R745",
+    "code_files": [
+      "src/deepseek_v41_head.rs",
+      "src/deepseek_v41_sampler.rs",
+      "src/lib.rs",
+      "docs/ARCHITECTURE.md"
+    ],
+    "report": "research/R745/REPORT.md",
+    "result": "research/R745/RESULT.json",
+    "test_result": "research/R745/TEST-RESULT.txt",
+    "manifest": "research/R745/SHA256SUMS",
+    "manifest_sha256": "75fa90291e6c1cddcfe8a4f0994bac5ee2f81226b95ea3058fba57f9fb36245d",
+    "manifest_file_count": 10,
+    "donor": "DeepSeek-V4.1-Flash",
+    "donor_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "donor_license": "MIT",
+    "source_code_copied": false,
+    "adapted_behavior": "one FP32 (score, token_id) winner per vocabulary shard, atomically reduced under exact run/model/plan/layer/batch/epoch/attempt/token identity",
+    "verification": "debug and release CPU harness 18 passed, 0 failed, 3 ignored; 97 independent flat-oracle rows; rustfmt pass; Clippy exit 0 with two existing SHA-counter warnings",
+    "source_readback_exact": true,
+    "source_readback_files_verified": 4,
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "active_operations": [],
+    "receipt_pending": true,
+    "next_action": "Wait for source CI, then verify all R745 artifacts exactly; next implement only an authenticated partial transport and connect compatible resident LM-head shards under a fresh network/hardware admission."
   }
+}
 }

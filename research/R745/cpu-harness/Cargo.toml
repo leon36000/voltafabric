@@ -1,0 +1,17 @@
+[package]
+name = "r744-deepseek-prompt-feature-harness"
+version = "0.1.0"
+edition = "2021"
+
+[features]
+deepseek-v41-stream = ["dep:deepseek-recipe", "dep:tokio", "dep:tokio-stream"]
+
+[dependencies]
+deepseek-recipe-core = "=0.2.0"
+deepseek-recipe-encoding = "=0.2.0"
+deepseek-recipe = { version = "=0.2.0", optional = true }
+tokenizers = "=0.23.2"
+tokio = { version = "=1.48.0", features = ["macros", "rt"], optional = true }
+tokio-stream = { version = "=0.1.18", optional = true }
+
+[workspace]
