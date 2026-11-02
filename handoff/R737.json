@@ -1,0 +1,23 @@
+{
+  "id": "R737",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_COMPOSITION_CHECKED_PRIVATE_GITLAB_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
+  "active_operations": [],
+  "summary": "Added a one-token pure-window attention+FFN composition with a one-shot route receipt boundary and full-block KV commit only after the FFN HC join succeeds.",
+  "verification": "cargo fmt --all -- --check, cargo check --locked --lib, cargo clippy --locked --lib -- -D warnings passed; no tests or independent oracle run.",
+  "parent": {
+    "branch": "r736-deepseek-window-output-20261102",
+    "commit": "2f194bd2d6f0003c9434343359527bca9399aa43",
+    "pipeline_id": 2586,
+    "pipeline_status": "success"
+  },
+  "source_files": [
+    "src/deepseek_v41_window_block.rs",
+    "src/lib.rs"
+  ],
+  "manifest": "research/R737/SHA256SUMS",
+  "manifest_sha256": "420a1df24990dfe2f37c91618c12afc72e827967296e3ada923874894ab1e070",
+  "receipt_pending": true,
+  "next_action": "R738: bind the route boundary to resident MXFP4 owners and persistent Sessions without hot-path LOAD, then define an independent numeric oracle."
+}

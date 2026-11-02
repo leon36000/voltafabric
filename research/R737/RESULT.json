@@ -1,0 +1,64 @@
+{
+  "id": "R737",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_COMPOSITION_CHECKED_PRIVATE_GITLAB_PENDING",
+  "parent_branch": "r736-deepseek-window-output-20261102",
+  "parent_commit": "2f194bd2d6f0003c9434343359527bca9399aa43",
+  "target_branch": "r737-deepseek-window-block-20261102",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "code_copied": false
+  },
+  "source_files": [
+    "src/deepseek_v41_window_block.rs",
+    "src/lib.rs"
+  ],
+  "composition": [
+    "attention HC-pre and pinned pure-window attention",
+    "attention HC-post",
+    "FFN HC-pre and gate-selected top-6 plan",
+    "resident shared expert reference",
+    "one-shot route receipt identity/fingerprint check",
+    "existing FP32-preweighted Collector result plus shared output exactly once",
+    "FFN HC-post"
+  ],
+  "atomicity": {
+    "outer_kv_candidate_clone": true,
+    "caller_cache_committed_after_complete_block_only": true,
+    "aborted_or_unknown_route_publishes_output": false,
+    "automatic_retry": false
+  },
+  "residency": {
+    "checkpoint_payload_read_by_this_module": false,
+    "executor_must_use_resident_rank_owners": true,
+    "residency_attested_by_this_closure_type": false
+  },
+  "verification": {
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_lib": "PASS",
+    "cargo_clippy_warnings_denied": "PASS",
+    "tests_added_or_run": false,
+    "independent_numeric_oracle": false
+  },
+  "actual_checkpoint_payload_loaded": false,
+  "real_route_executor_connected": false,
+  "complete_layer_executed": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER; this work ran only in response to the current owner request",
+  "limitations": [
+    "The route executor is a trust boundary and must prove persistent owner residency outside this module",
+    "No live Session executor or real checkpoint tensors were connected",
+    "No tests, independent numerical oracle, GPU, tokenizer, logits, sampler, or generation"
+  ],
+  "manifest": "research/R737/SHA256SUMS",
+  "manifest_sha256": "420a1df24990dfe2f37c91618c12afc72e827967296e3ada923874894ab1e070",
+  "receipt_pending": true,
+  "next_action": "R738: bind the one-shot callback to resident MXFP4 owners and persistent Sessions without hot-path LOAD, then specify an independent numerical oracle."
+}
