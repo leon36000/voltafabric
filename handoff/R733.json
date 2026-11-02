@@ -1,7 +1,7 @@
 {
   "id": "R733",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "automatic_continuation": "STOPPED_BY_OWNER",
   "active_operations": [],
   "summary": "Added a bounded identity-bound CPU reference for the pinned DeepSeek sliding KV window and denominator-only attention sink. Four debug and release tests, fmt and Clippy pass.",
@@ -11,9 +11,9 @@
     "license": "MIT",
     "code_copied": false
   },
-  "source_pipeline": "PENDING",
-  "source_readback": "PENDING",
-  "receipt_pending": true,
+  "source_pipeline": "SUCCESS #2575; all four jobs passed",
+  "source_readback": "7/7 source commit members exactly verified at commit 71a9d5e3e006ffdf8a31687ab0b909561ace855f",
+  "receipt_pending": false,
   "real_checkpoint_payload": false,
   "complete_attention_pass": false,
   "complete_generation": false,
@@ -25,5 +25,14 @@
     "Projection/RMSNorm/RoPE, compressed attention, output projection and HC-post remain unconnected",
     "f64 reference is not PyTorch/TileLang bitwise parity"
   ],
-  "next_action": "R734: connect the already-pinned attention projections and norms to this identity-bound window with bounded synthetic tensors; no model download or GPU without admission."
+  "next_action": "R734: add the pinned low-rank query and KV projection/RMSNorm boundary with indexed Safetensors admission; stop before RoPE/attention and preserve exact identity. No model download or GPU.",
+  "source_commit": "71a9d5e3e006ffdf8a31687ab0b909561ace855f",
+  "source_pipeline_id": 2575,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  }
 }

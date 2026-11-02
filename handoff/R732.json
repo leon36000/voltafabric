@@ -29,5 +29,6 @@
   "unknown_replayed": false,
   "manifest": "research/R732/SHA256SUMS",
   "manifest_sha256": "de1dfa716416357ee5fafa1160811a18215d0677a6387550b4fb84e85ebfd1d9",
-  "next_action": "Connect the smallest already-admitted DeepSeek attention/GDN block to the same residual identity, then continue toward one-token decode. No automatic relaunch."
+  "next_action": "Connect the smallest already-admitted DeepSeek attention/GDN block to the same residual identity, then continue toward one-token decode. No automatic relaunch.",
+  "r732_receipt_pipeline": "SUCCESS #2574; all four jobs passed"
 }

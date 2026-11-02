@@ -68,5 +68,6 @@
   },
   "source_readback_exact": true,
   "source_readback_files_verified": 8,
-  "r731_receipt_pipeline": "SUCCESS #2571"
+  "r731_receipt_pipeline": "SUCCESS #2571",
+  "r732_receipt_pipeline": "SUCCESS #2574; gitleaks, semgrep, trivy and pc4_ci_fallback all passed"
 }

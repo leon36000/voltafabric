@@ -1,7 +1,7 @@
 {
   "id": "R733",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_branch": "r732-deepseek-hc-ffn-session-20261102",
   "parent_commit": "570d025cf2952f0f4d1ff66aef8cfdca4ca97cb2",
   "source_files": [
@@ -41,11 +41,11 @@
   "production_r53": false,
   "performance_measured": false,
   "route_or_coefficients_changed": false,
-  "source_pipeline": "PENDING",
-  "source_readback": "PENDING",
+  "source_pipeline": "SUCCESS #2575; gitleaks, semgrep, trivy and pc4_ci_fallback all passed",
+  "source_readback": "7/7 source commit members read back exactly from GitLab commit 71a9d5e3e006ffdf8a31687ab0b909561ace855f",
   "branch": "r733-deepseek-window-attention-20261102",
-  "source_commit": "PENDING",
-  "published_utc": "PENDING",
+  "source_commit": "71a9d5e3e006ffdf8a31687ab0b909561ace855f",
+  "published_utc": "2026-11-02T17:24:12Z",
   "manifest": "research/R733/SHA256SUMS",
   "manifest_file_count": 4,
   "manifest_sha256": "d9e49d9edcf7f185045921f6ecd5f91fe90ee54d765e92b712de36d3f91a2a42",
@@ -56,5 +56,15 @@
     "No output projection, HC-post composition, tokenizer, logits, sampler or generated token",
     "No real checkpoint payload, GPU, inter-PC, production R53 or performance proof"
   ],
-  "next_action": "R734: connect pinned attention input projections and norms to the identity-bound KV window using synthetic selected tensors; retain separate output-projection and HC-post boundaries."
+  "next_action": "R734: add the pinned low-rank query and KV projection/RMSNorm boundary with indexed Safetensors admission; stop before RoPE/attention and preserve exact identity. No model download or GPU.",
+  "source_pipeline_id": 2575,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7
 }
