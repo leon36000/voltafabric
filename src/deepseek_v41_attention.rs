@@ -50,7 +50,7 @@ impl DeepSeekV41WindowAttentionOutput {
 /// One-sequence sliding KV ring for the pinned sparse-attention window path.
 /// It is bound at construction to one full VoltaFabric token identity and
 /// attempt; each append must be the next absolute token position.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct DeepSeekV41WindowCache {
     stamp: Stamp,
     attempt: u64,

@@ -1,0 +1,40 @@
+{
+  "id": "R736",
+  "date": "2026-11-02",
+  "state": "LOCAL_SOURCE_CPU_CHECKED_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
+  "active_operations": [],
+  "summary": "Added a bounded, indexed DeepSeek pure-window attention output projection and its attention-branch HC residual join. The KV candidate cache commits only after the complete sublayer succeeds.",
+  "verification": "cargo fmt --all -- --check, cargo check --locked --lib and cargo clippy --locked --lib -- -D warnings passed. No tests or numerical oracle run.",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "code_copied": false
+  },
+  "parent": {
+    "branch": "r735-deepseek-window-rope-20261102",
+    "commit": "20ab446be96a55eb0a6347fb58ccc89444358f9e",
+    "pipeline_id": 2582,
+    "pipeline_status": "success"
+  },
+  "source_files": [
+    "src/deepseek_v41.rs",
+    "src/deepseek_v41_attention.rs",
+    "src/deepseek_v41_attention_output.rs",
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_gate/hc.rs",
+    "src/deepseek_v41_rope.rs",
+    "src/lib.rs"
+  ],
+  "payload_cap_bytes": 117440512,
+  "actual_model_payload_loaded": false,
+  "complete_generation": false,
+  "gpu": false,
+  "unknown_replayed": false,
+  "manifest": "research/R736/SHA256SUMS",
+  "manifest_sha256": "d912a6d1e663243e39d6a1e0122f40e9e3bf691da1aba18a3612515c26f490e0",
+  "receipt_pending": true,
+  "next_action": "R737: connect R736 attention to the existing pinned gate, VoltaFabric expert owners and FFN path for one identified full layer, and define an independent numeric oracle before extending to compressed-KV attention."
+}

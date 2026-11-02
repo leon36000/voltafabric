@@ -471,14 +471,49 @@ pub fn deepseek_hc_post_reference(
     coefficients: &DeepSeekV41HcPostCoefficients,
 ) -> Result<DeepSeekV41ResidualStream> {
     let stamp = sublayer.stamp();
-    validate_hc_identity(stamp, sublayer.attempt())?;
+    deepseek_hc_post_row(
+        stamp,
+        sublayer.attempt(),
+        sublayer.output_bf16_f32(),
+        residual,
+        coefficients,
+        hc::HcProjectionBranch::Ffn,
+    )
+}
+
+/// Apply the pinned post-attention HC residual mix after a complete attention
+/// output row. The attention and FFN branches are kept distinct at this boundary.
+pub fn deepseek_hc_attention_post_reference(
+    sublayer: &crate::deepseek_v41_attention_output::DeepSeekV41AttentionSublayerOutput,
+    residual: &DeepSeekV41ResidualStream,
+    coefficients: &DeepSeekV41HcPostCoefficients,
+) -> Result<DeepSeekV41ResidualStream> {
+    deepseek_hc_post_row(
+        sublayer.stamp(),
+        sublayer.attempt(),
+        sublayer.output_bf16_f32(),
+        residual,
+        coefficients,
+        hc::HcProjectionBranch::Attention,
+    )
+}
+
+fn deepseek_hc_post_row(
+    stamp: &crate::moe::Stamp,
+    attempt: u64,
+    output_bf16_f32: &[f32],
+    residual: &DeepSeekV41ResidualStream,
+    coefficients: &DeepSeekV41HcPostCoefficients,
+    expected_branch: hc::HcProjectionBranch,
+) -> Result<DeepSeekV41ResidualStream> {
+    validate_hc_identity(stamp, attempt)?;
     if stamp != residual.stamp()
         || stamp != &coefficients.stamp
-        || sublayer.attempt() != residual.attempt()
-        || sublayer.attempt() != coefficients.attempt
-        || coefficients.branch != hc::HcProjectionBranch::Ffn
-        || sublayer.output_bf16_f32.len() != HIDDEN_SIZE
-        || sublayer.output_bf16_f32.iter().any(|value| {
+        || attempt != residual.attempt()
+        || attempt != coefficients.attempt
+        || coefficients.branch != expected_branch
+        || output_bf16_f32.len() != HIDDEN_SIZE
+        || output_bf16_f32.iter().any(|value| {
             !value.is_finite()
                 || crate::deepseek_v41::cast_bf16_rne_reference(*value)
                     .map(|rounded| rounded.to_bits() != value.to_bits())
@@ -494,7 +529,7 @@ pub fn deepseek_hc_post_reference(
     let mut outputs = Vec::with_capacity(crate::deepseek_v41::PINNED_HC_MULT);
     for destination in 0..crate::deepseek_v41::PINNED_HC_MULT {
         let mut row = Vec::with_capacity(HIDDEN_SIZE);
-        for hidden in 0..HIDDEN_SIZE {
+        for (hidden, &attention_value) in output_bf16_f32.iter().enumerate() {
             let mut residual_mix = 0.0f32;
             for source in 0..crate::deepseek_v41::PINNED_HC_MULT {
                 residual_mix += coefficients.comb[destination][source]
@@ -506,8 +541,7 @@ pub fn deepseek_hc_post_reference(
                     ));
                 }
             }
-            let value =
-                coefficients.post[destination] * sublayer.output_bf16_f32[hidden] + residual_mix;
+            let value = coefficients.post[destination] * attention_value + residual_mix;
             if !value.is_finite() {
                 return Err(Error::new(
                     "NUMERICAL_OVERFLOW",
@@ -518,7 +552,7 @@ pub fn deepseek_hc_post_reference(
         }
         outputs.push(row);
     }
-    DeepSeekV41ResidualStream::new(stamp.clone(), sublayer.attempt(), outputs)
+    DeepSeekV41ResidualStream::new(stamp.clone(), attempt, outputs)
 }
 
 /// Add the shared expert exactly once after the routed FP32-preweighted Collector

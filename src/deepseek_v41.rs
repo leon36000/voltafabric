@@ -98,6 +98,25 @@ impl Fp8ActivationQuantized {
         }
         Ok(values)
     }
+
+    /// Reconstruct the pinned fake-quant/dequant activation boundary as exact
+    /// BF16 values represented in FP32. This is used by the CPU output-projection
+    /// reference; it is not a device buffer or a GEMM result.
+    pub fn dequantized_bf16_f32(&self) -> Result<Vec<f32>> {
+        self.dequantized_values_f64()?
+            .into_iter()
+            .map(|value| {
+                let value = value as f32;
+                if !value.is_finite() {
+                    return Err(Error::new(
+                        "NUMERICAL_OVERFLOW",
+                        "dequantized FP8 activation does not fit finite FP32",
+                    ));
+                }
+                cast_bf16_rne_reference(value)
+            })
+            .collect()
+    }
 }
 
 fn e4m3fn_positive(code: u8) -> f32 {

@@ -103,6 +103,7 @@ pub struct DeepSeekV41HcMixes {
     branch: HcProjectionBranch,
     pre_mix: Box<[f32]>,
     post_coefficients: DeepSeekV41HcPostCoefficients,
+    receipt: HcProjectionLoadReceipt,
 }
 
 impl DeepSeekV41HcMixes {
@@ -132,6 +133,10 @@ impl DeepSeekV41HcMixes {
 
     pub fn comb(&self) -> &[Vec<f32>] {
         self.post_coefficients.comb()
+    }
+
+    pub fn receipt(&self) -> &HcProjectionLoadReceipt {
+        &self.receipt
     }
 
     /// Apply this HC pre-vector to the exact residual stream that produced it.
@@ -167,6 +172,22 @@ impl DeepSeekV41HcMixes {
             ));
         }
         super::deepseek_hc_post_reference(sublayer, residual, &self.post_coefficients)
+    }
+
+    /// Apply the matching attention HC branch to a completed attention row.
+    pub fn apply_attention_post(
+        &self,
+        sublayer: &crate::deepseek_v41_attention_output::DeepSeekV41AttentionSublayerOutput,
+        residual: &DeepSeekV41ResidualStream,
+    ) -> Result<DeepSeekV41ResidualStream> {
+        if self.branch != HcProjectionBranch::Attention
+            || self.post_coefficients.branch() != HcProjectionBranch::Attention
+        {
+            return Err(invalid(
+                "DeepSeek HC projection is not the attention branch required by attention post",
+            ));
+        }
+        super::deepseek_hc_attention_post_reference(sublayer, residual, &self.post_coefficients)
     }
 }
 
@@ -408,6 +429,7 @@ impl DeepSeekV41HcProjection {
                 sinkhorn_iterations: self.sinkhorn_iterations,
                 epsilon: self.sinkhorn_epsilon,
             },
+            &self.receipt,
         )
     }
 }
@@ -488,6 +510,7 @@ fn split_sinkhorn(
     attempt: u64,
     mixes: &[f32],
     parameters: &HcSplitParameters<'_>,
+    receipt: &HcProjectionLoadReceipt,
 ) -> Result<DeepSeekV41HcMixes> {
     validate_hc_identity(stamp, attempt)?;
     if mixes.len() != HC_MIX_COUNT
@@ -582,6 +605,7 @@ fn split_sinkhorn(
         branch: parameters.branch,
         pre_mix: pre.into_boxed_slice(),
         post_coefficients,
+        receipt: receipt.clone(),
     })
 }
 

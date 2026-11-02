@@ -13,6 +13,33 @@ use crate::deepseek_v41_projection::DeepSeekV41ProjectedQkv;
 use crate::moe::Stamp;
 use crate::{invalid, Error, Result};
 
+/// Identity-preserving per-head attention result after undoing the pinned RoPE.
+#[derive(Debug, Clone, PartialEq)]
+pub struct DeepSeekV41UnrotatedAttentionOutput {
+    stamp: Stamp,
+    attempt: u64,
+    position: u64,
+    values_bf16_f32: Vec<f32>,
+}
+
+impl DeepSeekV41UnrotatedAttentionOutput {
+    pub fn stamp(&self) -> &Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn position(&self) -> u64 {
+        self.position
+    }
+
+    pub fn values_bf16_f32(&self) -> &[f32] {
+        &self.values_bf16_f32
+    }
+}
+
 pub const PINNED_CONFIG_SHA256: &str =
     "8be45ce0476004a3f529fd896115a4a2e800a129ad2d3ec05b16050f52e21879";
 pub const PINNED_WINDOW_HEAD_DIM: usize = 512;
@@ -120,6 +147,47 @@ fn uint(value: &serde_json::Value, key: &str) -> Result<u64> {
         .get(key)
         .and_then(serde_json::Value::as_u64)
         .ok_or_else(|| invalid(format!("DeepSeek pinned config field {key} is absent")))
+}
+
+impl DeepSeekV41WindowAttentionOutput {
+    /// Undo the adjacent-pair RoPE applied to the attention result by the
+    /// pinned donor before `wo_a`. Output remains in the original BF16 boundary.
+    pub fn apply_inverse_window_rope(
+        &self,
+        config: &DeepSeekV41WindowRopeConfig,
+    ) -> Result<DeepSeekV41UnrotatedAttentionOutput> {
+        if self.stamp().model_revision != PINNED_MODEL_REVISION
+            || self.stamp().layer != config.layer
+            || self.attempt() == 0
+            || self.position() >= config.max_position
+            || self.output_bf16_f32().len() != config.query_heads * config.head_dim
+        {
+            return Err(invalid(
+                "DeepSeek attention output identity, shape or position differs from pinned RoPE config",
+            ));
+        }
+        let mut output = self.output_bf16_f32().to_vec();
+        validate_bf16(&output)?;
+        for head in 0..config.query_heads {
+            let start = head
+                .checked_mul(config.head_dim)
+                .ok_or_else(|| invalid("DeepSeek inverse RoPE head offset overflow"))?;
+            rotate_slice_tail_direction(
+                &mut output[start..start + config.head_dim],
+                config.head_dim,
+                config.rope_dim,
+                config.theta,
+                self.position(),
+                -1.0,
+            )?;
+        }
+        Ok(DeepSeekV41UnrotatedAttentionOutput {
+            stamp: self.stamp().clone(),
+            attempt: self.attempt(),
+            position: self.position(),
+            values_bf16_f32: output,
+        })
+    }
 }
 
 /// Post-RoPE Q/KV values ready for the R733 window cache; identity and absolute
@@ -309,6 +377,17 @@ fn rotate_slice_tail(
     theta: f32,
     position: u64,
 ) -> Result<()> {
+    rotate_slice_tail_direction(vector, head_dim, rope_dim, theta, position, 1.0)
+}
+
+fn rotate_slice_tail_direction(
+    vector: &mut [f32],
+    head_dim: usize,
+    rope_dim: usize,
+    theta: f32,
+    position: u64,
+    direction: f32,
+) -> Result<()> {
     if vector.len() != head_dim
         || rope_dim == 0
         || rope_dim > head_dim
@@ -316,6 +395,7 @@ fn rotate_slice_tail(
         || !theta.is_finite()
         || theta <= 1.0
         || position > PINNED_WINDOW_MAX_POSITION
+        || (direction != 1.0 && direction != -1.0)
     {
         return Err(invalid("DeepSeek RoPE rotation bounds are invalid"));
     }
@@ -335,8 +415,8 @@ fn rotate_slice_tail(
         let index = start + 2 * pair;
         let real = vector[index];
         let imaginary = vector[index + 1];
-        vector[index] = cast_bf16_rne_reference(real * cos - imaginary * sin)?;
-        vector[index + 1] = cast_bf16_rne_reference(real * sin + imaginary * cos)?;
+        vector[index] = cast_bf16_rne_reference(real * cos - imaginary * sin * direction)?;
+        vector[index + 1] = cast_bf16_rne_reference(real * sin * direction + imaginary * cos)?;
     }
     Ok(())
 }

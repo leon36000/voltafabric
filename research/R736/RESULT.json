@@ -1,0 +1,67 @@
+{
+  "id": "R736",
+  "date": "2026-11-02",
+  "state": "LOCAL_SOURCE_CPU_COMPILE_AND_CLIPPY_PASS_GITLAB_PENDING",
+  "parent_branch": "r735-deepseek-window-rope-20261102",
+  "parent_commit": "20ab446be96a55eb0a6347fb58ccc89444358f9e",
+  "target_branch": "r736-deepseek-window-output-20261102",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "code_copied": false
+  },
+  "source_files": [
+    "src/deepseek_v41.rs",
+    "src/deepseek_v41_attention.rs",
+    "src/deepseek_v41_attention_output.rs",
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_gate/hc.rs",
+    "src/deepseek_v41_rope.rs",
+    "src/lib.rs"
+  ],
+  "adapted_path": "HC-pre -> attn_norm -> R734 indexed Q/KV -> R735 Q/KV RoPE -> R733 sink/window -> inverse output RoPE -> activation FP8 QDQ -> grouped BF16 wo_a -> FP8/E8M0 wo_b -> attention HC-post",
+  "checkpoint": {
+    "index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+    "layer_zero_source_shard_from_index": "model-00003-of-00048.safetensors",
+    "tensor_names": [
+      "layers.0.attn_norm.weight",
+      "layers.0.attn.attn_sink",
+      "layers.0.attn.wo_a.weight",
+      "layers.0.attn.wo_b.weight",
+      "layers.0.attn.wo_b.scale"
+    ],
+    "raw_payload_bytes": 109103360,
+    "payload_cap_bytes": 117440512,
+    "actual_tensor_payload_loaded": false,
+    "per_tensor_sha256_must_be_admitted_by_caller": true
+  },
+  "atomicity": {
+    "kv_cache_candidate_clone_bytes": 262144,
+    "cache_committed_after_output_and_hc_post_only": true,
+    "partial_output_published": false
+  },
+  "verification": {
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_lib": "PASS",
+    "cargo_clippy_warnings_denied": "PASS",
+    "tests_added_or_run": false,
+    "independent_numeric_oracle": false
+  },
+  "complete_generation": false,
+  "complete_checkpoint_payload": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER; this work ran only in response to the current owner request",
+  "limitations": [
+    "No real checkpoint tensor payload or admitted tensor digest set was loaded",
+    "No functional test or independent numeric oracle was run",
+    "Only the pinned pure-window attention sublayer is connected; KV-compressed layers and full generation remain unqualified"
+  ],
+  "manifest": "research/R736/SHA256SUMS",
+  "next_action": "R737: connect R736 attention to the existing pinned gate, VoltaFabric expert owners and FFN path for one identified full layer, and define an independent numeric oracle before extending to compressed-KV attention.",
+  "manifest_sha256": "d912a6d1e663243e39d6a1e0122f40e9e3bf691da1aba18a3612515c26f490e0"
+}
