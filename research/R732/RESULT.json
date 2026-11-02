@@ -1,7 +1,7 @@
 {
   "id": "R732",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_branch": "r731-deepseek-hc-projection-20261102",
   "parent_commit": "f12139a2b46dcabeb5c7164f85ac33e3bc973f4f",
   "source_files": [
@@ -32,8 +32,8 @@
     "whitespace_scan": "PASS"
   },
   "oracle": "Existing independent resident MXFP4 route oracle; independent shared-sum BF16 RNE and f64 HC-post formula. R731 separately verifies HC projection/Sinkhorn against f64. No PyTorch/TileLang backend comparison.",
-  "source_pipeline": "PENDING",
-  "source_readback": "PENDING",
+  "source_pipeline": "SUCCESS #2573; gitleaks, semgrep, trivy and pc4_ci_fallback all success",
+  "source_readback": "8/8 source commit members, including SHA256SUMS, read back exactly from GitLab",
   "unknown_replayed": false,
   "automatic_continuation": "STOPPED_BY_OWNER",
   "real_checkpoint_payload": false,
@@ -56,6 +56,17 @@
   "manifest_sha256": "de1dfa716416357ee5fafa1160811a18215d0677a6387550b4fb84e85ebfd1d9",
   "manifest_file_count": 5,
   "branch": "r732-deepseek-hc-ffn-session-20261102",
-  "source_commit": "PENDING",
-  "published_utc": "PENDING"
+  "source_commit": "4551cf7f8bf08bb815cec0778281722216b4881a",
+  "published_utc": "2026-11-02T17:12:47Z",
+  "source_pipeline_id": 2573,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 8,
+  "r731_receipt_pipeline": "SUCCESS #2571"
 }
