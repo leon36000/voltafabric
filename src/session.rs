@@ -229,6 +229,87 @@ pub fn collect_qwen2moe_ffn_output(
     collector.finish()
 }
 
+/// Compose Qwen2MoE's routed output with the pinned llama.cpp arithmetic boundary:
+/// multiply each unweighted FP32 down row by its exact FP32 route coefficient, then
+/// accumulate one FP32 addition per slot in original token/slot order. This is a
+/// separate contract from `collect_qwen2moe_ffn_output`, which decodes FP16 and uses
+/// the ordinary FP64 Collector.
+#[cfg(feature = "native-ggml-cpu")]
+pub fn collect_qwen2moe_ffn_output_preweighted_fp32(
+    problem: &routing::RoutingProblem,
+    output: &GroupedProjectionBatchOutput,
+    expected_attempt: u64,
+) -> Result<Vec<Vec<f32>>> {
+    routing::validate(problem)?;
+    let expected_tensor = format!("blk.{}.ffn_down_exps.weight", problem.stamp.layer);
+    if expected_attempt == 0
+        || output.attempt != expected_attempt
+        || output.stamp != problem.stamp
+        || output.tensor != expected_tensor
+        || output.dispatch_hidden != problem.hidden
+        || output.output_columns != problem.hidden
+        || !(1..=10_240).contains(&output.input_columns)
+        || output.slots.is_empty()
+    {
+        return Err(invalid(
+            "Qwen2MoE preweighted down result identity or shape",
+        ));
+    }
+    let dispatch = routing::dispatch(problem)?;
+    if output.slots.len() != dispatch.slots.len() {
+        return Err(invalid("Qwen2MoE preweighted down result slot coverage"));
+    }
+    for (actual, expected) in output.slots.iter().zip(&dispatch.slots) {
+        if actual.token != expected.token
+            || actual.slot != expected.slot
+            || actual.expert != expected.expert
+            || actual.rank != expected.rank
+            || actual.local != expected.local
+            || actual.values.len() != problem.hidden
+            || actual.values.iter().any(|value| !value.is_finite())
+        {
+            return Err(invalid(
+                "Qwen2MoE preweighted down result order, route or value",
+            ));
+        }
+    }
+
+    let mut collector =
+        crate::preweighted::Collector::new_qwen2moe_ffn_postdown_fp32(problem, expected_attempt)?;
+    let contract = collector.contract().clone();
+    for (slot, expected) in output.slots.iter().zip(&dispatch.slots) {
+        let weight = expected.weight as f32;
+        let value_bits = slot
+            .values
+            .iter()
+            .map(|&value| {
+                let weighted = value * weight;
+                if weighted.is_finite() {
+                    Ok(weighted.to_bits())
+                } else {
+                    Err(crate::Error::new(
+                        "NUMERICAL_OVERFLOW",
+                        "Qwen2MoE FP32 route product is non-finite; no batch published",
+                    ))
+                }
+            })
+            .collect::<Result<Vec<_>>>()?;
+        collector.accept(crate::preweighted::Completion {
+            contract: contract.clone(),
+            attempt: Some(expected_attempt),
+            stamp: output.stamp.clone(),
+            token: slot.token,
+            slot: slot.slot,
+            expert: slot.expert,
+            rank: slot.rank,
+            local: slot.local,
+            weight_bits: weight.to_bits(),
+            value_bits,
+        })?;
+    }
+    collector.finish()
+}
+
 /// Compose the separate Qwen2MoE gate/up projections into inputs for its down projection.
 /// Caller must pass the exact outputs from the same routed batch and attempt. This helper
 /// returns unweighted per-slot rows; it does not invoke the down Sessions or Collector.

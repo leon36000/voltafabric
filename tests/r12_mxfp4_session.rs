@@ -487,6 +487,7 @@ fn assert_expired(collector: &mut preweighted::Collector, p: &RoutingProblem) {
     let slot = voltafabric::routing::dispatch(p).unwrap().slots.remove(0);
     let row = preweighted::Completion {
         contract: collector.contract().clone(),
+        attempt: None,
         stamp: p.stamp.clone(),
         token: slot.token,
         slot: slot.slot,
