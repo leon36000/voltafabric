@@ -1,1 +1,66 @@
-IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLWV1byBwaXBlZmFpbAoKZGllKCkgewogIHByaW50ZiAnUjY5NyBwaW5uZWQgbGxhbWEuY3BwIHB1YmxpYyBkZWNvZGUgdGVzdDogJXNcbicgIiQxIiA+JjIKICBleGl0IDIKfQoKOiAiJHtWRl9MTEFNQV9TT1VSQ0VfRElSOj9WRl9MTEFNQV9TT1VSQ0VfRElSIGlzIHJlcXVpcmVkfSIKOiAiJHtWRl9MTEFNQV9MSUJSQVJZOj9WRl9MTEFNQV9MSUJSQVJZIGlzIHJlcXVpcmVkfSIKOiAiJHtWRl9HR01MX05BVElWRV9CVUlMRDo/VkZfR0dNTF9OQVRJVkVfQlVJTEQgaXMgcmVxdWlyZWR9Igo6ICIke1ZGX1ZPTFRBX1JFUE86P1ZGX1ZPTFRBX1JFUE8gaXMgcmVxdWlyZWR9Igo6ICIke1ZGX1I2OTdfQURBUFRFUl9ESVI6P1ZGX1I2OTdfQURBUFRFUl9ESVIgaXMgcmVxdWlyZWR9Igo6ICIke1ZGX1RFU1RfT1VUUFVUX0RJUjo/VkZfVEVTVF9PVVRQVVRfRElSIGlzIHJlcXVpcmVkfSIKOiAiJHtDWFg6P0NYWCBpcyByZXF1aXJlZH0iCgpleHBlY3RlZF9yZXZpc2lvbj0zY2YwMzI1N2YyMTlhZmJlNzMzNDA0NWZmN2M2YTA2YWM2OGM2MjdkCmFjdHVhbF9yZXZpc2lvbj0kKGdpdCAtQyAiJFZGX0xMQU1BX1NPVVJDRV9ESVIiIHJldi1wYXJzZSBIRUFEKQpbWyAiJGFjdHVhbF9yZXZpc2lvbiIgPT0gIiRleHBlY3RlZF9yZXZpc2lvbiIgXV0gfHwgZGllICJ1bmV4cGVjdGVkIGRvbm9yIHJldmlzaW9uOiAkYWN0dWFsX3JldmlzaW9uIgpkb25vcl9nZ21sX2RpcnR5PSQoZ2l0IC1DICIkVkZfTExBTUFfU09VUkNFX0RJUiIgc3RhdHVzIC0tcG9yY2VsYWluIC0tIGdnbWwpCltbIC16ICIkZG9ub3JfZ2dtbF9kaXJ0eSIgXV0gfHwgZGllICJkb25vciBHR01MIGRlcGVuZGVuY3kgaGFzIGxvY2FsIGNoYW5nZXMiCltbIC1mICIkVkZfTExBTUFfTElCUkFSWSIgXV0gfHwgZGllICJwaW5uZWQgbGxhbWEuY3BwIGxpYnJhcnkgaXMgbWlzc2luZyIKW1sgLWYgIiRWRl9HR01MX05BVElWRV9CVUlMRC9saWJ2Zl9uYXRpdmVfZ2dtbC5hIiBdXSB8fCBkaWUgIlI2NTUgbmF0aXZlIEdHTUwgYXJjaGl2ZSBtaXNzaW5nIgoKYWRhcHRlcl9kaXI9IiRWRl9WT0xUQV9SRVBPL2FkYXB0ZXJzL25hdGl2ZV9nZ21sIgp0ZXN0X2Rpcj0iJFZGX1I2OTdfQURBUFRFUl9ESVIiCmxvYWRlcl9tYW5pZmVzdD0iJFZGX1I2OTdfQURBUFRFUl9ESVIvcnVzdC1sb2FkZXIvQ2FyZ28udG9tbCIKW1sgLWYgIiRsb2FkZXJfbWFuaWZlc3QiIF1dIHx8IGRpZSAiUjY5NyBSdXN0IGxvYWRlciBtYW5pZmVzdCBtaXNzaW5nIgpta2RpciAtcCAiJFZGX1RFU1RfT1VUUFVUX0RJUiIKY2FyZ29fdGFyZ2V0PSIkVkZfVEVTVF9PVVRQVVRfRElSL2NhcmdvLXRhcmdldCIKd29ya2VyPSIkY2FyZ29fdGFyZ2V0L2RlYnVnL3ZmLXJhbmstc2Vzc2lvbiIKbG9hZGVyPSIkY2FyZ29fdGFyZ2V0L3JlbGVhc2UvbGlidmZfcjY5N19sb2FkZXIuc28iCmJpbmFyeT0iJFZGX1RFU1RfT1VUUFVUX0RJUi9yNjk3X3B1YmxpY19kZWNvZGVfdGVzdCIKCkNBUkdPX1RBUkdFVF9ESVI9IiRjYXJnb190YXJnZXQiIFZGX0dHTUxfTkFUSVZFX0JVSUxEPSIkVkZfR0dNTF9OQVRJVkVfQlVJTEQiIFwKICBjYXJnbyBidWlsZCAtLWxvY2tlZCAtLW9mZmxpbmUgLS1tYW5pZmVzdC1wYXRoICIkVkZfVk9MVEFfUkVQTy9DYXJnby50b21sIiBcCiAgLS1mZWF0dXJlcyBuYXRpdmUtZ2dtbC1jcHUgLS1iaW4gdmYtcmFuay1zZXNzaW9uCkNBUkdPX1RBUkdFVF9ESVI9IiRjYXJnb190YXJnZXQiIFZGX0dHTUxfTkFUSVZFX0JVSUxEPSIkVkZfR0dNTF9OQVRJVkVfQlVJTEQiIFwKICBjYXJnbyBidWlsZCAtLWxvY2tlZCAtLW9mZmxpbmUgLS1tYW5pZmVzdC1wYXRoICIkbG9hZGVyX21hbmlmZXN0IiAtLXJlbGVhc2UKW1sgLXggIiR3b3JrZXIiIF1dIHx8IGRpZSAicmFuay1zZXNzaW9uIHdvcmtlciB3YXMgbm90IGJ1aWx0IgpbWyAtZiAiJGxvYWRlciIgXV0gfHwgZGllICJSNjk3IFNlc3Npb24gbG9hZGVyIHdhcyBub3QgYnVpbHQiCgoiJENYWCIgLXN0ZD1jKysxNyAtV2FsbCAtV2V4dHJhIC1XZXJyb3IgLU8wIC1nIFwKICAtSSIkYWRhcHRlcl9kaXIiIFwKICAtSSIkKGRpcm5hbWUgLS0gIiRWRl9SNjk3X0FEQVBURVJfRElSIikiIFwKICAtSSIkVkZfTExBTUFfU09VUkNFX0RJUi9zcmMiIFwKICAtSSIkVkZfTExBTUFfU09VUkNFX0RJUi9pbmNsdWRlIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvZ2dtbC9pbmNsdWRlIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvZ2dtbC9zcmMiIFwKICAiJHRlc3RfZGlyL3I2OTdfcHVibGljX2RlY29kZV90ZXN0LmNwcCIgXAogICIkYWRhcHRlcl9kaXIvcm91dGVfZ3JhcGhfdHJhbnNhY3Rpb24uY3BwIiBcCiAgIiRhZGFwdGVyX2Rpci9xd2VuMm1vZV9yb3V0ZV9pbnZvY2F0aW9uLmNwcCIgXAogICIkYWRhcHRlcl9kaXIvcXdlbjJtb2VfbGxhbWFfcm91dGVfYnJpZGdlLmNwcCIgXAogIC1MIiRjYXJnb190YXJnZXQvcmVsZWFzZSIgLVdsLC0tbm8tYXMtbmVlZGVkIC1sdmZfcjY5N19sb2FkZXIgXAogICIkVkZfTExBTUFfTElCUkFSWSIgXAogICIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikvbGliZ2dtbC1jcHUuc28uMC4yNC4wIiBcCiAgIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKS9saWJnZ21sLWJhc2Uuc28uMC4yNC4wIiBcCiAgIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKS9saWJnZ21sLnNvLjAuMjQuMCIgXAogIC1XbCwtcnBhdGgsIiRjYXJnb190YXJnZXQvcmVsZWFzZSIgXAogIC1XbCwtcnBhdGgsIiQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKSIgXAogIC1vICIkYmluYXJ5IgoKZG9ub3JfbGlicmFyeV9kaXI9JChkaXJuYW1lIC0tICIkVkZfTExBTUFfTElCUkFSWSIpClZGX1JBTktfU0VTU0lPTl9CSU49IiR3b3JrZXIiIFwKTERfTElCUkFSWV9QQVRIPSIkY2FyZ29fdGFyZ2V0L3JlbGVhc2U6JGRvbm9yX2xpYnJhcnlfZGlyJHtMRF9MSUJSQVJZX1BBVEg6KzokTERfTElCUkFSWV9QQVRIfSIgXAogICIkYmluYXJ5Igo=
+#!/usr/bin/env bash
+set -euo pipefail
+
+die() {
+  printf 'R697 pinned llama.cpp public decode test: %s\n' "$1" >&2
+  exit 2
+}
+
+: "${VF_LLAMA_SOURCE_DIR:?VF_LLAMA_SOURCE_DIR is required}"
+: "${VF_LLAMA_LIBRARY:?VF_LLAMA_LIBRARY is required}"
+: "${VF_GGML_NATIVE_BUILD:?VF_GGML_NATIVE_BUILD is required}"
+: "${VF_VOLTA_REPO:?VF_VOLTA_REPO is required}"
+: "${VF_R697_ADAPTER_DIR:?VF_R697_ADAPTER_DIR is required}"
+: "${VF_TEST_OUTPUT_DIR:?VF_TEST_OUTPUT_DIR is required}"
+: "${CXX:?CXX is required}"
+
+expected_revision=3cf03257f219afbe7334045ff7c6a06ac68c627d
+actual_revision=$(git -C "$VF_LLAMA_SOURCE_DIR" rev-parse HEAD)
+[[ "$actual_revision" == "$expected_revision" ]] || die "unexpected donor revision: $actual_revision"
+donor_ggml_dirty=$(git -C "$VF_LLAMA_SOURCE_DIR" status --porcelain -- ggml)
+[[ -z "$donor_ggml_dirty" ]] || die "donor GGML dependency has local changes"
+[[ -f "$VF_LLAMA_LIBRARY" ]] || die "pinned llama.cpp library is missing"
+[[ -f "$VF_GGML_NATIVE_BUILD/libvf_native_ggml.a" ]] || die "R655 native GGML archive missing"
+
+adapter_dir="$VF_VOLTA_REPO/adapters/native_ggml"
+test_dir="$VF_R697_ADAPTER_DIR"
+loader_manifest="$VF_R697_ADAPTER_DIR/rust-loader/Cargo.toml"
+[[ -f "$loader_manifest" ]] || die "R697 Rust loader manifest missing"
+mkdir -p "$VF_TEST_OUTPUT_DIR"
+cargo_target="$VF_TEST_OUTPUT_DIR/cargo-target"
+worker="$cargo_target/debug/vf-rank-session"
+loader="$cargo_target/release/libvf_r697_loader.so"
+binary="$VF_TEST_OUTPUT_DIR/r697_public_decode_test"
+
+CARGO_TARGET_DIR="$cargo_target" VF_GGML_NATIVE_BUILD="$VF_GGML_NATIVE_BUILD" \
+  cargo build --locked --offline --manifest-path "$VF_VOLTA_REPO/Cargo.toml" \
+  --features native-ggml-cpu --bin vf-rank-session
+CARGO_TARGET_DIR="$cargo_target" VF_GGML_NATIVE_BUILD="$VF_GGML_NATIVE_BUILD" \
+  cargo build --locked --offline --manifest-path "$loader_manifest" --release
+[[ -x "$worker" ]] || die "rank-session worker was not built"
+[[ -f "$loader" ]] || die "R697 Session loader was not built"
+
+"$CXX" -std=c++17 -Wall -Wextra -Werror -O0 -g \
+  -I"$adapter_dir" \
+  -I"$(dirname -- "$VF_R697_ADAPTER_DIR")" \
+  -I"$VF_LLAMA_SOURCE_DIR/src" \
+  -I"$VF_LLAMA_SOURCE_DIR/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/src" \
+  "$test_dir/r697_public_decode_test.cpp" \
+  "$adapter_dir/route_graph_transaction.cpp" \
+  "$adapter_dir/qwen2moe_route_invocation.cpp" \
+  "$adapter_dir/qwen2moe_llama_route_bridge.cpp" \
+  -L"$cargo_target/release" -Wl,--no-as-needed -lvf_r697_loader \
+  "$VF_LLAMA_LIBRARY" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-cpu.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-base.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml.so.0.24.0" \
+  -Wl,-rpath,"$cargo_target/release" \
+  -Wl,-rpath,"$(dirname -- "$VF_LLAMA_LIBRARY")" \
+  -o "$binary"
+
+donor_library_dir=$(dirname -- "$VF_LLAMA_LIBRARY")
+VF_RANK_SESSION_BIN="$worker" \
+LD_LIBRARY_PATH="$cargo_target/release:$donor_library_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+  "$binary"

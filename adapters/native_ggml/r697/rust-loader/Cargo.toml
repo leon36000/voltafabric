@@ -1,1 +1,16 @@
-W3BhY2thZ2VdCm5hbWUgPSAidmYtcjY5Ny1sb2FkZXItZmZpIgp2ZXJzaW9uID0gIjAuMS4wIgplZGl0aW9uID0gIjIwMjEiCnJ1c3QtdmVyc2lvbiA9ICIxLjkwIgpwdWJsaXNoID0gZmFsc2UKCltsaWJdCm5hbWUgPSAidmZfcjY5N19sb2FkZXIiCmNyYXRlLXR5cGUgPSBbImNkeWxpYiJdCgpbZGVwZW5kZW5jaWVzXQp2b2x0YWZhYnJpYyA9IHsgcGF0aCA9ICIuLi8uLi8uLi8uLi8iLCBmZWF0dXJlcyA9IFsibmF0aXZlLWdnbWwtY3B1Il0gfQp2Zi1nZ21sLW5hdGl2ZS1mZmkgPSB7IHBhdGggPSAiLi4vLi4vLi4vLi4vY3JhdGVzL2dnbWwtbmF0aXZlLWZmaSIgfQoKW3dvcmtzcGFjZV0K
+[package]
+name = "vf-r697-loader-ffi"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.90"
+publish = false
+
+[lib]
+name = "vf_r697_loader"
+crate-type = ["cdylib"]
+
+[dependencies]
+voltafabric = { path = "../../../../", features = ["native-ggml-cpu"] }
+vf-ggml-native-ffi = { path = "../../../../crates/ggml-native-ffi" }
+
+[workspace]

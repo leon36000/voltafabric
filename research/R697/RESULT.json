@@ -1,1 +1,55 @@
-ewogICJzY2hlbWFfdmVyc2lvbiI6IDEsCiAgImlkIjogIlI2OTciLAogICJzdGF0ZSI6ICJDUFVfU1lOVEhFVElDX1BBU1NfUEVORElOR19HSVRMQUJfUkVBREJBQ0siLAogICJicmFuY2giOiAicjY5Ny1sbGFtYS1yb3V0ZS1tZW1vcnktYWR2aXNvcnktMjAyNjExMDIiLAogICJwYXJlbnRfY29tbWl0IjogImM0MzZhYWQ5MDRhZDczOTU1MjM2MTFhM2I0MjA5Yjc1OGMxZGZkY2QiLAogICJkb25vciI6IHsKICAgICJyZXBvc2l0b3J5IjogImdnbWwtb3JnL2xsYW1hLmNwcCIsCiAgICAiY29tbWl0IjogIjNjZjAzMjU3ZjIxOWFmYmU3MzM0MDQ1ZmY3YzZhMDZhYzY4YzYyN2QiLAogICAgImxpY2Vuc2UiOiAiTUlUIiwKICAgICJhcGkiOiAicHVibGljIGxsYW1hX2RlY29kZSIsCiAgICAidXBzdHJlYW1fc291cmNlX2NvcGllZCI6IGZhbHNlCiAgfSwKICAidmVyaWZpY2F0aW9uIjogewogICAgImRldmljZSI6ICJDUFUiLAogICAgInN5bnRoZXRpY19maXh0dXJlX3J1bl9jb3VudCI6IDEsCiAgICAidmZfcmFua19zZXNzaW9uX2RlYnVnX29mZmxpbmVfbG9ja2VkIjogIlBBU1MiLAogICAgInI2OTdfcnVzdF9mZmlfcmVsZWFzZV9vZmZsaW5lX2xvY2tlZCI6ICJQQVNTIiwKICAgICJjcHAxN19saW5rX3dhbGxfZXh0cmFfd2Vycm9yIjogIlBBU1MiLAogICAgImJhc2hfbiI6ICJQQVNTIiwKICAgICJydXN0Zm10X3I2OTdfbG9hZGVyIjogIlBBU1MiLAogICAgImRlY29kZV9zdGVwcyI6IDMsCiAgICAic2VsZWN0ZWRfZ2d1Zl9zbGljZV9ieXRlcyI6IDEzMDU2LAogICAgInNlbGVjdGVkX2dndWZfYnl0ZXNfcGVyX3Byb2plY3Rpb24iOiAyMTc2LAogICAgInNlbGVjdGVkX2dndWZfYnl0ZXNfcGVyX2V4cGVydF9wcm9qZWN0aW9uIjogMTA4OCwKICAgICJkb25vcl90b2tlbnMiOiBbMywgMywgM10sCiAgICAidm9sdGFmYWJyaWNfdG9rZW5zIjogWzMsIDMsIDNdLAogICAgIm1heF9hYnNfbG9naXRfZXJyb3IiOiAwLjAsCiAgICAibGF0ZV9sYXllcl9yZWZ1c2FsX3N0YXR1cyI6IC0zLAogICAgInNhbXBsZWRfYWZ0ZXJfbGF0ZV9sYXllcl9yZWplY3QiOiBmYWxzZSwKICAgICJsZWRnZXJfY2xhaW1fY291bnQiOiA3LAogICAgImxlZGdlcl9jbGFpbV9zdGF0dXMiOiAiUkVTRVJWRURfVU5LTk9XTl9OT19SRVBMQVkiCiAgfSwKICAiY29udHJhY3RzIjogewogICAgIm1lbW9yeV9hZHZpY2Vfb25seSI6IHRydWUsCiAgICAiZG9ub3JfZ2F0ZV9yb3V0ZV9hdXRob3JpdGF0aXZlIjogdHJ1ZSwKICAgICJjb2VmZmljaWVudF9yb3V0ZV9tdXRhdGlvbiI6IGZhbHNlLAogICAgInJlZ2lzdHJ5X211dGF0ZWQiOiBmYWxzZSwKICAgICJzdGFsZV9hdHRlbXB0X3JlYWRiYWNrX3JlZnVzZWQiOiB0cnVlLAogICAgImNhcGFjaXR5X3JlZnVzYWxfcGFydGlhbF9hZHZpY2UiOiBmYWxzZSwKICAgICJwYXJ0aWFsX2RlY29kZV9zYW1wbGVkIjogZmFsc2UKICB9LAogICJsaW1pdGF0aW9ucyI6IHsKICAgICJ0cmFpbmVkX2NoZWNrcG9pbnQiOiBmYWxzZSwKICAgICJmdWxsX2dlbmVyYXRpb24iOiBmYWxzZSwKICAgICJncHUiOiBmYWxzZSwKICAgICJpbnRlcl9wY193b3JrZXIiOiBmYWxzZSwKICAgICJwcm9kdWN0aW9uX25ldHdvcmsiOiBmYWxzZSwKICAgICJwZXJmb3JtYW5jZV9jbGFpbSI6IGZhbHNlLAogICAgInN5bnRoZXRpY19nZ3VmX29ubHkiOiB0cnVlLAogICAgImZvcm1hdCI6ICJROF8wIGZpeHR1cmUgb25seTsgbm8gY29udmVyc2lvbiB0byBRUE4yL05WRlA0IEsxNiwgTVhGUDQgSzMyLCBvciBJUTMiCiAgfSwKICAiYXV0b21hdGljX3JlbGF1bmNoIjogIlNUT1BQRURfQllfT1dORVIiLAogICJyZXBsYXlfYWxsb3dlZCI6IGZhbHNlCn0K
+{
+  "schema_version": 1,
+  "id": "R697",
+  "state": "CPU_SYNTHETIC_PASS_PENDING_GITLAB_READBACK",
+  "branch": "r697-llama-route-memory-advisory-20261102",
+  "parent_commit": "c436aad904ad7395523611a3b4209b758c1dfdcd",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "api": "public llama_decode",
+    "upstream_source_copied": false
+  },
+  "verification": {
+    "device": "CPU",
+    "synthetic_fixture_run_count": 1,
+    "vf_rank_session_debug_offline_locked": "PASS",
+    "r697_rust_ffi_release_offline_locked": "PASS",
+    "cpp17_link_wall_extra_werror": "PASS",
+    "bash_n": "PASS",
+    "rustfmt_r697_loader": "PASS",
+    "decode_steps": 3,
+    "selected_gguf_slice_bytes": 13056,
+    "selected_gguf_bytes_per_projection": 2176,
+    "selected_gguf_bytes_per_expert_projection": 1088,
+    "donor_tokens": [3, 3, 3],
+    "voltafabric_tokens": [3, 3, 3],
+    "max_abs_logit_error": 0.0,
+    "late_layer_refusal_status": -3,
+    "sampled_after_late_layer_reject": false,
+    "ledger_claim_count": 7,
+    "ledger_claim_status": "RESERVED_UNKNOWN_NO_REPLAY"
+  },
+  "contracts": {
+    "memory_advice_only": true,
+    "donor_gate_route_authoritative": true,
+    "coefficient_route_mutation": false,
+    "registry_mutated": false,
+    "stale_attempt_readback_refused": true,
+    "capacity_refusal_partial_advice": false,
+    "partial_decode_sampled": false
+  },
+  "limitations": {
+    "trained_checkpoint": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "performance_claim": false,
+    "synthetic_gguf_only": true,
+    "format": "Q8_0 fixture only; no conversion to QPN2/NVFP4 K16, MXFP4 K32, or IQ3"
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "replay_allowed": false
+}

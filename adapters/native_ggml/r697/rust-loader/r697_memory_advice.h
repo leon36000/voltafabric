@@ -1,1 +1,40 @@
-I3ByYWdtYSBvbmNlCgojaW5jbHVkZSA8Y3N0ZGRlZj4KI2luY2x1ZGUgPGNzdGRpbnQ+CgpleHRlcm4gIkMiIHsKc3RydWN0IFZGUjY5N01lbW9yeUFkdmljZSB7CiAgICBzdGQ6OnVpbnQzMl90IHZlcnNpb247CiAgICBzdGQ6OnVpbnQzMl90IHN0YXR1czsKICAgIHN0ZDo6dWludDMyX3QgcmVmdXNhbF9jb2RlOwogICAgc3RkOjp1aW50MzJfdCBsYXllcjsKICAgIHN0ZDo6dWludDMyX3QgcmFuazsKICAgIHN0ZDo6dWludDMyX3QgcmVzZXJ2ZWQ7CiAgICBzdGQ6OnVpbnQ2NF90IGVwb2NoOwogICAgc3RkOjp1aW50NjRfdCBiYXRjaDsKICAgIHN0ZDo6dWludDY0X3QgYXR0ZW1wdDsKICAgIHN0ZDo6dWludDY0X3QgY2FwYWNpdHlfYnl0ZXM7CiAgICBzdGQ6OnVpbnQ2NF90IHJlc2lkZW50X2V4cGVydF9ieXRlczsKICAgIHN0ZDo6dWludDY0X3QgY2FuZGlkYXRlX2V4cGVydF9ieXRlczsKICAgIHN0ZDo6dWludDY0X3QgbG9hZGluZ19wZWFrX2J5dGVzOwogICAgc3RkOjp1aW50NjRfdCBoZWFkcm9vbV9ieXRlczsKfTsKCnZvaWQgKnZmX3I2OTdfb3Blbihjb25zdCBjaGFyICpzb3VyY2VfZ2d1ZiwgY29uc3QgY2hhciAqcmFua19zZXNzaW9uX2JpbmFyeSwKICAgICAgICAgICAgICAgICAgIGNvbnN0IGNoYXIgKmxlZGdlcl9yb290KTsKaW50MzJfdCB2Zl9yNjk3X3NldF9hZHZpc29yeV9jYXBhY2l0eSh2b2lkICpjb250ZXh0LCBzdGQ6OnVpbnQ2NF90IGNhcGFjaXR5X2J5dGVzKTsKaW50MzJfdCB2Zl9yNjk3X2dldF9tZW1vcnlfYWR2aWNlKAogICAgdm9pZCAqY29udGV4dCwgY29uc3QgY2hhciAqcnVuX2lkLCBjb25zdCBjaGFyICptb2RlbF9yZXZpc2lvbiwKICAgIGNvbnN0IGNoYXIgKnBsYW5faWQsIHN0ZDo6dWludDMyX3QgbGF5ZXIsIHN0ZDo6dWludDY0X3QgZXBvY2gsCiAgICBzdGQ6OnVpbnQ2NF90IGJhdGNoLCBzdGQ6OnVpbnQ2NF90IGF0dGVtcHQsIFZGUjY5N01lbW9yeUFkdmljZSAqb3V0KTsKaW50MzJfdCB2Zl9yNjk3X3J1bl9yb3V0ZWRfbGF5ZXIoCiAgICB2b2lkICpjb250ZXh0LCBjb25zdCBjaGFyICpydW5faWQsIGNvbnN0IGNoYXIgKm1vZGVsX3JldmlzaW9uLAogICAgY29uc3QgY2hhciAqcGxhbl9pZCwgc3RkOjp1aW50MzJfdCBsYXllciwgc3RkOjp1aW50NjRfdCBlcG9jaCwKICAgIHN0ZDo6dWludDY0X3QgYmF0Y2gsIHN0ZDo6dWludDY0X3QgYXR0ZW1wdCwgc3RkOjpzaXplX3QgaGlkZGVuLAogICAgc3RkOjpzaXplX3Qgc2xvdHMsIHN0ZDo6c2l6ZV90IHRva2VucywgY29uc3Qgc3RkOjppbnQzMl90ICpleHBlcnRfaWRzLAogICAgc3RkOjpzaXplX3QgZXhwZXJ0X2lkc19sZW4sIGNvbnN0IGZsb2F0ICpyb3V0ZV93ZWlnaHRzLAogICAgc3RkOjpzaXplX3Qgcm91dGVfd2VpZ2h0c19sZW4sIGNvbnN0IGZsb2F0ICphY3RpdmF0aW9ucywKICAgIHN0ZDo6c2l6ZV90IGFjdGl2YXRpb25zX2xlbiwgZG91YmxlICpvdXRwdXQsIHN0ZDo6c2l6ZV90IG91dHB1dF9sZW4pOwp2b2lkIHZmX3I2OTdfY2xvc2Uodm9pZCAqY29udGV4dCk7Cn0K
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+
+extern "C" {
+struct VFR697MemoryAdvice {
+    std::uint32_t version;
+    std::uint32_t status;
+    std::uint32_t refusal_code;
+    std::uint32_t layer;
+    std::uint32_t rank;
+    std::uint32_t reserved;
+    std::uint64_t epoch;
+    std::uint64_t batch;
+    std::uint64_t attempt;
+    std::uint64_t capacity_bytes;
+    std::uint64_t resident_expert_bytes;
+    std::uint64_t candidate_expert_bytes;
+    std::uint64_t loading_peak_bytes;
+    std::uint64_t headroom_bytes;
+};
+
+void *vf_r697_open(const char *source_gguf, const char *rank_session_binary,
+                   const char *ledger_root);
+int32_t vf_r697_set_advisory_capacity(void *context, std::uint64_t capacity_bytes);
+int32_t vf_r697_get_memory_advice(
+    void *context, const char *run_id, const char *model_revision,
+    const char *plan_id, std::uint32_t layer, std::uint64_t epoch,
+    std::uint64_t batch, std::uint64_t attempt, VFR697MemoryAdvice *out);
+int32_t vf_r697_run_routed_layer(
+    void *context, const char *run_id, const char *model_revision,
+    const char *plan_id, std::uint32_t layer, std::uint64_t epoch,
+    std::uint64_t batch, std::uint64_t attempt, std::size_t hidden,
+    std::size_t slots, std::size_t tokens, const std::int32_t *expert_ids,
+    std::size_t expert_ids_len, const float *route_weights,
+    std::size_t route_weights_len, const float *activations,
+    std::size_t activations_len, double *output, std::size_t output_len);
+void vf_r697_close(void *context);
+}

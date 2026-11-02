@@ -1,1 +1,656 @@
-IyFbYWxsb3codW5zYWZlX2NvZGUpXQoKdXNlIHN0ZDo6ewogICAgY29sbGVjdGlvbnM6OkJUcmVlTWFwLAogICAgZmZpOjp7Y19jaGFyLCBjX3ZvaWQsIENTdHJ9LAogICAgZnM6OkZpbGUsCiAgICBpbzo6UmVhZCwKICAgIHBhbmljOjp7Y2F0Y2hfdW53aW5kLCBBc3NlcnRVbndpbmRTYWZlfSwKICAgIHBhdGg6OlBhdGgsCiAgICB0aW1lOjpEdXJhdGlvbiwKfTsKdXNlIHZvbHRhZmFicmljOjp7CiAgICBjb3N0Ojp7Q29zdE9yaWdpbiwgQ29zdFByb3ZlbmFuY2V9LAogICAgZ2d1Zl9leHBlcnRfc2xpY2VzOjp7RXhwZXJ0Q2hlY2twb2ludFNsaWNlLCBTZWxlY3RlZEV4cGVydFNsaWNlUmVhZGVyfSwKICAgIG1vZTo6e1JlZ2lzdHJ5LCBSZXBsaWNhLCBTdGFtcH0sCiAgICBuYXRpdmVfZ2dtbF9jcHU6Okdyb3VwZWRNYXRyaXhCaW5kaW5nLAogICAgbmF0aXZlX2xlZGdlcjo6TmF0aXZlQmF0Y2hMZWRnZXIsCiAgICBwbGFubmVyOjp7CiAgICAgICAgcGxhbl9xd2VuMm1vZV9hZHZpc29yeV93aXRoX21lbW9yeSwgRXhwZXJ0UHJvZmlsZSwgUGVyUmFua01lbW9yeUVudmVsb3BlLCBQbGFjZW1lbnRQcm9ibGVtLAogICAgICAgIFdpcmVQb2xpY3ksCiAgICB9LAogICAgcm91dGluZzo6e3F3ZW4ybW9lX3JvdXRlc19mcm9tX2Rvbm9yLCBRd2VuMk1vRURvbm9yU2VsZWN0aW9ufSwKICAgIHNlc3Npb246OntFbmRwb2ludCwgU2Vzc2lvbn0sCiAgICBzaGEyNTYsCiAgICB0b3BvbG9neTo6e0RldmljZSwgT3JpZ2luLCBUb3BvbG9neX0sCiAgICB0cmFmZmljOjpXaXJlRm9ybWF0LAp9OwoKY29uc3QgSElEREVOOiB1c2l6ZSA9IDMyOwpjb25zdCBMQVlFUlM6IHUzMiA9IDI7CmNvbnN0IFJBTks6IHUzMiA9IDc7CmNvbnN0IEVQT0NIOiB1NjQgPSAxOwpjb25zdCBSVU46ICZzdHIgPSAicjY5Ny1tZW1vcnktYWR2aWNlLXYxIjsKY29uc3QgTU9ERUw6ICZzdHIgPSAicXdlbjJtb2Utc3ludGhldGljLW1lbW9yeS1yMSI7CmNvbnN0IFBMQU46ICZzdHIgPSAicjY5Ny1yb3V0ZS1hZHZpc29yeS1wbGFuLXYxIjsKY29uc3QgREVGQVVMVF9BRFZJU09SWV9DQVBBQ0lUWV9CWVRFUzogdTY0ID0gMSA8PCAyMDsKY29uc3QgVElNRU9VVDogRHVyYXRpb24gPSBEdXJhdGlvbjo6ZnJvbV9zZWNzKDEwKTsKY29uc3QgUFJPSkVDVElPTlM6IFsmc3RyOyAzXSA9IFsKICAgICJmZm5fZ2F0ZV9leHBzLndlaWdodCIsCiAgICAiZmZuX3VwX2V4cHMud2VpZ2h0IiwKICAgICJmZm5fZG93bl9leHBzLndlaWdodCIsCl07CmNvbnN0IFJFU0lERU5UUzogWyh1MzIsIHUzMik7IDJdID0gWyg0MCwgMCksICgzLCAxKV07CmNvbnN0IENIRUNLUE9JTlRfU0xJQ0VTOiBbRXhwZXJ0Q2hlY2twb2ludFNsaWNlOyAyXSA9IFsKICAgIEV4cGVydENoZWNrcG9pbnRTbGljZSB7CiAgICAgICAgcmVzaWRlbnRfZXhwZXJ0OiA0MCwKICAgICAgICByZXNpZGVudF9sb2NhbDogMCwKICAgICAgICBjaGVja3BvaW50X2V4cGVydDogMSwKICAgIH0sCiAgICBFeHBlcnRDaGVja3BvaW50U2xpY2UgewogICAgICAgIHJlc2lkZW50X2V4cGVydDogMywKICAgICAgICByZXNpZGVudF9sb2NhbDogMSwKICAgICAgICBjaGVja3BvaW50X2V4cGVydDogMCwKICAgIH0sCl07CgpzdHJ1Y3QgTGF5ZXJTZXNzaW9ucyB7CiAgICBnYXRlOiBWZWM8U2Vzc2lvbj4sCiAgICB1cDogVmVjPFNlc3Npb24+LAogICAgZG93bjogVmVjPFNlc3Npb24+LAogICAgZXhwZXJ0X3dlaWdodF9ieXRlczogQlRyZWVNYXA8dTMyLCB1NjQ+LAp9CgpzdHJ1Y3QgUjY5N0NvbnRleHQgewogICAgbGF5ZXJzOiBWZWM8TGF5ZXJTZXNzaW9ucz4sCiAgICBsZWRnZXI6IE5hdGl2ZUJhdGNoTGVkZ2VyLAogICAgcmVzaWRlbnRfZXhwZXJ0X2J5dGVzOiB1NjQsCiAgICBhZHZpc29yeV9jYXBhY2l0eV9ieXRlczogdTY0LAogICAgbGFzdF9tZW1vcnlfYWR2aWNlOiBPcHRpb248U3RhbXBlZE1lbW9yeUFkdmljZT4sCn0KCiNbcmVwcihDKV0KI1tkZXJpdmUoQ2xvbmUsIENvcHksIERlZmF1bHQpXQpwdWIgc3RydWN0IFZGUjY5N01lbW9yeUFkdmljZSB7CiAgICBwdWIgdmVyc2lvbjogdTMyLAogICAgLy8vIDAgPSBhZHZpc29yeSByZXR1cm5lZDsgMSA9IG5vIGFkdmlzb3J5IChjYXBhY2l0eS9pbnB1dC9wbGFubmVyIHJlZnVzYWwpLgogICAgcHViIHN0YXR1czogdTMyLAogICAgLy8vIDAgPSBub25lOyAxID0gY2FwYWNpdHkgZXhjZWVkZWQ7IDIgPSBvdGhlciBwbGFubmVyIGVycm9yOyAzID0gcGFuaWMuCiAgICBwdWIgcmVmdXNhbF9jb2RlOiB1MzIsCiAgICBwdWIgbGF5ZXI6IHUzMiwKICAgIHB1YiByYW5rOiB1MzIsCiAgICBwdWIgcmVzZXJ2ZWQ6IHUzMiwKICAgIHB1YiBlcG9jaDogdTY0LAogICAgcHViIGJhdGNoOiB1NjQsCiAgICBwdWIgYXR0ZW1wdDogdTY0LAogICAgcHViIGNhcGFjaXR5X2J5dGVzOiB1NjQsCiAgICBwdWIgcmVzaWRlbnRfZXhwZXJ0X2J5dGVzOiB1NjQsCiAgICBwdWIgY2FuZGlkYXRlX2V4cGVydF9ieXRlczogdTY0LAogICAgcHViIGxvYWRpbmdfcGVha19ieXRlczogdTY0LAogICAgcHViIGhlYWRyb29tX2J5dGVzOiB1NjQsCn0KCnN0cnVjdCBTdGFtcGVkTWVtb3J5QWR2aWNlIHsKICAgIHN0YW1wOiBTdGFtcCwKICAgIGF0dGVtcHQ6IHU2NCwKICAgIHJlY29yZDogVkZSNjk3TWVtb3J5QWR2aWNlLAp9CgpmbiBzZWxlY3RlZF9kaWdlc3QoZmlsZTogJm11dCBGaWxlLCB0ZW5zb3I6ICZzdHIpIC0+IFJlc3VsdDwoU3RyaW5nLCB1NjQsIHU2NCksIFN0cmluZz4gewogICAgbGV0IHNwYW4gPSB2Zl9nZ21sX25hdGl2ZV9mZmk6OmdndWZfdGVuc29yX3NwYW4oZmlsZSwgdGVuc29yKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJHR1VGIHNwYW4ge3RlbnNvcn06IHtlfSIpKT87CiAgICBpZiBzcGFuLmdnbWxfdHlwZSAhPSA4IHx8IHNwYW4uZGltZW5zaW9ucyAhPSBbMzIsIDMyLCA0LCAxXSB8fCBzcGFuLmJ5dGVzID09IDAgewogICAgICAgIHJldHVybiBFcnIoZm9ybWF0ISgidW5leHBlY3RlZCBwaW5uZWQgUThfMCBzaGFwZSBmb3Ige3RlbnNvcn0iKSk7CiAgICB9CiAgICBsZXQgbXV0IHJlYWRlciA9IFNlbGVjdGVkRXhwZXJ0U2xpY2VSZWFkZXI6Om5ldyhmaWxlLCBzcGFuLm9mZnNldCwgc3Bhbi5ieXRlcywgNCwgJlsxLCAwXSkKICAgICAgICAubWFwX2Vycih8ZXwgZm9ybWF0ISgic2VsZWN0ZWQgUThfMCByZWFkZXIge3RlbnNvcn06IHtlfSIpKT87CiAgICBsZXQgbXV0IHBheWxvYWQgPSBWZWM6OndpdGhfY2FwYWNpdHkoKHNwYW4uYnl0ZXMgLyAyKSBhcyB1c2l6ZSk7CiAgICByZWFkZXIKICAgICAgICAucmVhZF90b19lbmQoJm11dCBwYXlsb2FkKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJyZWFkIHNlbGVjdGVkIFE4XzAgcGF5bG9hZCB7dGVuc29yfToge2V9IikpPzsKICAgIGxldCBzZWxlY3RlZF9ieXRlcyA9IHU2NDo6dHJ5X2Zyb20ocGF5bG9hZC5sZW4oKSkubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgbGV0IHBlcl9leHBlcnRfYnl0ZXMgPSBzcGFuLmJ5dGVzIC8gNDsKICAgIGlmIHNwYW4uYnl0ZXMgJSA0ICE9IDAgfHwgc2VsZWN0ZWRfYnl0ZXMgIT0gcGVyX2V4cGVydF9ieXRlcyAqIDIgewogICAgICAgIHJldHVybiBFcnIoZm9ybWF0ISgic2VsZWN0ZWQgUThfMCBieXRlIGdlb21ldHJ5IGRpZmZlcnMgZm9yIHt0ZW5zb3J9IikpOwogICAgfQogICAgT2soKHNoYTI1Njo6aGV4KCZwYXlsb2FkKSwgc2VsZWN0ZWRfYnl0ZXMsIHBlcl9leHBlcnRfYnl0ZXMpKQp9CgpmbiB0ZW5zb3JfbmFtZShsYXllcjogdTMyLCBwcm9qZWN0aW9uOiAmc3RyKSAtPiBTdHJpbmcgewogICAgZm9ybWF0ISgiYmxrLntsYXllcn0ue3Byb2plY3Rpb259IikKfQoKZm4gbG9hZF9wcm9qZWN0aW9uKAogICAgc291cmNlOiAmUGF0aCwKICAgIHdvcmtlcjogJnN0ciwKICAgIGxheWVyOiB1MzIsCiAgICBwcm9qZWN0aW9uOiAmc3RyLAopIC0+IFJlc3VsdDwoU2Vzc2lvbiwgdTY0KSwgU3RyaW5nPiB7CiAgICBsZXQgdGVuc29yID0gdGVuc29yX25hbWUobGF5ZXIsIHByb2plY3Rpb24pOwogICAgbGV0IG11dCBmaWxlID0gRmlsZTo6b3Blbihzb3VyY2UpLm1hcF9lcnIofGV8IGZvcm1hdCEoIm9wZW4gc291cmNlIEdHVUY6IHtlfSIpKT87CiAgICBsZXQgKGRpZ2VzdCwgc2VsZWN0ZWRfYnl0ZXMsIHBlcl9leHBlcnRfYnl0ZXMpID0gc2VsZWN0ZWRfZGlnZXN0KCZtdXQgZmlsZSwgJnRlbnNvcik/OwogICAgbGV0IGJpbmRpbmcgPSBHcm91cGVkTWF0cml4QmluZGluZyB7CiAgICAgICAgbW9kZWxfcmV2aXNpb246IE1PREVMLnRvX293bmVkKCksCiAgICAgICAgbGF5ZXIsCiAgICAgICAgdGVuc29yOiB0ZW5zb3IuY2xvbmUoKSwKICAgICAgICBnZ21sX3R5cGU6IDgsCiAgICAgICAgcmFuazogUkFOSywKICAgICAgICBlcG9jaDogRVBPQ0gsCiAgICAgICAgcm93czogSElEREVOLAogICAgICAgIGNvbHVtbnM6IEhJRERFTiwKICAgICAgICByZXNpZGVudHM6IFJFU0lERU5UUy50b192ZWMoKSwKICAgICAgICBzaGEyNTY6IGRpZ2VzdCwKICAgIH07CiAgICBsZXQgZW5kcG9pbnQgPSBFbmRwb2ludCB7CiAgICAgICAgcmFuazogUkFOSywKICAgICAgICBhcmd2OiB2ZWMhW3dvcmtlci50b19vd25lZCgpXSwKICAgIH07CiAgICBsZXQgbXV0IHNlc3Npb24gPSBTZXNzaW9uOjpjb25uZWN0KCZlbmRwb2ludCwgVElNRU9VVCkubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgc2Vzc2lvbgogICAgICAgIC5sb2FkX2dyb3VwZWRfbWF0cml4X2dndWZfZXhwZXJ0X3NsaWNlcygKICAgICAgICAgICAgJmJpbmRpbmcsCiAgICAgICAgICAgIHNvdXJjZSwKICAgICAgICAgICAgJnRlbnNvciwKICAgICAgICAgICAgJkNIRUNLUE9JTlRfU0xJQ0VTLAogICAgICAgICAgICBUSU1FT1VULAogICAgICAgICkKICAgICAgICAubWFwX2Vycih8ZXwgZm9ybWF0ISgicmVzaWRlbnQgR0dVRiBleHBlcnQtc2xpY2UgbG9hZCB7dGVuc29yfToge2V9IikpPzsKICAgIGlmIHNlc3Npb24udHJhZmZpYy53ZWlnaHRfYnl0ZXNfc2VudCAhPSBzZWxlY3RlZF9ieXRlcyB7CiAgICAgICAgcmV0dXJuIEVycihmb3JtYXQhKAogICAgICAgICAgICAicmFuay1sb2NhbCBsb2FkZXIgYnl0ZSBjb3VudCBkaWZmZXJzIGZvciB7dGVuc29yfTogc2VudCB7fSwgZXhwZWN0ZWQge30iLAogICAgICAgICAgICBzZXNzaW9uLnRyYWZmaWMud2VpZ2h0X2J5dGVzX3NlbnQsIHNlbGVjdGVkX2J5dGVzCiAgICAgICAgKSk7CiAgICB9CiAgICBlcHJpbnRsbiEoCiAgICAgICAgIlI2OTcgcnVzdF9sb2FkZXIgdGVuc29yPXt0ZW5zb3J9IHJhbms9e1JBTkt9IHJlc2lkZW50X29yZGVyPVs0MCwzXSBjaGVja3BvaW50X29yZGVyPVsxLDBdIGJ5dGVzPXtzZWxlY3RlZF9ieXRlc30gcGVyX2V4cGVydF9ieXRlcz17cGVyX2V4cGVydF9ieXRlc30iCiAgICApOwogICAgT2soKHNlc3Npb24sIHBlcl9leHBlcnRfYnl0ZXMpKQp9CgpmbiBtYWtlX2NvbnRleHQoc291cmNlOiAmUGF0aCwgd29ya2VyOiAmc3RyLCBsZWRnZXJfcm9vdDogJlBhdGgpIC0+IFJlc3VsdDxSNjk3Q29udGV4dCwgU3RyaW5nPiB7CiAgICBpZiAhc291cmNlLmlzX2ZpbGUoKSB8fCB3b3JrZXIudHJpbSgpLmlzX2VtcHR5KCkgewogICAgICAgIHJldHVybiBFcnIoInJhbmstbG9jYWwgc291cmNlIG9yIHdvcmtlciBleGVjdXRhYmxlIG1pc3NpbmciLmludG8oKSk7CiAgICB9CiAgICBmb3IgbGF5ZXIgaW4gMC4uTEFZRVJTIHsKICAgICAgICBmb3IgcHJvamVjdGlvbiBpbiBQUk9KRUNUSU9OUyB7CiAgICAgICAgICAgIGxldCB0ZW5zb3IgPSB0ZW5zb3JfbmFtZShsYXllciwgcHJvamVjdGlvbik7CiAgICAgICAgICAgIGxldCBmaWxlID0gRmlsZTo6b3Blbihzb3VyY2UpLm1hcF9lcnIofGV8IGZvcm1hdCEoIm9wZW4gc291cmNlIEdHVUY6IHtlfSIpKT87CiAgICAgICAgICAgIHZmX2dnbWxfbmF0aXZlX2ZmaTo6Z2d1Zl90ZW5zb3Jfc3BhbigmZmlsZSwgJnRlbnNvcikKICAgICAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJwaW5uZWQgdGVuc29yIHt0ZW5zb3J9OiB7ZX0iKSk/OwogICAgICAgIH0KICAgIH0KICAgIGxldCBsZWRnZXIgPSBOYXRpdmVCYXRjaExlZGdlcjo6b3BlbihsZWRnZXJfcm9vdCkubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgbGV0IG11dCBsYXllcnMgPSBWZWM6OndpdGhfY2FwYWNpdHkoTEFZRVJTIGFzIHVzaXplKTsKICAgIGZvciBsYXllciBpbiAwLi5MQVlFUlMgewogICAgICAgIGxldCAoZ2F0ZSwgZ2F0ZV9ieXRlcykgPSBsb2FkX3Byb2plY3Rpb24oc291cmNlLCB3b3JrZXIsIGxheWVyLCBQUk9KRUNUSU9OU1swXSk/OwogICAgICAgIGxldCAodXAsIHVwX2J5dGVzKSA9IGxvYWRfcHJvamVjdGlvbihzb3VyY2UsIHdvcmtlciwgbGF5ZXIsIFBST0pFQ1RJT05TWzFdKT87CiAgICAgICAgbGV0IChkb3duLCBkb3duX2J5dGVzKSA9IGxvYWRfcHJvamVjdGlvbihzb3VyY2UsIHdvcmtlciwgbGF5ZXIsIFBST0pFQ1RJT05TWzJdKT87CiAgICAgICAgbGV0IHBlcl9leHBlcnRfYnl0ZXMgPSBnYXRlX2J5dGVzCiAgICAgICAgICAgIC5jaGVja2VkX2FkZCh1cF9ieXRlcykKICAgICAgICAgICAgLmFuZF90aGVuKHxieXRlc3wgYnl0ZXMuY2hlY2tlZF9hZGQoZG93bl9ieXRlcykpCiAgICAgICAgICAgIC5va19vcl9lbHNlKHx8ICJwZXItZXhwZXJ0IEdHVUYgYnl0ZSBjb3VudCBvdmVyZmxvdyIudG9fb3duZWQoKSk/OwogICAgICAgIGxheWVycy5wdXNoKExheWVyU2Vzc2lvbnMgewogICAgICAgICAgICBnYXRlOiB2ZWMhW2dhdGVdLAogICAgICAgICAgICB1cDogdmVjIVt1cF0sCiAgICAgICAgICAgIGRvd246IHZlYyFbZG93bl0sCiAgICAgICAgICAgIGV4cGVydF93ZWlnaHRfYnl0ZXM6IEJUcmVlTWFwOjpmcm9tKFsoNDAsIHBlcl9leHBlcnRfYnl0ZXMpLCAoMywgcGVyX2V4cGVydF9ieXRlcyldKSwKICAgICAgICB9KTsKICAgIH0KICAgIGxldCByZXNpZGVudF9leHBlcnRfYnl0ZXMgPSBsYXllcnMuaXRlcigpLnRyeV9mb2xkKDBfdTY0LCB8c3VtLCBsYXllcnwgewogICAgICAgIGxheWVyCiAgICAgICAgICAgIC5leHBlcnRfd2VpZ2h0X2J5dGVzCiAgICAgICAgICAgIC52YWx1ZXMoKQogICAgICAgICAgICAudHJ5X2ZvbGQoc3VtLCB8dG90YWwsIGJ5dGVzfCB7CiAgICAgICAgICAgICAgICB0b3RhbAogICAgICAgICAgICAgICAgICAgIC5jaGVja2VkX2FkZCgqYnl0ZXMpCiAgICAgICAgICAgICAgICAgICAgLm9rX29yX2Vsc2UofHwgInJlc2lkZW50IEdHVUYgYnl0ZSBjb3VudCBvdmVyZmxvdyIudG9fb3duZWQoKSkKICAgICAgICAgICAgfSkKICAgIH0pPzsKICAgIE9rKFI2OTdDb250ZXh0IHsKICAgICAgICBsYXllcnMsCiAgICAgICAgbGVkZ2VyLAogICAgICAgIHJlc2lkZW50X2V4cGVydF9ieXRlcywKICAgICAgICBhZHZpc29yeV9jYXBhY2l0eV9ieXRlczogREVGQVVMVF9BRFZJU09SWV9DQVBBQ0lUWV9CWVRFUywKICAgICAgICBsYXN0X21lbW9yeV9hZHZpY2U6IE5vbmUsCiAgICB9KQp9CgpmbiBtZW1vcnlfYWR2aWNlX2Zvcl9yb3V0ZSgKICAgIGNvbnRleHQ6ICZSNjk3Q29udGV4dCwKICAgIGxheWVyOiB1MzIsCiAgICByb3V0ZWQ6ICZ2b2x0YWZhYnJpYzo6cm91dGluZzo6UXdlbjJNb0VSb3V0ZUJhdGNoLAopIC0+IFN0YW1wZWRNZW1vcnlBZHZpY2UgewogICAgbGV0IHN0YW1wID0gcm91dGVkLnByb2JsZW0oKS5zdGFtcC5jbG9uZSgpOwogICAgbGV0IGF0dGVtcHQgPSByb3V0ZWQuYXR0ZW1wdCgpOwogICAgbGV0IG11dCByZWNvcmQgPSBWRlI2OTdNZW1vcnlBZHZpY2UgewogICAgICAgIHZlcnNpb246IDEsCiAgICAgICAgc3RhdHVzOiAxLAogICAgICAgIGxheWVyLAogICAgICAgIHJhbms6IFJBTkssCiAgICAgICAgZXBvY2g6IHN0YW1wLmVwb2NoLAogICAgICAgIGJhdGNoOiBzdGFtcC5iYXRjaCwKICAgICAgICBhdHRlbXB0LAogICAgICAgIGNhcGFjaXR5X2J5dGVzOiBjb250ZXh0LmFkdmlzb3J5X2NhcGFjaXR5X2J5dGVzLAogICAgICAgIC4uVkZSNjk3TWVtb3J5QWR2aWNlOjpkZWZhdWx0KCkKICAgIH07CiAgICBsZXQgcGxhbm5lZCA9IGNhdGNoX3Vud2luZChBc3NlcnRVbndpbmRTYWZlKHx8IHsKICAgICAgICBsZXQgbGF5ZXJfc2Vzc2lvbnMgPSBjb250ZXh0LmxheWVycy5nZXQobGF5ZXIgYXMgdXNpemUpLm9rX29yX2Vsc2UofHwgewogICAgICAgICAgICB2b2x0YWZhYnJpYzo6RXJyb3I6Om5ldygiSU5WQUxJRF9JTlBVVCIsICJsYXllciBvdXRzaWRlIHJlc2lkZW50IEdHVUYgaW52ZW50b3J5IikKICAgICAgICB9KT87CiAgICAgICAgbGV0IGV4cGVydHMgPSBsYXllcl9zZXNzaW9ucwogICAgICAgICAgICAuZXhwZXJ0X3dlaWdodF9ieXRlcwogICAgICAgICAgICAuaXRlcigpCiAgICAgICAgICAgIC5tYXAofCgmaWQsICZyZXNpZGVudF9ieXRlcyl8IEV4cGVydFByb2ZpbGUgewogICAgICAgICAgICAgICAgaWQsCiAgICAgICAgICAgICAgICByZXNpZGVudF9ieXRlcywKICAgICAgICAgICAgICAgIGNvbXB1dGVfdXM6IDEuMCwKICAgICAgICAgICAgICAgIGNvc3RfcHJvdmVuYW5jZTogQ29zdFByb3ZlbmFuY2UgewogICAgICAgICAgICAgICAgICAgIG9yaWdpbjogQ29zdE9yaWdpbjo6U3ludGhldGljLAogICAgICAgICAgICAgICAgICAgIHNvdXJjZTogU29tZSgiUjY5NyBkZXRlcm1pbmlzdGljIGZpeHR1cmU7IG5vIHRpbWluZyBtZWFzdXJlbWVudCIuaW50bygpKSwKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgIH0pCiAgICAgICAgICAgIC5jb2xsZWN0KCk7CiAgICAgICAgbGV0IGJhc2UgPSBQbGFjZW1lbnRQcm9ibGVtIHsKICAgICAgICAgICAgdG9wb2xvZ3k6IFRvcG9sb2d5IHsKICAgICAgICAgICAgICAgIHNjaGVtYV92ZXJzaW9uOiAxLAogICAgICAgICAgICAgICAgb3JpZ2luOiBPcmlnaW46OlN5bnRoZXRpYywKICAgICAgICAgICAgICAgIHNvdXJjZV9ub3RlOgogICAgICAgICAgICAgICAgICAgICJSNjk3IG9uZS1yYW5rIENQVSBmaXh0dXJlOyBjYXBhY2l0eSBhbmQgbm9uLXdlaWdodCBidWRnZXRzIGFyZSBzeW50aGV0aWMiCiAgICAgICAgICAgICAgICAgICAgICAgIC5pbnRvKCksCiAgICAgICAgICAgICAgICBkZXZpY2VzOiB2ZWMhW0RldmljZSB7CiAgICAgICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgICAgICBob3N0OiAicjY5Ny1zeW50aGV0aWMtY3B1LXJhbmsiLmludG8oKSwKICAgICAgICAgICAgICAgICAgICBjYXBhY2l0eV9ieXRlczogY29udGV4dC5hZHZpc29yeV9jYXBhY2l0eV9ieXRlcywKICAgICAgICAgICAgICAgICAgICByZXNlcnZlZF9ieXRlczogMCwKICAgICAgICAgICAgICAgIH1dLAogICAgICAgICAgICAgICAgbGlua3M6IHZlYyFbXSwKICAgICAgICAgICAgfSwKICAgICAgICAgICAgZXhwZXJ0cywKICAgICAgICAgICAgZGVtYW5kczogdmVjIVtdLAogICAgICAgICAgICBoaWRkZW46IEhJRERFTiBhcyB1NjQsCiAgICAgICAgICAgIHdpcmU6IFdpcmVGb3JtYXQ6OmRlZmF1bHQoKSwKICAgICAgICAgICAgbWF4X2l0ZXJhdGlvbnM6IDAsCiAgICAgICAgICAgIHdpcmVfcG9saWN5OiBXaXJlUG9saWN5OjpBZGFwdGl2ZSwKICAgICAgICAgICAgbWF4X3dvcmtfdW5pdHM6IDEwMF8wMDAsCiAgICAgICAgfTsKICAgICAgICBsZXQgY2FuZGlkYXRlX2V4cGVydF9ieXRlcyA9CiAgICAgICAgICAgIGxheWVyX3Nlc3Npb25zCiAgICAgICAgICAgICAgICAuZXhwZXJ0X3dlaWdodF9ieXRlcwogICAgICAgICAgICAgICAgLnZhbHVlcygpCiAgICAgICAgICAgICAgICAudHJ5X2ZvbGQoMF91NjQsIHxzdW0sIGJ5dGVzfCB7CiAgICAgICAgICAgICAgICAgICAgc3VtLmNoZWNrZWRfYWRkKCpieXRlcykub2tfb3JfZWxzZSh8fCB7CiAgICAgICAgICAgICAgICAgICAgICAgIHZvbHRhZmFicmljOjpFcnJvcjo6bmV3KAogICAgICAgICAgICAgICAgICAgICAgICAgICAgIklOVkFMSURfSU5QVVQiLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgImNhbmRpZGF0ZSBHR1VGIGJ5dGUgY291bnQgb3ZlcmZsb3ciLAogICAgICAgICAgICAgICAgICAgICAgICApCiAgICAgICAgICAgICAgICAgICAgfSkKICAgICAgICAgICAgICAgIH0pPzsKICAgICAgICBsZXQgYWR2aWNlID0gcGxhbl9xd2VuMm1vZV9hZHZpc29yeV93aXRoX21lbW9yeSgKICAgICAgICAgICAgJmJhc2UsCiAgICAgICAgICAgIHJvdXRlZCwKICAgICAgICAgICAgUkFOSywKICAgICAgICAgICAgJltQZXJSYW5rTWVtb3J5RW52ZWxvcGUgewogICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgIHJlc2lkZW50X2V4cGVydF9ieXRlczogY29udGV4dC5yZXNpZGVudF9leHBlcnRfYnl0ZXMsCiAgICAgICAgICAgICAgICBrdl9ieXRlczogMCwKICAgICAgICAgICAgICAgIHJlY3VycmVudF9ieXRlczogMCwKICAgICAgICAgICAgICAgIHdvcmtzcGFjZV9ieXRlczogMCwKICAgICAgICAgICAgICAgIGdyYXBoX2J5dGVzOiAwLAogICAgICAgICAgICAgICAgY29tbXVuaWNhdGlvbl9ieXRlczogMCwKICAgICAgICAgICAgICAgIHNhZmV0eV9tYXJnaW5fYnl0ZXM6IDAsCiAgICAgICAgICAgICAgICBsb2FkX3RlbXBvcmFyeV9ieXRlczogY2FuZGlkYXRlX2V4cGVydF9ieXRlcywKICAgICAgICAgICAgfV0sCiAgICAgICAgKT87CiAgICAgICAgaWYgYWR2aWNlLnJhbmtzLmxlbigpICE9IDEKICAgICAgICAgICAgfHwgYWR2aWNlLnJvdXRlZC5zdGFtcCAhPSBzdGFtcAogICAgICAgICAgICB8fCBhZHZpY2Uucm91dGVkLmF0dGVtcHQgIT0gYXR0ZW1wdAogICAgICAgIHsKICAgICAgICAgICAgcmV0dXJuIEVycih2b2x0YWZhYnJpYzo6RXJyb3I6Om5ldygKICAgICAgICAgICAgICAgICJJTlZBTElEX0lOUFVUIiwKICAgICAgICAgICAgICAgICJtZW1vcnkgYWR2aWNlIGlkZW50aXR5L3JhbmsgbWlzbWF0Y2giLAogICAgICAgICAgICApKTsKICAgICAgICB9CiAgICAgICAgT2s6OjxfLCB2b2x0YWZhYnJpYzo6RXJyb3I+KGFkdmljZS5yYW5rc1swXS5jbG9uZSgpKQogICAgfSkpOwogICAgbWF0Y2ggcGxhbm5lZCB7CiAgICAgICAgT2soT2socmFuaykpID0+IHsKICAgICAgICAgICAgcmVjb3JkLnN0YXR1cyA9IDA7CiAgICAgICAgICAgIHJlY29yZC5yZXNpZGVudF9leHBlcnRfYnl0ZXMgPSByYW5rLnJlc2lkZW50X2V4cGVydF9ieXRlczsKICAgICAgICAgICAgcmVjb3JkLmNhbmRpZGF0ZV9leHBlcnRfYnl0ZXMgPSByYW5rLmV4cGVydF93ZWlnaHRfYnl0ZXM7CiAgICAgICAgICAgIHJlY29yZC5sb2FkaW5nX3BlYWtfYnl0ZXMgPSByYW5rLmxvYWRpbmdfcGVha19ieXRlczsKICAgICAgICAgICAgcmVjb3JkLmhlYWRyb29tX2J5dGVzID0gcmFuay5oZWFkcm9vbV9ieXRlczsKICAgICAgICB9CiAgICAgICAgT2soRXJyKGVycm9yKSkgPT4gewogICAgICAgICAgICByZWNvcmQucmVmdXNhbF9jb2RlID0gaWYgZXJyb3IuY29kZSA9PSAiQ0FQQUNJVFlfRVhDRUVERUQiIHsKICAgICAgICAgICAgICAgIDEKICAgICAgICAgICAgfSBlbHNlIHsKICAgICAgICAgICAgICAgIDIKICAgICAgICAgICAgfTsKICAgICAgICB9CiAgICAgICAgRXJyKF8pID0+IHJlY29yZC5yZWZ1c2FsX2NvZGUgPSAzLAogICAgfQogICAgU3RhbXBlZE1lbW9yeUFkdmljZSB7CiAgICAgICAgc3RhbXAsCiAgICAgICAgYXR0ZW1wdCwKICAgICAgICByZWNvcmQsCiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQovLy8gT3BlbnMgdGhlIFI2OTcgbG9jYWwgQ1BVIFNlc3Npb24gYWRhcHRlci4KLy8vCi8vLyAjIFNhZmV0eQovLy8gRWFjaCBhcmd1bWVudCBtdXN0IHBvaW50IHRvIGEgTlVMLXRlcm1pbmF0ZWQgVVRGLTggc3RyaW5nIHZhbGlkIGZvciB0aGUKLy8vIGR1cmF0aW9uIG9mIHRoaXMgY2FsbC4gVGhlIHN0cmluZ3MgbXVzdCBub3QgYmUgbXV0YXRlZCBjb25jdXJyZW50bHkuCnB1YiB1bnNhZmUgZXh0ZXJuICJDIiBmbiB2Zl9yNjk3X29wZW4oCiAgICBzb3VyY2U6ICpjb25zdCBjX2NoYXIsCiAgICB3b3JrZXI6ICpjb25zdCBjX2NoYXIsCiAgICBsZWRnZXJfcm9vdDogKmNvbnN0IGNfY2hhciwKKSAtPiAqbXV0IGNfdm9pZCB7CiAgICBsZXQgcmVzdWx0ID0gY2F0Y2hfdW53aW5kKEFzc2VydFVud2luZFNhZmUofHwgewogICAgICAgIGlmIHNvdXJjZS5pc19udWxsKCkgfHwgd29ya2VyLmlzX251bGwoKSB8fCBsZWRnZXJfcm9vdC5pc19udWxsKCkgewogICAgICAgICAgICByZXR1cm4gRXJyKCJudWxsIFI2OTcgYnJpZGdlIGFyZ3VtZW50Ii50b19vd25lZCgpKTsKICAgICAgICB9CiAgICAgICAgbGV0IHNvdXJjZSA9IHVuc2FmZSB7IENTdHI6OmZyb21fcHRyKHNvdXJjZSkgfQogICAgICAgICAgICAudG9fc3RyKCkKICAgICAgICAgICAgLm1hcF9lcnIofGV8IGUudG9fc3RyaW5nKCkpPzsKICAgICAgICBsZXQgd29ya2VyID0gdW5zYWZlIHsgQ1N0cjo6ZnJvbV9wdHIod29ya2VyKSB9CiAgICAgICAgICAgIC50b19zdHIoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIGxldCBsZWRnZXJfcm9vdCA9IHVuc2FmZSB7IENTdHI6OmZyb21fcHRyKGxlZGdlcl9yb290KSB9CiAgICAgICAgICAgIC50b19zdHIoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIG1ha2VfY29udGV4dChQYXRoOjpuZXcoc291cmNlKSwgd29ya2VyLCBQYXRoOjpuZXcobGVkZ2VyX3Jvb3QpKQogICAgfSkpOwogICAgbWF0Y2ggcmVzdWx0IHsKICAgICAgICBPayhPayhjb250ZXh0KSkgPT4gQm94OjppbnRvX3JhdyhCb3g6Om5ldyhjb250ZXh0KSkuY2FzdCgpLAogICAgICAgIE9rKEVycihlcnJvcikpID0+IHsKICAgICAgICAgICAgZXByaW50bG4hKCJSNjk3IFJ1c3QgbG9hZGVyIHJlZnVzZWQ6IHtlcnJvcn0iKTsKICAgICAgICAgICAgc3RkOjpwdHI6Om51bGxfbXV0KCkKICAgICAgICB9CiAgICAgICAgRXJyKF8pID0+IHsKICAgICAgICAgICAgZXByaW50bG4hKCJSNjk3IFJ1c3QgbG9hZGVyIHBhbmlja2VkOyBjb250ZXh0IG5vdCBwdWJsaXNoZWQiKTsKICAgICAgICAgICAgc3RkOjpwdHI6Om51bGxfbXV0KCkKICAgICAgICB9CiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQovLy8gU2V0cyBhIGRldGVybWluaXN0aWMgY2FwYWNpdHkgaW5wdXQgZm9yIHRoZSBvcHRpb25hbCBSNjk3IGFkdmlzb3IuCi8vLwovLy8gIyBTYWZldHkKLy8vIGBvcGFxdWVgIG11c3QgYmUgbnVsbCBvciBhIGxpdmUgY29udGV4dCByZXR1cm5lZCBieSBgdmZfcjY5N19vcGVuYCB0aGF0IGhhcwovLy8gbm90IGFscmVhZHkgYmVlbiBjbG9zZWQuCnB1YiB1bnNhZmUgZXh0ZXJuICJDIiBmbiB2Zl9yNjk3X3NldF9hZHZpc29yeV9jYXBhY2l0eSgKICAgIG9wYXF1ZTogKm11dCBjX3ZvaWQsCiAgICBjYXBhY2l0eV9ieXRlczogdTY0LAopIC0+IGkzMiB7CiAgICBpZiBvcGFxdWUuaXNfbnVsbCgpIHx8IGNhcGFjaXR5X2J5dGVzID09IDAgewogICAgICAgIHJldHVybiAxOwogICAgfQogICAgbWF0Y2ggY2F0Y2hfdW53aW5kKEFzc2VydFVud2luZFNhZmUofHwgdW5zYWZlIHsKICAgICAgICBsZXQgY29udGV4dCA9ICZtdXQgKm9wYXF1ZS5jYXN0Ojo8UjY5N0NvbnRleHQ+KCk7CiAgICAgICAgY29udGV4dC5hZHZpc29yeV9jYXBhY2l0eV9ieXRlcyA9IGNhcGFjaXR5X2J5dGVzOwogICAgICAgIGNvbnRleHQubGFzdF9tZW1vcnlfYWR2aWNlID0gTm9uZTsKICAgIH0pKSB7CiAgICAgICAgT2soKCkpID0+IDAsCiAgICAgICAgRXJyKF8pID0+IDIsCiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQovLy8gUmV0dXJucyBvbmx5IHRoZSBhZHZpY2UgbWF0Y2hpbmcgdGhlIGV4YWN0IGxhc3Qgcm91dGUgU3RhbXAgYW5kIGF0dGVtcHQuCi8vLwovLy8gIyBTYWZldHkKLy8vIElkZW50aXR5IHBvaW50ZXJzIG11c3QgYmUgTlVMLXRlcm1pbmF0ZWQgVVRGLTggc3RyaW5ncy4gYG9wYXF1ZWAgbXVzdCBiZSBhCi8vLyBsaXZlIGNvbnRleHQgZnJvbSBgdmZfcjY5N19vcGVuYCwgYW5kIGBvdXRgIG11c3QgcG9pbnQgdG8gd3JpdGFibGUgc3RvcmFnZQovLy8gZm9yIG9uZSBgVkZSNjk3TWVtb3J5QWR2aWNlYCB2YWx1ZS4KcHViIHVuc2FmZSBleHRlcm4gIkMiIGZuIHZmX3I2OTdfZ2V0X21lbW9yeV9hZHZpY2UoCiAgICBvcGFxdWU6ICptdXQgY192b2lkLAogICAgcnVuX2lkOiAqY29uc3QgY19jaGFyLAogICAgbW9kZWxfcmV2aXNpb246ICpjb25zdCBjX2NoYXIsCiAgICBwbGFuX2lkOiAqY29uc3QgY19jaGFyLAogICAgbGF5ZXI6IHUzMiwKICAgIGVwb2NoOiB1NjQsCiAgICBiYXRjaDogdTY0LAogICAgYXR0ZW1wdDogdTY0LAogICAgb3V0OiAqbXV0IFZGUjY5N01lbW9yeUFkdmljZSwKKSAtPiBpMzIgewogICAgaWYgb3BhcXVlLmlzX251bGwoKQogICAgICAgIHx8IHJ1bl9pZC5pc19udWxsKCkKICAgICAgICB8fCBtb2RlbF9yZXZpc2lvbi5pc19udWxsKCkKICAgICAgICB8fCBwbGFuX2lkLmlzX251bGwoKQogICAgICAgIHx8IG91dC5pc19udWxsKCkKICAgIHsKICAgICAgICByZXR1cm4gMTsKICAgIH0KICAgIGxldCByZXN1bHQgPSBjYXRjaF91bndpbmQoQXNzZXJ0VW53aW5kU2FmZSh8fCB1bnNhZmUgewogICAgICAgIGxldCBjb250ZXh0ID0gJipvcGFxdWUuY2FzdDo6PFI2OTdDb250ZXh0PigpOwogICAgICAgIGxldCBleHBlY3RlZCA9IFN0YW1wIHsKICAgICAgICAgICAgcnVuX2lkOiBDU3RyOjpmcm9tX3B0cihydW5faWQpCiAgICAgICAgICAgICAgICAudG9fc3RyKCkKICAgICAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT8KICAgICAgICAgICAgICAgIC50b19vd25lZCgpLAogICAgICAgICAgICBtb2RlbF9yZXZpc2lvbjogQ1N0cjo6ZnJvbV9wdHIobW9kZWxfcmV2aXNpb24pCiAgICAgICAgICAgICAgICAudG9fc3RyKCkKICAgICAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT8KICAgICAgICAgICAgICAgIC50b19vd25lZCgpLAogICAgICAgICAgICBwbGFuX2lkOiBDU3RyOjpmcm9tX3B0cihwbGFuX2lkKQogICAgICAgICAgICAgICAgLnRvX3N0cigpCiAgICAgICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/CiAgICAgICAgICAgICAgICAudG9fb3duZWQoKSwKICAgICAgICAgICAgbGF5ZXIsCiAgICAgICAgICAgIGJhdGNoLAogICAgICAgICAgICBlcG9jaCwKICAgICAgICB9OwogICAgICAgIGxldCBhZHZpY2UgPSBjb250ZXh0CiAgICAgICAgICAgIC5sYXN0X21lbW9yeV9hZHZpY2UKICAgICAgICAgICAgLmFzX3JlZigpCiAgICAgICAgICAgIC5va19vcl9lbHNlKHx8ICJubyBjdXJyZW50IFI2OTcgbWVtb3J5IGFkdmljZSIudG9fb3duZWQoKSk/OwogICAgICAgIGlmIGFkdmljZS5zdGFtcCAhPSBleHBlY3RlZCB8fCBhZHZpY2UuYXR0ZW1wdCAhPSBhdHRlbXB0IHsKICAgICAgICAgICAgcmV0dXJuIEVycigiUjY5NyBtZW1vcnkgYWR2aWNlIGlkZW50aXR5IG9yIGF0dGVtcHQgaXMgc3RhbGUiLnRvX293bmVkKCkpOwogICAgICAgIH0KICAgICAgICBzdGQ6OnB0cjo6d3JpdGUob3V0LCBhZHZpY2UucmVjb3JkKTsKICAgICAgICBPazo6PCgpLCBTdHJpbmc+KCgpKQogICAgfSkpOwogICAgbWF0Y2ggcmVzdWx0IHsKICAgICAgICBPayhPaygoKSkpID0+IDAsCiAgICAgICAgT2soRXJyKGVycm9yKSkgPT4gewogICAgICAgICAgICBlcHJpbnRsbiEoIlI2OTcgbWVtb3J5IGFkdmljZSByZWFkYmFjayByZWZ1c2VkOiB7ZXJyb3J9Iik7CiAgICAgICAgICAgIDIKICAgICAgICB9CiAgICAgICAgRXJyKF8pID0+IDMsCiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQojW2FsbG93KGNsaXBweTo6dG9vX21hbnlfYXJndW1lbnRzKV0KLy8vIFJ1bnMgb25lIGRvbm9yLXJvdXRlZCBRd2VuMk1vRSBGRk4gYmF0Y2ggYW5kIGF0b21pY2FsbHkgcHVibGlzaGVzIGl0cyBvdXRwdXQuCi8vLwovLy8gIyBTYWZldHkKLy8vIFRoZSBpZGVudGl0eSBwb2ludGVycyBtdXN0IGJlIE5VTC10ZXJtaW5hdGVkIFVURi04IHN0cmluZ3MuIFRoZSBleHBlcnQsCi8vLyB3ZWlnaHQsIGFjdGl2YXRpb24sIGFuZCBvdXRwdXQgcG9pbnRlcnMgbXVzdCByZWZlcmVuY2UgYXJyYXlzIG9mIHRoZSBsZW5ndGhzCi8vLyBzdXBwbGllZCBoZXJlOyBgb3V0cHV0YCBtdXN0IGJlIHdyaXRhYmxlIGFuZCBtdXN0IG5vdCBhbGlhcyBhbnkgaW5wdXQgYXJyYXkuCi8vLyBBbGwgcmVmZXJlbmNlZCBtZW1vcnkgbXVzdCByZW1haW4gdmFsaWQgZm9yIHRoZSBkdXJhdGlvbiBvZiB0aGlzIGNhbGwuCnB1YiB1bnNhZmUgZXh0ZXJuICJDIiBmbiB2Zl9yNjk3X3J1bl9yb3V0ZWRfbGF5ZXIoCiAgICBvcGFxdWU6ICptdXQgY192b2lkLAogICAgcnVuX2lkOiAqY29uc3QgY19jaGFyLAogICAgbW9kZWxfcmV2aXNpb246ICpjb25zdCBjX2NoYXIsCiAgICBwbGFuX2lkOiAqY29uc3QgY19jaGFyLAogICAgbGF5ZXI6IHUzMiwKICAgIGVwb2NoOiB1NjQsCiAgICBiYXRjaDogdTY0LAogICAgYXR0ZW1wdDogdTY0LAogICAgaGlkZGVuOiB1c2l6ZSwKICAgIHNsb3RzOiB1c2l6ZSwKICAgIHRva2VuczogdXNpemUsCiAgICBleHBlcnRfaWRzOiAqY29uc3QgaTMyLAogICAgZXhwZXJ0X2lkc19sZW46IHVzaXplLAogICAgcm91dGVfd2VpZ2h0czogKmNvbnN0IGYzMiwKICAgIHJvdXRlX3dlaWdodHNfbGVuOiB1c2l6ZSwKICAgIGFjdGl2YXRpb25zOiAqY29uc3QgZjMyLAogICAgYWN0aXZhdGlvbnNfbGVuOiB1c2l6ZSwKICAgIG91dHB1dDogKm11dCBmNjQsCiAgICBvdXRwdXRfbGVuOiB1c2l6ZSwKKSAtPiBpMzIgewogICAgaWYgb3BhcXVlLmlzX251bGwoKQogICAgICAgIHx8IHJ1bl9pZC5pc19udWxsKCkKICAgICAgICB8fCBtb2RlbF9yZXZpc2lvbi5pc19udWxsKCkKICAgICAgICB8fCBwbGFuX2lkLmlzX251bGwoKQogICAgICAgIHx8IGV4cGVydF9pZHMuaXNfbnVsbCgpCiAgICAgICAgfHwgcm91dGVfd2VpZ2h0cy5pc19udWxsKCkKICAgICAgICB8fCBhY3RpdmF0aW9ucy5pc19udWxsKCkKICAgICAgICB8fCBvdXRwdXQuaXNfbnVsbCgpCiAgICAgICAgfHwgaGlkZGVuICE9IEhJRERFTgogICAgICAgIHx8IHNsb3RzICE9IDIKICAgICAgICB8fCB0b2tlbnMgIT0gMQogICAgICAgIHx8IGxheWVyID49IExBWUVSUwogICAgICAgIHx8IGVwb2NoICE9IEVQT0NICiAgICAgICAgfHwgYmF0Y2ggPT0gMAogICAgICAgIHx8IGF0dGVtcHQgPT0gMAogICAgICAgIHx8IGV4cGVydF9pZHNfbGVuICE9IHNsb3RzICogdG9rZW5zCiAgICAgICAgfHwgcm91dGVfd2VpZ2h0c19sZW4gIT0gc2xvdHMgKiB0b2tlbnMKICAgICAgICB8fCBhY3RpdmF0aW9uc19sZW4gIT0gaGlkZGVuICogdG9rZW5zCiAgICAgICAgfHwgb3V0cHV0X2xlbiAhPSBoaWRkZW4gKiB0b2tlbnMKICAgIHsKICAgICAgICByZXR1cm4gMTsKICAgIH0KCiAgICBsZXQgcmVzdWx0ID0gY2F0Y2hfdW53aW5kKEFzc2VydFVud2luZFNhZmUofHwgdW5zYWZlIHsKICAgICAgICBsZXQgY29udGV4dCA9ICZtdXQgKm9wYXF1ZS5jYXN0Ojo8UjY5N0NvbnRleHQ+KCk7CiAgICAgICAgbGV0IHJ1bl9pZCA9IENTdHI6OmZyb21fcHRyKHJ1bl9pZCkudG9fc3RyKCkubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIGxldCBtb2RlbF9yZXZpc2lvbiA9IENTdHI6OmZyb21fcHRyKG1vZGVsX3JldmlzaW9uKQogICAgICAgICAgICAudG9fc3RyKCkKICAgICAgICAgICAgLm1hcF9lcnIofGV8IGUudG9fc3RyaW5nKCkpPzsKICAgICAgICBsZXQgcGxhbl9pZCA9IENTdHI6OmZyb21fcHRyKHBsYW5faWQpCiAgICAgICAgICAgIC50b19zdHIoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIGxldCBzZWxlY3RlZF9leHBlcnRzID0gc3RkOjpzbGljZTo6ZnJvbV9yYXdfcGFydHMoZXhwZXJ0X2lkcywgZXhwZXJ0X2lkc19sZW4pOwogICAgICAgIGxldCBmaW5hbF93ZWlnaHRzID0gc3RkOjpzbGljZTo6ZnJvbV9yYXdfcGFydHMocm91dGVfd2VpZ2h0cywgcm91dGVfd2VpZ2h0c19sZW4pOwogICAgICAgIGxldCBhY3RpdmF0aW9uX3ZhbHVlcyA9IHN0ZDo6c2xpY2U6OmZyb21fcmF3X3BhcnRzKGFjdGl2YXRpb25zLCBhY3RpdmF0aW9uc19sZW4pOwogICAgICAgIGlmIHJ1bl9pZCAhPSBSVU4KICAgICAgICAgICAgfHwgbW9kZWxfcmV2aXNpb24gIT0gTU9ERUwKICAgICAgICAgICAgfHwgcGxhbl9pZCAhPSBQTEFOCiAgICAgICAgICAgIHx8IHNlbGVjdGVkX2V4cGVydHMKICAgICAgICAgICAgICAgIC5pdGVyKCkKICAgICAgICAgICAgICAgIC5hbnkofCZleHBlcnR8IGV4cGVydCAhPSAzICYmIGV4cGVydCAhPSA0MCkKICAgICAgICAgICAgfHwgYWN0aXZhdGlvbl92YWx1ZXMuaXRlcigpLmFueSh8dmFsdWV8ICF2YWx1ZS5pc19maW5pdGUoKSkKICAgICAgICB7CiAgICAgICAgICAgIHJldHVybiBFcnIoCiAgICAgICAgICAgICAgICAiVm9sdGFGYWJyaWMgcm91dGUgaWRlbnRpdHkgb3IgaW5wdXQgaXMgb3V0c2lkZSB0aGUgcGlubmVkIGZpeHR1cmUiLnRvX293bmVkKCksCiAgICAgICAgICAgICk7CiAgICAgICAgfQoKICAgICAgICBsZXQgc2VsZWN0aW9uID0gUXdlbjJNb0VEb25vclNlbGVjdGlvbiB7CiAgICAgICAgICAgIHN0YW1wOiBTdGFtcCB7CiAgICAgICAgICAgICAgICBydW5faWQ6IHJ1bl9pZC50b19vd25lZCgpLAogICAgICAgICAgICAgICAgbW9kZWxfcmV2aXNpb246IG1vZGVsX3JldmlzaW9uLnRvX293bmVkKCksCiAgICAgICAgICAgICAgICBwbGFuX2lkOiBwbGFuX2lkLnRvX293bmVkKCksCiAgICAgICAgICAgICAgICBsYXllciwKICAgICAgICAgICAgICAgIGJhdGNoLAogICAgICAgICAgICAgICAgZXBvY2gsCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIGF0dGVtcHQsCiAgICAgICAgICAgIHRva2VucywKICAgICAgICAgICAgdG9wX2s6IHNsb3RzLAogICAgICAgICAgICBzZWxlY3RlZF9leHBlcnRzOiBzZWxlY3RlZF9leHBlcnRzLnRvX3ZlYygpLAogICAgICAgICAgICBmaW5hbF93ZWlnaHRzOiBmaW5hbF93ZWlnaHRzLnRvX3ZlYygpLAogICAgICAgIH07CiAgICAgICAgbGV0IHByb2JsZW0gPSBxd2VuMm1vZV9yb3V0ZXNfZnJvbV9kb25vcigKICAgICAgICAgICAgc2VsZWN0aW9uLAogICAgICAgICAgICBoaWRkZW4sCiAgICAgICAgICAgIHZlYyFbMywgNDBdLAogICAgICAgICAgICBSZWdpc3RyeSB7CiAgICAgICAgICAgICAgICBlcG9jaDogRVBPQ0gsCiAgICAgICAgICAgICAgICBjb3BpZXM6IHZlYyFbCiAgICAgICAgICAgICAgICAgICAgUmVwbGljYSB7CiAgICAgICAgICAgICAgICAgICAgICAgIGV4cGVydDogNDAsCiAgICAgICAgICAgICAgICAgICAgICAgIHJhbms6IFJBTkssCiAgICAgICAgICAgICAgICAgICAgICAgIGxvY2FsOiAwLAogICAgICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICAgICAgUmVwbGljYSB7CiAgICAgICAgICAgICAgICAgICAgICAgIGV4cGVydDogMywKICAgICAgICAgICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgICAgICAgICAgbG9jYWw6IDEsCiAgICAgICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgIF0sCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIEJUcmVlTWFwOjpuZXcoKSwKICAgICAgICAgICAgQlRyZWVNYXA6OmZyb20oWyhSQU5LLCB2ZWMhWzAsIDFdKV0pLAogICAgICAgICkKICAgICAgICAubWFwX2Vycih8ZXwgZm9ybWF0ISgidmFsaWRhdGUgZG9ub3Igcm91dGUgYmF0Y2g6IHtlfSIpKT87CiAgICAgICAgLy8gVGhlIFI2OTYgcGxhbm5lciBpcyBhZHZpc29yeSBvbmx5OiByZWZ1c2FsIGlzIHJlY29yZGVkIGZvciB0aGlzIGV4YWN0CiAgICAgICAgLy8gcm91dGUgU3RhbXArYXR0ZW1wdCBhbmQgbmV2ZXIgY2hhbmdlcyBvciBibG9ja3MgdGhlIGF1dGhvcml0YXRpdmUgZGlzcGF0Y2guCiAgICAgICAgbGV0IG1lbW9yeV9hZHZpY2UgPSBtZW1vcnlfYWR2aWNlX2Zvcl9yb3V0ZShjb250ZXh0LCBsYXllciwgJnByb2JsZW0pOwogICAgICAgIGNvbnRleHQubGFzdF9tZW1vcnlfYWR2aWNlID0gU29tZShtZW1vcnlfYWR2aWNlKTsKICAgICAgICBsZXQgdG9rZW5faW5wdXRzID0gKDAuLnRva2VucykKICAgICAgICAgICAgLm1hcCh8dG9rZW58IHsKICAgICAgICAgICAgICAgIGxldCBzdGFydCA9IHRva2VuICogaGlkZGVuOwogICAgICAgICAgICAgICAgYWN0aXZhdGlvbl92YWx1ZXNbc3RhcnQuLnN0YXJ0ICsgaGlkZGVuXS50b192ZWMoKQogICAgICAgICAgICB9KQogICAgICAgICAgICAuY29sbGVjdDo6PFZlYzxfPj4oKTsKICAgICAgICBsZXQgbGF5ZXJfc2Vzc2lvbnMgPSBjb250ZXh0CiAgICAgICAgICAgIC5sYXllcnMKICAgICAgICAgICAgLmdldF9tdXQobGF5ZXIgYXMgdXNpemUpCiAgICAgICAgICAgIC5va19vcl9lbHNlKHx8ICJRd2VuMk1vRSBsYXllciBpcyBvdXRzaWRlIHJlc2lkZW50IFNlc3Npb24gc2V0Ii50b19vd25lZCgpKT87CiAgICAgICAgbGV0IGRvd24gPSBTZXNzaW9uOjpleGVjX3F3ZW4ybW9lX2Zmbl9mcm9tX2Rvbm9yX3JvdXRlcygKICAgICAgICAgICAgJm11dCBsYXllcl9zZXNzaW9ucy5nYXRlLAogICAgICAgICAgICAmbXV0IGxheWVyX3Nlc3Npb25zLnVwLAogICAgICAgICAgICAmbXV0IGxheWVyX3Nlc3Npb25zLmRvd24sCiAgICAgICAgICAgICZwcm9ibGVtLAogICAgICAgICAgICAmdG9rZW5faW5wdXRzLAogICAgICAgICAgICAmY29udGV4dC5sZWRnZXIsCiAgICAgICAgICAgIFRJTUVPVVQsCiAgICAgICAgICAgIE5vbmUsCiAgICAgICAgKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJWb2x0YUZhYnJpYyBkb25vci1yb3V0ZWQgUXdlbjJNb0UgRkZOOiB7ZX0iKSk/OwogICAgICAgIGxldCByb3dzID0gdm9sdGFmYWJyaWM6OnNlc3Npb246OmNvbGxlY3RfcXdlbjJtb2VfZmZuX291dHB1dF9wcmV3ZWlnaHRlZF9mcDMyKAogICAgICAgICAgICBwcm9ibGVtLnByb2JsZW0oKSwKICAgICAgICAgICAgJmRvd24sCiAgICAgICAgICAgIHByb2JsZW0uYXR0ZW1wdCgpLAogICAgICAgICkKICAgICAgICAubWFwX2Vycih8ZXwgZm9ybWF0ISgiVm9sdGFGYWJyaWMgcm91dGVkIFF3ZW4yTW9FIEZQMzIgQ29sbGVjdG9yOiB7ZX0iKSk/OwogICAgICAgIGlmIHJvd3MubGVuKCkgIT0gdG9rZW5zCiAgICAgICAgICAgIHx8IHJvd3MKICAgICAgICAgICAgICAgIC5pdGVyKCkKICAgICAgICAgICAgICAgIC5hbnkofHJvd3wgcm93LmxlbigpICE9IGhpZGRlbiB8fCByb3cuaXRlcigpLmFueSh8dnwgIXYuaXNfZmluaXRlKCkpKQogICAgICAgIHsKICAgICAgICAgICAgcmV0dXJuIEVycigiVm9sdGFGYWJyaWMgcm91dGVkIENvbGxlY3RvciByZXR1cm5lZCBhbiBpbnZhbGlkIGJhdGNoIi5pbnRvKCkpOwogICAgICAgIH0KICAgICAgICBsZXQgc3RhZ2VkID0gcm93cwogICAgICAgICAgICAuaW50b19pdGVyKCkKICAgICAgICAgICAgLmZsYXR0ZW4oKQogICAgICAgICAgICAubWFwKGY2NDo6ZnJvbSkKICAgICAgICAgICAgLmNvbGxlY3Q6OjxWZWM8Xz4+KCk7CiAgICAgICAgaWYgc3RhZ2VkLmxlbigpICE9IG91dHB1dF9sZW4gfHwgc3RhZ2VkLml0ZXIoKS5hbnkofHZhbHVlfCAhdmFsdWUuaXNfZmluaXRlKCkpIHsKICAgICAgICAgICAgcmV0dXJuIEVycigiVm9sdGFGYWJyaWMgcm91dGVkIENvbGxlY3RvciBvdXRwdXQgaXMgaW5jb21wbGV0ZSIuaW50bygpKTsKICAgICAgICB9CiAgICAgICAgc3RkOjpzbGljZTo6ZnJvbV9yYXdfcGFydHNfbXV0KG91dHB1dCwgb3V0cHV0X2xlbikuY29weV9mcm9tX3NsaWNlKCZzdGFnZWQpOwogICAgICAgIE9rOjo8KCksIFN0cmluZz4oKCkpCiAgICB9KSk7CiAgICBtYXRjaCByZXN1bHQgewogICAgICAgIE9rKE9rKCgpKSkgPT4gMCwKICAgICAgICBPayhFcnIoZXJyb3IpKSA9PiB7CiAgICAgICAgICAgIGVwcmludGxuISgiUjY5NyBWb2x0YUZhYnJpYyByb3V0ZWQgbGF5ZXIgcmVmdXNlZCBhdG9taWNhbGx5OiB7ZXJyb3J9Iik7CiAgICAgICAgICAgIDIKICAgICAgICB9CiAgICAgICAgRXJyKF8pID0+IHsKICAgICAgICAgICAgZXByaW50bG4hKCJSNjk3IFZvbHRhRmFicmljIHJvdXRlZCBsYXllciBwYW5pY2tlZDsgb3V0cHV0IHdhcyBub3QgcHVibGlzaGVkIik7CiAgICAgICAgICAgIDMKICAgICAgICB9CiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQovLy8gQ2xvc2VzIGEgY29udGV4dCBwcmV2aW91c2x5IHJldHVybmVkIGJ5IGB2Zl9yNjk3X29wZW5gLgovLy8KLy8vICMgU2FmZXR5Ci8vLyBgb3BhcXVlYCBtdXN0IGJlIG51bGwgb3IgYSBsaXZlIGNvbnRleHQgcmV0dXJuZWQgYnkgYHZmX3I2OTdfb3BlbmAgdGhhdCBoYXMKLy8vIG5vdCBhbHJlYWR5IGJlZW4gY2xvc2VkLgpwdWIgdW5zYWZlIGV4dGVybiAiQyIgZm4gdmZfcjY5N19jbG9zZShvcGFxdWU6ICptdXQgY192b2lkKSB7CiAgICBpZiAhb3BhcXVlLmlzX251bGwoKSB7CiAgICAgICAgbGV0IF8gPSBjYXRjaF91bndpbmQoQXNzZXJ0VW53aW5kU2FmZSh8fCB1bnNhZmUgewogICAgICAgICAgICBkcm9wKEJveDo6ZnJvbV9yYXcob3BhcXVlLmNhc3Q6OjxSNjk3Q29udGV4dD4oKSkpOwogICAgICAgIH0pKTsKICAgIH0KfQo=
+#![allow(unsafe_code)]
+
+use std::{
+    collections::BTreeMap,
+    ffi::{c_char, c_void, CStr},
+    fs::File,
+    io::Read,
+    panic::{catch_unwind, AssertUnwindSafe},
+    path::Path,
+    time::Duration,
+};
+use voltafabric::{
+    cost::{CostOrigin, CostProvenance},
+    gguf_expert_slices::{ExpertCheckpointSlice, SelectedExpertSliceReader},
+    moe::{Registry, Replica, Stamp},
+    native_ggml_cpu::GroupedMatrixBinding,
+    native_ledger::NativeBatchLedger,
+    planner::{
+        plan_qwen2moe_advisory_with_memory, ExpertProfile, PerRankMemoryEnvelope, PlacementProblem,
+        WirePolicy,
+    },
+    routing::{qwen2moe_routes_from_donor, Qwen2MoEDonorSelection},
+    session::{Endpoint, Session},
+    sha256,
+    topology::{Device, Origin, Topology},
+    traffic::WireFormat,
+};
+
+const HIDDEN: usize = 32;
+const LAYERS: u32 = 2;
+const RANK: u32 = 7;
+const EPOCH: u64 = 1;
+const RUN: &str = "r697-memory-advice-v1";
+const MODEL: &str = "qwen2moe-synthetic-memory-r1";
+const PLAN: &str = "r697-route-advisory-plan-v1";
+const DEFAULT_ADVISORY_CAPACITY_BYTES: u64 = 1 << 20;
+const TIMEOUT: Duration = Duration::from_secs(10);
+const PROJECTIONS: [&str; 3] = [
+    "ffn_gate_exps.weight",
+    "ffn_up_exps.weight",
+    "ffn_down_exps.weight",
+];
+const RESIDENTS: [(u32, u32); 2] = [(40, 0), (3, 1)];
+const CHECKPOINT_SLICES: [ExpertCheckpointSlice; 2] = [
+    ExpertCheckpointSlice {
+        resident_expert: 40,
+        resident_local: 0,
+        checkpoint_expert: 1,
+    },
+    ExpertCheckpointSlice {
+        resident_expert: 3,
+        resident_local: 1,
+        checkpoint_expert: 0,
+    },
+];
+
+struct LayerSessions {
+    gate: Vec<Session>,
+    up: Vec<Session>,
+    down: Vec<Session>,
+    expert_weight_bytes: BTreeMap<u32, u64>,
+}
+
+struct R697Context {
+    layers: Vec<LayerSessions>,
+    ledger: NativeBatchLedger,
+    resident_expert_bytes: u64,
+    advisory_capacity_bytes: u64,
+    last_memory_advice: Option<StampedMemoryAdvice>,
+}
+
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct VFR697MemoryAdvice {
+    pub version: u32,
+    /// 0 = advisory returned; 1 = no advisory (capacity/input/planner refusal).
+    pub status: u32,
+    /// 0 = none; 1 = capacity exceeded; 2 = other planner error; 3 = panic.
+    pub refusal_code: u32,
+    pub layer: u32,
+    pub rank: u32,
+    pub reserved: u32,
+    pub epoch: u64,
+    pub batch: u64,
+    pub attempt: u64,
+    pub capacity_bytes: u64,
+    pub resident_expert_bytes: u64,
+    pub candidate_expert_bytes: u64,
+    pub loading_peak_bytes: u64,
+    pub headroom_bytes: u64,
+}
+
+struct StampedMemoryAdvice {
+    stamp: Stamp,
+    attempt: u64,
+    record: VFR697MemoryAdvice,
+}
+
+fn selected_digest(file: &mut File, tensor: &str) -> Result<(String, u64, u64), String> {
+    let span = vf_ggml_native_ffi::gguf_tensor_span(file, tensor)
+        .map_err(|e| format!("GGUF span {tensor}: {e}"))?;
+    if span.ggml_type != 8 || span.dimensions != [32, 32, 4, 1] || span.bytes == 0 {
+        return Err(format!("unexpected pinned Q8_0 shape for {tensor}"));
+    }
+    let mut reader = SelectedExpertSliceReader::new(file, span.offset, span.bytes, 4, &[1, 0])
+        .map_err(|e| format!("selected Q8_0 reader {tensor}: {e}"))?;
+    let mut payload = Vec::with_capacity((span.bytes / 2) as usize);
+    reader
+        .read_to_end(&mut payload)
+        .map_err(|e| format!("read selected Q8_0 payload {tensor}: {e}"))?;
+    let selected_bytes = u64::try_from(payload.len()).map_err(|e| e.to_string())?;
+    let per_expert_bytes = span.bytes / 4;
+    if span.bytes % 4 != 0 || selected_bytes != per_expert_bytes * 2 {
+        return Err(format!("selected Q8_0 byte geometry differs for {tensor}"));
+    }
+    Ok((sha256::hex(&payload), selected_bytes, per_expert_bytes))
+}
+
+fn tensor_name(layer: u32, projection: &str) -> String {
+    format!("blk.{layer}.{projection}")
+}
+
+fn load_projection(
+    source: &Path,
+    worker: &str,
+    layer: u32,
+    projection: &str,
+) -> Result<(Session, u64), String> {
+    let tensor = tensor_name(layer, projection);
+    let mut file = File::open(source).map_err(|e| format!("open source GGUF: {e}"))?;
+    let (digest, selected_bytes, per_expert_bytes) = selected_digest(&mut file, &tensor)?;
+    let binding = GroupedMatrixBinding {
+        model_revision: MODEL.to_owned(),
+        layer,
+        tensor: tensor.clone(),
+        ggml_type: 8,
+        rank: RANK,
+        epoch: EPOCH,
+        rows: HIDDEN,
+        columns: HIDDEN,
+        residents: RESIDENTS.to_vec(),
+        sha256: digest,
+    };
+    let endpoint = Endpoint {
+        rank: RANK,
+        argv: vec![worker.to_owned()],
+    };
+    let mut session = Session::connect(&endpoint, TIMEOUT).map_err(|e| e.to_string())?;
+    session
+        .load_grouped_matrix_gguf_expert_slices(
+            &binding,
+            source,
+            &tensor,
+            &CHECKPOINT_SLICES,
+            TIMEOUT,
+        )
+        .map_err(|e| format!("resident GGUF expert-slice load {tensor}: {e}"))?;
+    if session.traffic.weight_bytes_sent != selected_bytes {
+        return Err(format!(
+            "rank-local loader byte count differs for {tensor}: sent {}, expected {}",
+            session.traffic.weight_bytes_sent, selected_bytes
+        ));
+    }
+    eprintln!(
+        "R697 rust_loader tensor={tensor} rank={RANK} resident_order=[40,3] checkpoint_order=[1,0] bytes={selected_bytes} per_expert_bytes={per_expert_bytes}"
+    );
+    Ok((session, per_expert_bytes))
+}
+
+fn make_context(source: &Path, worker: &str, ledger_root: &Path) -> Result<R697Context, String> {
+    if !source.is_file() || worker.trim().is_empty() {
+        return Err("rank-local source or worker executable missing".into());
+    }
+    for layer in 0..LAYERS {
+        for projection in PROJECTIONS {
+            let tensor = tensor_name(layer, projection);
+            let file = File::open(source).map_err(|e| format!("open source GGUF: {e}"))?;
+            vf_ggml_native_ffi::gguf_tensor_span(&file, &tensor)
+                .map_err(|e| format!("pinned tensor {tensor}: {e}"))?;
+        }
+    }
+    let ledger = NativeBatchLedger::open(ledger_root).map_err(|e| e.to_string())?;
+    let mut layers = Vec::with_capacity(LAYERS as usize);
+    for layer in 0..LAYERS {
+        let (gate, gate_bytes) = load_projection(source, worker, layer, PROJECTIONS[0])?;
+        let (up, up_bytes) = load_projection(source, worker, layer, PROJECTIONS[1])?;
+        let (down, down_bytes) = load_projection(source, worker, layer, PROJECTIONS[2])?;
+        let per_expert_bytes = gate_bytes
+            .checked_add(up_bytes)
+            .and_then(|bytes| bytes.checked_add(down_bytes))
+            .ok_or_else(|| "per-expert GGUF byte count overflow".to_owned())?;
+        layers.push(LayerSessions {
+            gate: vec![gate],
+            up: vec![up],
+            down: vec![down],
+            expert_weight_bytes: BTreeMap::from([(40, per_expert_bytes), (3, per_expert_bytes)]),
+        });
+    }
+    let resident_expert_bytes = layers.iter().try_fold(0_u64, |sum, layer| {
+        layer
+            .expert_weight_bytes
+            .values()
+            .try_fold(sum, |total, bytes| {
+                total
+                    .checked_add(*bytes)
+                    .ok_or_else(|| "resident GGUF byte count overflow".to_owned())
+            })
+    })?;
+    Ok(R697Context {
+        layers,
+        ledger,
+        resident_expert_bytes,
+        advisory_capacity_bytes: DEFAULT_ADVISORY_CAPACITY_BYTES,
+        last_memory_advice: None,
+    })
+}
+
+fn memory_advice_for_route(
+    context: &R697Context,
+    layer: u32,
+    routed: &voltafabric::routing::Qwen2MoERouteBatch,
+) -> StampedMemoryAdvice {
+    let stamp = routed.problem().stamp.clone();
+    let attempt = routed.attempt();
+    let mut record = VFR697MemoryAdvice {
+        version: 1,
+        status: 1,
+        layer,
+        rank: RANK,
+        epoch: stamp.epoch,
+        batch: stamp.batch,
+        attempt,
+        capacity_bytes: context.advisory_capacity_bytes,
+        ..VFR697MemoryAdvice::default()
+    };
+    let planned = catch_unwind(AssertUnwindSafe(|| {
+        let layer_sessions = context.layers.get(layer as usize).ok_or_else(|| {
+            voltafabric::Error::new("INVALID_INPUT", "layer outside resident GGUF inventory")
+        })?;
+        let experts = layer_sessions
+            .expert_weight_bytes
+            .iter()
+            .map(|(&id, &resident_bytes)| ExpertProfile {
+                id,
+                resident_bytes,
+                compute_us: 1.0,
+                cost_provenance: CostProvenance {
+                    origin: CostOrigin::Synthetic,
+                    source: Some("R697 deterministic fixture; no timing measurement".into()),
+                },
+            })
+            .collect();
+        let base = PlacementProblem {
+            topology: Topology {
+                schema_version: 1,
+                origin: Origin::Synthetic,
+                source_note:
+                    "R697 one-rank CPU fixture; capacity and non-weight budgets are synthetic"
+                        .into(),
+                devices: vec![Device {
+                    rank: RANK,
+                    host: "r697-synthetic-cpu-rank".into(),
+                    capacity_bytes: context.advisory_capacity_bytes,
+                    reserved_bytes: 0,
+                }],
+                links: vec![],
+            },
+            experts,
+            demands: vec![],
+            hidden: HIDDEN as u64,
+            wire: WireFormat::default(),
+            max_iterations: 0,
+            wire_policy: WirePolicy::Adaptive,
+            max_work_units: 100_000,
+        };
+        let candidate_expert_bytes =
+            layer_sessions
+                .expert_weight_bytes
+                .values()
+                .try_fold(0_u64, |sum, bytes| {
+                    sum.checked_add(*bytes).ok_or_else(|| {
+                        voltafabric::Error::new(
+                            "INVALID_INPUT",
+                            "candidate GGUF byte count overflow",
+                        )
+                    })
+                })?;
+        let advice = plan_qwen2moe_advisory_with_memory(
+            &base,
+            routed,
+            RANK,
+            &[PerRankMemoryEnvelope {
+                rank: RANK,
+                resident_expert_bytes: context.resident_expert_bytes,
+                kv_bytes: 0,
+                recurrent_bytes: 0,
+                workspace_bytes: 0,
+                graph_bytes: 0,
+                communication_bytes: 0,
+                safety_margin_bytes: 0,
+                load_temporary_bytes: candidate_expert_bytes,
+            }],
+        )?;
+        if advice.ranks.len() != 1
+            || advice.routed.stamp != stamp
+            || advice.routed.attempt != attempt
+        {
+            return Err(voltafabric::Error::new(
+                "INVALID_INPUT",
+                "memory advice identity/rank mismatch",
+            ));
+        }
+        Ok::<_, voltafabric::Error>(advice.ranks[0].clone())
+    }));
+    match planned {
+        Ok(Ok(rank)) => {
+            record.status = 0;
+            record.resident_expert_bytes = rank.resident_expert_bytes;
+            record.candidate_expert_bytes = rank.expert_weight_bytes;
+            record.loading_peak_bytes = rank.loading_peak_bytes;
+            record.headroom_bytes = rank.headroom_bytes;
+        }
+        Ok(Err(error)) => {
+            record.refusal_code = if error.code == "CAPACITY_EXCEEDED" {
+                1
+            } else {
+                2
+            };
+        }
+        Err(_) => record.refusal_code = 3,
+    }
+    StampedMemoryAdvice {
+        stamp,
+        attempt,
+        record,
+    }
+}
+
+#[no_mangle]
+/// Opens the R697 local CPU Session adapter.
+///
+/// # Safety
+/// Each argument must point to a NUL-terminated UTF-8 string valid for the
+/// duration of this call. The strings must not be mutated concurrently.
+pub unsafe extern "C" fn vf_r697_open(
+    source: *const c_char,
+    worker: *const c_char,
+    ledger_root: *const c_char,
+) -> *mut c_void {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        if source.is_null() || worker.is_null() || ledger_root.is_null() {
+            return Err("null R697 bridge argument".to_owned());
+        }
+        let source = unsafe { CStr::from_ptr(source) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let worker = unsafe { CStr::from_ptr(worker) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let ledger_root = unsafe { CStr::from_ptr(ledger_root) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        make_context(Path::new(source), worker, Path::new(ledger_root))
+    }));
+    match result {
+        Ok(Ok(context)) => Box::into_raw(Box::new(context)).cast(),
+        Ok(Err(error)) => {
+            eprintln!("R697 Rust loader refused: {error}");
+            std::ptr::null_mut()
+        }
+        Err(_) => {
+            eprintln!("R697 Rust loader panicked; context not published");
+            std::ptr::null_mut()
+        }
+    }
+}
+
+#[no_mangle]
+/// Sets a deterministic capacity input for the optional R697 advisor.
+///
+/// # Safety
+/// `opaque` must be null or a live context returned by `vf_r697_open` that has
+/// not already been closed.
+pub unsafe extern "C" fn vf_r697_set_advisory_capacity(
+    opaque: *mut c_void,
+    capacity_bytes: u64,
+) -> i32 {
+    if opaque.is_null() || capacity_bytes == 0 {
+        return 1;
+    }
+    match catch_unwind(AssertUnwindSafe(|| unsafe {
+        let context = &mut *opaque.cast::<R697Context>();
+        context.advisory_capacity_bytes = capacity_bytes;
+        context.last_memory_advice = None;
+    })) {
+        Ok(()) => 0,
+        Err(_) => 2,
+    }
+}
+
+#[no_mangle]
+/// Returns only the advice matching the exact last route Stamp and attempt.
+///
+/// # Safety
+/// Identity pointers must be NUL-terminated UTF-8 strings. `opaque` must be a
+/// live context from `vf_r697_open`, and `out` must point to writable storage
+/// for one `VFR697MemoryAdvice` value.
+pub unsafe extern "C" fn vf_r697_get_memory_advice(
+    opaque: *mut c_void,
+    run_id: *const c_char,
+    model_revision: *const c_char,
+    plan_id: *const c_char,
+    layer: u32,
+    epoch: u64,
+    batch: u64,
+    attempt: u64,
+    out: *mut VFR697MemoryAdvice,
+) -> i32 {
+    if opaque.is_null()
+        || run_id.is_null()
+        || model_revision.is_null()
+        || plan_id.is_null()
+        || out.is_null()
+    {
+        return 1;
+    }
+    let result = catch_unwind(AssertUnwindSafe(|| unsafe {
+        let context = &*opaque.cast::<R697Context>();
+        let expected = Stamp {
+            run_id: CStr::from_ptr(run_id)
+                .to_str()
+                .map_err(|e| e.to_string())?
+                .to_owned(),
+            model_revision: CStr::from_ptr(model_revision)
+                .to_str()
+                .map_err(|e| e.to_string())?
+                .to_owned(),
+            plan_id: CStr::from_ptr(plan_id)
+                .to_str()
+                .map_err(|e| e.to_string())?
+                .to_owned(),
+            layer,
+            batch,
+            epoch,
+        };
+        let advice = context
+            .last_memory_advice
+            .as_ref()
+            .ok_or_else(|| "no current R697 memory advice".to_owned())?;
+        if advice.stamp != expected || advice.attempt != attempt {
+            return Err("R697 memory advice identity or attempt is stale".to_owned());
+        }
+        std::ptr::write(out, advice.record);
+        Ok::<(), String>(())
+    }));
+    match result {
+        Ok(Ok(())) => 0,
+        Ok(Err(error)) => {
+            eprintln!("R697 memory advice readback refused: {error}");
+            2
+        }
+        Err(_) => 3,
+    }
+}
+
+#[no_mangle]
+#[allow(clippy::too_many_arguments)]
+/// Runs one donor-routed Qwen2MoE FFN batch and atomically publishes its output.
+///
+/// # Safety
+/// The identity pointers must be NUL-terminated UTF-8 strings. The expert,
+/// weight, activation, and output pointers must reference arrays of the lengths
+/// supplied here; `output` must be writable and must not alias any input array.
+/// All referenced memory must remain valid for the duration of this call.
+pub unsafe extern "C" fn vf_r697_run_routed_layer(
+    opaque: *mut c_void,
+    run_id: *const c_char,
+    model_revision: *const c_char,
+    plan_id: *const c_char,
+    layer: u32,
+    epoch: u64,
+    batch: u64,
+    attempt: u64,
+    hidden: usize,
+    slots: usize,
+    tokens: usize,
+    expert_ids: *const i32,
+    expert_ids_len: usize,
+    route_weights: *const f32,
+    route_weights_len: usize,
+    activations: *const f32,
+    activations_len: usize,
+    output: *mut f64,
+    output_len: usize,
+) -> i32 {
+    if opaque.is_null()
+        || run_id.is_null()
+        || model_revision.is_null()
+        || plan_id.is_null()
+        || expert_ids.is_null()
+        || route_weights.is_null()
+        || activations.is_null()
+        || output.is_null()
+        || hidden != HIDDEN
+        || slots != 2
+        || tokens != 1
+        || layer >= LAYERS
+        || epoch != EPOCH
+        || batch == 0
+        || attempt == 0
+        || expert_ids_len != slots * tokens
+        || route_weights_len != slots * tokens
+        || activations_len != hidden * tokens
+        || output_len != hidden * tokens
+    {
+        return 1;
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| unsafe {
+        let context = &mut *opaque.cast::<R697Context>();
+        let run_id = CStr::from_ptr(run_id).to_str().map_err(|e| e.to_string())?;
+        let model_revision = CStr::from_ptr(model_revision)
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let plan_id = CStr::from_ptr(plan_id)
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let selected_experts = std::slice::from_raw_parts(expert_ids, expert_ids_len);
+        let final_weights = std::slice::from_raw_parts(route_weights, route_weights_len);
+        let activation_values = std::slice::from_raw_parts(activations, activations_len);
+        if run_id != RUN
+            || model_revision != MODEL
+            || plan_id != PLAN
+            || selected_experts
+                .iter()
+                .any(|&expert| expert != 3 && expert != 40)
+            || activation_values.iter().any(|value| !value.is_finite())
+        {
+            return Err(
+                "VoltaFabric route identity or input is outside the pinned fixture".to_owned(),
+            );
+        }
+
+        let selection = Qwen2MoEDonorSelection {
+            stamp: Stamp {
+                run_id: run_id.to_owned(),
+                model_revision: model_revision.to_owned(),
+                plan_id: plan_id.to_owned(),
+                layer,
+                batch,
+                epoch,
+            },
+            attempt,
+            tokens,
+            top_k: slots,
+            selected_experts: selected_experts.to_vec(),
+            final_weights: final_weights.to_vec(),
+        };
+        let problem = qwen2moe_routes_from_donor(
+            selection,
+            hidden,
+            vec![3, 40],
+            Registry {
+                epoch: EPOCH,
+                copies: vec![
+                    Replica {
+                        expert: 40,
+                        rank: RANK,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 3,
+                        rank: RANK,
+                        local: 1,
+                    },
+                ],
+            },
+            BTreeMap::new(),
+            BTreeMap::from([(RANK, vec![0, 1])]),
+        )
+        .map_err(|e| format!("validate donor route batch: {e}"))?;
+        // The R696 planner is advisory only: refusal is recorded for this exact
+        // route Stamp+attempt and never changes or blocks the authoritative dispatch.
+        let memory_advice = memory_advice_for_route(context, layer, &problem);
+        context.last_memory_advice = Some(memory_advice);
+        let token_inputs = (0..tokens)
+            .map(|token| {
+                let start = token * hidden;
+                activation_values[start..start + hidden].to_vec()
+            })
+            .collect::<Vec<_>>();
+        let layer_sessions = context
+            .layers
+            .get_mut(layer as usize)
+            .ok_or_else(|| "Qwen2MoE layer is outside resident Session set".to_owned())?;
+        let down = Session::exec_qwen2moe_ffn_from_donor_routes(
+            &mut layer_sessions.gate,
+            &mut layer_sessions.up,
+            &mut layer_sessions.down,
+            &problem,
+            &token_inputs,
+            &context.ledger,
+            TIMEOUT,
+            None,
+        )
+        .map_err(|e| format!("VoltaFabric donor-routed Qwen2MoE FFN: {e}"))?;
+        let rows = voltafabric::session::collect_qwen2moe_ffn_output_preweighted_fp32(
+            problem.problem(),
+            &down,
+            problem.attempt(),
+        )
+        .map_err(|e| format!("VoltaFabric routed Qwen2MoE FP32 Collector: {e}"))?;
+        if rows.len() != tokens
+            || rows
+                .iter()
+                .any(|row| row.len() != hidden || row.iter().any(|v| !v.is_finite()))
+        {
+            return Err("VoltaFabric routed Collector returned an invalid batch".into());
+        }
+        let staged = rows
+            .into_iter()
+            .flatten()
+            .map(f64::from)
+            .collect::<Vec<_>>();
+        if staged.len() != output_len || staged.iter().any(|value| !value.is_finite()) {
+            return Err("VoltaFabric routed Collector output is incomplete".into());
+        }
+        std::slice::from_raw_parts_mut(output, output_len).copy_from_slice(&staged);
+        Ok::<(), String>(())
+    }));
+    match result {
+        Ok(Ok(())) => 0,
+        Ok(Err(error)) => {
+            eprintln!("R697 VoltaFabric routed layer refused atomically: {error}");
+            2
+        }
+        Err(_) => {
+            eprintln!("R697 VoltaFabric routed layer panicked; output was not published");
+            3
+        }
+    }
+}
+
+#[no_mangle]
+/// Closes a context previously returned by `vf_r697_open`.
+///
+/// # Safety
+/// `opaque` must be null or a live context returned by `vf_r697_open` that has
+/// not already been closed.
+pub unsafe extern "C" fn vf_r697_close(opaque: *mut c_void) {
+    if !opaque.is_null() {
+        let _ = catch_unwind(AssertUnwindSafe(|| unsafe {
+            drop(Box::from_raw(opaque.cast::<R697Context>()));
+        }));
+    }
+}
