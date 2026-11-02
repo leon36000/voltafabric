@@ -1,0 +1,23 @@
+R723 scoped CPU verification
+=============================
+
+Gate-selected top-6 route -> indexed shard -> six resident owners -> grouped CPU Sessions -> independent FP64 MXFP4 oracle:
+  cargo test --locked --offline --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
+  debug: 1 passed; 7 filtered out; 80.68 s
+  release: 1 passed; 7 filtered out; 5.07 s
+
+Incomplete 36-tensor digest map rejected before opening a missing shard:
+  cargo test --locked --offline --test r712_deepseek_session_owner gate_indexed_payload_read_validates_all_route_hashes_before_opening_source
+  debug: 1 passed; 7 filtered out; 1.66 s
+  release: 1 passed; 7 filtered out; 0.12 s
+
+Existing in-memory route reader regression after sharing the route helper:
+  cargo test --locked --offline --test r712_deepseek_session_owner route_payload_read_preflights_all_digests_then_returns_six_residents_atomically
+  debug: 1 passed; 7 filtered out; 71.69 s
+
+Additional checks:
+  cargo clippy --locked --offline --lib -- -D warnings: PASS
+  cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+
+All tests are CPU-only. The file-backed route fixture writes synthetic tensor payloads only inside a temporary .work directory and removes it through RAII. No model weights, GPU, production R53, network transport, UNKNOWN replay or benchmark were used.

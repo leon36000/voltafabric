@@ -483,6 +483,89 @@ fn indexed_residents_for_route(
     (temp, residents)
 }
 
+fn indexed_route_payload_reads(
+    batch: &voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch,
+) -> (
+    IndexedTempDirectory,
+    voltafabric::deepseek_v41_gate::DeepSeekV41RoutePayloadReads,
+) {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let header = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    );
+    let source = PinnedMxfp4PayloadSource {
+        index_bytes: index,
+        header_bytes: header,
+        expected_header_sha256: HEADER_SHA256,
+        header_shard_name: "model-00003-of-00048.safetensors",
+        source_shard_bytes: SHARD_BYTES,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+    };
+    const ROUTE_PAYLOAD_BYTES: u64 = 112_803_840;
+    let plan = batch
+        .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES)
+        .unwrap();
+    assert_eq!(plan.route_experts(), TOP6);
+    assert_eq!(plan.payload_plan().tensors.len(), 36);
+    assert_eq!(
+        plan.payload_plan().selected_payload_bytes,
+        ROUTE_PAYLOAD_BYTES
+    );
+
+    let temp = IndexedTempDirectory::new();
+    let shard_path = temp.path().join(&plan.payload_plan().source_shard);
+    let mut shard = File::create(&shard_path).unwrap();
+    shard
+        .set_len(plan.payload_plan().source_shard_bytes)
+        .unwrap();
+    shard
+        .write_all(&(header.len() as u64).to_le_bytes())
+        .unwrap();
+    shard.write_all(header).unwrap();
+
+    let mut hashes = BTreeMap::new();
+    for tensor in &plan.payload_plan().tensors {
+        let length = usize::try_from(tensor.file_offset_end - tensor.file_offset_start).unwrap();
+        let byte = if tensor.name.ends_with(".scale") {
+            0x6f
+        } else {
+            0x22
+        };
+        let payload = vec![byte; length];
+        hashes.insert(tensor.name.clone(), voltafabric::sha256::hex(&payload));
+        shard
+            .seek(SeekFrom::Start(tensor.file_offset_start))
+            .unwrap();
+        shard.write_all(&payload).unwrap();
+    }
+    drop(shard);
+
+    let reads = batch
+        .read_selected_mxfp4_indexed_payloads(
+            temp.path(),
+            &plan,
+            source,
+            &hashes,
+            ROUTE_PAYLOAD_BYTES,
+        )
+        .unwrap();
+    assert_eq!(reads.stamp(), &batch.problem().stamp);
+    assert_eq!(reads.attempt(), batch.attempt());
+    assert_eq!(reads.route_fingerprint(), plan.route_fingerprint());
+    assert_eq!(reads.reads().len(), TOP6.len());
+    assert_eq!(
+        reads
+            .reads()
+            .iter()
+            .map(|read| read.expert())
+            .collect::<Vec<_>>(),
+        TOP6
+    );
+    (temp, reads)
+}
+
 #[test]
 fn complete_top6_is_preflighted_then_loaded_on_six_cpu_sessions_without_exec() {
     let route = distributed_route_problem();
@@ -847,14 +930,8 @@ fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
     let route = batch.problem();
     assert_eq!(route.experts, TOP6);
     assert_eq!(batch.attempt(), 29);
-    let residents = TOP6
-        .iter()
-        .enumerate()
-        .map(|(index, &expert)| {
-            let rank = if index < 2 { 4 } else { 3 + index as u32 };
-            resident_for_expert(route, expert, rank)
-        })
-        .collect::<Vec<_>>();
+    let (_checkpoint, reads) = indexed_route_payload_reads(&batch);
+    let residents = reads.into_session_residents(64 * 1024 * 1024).unwrap();
     let input: Vec<f32> = (0..route.hidden)
         .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
         .collect();
@@ -1210,4 +1287,41 @@ fn route_payload_read_preflights_all_digests_then_returns_six_residents_atomical
         assert_eq!(close.bye_execs, Some(1));
         assert!(close.error.is_none(), "{close:?}");
     }
+}
+
+#[test]
+fn gate_indexed_payload_read_validates_all_route_hashes_before_opening_source() {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let header = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    );
+    let batch = gated_grouped_route_batch();
+    let source = PinnedMxfp4PayloadSource {
+        index_bytes: index,
+        header_bytes: header,
+        expected_header_sha256: HEADER_SHA256,
+        header_shard_name: "model-00003-of-00048.safetensors",
+        source_shard_bytes: SHARD_BYTES,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+    };
+    const ROUTE_PAYLOAD_BYTES: u64 = 112_803_840;
+    let plan = batch
+        .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES)
+        .unwrap();
+    let temp = IndexedTempDirectory::new();
+
+    // The directory deliberately contains no shard. An incomplete digest manifest
+    // must be rejected before the file-backed reader attempts to open any shard.
+    let error = batch
+        .read_selected_mxfp4_indexed_payloads(
+            temp.path(),
+            &plan,
+            source,
+            &BTreeMap::new(),
+            ROUTE_PAYLOAD_BYTES,
+        )
+        .unwrap_err();
+    assert!(error.message.contains("exactly 36 selected tensors"));
 }

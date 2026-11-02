@@ -26,6 +26,7 @@ use safetensors::tensor::Dtype;
 use std::{
     collections::BTreeMap,
     io::{Read, Seek},
+    path::Path,
 };
 
 pub const ROUTED_EXPERTS: usize = 384;
@@ -415,6 +416,82 @@ impl DeepSeekV41RouteBatch {
         expected_payload_sha256: &BTreeMap<String, String>,
         max_total_selected_payload_bytes: u64,
     ) -> Result<DeepSeekV41RoutePayloadReads> {
+        self.read_selected_mxfp4_payloads_with(
+            plan,
+            source,
+            expected_payload_sha256,
+            max_total_selected_payload_bytes,
+            |expert, rank, expert_hashes, max_payload_bytes| {
+                crate::deepseek_v41::read_pinned_mxfp4_rank_expert(
+                    reader,
+                    crate::deepseek_v41::PinnedMxfp4RankExpertReadRequest {
+                        route: &self.problem,
+                        attempt: self.attempt,
+                        expert,
+                        rank,
+                        index_bytes: source.index_bytes,
+                        header_shard_name: source.header_shard_name,
+                        expected_header_sha256: source.expected_header_sha256,
+                        expected_payload_sha256: expert_hashes,
+                        max_source_shard_bytes: source.max_source_shard_bytes,
+                        max_payload_bytes,
+                    },
+                )
+            },
+        )
+    }
+
+    /// Authenticate the gate-selected top-6 directly from the pinned checkpoint
+    /// directory. All route identities and all 36 payload hashes are validated
+    /// before the first file-backed read. The method exposes no partial read set.
+    pub fn read_selected_mxfp4_indexed_payloads(
+        &self,
+        root: &Path,
+        plan: &DeepSeekV41RoutePayloadPlan,
+        source: PinnedMxfp4PayloadSource<'_>,
+        expected_payload_sha256: &BTreeMap<String, String>,
+        max_total_selected_payload_bytes: u64,
+    ) -> Result<DeepSeekV41RoutePayloadReads> {
+        self.read_selected_mxfp4_payloads_with(
+            plan,
+            source,
+            expected_payload_sha256,
+            max_total_selected_payload_bytes,
+            |expert, rank, expert_hashes, max_payload_bytes| {
+                crate::deepseek_v41::read_pinned_mxfp4_rank_expert_indexed(
+                    root,
+                    crate::deepseek_v41::PinnedMxfp4IndexedRankExpertReadRequest {
+                        route: &self.problem,
+                        attempt: self.attempt,
+                        expert,
+                        rank,
+                        index_bytes: source.index_bytes,
+                        expected_header_sha256: source.expected_header_sha256,
+                        expected_payload_sha256: expert_hashes,
+                        max_source_shard_bytes: source.max_source_shard_bytes,
+                        max_payload_bytes,
+                    },
+                )
+            },
+        )
+    }
+
+    fn read_selected_mxfp4_payloads_with<F>(
+        &self,
+        plan: &DeepSeekV41RoutePayloadPlan,
+        source: PinnedMxfp4PayloadSource<'_>,
+        expected_payload_sha256: &BTreeMap<String, String>,
+        max_total_selected_payload_bytes: u64,
+        mut read_expert: F,
+    ) -> Result<DeepSeekV41RoutePayloadReads>
+    where
+        F: FnMut(
+            u32,
+            u32,
+            &BTreeMap<String, String>,
+            u64,
+        ) -> Result<crate::deepseek_v41::PinnedMxfp4RankExpertRead>,
+    {
         crate::routing::validate(&self.problem)?;
         if self.attempt == 0
             || plan.stamp != self.problem.stamp
@@ -528,21 +605,33 @@ impl DeepSeekV41RouteBatch {
                         })
                 })
                 .collect::<Result<BTreeMap<_, _>>>()?;
-            let read = crate::deepseek_v41::read_pinned_mxfp4_rank_expert(
-                reader,
-                crate::deepseek_v41::PinnedMxfp4RankExpertReadRequest {
-                    route: &self.problem,
-                    attempt: self.attempt,
-                    expert: choice.expert,
-                    rank: binding.rank,
-                    index_bytes: source.index_bytes,
-                    header_shard_name: source.header_shard_name,
-                    expected_header_sha256: source.expected_header_sha256,
-                    expected_payload_sha256: &expert_hashes,
-                    max_source_shard_bytes: source.max_source_shard_bytes,
-                    max_payload_bytes: expert_bytes,
-                },
-            )?;
+            let read = read_expert(choice.expert, binding.rank, &expert_hashes, expert_bytes)?;
+            let expected_expert_tensors = payload_plan
+                .tensors
+                .iter()
+                .filter(|tensor| tensor.expert == choice.expert)
+                .collect::<Vec<_>>();
+            let read_plan = read.plan();
+            let tensors_match = expected_expert_tensors.len() == read_plan.tensors.len()
+                && expected_expert_tensors
+                    .iter()
+                    .zip(&read_plan.tensors)
+                    .all(|(expected, actual)| **expected == *actual);
+            if read_plan.model_revision != payload_plan.model_revision
+                || read_plan.namespace != payload_plan.namespace
+                || read_plan.layer != payload_plan.layer
+                || read_plan.experts.as_slice() != [choice.expert]
+                || read_plan.source_shard != payload_plan.source_shard
+                || read_plan.source_shard_bytes != payload_plan.source_shard_bytes
+                || read_plan.header_bytes != payload_plan.header_bytes
+                || read_plan.data_start_bytes != payload_plan.data_start_bytes
+                || read_plan.selected_payload_bytes != expert_bytes
+                || !tensors_match
+            {
+                return Err(invalid(
+                    "DeepSeek selected indexed expert read differs from its route-level source plan",
+                ));
+            }
             if read.stamp() != &self.problem.stamp
                 || read.route_experts() != payload_plan.experts
                 || read.route_fingerprint() != route_fingerprint

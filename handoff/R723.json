@@ -1,0 +1,41 @@
+{
+  "id": "R723",
+  "owner": "integrator",
+  "state": "CPU_SOURCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "branch": "r723-gate-indexed-session-20261102",
+  "parent_commit": "d018741e60e434826051cd0268d78254e68784c5",
+  "path": "research/R723",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "adapted_boundary": "Gate-selected one-token top-6 route to the pinned indexed Safetensors expert reader, existing resident owners, grouped CPU Sessions and independent MXFP4 oracle.",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "local_tests": {
+    "gate_indexed_session_debug": "1/1 pass",
+    "gate_indexed_session_release": "1/1 pass",
+    "incomplete_hash_preflight_debug": "1/1 pass before missing source open",
+    "incomplete_hash_preflight_release": "1/1 pass before missing source open",
+    "legacy_route_reader_regression_debug": "1/1 pass",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass"
+  },
+  "limits": {
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "next_action": "R724: connect the route-level indexed import to a model-layer loader entry point and add an admitted real-checkpoint manifest boundary before claiming full generation.",
+  "source_commit": "awaiting GitLab source commit",
+  "source_pipeline_id": null,
+  "source_pipeline_status": "pending",
+  "readback_verified": false,
+  "prepared_utc": "2026-11-02T13:52:34Z"
+}
