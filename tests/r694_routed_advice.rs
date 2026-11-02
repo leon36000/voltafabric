@@ -2,7 +2,10 @@ use std::collections::BTreeMap;
 use voltafabric_r694_exact_source_check::{
     cost::{CostOrigin, CostProvenance},
     moe::{Registry, Replica, Stamp},
-    planner::{plan_qwen2moe_advisory, ExpertProfile, PlacementProblem, WirePolicy},
+    planner::{
+        plan_qwen2moe_advisory, plan_qwen2moe_advisory_with_memory, ExpertProfile,
+        PerRankMemoryEnvelope, PlacementProblem, WirePolicy,
+    },
     routing::{self, Qwen2MoEDonorSelection, Qwen2MoERouteBatch},
     topology::{Device, Link, Origin, Topology, Transport},
     traffic::WireFormat,
@@ -180,4 +183,88 @@ fn missing_path_returns_error_without_an_advice() {
     let mut p = problem();
     p.topology.links.clear();
     assert!(plan_qwen2moe_advisory(&p, &b, 0).is_err());
+}
+
+fn envelope(rank: u32, kv: u64, load_temporary: u64) -> PerRankMemoryEnvelope {
+    PerRankMemoryEnvelope {
+        rank,
+        kv_bytes: kv,
+        recurrent_bytes: 0,
+        workspace_bytes: 0,
+        graph_bytes: 0,
+        communication_bytes: 0,
+        safety_margin_bytes: 0,
+        load_temporary_bytes: load_temporary,
+    }
+}
+
+#[test]
+fn per_rank_kv_and_loading_budgets_are_bound_to_route_advice() {
+    let b = routed();
+    let before = snapshot(&b);
+    let mut p = problem();
+    p.topology.devices[1].capacity_bytes = 32;
+    p.topology.devices[2].capacity_bytes = 32;
+    let advice = plan_qwen2moe_advisory_with_memory(
+        &p,
+        &b,
+        0,
+        &[envelope(0, 0, 0), envelope(1, 8, 2), envelope(2, 4, 1)],
+    )
+    .unwrap();
+
+    assert_eq!(advice.routed.stamp, before.0);
+    assert_eq!(advice.routed.attempt, 901);
+    assert_eq!(
+        advice.routed.route_experts_by_token,
+        vec![vec![40, 3], vec![3, 40]]
+    );
+    assert_eq!(snapshot(&b), before);
+    for rank in advice.ranks {
+        assert!(rank.loading_peak_bytes <= rank.capacity_bytes);
+        assert_eq!(
+            rank.loading_peak_bytes,
+            rank.steady_bytes + rank.load_temporary_bytes
+        );
+    }
+}
+
+#[test]
+fn insufficient_kv_or_temporary_headroom_fails_without_partial_advice() {
+    let b = routed();
+    let before = snapshot(&b);
+    let mut p = problem();
+    p.topology.devices[1].capacity_bytes = 24;
+    p.topology.devices[2].capacity_bytes = 24;
+    let err = plan_qwen2moe_advisory_with_memory(
+        &p,
+        &b,
+        0,
+        &[envelope(0, 0, 0), envelope(1, 8, 9), envelope(2, 8, 9)],
+    )
+    .unwrap_err();
+    assert_eq!(err.code, "CAPACITY_EXCEEDED");
+    assert_eq!(snapshot(&b), before);
+}
+
+#[test]
+fn memory_envelopes_must_cover_each_rank_once_and_reject_overflow() {
+    let b = routed();
+    let p = problem();
+    let incomplete = [envelope(0, 0, 0), envelope(1, 0, 0)];
+    assert!(plan_qwen2moe_advisory_with_memory(&p, &b, 0, &incomplete).is_err());
+
+    let duplicate = [envelope(0, 0, 0), envelope(1, 0, 0), envelope(1, 0, 0)];
+    assert!(plan_qwen2moe_advisory_with_memory(&p, &b, 0, &duplicate).is_err());
+
+    let overflow = [
+        envelope(0, 0, 0),
+        PerRankMemoryEnvelope {
+            kv_bytes: u64::MAX,
+            workspace_bytes: 1,
+            ..envelope(1, 0, 0)
+        },
+        envelope(2, 0, 0),
+    ];
+    assert!(plan_qwen2moe_advisory_with_memory(&p, &b, 0, &overflow).is_err());
 }

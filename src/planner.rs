@@ -1,5 +1,5 @@
 use crate::cost::CostProvenance;
-use crate::memory::{add, mul};
+use crate::memory::{add, mul, Budget};
 use crate::schedule::{self, schedule_with_budget, Job};
 use crate::topology::{PreparedTopology, Topology};
 use crate::traffic::{message_sizes, WireFormat};
@@ -144,6 +144,148 @@ pub fn plan_qwen2moe_advisory(
         route_experts_by_token,
         route_weight_bits_hex_by_token,
         placement,
+    })
+}
+
+/// Non-weight per-rank memory that must remain available while placing a routed layer.
+/// `load_temporary_bytes` is included during placement so a suggested owner set is safe
+/// both while loading resident weights and after the temporary buffer is released.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PerRankMemoryEnvelope {
+    pub rank: u32,
+    pub kv_bytes: u64,
+    pub recurrent_bytes: u64,
+    pub workspace_bytes: u64,
+    pub graph_bytes: u64,
+    pub communication_bytes: u64,
+    pub safety_margin_bytes: u64,
+    pub load_temporary_bytes: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RankMemoryAdvice {
+    pub rank: u32,
+    pub capacity_bytes: u64,
+    pub preexisting_reserved_bytes: u64,
+    pub expert_weight_bytes: u64,
+    pub kv_bytes: u64,
+    pub recurrent_bytes: u64,
+    pub workspace_bytes: u64,
+    pub graph_bytes: u64,
+    pub communication_bytes: u64,
+    pub safety_margin_bytes: u64,
+    pub load_temporary_bytes: u64,
+    pub steady_bytes: u64,
+    pub loading_peak_bytes: u64,
+    pub headroom_bytes: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RoutedPlacementMemoryAdvice {
+    pub routed: RoutedPlacementAdvice,
+    pub ranks: Vec<RankMemoryAdvice>,
+}
+
+/// Build route-bound placement advice with separate KV, recurrent, graph, workspace,
+/// communication, margin, and temporary-loading budgets for every topology rank.
+/// The route and live owner registry are read-only; missing or over-budget inputs fail
+/// before any advice is returned.
+pub fn plan_qwen2moe_advisory_with_memory(
+    base: &PlacementProblem,
+    routed: &crate::routing::Qwen2MoERouteBatch,
+    source_rank: u32,
+    envelopes: &[PerRankMemoryEnvelope],
+) -> Result<RoutedPlacementMemoryAdvice> {
+    if envelopes.len() != base.topology.devices.len() {
+        return Err(invalid("one memory envelope per topology rank required"));
+    }
+    let by_rank: BTreeMap<_, _> = envelopes.iter().map(|e| (e.rank, e)).collect();
+    let device_ranks: BTreeSet<_> = base.topology.devices.iter().map(|d| d.rank).collect();
+    if by_rank.len() != envelopes.len()
+        || device_ranks.len() != base.topology.devices.len()
+        || device_ranks != by_rank.keys().copied().collect()
+    {
+        return Err(invalid(
+            "memory envelopes must cover topology ranks exactly once",
+        ));
+    }
+
+    let mut candidate = base.clone();
+    for device in &mut candidate.topology.devices {
+        let envelope = by_rank[&device.rank];
+        let budget = Budget {
+            capacity: device.capacity_bytes,
+            weights: 0,
+            kv: envelope.kv_bytes,
+            recurrent: envelope.recurrent_bytes,
+            workspace: envelope.workspace_bytes,
+            graphs: envelope.graph_bytes,
+            communication: envelope.communication_bytes,
+            margin: add(device.reserved_bytes, envelope.safety_margin_bytes)?,
+            load_temporary: envelope.load_temporary_bytes,
+        };
+        let non_weight = budget.check()?;
+        device.reserved_bytes = non_weight.loading_peak_bytes;
+    }
+
+    let routed_advice = plan_qwen2moe_advisory(&candidate, routed, source_rank)?;
+    let mut ranks = Vec::with_capacity(candidate.topology.devices.len());
+    for device in &candidate.topology.devices {
+        let envelope = by_rank[&device.rank];
+        let expert_weight_bytes = routed_advice
+            .placement
+            .bytes_by_rank
+            .get(&device.rank)
+            .copied()
+            .unwrap_or(0);
+        let budget = Budget {
+            capacity: device.capacity_bytes,
+            weights: expert_weight_bytes,
+            kv: envelope.kv_bytes,
+            recurrent: envelope.recurrent_bytes,
+            workspace: envelope.workspace_bytes,
+            graphs: envelope.graph_bytes,
+            communication: envelope.communication_bytes,
+            margin: add(
+                base.topology
+                    .devices
+                    .iter()
+                    .find(|d| d.rank == device.rank)
+                    .ok_or_else(|| invalid("topology rank disappeared"))?
+                    .reserved_bytes,
+                envelope.safety_margin_bytes,
+            )?,
+            load_temporary: envelope.load_temporary_bytes,
+        };
+        let report = budget.check()?;
+        let preexisting_reserved_bytes = base
+            .topology
+            .devices
+            .iter()
+            .find(|d| d.rank == device.rank)
+            .ok_or_else(|| invalid("topology rank disappeared"))?
+            .reserved_bytes;
+        ranks.push(RankMemoryAdvice {
+            rank: device.rank,
+            capacity_bytes: device.capacity_bytes,
+            preexisting_reserved_bytes,
+            expert_weight_bytes,
+            kv_bytes: envelope.kv_bytes,
+            recurrent_bytes: envelope.recurrent_bytes,
+            workspace_bytes: envelope.workspace_bytes,
+            graph_bytes: envelope.graph_bytes,
+            communication_bytes: envelope.communication_bytes,
+            safety_margin_bytes: envelope.safety_margin_bytes,
+            load_temporary_bytes: envelope.load_temporary_bytes,
+            steady_bytes: report.steady_bytes,
+            loading_peak_bytes: report.loading_peak_bytes,
+            headroom_bytes: report.headroom_bytes,
+        });
+    }
+    Ok(RoutedPlacementMemoryAdvice {
+        routed: routed_advice,
+        ranks,
     })
 }
 
