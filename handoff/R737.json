@@ -1,7 +1,7 @@
 {
   "id": "R737",
   "date": "2026-11-02",
-  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
   "active_operations": [],
   "summary": "Added a one-token pure-window attention+FFN composition with a one-shot route receipt boundary and full-block KV commit only after the FFN HC join succeeds.",
@@ -18,8 +18,8 @@
   ],
   "manifest": "research/R737/SHA256SUMS",
   "manifest_sha256": "420a1df24990dfe2f37c91618c12afc72e827967296e3ada923874894ab1e070",
-  "receipt_pending": true,
-  "next_action": "R738: bind the route boundary to resident MXFP4 owners and persistent Sessions without hot-path LOAD, then define an independent numeric oracle.",
+  "receipt_pending": false,
+  "next_action": "R738: connect the identified top-6 route to preloaded MXFP4 Sessions; preflight all owners before EXEC, preserve UNKNOWN terminally, then establish an independent numerical oracle.",
   "source_commit": "b1618e2b8f0f24d618b7b4e14f9bb6a98524e411",
   "source_pipeline_id": 2588,
   "source_pipeline_status": "success",
@@ -30,5 +30,22 @@
     "fallback": "success"
   },
   "source_readback": "Exact readback verified for all six R737 source/report/result/manifest/handoff files at b1618e2b8f0f24d618b7b4e14f9bb6a98524e411",
-  "receipt_pipeline_pending": true
+  "receipt_pipeline_pending": false,
+  "receipt_commit": "aa38b3a22bbfe40fca6174fc5f00b5c84642fce7",
+  "receipt_pipeline_id": 2589,
+  "receipt_pipeline_status": "success",
+  "receipt_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "receipt_readback": {
+    "exact": true,
+    "commit": "aa38b3a22bbfe40fca6174fc5f00b5c84642fce7",
+    "files": [
+      "research/R737/RESULT.json",
+      "handoff/R737.json"
+    ]
+  }
 }
