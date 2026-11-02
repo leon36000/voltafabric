@@ -186,6 +186,16 @@ pub struct GateShardSpec {
     pub max_payload_bytes: u64,
 }
 
+/// Pinned index-backed source for the three gate projection tensors. The index
+/// digest is fixed to the pinned DeepSeek checkpoint revision; the selected
+/// source shard header digest and source-size ceiling are supplied by admission.
+#[derive(Debug, Clone, Copy)]
+pub struct PinnedGateIndexSource<'a> {
+    pub index_bytes: &'a [u8],
+    pub expected_header_sha256: &'a str,
+    pub max_source_shard_bytes: u64,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GateTensorReceipt {
     pub name: String,
@@ -776,51 +786,187 @@ pub struct DeepSeekV41Gate {
     receipt: GateLoadReceipt,
 }
 
+fn validate_gate_spec(spec: &GateShardSpec) -> Result<()> {
+    if spec.model_revision != PINNED_MODEL_REVISION {
+        return Err(invalid("unsupported DeepSeek V4.1 Flash model revision"));
+    }
+    if !spec.gate_temperature.is_finite()
+        || spec.gate_temperature <= 0.0
+        || !spec.route_scale.is_finite()
+        || spec.route_scale <= 0.0
+    {
+        return Err(invalid(
+            "DeepSeek gate configuration is not finite and positive",
+        ));
+    }
+    if spec.max_payload_bytes < GATE_PAYLOAD_BYTES
+        || spec.max_payload_bytes > checkpoint::MAX_NAMED_TENSOR_PAYLOAD_BYTES
+    {
+        return Err(Error::new(
+            "ARTIFACT_BUDGET",
+            "DeepSeek gate payload ceiling is zero, too small, or exceeds the bounded importer",
+        ));
+    }
+    if [
+        spec.tensor_sha256.weight.as_str(),
+        spec.tensor_sha256.text_bias.as_str(),
+        spec.tensor_sha256.image_bias.as_str(),
+    ]
+    .iter()
+    .any(|digest| !crate::sha256::is_hex_digest(digest))
+    {
+        return Err(invalid(
+            "DeepSeek gate payload hashes must be three complete SHA-256 digests",
+        ));
+    }
+    Ok(())
+}
+
+fn gate_tensor_specs(spec: &GateShardSpec) -> [NamedTensorSpec; 3] {
+    let prefix = format!("layers.{}.ffn.gate", spec.layer);
+    [
+        NamedTensorSpec {
+            name: format!("{prefix}.weight"),
+            dtype: Dtype::BF16,
+            shape: vec![ROUTED_EXPERTS, HIDDEN_SIZE],
+            bytes: GATE_WEIGHT_BYTES,
+            sha256: spec.tensor_sha256.weight.clone(),
+        },
+        NamedTensorSpec {
+            name: format!("{prefix}.bias"),
+            dtype: Dtype::F32,
+            shape: vec![ROUTED_EXPERTS],
+            bytes: GATE_BIAS_BYTES,
+            sha256: spec.tensor_sha256.text_bias.clone(),
+        },
+        NamedTensorSpec {
+            name: format!("{prefix}.bias_vl"),
+            dtype: Dtype::F32,
+            shape: vec![ROUTED_EXPERTS],
+            bytes: GATE_BIAS_BYTES,
+            sha256: spec.tensor_sha256.image_bias.clone(),
+        },
+    ]
+}
+
 impl DeepSeekV41Gate {
     pub fn load<R: Read + Seek>(reader: &mut R, spec: &GateShardSpec) -> Result<Self> {
-        if spec.model_revision != PINNED_MODEL_REVISION {
-            return Err(invalid("unsupported DeepSeek V4.1 Flash model revision"));
-        }
-        if !spec.gate_temperature.is_finite()
-            || spec.gate_temperature <= 0.0
-            || !spec.route_scale.is_finite()
-            || spec.route_scale <= 0.0
-        {
-            return Err(invalid(
-                "DeepSeek gate configuration is not finite and positive",
-            ));
-        }
-        let prefix = format!("layers.{}.ffn.gate", spec.layer);
-        let weight_name = format!("{prefix}.weight");
-        let text_name = format!("{prefix}.bias");
-        let image_name = format!("{prefix}.bias_vl");
+        validate_gate_spec(spec)?;
         let imported = checkpoint::read_named_tensors(
             reader,
-            &[
-                NamedTensorSpec {
-                    name: weight_name.clone(),
-                    dtype: Dtype::BF16,
-                    shape: vec![ROUTED_EXPERTS, HIDDEN_SIZE],
-                    bytes: GATE_WEIGHT_BYTES,
-                    sha256: spec.tensor_sha256.weight.clone(),
-                },
-                NamedTensorSpec {
-                    name: text_name.clone(),
-                    dtype: Dtype::F32,
-                    shape: vec![ROUTED_EXPERTS],
-                    bytes: GATE_BIAS_BYTES,
-                    sha256: spec.tensor_sha256.text_bias.clone(),
-                },
-                NamedTensorSpec {
-                    name: image_name.clone(),
-                    dtype: Dtype::F32,
-                    shape: vec![ROUTED_EXPERTS],
-                    bytes: GATE_BIAS_BYTES,
-                    sha256: spec.tensor_sha256.image_bias.clone(),
-                },
-            ],
+            &gate_tensor_specs(spec),
             spec.max_payload_bytes,
         )?;
+        Self::from_imported(imported, spec)
+    }
+
+    /// Load the same resident gate projection through the pinned Safetensors
+    /// index. All three tensors must resolve to one shard; its header is checked
+    /// before and after payload import, and the index and payloads are hashed.
+    pub fn load_indexed(
+        root: &Path,
+        source: PinnedGateIndexSource<'_>,
+        spec: &GateShardSpec,
+    ) -> Result<Self> {
+        validate_gate_spec(spec)?;
+        if source.max_source_shard_bytes == 0
+            || !crate::sha256::is_hex_digest(source.expected_header_sha256)
+        {
+            return Err(invalid(
+                "DeepSeek gate source needs a positive byte ceiling and valid header digest",
+            ));
+        }
+        let selected = gate_tensor_specs(spec);
+        let selected_names = selected
+            .iter()
+            .map(|tensor| tensor.name.clone())
+            .collect::<Vec<_>>();
+        let planned = checkpoint::plan_indexed_safetensors_shards(
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            &selected_names,
+        )?;
+        if planned.tensors_by_shard.len() != 1 || planned.tensor_to_shard.len() != selected.len() {
+            return Err(invalid(
+                "pinned DeepSeek gate tensors must resolve completely to one source shard",
+            ));
+        }
+        let (shard_name, shard_tensors) = planned
+            .tensors_by_shard
+            .iter()
+            .next()
+            .ok_or_else(|| invalid("pinned DeepSeek gate index selected no shard"))?;
+        let expected_names = selected_names
+            .iter()
+            .collect::<std::collections::BTreeSet<_>>();
+        let actual_names = shard_tensors
+            .iter()
+            .collect::<std::collections::BTreeSet<_>>();
+        if shard_tensors.len() != selected.len() || actual_names != expected_names {
+            return Err(invalid(
+                "pinned DeepSeek gate index differs from the exact three gate tensors",
+            ));
+        }
+        let header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if header.sha256 != source.expected_header_sha256 {
+            return Err(invalid(
+                "pinned DeepSeek gate source shard header digest differs",
+            ));
+        }
+        let indexed = checkpoint::read_indexed_named_tensors(
+            root,
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            &selected,
+            spec.max_payload_bytes,
+        )?;
+        if indexed.plan != planned
+            || indexed.file_bytes != header.file_bytes
+            || indexed.header_bytes
+                != u64::try_from(header.header_bytes.len())
+                    .map_err(|_| invalid("DeepSeek gate header length does not fit u64"))?
+            || indexed.tensors.len() != selected.len()
+        {
+            return Err(invalid(
+                "indexed DeepSeek gate payload import differs from its preflight plan",
+            ));
+        }
+        let final_header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if final_header.file_bytes != header.file_bytes || final_header.sha256 != header.sha256 {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "DeepSeek gate shard changed during indexed payload import",
+            ));
+        }
+        Self::from_imported(
+            checkpoint::NamedTensorImport {
+                file_bytes: indexed.file_bytes,
+                header_bytes: indexed.header_bytes,
+                io_bytes: indexed.io_bytes,
+                tensors: indexed.tensors,
+            },
+            spec,
+        )
+    }
+
+    fn from_imported(
+        imported: checkpoint::NamedTensorImport,
+        spec: &GateShardSpec,
+    ) -> Result<Self> {
+        validate_gate_spec(spec)?;
+        if imported.tensors.len() != 3 {
+            return Err(invalid(
+                "DeepSeek gate import does not contain exactly three selected tensors",
+            ));
+        }
         let file_bytes = imported.file_bytes;
         let header_bytes = imported.header_bytes;
         let io_bytes = imported.io_bytes;
@@ -835,6 +981,9 @@ impl DeepSeekV41Gate {
             .collect::<Vec<_>>();
 
         let mut selected = imported.tensors;
+        let weight_name = format!("layers.{}.ffn.gate.weight", spec.layer);
+        let text_name = format!("layers.{}.ffn.gate.bias", spec.layer);
+        let image_name = format!("layers.{}.ffn.gate.bias_vl", spec.layer);
         let weight = selected
             .remove(&weight_name)
             .ok_or_else(|| invalid("gate weight absent after complete shard preflight"))?;

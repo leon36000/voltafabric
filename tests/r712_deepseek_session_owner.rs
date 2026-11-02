@@ -483,10 +483,9 @@ fn indexed_residents_for_route(
     (temp, residents)
 }
 
-fn indexed_route_payload_reads(
-    batch: &voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch,
-) -> (
+fn indexed_gate_route_payloads() -> (
     IndexedTempDirectory,
+    voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch,
     voltafabric::deepseek_v41_gate::DeepSeekV41RoutePayloadReads,
 ) {
     let index = include_bytes!(
@@ -495,6 +494,128 @@ fn indexed_route_payload_reads(
     let header = include_bytes!(
         "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
     );
+    let header_value: serde_json::Value = serde_json::from_slice(header).unwrap();
+    let data_start = header.len() as u64 + 8;
+    let temp = IndexedTempDirectory::new();
+    let shard_path = temp.path().join("model-00003-of-00048.safetensors");
+    let mut shard = File::create(&shard_path).unwrap();
+    shard.set_len(SHARD_BYTES).unwrap();
+    shard
+        .write_all(&(header.len() as u64).to_le_bytes())
+        .unwrap();
+    shard.write_all(header).unwrap();
+
+    let mut gate_weight = vec![0u8; GATE_WEIGHT_BYTES as usize];
+    for expert in 0..ROUTED_EXPERTS {
+        for bit in 0..9 {
+            if expert & (1 << bit) != 0 {
+                let offset = (expert * HIDDEN_SIZE + bit) * 2;
+                gate_weight[offset..offset + 2].copy_from_slice(&0x3f80u16.to_le_bytes());
+            }
+        }
+    }
+    let mut text_bias_values = vec![0.0f32; ROUTED_EXPERTS];
+    text_bias_values[0] = 1_000.0;
+    let image_bias_values = vec![0.0f32; ROUTED_EXPERTS];
+    let encode = |values: &[f32]| {
+        values
+            .iter()
+            .flat_map(|value| value.to_le_bytes())
+            .collect::<Vec<_>>()
+    };
+    let text_bias = encode(&text_bias_values);
+    let image_bias = encode(&image_bias_values);
+    let gate_payloads = [
+        ("layers.0.ffn.gate.weight", gate_weight.as_slice()),
+        ("layers.0.ffn.gate.bias", text_bias.as_slice()),
+        ("layers.0.ffn.gate.bias_vl", image_bias.as_slice()),
+    ];
+    for (name, payload) in gate_payloads {
+        let offsets = header_value[name]["data_offsets"].as_array().unwrap();
+        let start = data_start + offsets[0].as_u64().unwrap();
+        let end = data_start + offsets[1].as_u64().unwrap();
+        assert_eq!(end - start, payload.len() as u64);
+        shard.seek(SeekFrom::Start(start)).unwrap();
+        shard.write_all(payload).unwrap();
+    }
+    drop(shard);
+
+    let gate_spec = GateShardSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        gate_temperature: 1.0,
+        route_scale: ROUTE_SCALE,
+        tensor_sha256: GateTensorHashes {
+            weight: voltafabric::sha256::hex(&gate_weight),
+            text_bias: voltafabric::sha256::hex(&text_bias),
+            image_bias: voltafabric::sha256::hex(&image_bias),
+        },
+        max_payload_bytes: GATE_PAYLOAD_BYTES,
+    };
+    let gate = DeepSeekV41Gate::load_indexed(
+        temp.path(),
+        voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
+            index_bytes: index,
+            expected_header_sha256: HEADER_SHA256,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        },
+        &gate_spec,
+    )
+    .unwrap();
+    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
+    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
+        *value = (1u32 << bit) as f32;
+    }
+    let stamp = Stamp {
+        run_id: "r716-gate-to-grouped-session".to_owned(),
+        model_revision: REVISION.to_owned(),
+        plan_id: "r716-synthetic-rank-plan".to_owned(),
+        layer: 0,
+        batch: 9,
+        epoch: 13,
+    };
+    let registry = Registry {
+        epoch: stamp.epoch,
+        copies: TOP6
+            .iter()
+            .enumerate()
+            .map(|(index, &expert)| Replica {
+                expert,
+                rank: if index < 2 { 4 } else { 3 + index as u32 },
+                local: if index < 2 { index as u32 } else { 0 },
+            })
+            .collect(),
+    };
+    let batch = gate
+        .prepare_route_batch(
+            &hidden,
+            TokenKind::Text,
+            stamp,
+            29,
+            registry,
+            BTreeMap::new(),
+            BTreeMap::from([
+                (4, vec![0, 1]),
+                (5, vec![0]),
+                (6, vec![0]),
+                (7, vec![0]),
+                (8, vec![0]),
+            ]),
+        )
+        .unwrap();
+    let reference_batch = gated_grouped_route_batch();
+    assert_eq!(batch.problem().experts, TOP6);
+    assert_eq!(
+        batch.problem().routes[0]
+            .iter()
+            .map(|choice| choice.weight.to_bits())
+            .collect::<Vec<_>>(),
+        reference_batch.problem().routes[0]
+            .iter()
+            .map(|choice| choice.weight.to_bits())
+            .collect::<Vec<_>>()
+    );
+
     let source = PinnedMxfp4PayloadSource {
         index_bytes: index,
         header_bytes: header,
@@ -507,24 +628,14 @@ fn indexed_route_payload_reads(
     let plan = batch
         .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES)
         .unwrap();
-    assert_eq!(plan.route_experts(), TOP6);
-    assert_eq!(plan.payload_plan().tensors.len(), 36);
     assert_eq!(
-        plan.payload_plan().selected_payload_bytes,
-        ROUTE_PAYLOAD_BYTES
+        plan.payload_plan().source_shard,
+        "model-00003-of-00048.safetensors"
     );
-
-    let temp = IndexedTempDirectory::new();
-    let shard_path = temp.path().join(&plan.payload_plan().source_shard);
-    let mut shard = File::create(&shard_path).unwrap();
-    shard
-        .set_len(plan.payload_plan().source_shard_bytes)
+    let mut shard = std::fs::OpenOptions::new()
+        .write(true)
+        .open(&shard_path)
         .unwrap();
-    shard
-        .write_all(&(header.len() as u64).to_le_bytes())
-        .unwrap();
-    shard.write_all(header).unwrap();
-
     let mut hashes = BTreeMap::new();
     for tensor in &plan.payload_plan().tensors {
         let length = usize::try_from(tensor.file_offset_end - tensor.file_offset_start).unwrap();
@@ -541,7 +652,6 @@ fn indexed_route_payload_reads(
         shard.write_all(&payload).unwrap();
     }
     drop(shard);
-
     let reads = batch
         .read_selected_mxfp4_indexed_payloads(
             temp.path(),
@@ -555,15 +665,7 @@ fn indexed_route_payload_reads(
     assert_eq!(reads.attempt(), batch.attempt());
     assert_eq!(reads.route_fingerprint(), plan.route_fingerprint());
     assert_eq!(reads.reads().len(), TOP6.len());
-    assert_eq!(
-        reads
-            .reads()
-            .iter()
-            .map(|read| read.expert())
-            .collect::<Vec<_>>(),
-        TOP6
-    );
-    (temp, reads)
+    (temp, batch, reads)
 }
 
 #[test]
@@ -926,11 +1028,10 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
 
 #[test]
 fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route() {
-    let batch = gated_grouped_route_batch();
+    let (_checkpoint, batch, reads) = indexed_gate_route_payloads();
     let route = batch.problem();
     assert_eq!(route.experts, TOP6);
     assert_eq!(batch.attempt(), 29);
-    let (_checkpoint, reads) = indexed_route_payload_reads(&batch);
     let residents = reads.into_session_residents(64 * 1024 * 1024).unwrap();
     let input: Vec<f32> = (0..route.hidden)
         .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
@@ -1324,4 +1425,68 @@ fn gate_indexed_payload_read_validates_all_route_hashes_before_opening_source() 
         )
         .unwrap_err();
     assert!(error.message.contains("exactly 36 selected tensors"));
+}
+
+#[test]
+fn indexed_gate_load_rejects_a_nonpinned_index_before_opening_shard() {
+    let mut index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    )
+    .to_vec();
+    index[0] ^= 1;
+    let temp = IndexedTempDirectory::new();
+    let spec = GateShardSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        gate_temperature: 1.0,
+        route_scale: ROUTE_SCALE,
+        tensor_sha256: GateTensorHashes {
+            weight: "0".repeat(64),
+            text_bias: "0".repeat(64),
+            image_bias: "0".repeat(64),
+        },
+        max_payload_bytes: GATE_PAYLOAD_BYTES,
+    };
+    let error = DeepSeekV41Gate::load_indexed(
+        temp.path(),
+        voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
+            index_bytes: &index,
+            expected_header_sha256: HEADER_SHA256,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        },
+        &spec,
+    )
+    .unwrap_err();
+    assert!(error.message.contains("wrong digest"));
+}
+
+#[test]
+fn indexed_gate_load_rejects_malformed_tensor_hashes_before_opening_shard() {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let temp = IndexedTempDirectory::new();
+    let spec = GateShardSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        gate_temperature: 1.0,
+        route_scale: ROUTE_SCALE,
+        tensor_sha256: GateTensorHashes {
+            weight: "not-a-digest".to_owned(),
+            text_bias: "0".repeat(64),
+            image_bias: "0".repeat(64),
+        },
+        max_payload_bytes: GATE_PAYLOAD_BYTES,
+    };
+    let error = DeepSeekV41Gate::load_indexed(
+        temp.path(),
+        voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
+            index_bytes: index,
+            expected_header_sha256: HEADER_SHA256,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        },
+        &spec,
+    )
+    .unwrap_err();
+    assert!(error.message.contains("three complete SHA-256 digests"));
 }

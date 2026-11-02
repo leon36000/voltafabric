@@ -803,7 +803,7 @@ pub enum Mxfp4ExpertNamespace {
 
 const MAX_PINNED_EXPERT_INDEX_BYTES: usize = 8 * 1024 * 1024;
 const MAX_EXPERTS_PER_PAYLOAD_PLAN: usize = 6;
-const PINNED_EXPERT_INDEX_SHA256: &str =
+pub(crate) const PINNED_EXPERT_INDEX_SHA256: &str =
     "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8";
 
 #[derive(Debug, Clone, PartialEq, Eq)]

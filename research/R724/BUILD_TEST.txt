@@ -1,0 +1,24 @@
+R724 scoped CPU verification
+=============================
+
+Same-file indexed gate -> route -> six indexed experts -> owners -> grouped CPU Sessions -> FP64 MXFP4 oracle:
+  cargo test --locked --offline --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
+  debug: 1 passed; 9 filtered out; 83.16 s
+  release: 1 passed; 9 filtered out; 5.27 s
+
+Non-pinned index rejected before opening any source shard:
+  cargo test --locked --offline --test r712_deepseek_session_owner indexed_gate_load_rejects_a_nonpinned_index_before_opening_shard
+  debug: 1 passed; 9 filtered out; 0.41 s
+  release: 1 passed; 9 filtered out; 0.03 s
+
+Malformed gate tensor hash rejected before opening any source shard:
+  cargo test --locked --offline --test r712_deepseek_session_owner indexed_gate_load_rejects_malformed_tensor_hashes_before_opening_shard
+  debug: 1 passed; 9 filtered out; 0.00 s
+  release: 1 passed; 9 filtered out; 0.00 s
+
+Additional checks:
+  cargo clippy --locked --offline --lib -- -D warnings: PASS
+  cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+
+The source file is a temporary sparse fixture below .work and is cleaned by RAII. Its gate and expert payload bytes are synthetic. No model weights/download, GPU, network transport, R53 production worker, UNKNOWN replay or performance benchmark was used.
