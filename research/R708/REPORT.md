@@ -17,7 +17,7 @@ R708 réutilise les validations existantes `RoutingProblem`/`RankDispatch`, `val
 - `cargo clippy --offline --locked --lib -- -D warnings` : réussi.
 - `rustfmt --edition 2021 --check` et `git diff --check` des deux fichiers : réussis.
 - Relecture GitLab des deux fichiers source : exacte.
-- Pipeline #2453 en cours au moment du reçu; scans/fallback uniquement, pas compilation/test Rust.
+- Pipeline #2453 terminé avec succès; ses jobs configurés sont scans/fallback uniquement, pas compilation/test Rust.
 
 ## Limites
 

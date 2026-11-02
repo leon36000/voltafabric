@@ -22,7 +22,7 @@ La tranche réutilise la grammaire de noms MXFP4 déjà contrôlée par VoltaFab
 
 Les identifiants sélectionnés sont une fixture de route, pas une génération mesurée. L'index et l'en-tête ne prouvent ni présence ni hash des octets de poids. Les artefacts locaux suivis ne couvrent toujours pas les experts 379–382; l'admission complète des six reste refusée. Aucun shard complet ni checkpoint n'a été téléchargé. Pas de Session/worker lancé, GPU, transport inter‑PC, R53 de production, UNKNOWN rejoué ou sortie de modèle complète.
 
-Pipeline GitLab #2456 en cours lors de la rédaction; ses jobs sont les scans/fallback configurés, pas une compilation ni les tests Rust locaux. Relance automatique arrêtée; aucune fusion vers `main`.
+Pipeline GitLab #2456 terminé avec succès. Ses quatre jobs réussis couvrent les scans/fallback configurés, pas une compilation ni les tests Rust locaux. Relance automatique arrêtée; aucune fusion vers `main`.
 
 ## Traçabilité
 

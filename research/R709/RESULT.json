@@ -1,10 +1,12 @@
 {
   "id": "R709",
-  "state": "SOURCE_PUBLISHED_LOCAL_CPU_DEBUG_RELEASE_PASS_PIPELINE_RUNNING",
+  "state": "SOURCE_PUBLISHED_LOCAL_CPU_DEBUG_RELEASE_PASS_PIPELINE_SCANS_SUCCESS",
   "branch": "r709-deepseek-expert-range-plan-20261102",
   "parent_commit": "ac541f796253351da0f75289fd95d6641f5c8c91",
   "source_commit": "a68ee0e01931af18084ad52b78af8d2ebbd56701",
-  "code_files": ["src/deepseek_v41.rs"],
+  "code_files": [
+    "src/deepseek_v41.rs"
+  ],
   "path": "research/R709",
   "test_module": "deepseek_v41::a147_pinned_expert_payload_plan_tests",
   "debug_tests_passed": 2,
@@ -15,11 +17,18 @@
   "source_sha256": "c889a6676a725a52418abff737837773c52535bbbfcf079e939fa9903fa22c51",
   "source_git_blob": "1c1a64f59b4cf5948d1fde3b755129b9906297c8",
   "readback_exact": true,
-  "readback_files_verified": 1,
+  "readback_files_verified": 5,
   "pinned_model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
   "pinned_index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
   "header_sha256": "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449",
-  "selected_route_fixture": [0, 383, 382, 381, 380, 379],
+  "selected_route_fixture": [
+    0,
+    383,
+    382,
+    381,
+    380,
+    379
+  ],
   "source_shard": "model-00003-of-00048.safetensors",
   "source_shard_bytes": 7389759032,
   "header_bytes": 258136,
@@ -30,7 +39,12 @@
   "full_shard_downloaded": false,
   "full_checkpoint_downloaded": false,
   "six_expert_residency_admitted": false,
-  "missing_selected_expert_payloads": [379, 380, 381, 382],
+  "missing_selected_expert_payloads": [
+    379,
+    380,
+    381,
+    382
+  ],
   "session_worker_started": false,
   "full_generation": false,
   "gpu": false,
@@ -38,8 +52,8 @@
   "production_r53_used": false,
   "unknown_replayed": false,
   "pipeline_id": 2456,
-  "pipeline_status_at_report": "running",
+  "pipeline_status_at_report": "success",
   "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R710: connect route-selected expert IDs to these checked index/header plans and the bounded selective Safetensors reader; admit only exact resident payloads with per-payload integrity evidence, no full-shard/model download or GPU."
+  "next_action": "R710: connect route-selected expert IDs to the checked index/header plan and bounded selective Safetensors reader; admit only exact resident payloads with per-payload integrity evidence. No full-shard/model download, GPU, production network, UNKNOWN replay, or automatic relaunch."
 }

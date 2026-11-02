@@ -1,6 +1,6 @@
 {
   "id": "R708",
-  "state": "SOURCE_PUBLISHED_READBACK_EXACT_CPU_DEBUG_RELEASE_PASS_PIPELINE_RUNNING",
+  "state": "SOURCE_PUBLISHED_READBACK_EXACT_CPU_DEBUG_RELEASE_PASS_PIPELINE_SCANS_SUCCESS",
   "branch": "r708-mxfp4-preflight-before-artifact-io-20261102",
   "parent_commit": "951e56679779cf84102acb181c0d5cc17538cc52",
   "source_commit": "6c66ca3acd514f6cd6291990230f9e9d8863b404",
@@ -16,8 +16,8 @@
   "rustfmt": "PASS",
   "diff_check": "PASS",
   "pipeline_id": 2453,
-  "pipeline_status_at_report": "running",
-  "pipeline_status_current": "running",
+  "pipeline_status_at_report": "success",
+  "pipeline_status_current": "success",
   "pipeline_scope": "configured scans/fallback only; not Rust compilation or CPU tests",
   "route": "synthetic DeepSeek top-6 [0,383,382,381,380,379], only rank-0 expert-0 binding present",
   "artifact_path_opened": false,
@@ -30,5 +30,5 @@
   "production_r53_used": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R709: map the pinned DeepSeek expert tensor names and shard ownership into a bounded exact-resident inventory; CPU/source-only, no checkpoint download."
+  "next_action": "R709 completed: the pinned MXFP4 tensor-to-shard range plan is published. Continue with route-selected plans and bounded selective reads; keep missing payload refusal atomic."
 }
