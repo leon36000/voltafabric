@@ -6,6 +6,7 @@
 use std::collections::BTreeMap;
 use std::time::{Duration, Instant};
 use voltafabric::cost::{CostOrigin, CostProvenance};
+use voltafabric::deepseek_v41_gate::{RouterBiases, TokenKind, ROUTED_EXPERTS, ROUTE_SCALE, TOP_K};
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::planner::{
     self, ExpertProfile, PerRankMemoryEnvelope, PlacementProblem, WirePolicy,
@@ -406,5 +407,61 @@ fn one_byte_under_loading_peak_refuses_before_any_session_is_created() {
     assert!(
         refused.is_err(),
         "over-budget routes return no partial advice"
+    );
+}
+
+#[test]
+fn full_gate_top6_route_refuses_when_only_two_deepseek_experts_have_weight_profiles() {
+    let mut text_bias = vec![0.0; ROUTED_EXPERTS];
+    text_bias[0] = 1_000.0;
+    let gate = RouterBiases::new(text_bias, vec![0.0; ROUTED_EXPERTS], ROUTE_SCALE).unwrap();
+    let logits: Vec<f32> = (0..ROUTED_EXPERTS).map(|index| index as f32).collect();
+    let gate_route = gate.route(&logits, TokenKind::Text).unwrap();
+    assert_eq!(
+        gate_route
+            .iter()
+            .map(|choice| choice.expert)
+            .collect::<Vec<_>>(),
+        [0, 383, 382, 381, 380, 379]
+    );
+
+    // The base placement fixture only contains real weight profiles/shards for
+    // experts 0 and 383. Keep all six gate choices and make the registry/order
+    // self-consistent so the memory planner must reject absent expert profiles.
+    let mut route = problem(0.375, 0.375);
+    route.experts = gate_route.iter().map(|choice| choice.expert).collect();
+    route.routes = vec![gate_route];
+    route.registry.copies = route
+        .experts
+        .iter()
+        .enumerate()
+        .map(|(local, &expert)| Replica {
+            expert,
+            rank: 0,
+            local: local as u32,
+        })
+        .collect();
+    route.resident_order = BTreeMap::from([(0, (0..TOP_K as u32).collect())]);
+    voltafabric::routing::validate(&route).expect("complete six-choice gate route identity");
+
+    let bytes0 = include_bytes!("../fixtures/deepseek_v41_layer0_expert0_314113f8.safetensors");
+    let bytes383 = include_bytes!("../fixtures/deepseek_v41_layer0_expert383_314113f8.safetensors");
+    let refused = planner::plan_routing_advisory_with_memory(
+        &memory_problem(
+            u64::try_from(bytes0.len()).unwrap(),
+            u64::try_from(bytes383.len()).unwrap(),
+            false,
+        ),
+        &route,
+        905,
+        EXPERT0_RANK,
+        &envelopes(
+            u64::try_from(bytes0.len()).unwrap(),
+            u64::try_from(bytes383.len()).unwrap(),
+        ),
+    );
+    assert!(
+        refused.is_err(),
+        "the complete gate top-6 must not be truncated to the two available experts"
     );
 }
