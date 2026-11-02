@@ -1,16 +1,16 @@
 {
   "id": "R714",
   "path": "research/R714",
-  "state": "LOCAL_CPU_DEBUG_RELEASE_VERIFIED_PREPARED_FOR_PRIVATE_SUCCESSOR_BRANCH",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2516_SUCCESS",
   "branch": "r714-deepseek-session-exec-oracle-20261102",
   "parent_commit": "dad27c07ddd44c4fdcd6b1a3b46312514f7248ec",
-  "source_commit": null,
+  "source_commit": "2aaccc2b3002a3e56ccf79c4b4ffe1c5dd17a6a2",
   "evidence_commit": null,
-  "publication": "PENDING",
-  "readback_exact": false,
-  "readback_files_verified": 0,
-  "pipeline_id": null,
-  "pipeline_status": "not_started",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED",
+  "readback_exact": true,
+  "readback_files_verified": 8,
+  "pipeline_id": 2516,
+  "pipeline_status": "success",
   "pipeline_scope_expected": "configured GitLab scans/fallback only; not Rust compilation or local CPU tests",
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [],
@@ -46,5 +46,11 @@
   "arxiv_survey": "research/R712/ARXIV_SCOUT.md; one GPT-6 Luna scout completed",
   "next_action": "R715: build and test exact per-rank grouped MXFP4 owners for routes with co-located experts; preserve one coefficient application, atomic completeness and one-shot UNKNOWN semantics.",
   "manifest_sha256": "eb69d24ac7422869e9f080d02f42c216615c0a93a99c1a0818517d397971f572",
-  "manifest_file_count": 5
+  "manifest_file_count": 5,
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  }
 }

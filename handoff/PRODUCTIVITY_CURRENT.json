@@ -3056,7 +3056,7 @@
   "r713_deepseek_route_preflight": {
     "id": "R713",
     "owner": "integrator",
-    "state": "SOURCE_BRANCH_CREATED_READBACK_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_PIPELINE_2503_SUCCESS",
     "branch": "r713-deepseek-route-preflight-20261102",
     "parent_commit": "f4c73db055f63b5db014c334d082ae414efb2541",
     "path": "research/R713",
@@ -3091,6 +3091,46 @@
     "arxiv_scout": "research/R712/ARXIV_SCOUT.md",
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "active_operations": [],
-    "next_action": "R714: bind the route-set proof to each Session EXEC request and the existing Rust Collector; compare a synthetic CPU layer against an independent reduction-order oracle before reading actual checkpoint payloads. Keep automatic relaunch stopped; no GPU, production network, or UNKNOWN replay."
+    "next_action": "R714: bind the route-set proof to each Session EXEC request and the existing Rust Collector; compare a synthetic CPU layer against an independent reduction-order oracle before reading actual checkpoint payloads. Keep automatic relaunch stopped; no GPU, production network, or UNKNOWN replay.",
+    "source_commit": "df056168ce7d0506bfa18cef5b379243281df4cd",
+    "evidence_commit": "dad27c07ddd44c4fdcd6b1a3b46312514f7248ec",
+    "readback_exact": true,
+    "readback_files_verified": 16,
+    "pipeline_id": 2503,
+    "pipeline_status": "success"
+  },
+  "r714_deepseek_session_execution": {
+    "id": "R714",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2516_SUCCESS",
+    "branch": "r714-deepseek-session-exec-oracle-20261102",
+    "parent_commit": "dad27c07ddd44c4fdcd6b1a3b46312514f7248ec",
+    "source_commit": "2aaccc2b3002a3e56ccf79c4b4ffe1c5dd17a6a2",
+    "path": "research/R714",
+    "code_files": [
+      "src/deepseek_v41.rs",
+      "src/session/mxfp4.rs",
+      "tests/r712_deepseek_session_owner.rs"
+    ],
+    "readback_exact": true,
+    "readback_files_verified": 8,
+    "pipeline_id": 2516,
+    "pipeline_status": "success",
+    "pipeline_scope": "configured Gitleaks, Semgrep, Trivy and fallback only; not Rust compile or local CPU test evidence",
+    "local_cpu_tests": "3 debug and 3 release integration tests plus 6 debug and 6 release selective-read unit tests passed; strict Clippy, rustfmt and diff check passed",
+    "route_execution_adapter": "execute_pinned_mxfp4_route",
+    "collector_contract": "R9 FP32 preweighted results; route coefficient applied once before collection",
+    "synthetic_weight_payloads": true,
+    "actual_checkpoint_payload_read": false,
+    "co_located_top6_supported": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53_used": false,
+    "unknown_replayed": false,
+    "third_party_code_copied": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
+    "active_operations": [],
+    "next_action": "R715: group exact co-located top-6 owners into one bounded rank artifact and qualify one Session EXEC per rank against the independent MXFP4 oracle."
   }
 }

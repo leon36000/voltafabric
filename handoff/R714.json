@@ -1,7 +1,7 @@
 {
   "id": "R714",
   "owner": "integrator",
-  "state": "LOCAL_CPU_DEBUG_RELEASE_VERIFIED_PREPARED_FOR_PRIVATE_SUCCESSOR_BRANCH",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2516_SUCCESS",
   "branch": "r714-deepseek-session-exec-oracle-20261102",
   "parent_commit": "dad27c07ddd44c4fdcd6b1a3b46312514f7248ec",
   "path": "research/R714",
@@ -17,9 +17,9 @@
   "manifest_sha256": "eb69d24ac7422869e9f080d02f42c216615c0a93a99c1a0818517d397971f572",
   "manifest_file_count": 5,
   "local_cpu_tests": "debug and release: 3 focused integration tests plus 6 selective-read unit tests passed; strict Clippy, rustfmt and diff check pass",
-  "readback_exact": false,
-  "pipeline_id": null,
-  "pipeline_status": "not_started",
+  "readback_exact": true,
+  "pipeline_id": 2516,
+  "pipeline_status": "success",
   "synthetic_weight_payloads": true,
   "actual_checkpoint_payload_read": false,
   "complete_generation": false,
@@ -29,5 +29,7 @@
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [],
-  "next_action": "R715: build and test exact per-rank grouped MXFP4 owners for routes with co-located experts; preserve one coefficient application, atomic completeness and one-shot UNKNOWN semantics."
+  "next_action": "R715: group exact co-located top-6 owners into one bounded rank artifact and qualify one Session EXEC per rank against the independent MXFP4 oracle.",
+  "source_commit": "2aaccc2b3002a3e56ccf79c4b4ffe1c5dd17a6a2",
+  "readback_files_verified": 8
 }
