@@ -1,10 +1,11 @@
 {
   "id": "R735",
   "date": "2026-11-02",
-  "state": "LOCAL_BUILD_CHECKED_PRIVATE_GITLAB_PENDING",
+  "state": "LOCAL_BUILD_CHECKED_FOLLOWUP_PRIVATE_GITLAB_PENDING",
   "parent_branch": "r734-deepseek-attention-projection-20261102",
   "parent_commit": "4c5645c252357fb532502b0dab4946cfd20ecccc",
   "source_files": [
+    "src/deepseek_v41_attention.rs",
     "src/deepseek_v41_rope.rs",
     "src/lib.rs"
   ],
@@ -25,7 +26,7 @@
     "rope_theta": 10000,
     "max_position_embeddings": 1048576,
     "yarn_applied": false,
-    "reason": "pinned donor model.py disables YaRN and selects rope_theta for compress_ratio=0 window layers"
+    "softmax_scale": "head_dim^-0.5 fixed internally"
   },
   "configuration_mapping": "The adapter reads the exact pinned HF config explicitly. The retained inference snapshot has ModelArgs.rope_head_dim default 32 and no HF-config-to-ModelArgs loader; actual donor runtime mapping remains unqualified.",
   "adapted_boundary": "R734 exact-BF16 pre-RoPE Q/KV -> adjacent-complex-pair rotation of final 64 dimensions -> Stamp/attempt/position-bound BF16 post-RoPE values -> R733 atomic window cache append/attention.",
@@ -53,7 +54,7 @@
   "unknown_replayed": false,
   "private_gitlab": {
     "branch": "r735-deepseek-window-rope-20261102",
-    "source_commit": "PENDING",
+    "source_commit": "PENDING_FOLLOWUP_COMMIT",
     "source_pipeline_id": null,
     "source_pipeline_status": "PENDING",
     "source_readback_exact": false,
@@ -68,6 +69,6 @@
   ],
   "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation.",
   "manifest": "research/R735/SHA256SUMS",
-  "manifest_sha256": "6b1b7f88490dcfd3fed157db82a2c0095d4d46b18fbf13ffcc9ad63d0c3d5e06",
-  "manifest_file_count": 4
+  "manifest_sha256": "b1a8e31744ce04dc262ef235bde91ff4af15f94d06ecd62b4ee95d80b09566e9",
+  "manifest_file_count": 5
 }

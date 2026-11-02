@@ -131,6 +131,7 @@ pub struct DeepSeekV41PostRopeQkv {
     position: u64,
     query_heads: usize,
     head_dim: usize,
+    window_size: usize,
     query_bf16_f32: Vec<f32>,
     key_value_bf16_f32: Vec<f32>,
 }
@@ -156,6 +157,10 @@ impl DeepSeekV41PostRopeQkv {
         self.head_dim
     }
 
+    pub fn window_size(&self) -> usize {
+        self.window_size
+    }
+
     pub fn query_bf16_f32(&self) -> &[f32] {
         &self.query_bf16_f32
     }
@@ -170,8 +175,12 @@ impl DeepSeekV41PostRopeQkv {
         &self,
         cache: &mut DeepSeekV41WindowCache,
         attention_sink_f32: &[f32],
-        softmax_scale: f32,
     ) -> Result<DeepSeekV41WindowAttentionOutput> {
+        if cache.window_size() != self.window_size {
+            return Err(invalid(
+                "DeepSeek attention cache window differs from pinned layer config",
+            ));
+        }
         cache.append_and_attend(DeepSeekV41WindowAttentionRequest {
             stamp: &self.stamp,
             attempt: self.attempt,
@@ -179,7 +188,7 @@ impl DeepSeekV41PostRopeQkv {
             query_bf16_f32: &self.query_bf16_f32,
             key_value_bf16_f32: &self.key_value_bf16_f32,
             attention_sink_f32,
-            softmax_scale,
+            softmax_scale: (self.head_dim as f32).sqrt().recip(),
         })
     }
 }
@@ -231,6 +240,7 @@ impl DeepSeekV41ProjectedQkv {
             position,
             query_heads: config.query_heads,
             head_dim: config.head_dim,
+            window_size: config.window_size,
             query_bf16_f32: query,
             key_value_bf16_f32: key_value,
         })

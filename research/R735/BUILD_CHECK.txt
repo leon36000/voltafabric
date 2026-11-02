@@ -5,7 +5,7 @@ Commands:
   cargo fmt --all -- --check
   cargo clippy --locked --lib -- -D warnings
 
-Results:
+Results after adding fixed source-compatible scale and the pinned cache-window check:
   cargo check: PASS
   rustfmt workspace check: PASS
   Clippy warnings denied: PASS

@@ -1,10 +1,10 @@
 {
   "id": "R735",
   "date": "2026-11-02",
-  "state": "LOCAL_BUILD_CHECKED_PRIVATE_GITLAB_PENDING",
+  "state": "LOCAL_BUILD_CHECKED_FOLLOWUP_PRIVATE_GITLAB_PENDING",
   "automatic_continuation": "STOPPED_BY_OWNER",
   "active_operations": [],
-  "summary": "Added a config-pinned, identity-bound DeepSeek window RoPE reference and direct composition call into the R733 cache.",
+  "summary": "Added a config-pinned, identity-bound DeepSeek window RoPE reference and direct composition call into the R733 cache, including pinned-window and fixed-scale guards.",
   "verification": "cargo check, rustfmt workspace check and Clippy warnings-denied pass; no tests or numerical oracle run.",
   "source_pipeline": "PENDING",
   "source_readback": "PENDING",
@@ -15,9 +15,9 @@
     "license": "MIT",
     "code_copied": false
   },
-  "profile": "Pinned HF layer with compression ratio 0: 64/512 rotary/head dimensions, 64 heads, theta 10000, window 128; YaRN disabled by donor window path.",
+  "profile": "Pinned HF layer with compression ratio 0: 64/512 rotary/head dimensions, 64 heads, theta 10000, window 128; YaRN disabled by donor window path; softmax scale fixed to head_dim^-0.5.",
   "configuration_mapping": "HF config is consumed explicitly; donor runtime mapping to ModelArgs remains unqualified because no loader is present in the snapshot.",
   "manifest": "research/R735/SHA256SUMS",
-  "manifest_sha256": "6b1b7f88490dcfd3fed157db82a2c0095d4d46b18fbf13ffcc9ad63d0c3d5e06",
+  "manifest_sha256": "b1a8e31744ce04dc262ef235bde91ff4af15f94d06ecd62b4ee95d80b09566e9",
   "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation."
 }

@@ -125,6 +125,10 @@ impl DeepSeekV41WindowCache {
         self.next_position
     }
 
+    pub fn window_size(&self) -> usize {
+        self.window_size
+    }
+
     /// Append one BF16 key/value row and evaluate this query using the pinned
     /// sliding window. Validation and attention complete against a temporary
     /// candidate ring; a rejected request leaves cache state unchanged.
