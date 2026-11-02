@@ -12175,8 +12175,6 @@
     "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
     "source_commit": "c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b",
     "source_pipeline_id": 2610,
-    "source_commit": "c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b",
-    "source_pipeline_id": 2610,
     "manifest_sha256": "d6096c70f6e3aab416b5d485fd11d18c3d346b78fff2a885c979f25dd0a12475",
     "local_verification": "3 passed, 0 failed; pinned EOS/config/tokenizer; post-EOS truncation; official Recipe parser distinguishes special token from identical plain spelling",
     "complete_generation": false,

@@ -4628,8 +4628,6 @@
     "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
     "source_commit": "c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b",
     "source_pipeline_id": 2610,
-    "source_commit": "c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b",
-    "source_pipeline_id": 2610,
     "source_files": [
       "src/deepseek_v41_prompt.rs",
       "Cargo.toml",
