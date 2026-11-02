@@ -116,5 +116,7 @@
   "pipeline_id": 2384,
   "pipeline_status": "success",
   "pipeline_scope": "configured Gitleaks/Semgrep/Trivy/CI fallback scans only; not Rust/C++ compilation or local CPU evidence",
-  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384",
+  "manifest_files": 3,
+  "manifest_sha256": "0a4c5f17ed2f310edc699a503da9530d40effcec099c3870e942411a48db0a1a"
 }

@@ -13093,7 +13093,7 @@
     "report": "research/R698/REPORT.md",
     "result": "research/R698/RESULT.json",
     "manifest": "research/R698/SHA256SUMS",
-    "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
+    "manifest_sha256": "0a4c5f17ed2f310edc699a503da9530d40effcec099c3870e942411a48db0a1a",
     "readback_exact": true,
     "readback_files_verified": 7,
     "donor_model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
@@ -13128,6 +13128,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
     "next_action": "R699: connect the existing per-rank memory advisory to native DeepSeek MXFP4 K32 dispatch. Use only the pinned layer-0 expert fragments already present and the R694-R697 planner; preserve the model gate as the sole route authority, full VFB3 identity, weight residency, and atomic refusal if any requested expert or byte budget is missing. CPU-only with a fresh identity; no full checkpoint download, GPU, inter-PC or production network, cleanup, UNKNOWN replay, or automatic relaunch.",
-    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
+    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384",
+    "manifest_files": 3
   }
 }

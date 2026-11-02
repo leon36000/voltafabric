@@ -1478,7 +1478,7 @@
       "commit": "033ac7cb90c1189febc48700b4c261e071d49487",
       "path": "research/R698",
       "readback_files_verified": 7,
-      "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
+      "manifest_sha256": "0a4c5f17ed2f310edc699a503da9530d40effcec099c3870e942411a48db0a1a",
       "local_test": "1 passed; real layer-0 experts 0 and 383; two persistent CPU sessions; one token; output [1,5120]",
       "route_coefficients": [
         0.375,
@@ -1490,7 +1490,8 @@
       "pipeline_status": "success",
       "pipeline_scope": "configured security scans/CI fallback only; not Rust/C++ compilation or local CPU evidence",
       "published_utc": "2026-11-02 06:34:31 UTC",
-      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
+      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384",
+      "manifest_files": 3
     }
   ],
   "acceptance": [
@@ -2050,8 +2051,8 @@
     "path": "research/R698",
     "readback_exact": true,
     "readback_files_verified": 7,
-    "manifest_sha256": "408f994942c41d15a0b6945fadf39ca13fbf8b16fd8b933347b69792ffa8d239",
-    "manifest_files": 4,
+    "manifest_sha256": "0a4c5f17ed2f310edc699a503da9530d40effcec099c3870e942411a48db0a1a",
+    "manifest_files": 3,
     "model": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6",
     "license": "MIT",
     "real_experts": [

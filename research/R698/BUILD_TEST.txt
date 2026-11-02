@@ -20,3 +20,5 @@ Attempt 2 (fresh run_id/plan_id suffix v2):
 Scope: two local CPU vf-rank-session subprocesses; pinned expert-0 and expert-383 safetensors fragments; one 5120-element BF16 token; the FP32-preweighted Collector. No GPU, model download, inter-PC connection, or production R53 operation.
 
 GitLab pipeline 2384 (source commit 033ac7cb90c1189febc48700b4c261e071d49487): success. Jobs pc4_gitleaks, pc4_semgrep, pc4_trivy and pc4_ci_fallback all succeeded. This pipeline is security/fallback CI only and did not compile Rust/C++; it is separate from the local CPU test above.
+
+The SHA256SUMS manifest covers BUILD_TEST.txt, REPORT.md and the test source; RESULT.json carries the manifest hash but is excluded to avoid a self-referential digest.

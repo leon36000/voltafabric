@@ -24,6 +24,7 @@ Le callback public llama_decode de R697 exerce Qwen2MoE. Pour DeepSeek-V4.1, R69
 
 Commande ciblée cargo test --offline --locked --test r698_deepseek_real_mxfp4_session -- --nocapture : 1 réussi, 0 échec, deux Sessions CPU, deux chargements exacts, une route à deux rangs et une sortie de 5 120 valeurs. L’écart absolu maximal est inférieur ou égal à 5e-4, selon l’assertion contre la somme des deux sorties d’oracle. Durée : 10,14 s dans le checkout local r367-strata-exact-ingress ; le pipeline GitLab n’est pas cette preuve.
 La pipeline GitLab 2384 est maintenant terminée avec succès (Gitleaks, Semgrep, Trivy et fallback). Elle ne compile pas Rust/C++ et ne remplace pas l’essai CPU.
+Le manifeste SHA256 couvre BUILD_TEST.txt, REPORT.md et la source de test ; RESULT.json référence le hash du manifeste sans y être inclus, afin d’éviter un hash circulaire.
 
 Une prévalidation s’est arrêtée avant la création de toute Session : la constante SHA attendue de l’expert 383 avait un caractère manquant. Après correction, le test concluant a reçu un run_id et un plan_id distincts. Aucun LOAD/EXEC partiel ni claim inconnu n’a été créé par la prévalidation.
 
