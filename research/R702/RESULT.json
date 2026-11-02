@@ -3,6 +3,12 @@
   "status": "CPU_SYNTHETIC_GATE_PROJECTION_PASS",
   "branch": "r702-deepseek-gate-safetensors-20261102",
   "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+  "source_commit": "7c4d76d2fc94ace4d19d8f4530668a51c7f8f370",
+  "pipeline_id": 2407,
+  "pipeline_status": "success",
+  "pipeline_scope": "configured Gitleaks/Semgrep/Trivy and fallback jobs only; not Rust compilation or local CPU test evidence",
+  "readback_exact": true,
+  "readback_files_verified": 10,
   "component": "bounded Safetensors reader + pinned DeepSeek V4.1 Flash gate projection adapter",
   "donor": {
     "name": "DeepSeek V4.1 Flash",
@@ -25,18 +31,11 @@
   ],
   "gate_spec": {
     "weight_dtype": "BF16",
-    "weight_shape": [
-      384,
-      5120
-    ],
+    "weight_shape": [384, 5120],
     "text_bias_dtype": "F32",
-    "text_bias_shape": [
-      384
-    ],
+    "text_bias_shape": [384],
     "image_bias_dtype": "F32",
-    "image_bias_shape": [
-      384
-    ],
+    "image_bias_shape": [384],
     "selected_payload_bytes": 3935232,
     "explicit_temperature": true,
     "explicit_route_scale": true,
@@ -47,22 +46,8 @@
     "projected_logits": "exact FP32 values 0..383 from binary-coded BF16 rows",
     "unrelated_tensor_bytes": 65536,
     "selected_only_io_asserted": true,
-    "text_route_ids": [
-      0,
-      383,
-      382,
-      381,
-      380,
-      379
-    ],
-    "image_route_ids": [
-      1,
-      383,
-      382,
-      381,
-      380,
-      379
-    ],
+    "text_route_ids": [0, 383, 382, 381, 380, 379],
+    "image_route_ids": [1, 383, 382, 381, 380, 379],
     "text_route_matches_r701_decimal_oracle_tolerance": 2e-7,
     "refusal_cases": [
       "unrecognized model revision",
@@ -85,11 +70,5 @@
   "inter_pc_transport": false,
   "production_service": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "Use only an already-present, exact shard and predeclared tensor hashes to test the streaming loader if an admitted artifact becomes available; Session dispatch still requires all six gate-selected expert payload profiles.",
-  "source_commit": "7c4d76d2fc94ace4d19d8f4530668a51c7f8f370",
-  "pipeline_id": 2407,
-  "pipeline_status": "success",
-  "pipeline_scope": "configured Gitleaks/Semgrep/Trivy and fallback jobs only; not Rust compilation or local CPU test evidence",
-  "readback_exact": true,
-  "readback_files_verified": 10
+  "next_action": "Use only an already-present, exact shard and predeclared tensor hashes to test the streaming loader if an admitted artifact becomes available; Session dispatch still requires all six gate-selected expert payload profiles."
 }
