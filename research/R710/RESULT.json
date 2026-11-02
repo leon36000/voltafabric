@@ -1,6 +1,6 @@
 {
   "id": "R710",
-  "state": "SOURCE_AND_EVIDENCE_PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_PIPELINE_RUNNING",
+  "state": "SOURCE_AND_EVIDENCE_PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_PIPELINE_SCANS_SUCCESS",
   "branch": "r710-deepseek-route-expert-selective-read-20261102",
   "base_commit": "6fd52ce3b40fec7887ae217151fa2b97ccc79e64",
   "source_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
@@ -44,13 +44,21 @@
   "production_r53_used": false,
   "unknown_replayed": false,
   "pipeline_id": 2463,
-  "pipeline_status": "running",
+  "pipeline_status": "success",
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "next_action": "R711: construct one resident MXFP4 expert owner from the six verified payload tensors without copying a shard; preserve route/rank identities and atomic refusal if any digest, expert, or memory admission is missing.",
   "initial_encoded_commit": "965fb660997ff1ad2848d25e64bf79f39efa96ce",
   "encoding_correction_commit": "ad73ca3174a4a87b42e82e5f9ed8fe00eea43fe1",
   "readback_exact": true,
   "readback_files_verified": 5,
-  "pipeline_scope": "configured scans and fallback only; not Rust compilation or the local CPU tests",
-  "pipeline_observed_utc": "2026-11-02 09:57:59 UTC"
+  "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+  "pipeline_observed_utc": "2026-11-02 09:57:59 UTC",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2463",
+  "readback_verified_utc": "2026-11-02 10:02:00 UTC"
 }
