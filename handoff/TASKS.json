@@ -12152,17 +12152,32 @@
   "r741_deepseek_prompt_token_oracle": {
     "id": "R741",
     "branch": "r741-deepseek-prompt-token-oracle-20261102",
-    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_PIPELINE_SUCCESS",
+    "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_RECEIPT_PIPELINE_RUNNING",
     "source_commit": "39c8b7d22f69bd54b1f4fd675727272c81b7755d",
     "source_pipeline_id": 2608,
     "source_pipeline_status": "success",
-    "source_readback_exact": true,
+    "receipt_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
+    "receipt_pipeline_id": 2609,
+    "receipt_pipeline_status": "running",
+    "receipt_pending": true,
     "manifest_sha256": "6f500ac664424d551842ad47c71dbac1515ba48d2f10135db53f29fb41986411",
+    "test": "Isolated CPU pinned token-ID oracle: one test passed over five prompt cases.",
     "complete_generation": false,
     "gpu": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R742: qualify pinned EOS handling and bounded output streaming with the official DeepSeek Recipe processor; CPU-only, optional feature, no full-generation claim.",
-    "path": "research/R741",
-    "test": "Isolated CPU pinned token-ID oracle: 1 passed; five cases; not a full workspace build."
+    "next_action": "R742: qualify pinned EOS truncation and output parsing with the official DeepSeek Recipe StreamProcessor.",
+    "path": "research/R741"
+  },
+  "r742_deepseek_output_stop_boundary": {
+    "id": "R742",
+    "branch": "r742-deepseek-output-stop-boundary-20261102",
+    "status": "PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
+    "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
+    "manifest_sha256": "55da18aabda969498f6750e4d717b07334f1e98f1a72a0fedcfdf28e59d1f132",
+    "local_verification": "3 passed, 0 failed; pinned EOS/config/tokenizer; post-EOS truncation; official Recipe parser distinguishes special token from identical plain spelling",
+    "complete_generation": false,
+    "gpu": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R743: apply one cost-based placement or overlap idea from the arXiv survey in the existing CPU planner, with stable plans, resident-weight guards and unchanged routes; no hardware or performance claim."
   }
 }

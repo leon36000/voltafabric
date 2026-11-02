@@ -1,6 +1,7 @@
 use deepseek_recipe_core::conversation::{Conversation, ReasoningEffort};
 use deepseek_recipe_core::messages::InputMessage;
 use deepseek_recipe_core::prompt::Prompt;
+use deepseek_recipe_core::special_tokens::SpecialToken;
 use deepseek_recipe_encoding::v4::dsv41::DeepseekV41Encoding;
 use deepseek_recipe_encoding::{PromptEncoding, PromptTokenizer};
 use tokenizers::Tokenizer;
@@ -12,6 +13,9 @@ pub const MODEL_REVISION: &str = "314113f8a7dadb388215396ba5fbee2c610a04d6";
 pub const TOKENIZER_JSON_BYTES: usize = 6_367_257;
 pub const TOKENIZER_SHA256: &str =
     "c90dfa01249db1be4245780a052ede752e1361c612ac6d08e2bdada7d599476b";
+/// Checkpoint `config.json` pins `eos_token_id` to 1 for MODEL_REVISION.
+pub const EOS_TOKEN_ID: u32 = 1;
+pub const EOS_TOKEN_SPELLING: &str = "<｜end▁of▁sentence｜>";
 pub const MAX_TOKENIZER_JSON_BYTES: usize = 16 * 1024 * 1024;
 pub const MAX_USER_TEXT_BYTES: usize = 1024 * 1024;
 pub const MAX_PROMPT_TOKENS: usize = 1_048_576;
@@ -24,10 +28,21 @@ pub struct EncodedPrompt {
     pub reserved_completion_tokens: usize,
 }
 
+/// Generated token IDs up to, but not including, the first checkpoint EOS.
+/// The caller reports `Stop` to DeepSeek Recipe when `end_of_turn` is true;
+/// Recipe's stream contract requires EOS to be omitted from decoded tokens.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct GeneratedTokenPrefix<'a> {
+    pub token_ids: &'a [u32],
+    pub end_of_turn: bool,
+}
+
 #[derive(Clone)]
 pub struct DeepSeekV41PromptEncoder {
     encoding: DeepseekV41Encoding,
+    tokenizer: Tokenizer,
     tokenizer_sha256: String,
+    eos_token_id: u32,
 }
 
 impl DeepSeekV41PromptEncoder {
@@ -46,11 +61,57 @@ impl DeepSeekV41PromptEncoder {
         }
         let tokenizer = Tokenizer::from_bytes(tokenizer_json)
             .map_err(|error| format!("tokenizer JSON is invalid: {error}"))?;
+        let eos_token_id = tokenizer
+            .token_to_id(SpecialToken::Eos.default_str())
+            .ok_or_else(|| "pinned tokenizer lacks the checkpoint EOS token".to_owned())?;
+        if eos_token_id != EOS_TOKEN_ID || SpecialToken::Eos.default_str() != EOS_TOKEN_SPELLING {
+            return Err("pinned tokenizer EOS does not match the checkpoint contract".to_owned());
+        }
         let encoding = DeepseekV41Encoding::new().with_tokenizer(PromptTokenizer::new(&tokenizer));
         Ok(Self {
             encoding,
+            tokenizer,
             tokenizer_sha256: actual_sha256,
+            eos_token_id,
         })
+    }
+
+    /// Return the EOS ID admitted by the exact pinned tokenizer and checkpoint.
+    pub fn eos_token_id(&self) -> u32 {
+        self.eos_token_id
+    }
+
+    /// Remove EOS and any impossible trailing IDs from one sampled output batch.
+    /// The inference backend should stop sampling at this ID and report a
+    /// terminal `Stop`; this helper makes that boundary safe if an oversized
+    /// backend batch nevertheless contains IDs after EOS.
+    pub fn generated_prefix<'a>(&self, sampled_ids: &'a [u32]) -> GeneratedTokenPrefix<'a> {
+        match sampled_ids.iter().position(|&id| id == self.eos_token_id) {
+            Some(index) => GeneratedTokenPrefix {
+                token_ids: &sampled_ids[..index],
+                end_of_turn: true,
+            },
+            None => GeneratedTokenPrefix {
+                token_ids: sampled_ids,
+                end_of_turn: false,
+            },
+        }
+    }
+
+    /// Build DeepSeek Recipe's output processor with the same admitted tokenizer.
+    /// Recipe preserves token boundaries so plain text that merely spells a
+    /// control token cannot be mistaken for actual model control output.
+    #[cfg(feature = "deepseek-v41-stream")]
+    pub fn output_stream_processor<G>(
+        &self,
+        generator: G,
+        options: deepseek_recipe::stream::ParsingOptions,
+    ) -> deepseek_recipe::stream::StreamProcessor<G>
+    where
+        G: deepseek_recipe::stream::ChunkGenerator,
+    {
+        deepseek_recipe::stream::StreamProcessor::new(generator, options)
+            .with_tokenizer(self.tokenizer.clone())
     }
 
     /// Encode exactly one plain user turn. Rich histories, tools, images,
@@ -111,8 +172,15 @@ impl DeepSeekV41PromptEncoder {
 #[cfg(test)]
 mod reference_tests {
     use super::*;
+    #[cfg(feature = "deepseek-v41-stream")]
+    use deepseek_recipe::stream::{
+        ChunkGenerator, FinishReason, InferenceChunk, InferenceFinishReason, OutputChunk,
+        ParsingOptions, ThinkingInitialStage,
+    };
     use std::{env, fs};
     use tokenizers::{AddedVocabulary, Tokenizer};
+    #[cfg(feature = "deepseek-v41-stream")]
+    use tokio_stream::{StreamExt, iter};
 
     const TOKENIZER_ENV: &str = "VF_DEEPSEEK_V41_TOKENIZER_JSON";
 
@@ -137,6 +205,28 @@ mod reference_tests {
             .encode(text, false)
             .expect("reference plain-text region encodes");
         ids.extend_from_slice(encoded.get_ids());
+    }
+
+    #[cfg(feature = "deepseek-v41-stream")]
+    fn plain_ids(tokenizer: &Tokenizer, text: &str) -> Vec<u32> {
+        let mut plain = tokenizer.clone();
+        plain.with_added_vocabulary(AddedVocabulary::new());
+        plain.encode(text, false).expect("plain text encodes").get_ids().to_vec()
+    }
+
+    #[cfg(feature = "deepseek-v41-stream")]
+    struct CaptureOutput;
+
+    #[cfg(feature = "deepseek-v41-stream")]
+    impl ChunkGenerator for CaptureOutput {
+        type Chunk = OutputChunk;
+
+        fn generate(
+            &mut self,
+            chunk: OutputChunk,
+        ) -> impl std::future::Future<Output = Vec<Self::Chunk>> + Send {
+            std::future::ready(vec![chunk])
+        }
     }
 
     /// Independent one-turn reference: explicitly order the four prompt
@@ -215,5 +305,96 @@ mod reference_tests {
             assert_eq!(actual.context_limit, 8192);
             assert_eq!(actual.reserved_completion_tokens, 128);
         }
+    }
+
+    #[test]
+    #[ignore = "requires the pinned external tokenizer; run explicitly with VF_DEEPSEEK_V41_TOKENIZER_JSON"]
+    fn eos_id_matches_checkpoint_and_trims_unreachable_suffix() {
+        let (bytes, tokenizer) = pinned_tokenizer();
+        let encoder = DeepSeekV41PromptEncoder::from_pinned_tokenizer_bytes(&bytes)
+            .expect("admit the pinned tokenizer and its EOS contract");
+        assert_eq!(encoder.eos_token_id(), EOS_TOKEN_ID);
+        assert_eq!(special_id(&tokenizer, EOS_TOKEN_SPELLING), EOS_TOKEN_ID);
+
+        let expected = plain_ids(&tokenizer, "answer");
+        let mut sampled_ids = expected.clone();
+        sampled_ids.push(encoder.eos_token_id());
+        sampled_ids.extend(plain_ids(&tokenizer, " unreachable suffix"));
+        let stopped = encoder.generated_prefix(&sampled_ids);
+        assert!(stopped.end_of_turn);
+        assert_eq!(stopped.token_ids, expected);
+
+        let at_limit = encoder.generated_prefix(&expected);
+        assert!(!at_limit.end_of_turn);
+        assert_eq!(at_limit.token_ids, expected);
+        let eos_token = [encoder.eos_token_id()];
+        let eos_only = encoder.generated_prefix(&eos_token);
+        assert!(eos_only.end_of_turn);
+        assert!(eos_only.token_ids.is_empty());
+    }
+
+    #[cfg(feature = "deepseek-v41-stream")]
+    #[tokio::test(flavor = "current_thread")]
+    #[ignore = "requires the pinned external tokenizer; run explicitly with VF_DEEPSEEK_V41_TOKENIZER_JSON"]
+    async fn recipe_stream_keeps_control_tokens_distinct_from_plain_spellings() {
+        let (bytes, tokenizer) = pinned_tokenizer();
+        let encoder = DeepSeekV41PromptEncoder::from_pinned_tokenizer_bytes(&bytes)
+            .expect("admit the pinned tokenizer and its EOS contract");
+        let thinking_end = special_id(&tokenizer, SpecialToken::ThinkingEnd.default_str());
+        let mut sampled_ids = plain_ids(&tokenizer, "consider this");
+        sampled_ids.push(thinking_end);
+        sampled_ids.extend(plain_ids(&tokenizer, "answer prints literal </think> text"));
+        sampled_ids.push(encoder.eos_token_id());
+        sampled_ids.extend(plain_ids(&tokenizer, "must not appear after EOS"));
+
+        let prefix = encoder.generated_prefix(&sampled_ids);
+        assert!(prefix.end_of_turn);
+        let chunks = prefix
+            .token_ids
+            .iter()
+            .map(|&token_id| InferenceChunk::Tokens {
+                token_ids: vec![token_id],
+                logprobs: None,
+            })
+            .chain(std::iter::once(InferenceChunk::Finish {
+                finish_reason: InferenceFinishReason::Stop,
+            }));
+        let options = ParsingOptions {
+            thinking_initial_stage: Some(ThinkingInitialStage::ReasoningStart),
+            ..ParsingOptions::default()
+        };
+        let outputs = encoder
+            .output_stream_processor(CaptureOutput, options)
+            .into_protocol_stream(iter(chunks))
+            .collect::<Vec<_>>()
+            .await
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .expect("pinned output tokens parse");
+
+        let reasoning = outputs
+            .iter()
+            .filter_map(|chunk| match chunk {
+                OutputChunk::Reasoning { content, .. } => Some(content.as_str()),
+                _ => None,
+            })
+            .collect::<String>();
+        let content = outputs
+            .iter()
+            .filter_map(|chunk| match chunk {
+                OutputChunk::Content { content, .. } => Some(content.as_str()),
+                _ => None,
+            })
+            .collect::<String>();
+        assert_eq!(reasoning, "consider this");
+        assert_eq!(content, "answer prints literal </think> text");
+        assert!(outputs.iter().any(|chunk| matches!(
+            chunk,
+            OutputChunk::Finish {
+                finish_reason: FinishReason::Stop,
+                ..
+            }
+        )));
+        assert!(!content.contains("must not appear"));
     }
 }

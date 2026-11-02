@@ -1,0 +1,2 @@
+Command: CARGO_NET_OFFLINE=true cargo check --locked --manifest-path .runs/r740-full/Cargo.toml --lib --features deepseek-v41-stream
+Result: exit 101, E0583 for 29 Rust modules declared by src/lib.rs but absent from the partial .runs/r740-full verification snapshot. Cargo resolved and compiled the optional dependency graph, including deepseek-recipe 0.2.0 and num-bigint 0.4.8, before failing on the missing source files. This is not a full-workspace pass/fail signal; GitLab CI on the complete repository is required.

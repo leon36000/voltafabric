@@ -1,0 +1,25 @@
+warning: function `reset_test_hashed_bytes` is never used
+  --> src/sha256.rs:25:15
+   |
+25 | pub(crate) fn reset_test_hashed_bytes() {
+   |               ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(dead_code)]` on by default
+
+warning: function `test_hashed_bytes` is never used
+  --> src/sha256.rs:30:15
+   |
+30 | pub(crate) fn test_hashed_bytes() -> usize {
+   |               ^^^^^^^^^^^^^^^^^
+
+warning: `voltafabric-r742-oracle` (lib test) generated 2 warnings
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.07s
+     Running unittests src/lib.rs (.runs/r740-full/target/debug/deps/voltafabric_r742_oracle-f40b1190f1cfdb05)
+
+running 3 tests
+test deepseek_v41_prompt::reference_tests::eos_id_matches_checkpoint_and_trims_unreachable_suffix ... ok
+test deepseek_v41_prompt::reference_tests::recipe_stream_keeps_control_tokens_distinct_from_plain_spellings ... ok
+test deepseek_v41_prompt::reference_tests::one_turn_token_ids_match_independent_pinned_reference ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 2 filtered out; finished in 2.47s
+

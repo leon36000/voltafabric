@@ -1,0 +1,65 @@
+{
+  "id": "R742",
+  "status": "PRIVATE_GITLAB_SOURCE_COMMIT_PENDING_PIPELINE",
+  "parent_branch": "r741-deepseek-prompt-token-oracle-20261102",
+  "source_files": [
+    "src/deepseek_v41_prompt.rs",
+    "Cargo.toml",
+    "Cargo.lock"
+  ],
+  "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "checkpoint_eos_token_id": 1,
+  "checkpoint_eos_token_spelling": "<｜end▁of▁sentence｜>",
+  "donor_components": [
+    {
+      "name": "deepseek-recipe",
+      "version": "0.2.0",
+      "license": "MIT",
+      "use": "optional output StreamProcessor"
+    },
+    {
+      "name": "deepseek-recipe-core",
+      "version": "0.2.0",
+      "license": "MIT",
+      "use": "pinned prompt and EOS tokens"
+    },
+    {
+      "name": "deepseek-recipe-encoding",
+      "version": "0.2.0",
+      "license": "MIT",
+      "use": "pinned prompt renderer"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.23.2",
+      "license": "Apache-2.0",
+      "use": "pinned tokenizer"
+    }
+  ],
+  "donor_code_copied": false,
+  "tests": {
+    "passed": 3,
+    "failed": 0,
+    "scope": "isolated CPU Rust harness; exact R742 source module and official Recipe dependency; not full workspace"
+  },
+  "manifest_resolution": "pass after exact num-bigint pin 0.4.6 -> 0.4.8; 41 package names added, 212 -> 253 locked packages; no other existing locked package version changed",
+  "full_snapshot_check": "cargo metadata --locked resolved; cargo check/test compile feature dependencies then fail because the isolated R740 verification snapshot omits 29 src modules declared by lib.rs; full GitLab branch pipeline still required",
+  "prompt_parity_cases_included": 5,
+  "real_checkpoint_payload": false,
+  "generation_executed": false,
+  "output_decoder_qualified": false,
+  "stop_handling_unit_qualified": true,
+  "gpu_executed": false,
+  "inter_pc_transport_used": false,
+  "production_r53_used": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "Publish R742 on a branch from the verified R741 tip; wait for complete GitLab CI and exact readback. If the root build rejects num-bigint 0.4.8 or lock delta, isolate the optional stream parser instead of weakening core pins.",
+  "branch": "r742-deepseek-output-stop-boundary-20261102",
+  "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
+  "pipeline_status": "pending",
+  "source_readback_exact": false,
+  "build_log": "BUILD-RESULT.txt",
+  "build_log_raw_local_only": ".runs/r742-oracle/research/R742/BUILD-RAW.txt"
+}

@@ -6,9 +6,10 @@ rust-version = "1.90"
 publish = false
 
 [dependencies]
-num-bigint = "=0.4.6"
+num-bigint = "=0.4.8"
 deepseek-recipe-core = { version = "=0.2.0", optional = true }
 deepseek-recipe-encoding = { version = "=0.2.0", optional = true }
+deepseek-recipe = { version = "=0.2.0", optional = true }
 tokenizers = { version = "=0.23.2", optional = true }
 vf-qpn2-ffi = { path = "crates/qpn2-ffi", optional = true }
 vf-ggml-native-ffi = { path = "crates/ggml-native-ffi", optional = true }
@@ -22,6 +23,7 @@ native-ggml-cpu = ["dep:vf-ggml-native-ffi"]
 native-scalar-reference = ["native-ggml-cpu", "vf-ggml-native-ffi/scalar-reference"]
 ple-cpu-qualification = ["native-ggml-cpu"]
 deepseek-v41-recipe = ["dep:deepseek-recipe-core", "dep:deepseek-recipe-encoding", "dep:tokenizers"]
+deepseek-v41-stream = ["deepseek-v41-recipe", "dep:deepseek-recipe"]
 
 [lib]
 name = "voltafabric"
@@ -37,6 +39,10 @@ lto = "thin"
 
 [lints.rust]
 unsafe_code = "forbid"
+
+[dev-dependencies]
+tokio = { version = "=1.48.0", features = ["macros", "rt"] }
+tokio-stream = "=0.1.17"
 
 [[bin]]
 name = "vf-rank-worker"
