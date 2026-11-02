@@ -148,7 +148,6 @@ pub fn plan_qwen2moe_advisory(
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VariantCost {
     pub modeled_latency_us: f64,
     pub wire_bytes: u64,
