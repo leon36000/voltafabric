@@ -1,26 +1,52 @@
 {
   "id": "R743",
-  "status": "PRIVATE_GITLAB_SOURCE_PIPELINE_PENDING",
+  "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_SOURCE_PIPELINE_SUCCESS",
   "branch": "r743-cpu-planner-concurrent-scenarios-20261102",
-  "parent_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
+  "branch_base_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
+  "initial_artifact_commit": "3aefc412576f7ff46b1e131a3457533f72541a41",
+  "initial_artifact_pipeline": {
+    "id": 2620,
+    "status": "canceled",
+    "reason": "source artifact content was encoded as base64 text"
+  },
+  "source_commit": "b9e7776261acb88b91e657b366784f088eb25788",
+  "source_pipeline": {
+    "id": 2621,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
+  },
   "source_files": [
     "src/planner.rs",
     "tests/a743_planner_concurrency.rs",
     "docs/ARCHITECTURE.md"
   ],
-  "adapted_idea": {
+  "evidence_files": [
+    "research/R743/REPORT.md",
+    "research/R743/RESULT.json",
+    "research/R743/TEST-RESULT.txt",
+    "research/R743/SHA256SUMS"
+  ],
+  "source_readback_exact": true,
+  "source_readback_verified_files": 7,
+  "adaptation": {
     "source": "HeteGen, arXiv:2403.01164",
-    "use": "explicit concurrent workload graphs over shared rank/link resources",
-    "verified_source": "arXiv abstract describes heterogeneous CPU/GPU parallel computing and asynchronous overlap to mitigate I/O bottlenecks",
-    "copied_donor_code": false,
-    "cpu_offload_implemented": false,
-    "hardware_claim": false
+    "paper_claim": "CPU/GPU heterogeneous parallel computing with asynchronous overlap to mitigate I/O bottlenecks",
+    "used": "explicit concurrent workload DAG evaluation over shared exclusive rank/link resources",
+    "donor_code_copied": false,
+    "cpu_offload_implemented": false
   },
-  "contract": {
+  "contracts": {
     "routes_mutated": false,
-    "coefficient_application_changed": false,
-    "resident_weights_guard": "Prepared::memory capacity validation remains active for every candidate",
-    "scenario_frequency": "additional workload weight; exact dyadic weighted mean",
+    "coefficients_changed": false,
+    "resident_weights_guarded": true,
+    "partial_plan_on_error": false,
+    "scenario_frequency": "additional weight in exact dyadic weighted mean",
+    "schedule_model": "deterministic list schedule; exclusive GPU/link resources; no fluid bandwidth sharing or measured queueing",
     "limits": {
       "scenario_count": 256,
       "demands_per_scenario": {
@@ -28,33 +54,23 @@
         "max": 16
       },
       "combined_jobs_max": 4096
-    },
-    "failures": "invalid scenario, capacity failure, and work-budget exhaustion return errors without a plan",
-    "schedule_model": "deterministic list scheduler with exclusive GPU and link resources; no fluid bandwidth sharing or measured queueing"
+    }
   },
   "verification": {
-    "rustfmt": "pass on planner and test",
     "isolated_cpu_tests": {
       "passed": 5,
       "failed": 0
     },
-    "cases": [
-      "shared-GPU serialization versus independent-GPU overlap",
-      "resident expert placement",
-      "memory capacity refusal",
-      "malformed scenarios and backward-compatible JSON shape",
-      "work-budget exhaustion with no partial plan"
-    ],
-    "test_scope": "isolated CPU Rust harness with exact R742 planner support modules; serde_json 1.0.154 used because 1.0.145 was unavailable in the offline cache; repository Cargo.lock unchanged",
-    "full_gitlab_pipeline": "pending"
+    "rustfmt": "pass",
+    "harness": "exact R742 planner support modules; serde_json 1.0.154 used because 1.0.145 unavailable offline; project Cargo.lock unchanged"
   },
-  "complete_generation": false,
   "real_checkpoint_payload": false,
+  "complete_generation": false,
   "gpu_executed": false,
   "inter_pc_transport": false,
   "production_r53": false,
   "performance_measured": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "After exact readback and successful configured GitLab pipeline, continue with a bounded generation seam that consumes authenticated resident owners and rejects partial data."
+  "next_action": "Continue a bounded CPU seam from indexed checkpoint tensors through resident owners and the existing Session, rejecting incomplete tensors atomically; no GPU or full-generation claim."
 }

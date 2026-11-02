@@ -4685,10 +4685,24 @@
   "r743_cpu_planner_concurrent_scenarios": {
     "id": "R743",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_2621_SUCCESS_RECEIPT_PENDING",
     "branch": "r743-cpu-planner-concurrent-scenarios-20261102",
-    "parent_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
-    "source_commit": "PENDING_GITLAB_COMMIT_RESPONSE",
+    "branch_base_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
+    "initial_artifact_commit": "3aefc412576f7ff46b1e131a3457533f72541a41",
+    "initial_artifact_pipeline_id": 2620,
+    "initial_artifact_pipeline_status": "canceled",
+    "source_correction_commit": "b9e7776261acb88b91e657b366784f088eb25788",
+    "source_commit": "b9e7776261acb88b91e657b366784f088eb25788",
+    "source_pipeline_id": 2621,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_verified_files": 7,
     "path": "research/R743",
     "code_files": [
       "src/planner.rs",
@@ -4699,15 +4713,12 @@
     "result": "research/R743/RESULT.json",
     "build_test": "research/R743/TEST-RESULT.txt",
     "manifest": "research/R743/SHA256SUMS",
-    "manifest_sha256": "722f33fb4654eaefe6594b45e34e3e171af85728392db3774f33f8a2a927c3bf",
+    "manifest_sha256": "3644bd2c3903869808f666f83dc4007cccef6c7e47ba52389e76bf165aabd275",
     "manifest_file_count": 6,
-    "adapted_idea": "HeteGen arXiv:2403.01164 asynchronous overlap idea, adapted as explicit concurrent demand DAG scenarios over VoltaFabric exclusive rank/link resources; no donor code copied",
+    "adapted_idea": "HeteGen arXiv:2403.01164 asynchronous-overlap idea adapted as explicit concurrent demand DAGs over VoltaFabric exclusive rank/link resources; no donor code copied.",
     "donor_code_copied": false,
     "cpu_offload_implemented": false,
-    "local_cpu_verification": "5/5 isolated CPU tests; rustfmt check pass; reduced exact R742 support-module harness; repository Cargo.lock unchanged",
-    "source_pipeline_status": "pending",
-    "source_readback_exact": false,
-    "receipt_pending": true,
+    "local_cpu_verification": "isolated Rust harness 5/5; rustfmt passes; exact seven-file GitLab readback; configured pipeline #2621 all four jobs success",
     "routes_mutated": false,
     "coefficient_application_changed": false,
     "resident_weights_guarded": true,
@@ -4720,6 +4731,7 @@
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "active_operations": [],
-    "next_action": "R744: continue the indexed-checkpoint-to-resident-owner generation path using only authenticated synthetic CPU fixtures; refuse missing/partial tensors atomically, preserve route coefficients, and do not claim full generation, GPU, transport, or performance."
+    "receipt_pending": true,
+    "next_action": "R744: continue with a bounded CPU seam from indexed checkpoint tensors through resident owners and the existing Session, rejecting incomplete tensors atomically; no GPU or full-generation claim."
   }
 }
