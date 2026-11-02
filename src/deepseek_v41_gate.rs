@@ -254,6 +254,61 @@ impl DeepSeekV41RouteBatch {
         })
     }
 
+    /// Bind selectively-read MXFP4 experts to the exact route produced by this gate
+    /// batch. Callers do not re-create a `RoutingProblem` or restate the attempt.
+    pub fn preflight_mxfp4_residents(
+        &self,
+        residents: &[crate::deepseek_v41::PinnedMxfp4RankResidentExpert],
+        max_total_artifact_bytes: u64,
+    ) -> Result<crate::deepseek_v41::PinnedMxfp4RoutePreflight> {
+        crate::deepseek_v41::preflight_pinned_mxfp4_route_residents(
+            &self.problem,
+            self.attempt,
+            residents,
+            max_total_artifact_bytes,
+        )
+    }
+
+    /// Group those same route-bound residents according to the gate batch's exact
+    /// rank/local dispatch. Extra resident locals and changed route receipts refuse.
+    pub fn group_mxfp4_residents(
+        &self,
+        preflight: crate::deepseek_v41::PinnedMxfp4RoutePreflight,
+        residents: Vec<crate::deepseek_v41::PinnedMxfp4RankResidentExpert>,
+        max_peak_bytes: u64,
+    ) -> Result<(
+        crate::deepseek_v41::PinnedMxfp4RoutePreflight,
+        Vec<crate::deepseek_v41::PinnedMxfp4RankResidentGroup>,
+    )> {
+        crate::deepseek_v41::group_pinned_mxfp4_route_residents(
+            &self.problem,
+            preflight,
+            residents,
+            max_peak_bytes,
+        )
+    }
+
+    /// Execute a consumed gate route through grouped rank-local MXFP4 Sessions.
+    /// The method derives its route and attempt from this private gate receipt.
+    pub fn execute_grouped_mxfp4(
+        self,
+        preflight: crate::deepseek_v41::PinnedMxfp4RoutePreflight,
+        inputs: Vec<crate::session::mxfp4::TokenInput>,
+        load_receipts: Vec<crate::deepseek_v41::PinnedMxfp4RouteRankGroupLoadReceipt>,
+        sessions: &mut BTreeMap<u32, crate::session::Session>,
+        timeout: std::time::Duration,
+    ) -> Result<crate::deepseek_v41::PinnedMxfp4RouteExecutionReceipt> {
+        crate::deepseek_v41::execute_pinned_mxfp4_route_grouped(
+            preflight,
+            &self.problem,
+            self.attempt,
+            inputs,
+            load_receipts,
+            sessions,
+            timeout,
+        )
+    }
+
     /// Bind this validated route to VoltaFabric's existing route-aware memory planner.
     /// This returns advisory placement only: it does not load, move, or dispatch weights.
     /// The stored attempt and gate coefficients pass through unchanged.

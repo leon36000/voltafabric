@@ -1,0 +1,30 @@
+{
+  "id": "R716",
+  "owner": "integrator",
+  "state": "SOURCE_COMMIT_PENDING_READBACK",
+  "branch": "r716-deepseek-gate-to-grouped-exec-20261102",
+  "parent_commit": "dfd0a220386a6b1ffe4a9d2ce46b8e2d3df06839",
+  "path": "research/R716",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "report": "research/R716/REPORT.md",
+  "result": "research/R716/RESULT.json",
+  "build_test": "research/R716/BUILD_TEST.txt",
+  "manifest": "research/R716/SHA256SUMS",
+  "manifest_sha256": "05527d7d3c5a5926408dfa6a83df1ee1b8da22331c81d52ec9eaed8db1888dfd",
+  "manifest_file_count": 4,
+  "local_cpu_test": "gate-produced top-6 to six grouped synthetic MXFP4 owners, five Sessions, completed six slots, independent FP64 expert oracle; debug 1/1, release 1/1",
+  "synthetic_gate_tensors": true,
+  "synthetic_expert_payloads": true,
+  "actual_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "next_action": "R717: verify the real checkpoint/registry inventory from retained sources; keep gate route refusal before Session startup while experts 379-382 are absent. No download, GPU, production network, UNKNOWN replay, cleanup or automatic relaunch."
+}

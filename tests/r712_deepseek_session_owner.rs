@@ -2,6 +2,7 @@
 //! The sparse source weights are synthetic; no checkpoint payload is read.
 #![cfg(target_os = "linux")]
 
+use safetensors::tensor::{serialize, Dtype, TensorView};
 use std::collections::BTreeMap;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::time::Duration;
@@ -11,6 +12,10 @@ use voltafabric::deepseek_v41::{
     preflight_pinned_mxfp4_route_residents, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
     PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RouteExecutionState,
     REVISION,
+};
+use voltafabric::deepseek_v41_gate::{
+    DeepSeekV41Gate, GateShardSpec, GateTensorHashes, TokenKind, GATE_PAYLOAD_BYTES,
+    GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, ROUTED_EXPERTS, ROUTE_SCALE,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -164,6 +169,100 @@ fn grouped_route_problem() -> RoutingProblem {
         (8, vec![0]),
     ]);
     route
+}
+
+fn gated_grouped_route_batch() -> voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch {
+    let mut weight = vec![0u8; GATE_WEIGHT_BYTES as usize];
+    for expert in 0..ROUTED_EXPERTS {
+        for bit in 0..9 {
+            if expert & (1 << bit) != 0 {
+                let offset = (expert * HIDDEN_SIZE + bit) * 2;
+                weight[offset..offset + 2].copy_from_slice(&0x3f80u16.to_le_bytes());
+            }
+        }
+    }
+    let mut text_bias = vec![0.0f32; ROUTED_EXPERTS];
+    text_bias[0] = 1_000.0;
+    let image_bias = vec![0.0f32; ROUTED_EXPERTS];
+    let encode = |values: &[f32]| {
+        values
+            .iter()
+            .flat_map(|value| value.to_le_bytes())
+            .collect::<Vec<_>>()
+    };
+    let text_bytes = encode(&text_bias);
+    let image_bytes = encode(&image_bias);
+    let shard = serialize(
+        vec![
+            (
+                "layers.0.ffn.gate.weight".to_owned(),
+                TensorView::new(Dtype::BF16, vec![ROUTED_EXPERTS, HIDDEN_SIZE], &weight).unwrap(),
+            ),
+            (
+                "layers.0.ffn.gate.bias".to_owned(),
+                TensorView::new(Dtype::F32, vec![ROUTED_EXPERTS], &text_bytes).unwrap(),
+            ),
+            (
+                "layers.0.ffn.gate.bias_vl".to_owned(),
+                TensorView::new(Dtype::F32, vec![ROUTED_EXPERTS], &image_bytes).unwrap(),
+            ),
+        ],
+        None,
+    )
+    .unwrap();
+    let spec = GateShardSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        gate_temperature: 1.0,
+        route_scale: ROUTE_SCALE,
+        tensor_sha256: GateTensorHashes {
+            weight: voltafabric::sha256::hex(&weight),
+            text_bias: voltafabric::sha256::hex(&text_bytes),
+            image_bias: voltafabric::sha256::hex(&image_bytes),
+        },
+        max_payload_bytes: GATE_PAYLOAD_BYTES,
+    };
+    let gate = DeepSeekV41Gate::load(&mut io::Cursor::new(&shard), &spec).unwrap();
+    let mut hidden = vec![0.0f32; HIDDEN_SIZE];
+    for (bit, value) in hidden.iter_mut().take(9).enumerate() {
+        *value = (1u32 << bit) as f32;
+    }
+    let stamp = Stamp {
+        run_id: "r716-gate-to-grouped-session".to_owned(),
+        model_revision: REVISION.to_owned(),
+        plan_id: "r716-synthetic-rank-plan".to_owned(),
+        layer: 0,
+        batch: 9,
+        epoch: 13,
+    };
+    let registry = Registry {
+        epoch: stamp.epoch,
+        copies: TOP6
+            .iter()
+            .enumerate()
+            .map(|(index, &expert)| Replica {
+                expert,
+                rank: if index < 2 { 4 } else { 3 + index as u32 },
+                local: if index < 2 { index as u32 } else { 0 },
+            })
+            .collect(),
+    };
+    gate.prepare_route_batch(
+        &hidden,
+        TokenKind::Text,
+        stamp,
+        29,
+        registry,
+        BTreeMap::new(),
+        BTreeMap::from([
+            (4, vec![0, 1]),
+            (5, vec![0]),
+            (6, vec![0]),
+            (7, vec![0]),
+            (8, vec![0]),
+        ]),
+    )
+    .unwrap()
 }
 
 fn resident_for_expert(
@@ -580,6 +679,129 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
         "FP64 MXFP4 oracle max abs error {max_abs}"
     );
 
+    for (_, session) in sessions {
+        assert_eq!(session.traffic.execs, 1);
+        let close = session.close(Duration::from_secs(10));
+        assert_eq!(close.bye_execs, Some(1));
+        assert!(close.error.is_none(), "{close:?}");
+    }
+}
+
+#[test]
+fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route() {
+    let batch = gated_grouped_route_batch();
+    let route = batch.problem();
+    assert_eq!(route.experts, TOP6);
+    assert_eq!(batch.attempt(), 29);
+    let residents = TOP6
+        .iter()
+        .enumerate()
+        .map(|(index, &expert)| {
+            let rank = if index < 2 { 4 } else { 3 + index as u32 };
+            resident_for_expert(route, expert, rank)
+        })
+        .collect::<Vec<_>>();
+    let input: Vec<f32> = (0..route.hidden)
+        .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
+        .collect();
+    for value in &input {
+        assert_eq!(
+            voltafabric::deepseek_v41::cast_bf16_rne_reference(*value).unwrap(),
+            *value
+        );
+    }
+    let expected = route.routes[0]
+        .iter()
+        .try_fold(
+            vec![0.0_f32; route.hidden],
+            |mut sum, choice| -> Result<_, String> {
+                let resident = residents
+                    .iter()
+                    .find(|resident| resident.expert() == choice.expert)
+                    .ok_or_else(|| "oracle resident missing".to_owned())?;
+                let expert = resident
+                    .owner()
+                    .expert(choice.expert)
+                    .map_err(|error| error.to_string())?;
+                let row = expert
+                    .forward_reference(&input, Some(choice.weight as f32))
+                    .map_err(|error| error.to_string())?;
+                for (target, value) in sum.iter_mut().zip(row) {
+                    *target += value;
+                }
+                Ok(sum)
+            },
+        )
+        .unwrap();
+    let total = residents
+        .iter()
+        .map(|resident| resident.packed_artifact_bytes())
+        .sum::<u64>();
+    let preflight = batch.preflight_mxfp4_residents(&residents, total).unwrap();
+    let (preflight, groups) = batch
+        .group_mxfp4_residents(preflight, residents, 256 * 1024 * 1024)
+        .unwrap();
+    let mut sessions = BTreeMap::new();
+    let mut loads = Vec::new();
+    for group in groups {
+        let rank = group.rank();
+        let endpoint = Endpoint {
+            rank,
+            argv: vec![env!("CARGO_BIN_EXE_vf-rank-session").into()],
+        };
+        let mut session = Session::connect_mxfp4(
+            &endpoint,
+            Duration::from_secs(10),
+            &mxfp4::Producer::default(),
+        )
+        .unwrap();
+        loads.push(
+            group
+                .load_into_session(&mut session, &preflight, Duration::from_secs(30))
+                .unwrap(),
+        );
+        assert!(sessions.insert(rank, session).is_none());
+    }
+    let receipt = batch
+        .execute_grouped_mxfp4(
+            preflight,
+            vec![mxfp4::TokenInput {
+                token: 0,
+                value_bits: input.iter().map(|value| value.to_bits()).collect(),
+            }],
+            loads,
+            &mut sessions,
+            Duration::from_secs(90),
+        )
+        .unwrap();
+    assert_eq!(receipt.state(), PinnedMxfp4RouteExecutionState::Completed);
+    assert_eq!(receipt.route_experts(), TOP6);
+    assert_eq!(receipt.exec_receipts().len(), 5);
+    assert_eq!(
+        receipt
+            .exec_receipts()
+            .iter()
+            .map(|r| r.expected_slots)
+            .sum::<usize>(),
+        6
+    );
+    let actual = receipt
+        .output_bits()
+        .unwrap()
+        .first()
+        .unwrap()
+        .iter()
+        .map(|bits| f32::from_bits(*bits))
+        .collect::<Vec<_>>();
+    let max_abs = actual
+        .iter()
+        .zip(&expected)
+        .map(|(actual, expected)| (actual - expected).abs())
+        .fold(0.0_f32, f32::max);
+    assert!(
+        max_abs <= 5.0e-4,
+        "gated route oracle max abs error {max_abs}"
+    );
     for (_, session) in sessions {
         assert_eq!(session.traffic.execs, 1);
         let close = session.close(Duration::from_secs(10));

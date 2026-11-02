@@ -1,0 +1,14 @@
+R716 CPU verification receipt
+
+Focused gate-to-grouped-execution integration:
+  cargo test --offline --locked --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_re
+  result: debug 1 passed, 0 failed.
+  cargo test --offline --locked --release --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_re
+  result: release 1 passed, 0 failed.
+
+Static checks after the gate-batch wrappers and integration test:
+  cargo clippy --offline --locked --lib --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+  git diff --check: PASS
+
+The test constructs synthetic gate Safetensors and synthetic MXFP4 expert payloads. It performs one model-gate route, complete six-owner preflight, exact rank grouping, five CPU Session LOADs, one grouped EXEC per participating rank, and an independent `Mxfp4Expert::forward_reference` comparison. It does not read real checkpoint payloads, use GPU/production R53/network, or replay UNKNOWN.
