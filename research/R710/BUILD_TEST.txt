@@ -1,1 +1,21 @@
-UjcxMCBsb2NhbCBDUFUgdmVyaWZpY2F0aW9uCj09PT09PT09PT09PT09PT09PT09PT09PT09PQoKU291cmNlIHRhcmdldDogc3JjL2RlZXBzZWVrX3Y0MS5ycwpGb2N1c2VkIG1vZHVsZTogZGVlcHNlZWtfdjQxOjphMTQ4X3Bpbm5lZF9leHBlcnRfc2VsZWN0aXZlX3JlYWRfdGVzdHMKCkNvbW1hbmRzIGFuZCByZXN1bHRzOgotIGNhcmdvIHRlc3QgLS1vZmZsaW5lIC0tbG9ja2VkIC0tbGliIGExNDhfcGlubmVkX2V4cGVydF9zZWxlY3RpdmVfcmVhZF90ZXN0czogMyBwYXNzZWQsIDAgZmFpbGVkCi0gY2FyZ28gdGVzdCAtLW9mZmxpbmUgLS1sb2NrZWQgLS1yZWxlYXNlIC0tbGliIGExNDhfcGlubmVkX2V4cGVydF9zZWxlY3RpdmVfcmVhZF90ZXN0czogMyBwYXNzZWQsIDAgZmFpbGVkCi0gY2FyZ28gY2xpcHB5IC0tb2ZmbGluZSAtLWxvY2tlZCAtLWxpYiAtLSAtRCB3YXJuaW5nczogUEFTUwotIHJ1c3RmbXQgLS1lZGl0aW9uIDIwMjEgLS1jaGVjayBzcmMvZGVlcHNlZWtfdjQxLnJzOiBQQVNTCi0gZ2l0IGRpZmYgLS1jaGVjayAtLSBzcmMvZGVlcHNlZWtfdjQxLnJzOiBQQVNTCgpTcGFyc2UgZml4dHVyZToKLSBPZmZpY2lhbCBwaW5uZWQgRGVlcFNlZWsgZXhwZXJ0IGluZGV4IGFuZCBsYXllci0wIFNhZmV0ZW5zb3JzIGhlYWRlciBvbmx5Ci0gTG9naWNhbCBzb3VyY2Ugc2hhcmQgc2l6ZTogNywzODksNzU5LDAzMiBieXRlczsgbm8gZnVsbCBzaGFyZCBhbGxvY2F0aW9uIG9yIGRvd25sb2FkCi0gT25lIGV4cGVydCdzIHNpeCBzeW50aGV0aWMgcGF5bG9hZCBzZWdtZW50czogMTgsODAwLDY0MCBieXRlcwotIFRoZSBzdWNjZXNzZnVsIHRlc3Qgb2JzZXJ2ZWQgb25seSB0aGUgc2l4IGV4YWN0IHNlbGVjdGVkIHBheWxvYWQgcmFuZ2VzOyBtZXRhZGF0YS9oZWFkZXIgcmVhZHMgYXJlIGNvdW50ZWQgc2VwYXJhdGVseQotIE1pc3NpbmcgZGlnZXN0IGFuZCBub24tcm91dGUgZXhwZXJ0IHJlZnVzZSBiZWZvcmUgcGF5bG9hZCByZWFkczsgd3JvbmcgZGlnZXN0IHJldHVybnMgYW4gZXJyb3Igd2l0aCBubyBwYXJ0aWFsIGltcG9ydAoKU2NvcGU6IENQVSB0ZXN0IGZpeHR1cmVzIG9ubHkuIE5vIHJlYWwgY2hlY2twb2ludCBwYXlsb2FkLCBTZXNzaW9uIHdvcmtlciwgR1BVLCBwcm9kdWN0aW9uIG5ldHdvcmssIG9yIGJlbmNobWFyayBjb21wYXJpc29uIHdhcyB1c2VkLgo=
+R710 local CPU verification
+===========================
+
+Source target: src/deepseek_v41.rs
+Focused module: deepseek_v41::a148_pinned_expert_selective_read_tests
+
+Commands and results:
+- cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests: 3 passed, 0 failed
+- cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests: 3 passed, 0 failed
+- cargo clippy --offline --locked --lib -- -D warnings: PASS
+- rustfmt --edition 2021 --check src/deepseek_v41.rs: PASS
+- git diff --check -- src/deepseek_v41.rs: PASS
+
+Sparse fixture:
+- Official pinned DeepSeek expert index and layer-0 Safetensors header only
+- Logical source shard size: 7,389,759,032 bytes; no full shard allocation or download
+- One expert's six synthetic payload segments: 18,800,640 bytes
+- The successful test observed only the six exact selected payload ranges; metadata/header reads are counted separately
+- Missing digest and non-route expert refuse before payload reads; wrong digest returns an error with no partial import
+
+Scope: CPU test fixtures only. No real checkpoint payload, Session worker, GPU, production network, or benchmark comparison was used.
