@@ -1,0 +1,45 @@
+{
+  "id": "R739",
+  "date": "2026-11-02",
+  "state": "SOURCE_PIPELINE_SUCCESS_RECEIPT_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
+  "active_operations": [],
+  "summary": "Replaced the three full-ring clones on the single-token window block path with an identity-bound staged KV row that commits after the complete block succeeds.",
+  "parent": {
+    "branch": "r738-deepseek-preloaded-session-route-20261102",
+    "commit": "6d957db22f26117015f988300526364a803d6b60",
+    "pipeline_id": 2593,
+    "pipeline_status": "success"
+  },
+  "source_commit": "6486e1010accefd314df7e83967b004837961a0f",
+  "source_pipeline_id": 2595,
+  "source_pipeline_status": "success",
+  "source_readback_exact": true,
+  "source_readback_files_verified": 4,
+  "report": "research/R739/REPORT.md",
+  "manifest": "research/R739/SHA256SUMS",
+  "manifest_sha256": "9d139c1c77f1d124c9fdd97e79123a3939710c8705a10dd76cc33452de6eed4b",
+  "verification": {
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_offline_lib": "PASS",
+    "cargo_clippy_locked_offline_warnings_denied": "PASS",
+    "tests_added_or_run": false,
+    "automatic_pipeline_compile_or_generation_proof": false
+  },
+  "publication_correction": {
+    "malformed_intermediate_commit": "df7f840769afe883352f6c63f0cae1db9018f055",
+    "corrected_commit": "6486e1010accefd314df7e83967b004837961a0f",
+    "malformed_pipeline_id": 2594,
+    "malformed_pipeline_status": "canceled",
+    "history_rewritten": false,
+    "corrected_source_readback_exact": true
+  },
+  "receipt_pending": true,
+  "next_action": "Publish and read back the R739 report, source hashes, result and handoff; reconcile the receipt pipeline without rewriting history.",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  }
+}

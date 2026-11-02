@@ -1,0 +1,78 @@
+{
+  "id": "R739",
+  "date": "2026-11-02",
+  "target_branch": "r739-kv-transactional-cache-20261102",
+  "parent_branch": "r738-deepseek-preloaded-session-route-20261102",
+  "parent_commit": "6d957db22f26117015f988300526364a803d6b60",
+  "source_commit": "6486e1010accefd314df7e83967b004837961a0f",
+  "source_pipeline_id": 2595,
+  "source_pipeline_status": "success",
+  "source_readback_exact": true,
+  "source_readback_files_verified": 4,
+  "source_files": [
+    "src/deepseek_v41_attention.rs",
+    "src/deepseek_v41_attention_output.rs",
+    "src/deepseek_v41_rope.rs",
+    "src/deepseek_v41_window_block.rs"
+  ],
+  "change": "stage one identity-bound KV row and commit it only after the full block succeeds; avoid cloning the entire sliding window ring on the token path",
+  "derived_pinned_copy_accounting": {
+    "window_slots": 128,
+    "head_dim": 512,
+    "element_type": "FP32",
+    "old_full_ring_copies_per_token_per_layer": 3,
+    "old_full_ring_bytes_per_copy": 262144,
+    "old_total_full_ring_bytes_per_token_per_layer": 786432,
+    "new_staged_row_bytes": 2048,
+    "measurement": false
+  },
+  "atomicity": {
+    "complete_block_commit_only": true,
+    "stale_identity_or_position_refused": true,
+    "partial_block_or_unknown_does_not_mutate_cache": true,
+    "route_unknown_replayed": false
+  },
+  "verification": {
+    "staging": "four changed files exact from R738 GitLab source; other modules and dependency code reused from the existing local R737 mirror, not a fresh clone",
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_offline_lib": "PASS",
+    "cargo_clippy_locked_offline_warnings_denied": "PASS",
+    "tests_added_or_run": false,
+    "automatic_pipeline_is_compile_or_generation_proof": false
+  },
+  "publication_correction": {
+    "malformed_intermediate_commit": "df7f840769afe883352f6c63f0cae1db9018f055",
+    "corrected_additive_commit": "6486e1010accefd314df7e83967b004837961a0f",
+    "malformed_commit_pipeline_id": 2594,
+    "malformed_commit_pipeline_status": "canceled",
+    "history_rewritten": false,
+    "corrected_source_readback_exact": true
+  },
+  "external_reuse": {
+    "external_engine_code_copied": false,
+    "note": "This tranche optimizes VoltaFabric's cache transaction only; the requested vLLM, TensorRT-LLM, llama.cpp, SGLang, Maya, Strata and DeepInfer component extraction remains outstanding."
+  },
+  "actual_checkpoint_payload_loaded": false,
+  "independent_numeric_oracle": false,
+  "complete_layer_executed": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "performance_measured": false,
+  "limitations": [
+    "CPU reference only; no GPU qualification",
+    "full checkpoint payload not loaded",
+    "no independent numerical oracle was executed",
+    "tokenizer, logits, sampling and full generation remain unimplemented"
+  ],
+  "manifest": "research/R739/SHA256SUMS",
+  "manifest_sha256": "9d139c1c77f1d124c9fdd97e79123a3939710c8705a10dd76cc33452de6eed4b",
+  "receipt_pending": true,
+  "next_action": "Publish and read back the R739 report, source hashes, result and handoff; reconcile the receipt pipeline without rewriting history.",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  }
+}
