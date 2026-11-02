@@ -41,7 +41,7 @@
   "production_network": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER; work only in the current owner-requested turn",
-  "next_action": "R705: continue the CPU generation path using coherent already-tracked weights and full identities; keep DeepSeek dispatch refused until its real gate payload, all six selected expert profiles, resident ownership, and memory admission are present. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+  "next_action": "R705: continue the CPU generation path with coherent already-tracked weights and full identities. Keep DeepSeek dispatch refused until its real gate payload, all six selected expert profiles, resident ownership, and memory admission exist. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
   "source_commits": [
     "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
     "8b6519ba41f7a4f872612541a32ce8f05e4220a3"
@@ -51,19 +51,40 @@
   "source_readback_sha256": "644e17ed6fd0cac8a13e906a413869bca3a5abe18404fe45a57d686d1fb8a4b1",
   "publication_pipelines": [
     {
+      "id": 2417,
+      "commit": "9b2231894fc34371aacd6464ee09d0ced0c42b85",
+      "status_at_update": "success",
+      "scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2417"
+    },
+    {
       "id": 2421,
       "commit": "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
-      "status_at_receipt": "running",
-      "scope": "configured Gitleaks/Semgrep/Trivy and fallback only; not Rust compilation or local CPU tests",
+      "status_at_update": "running",
+      "note": "first R704 source commit; contained a duplicated trailing helper",
+      "scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
       "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2421"
     },
     {
       "id": 2426,
       "commit": "8b6519ba41f7a4f872612541a32ce8f05e4220a3",
-      "status_at_receipt": "pending",
-      "scope": "configured Gitleaks/Semgrep/Trivy and fallback only; not Rust compilation or local CPU tests",
+      "status_at_update": "canceled",
+      "note": "cancellation cause not established; no retry",
+      "scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
       "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2426"
+    },
+    {
+      "id": 2427,
+      "commit": "02ba5eb8c91cfc8118d1ab3a6aecfdacac80003f",
+      "status_at_update": "pending",
+      "scope": "configured scans/fallback only; not Rust compilation or local CPU tests",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2427"
     }
   ],
-  "readback_issue": "The first R704 source commit contained an accidental duplicated final softplus helper; a new non-force corrective commit removed it. Latest GitLab readback is byte-exact with the locally tested file."
+  "readback_issue": "The first R704 source commit appended an accidental duplicate final softplus helper. Commit 8b6519ba41f7a4f872612541a32ce8f05e4220a3 removed only that suffix; latest source readback is byte-exact with the tested local source.",
+  "receipt_commit": "02ba5eb8c91cfc8118d1ab3a6aecfdacac80003f",
+  "readback_files_verified": 6,
+  "pipeline_id": 2427,
+  "pipeline_status": "pending",
+  "pipeline_scope": "configured scans/fallback only; not Rust compilation or local CPU tests"
 }

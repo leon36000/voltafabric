@@ -35,7 +35,7 @@ layer et de l’attempt zéro.
 
 La première relecture du commit source `83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e` a révélé un doublon accidentel de la fonction finale `softplus_fp32`. Le commit correctif `8b6519ba41f7a4f872612541a32ce8f05e4220a3` a retiré uniquement ce suffixe; la relecture GitLab correspond ensuite exactement au fichier testé local, SHA-256 `644e17ed6fd0cac8a13e906a413869bca3a5abe18404fe45a57d686d1fb8a4b1`. Les tests CPU et Clippy ont été relancés après cette correction et passent.
 
-Le pipeline 2421 porte sur le premier commit et reste `running`; le pipeline 2426 porte sur le commit corrigé et est `pending` lors de cette vérification. Ils exécutent les scans configurés et le fallback GitLab, pas la compilation Rust ni les tests CPU. Aucun retry n’a été lancé.
+Le pipeline 2417 (R703) est `success` (scans configurés et fallback uniquement). Le pipeline 2421, associé au premier commit R704 contenant le suffixe dupliqué, est encore `running`; le pipeline 2426 du commit corrigé est `canceled`; le pipeline 2427 du reçu `02ba5eb8c91cfc8118d1ab3a6aecfdacac80003f` est `pending`. La cause exacte de l’annulation 2426 n’est pas établie. Aucun retry n’a été lancé. Ces pipelines ne compilent pas Rust et ne remplacent pas les tests CPU locaux.
 
 ## Réutilisation et limites
 
