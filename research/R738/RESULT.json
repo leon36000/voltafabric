@@ -1,34 +1,63 @@
 {
   "id": "R738",
   "date": "2026-11-02",
-  "state": "SOURCE_PIPELINE_PENDING",
+  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
   "parent_branch": "r737-deepseek-window-block-20261102",
   "parent_commit": "b8a2535731a60dc6786af0f855a7c25cd2ca58de",
   "target_branch": "r738-deepseek-preloaded-session-route-20261102",
+  "source_commit": "049011c823eef59b0fd2cde137576b604b3d5b61",
+  "source_pipeline_id": 2591,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7,
   "source_files": [
     "src/deepseek_v41.rs",
     "src/deepseek_v41_gate.rs",
     "src/deepseek_v41_window_block.rs"
   ],
-  "added_api": "forward_token_with_sessions(request, sessions_by_layer, timeout)",
-  "execution_contract": {
-    "no_hot_path_load": true,
-    "preflight_all_participating_sessions_before_first_exec": true,
-    "collector": "existing FP32-preweighted Collector; coefficients applied once",
-    "completion_requires_six_slots": true,
-    "partial_output": false,
-    "unknown_retry": false,
-    "kv_commit": "only after full attention+FFN block success"
-  },
+  "api": "forward_token_with_sessions(request, sessions_by_layer, timeout)",
   "reused_voltafabric": [
     "Session::preflight_preweighted_fp32_until",
     "Session::start_preweighted_fp32_until",
     "Session::finish_preweighted_fp32",
-    "existing FP32-preweighted Collector",
-    "R737 atomic attention+FFN/KV composition"
+    "FP32-preweighted Collector",
+    "R737 atomic KV/block composition"
   ],
+  "route_contract": {
+    "no_hot_path_load": true,
+    "all_participating_sessions_preflighted_before_exec": true,
+    "top6_slots_required": true,
+    "coefficients_applied_once": true,
+    "partial_output": false,
+    "automatic_retry": false,
+    "unknown_retry": false
+  },
+  "verification": {
+    "staging": "three changed Rust files exact from R738 commit; remaining modules/dependencies symlinked from local R737 source mirror",
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_offline_lib": "PASS",
+    "cargo_clippy_locked_offline_warnings_denied": "PASS",
+    "tests_added_or_run_manually": false,
+    "automatic_pipeline": {
+      "id": 2591,
+      "status": "success",
+      "jobs": [
+        "pc4_gitleaks",
+        "pc4_semgrep",
+        "pc4_trivy",
+        "pc4_ci_fallback"
+      ],
+      "compile_or_generation_proof": false
+    }
+  },
   "external_reuse": {
-    "donor": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6 (MIT), semantic reference only",
+    "donor": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6 MIT, semantic reference only",
     "copied_code": false,
     "vllm": false,
     "tensorrt_llm": false,
@@ -36,14 +65,6 @@
     "sglang": false,
     "maya": false,
     "strata": false
-  },
-  "verification": {
-    "local_tests_added_or_run": false,
-    "manual_tests_run": false,
-    "local_cargo_fmt_check": "not run",
-    "local_cargo_check": "not run",
-    "local_clippy": "not run",
-    "automatic_pipeline": "pending"
   },
   "actual_checkpoint_payload_loaded": false,
   "independent_numeric_oracle": false,
@@ -54,12 +75,12 @@
   "performance_measured": false,
   "unknown_replayed": false,
   "limitations": [
-    "initial Session loading must remain bound to a verified checkpoint/index; this adapter validates the live Session binding rather than reopening official model files per token",
-    "the layer/rank resident set must fit the existing Session owner and memory budgets",
-    "no logits, tokenizer, sampling, GPU, inter-PC, or multi-token generation"
+    "initial Session load must remain bound to verified checkpoint/index data; adapter checks the live Session dispatch binding",
+    "layer/rank resident set must fit existing Session owner and memory budgets",
+    "no logits, tokenizer, sampling, actual checkpoint payload, GPU, inter-PC, or multi-token generation"
   ],
   "manifest": "research/R738/SHA256SUMS",
-  "manifest_sha256": "9db49e0a70ee69b814686c9452e20ae4c316152ae0f0af01a1e551c4b2354667",
+  "manifest_sha256": "c6578ad63ea2770f1b4213915132ca2a7f11305a05ac854fc2f7f426a4ed4daf",
   "receipt_pending": true,
-  "next_action": "R739: bind a verified checkpoint owner admission to persistent per-layer Sessions and compare one full block against an independent numeric oracle."
+  "next_action": "After receipt pipeline success, record exact receipt readback. R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle."
 }

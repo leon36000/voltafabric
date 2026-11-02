@@ -1,26 +1,54 @@
 {
   "id": "R738",
   "date": "2026-11-02",
-  "state": "SOURCE_PIPELINE_PENDING",
+  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
   "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
   "active_operations": [],
-  "summary": "Replaced R737's abstract route executor seam with a concrete per-layer persistent Session adapter for a one-token top-6 MXFP4 route; no token-path LOAD.",
+  "summary": "Connected the R737 gate-selected top-6 route to already-loaded per-layer MXFP4 Sessions. Every participating Session is preflighted before EXEC; no token-path LOAD; incomplete and UNKNOWN results publish no block/KV output.",
   "parent": {
     "branch": "r737-deepseek-window-block-20261102",
     "commit": "b8a2535731a60dc6786af0f855a7c25cd2ca58de",
     "pipeline_id": 2590,
     "pipeline_status": "success"
   },
+  "source_commit": "049011c823eef59b0fd2cde137576b604b3d5b61",
+  "source_pipeline_id": 2591,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7,
   "source_files": [
     "src/deepseek_v41.rs",
     "src/deepseek_v41_gate.rs",
     "src/deepseek_v41_window_block.rs"
   ],
+  "report": "research/R738/REPORT.md",
   "manifest": "research/R738/SHA256SUMS",
-  "manifest_sha256": "9db49e0a70ee69b814686c9452e20ae4c316152ae0f0af01a1e551c4b2354667",
-  "source_commit_pending": true,
-  "source_pipeline_pending": true,
+  "manifest_sha256": "c6578ad63ea2770f1b4213915132ca2a7f11305a05ac854fc2f7f426a4ed4daf",
+  "verification": {
+    "staging": "three changed Rust files exact from R738 commit; remaining modules/dependencies symlinked from local R737 source mirror",
+    "cargo_fmt_check": "PASS",
+    "cargo_check_locked_offline_lib": "PASS",
+    "cargo_clippy_locked_offline_warnings_denied": "PASS",
+    "tests_added_or_run_manually": false,
+    "automatic_pipeline": {
+      "id": 2591,
+      "status": "success",
+      "jobs": [
+        "pc4_gitleaks",
+        "pc4_semgrep",
+        "pc4_trivy",
+        "pc4_ci_fallback"
+      ],
+      "compile_or_generation_proof": false
+    }
+  },
   "receipt_pending": true,
-  "verification": "No tests added or run manually. Automatic GitLab pipeline and exact readback pending.",
-  "next_action": "After source pipeline success, verify all committed source/docs and record its receipt; then implement checkpoint-bound Session admission plus an independent block oracle."
+  "receipt_pipeline_pending": true,
+  "next_action": "After receipt pipeline success, record exact receipt readback. R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle."
 }

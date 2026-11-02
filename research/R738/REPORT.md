@@ -10,13 +10,13 @@ Pour chaque token, le bloc prend le jeu de Sessions par couche, convertit l'acti
 
 R738 réutilise directement `Session::preflight_preweighted_fp32_until`, `start_preweighted_fp32_until`, `finish_preweighted_fp32`, `Collector`, la route privée déjà produite par le gate et la composition cache atomique de R737. Il n'intègre ni ne copie de code vLLM, TensorRT-LLM, llama.cpp, SGLang, Maya ou Strata. DeepSeek-V4.1-Flash reste la référence sémantique MIT épinglée en R737.
 
-## Limites
-
-Cette frontière vérifie l'état chargé connu du `Session` et son binding de dispatch; le chargement initial doit toujours provenir du plan/checkpoint vérifié et la correspondance avec les fichiers officiels n'est pas ré-auditée token par token. Aucun poids réels du checkpoint, oracle numérique indépendant, tests manuels, GPU, transport inter-PC, logits/tokenizer, échantillonnage ou génération multi-token n'a été exécuté ici. Un `Session` chargé doit pouvoir contenir tous les experts locaux annoncés par `resident_order`; la capacité et le placement réels restent à qualifier.
-
 ## Vérification
 
-La source sera soumise aux contrôles automatiques de la branche privée. Aucun test n'a été ajouté ni lancé manuellement dans cette tranche. La preuve de compilation, formatage et pipeline sera ajoutée au reçu après lecture exacte du commit et du pipeline.
+Dans `.runs/r738-check`, les trois fichiers Rust de R738 ont été relus exactement depuis le commit source, les autres modules et dépendances Rust étant liés au miroir local R737. `cargo fmt --all -- --check`, `cargo check --locked --offline --lib` et `cargo clippy --locked --offline --lib -- -D warnings` ont réussi. Aucun test n'a été ajouté ou lancé manuellement. Le pipeline GitLab source #2591 a réussi avec Gitleaks, Semgrep, Trivy et le job fallback; ce pipeline n'exécute pas de preuve de génération.
+
+## Limites
+
+Cette frontière vérifie l'état chargé connu du `Session` et son binding de dispatch; le chargement initial doit toujours provenir du plan/checkpoint vérifié et la correspondance avec les fichiers officiels n'est pas ré-auditée token par token. Aucun poids réels du checkpoint, oracle numérique indépendant, GPU, transport inter-PC, logits/tokenizer, échantillonnage ou génération multi-token n'a été exécuté ici. Un `Session` chargé doit pouvoir contenir tous les experts locaux annoncés par `resident_order`; la capacité et le placement réels restent à qualifier.
 
 ## Suite
 
