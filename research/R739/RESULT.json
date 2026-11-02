@@ -66,13 +66,18 @@
     "tokenizer, logits, sampling and full generation remain unimplemented"
   ],
   "manifest": "research/R739/SHA256SUMS",
-  "manifest_sha256": "9d139c1c77f1d124c9fdd97e79123a3939710c8705a10dd76cc33452de6eed4b",
-  "receipt_pending": true,
-  "next_action": "Publish and read back the R739 report, source hashes, result and handoff; reconcile the receipt pipeline without rewriting history.",
+  "manifest_sha256": "d4f98ee18f1b76d9780b84bf904a91ff0756e185b3b7537e004802e4f9728083",
+  "receipt_pending": false,
+  "next_action": "Continue with a source-pinned integration of DeepSeek Recipe prompt encoding and stream parsing into the VoltaFabric generation boundary; preserve separate format, identity and atomicity contracts.",
   "source_pipeline_jobs": {
     "pc4_gitleaks": "success",
     "pc4_semgrep": "success",
     "pc4_trivy": "success",
     "pc4_ci_fallback": "success"
-  }
+  },
+  "receipt_commit": "80515d0e1790579dbd8a6bad3f58aed011dbfe5a",
+  "receipt_pipeline_id": 2596,
+  "receipt_pipeline_status": "success",
+  "receipt_readback_exact": true,
+  "receipt_files_verified": 4
 }

@@ -22,6 +22,10 @@ The four modified Rust files were based on exact R738 GitLab source readback. Th
 - No tests were added or run.
 - GitLab source pipeline #2595 succeeded on commit `6486e1010accefd314df7e83967b004837961a0f`; Gitleaks, Semgrep, Trivy and fallback all passed. This is a scan/fallback result, not a compile, oracle or generation proof.
 
+## Receipt publication
+
+The source receipt commit `80515d0e1790579dbd8a6bad3f58aed011dbfe5a` passed GitLab pipeline #2596; Gitleaks, Semgrep, Trivy and fallback all passed. The four receipt files were read back exactly from that commit. A final additive reconciliation commit records this receipt state; history remains unrewritten.
+
 ## Publication correction
 
 The first R739 source commit accidentally supplied Base64 text as file contents. It was superseded by an additive text-content commit on the same branch, without rewriting history. The pipeline for the malformed intermediate commit was cancelled. The corrected commit is the R739 source revision and was re-read from GitLab exactly before receipt publication.

@@ -1,9 +1,11 @@
 {
   "id": "R739",
   "date": "2026-11-02",
-  "state": "SOURCE_PIPELINE_SUCCESS_RECEIPT_PENDING",
+  "state": "RECEIPT_PIPELINE_SUCCESS_FINAL_RECONCILIATION_PENDING",
   "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
-  "active_operations": [],
+  "active_operations": [
+    "Final additive R739 receipt reconciliation commit; pipeline pending"
+  ],
   "summary": "Replaced the three full-ring clones on the single-token window block path with an identity-bound staged KV row that commits after the complete block succeeds.",
   "parent": {
     "branch": "r738-deepseek-preloaded-session-route-20261102",
@@ -18,7 +20,7 @@
   "source_readback_files_verified": 4,
   "report": "research/R739/REPORT.md",
   "manifest": "research/R739/SHA256SUMS",
-  "manifest_sha256": "9d139c1c77f1d124c9fdd97e79123a3939710c8705a10dd76cc33452de6eed4b",
+  "manifest_sha256": "d4f98ee18f1b76d9780b84bf904a91ff0756e185b3b7537e004802e4f9728083",
   "verification": {
     "cargo_fmt_check": "PASS",
     "cargo_check_locked_offline_lib": "PASS",
@@ -34,12 +36,17 @@
     "history_rewritten": false,
     "corrected_source_readback_exact": true
   },
-  "receipt_pending": true,
-  "next_action": "Publish and read back the R739 report, source hashes, result and handoff; reconcile the receipt pipeline without rewriting history.",
+  "receipt_pending": false,
+  "next_action": "Continue with a source-pinned integration of DeepSeek Recipe prompt encoding and stream parsing into the VoltaFabric generation boundary; preserve separate format, identity and atomicity contracts.",
   "source_pipeline_jobs": {
     "pc4_gitleaks": "success",
     "pc4_semgrep": "success",
     "pc4_trivy": "success",
     "pc4_ci_fallback": "success"
-  }
+  },
+  "receipt_commit": "80515d0e1790579dbd8a6bad3f58aed011dbfe5a",
+  "receipt_pipeline_id": 2596,
+  "receipt_pipeline_status": "success",
+  "receipt_readback_exact": true,
+  "receipt_files_verified": 4
 }
