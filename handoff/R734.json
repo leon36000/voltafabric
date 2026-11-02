@@ -1,0 +1,32 @@
+{
+  "id": "R734",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "summary": "Ajout d'un import indexé des huit tenseurs FP8/BF16 de l'attention DeepSeek et de la référence Q/KV pré-RoPE liée au Stamp et à l'attempt.",
+  "verification": "7/7 tests ciblés et 16/16 tests des modules DeepSeek debug/release, rustfmt et Clippy warnings-denied PASS; index/header layer 0 vérifiés.",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "code_copied": false
+  },
+  "source_pipeline": "PENDING",
+  "source_readback": "PENDING",
+  "receipt_pending": true,
+  "real_checkpoint_payload": false,
+  "pre_rope_projection_only": true,
+  "complete_attention_pass": false,
+  "complete_generation": false,
+  "gpu": false,
+  "unknown_replayed": false,
+  "manifest": "research/R734/SHA256SUMS",
+  "manifest_sha256": "7280efeb3e8b5e2309afc6fa3a1a193823838a23f6ba6b2e6c67fe6bfdc25334",
+  "limitations": [
+    "Aucune charge utile du modèle n'a été lue",
+    "RoPE, attention, KV compressé, projection de sortie et HC-post non raccordés",
+    "La référence GEMV CPU ne démontre pas la parité CUDA/Torch"
+  ],
+  "next_action": "R735 : qualifier RoPE sur source/configuration admise puis raccorder les Q/KV post-RoPE au cache R733."
+}

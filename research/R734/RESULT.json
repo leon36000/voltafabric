@@ -1,0 +1,67 @@
+{
+  "id": "R734",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_PENDING",
+  "parent_branch": "r733-deepseek-window-attention-20261102",
+  "parent_commit": "80907fdc3b758b37850d17933dcb34100cd2158d",
+  "source_files": [
+    "src/deepseek_v41_projection.rs",
+    "src/lib.rs"
+  ],
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
+    "layer0_header_sha256": "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449",
+    "code_copied": false
+  },
+  "adapted_boundary": "Indexed eight-tensor admission -> resident FP8 wq_a -> BF16 q_norm -> resident FP8 wq_b, plus resident FP8 wkv -> BF16 kv_norm -> identity-bound Q/KV before RoPE.",
+  "weight_formats": "Pinned F8_E4M3 with E8M0 32x32 scale tiles; distinct from MXFP4 K32, QPN2/NVFP4 K16 and IQ3.",
+  "reused_voltafabric": [
+    "Fp8E4m3Matrix and E4M3/E8M0 activation quantizer",
+    "BF16 RNE conversion and Stamp identity",
+    "Indexed Safetensors shard/tensor admission and digest verification",
+    "R733 identity-bound KV window boundary as next composition point"
+  ],
+  "new_dependencies": false,
+  "real_checkpoint_payload": false,
+  "verification": {
+    "rustfmt": "PASS",
+    "debug": "PASS 7/7 targeted tests",
+    "release": "PASS 7/7 targeted tests",
+    "combined_deepseek_modules_debug": "PASS 16/16",
+    "combined_deepseek_modules_release": "PASS 16/16",
+    "clippy_warnings_denied": "PASS",
+    "pinned_index_and_header_schema": "PASS; layer 0 names/shapes checked locally"
+  },
+  "oracle": "Scalar independent E4M3/E8M0 identity-matrix calculation and chunked-vs-one-shot reference. No Torch/CUDA GEMM parity claim.",
+  "private_gitlab": {
+    "branch": "r734-deepseek-attention-projection-20261102",
+    "source_commit": "PENDING",
+    "source_pipeline_id": null,
+    "source_pipeline_status": "PENDING",
+    "source_readback_exact": false,
+    "source_readback_files_verified": 0
+  },
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "unknown_replayed": false,
+  "complete_attention_pass": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "limitations": [
+    "Output is pre-RoPE; no direct append to R733's post-RoPE cache",
+    "No actual selected tensor payload was imported",
+    "CPU FP8 GEMV reduction is not bitwise CUDA/Torch parity",
+    "RoPE, window attention, compressed KV/indexer, output projection and HC-post are not connected",
+    "No tokenizer, logits, sampler or generated token"
+  ],
+  "next_action": "R735: validate admitted DeepSeek RoPE parameters and connect the identity-bound pre-RoPE Q/KV to R733 after RoPE, preserving compressed KV and output projection as separate boundaries.",
+  "manifest": "research/R734/SHA256SUMS",
+  "manifest_sha256": "7280efeb3e8b5e2309afc6fa3a1a193823838a23f6ba6b2e6c67fe6bfdc25334",
+  "manifest_file_count": 4
+}

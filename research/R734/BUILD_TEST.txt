@@ -1,0 +1,24 @@
+R734 CPU build/test receipt
+
+Workspace: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification
+Branch source parent intended: r733-deepseek-window-attention-20261102 at receipt commit 80907fdc3b758b37850d17933dcb34100cd2158d
+
+Commands:
+  cargo fmt --all
+  cargo fmt --all -- --check
+  cargo test --locked --lib deepseek_v41_projection::tests -- --nocapture
+  cargo test --release --locked --lib deepseek_v41_projection::tests -- --nocapture
+  cargo clippy --locked --lib -- -D warnings
+
+Results:
+  fmt check: PASS
+  targeted debug tests: PASS, 7/7
+  targeted release tests: PASS, 7/7
+  combined DeepSeek module debug tests: PASS, 16/16
+  combined DeepSeek module release tests: PASS, 16/16
+  Clippy warnings denied: PASS
+
+Independent CPU checks include scalar E4M3 decoding for a known identity matrix,
+chunked-vs-one-shot matrix output, pinned layer-0 index/header names and shapes,
+and RNE BF16/identity guards. No actual model tensor payload, GPU, or production
+service was accessed. The full attention/generation path is not qualified.
