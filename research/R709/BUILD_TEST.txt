@@ -1,0 +1,22 @@
+R709 CPU-only source verification
+
+Commands, run from the R709 source tree:
+
+  cargo test --offline --locked --lib a147_pinned_expert_payload_plan_tests
+  cargo test --offline --locked --release --lib a147_pinned_expert_payload_plan_tests
+  cargo clippy --offline --locked --lib -- -D warnings
+  rustfmt --edition 2021 --check src/deepseek_v41.rs
+  git diff --check
+
+Results:
+
+  debug: 2 passed, 0 failed (1.45 s)
+  release: 2 passed, 0 failed (0.09 s)
+  clippy: PASS
+  rustfmt: PASS
+  diff check: PASS
+
+The first Clippy pass caught an over-wide function signature; the API was then
+changed to a typed PinnedExpertPayloadRequest. All listed commands were rerun
+successfully after that correction. These are local CPU results, not GitLab CI
+results and not model inference.
