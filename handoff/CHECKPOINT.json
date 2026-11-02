@@ -13134,10 +13134,10 @@
 ,
   "r699_deepseek_memory_admission": {
     "task": "Generalize per-rank memory advice for pinned DeepSeek MXFP4 dispatch and verify CPU Session usage.",
-    "state": "PUBLISHED_PRIVATE_GITLAB_CPU_TESTS_PASS_PIPELINE_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_TESTS_PASS_PIPELINE_PENDING",
     "branch": "r699-deepseek-mxfp4-memory-admission-20261102",
     "parent_commit": "e11d4b3d971d90875a13e7f474593c622b4ce77b",
-    "source_commit": null,
+    "source_commit": "579e8a796b27cc4d3cd1226032079b43fd2f3303",
     "report": "research/R699/REPORT.md",
     "result": "research/R699/RESULT.json",
     "manifest": "research/R699/SHA256SUMS",
@@ -13145,7 +13145,7 @@
     "manifest_files": 7,
     "local_tests": "R694 7 passed; R699 2 passed; 10.36s R699 CPU test; rustfmt and Clippy pass",
     "route_from_model_gate": false,
-    "pipeline_id": null,
+    "pipeline_id": 2395,
     "pipeline_status": "pending",
     "full_generation": false,
     "complete_checkpoint": false,
@@ -13154,6 +13154,10 @@
     "production_network": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "R700: identify and pin one license-compatible upstream inference component that materially closes a generation gap, then adapt it behind VoltaFabric gate, format and identity boundaries with a CPU oracle."
+    "next_action": "R700: identify and pin one license-compatible upstream inference component that materially closes a generation gap, then adapt it behind VoltaFabric gate, format and identity boundaries with a CPU oracle.",
+    "commit": "579e8a796b27cc4d3cd1226032079b43fd2f3303",
+    "readback_exact": true,
+    "readback_files_verified": 9,
+    "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2395"
   }
 }
