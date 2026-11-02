@@ -1,0 +1,71 @@
+{
+  "id": "R693",
+  "state": "LOCAL_CPU_TWO_LAYER_PUBLIC_DECODE_PASS_PENDING_PRIVATE_GITLAB_READBACK",
+  "base_branch": "r692-gguf-metadata-inventory-20261102",
+  "base_commit": "fbd39f2b5896d5b9c37cc922ed0261b56fe0dae1",
+  "donor": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "license": "MIT",
+    "local_seam_patch": "R679 under src/llama-*"
+  },
+  "test": {
+    "device": "CPU",
+    "synthetic_fixture": true,
+    "layers": 2,
+    "hidden": 32,
+    "donor_expert_count_metadata": 41,
+    "top_k": 2,
+    "resident_experts": [40, 3],
+    "checkpoint_experts": [1, 0],
+    "decode_steps": 3,
+    "donor_tokens": [3, 3, 3],
+    "voltafabric_tokens": [3, 3, 3],
+    "max_abs_logit_error": 0.0,
+    "layer0_experts": [40, 3],
+    "layer1_experts": [3, 40],
+    "collector_contract": "FP32 preweighted outputs",
+    "late_layer_reject_status": -3,
+    "late_layer_failure_atomic": true,
+    "sampled_after_reject": false
+  },
+  "attempt_history": [
+    {
+      "result": "FAILED_TEST_HARNESS_IDENTITY_REUSE",
+      "reason": "the rejection subcase repeated a successful Stamp and was refused before injection"
+    },
+    {
+      "result": "DISCARDED_IDENTITY_BYPASS",
+      "reason": "v7 successful identities were repeated in a different ledger directory; output retained but not evidence"
+    },
+    {
+      "result": "V8_PREFLIGHT_REFUSAL",
+      "reason": "C++ and Rust run-plan mismatch refused before Session dispatch; no reservation was made"
+    },
+    {
+      "result": "V9_CPU_PASS",
+      "reason": "unique identities passed; superseded by the v10 test of a pre-created stable ledger root"
+    }
+  ],
+  "authoritative_attempt": {
+    "run_id": "r693-public-decode-v10",
+    "plan_id": "r693-routed-layer-plan-v10",
+    "output_root": "fresh R693 output-v10 under .runs",
+    "batches": [901, 902, 903],
+    "attempts": [9001, 9002, 9003],
+    "rejection_batch": 9901,
+    "rejection_attempt": 99001,
+    "stable_precreated_ledger_root": true,
+    "exit_code": 0
+  },
+  "scope": {
+    "real_checkpoint": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "production_r53_lease": false,
+    "performance_claim": false
+  },
+  "next_action": "Implement R694 CPU topology/traffic cost simulator inspired by VarioPath using explicit synthetic inputs; preserve routing, owner registry, coefficients and reduction unchanged. No download, GPU, or production-network work. Replace a synthetic layer with an already-present checkpoint only after source, compatibility and license are proven."
+}

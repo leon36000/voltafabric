@@ -1,0 +1,69 @@
+R693 two-layer public llama_decode CPU fixture
+=============================================
+
+Base private GitLab branch and commit:
+  r692-gguf-metadata-inventory-20261102
+  fbd39f2b5896d5b9c37cc922ed0261b56fe0dae1
+
+Pinned donor:
+  llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d (MIT)
+  Local R679 seam patch; GGML dependency clean at execution.
+
+The authoritative run used the R655 source snapshot and a previously unused,
+stable output/ledger root. Rust opened the pre-created root directly; it no longer
+creates a timestamped child ledger:
+  CXX=g++ VF_LLAMA_SOURCE_DIR=<pinned-R679-checkout> \
+  VF_LLAMA_LIBRARY=<pinned-CPU-libllama.so> \
+  VF_GGML_NATIVE_BUILD=<R655-CPU-build> \
+  VF_VOLTA_REPO=<R655-exact-source-snapshot> \
+  VF_R693_ADAPTER_DIR=adapters/native_ggml/r693 \
+  VF_TEST_OUTPUT_DIR=<fresh-R693-output-v10> \
+  bash adapters/native_ggml/r693/run_r693_public_decode_test.sh
+
+Fresh local run result, exit 0:
+  run=r693-public-decode-v10
+  plan=r693-routed-layer-plan-v10
+  donor_tokens=3,3,3
+  voltafabric_tokens=3,3,3
+  max_abs_logit_error=0
+  layers_per_decode=2
+  layer 0 experts per step=40,3
+  layer 1 experts per step=3,40
+  per-layer selected top-2 coefficient sum=0.127954 (rounded log)
+  late-layer refusal decode status=-3
+  sampled_after_late_layer_reject=false
+
+The runner uses offline locked Cargo builds. The C++ compile passes C++17,
+-Wall, -Wextra and -Werror. `bash -n`, rustfmt and Cargo offline metadata checks
+also pass. The VoltaFabric root crate reports two existing warnings outside R693:
+the private `RawProjectionInputMeta` interface and unused captured QSA fields.
+
+The local compile resolved the Rust loader to the byte-exact R655 source snapshot
+using local absolute paths. The published Cargo manifest uses repository-relative
+paths; `cargo metadata --offline --locked --no-deps` passed in a `.runs` repository-
+shaped layout with that final relative manifest.
+
+Attempt history is retained to make the test provenance auditable:
+
+- v7 first run: the public three-step decode completed, then the rejection
+  subcase repeated a successful Stamp. The stable ledger correctly refused it
+  before injection. The test failed; this duplicate was not retried.
+- v7 second run: the same successful decode identities were mistakenly run in a
+  different ledger folder. This violates the no-bypass rule; its output is
+  retained but discarded as evidence. No production device, worker, network or
+  model was involved.
+- v8: a portable-manifest local build first lacked the fake-layout dependency
+  path; the binary was then built against the exact R655 snapshot but refused
+  before dispatch because C++ and Rust fixture identities differed. No Session
+  reservation was made for v8.
+- v9: a unique identity passed after the initial stable-ledger correction.
+- v10: final passing run with a pre-created stable ledger path and unique run,
+  plan, batch and attempt identities; exit 0. This is the authoritative result.
+
+No UNKNOWN claim was retried in the final v10 run. Earlier uncertain/invalid
+outputs and ledgers were retained, not cleared. This CPU test ledger is not the
+shared R53 hardware ledger.
+
+CPU only; synthetic weights; no trained checkpoint, GPU, production network,
+inter-PC worker, production R53 lease, or performance claim. GitLab pipeline
+status is not local compile/test evidence.
