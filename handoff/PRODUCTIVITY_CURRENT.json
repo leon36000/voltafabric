@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 05:35:00 UTC",
+  "updated_utc": "2026-11-02 06:34:31 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1426,6 +1426,70 @@
       "gpu": false,
       "full_crate_test": false,
       "automatic_relaunch": "STOPPED_BY_OWNER"
+    },
+    {
+      "id": "R697",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_SYNTHETIC_PASS_PIPELINE_PENDING",
+      "branch": "r697-llama-route-memory-advisory-20261102",
+      "parent_commit": "c436aad904ad7395523611a3b4209b758c1dfdcd",
+      "source_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+      "encoding_repair_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+      "initial_encoded_content_commit": "1a8322c281098a243fab7a9f1677d16ac8919e21",
+      "path": "research/R697",
+      "readback_files_verified": 11,
+      "readback_exact": true,
+      "code_files": [
+        "adapters/native_ggml/r697/r697_public_decode_test.cpp",
+        "adapters/native_ggml/r697/run_r697_public_decode_test.sh",
+        "adapters/native_ggml/r697/rust-loader/Cargo.toml",
+        "adapters/native_ggml/r697/rust-loader/Cargo.lock",
+        "adapters/native_ggml/r697/rust-loader/r697_memory_advice.h",
+        "adapters/native_ggml/r697/rust-loader/src/lib.rs"
+      ],
+      "research_files": [
+        "research/R697/REPORT.md",
+        "research/R697/BUILD_TEST.txt",
+        "research/R697/UPSTREAM_AUDIT.md",
+        "research/R697/RESULT.json",
+        "research/R697/SHA256SUMS"
+      ],
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d MIT",
+      "cpu_fixture_run_count": 1,
+      "decode_steps": 3,
+      "tokens_equal": true,
+      "max_abs_logit_error": 0,
+      "exact_selected_gguf_bytes": 13056,
+      "full_generation": false,
+      "gpu": false,
+      "inter_pc_worker": false,
+      "pipeline_id": 2382,
+      "pipeline_status": "pending",
+      "pipeline_scope": "configured Gitleaks/Semgrep/Trivy/fallback only; not Rust/C++ compilation or the local CPU run",
+      "manifest_sha256": "3f51f499bd645ff28ab9589b60bce0c680119c7ae2a2c0ab5371baece37a144b",
+      "manifest_files": 10
+    },
+    {
+      "id": "R698",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+      "branch": "r698-deepseek-real-mxfp4-session-20261102",
+      "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+      "commit": "033ac7cb90c1189febc48700b4c261e071d49487",
+      "path": "research/R698",
+      "readback_files_verified": 7,
+      "manifest_sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+      "local_test": "1 passed; real layer-0 experts 0 and 383; two persistent CPU sessions; one token; output [1,5120]",
+      "route_coefficients": [
+        0.375,
+        0.375
+      ],
+      "route_from_model_gate": false,
+      "max_abs_error_upper_bound": 0.0005,
+      "pipeline_id": 2384,
+      "pipeline_status": "running",
+      "pipeline_scope": "configured security scans/CI fallback only; not Rust/C++ compilation or local CPU evidence",
+      "published_utc": "2026-11-02 06:34:31 UTC"
     }
   ],
   "acceptance": [
@@ -1479,533 +1543,15 @@
     "R690 adds only a synthetic custom process_ubatch logits-to-sampler seam. It does not execute public llama_decode or provide a real tokenizer, attention/KV, production checkpoint, complete generation, GPU, inter-PC/RDMA, or performance evidence."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
-  "last_verified_results": [
-    "R637",
-    "R638",
-    "R642_CPU_LAUNCHER_FIXTURE_ONLY",
-    "R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY",
-    "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
-    "R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY",
-    "R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY",
-    "R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY",
-    "R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH",
-    "R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML",
-    "R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY",
-    "R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY",
-    "R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM",
-    "R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY",
-    "R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS",
-    "R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE",
-    "R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE",
-    "R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS",
-    "R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY",
-    "R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING",
-    "R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0",
-    "R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1",
-    "R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC",
-    "R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED",
-    "R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC",
-    "R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST",
-    "R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS",
-    "R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS",
-    "R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING",
-    "R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS",
-    "R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS",
-    "R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS",
-    "R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS",
-    "R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING",
-    "R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING",
-    "R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING",
-    "R680_LLAMA_HOOK_CALLBACK_BRIDGE_CPU_CTEST_6_PASS_1_SKIP_TWO_LAYER_ORACLE_IDENTITY_CHECK; PINNED_LLAMA_LIBRARY_REBUILD_PASS; GITLAB_READBACK_10_FILES_EXACT; PIPELINE_2301_RUNNING",
-    "R682_LIVE_LLAMA_CONTEXT_PROCESS_UBATCH_SYNTHETIC_QWEN2MOE_GRAPH_CPU_CTEST_1_PASS_EXACT_READBACK_7_OF_7; DONOR_BUILD_MOE_FFN_AND_GENERATION_NOT_QUALIFIED",
-    "R683_DONOR_BUILD_MOE_FFN_CALLBACK_CPU_CTEST_1_PASS_RAW_6_20_WEIGHT_0_5_ONCE_OUTPUT_3_10_GITLAB_READBACK_7_OF_7; PIPELINE_2316_RUNNING",
-    "R684_GGUF_V3_F32_DONOR_PARSER_AND_LIVE_BUILD_MOE_FFN_CPU_PASS_RAW_6_20_WEIGHT_ONCE_OUTPUT_3_10_COLLECTOR_REFUSAL_NO_PUBLICATION_GITLAB_READBACK_7_OF_7",
-    "R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.",
-    "R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.",
-    "R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED",
-    "R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.",
-    "R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.",
-    "R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation.",
-    "R691_PUBLIC_LLAMA_DECODE_CPU_SYNTHETIC_QWEN2MOE_PASS; donor/VF tokens 3,3,3; logits max_abs=0; exact GitLab readback 10/10; no real checkpoint/full-generation/GPU claim.",
-    "R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim.",
-    "GITLAB_PIPELINES_2358_AND_2360_CONFIGURED_SCANS_AND_FALLBACK_SUCCESS; local CPU tests remain separate evidence.",
-    "R693_QWEN2MOE_PUBLIC_DECODE_CPU_SYNTHETIC_TWO_LAYER",
-    "R694_ROUTE_BOUND_ADVISORY_PLACEMENT_CPU_SYNTHETIC",
-    "R695_PER_RANK_KV_AND_LOAD_ENVELOPE_CPU_SYNTHETIC",
-    "R696_ATOMIC_REPLACEMENT_RESIDENT_WEIGHT_PEAK_CPU_SYNTHETIC"
-  ],
-  "active_operations": [
-    {
-      "id": "gitlab-pipeline-2278",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "f65f14e514e04efae46f561579a8e845ed1f9c65",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "configured scans/fallback only; not C++ compile/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2282",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "2742e6f08a5e3017f0a248ee4ad55a1d0d17d5f9",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "configured security scans and fallback only; not C++ build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2284",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "cc6c5bfb776e7089aa1fefc459a6416aaee83935",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "configured scans/fallback only; not C++ build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2286",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "a4f0bf69ba8eebebb0b3fab3b69d89c6aca119c1",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "configured scans/fallback only; not C++ build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2287",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "db7e1e717bf00b8d0316b2fd9c6f7fbcf1cbfbcb",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R674 handoff scans/fallback only; not C++ build/test"
-    },
-    {
-      "id": "gitlab-pipeline-2288",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "a7a9ce4e829394bb17a1fa3583edf4ab231100a4",
-      "status": "canceled",
-      "jobs": {
-        "pc4_gitleaks": "canceled",
-        "pc4_semgrep": "canceled",
-        "pc4_trivy": "canceled",
-        "pc4_ci_fallback": "canceled"
-      },
-      "scope": "R675 code scan canceled before completion"
-    },
-    {
-      "id": "gitlab-pipeline-2289",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "45a267f115260245f72f5098550c3337b30b5364",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R675 handoff-only scans/fallback; not C++ build/test"
-    },
-    {
-      "id": "gitlab-pipeline-2290",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "321e975c7fd7996a294244860d47d4d095e7452b",
-      "status": "skipped",
-      "jobs": {
-        "pc4_gitleaks": "skipped",
-        "pc4_semgrep": "skipped",
-        "pc4_trivy": "skipped",
-        "pc4_ci_fallback": "skipped"
-      },
-      "scope": "expected skip-ci handoff update"
-    },
-    {
-      "id": "gitlab-pipeline-2291",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "dab94350f7fa6be4640ba5d019f37518c585a643",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R676 code pipeline scans/fallback only; not C++ build/test"
-    },
-    {
-      "id": "gitlab-pipeline-2293",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "c6478367a97592e5bd7e89d04062a0e8cea4ee61",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R677 source security scans/fallback only; not C++ build/test"
-    },
-    {
-      "id": "gitlab-pipeline-2294",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "b3c71a4e5a8bddef1bdc001c8f0c1d1bfb4bcd58",
-      "status": "skipped",
-      "jobs": {
-        "pc4_gitleaks": "skipped",
-        "pc4_semgrep": "skipped",
-        "pc4_trivy": "skipped",
-        "pc4_ci_fallback": "skipped"
-      },
-      "scope": "expected skip-ci R677 handoff commit"
-    },
-    {
-      "id": "gitlab-pipeline-2295",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "1b28fcf611c6a725302f847473413d303bd2ca20",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "previous source/handoff scans and fallback only; not CPU build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2297",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "aeebc2ae01dce9eaae651beb789d87678dce228e",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "scans/fallback only for superseded encoded-content commit; not treated as source validation"
-    },
-    {
-      "id": "gitlab-pipeline-2298",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "5c7c7b745146a26c6e7ffcf898bc9fb28fdb835b",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "previous source/handoff scans and fallback only; not CPU build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2301",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "f5438d6ed634b758f29ec22b55b412a157c15730",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "previous source/handoff scans and fallback only; not CPU build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2304",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "a820d6dcb56958becd20a83205e49f22a72d8b2d",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R681 configured scans/fallback only, not C++ build/test"
-    },
-    {
-      "id": "gitlab-pipeline-2309",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "7331a3d7f5b84d737bbbd65318eb31163ca92cfc",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R682 configured security scans/fallback only; local AArch64 CPU CTest is separate evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2313",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "ac33dccf23a0818e77698838104cd1e57f925bd5",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "previous source/handoff scans and fallback only; not CPU build/test evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2316",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "df3a19f4c7b224bf49c7d5ab82fefcd980f4dfa5",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R683 configured source scans/fallback; CPU CTest separately run locally."
-    },
-    {
-      "id": "gitlab-pipeline-2321",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "290e03b518d291c8a2749b205b8c0843731b2792",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R684 source/report scan and fallback pipeline; local pinned-donor CPU CTest is separate evidence."
-    },
-    {
-      "id": "gitlab-pipeline-2323",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "e47af9e5bc5d09c1964d0802576d98fa2299b267",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R685 source scans and fallback; CPU direct runner is separate local evidence."
-    },
-    {
-      "id": "gitlab-pipeline-2324",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "5368a720712cf4a29cc1e2d15a38a66969d9606c",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R686 configured scans/fallback only; direct CPU runner evidence is local."
-    },
-    {
-      "id": "gitlab-pipeline-2326",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "64bee0618146fc940405c7b05d46d89183e439e3",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "Superseded R687 source scan ran against the malformed base64-text publication; local CPU test is separate."
-    },
-    {
-      "id": "gitlab-pipeline-2327",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "c1638d646d1121a883afa2b0ffe12a77f32bdbea",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R686 raw-text correction scan/fallback; CPU direct runner evidence is local."
-    },
-    {
-      "id": "gitlab-pipeline-2328",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "74fd82f52f7b6fac51374fd3fc9de7d7b7573003",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R687 raw-text correction scan/fallback; local CPU direct runner evidence remains separate."
-    },
-    {
-      "id": "gitlab-pipeline-2330",
-      "ref": "r663-qwen2moe-collector-bridge-20261101",
-      "commit": "3262f93a96b3e77291d3a3af8f7ebabb8b7945a9",
-      "status": "success",
-      "jobs": {
-        "pc4_ci_fallback": "success",
-        "pc4_trivy": "success",
-        "pc4_semgrep": "success",
-        "pc4_gitleaks": "success"
-      },
-      "scope": "R688 source scan/fallback pipeline; separate local CPU C++/Rust integration test is recorded in research/R688."
-    },
-    {
-      "id": "gitlab-pipeline-2352",
-      "ref": "r689-qwen2moe-fp32-live-session-20261101",
-      "commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
-      "status": "success",
-      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate.",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      }
-    },
-    {
-      "id": "gitlab-pipeline-2351",
-      "ref": "r689-qwen2moe-fp32-live-session-20261101",
-      "commit": "d109e704d731e5720b03cee4de5be1ae3ac3637f",
-      "status": "success",
-      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate.",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      }
-    },
-    {
-      "id": "gitlab-pipeline-2350",
-      "ref": "r689-qwen2moe-fp32-live-session-20261101",
-      "commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
-      "status": "success",
-      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
-    },
-    {
-      "id": "gitlab-pipeline-2354",
-      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
-      "commit": "084e8ae4a5a08f349442ade3c0e82d0b95272311",
-      "status": "skipped",
-      "scope": "branch creation ref; no source validation"
-    },
-    {
-      "id": "gitlab-pipeline-2355",
-      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
-      "commit": "93a9595f5cc6533c1bf6bb1dbd1237b211a2b6a7",
-      "status": "success",
-      "scope": "superseded literal-Base64 content scan; not source readback evidence"
-    },
-    {
-      "id": "gitlab-pipeline-2356",
-      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
-      "commit": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "corrected raw-text source readback; configured scans/fallback only, not local C++ test"
-    },
-    {
-      "id": "gitlab-pipeline-2358",
-      "ref": "r691-public-llama-decode-20261102",
-      "commit": "52e27c0280c432e43f32b14355eebda1b5b00db0",
-      "status": "success",
-      "scope": "configured scans and fallback only; not local CPU test evidence",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      }
-    },
-    {
-      "id": "gitlab-pipeline-2360",
-      "ref": "r692-gguf-metadata-inventory-20261102",
-      "commit": "0d5098eb95807b476526c2e3ec6a388fb8788c74",
-      "status": "success",
-      "scope": "configured scans and fallback only; not local CPU test evidence",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      }
-    },
-    {
-      "id": "gitlab-pipeline-2370",
-      "ref": "r695-layer-memory-envelope-20261102",
-      "commit": "dc8e737738042a7d6d2e025307a093b74846d830",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R695 configured scans/fallback; local CPU tests separate"
-    },
-    {
-      "id": "gitlab-pipeline-2372",
-      "ref": "r696-atomic-expert-replacement-memory-20261102",
-      "commit": "dc8e737738042a7d6d2e025307a093b74846d830",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "duplicate branch-source scans/fallback; not Rust proof"
-    },
-    {
-      "id": "gitlab-pipeline-2373",
-      "ref": "r696-atomic-expert-replacement-memory-20261102",
-      "commit": "7489c376de6841eb371141b6b5e4a5284af8b1dc",
-      "status": "success",
-      "jobs": {
-        "pc4_gitleaks": "success",
-        "pc4_semgrep": "success",
-        "pc4_trivy": "success",
-        "pc4_ci_fallback": "success"
-      },
-      "scope": "R696 configured scans/fallback only; local CPU tests separate"
-    }
-  ],
-  "next_action": "R697: connecter le budget mémoire par rang en conseil facultatif au callback de route llama_decode; valider les octets GGUF exacts avec un nouveau lot CPU identifié, en gardant le gate et le registre autoritaires. Aucun GPU, worker inter-PC, réseau de production, UNKNOWN rejoué ni relance automatique.",
-  "report": "research/R696/REPORT.md",
+  "last_verified_results": "R637,R638,R642_CPU_LAUNCHER_FIXTURE_ONLY,R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY,R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY,R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH,R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML,R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY,R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY,R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM,R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY,R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS,R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE,R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE,R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS,R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY,R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING,R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0,R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1,R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC,R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED,R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC,R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST,R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS,R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS,R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING,R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS,R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS,R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS,R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS,R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING,R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING,R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING,R680_LLAMA_HOOK_CALLBACK_BRIDGE_CPU_CTEST_6_PASS_1_SKIP_TWO_LAYER_ORACLE_IDENTITY_CHECK; PINNED_LLAMA_LIBRARY_REBUILD_PASS; GITLAB_READBACK_10_FILES_EXACT; PIPELINE_2301_RUNNING,R682_LIVE_LLAMA_CONTEXT_PROCESS_UBATCH_SYNTHETIC_QWEN2MOE_GRAPH_CPU_CTEST_1_PASS_EXACT_READBACK_7_OF_7; DONOR_BUILD_MOE_FFN_AND_GENERATION_NOT_QUALIFIED,R683_DONOR_BUILD_MOE_FFN_CALLBACK_CPU_CTEST_1_PASS_RAW_6_20_WEIGHT_0_5_ONCE_OUTPUT_3_10_GITLAB_READBACK_7_OF_7; PIPELINE_2316_RUNNING,R684_GGUF_V3_F32_DONOR_PARSER_AND_LIVE_BUILD_MOE_FFN_CPU_PASS_RAW_6_20_WEIGHT_ONCE_OUTPUT_3_10_COLLECTOR_REFUSAL_NO_PUBLICATION_GITLAB_READBACK_7_OF_7,R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.,R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.,R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED,R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.,R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.,R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation.,R691_PUBLIC_LLAMA_DECODE_CPU_SYNTHETIC_QWEN2MOE_PASS; donor/VF tokens 3,3,3; logits max_abs=0; exact GitLab readback 10/10; no real checkpoint/full-generation/GPU claim.,R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim.,GITLAB_PIPELINES_2358_AND_2360_CONFIGURED_SCANS_AND_FALLBACK_SUCCESS; local CPU tests remain separate evidence.,R693_QWEN2MOE_PUBLIC_DECODE_CPU_SYNTHETIC_TWO_LAYER,R694_ROUTE_BOUND_ADVISORY_PLACEMENT_CPU_SYNTHETIC,R695_PER_RANK_KV_AND_LOAD_ENVELOPE_CPU_SYNTHETIC,R696_ATOMIC_REPLACEMENT_RESIDENT_WEIGHT_PEAK_CPU_SYNTHETIC;R697_PUBLIC_LLAMA_DECODE_MEMORY_ADVISORY_CPU_SYNTHETIC_PASS_READBACK_EXACT_11_FILES;TOKENS_3_3_3_LOGIT_MAX_ABS_0;LATE_REFUSAL_ATOMIC_NO_SAMPLE;PIPELINE_2382_PENDING\nR697 GitLab pipeline 2382: success on configured scans/fallback only. R698: exact GitLab readback of 7 files at commit 033ac7cb90c1189febc48700b4c261e071d49487; CPU test passed on two real DeepSeek MXFP4 K32 layer-0 experts through two local Sessions and the FP32-preweighted Collector. R698 pipeline 2384 remains running; it is not compile/test evidence.",
+  "active_operations": [],
+  "next_action": "R699: connect the existing per-rank memory advisory to native DeepSeek MXFP4 K32 dispatch. Use only the pinned layer-0 expert fragments already present and the R694-R697 planner; preserve the model gate as the sole route authority, full VFB3 identity, weight residency, and atomic refusal if any requested expert or byte budget is missing. CPU-only with a fresh identity; no full checkpoint download, GPU, inter-PC or production network, cleanup, UNKNOWN replay, or automatic relaunch.",
+  "report": "research/R698/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source development on private GitLab. Superpowers absent; no skills used. Automatic relaunch remains stopped; no production checkpoint, GPU, production network, cleanup or formatting.",
   "wave_manifest": {
-    "path": "research/R696/SHA256SUMS",
-    "sha256": "3a5869464e3d947b2ca2d41aa693728148ababa941e2fbc19918652e7aaea8eb",
-    "files": 6
+    "path": "research/R698/SHA256SUMS",
+    "sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+    "files": 4
   },
   "r688_result": {
     "state": "CPU_HOST_INTEGRATION_PASS_SYNTHETIC_FIXTURE_ONLY",
@@ -2446,5 +1992,87 @@
         "pc4_ci_fallback": "success"
       }
     }
+  },
+  "r697_result": {
+    "id": "R697",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_SYNTHETIC_PASS_PIPELINE_2382_SCANS_SUCCESS",
+    "branch": "r697-llama-route-memory-advisory-20261102",
+    "parent_commit": "c436aad904ad7395523611a3b4209b758c1dfdcd",
+    "source_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+    "initial_encoded_content_commit": "1a8322c281098a243fab7a9f1677d16ac8919e21",
+    "encoding_repair_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+    "readback_exact": true,
+    "readback_files_verified": 11,
+    "manifest_sha256": "6b0aaa348621adffb1e3d48fc6dcae659402c326710805e33d6bf2ac9906843e",
+    "manifest_files": 10,
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "code_reuse": "public llama_decode boundary; no llama.cpp source copied; R693/R694/R695/R696 VoltaFabric route and memory modules reused",
+    "local_cpu": {
+      "fixture_run_count": 1,
+      "decode_steps": 3,
+      "donor_tokens": [
+        3,
+        3,
+        3
+      ],
+      "voltafabric_tokens": [
+        3,
+        3,
+        3
+      ],
+      "max_abs_logit_error": 0,
+      "selected_gguf_bytes": 13056,
+      "late_layer_refusal_status": -3,
+      "sampled_after_late_layer_reject": false,
+      "ledger_claims": 7,
+      "ledger_status": "RESERVED_UNKNOWN_NO_REPLAY"
+    },
+    "pipeline_id": 2382,
+    "pipeline_status": "success",
+    "pipeline_scope": "configured Gitleaks/Semgrep/Trivy/CI fallback only; not C++/Rust compilation or local CPU test",
+    "full_generation": false,
+    "trained_checkpoint": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "performance_claim": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false
+  },
+  "r698_result": {
+    "id": "R698",
+    "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_REAL_MXFP4_TWO_SESSION_PASS_PIPELINE_PENDING",
+    "branch": "r698-deepseek-real-mxfp4-session-20261102",
+    "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+    "source_commit": "033ac7cb90c1189febc48700b4c261e071d49487",
+    "path": "research/R698",
+    "readback_exact": true,
+    "readback_files_verified": 7,
+    "manifest_sha256": "4f76f14ee16997844e9733c7d2c008fb1074907b766b9207f91c8bec88d4e90f",
+    "manifest_files": 4,
+    "model": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "real_experts": [
+      0,
+      383
+    ],
+    "format": "MXFP4 K32; no NVFP4/IQ3 conversion",
+    "test": "two persistent local CPU vf-rank-session processes and FP32-preweighted Collector",
+    "test_result": "1 passed; 0 failed; 10.14 s",
+    "max_abs_error_upper_bound": 0.0005,
+    "route_is_synthetic_not_model_gate": true,
+    "full_generation": false,
+    "complete_checkpoint": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "production_r53": false,
+    "performance_claim": false,
+    "pipeline_id": 2384,
+    "pipeline_status": "running",
+    "pipeline_scope": "configured security scans/CI fallback only; not compilation or local CPU test",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false
   }
 }
