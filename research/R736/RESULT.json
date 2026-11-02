@@ -1,7 +1,7 @@
 {
   "id": "R736",
   "date": "2026-11-02",
-  "state": "LOCAL_SOURCE_CPU_COMPILE_AND_CLIPPY_PASS_GITLAB_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
   "parent_branch": "r735-deepseek-window-rope-20261102",
   "parent_commit": "20ab446be96a55eb0a6347fb58ccc89444358f9e",
   "target_branch": "r736-deepseek-window-output-20261102",
@@ -63,5 +63,22 @@
   ],
   "manifest": "research/R736/SHA256SUMS",
   "next_action": "R737: connect R736 attention to the existing pinned gate, VoltaFabric expert owners and FFN path for one identified full layer, and define an independent numeric oracle before extending to compressed-KV attention.",
-  "manifest_sha256": "d912a6d1e663243e39d6a1e0122f40e9e3bf691da1aba18a3612515c26f490e0"
+  "manifest_sha256": "d912a6d1e663243e39d6a1e0122f40e9e3bf691da1aba18a3612515c26f490e0",
+  "private_gitlab": {
+    "branch": "r736-deepseek-window-output-20261102",
+    "parent_commit": "20ab446be96a55eb0a6347fb58ccc89444358f9e",
+    "source_commit": "95a5df4d212ceb129f419a331e1b63871b3da085",
+    "source_pipeline_id": 2584,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_files_verified": 11,
+    "receipt_pending": true,
+    "receipt_pipeline_pending": true
+  }
 }
