@@ -14192,5 +14192,48 @@
     "published_utc": "2026-11-02 17:43:16 UTC",
     "receipt_pending": false,
     "next_action": "R735: reconcile the pinned config's qk_rope_head_dim=64 with model.py ModelArgs.rope_head_dim default=32. Confirm the mapping and effective layer-0 profile (compress_ratio=0, theta=10000, YaRN disabled) before implementing identity-bound BF16 RoPE and composing with the R733 window cache; CPU only, no payload/GPU."
+  },
+  "r735_deepseek_window_rope": {
+    "id": "R735",
+    "owner": "integrator",
+    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PENDING",
+    "branch": "r735-deepseek-window-rope-20261102",
+    "parent_commit": "4c5645c252357fb532502b0dab4946cfd20ecccc",
+    "source_commit": "b7a3bf9631499ec1a6e273b6fd602e3de62a4861",
+    "path": "research/R735",
+    "source_pipeline_id": 2580,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "code_files": [
+      "src/deepseek_v41_attention.rs",
+      "src/deepseek_v41_rope.rs",
+      "src/lib.rs"
+    ],
+    "report": "research/R735/REPORT.md",
+    "result": "research/R735/RESULT.json",
+    "manifest": "research/R735/SHA256SUMS",
+    "manifest_sha256": "b1a8e31744ce04dc262ef235bde91ff4af15f94d06ecd62b4ee95d80b09566e9",
+    "manifest_file_count": 5,
+    "source_readback_exact": true,
+    "source_readback_files_verified": 8,
+    "adapted_boundary": "Pinned DeepSeek window RoPE -> R733 atomic cache/attention; cache size and softmax scale fixed to pinned model profile.",
+    "donor": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6 (MIT); no donor code copied.",
+    "verification": "cargo check, rustfmt, Clippy -D warnings pass; no tests or numerical RoPE oracle run.",
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "published_utc": "2026-11-02 18:01:40 UTC",
+    "receipt_pending": true,
+    "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation."
   }
 }
