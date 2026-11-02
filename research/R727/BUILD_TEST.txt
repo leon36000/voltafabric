@@ -1,0 +1,41 @@
+R727 local verification receipt
+Date: 2026-11-02
+Host: PC6 CPU only; no GPU or network worker was used.
+
+Commands and results
+====================
+
+1. cargo test --locked --offline --test r727_deepseek_shared_hc --test r726_deepseek_ffn_norm
+   PASS: R726 2/2; R727 4/4.
+
+2. cargo test --locked --offline --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
+   PASS: 1/1. This is the existing Session/owner bridge regression, not a production
+   worker or network test.
+
+3. cargo test --locked --offline --release --test r727_deepseek_shared_hc --test r726_deepseek_ffn_norm
+   PASS: R726 2/2; R727 4/4.
+
+4. cargo test --locked --offline --release --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
+   PASS: 1/1.
+
+5. cargo clippy --locked --offline --lib -- -D warnings
+   PASS.
+
+6. cargo clippy --locked --offline --test r727_deepseek_shared_hc -- -D warnings
+   PASS.
+
+7. rustfmt --edition 2021 --check src/deepseek_v41.rs tests/r727_deepseek_shared_hc.rs
+   PASS.
+
+8. git diff --check -- src/deepseek_v41.rs tests/r727_deepseek_shared_hc.rs research/R727
+   PASS (tracked diff; new files were also whitespace-scanned before publication).
+
+Scope limits
+============
+
+All new numerical cases use synthetic CPU tensors and independent test formulas;
+only committed index/header metadata was read from the pinned model repository. No
+real checkpoint payload, CUDA, V100, RDMA, inter-PC path, complete generation, or
+performance comparison was exercised. GitLab CI for the source branch is expected to
+run repository security scans/fallback and does not compile this Rust crate; the local
+commands above are the Rust verification evidence.

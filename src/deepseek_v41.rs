@@ -34,6 +34,10 @@ pub const REVISION: &str = "314113f8a7dadb388215396ba5fbee2c610a04d6";
 pub const MXFP4_BLOCK: u64 = 32;
 pub const MAX_MXFP4_DIM: u64 = 65_536;
 pub const MAX_MXFP4_COMPRESSED_BYTES: u64 = 64 * 1024 * 1024;
+/// Separate storage ceiling for the FP8 shared expert; its codes are byte-per-value,
+/// not MXFP4 packed nibbles.
+pub const MAX_FP8_COMPRESSED_BYTES: u64 = 64 * 1024 * 1024;
+pub const MAX_FP8_DIM: u64 = 65_536;
 /// Bound for one three-projection expert Safetensors artifact admitted by the CPU owner.
 pub const MAX_MXFP4_EXPERT_ARTIFACT_BYTES: u64 = 64 * 1024 * 1024;
 /// Maximum work for the bounded CPU reference matvec. This covers one 2304x5120
@@ -43,6 +47,11 @@ pub const MAX_MXFP4_REFERENCE_MACS: u64 = 16 * 1024 * 1024;
 pub const MAX_DEEPSEEK_EXPERT_REFERENCE_MACS: u64 = 48 * 1024 * 1024;
 /// `swiglu_limit` of the official config.json.
 pub const SWIGLU_LIMIT: f32 = 10.0;
+/// V4.1 residual stream multiplicity from the pinned checkpoint configuration.
+pub const PINNED_HC_MULT: usize = 4;
+/// One 2304x5120 shared-expert projection is 11,796,480 MACs.
+pub const MAX_FP8_REFERENCE_MACS: u64 = 16 * 1024 * 1024;
+pub const MAX_SHARED_EXPERT_REFERENCE_MACS: u64 = 48 * 1024 * 1024;
 pub const MAX_ACTIVATION_LEN: usize = 1 << 20;
 /// DeepSeek V4.1 uses one dynamically selected FP8 activation scale per 32 values.
 pub const FP8_ACTIVATION_BLOCK: usize = 32;
@@ -191,6 +200,243 @@ pub fn fp8_activation_quantize_reference(input: &[f32]) -> Result<Fp8ActivationQ
         values: values.into_boxed_slice(),
         scale_codes: scale_codes.into_boxed_slice(),
     })
+}
+
+/// CPU reference for the pinned Hyper-Connections `hc_pre` operation.
+///
+/// `residual_copies` is copy-major `[hc_mult, hidden]`; `pre_mix` is the already
+/// computed FP32 vector from `hc_split_sinkhorn`. The input copies are represented
+/// as exact BF16 values, products/sum use explicit FP32 copy order, and the result
+/// is rounded to BF16 once, matching `Block.hc_pre`. This does not compute the
+/// learned projection or Sinkhorn coefficients, and it is not a GPU kernel.
+pub fn deepseek_hc_pre_reference(
+    residual_copies: &[f32],
+    pre_mix: &[f32],
+    hidden: usize,
+) -> Result<Vec<f32>> {
+    if pre_mix.len() != PINNED_HC_MULT
+        || hidden == 0
+        || hidden > MAX_ACTIVATION_LEN
+        || residual_copies.len() != PINNED_HC_MULT.saturating_mul(hidden)
+        || pre_mix.iter().any(|value| !value.is_finite())
+    {
+        return Err(invalid(
+            "pinned Hyper-Connections pre-mix shape or coefficients are invalid",
+        ));
+    }
+    for &value in residual_copies {
+        if !value.is_finite() || cast_bf16_rne_reference(value)?.to_bits() != value.to_bits() {
+            return Err(invalid(
+                "Hyper-Connections residual copies must be exact finite BF16 values",
+            ));
+        }
+    }
+
+    let mut output = Vec::with_capacity(hidden);
+    for column in 0..hidden {
+        let mut sum = 0.0f32;
+        for copy in 0..PINNED_HC_MULT {
+            sum += pre_mix[copy] * residual_copies[copy * hidden + column];
+        }
+        output.push(cast_bf16_rne_reference(sum)?);
+    }
+    Ok(output)
+}
+
+/// Immutable FP8 E4M3FN weights with one E8M0 scale per 32 consecutive K values.
+/// This is the distinct always-active shared-expert format in the pinned model;
+/// it is not MXFP4 and does not use packed nibbles.
+#[derive(Debug)]
+pub struct Fp8E4m3Matrix {
+    rows: u64,
+    cols: u64,
+    codes: Box<[u8]>,
+    scales: Box<[u8]>,
+}
+
+impl Fp8E4m3Matrix {
+    /// Check dimensions, K blocking, finite E4M3FN codes, E8M0 scales and the
+    /// byte cap before taking ownership of either plane.
+    pub fn new(rows: u64, cols: u64, codes: Vec<u8>, scales: Vec<u8>) -> Result<Self> {
+        if rows == 0
+            || cols == 0
+            || rows > MAX_FP8_DIM
+            || cols > MAX_FP8_DIM
+            || !cols.is_multiple_of(MXFP4_BLOCK)
+        {
+            return Err(invalid("FP8 E4M3 matrix dimensions or K block are invalid"));
+        }
+        let code_bytes = rows
+            .checked_mul(cols)
+            .ok_or_else(|| invalid("FP8 E4M3 code byte count overflow"))?;
+        let scale_bytes = rows
+            .checked_mul(cols / MXFP4_BLOCK)
+            .ok_or_else(|| invalid("FP8 E4M3 scale byte count overflow"))?;
+        if code_bytes
+            .checked_add(scale_bytes)
+            .is_none_or(|bytes| bytes > MAX_FP8_COMPRESSED_BYTES)
+            || u64::try_from(codes.len()).ok() != Some(code_bytes)
+            || u64::try_from(scales.len()).ok() != Some(scale_bytes)
+        {
+            return Err(invalid("FP8 E4M3 plane lengths or byte cap are invalid"));
+        }
+        if scales.contains(&255) {
+            return Err(Error::new("FP8_SCALE_NAN", "E8M0 scale 255 encodes NaN"));
+        }
+        if codes.iter().any(|code| code & 0x7f == 0x7f) {
+            return Err(Error::new(
+                "FP8_WEIGHT_NAN",
+                "E4M3FN weight contains its NaN encoding",
+            ));
+        }
+        Ok(Self {
+            rows,
+            cols,
+            codes: codes.into_boxed_slice(),
+            scales: scales.into_boxed_slice(),
+        })
+    }
+
+    pub fn rows(&self) -> u64 {
+        self.rows
+    }
+
+    pub fn cols(&self) -> u64 {
+        self.cols
+    }
+
+    /// Immutable resident FP8 code and E8M0 scale planes.
+    pub fn compressed_planes(&self) -> (&[u8], &[u8]) {
+        (&self.codes, &self.scales)
+    }
+
+    /// Bounded single-token reference GEMV from E4M3FN/E8M0 planes and the
+    /// pinned dynamically quantized FP8 activation. Each 32-value dot is
+    /// accumulated in f64 and multiplied by the two block scales exactly once.
+    pub fn matvec_reference(&self, input: &Fp8ActivationQuantized) -> Result<Vec<f32>> {
+        let macs = self
+            .rows
+            .checked_mul(self.cols)
+            .ok_or_else(|| invalid("FP8 E4M3 reference work count overflow"))?;
+        if macs > MAX_FP8_REFERENCE_MACS {
+            return Err(invalid(format!(
+                "FP8 E4M3 reference work limit exceeded: {macs} > {MAX_FP8_REFERENCE_MACS}"
+            )));
+        }
+        if u64::try_from(input.values.len()).ok() != Some(self.cols)
+            || input.scale_codes.len() as u64 != self.cols / MXFP4_BLOCK
+        {
+            return Err(invalid("FP8 E4M3 matvec activation shape differs from K"));
+        }
+
+        let cols =
+            usize::try_from(self.cols).map_err(|_| invalid("FP8 E4M3 K does not fit usize"))?;
+        let blocks = cols / MXFP4_BLOCK as usize;
+        let mut output = Vec::with_capacity(self.rows as usize);
+        for row in 0..self.rows as usize {
+            let mut total = 0.0f64;
+            for block in 0..blocks {
+                let activation_scale = decode_e8m0(input.scale_codes[block])?;
+                let weight_scale = decode_e8m0(self.scales[row * blocks + block])?;
+                let mut dot = 0.0f64;
+                let start = row * cols + block * MXFP4_BLOCK as usize;
+                for offset in 0..MXFP4_BLOCK as usize {
+                    let activation = decode_e4m3fn_f64(input.values[block * 32 + offset])?;
+                    let weight = decode_e4m3fn_f64(self.codes[start + offset])?;
+                    dot += activation * weight;
+                }
+                total += (dot * activation_scale) * weight_scale;
+            }
+            let value = total as f32;
+            if !value.is_finite() {
+                return Err(Error::new(
+                    "NUMERICAL_OVERFLOW",
+                    "FP8 E4M3 GEMV output is nonfinite",
+                ));
+            }
+            output.push(value);
+        }
+        Ok(output)
+    }
+}
+
+fn decode_e4m3fn_f64(code: u8) -> Result<f64> {
+    let magnitude_code = code & 0x7f;
+    if magnitude_code == 0x7f {
+        return Err(Error::new("FP8_WEIGHT_NAN", "E4M3FN code encodes NaN"));
+    }
+    let sign = if code & 0x80 == 0 { 1.0 } else { -1.0 };
+    Ok(sign * f64::from(e4m3fn_positive(magnitude_code)))
+}
+
+/// CPU reference for one always-active pinned DeepSeek shared SwiGLU expert.
+/// Each projection is resident FP8 E4M3FN/E8M0; the routed MXFP4 K32 experts
+/// remain a separate type and path. The return is raw FP32 shared output, with
+/// no gate coefficient; callers add it once to the completed routed contribution.
+#[derive(Debug)]
+pub struct DeepSeekV41SharedExpert {
+    w1: Fp8E4m3Matrix,
+    w2: Fp8E4m3Matrix,
+    w3: Fp8E4m3Matrix,
+}
+
+impl DeepSeekV41SharedExpert {
+    pub fn new(w1: Fp8E4m3Matrix, w2: Fp8E4m3Matrix, w3: Fp8E4m3Matrix) -> Result<Self> {
+        let w1_macs = w1
+            .rows
+            .checked_mul(w1.cols)
+            .ok_or_else(|| invalid("shared FP8 W1 MAC count overflow"))?;
+        let w2_macs = w2
+            .rows
+            .checked_mul(w2.cols)
+            .ok_or_else(|| invalid("shared FP8 W2 MAC count overflow"))?;
+        let total_macs = w1_macs
+            .checked_mul(2)
+            .and_then(|macs| macs.checked_add(w2_macs))
+            .ok_or_else(|| invalid("shared FP8 expert MAC count overflow"))?;
+        if w1.rows != w3.rows
+            || w1.cols != w3.cols
+            || w2.cols != w1.rows
+            || w2.rows != w1.cols
+            || w1_macs > MAX_FP8_REFERENCE_MACS
+            || w2_macs > MAX_FP8_REFERENCE_MACS
+            || total_macs > MAX_SHARED_EXPERT_REFERENCE_MACS
+        {
+            return Err(invalid(
+                "pinned shared FP8 expert projection shapes or work bounds differ",
+            ));
+        }
+        Ok(Self { w1, w2, w3 })
+    }
+
+    /// Execute the pinned `w1 -> clamp -> SiLU*up -> BF16 cast -> w2` sequence.
+    /// `w3` is the up projection; output is deliberately unweighted.
+    pub fn forward_reference(&self, input_bf16_f32: &[f32]) -> Result<Vec<f32>> {
+        if input_bf16_f32.len() as u64 != self.w1.cols
+            || input_bf16_f32.iter().any(|value| {
+                !value.is_finite()
+                    || cast_bf16_rne_reference(*value)
+                        .map(|rounded| rounded.to_bits() != value.to_bits())
+                        .unwrap_or(true)
+            })
+        {
+            return Err(invalid(
+                "shared FP8 expert input must be finite exact-BF16 values of width K",
+            ));
+        }
+        let quantized_input = fp8_activation_quantize_reference(input_bf16_f32)?;
+        let mut gate = self.w1.matvec_reference(&quantized_input)?;
+        let mut up = self.w3.matvec_reference(&quantized_input)?;
+        let mut down_input = Vec::with_capacity(gate.len());
+        for (gate_value, up_value) in gate.iter_mut().zip(up.iter_mut()) {
+            *gate_value = gate_value.min(SWIGLU_LIMIT);
+            *up_value = up_value.clamp(-SWIGLU_LIMIT, SWIGLU_LIMIT);
+            let silu = *gate_value / (1.0 + (-*gate_value).exp());
+            down_input.push(cast_bf16_rne_reference(silu * *up_value)?);
+        }
+        let quantized_down_input = fp8_activation_quantize_reference(&down_input)?;
+        self.w2.matvec_reference(&quantized_down_input)
+    }
 }
 
 /// Round one finite FP32 value to BF16 using round-to-nearest, ties-to-even.

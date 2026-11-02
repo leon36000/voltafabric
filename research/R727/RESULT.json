@@ -1,0 +1,43 @@
+{
+  "id": "R727",
+  "state": "LOCAL_CPU_OPERATOR_AND_METADATA_PASS_READY_FOR_PRIVATE_GITLAB_SOURCE_PUBLICATION",
+  "branch": "r727-deepseek-shared-fp8-hc-20261102",
+  "parent_commit": "8550acd70d206fb15855e2d6e24f736a75969de0",
+  "code_files": [
+    "src/deepseek_v41.rs",
+    "tests/r727_deepseek_shared_hc.rs"
+  ],
+  "adaptation": [
+    "Pinned four-copy Hyper-Connections hc_pre CPU reference with explicit FP32 copy order and BF16 output",
+    "Distinct FP8 E4M3FN/E8M0 shared-expert matrix and three-projection SwiGLU CPU oracle"
+  ],
+  "donor_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+  "donor_license": "MIT",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "pinned_metadata": {
+    "shared_projection_dtypes": "weights F8_E4M3, scales F8_E8M0",
+    "layer0_shapes": {
+      "w1_w3_weight": [2304, 5120],
+      "w1_w3_scale": [72, 160],
+      "w2_weight": [5120, 2304],
+      "w2_scale": [160, 72]
+    },
+    "shared_gate_norm_shard_colocation": "40/40 backbone layers"
+  },
+  "test_scope": "synthetic CPU operator tensors plus pinned committed index/header metadata",
+  "real_checkpoint_payload": false,
+  "routed_expert_coefficients_applied": false,
+  "shared_output_joined_to_collector": false,
+  "hc_mixes_sinkhorn_implemented": false,
+  "hc_post_residual_implemented": false,
+  "attention_implemented": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R728: indexed-load the six FP8 shared-expert tensors and bind unweighted shared output to the routed Collector completion, preserving identities and atomic refusal; no GPU or full-generation claim."
+}

@@ -1,0 +1,44 @@
+{
+  "id": "R727",
+  "date": "2026-11-02",
+  "state": "READY_FOR_PRIVATE_GITLAB_SOURCE_PUBLICATION",
+  "parent_commit": "8550acd70d206fb15855e2d6e24f736a75969de0",
+  "branch": "r727-deepseek-shared-fp8-hc-20261102",
+  "source_pipeline": "PENDING",
+  "receipt_pipeline": "PENDING",
+  "verified_local": {
+    "r726_and_r727_debug_cpu": "PASS; R726 2/2, R727 4/4",
+    "r712_session_owner_debug_cpu": "PASS; 1/1",
+    "r726_and_r727_release_cpu": "PASS; R726 2/2, R727 4/4",
+    "r712_session_owner_release_cpu": "PASS; 1/1",
+    "clippy_library_and_r727_test": "PASS",
+    "rustfmt_and_diff_check": "PASS"
+  },
+  "changed_targets": [
+    "src/deepseek_v41.rs",
+    "tests/r727_deepseek_shared_hc.rs",
+    "research/R727/REPORT.md",
+    "research/R727/OPEN_SOURCE_SCREEN.md",
+    "research/R727/RESULT.json",
+    "research/R727/BUILD_TEST.txt",
+    "research/R727/SHA256SUMS",
+    "handoff/R727.json"
+  ],
+  "adaptation": "CPU reference for pinned four-copy HC pre-mix and shared E4M3FN/E8M0 FP8 SwiGLU projections; preserves raw unweighted shared output.",
+  "donor": {
+    "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "donor_code_copied": false,
+    "new_dependencies": false
+  },
+  "limitations": [
+    "Synthetic CPU payloads only; no model payload read.",
+    "No indexed shared-FP8 tensor loader or Collector join in this tranche.",
+    "No learned HC projection/Sinkhorn or hc_post implementation.",
+    "No attention, full generation, GPU, inter-PC transport, or performance claim."
+  ],
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "next_action": "R728: implement bounded indexed loading for the six shared FP8 tensors and bind its raw output to the completed routed Collector result under full identity and atomic refusal; CPU-only until GPU gates are satisfied."
+}
