@@ -248,6 +248,14 @@ pub struct IndexedSafetensorsPlan {
     pub total_size_bytes: Option<u64>,
 }
 
+#[derive(Debug)]
+pub struct IndexedSafetensorsShardHeader {
+    pub file_bytes: u64,
+    pub header_bytes: Vec<u8>,
+    pub data_start_bytes: u64,
+    pub sha256: String,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 struct HuggingFaceSafetensorsIndex {
@@ -309,6 +317,121 @@ fn valid_safetensors_shard_basename(name: &str) -> bool {
         && name
             .bytes()
             .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
+}
+
+fn open_indexed_safetensors_shard(
+    root: &Path,
+    shard_name: &str,
+) -> Result<(File, std::fs::Metadata)> {
+    if !valid_safetensors_shard_basename(shard_name) {
+        return Err(invalid("indexed Safetensors shard basename is invalid"));
+    }
+    let canonical_root = std::fs::canonicalize(root).map_err(io)?;
+    if !std::fs::metadata(&canonical_root).map_err(io)?.is_dir() {
+        return Err(invalid("Safetensors shard root must be a directory"));
+    }
+    let shard_path = canonical_root.join(shard_name);
+    let path_metadata = std::fs::symlink_metadata(&shard_path).map_err(io)?;
+    if !path_metadata.file_type().is_file() {
+        return Err(invalid(
+            "indexed Safetensors shard must be a regular non-symlink file",
+        ));
+    }
+    let canonical_shard = std::fs::canonicalize(&shard_path).map_err(io)?;
+    if canonical_shard.parent() != Some(canonical_root.as_path())
+        || canonical_shard.file_name().and_then(|name| name.to_str()) != Some(shard_name)
+    {
+        return Err(invalid(
+            "indexed Safetensors shard resolves outside its root",
+        ));
+    }
+
+    let mut options = std::fs::OpenOptions::new();
+    options.read(true);
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::OpenOptionsExt;
+        options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
+    }
+    let shard_file = options.open(&shard_path).map_err(io)?;
+    let before = shard_file.metadata().map_err(io)?;
+    if !before.is_file()
+        || before.len() != path_metadata.len()
+        || before.modified().map_err(io)? != path_metadata.modified().map_err(io)?
+    {
+        return Err(Error::new(
+            "CHECKPOINT_CHANGED",
+            "indexed Safetensors shard changed while it was opened",
+        ));
+    }
+    Ok((shard_file, before))
+}
+
+/// Read and validate a single indexed shard's bounded header without reading any
+/// tensor payload. The index planner remains responsible for authenticating the
+/// shard name; this helper enforces root confinement, a regular-file target, and
+/// stable metadata around the header read.
+pub fn read_indexed_safetensors_shard_header(
+    root: &Path,
+    shard_name: &str,
+    max_source_shard_bytes: u64,
+) -> Result<IndexedSafetensorsShardHeader> {
+    if max_source_shard_bytes == 0 {
+        return Err(invalid("indexed Safetensors source byte ceiling is zero"));
+    }
+    let (mut shard_file, before) = open_indexed_safetensors_shard(root, shard_name)?;
+    let file_bytes = before.len();
+    if file_bytes == 0 || file_bytes > max_source_shard_bytes {
+        return Err(invalid(
+            "indexed Safetensors shard is empty or exceeds its byte ceiling",
+        ));
+    }
+    shard_file.seek(SeekFrom::Start(0)).map_err(io)?;
+    let mut length = [0_u8; 8];
+    shard_file.read_exact(&mut length).map_err(io)?;
+    let header_len = u64::from_le_bytes(length);
+    if header_len == 0 || header_len > MAX_HEADER_BYTES {
+        return Err(invalid(
+            "indexed Safetensors shard header exceeds 8 MiB bound or is empty",
+        ));
+    }
+    let data_start_bytes = header_len
+        .checked_add(8)
+        .ok_or_else(|| invalid("indexed Safetensors header offset overflow"))?;
+    if data_start_bytes > file_bytes {
+        return Err(invalid("indexed Safetensors shard header is truncated"));
+    }
+    let header_len = usize::try_from(header_len)
+        .map_err(|_| invalid("indexed Safetensors header does not fit memory size"))?;
+    let mut header_bytes = Vec::new();
+    header_bytes
+        .try_reserve_exact(header_len)
+        .map_err(|error| Error::new("ALLOCATION_FAILED", error.to_string()))?;
+    header_bytes.resize(header_len, 0);
+    shard_file.read_exact(&mut header_bytes).map_err(io)?;
+    serde_json::from_slice::<UniqueHeader>(&header_bytes).map_err(json)?;
+    let metadata: Metadata = serde_json::from_slice(&header_bytes).map_err(json)?;
+    if data_start_bytes.checked_add(metadata.data_len() as u64) != Some(file_bytes) {
+        return Err(invalid(
+            "indexed Safetensors header offsets do not cover exact shard length",
+        ));
+    }
+    let after = shard_file.metadata().map_err(io)?;
+    if before.len() != after.len()
+        || before.modified().map_err(io)? != after.modified().map_err(io)?
+    {
+        return Err(Error::new(
+            "CHECKPOINT_CHANGED",
+            "indexed Safetensors shard changed during header read",
+        ));
+    }
+    let sha256 = crate::sha256::hex(&header_bytes);
+    Ok(IndexedSafetensorsShardHeader {
+        file_bytes,
+        header_bytes,
+        data_start_bytes,
+        sha256,
+    })
 }
 
 /// Resolve a small, explicit tensor selection through a Hugging Face
@@ -558,54 +681,14 @@ pub fn read_indexed_named_tensors(
 
     let plan =
         plan_indexed_safetensors_shards(index_bytes, expected_index_sha256, &requested_names)?;
-    let canonical_root = std::fs::canonicalize(root).map_err(io)?;
-    if !std::fs::metadata(&canonical_root).map_err(io)?.is_dir() {
-        return Err(invalid("Safetensors shard root must be a directory"));
-    }
-
     let mut file_bytes = 0u64;
     let mut header_bytes = 0u64;
     let mut io_bytes = 0u64;
     let mut tensors = BTreeMap::new();
     for (shard_name, tensor_names) in &plan.tensors_by_shard {
-        // The planner restricted names to safe basenames. These checks also
-        // bind each source to this root and close the final-component symlink
-        // race on Unix with O_NOFOLLOW below.
-        let shard_path = canonical_root.join(shard_name);
-        let path_metadata = std::fs::symlink_metadata(&shard_path).map_err(io)?;
-        if !path_metadata.file_type().is_file() {
-            return Err(invalid(
-                "indexed Safetensors shard must be a regular non-symlink file",
-            ));
-        }
-        let canonical_shard = std::fs::canonicalize(&shard_path).map_err(io)?;
-        if canonical_shard.parent() != Some(canonical_root.as_path())
-            || canonical_shard.file_name().and_then(|name| name.to_str())
-                != Some(shard_name.as_str())
-        {
-            return Err(invalid(
-                "indexed Safetensors shard resolves outside its root",
-            ));
-        }
-
-        let mut options = std::fs::OpenOptions::new();
-        options.read(true);
-        #[cfg(unix)]
-        {
-            use std::os::unix::fs::OpenOptionsExt;
-            options.custom_flags(libc::O_NONBLOCK | libc::O_NOFOLLOW);
-        }
-        let mut shard_file = options.open(&shard_path).map_err(io)?;
-        let before = shard_file.metadata().map_err(io)?;
-        if !before.is_file()
-            || before.len() != path_metadata.len()
-            || before.modified().map_err(io)? != path_metadata.modified().map_err(io)?
-        {
-            return Err(Error::new(
-                "CHECKPOINT_CHANGED",
-                "indexed Safetensors shard changed while it was opened",
-            ));
-        }
+        // Reuse the same root confinement and no-follow open for the header-only
+        // admission path and the selected-payload reader.
+        let (mut shard_file, before) = open_indexed_safetensors_shard(root, shard_name)?;
 
         let shard_specs = tensor_names
             .iter()

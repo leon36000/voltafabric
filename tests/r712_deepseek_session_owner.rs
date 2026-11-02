@@ -4,14 +4,18 @@
 
 use safetensors::tensor::{serialize, Dtype, TensorView};
 use std::collections::BTreeMap;
-use std::io::{self, Read, Seek, SeekFrom};
+use std::fs::{self, File};
+use std::io::{self, Read, Seek, SeekFrom, Write};
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use voltafabric::deepseek_v41::{
     execute_pinned_mxfp4_route, execute_pinned_mxfp4_route_grouped,
     group_pinned_mxfp4_route_residents, plan_pinned_mxfp4_expert_payloads,
-    preflight_pinned_mxfp4_route_residents, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
-    PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RouteExecutionState,
-    REVISION,
+    preflight_pinned_mxfp4_route_residents, read_pinned_mxfp4_rank_expert,
+    read_pinned_mxfp4_rank_expert_indexed, Mxfp4ExpertNamespace, PinnedExpertPayloadRequest,
+    PinnedMxfp4IndexedRankExpertReadRequest, PinnedMxfp4RankExpertReadRequest,
+    PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
     DeepSeekV41Gate, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource, TokenKind,
@@ -28,6 +32,33 @@ const PINNED_INDEX_SHA256: &str =
     "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8";
 const TOP6: [u32; 6] = [0, 383, 382, 381, 380, 379];
 const ROUTE_WEIGHTS: [f64; 6] = [0.5, 0.25, 0.125, 0.0625, 0.03125, 0.03125];
+static NEXT_INDEXED_TEMP: AtomicU64 = AtomicU64::new(0);
+
+struct IndexedTempDirectory(PathBuf);
+
+impl IndexedTempDirectory {
+    fn new() -> Self {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join(".work");
+        fs::create_dir_all(&root).unwrap();
+        let sequence = NEXT_INDEXED_TEMP.fetch_add(1, Ordering::Relaxed);
+        let path = root.join(format!(
+            "r722-indexed-session-{}-{sequence}",
+            std::process::id()
+        ));
+        fs::create_dir(&path).unwrap();
+        Self(path)
+    }
+
+    fn path(&self) -> &Path {
+        &self.0
+    }
+}
+
+impl Drop for IndexedTempDirectory {
+    fn drop(&mut self) {
+        let _ = fs::remove_dir_all(&self.0);
+    }
+}
 
 struct SparseShard {
     file_bytes: u64,
@@ -359,6 +390,99 @@ fn resident_for_expert(
     read.into_session_resident(peak).unwrap()
 }
 
+fn indexed_residents_for_route(
+    route: &RoutingProblem,
+) -> (
+    IndexedTempDirectory,
+    Vec<voltafabric::deepseek_v41::PinnedMxfp4RankResidentExpert>,
+) {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let header = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    );
+    let plan = plan_pinned_mxfp4_expert_payloads(PinnedExpertPayloadRequest {
+        index_bytes: index,
+        header_bytes: header,
+        expected_header_sha256: HEADER_SHA256,
+        header_shard_name: "model-00003-of-00048.safetensors",
+        source_shard_bytes: SHARD_BYTES,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        namespace: Mxfp4ExpertNamespace::Backbone,
+        layer: 0,
+        experts: &TOP6,
+    })
+    .unwrap();
+    let temp = IndexedTempDirectory::new();
+    let shard_path = temp.path().join(&plan.source_shard);
+    let mut shard = File::create(&shard_path).unwrap();
+    shard.set_len(SHARD_BYTES).unwrap();
+    shard
+        .write_all(&(header.len() as u64).to_le_bytes())
+        .unwrap();
+    shard.write_all(header).unwrap();
+
+    let mut hashes_by_expert = TOP6
+        .iter()
+        .map(|&expert| (expert, BTreeMap::new()))
+        .collect::<BTreeMap<_, _>>();
+    for tensor in &plan.tensors {
+        let length = usize::try_from(tensor.file_offset_end - tensor.file_offset_start).unwrap();
+        let value = if tensor.name.ends_with(".scale") {
+            0x6f
+        } else {
+            0x22
+        };
+        let payload = vec![value; length];
+        let expert = tensor.expert;
+        hashes_by_expert
+            .get_mut(&expert)
+            .unwrap()
+            .insert(tensor.name.clone(), voltafabric::sha256::hex(&payload));
+        shard
+            .seek(SeekFrom::Start(tensor.file_offset_start))
+            .unwrap();
+        shard.write_all(&payload).unwrap();
+    }
+    drop(shard);
+
+    let residents = TOP6
+        .iter()
+        .map(|&expert| {
+            let rank = route
+                .registry
+                .copies
+                .iter()
+                .find(|copy| copy.expert == expert)
+                .unwrap()
+                .rank;
+            let read = read_pinned_mxfp4_rank_expert_indexed(
+                temp.path(),
+                PinnedMxfp4IndexedRankExpertReadRequest {
+                    route,
+                    attempt: 29,
+                    expert,
+                    rank,
+                    index_bytes: index,
+                    expected_header_sha256: HEADER_SHA256,
+                    expected_payload_sha256: &hashes_by_expert[&expert],
+                    max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+                    max_payload_bytes: voltafabric::checkpoint::MAX_NAMED_TENSOR_PAYLOAD_BYTES,
+                },
+            )
+            .unwrap();
+            assert_eq!(read.plan().source_shard, plan.source_shard);
+            assert_eq!(read.plan().experts, vec![expert]);
+            let peak = read.plan().selected_payload_bytes * 2
+                + voltafabric::checkpoint::MAX_HEADER_BYTES
+                + 8;
+            read.into_session_resident(peak).unwrap()
+        })
+        .collect();
+    (temp, residents)
+}
+
 #[test]
 fn complete_top6_is_preflighted_then_loaded_on_six_cpu_sessions_without_exec() {
     let route = distributed_route_problem();
@@ -435,11 +559,7 @@ fn complete_top6_is_preflighted_then_loaded_on_six_cpu_sessions_without_exec() {
 #[test]
 fn complete_top6_exec_uses_one_route_weight_and_matches_fp64_oracle() {
     let route = distributed_route_problem();
-    let residents = TOP6
-        .iter()
-        .enumerate()
-        .map(|(index, &expert)| resident_for_expert(&route, expert, 4 + index as u32))
-        .collect::<Vec<_>>();
+    let (_indexed_source, residents) = indexed_residents_for_route(&route);
     let input: Vec<f32> = (0..route.hidden)
         .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
         .collect();

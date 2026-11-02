@@ -1,0 +1,38 @@
+{
+  "id": "R722",
+  "owner": "integrator",
+  "state": "SOURCE_AND_EVIDENCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "branch": "r722-deepseek-indexed-session-20261102",
+  "parent_commit": "21738ea276680b2e21be07bcf3358db3702d721c",
+  "path": "research/R722",
+  "code_files": [
+    "src/checkpoint.rs",
+    "src/deepseek_v41.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "adapted_boundary": "Pinned DeepSeek selected expert reads through the R721 indexed Safetensors loader into the existing resident owner and CPU Session route path.",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "local_tests": {
+    "indexed_reader_debug": "1/1 pass",
+    "indexed_reader_release": "1/1 pass",
+    "route_session_oracle_debug": "1/1 pass",
+    "route_session_oracle_release": "1/1 pass",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "limits": {
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "next_action": "R723: connect the gate-selected token route to the pinned indexed reader and existing CPU Session path, retaining atomic owner preflight and the independent MXFP4 oracle. Require separately admitted real checkpoint payloads before claiming model generation.",
+  "prepared_utc": "2026-11-02T13:46:54Z"
+}

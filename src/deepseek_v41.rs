@@ -23,6 +23,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{Read, Seek, SeekFrom};
 use std::ops::Range;
+use std::path::Path;
 use std::sync::Arc;
 
 pub mod r9_fp32;
@@ -844,6 +845,22 @@ pub struct PinnedMxfp4RankExpertReadRequest<'a> {
     pub rank: u32,
     pub index_bytes: &'a [u8],
     pub header_shard_name: &'a str,
+    pub expected_header_sha256: &'a str,
+    pub expected_payload_sha256: &'a BTreeMap<String, String>,
+    pub max_source_shard_bytes: u64,
+    pub max_payload_bytes: u64,
+}
+
+/// Inputs for importing one route-selected expert from a pinned, indexed
+/// SafeTensors checkpoint directory. The index and each of the six selected
+/// tensor payloads are independently hash checked before a read receipt exists.
+#[derive(Debug, Clone, Copy)]
+pub struct PinnedMxfp4IndexedRankExpertReadRequest<'a> {
+    pub route: &'a crate::routing::RoutingProblem,
+    pub attempt: u64,
+    pub expert: u32,
+    pub rank: u32,
+    pub index_bytes: &'a [u8],
     pub expected_header_sha256: &'a str,
     pub expected_payload_sha256: &'a BTreeMap<String, String>,
     pub max_source_shard_bytes: u64,
@@ -3447,6 +3464,232 @@ pub fn read_pinned_mxfp4_rank_expert<R: Read + Seek>(
     })
 }
 
+/// Read one route-selected DeepSeek expert through the Hugging Face indexed
+/// shard map, then return the same receipt type as the bounded single-shard
+/// reader. The pinned V4.1 index maps each expert layer to one source shard;
+/// the generic index reader is still used for the actual selected-tensor read
+/// and fails closed if the six tensors stop sharing that shard.
+pub fn read_pinned_mxfp4_rank_expert_indexed(
+    root: &Path,
+    request: PinnedMxfp4IndexedRankExpertReadRequest<'_>,
+) -> Result<PinnedMxfp4RankExpertRead> {
+    let PinnedMxfp4IndexedRankExpertReadRequest {
+        route,
+        attempt,
+        expert,
+        rank,
+        index_bytes,
+        expected_header_sha256,
+        expected_payload_sha256,
+        max_source_shard_bytes,
+        max_payload_bytes,
+    } = request;
+    crate::routing::validate(route)?;
+    if attempt == 0
+        || route.stamp.model_revision != REVISION
+        || route.hidden != crate::deepseek_v41_gate::HIDDEN_SIZE
+        || route.routes.len() != 1
+        || route.routes[0].len() != crate::deepseek_v41_gate::TOP_K
+        || route.experts.len() != crate::deepseek_v41_gate::TOP_K
+        || route.experts
+            != route.routes[0]
+                .iter()
+                .map(|choice| choice.expert)
+                .collect::<Vec<_>>()
+        || !route.experts.contains(&expert)
+    {
+        return Err(invalid(
+            "DeepSeek indexed payload request does not match one identified top-6 route",
+        ));
+    }
+    let route_fingerprint = pinned_top6_route_fingerprint(route, attempt)?;
+    let local = route
+        .registry
+        .copies
+        .iter()
+        .find(|copy| copy.expert == expert && copy.rank == rank)
+        .map(|copy| copy.local)
+        .ok_or_else(|| invalid("selected DeepSeek expert has no binding on the requested rank"))?;
+    if !route
+        .resident_order
+        .get(&rank)
+        .is_some_and(|order| order.contains(&local))
+    {
+        return Err(invalid(
+            "selected DeepSeek expert local binding is absent from the rank order",
+        ));
+    }
+    if index_bytes.is_empty()
+        || index_bytes.len() > MAX_PINNED_EXPERT_INDEX_BYTES
+        || crate::sha256::hex(index_bytes) != PINNED_EXPERT_INDEX_SHA256
+        || !crate::sha256::is_hex_digest(expected_header_sha256)
+        || max_source_shard_bytes == 0
+        || max_payload_bytes == 0
+        || max_payload_bytes > crate::checkpoint::MAX_NAMED_TENSOR_PAYLOAD_BYTES
+    {
+        return Err(invalid(
+            "DeepSeek indexed read identity, pinned index, or byte ceiling is invalid",
+        ));
+    }
+
+    let prefix = format!("layers.{}.ffn.experts.{expert}", route.stamp.layer);
+    let tensor_names = [
+        format!("{prefix}.w1.weight"),
+        format!("{prefix}.w1.scale"),
+        format!("{prefix}.w2.weight"),
+        format!("{prefix}.w2.scale"),
+        format!("{prefix}.w3.weight"),
+        format!("{prefix}.w3.scale"),
+    ];
+    let expected_names = tensor_names.iter().cloned().collect::<BTreeSet<_>>();
+    if expected_payload_sha256.len() != tensor_names.len()
+        || expected_payload_sha256
+            .keys()
+            .any(|name| !expected_names.contains(name))
+        || tensor_names.iter().any(|name| {
+            expected_payload_sha256
+                .get(name)
+                .is_none_or(|digest| !crate::sha256::is_hex_digest(digest))
+        })
+    {
+        return Err(invalid(
+            "DeepSeek indexed read requires exactly six selected payload hashes",
+        ));
+    }
+
+    let indexed_plan = crate::checkpoint::plan_indexed_safetensors_shards(
+        index_bytes,
+        PINNED_EXPERT_INDEX_SHA256,
+        &tensor_names,
+    )?;
+    if indexed_plan.tensor_count != 96_085
+        || indexed_plan.total_size_bytes != Some(510_286_023_000)
+        || indexed_plan.tensors_by_shard.len() != 1
+    {
+        return Err(invalid(
+            "pinned DeepSeek index metadata or one-layer shard mapping differs",
+        ));
+    }
+    let (header_shard_name, selected_names) = indexed_plan
+        .tensors_by_shard
+        .iter()
+        .next()
+        .ok_or_else(|| invalid("pinned DeepSeek index selected no source shard"))?;
+    if selected_names.len() != tensor_names.len()
+        || selected_names.iter().collect::<BTreeSet<_>>()
+            != tensor_names.iter().collect::<BTreeSet<_>>()
+    {
+        return Err(invalid(
+            "pinned DeepSeek shard plan differs from the exact six selected tensors",
+        ));
+    }
+
+    let header = crate::checkpoint::read_indexed_safetensors_shard_header(
+        root,
+        header_shard_name,
+        max_source_shard_bytes,
+    )?;
+    if header.sha256 != expected_header_sha256 {
+        return Err(invalid(
+            "DeepSeek indexed shard header differs from the pinned digest",
+        ));
+    }
+    let plan = plan_pinned_mxfp4_expert_payloads(PinnedExpertPayloadRequest {
+        index_bytes,
+        header_bytes: &header.header_bytes,
+        expected_header_sha256: &header.sha256,
+        header_shard_name,
+        source_shard_bytes: header.file_bytes,
+        max_source_shard_bytes,
+        namespace: Mxfp4ExpertNamespace::Backbone,
+        layer: route.stamp.layer,
+        experts: &[expert],
+    })?;
+    if plan.data_start_bytes != header.data_start_bytes
+        || plan.selected_payload_bytes > max_payload_bytes
+        || plan.tensors.len() != tensor_names.len()
+    {
+        return Err(invalid(
+            "DeepSeek indexed shard header differs from the pinned expert plan",
+        ));
+    }
+
+    let selected = plan
+        .tensors
+        .iter()
+        .map(|tensor| {
+            let dtype = match tensor.dtype {
+                "I8" => Dtype::I8,
+                "F8_E8M0" => Dtype::F8_E8M0,
+                _ => return Err(invalid("DeepSeek indexed tensor dtype is unsupported")),
+            };
+            Ok(crate::checkpoint::NamedTensorSpec {
+                name: tensor.name.clone(),
+                dtype,
+                shape: tensor.shape.clone(),
+                bytes: tensor
+                    .file_offset_end
+                    .checked_sub(tensor.file_offset_start)
+                    .ok_or_else(|| invalid("DeepSeek indexed tensor range is reversed"))?,
+                sha256: expected_payload_sha256[&tensor.name].clone(),
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
+    let indexed_import = crate::checkpoint::read_indexed_named_tensors(
+        root,
+        index_bytes,
+        PINNED_EXPERT_INDEX_SHA256,
+        &selected,
+        max_payload_bytes,
+    )?;
+    if indexed_import.plan != indexed_plan
+        || indexed_import.file_bytes != header.file_bytes
+        || indexed_import.header_bytes
+            != u64::try_from(header.header_bytes.len())
+                .map_err(|_| invalid("DeepSeek indexed header size does not fit u64"))?
+        || indexed_import.tensors.len() != tensor_names.len()
+    {
+        return Err(invalid(
+            "indexed Safetensors import differs from the pinned DeepSeek read plan",
+        ));
+    }
+    let final_header = crate::checkpoint::read_indexed_safetensors_shard_header(
+        root,
+        header_shard_name,
+        max_source_shard_bytes,
+    )?;
+    if final_header.file_bytes != header.file_bytes || final_header.sha256 != header.sha256 {
+        return Err(Error::new(
+            "CHECKPOINT_CHANGED",
+            "DeepSeek indexed shard size or header changed during selective read",
+        ));
+    }
+    let header_io_bytes = header.data_start_bytes;
+    let total_io_bytes = header_io_bytes
+        .checked_add(indexed_import.io_bytes)
+        .and_then(|bytes| bytes.checked_add(final_header.data_start_bytes))
+        .ok_or_else(|| invalid("DeepSeek indexed reader I/O byte count overflow"))?;
+    Ok(PinnedMxfp4RankExpertRead {
+        stamp: route.stamp.clone(),
+        attempt,
+        route_experts: route.experts.clone(),
+        route_fingerprint,
+        expert,
+        rank,
+        local,
+        plan,
+        header_sha256: header.sha256,
+        header_validation_io_bytes: header_io_bytes,
+        total_io_bytes,
+        payloads: crate::checkpoint::NamedTensorImport {
+            file_bytes: indexed_import.file_bytes,
+            header_bytes: indexed_import.header_bytes,
+            io_bytes: indexed_import.io_bytes,
+            tensors: indexed_import.tensors,
+        },
+    })
+}
+
 impl Mxfp4Expert {
     /// Load exactly one expert's six MXFP4 tensors without copying any plane out of the
     /// input buffer. The input Vec is moved into the owner, so callers should read the
@@ -4265,19 +4508,48 @@ mod a105_full_pinned_expert_index_tests {
 mod a148_pinned_expert_selective_read_tests {
     use super::{
         plan_pinned_mxfp4_expert_payloads, preflight_pinned_mxfp4_route_residents,
-        read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace, PinnedExpertPayloadRequest,
+        read_pinned_mxfp4_rank_expert, read_pinned_mxfp4_rank_expert_indexed, Mxfp4ExpertNamespace,
+        PinnedExpertPayloadRequest, PinnedMxfp4IndexedRankExpertReadRequest,
         PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RankResidentExpert,
         PINNED_EXPERT_INDEX_SHA256, REVISION,
     };
     use crate::moe::{Choice, Registry, Replica, Stamp};
     use std::{
         collections::BTreeMap,
-        io::{self, Read, Seek, SeekFrom},
+        fs::{self, File},
+        io::{self, Read, Seek, SeekFrom, Write},
+        path::{Path, PathBuf},
+        sync::atomic::{AtomicUsize, Ordering},
     };
 
     const HEADER_SHA256: &str = "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449";
     const SHARD_BYTES: u64 = 7_389_759_032;
     const TOP6: [u32; 6] = [0, 383, 382, 381, 380, 379];
+    static NEXT_TEMP_DIR: AtomicUsize = AtomicUsize::new(0);
+
+    struct TempDirectory(PathBuf);
+
+    impl TempDirectory {
+        fn new() -> Self {
+            let sequence = NEXT_TEMP_DIR.fetch_add(1, Ordering::Relaxed);
+            let path = std::env::temp_dir().join(format!(
+                "voltafabric-r722-pinned-index-{}-{sequence}",
+                std::process::id()
+            ));
+            fs::create_dir(&path).unwrap();
+            Self(path)
+        }
+
+        fn path(&self) -> &Path {
+            &self.0
+        }
+    }
+
+    impl Drop for TempDirectory {
+        fn drop(&mut self) {
+            let _ = fs::remove_dir_all(&self.0);
+        }
+    }
 
     struct SparseShard {
         file_bytes: u64,
@@ -4702,6 +4974,73 @@ mod a148_pinned_expert_selective_read_tests {
                 .is_err()
         );
         assert!(source.read_spans.iter().any(|(start, _)| *start >= 258_144));
+    }
+
+    #[test]
+    fn indexed_file_reader_returns_the_existing_route_resident_type() {
+        let route = route_problem();
+        let (expected_plan, hashes, _) = fixture(TOP6[0]);
+        let index = include_bytes!(
+            "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+        );
+        let header = include_bytes!(
+            "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+        );
+        let temp = TempDirectory::new();
+        let shard_path = temp.path().join("model-00003-of-00048.safetensors");
+        let mut shard = File::create(&shard_path).unwrap();
+        shard.set_len(SHARD_BYTES).unwrap();
+        shard
+            .write_all(&(header.len() as u64).to_le_bytes())
+            .unwrap();
+        shard.write_all(header).unwrap();
+        for (slot, tensor) in expected_plan.tensors.iter().enumerate() {
+            let length =
+                usize::try_from(tensor.file_offset_end - tensor.file_offset_start).unwrap();
+            let payload = vec![u8::try_from(slot + 1).unwrap(); length];
+            shard
+                .seek(SeekFrom::Start(tensor.file_offset_start))
+                .unwrap();
+            shard.write_all(&payload).unwrap();
+        }
+        drop(shard);
+
+        let read = read_pinned_mxfp4_rank_expert_indexed(
+            temp.path(),
+            PinnedMxfp4IndexedRankExpertReadRequest {
+                route: &route,
+                attempt: 29,
+                expert: TOP6[0],
+                rank: 4,
+                index_bytes: index,
+                expected_header_sha256: HEADER_SHA256,
+                expected_payload_sha256: &hashes,
+                max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+                max_payload_bytes: crate::checkpoint::MAX_NAMED_TENSOR_PAYLOAD_BYTES,
+            },
+        )
+        .unwrap();
+        assert_eq!(read.plan, expected_plan);
+        assert_eq!(read.stamp, route.stamp);
+        assert_eq!(read.route_experts, TOP6);
+        assert_eq!((read.expert, read.rank, read.local), (TOP6[0], 4, 0));
+        assert_eq!(read.header_sha256, HEADER_SHA256);
+        assert_eq!(read.payloads.file_bytes, SHARD_BYTES);
+        assert_eq!(read.payloads.tensors.len(), 6);
+
+        let peak = expected_plan.selected_payload_bytes * 2
+            + crate::checkpoint::MAX_HEADER_BYTES as u64
+            + 8;
+        let resident = read.into_session_resident(peak).unwrap();
+        assert_eq!(resident.stamp(), &route.stamp);
+        assert_eq!(resident.route_experts(), TOP6);
+        assert_eq!(
+            (resident.expert(), resident.rank(), resident.local()),
+            (0, 4, 0)
+        );
+        assert_eq!(resident.source_header_sha256(), HEADER_SHA256);
+        assert_eq!(resident.payload_sha256().len(), 6);
+        assert_eq!(resident.owner().binding().experts[0].expert, TOP6[0]);
     }
 }
 

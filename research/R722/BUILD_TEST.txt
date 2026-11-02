@@ -1,0 +1,20 @@
+R722 scoped CPU-only verification
+==================================
+
+Focused indexed reader unit test:
+  cargo test --locked --offline --lib indexed_file_reader_returns_the_existing_route_resident_type
+  debug: 1 passed; 118 filtered out; 7.98 s
+  release: 1 passed; 118 filtered out; 0.81 s
+
+Pinned DeepSeek route through indexed read -> six resident experts -> six local CPU Sessions -> FP64 MXFP4 oracle:
+  cargo test --locked --offline --test r712_deepseek_session_owner complete_top6_exec_uses_one_route_weight_and_matches_fp64_oracle
+  debug: 1 passed; 6 filtered out; 66.65 s
+  release: 1 passed; 6 filtered out; 6.32 s
+
+Additional checks:
+  cargo clippy --locked --offline --lib -- -D warnings: PASS
+  cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+  git diff --check: PASS
+
+The integration fixture uses the pinned index and header files already present in the repository and synthetic tensor payload bytes written into a temporary sparse shard below .work. No model payload, GPU, network, worker reservation, production R53, or benchmark was used. The test exercises the existing CPU Session and Collector path; configured GitLab scans are separate evidence and do not replace these local tests.
