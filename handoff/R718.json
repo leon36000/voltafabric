@@ -1,1 +1,30 @@
-ewogICJpZCI6ICJSNzE4IiwKICAib3duZXIiOiAiaW50ZWdyYXRvciIsCiAgInN0YXRlIjogIkxPQ0FMX0NQVV9WRVJJRklFRF9TT1VSQ0VfTk9UX1lFVF9QVUJMSVNIRUQiLAogICJicmFuY2giOiAicjcxOC1kZWVwc2Vlay1hdG9taWMtcm91dGUtcGF5bG9hZC1yZWFkLTIwMjYxMTAyIiwKICAicGF0aCI6ICJyZXNlYXJjaC9SNzE4IiwKICAiY29kZV9maWxlcyI6IFsKICAgICJzcmMvZGVlcHNlZWtfdjQxX2dhdGUucnMiLAogICAgInRlc3RzL3I3MTJfZGVlcHNlZWtfc2Vzc2lvbl9vd25lci5ycyIKICBdLAogICJyb3V0ZV9yZWFkX2FwaSI6ICJEZWVwU2Vla1Y0MVJvdXRlQmF0Y2g6OnJlYWRfc2VsZWN0ZWRfbXhmcDRfcGF5bG9hZHMiLAogICJwYXJlbnRfc291cmNlIjogewogICAgImJyYW5jaCI6ICJyNzE3LWRlZXBzZWVrLWdhdGUtcGF5bG9hZC1wbGFuLTIwMjYxMTAyIiwKICAgICJ2ZXJpZmllZF9yZWNlaXB0X2NvbW1pdCI6ICI3MTk1ZmVjNDU0MDczMjFmYjU4ZTg5NGIwYjI3OTYwOGJmZDJkNWIzIgogIH0sCiAgIm1hbmlmZXN0X3NoYTI1NiI6ICJhMWMzNGEwNDBiOWJjMWIzNjJhZTI1NDA0MDQ2N2NlNmQxMGY1OGQzOTQ2MzMyY2MwNDU2YTVjNzU1OTZjMjBlIiwKICAibG9jYWxfY3B1X3Rlc3RzIjogImRlYnVnIGFuZCByZWxlYXNlIDEvMTsgc3RyaWN0IHRhcmdldGVkIENsaXBweSwgcnVzdGZtdCBhbmQgZGlmZiBjaGVjayBwYXNzIiwKICAiZml4dHVyZSI6ICIzNiBzZWxlY3RlZCBwYXlsb2FkIHJhbmdlcyAvIDExMjgwMzg0MCBieXRlczsgc3ludGhldGljIGRhdGE7IHRyYWNrZWQgcGlubmVkIGluZGV4L2hlYWRlciIsCiAgImF0b21pY19yZWZ1c2FsIjogIjM1LzM2IHBheWxvYWQgZGlnZXN0cyByZWZ1c2VkIGJlZm9yZSBzb3VyY2UgSS9PIiwKICAicmVzaWRlbmN5IjogInNpeCBzeW50aGV0aWMgcm91dGUtYm91bmQgb3duZXJzIGNvbnZlcnRlZCwgcm91dGUtcHJlZmxpZ2h0ZWQsIGFuZCBncm91cGVkIGludG8gZml2ZSByYW5rIGFydGlmYWN0czsgbm8gU2Vzc2lvbiB3b3JrZXIgc3RhcnRlZCIsCiAgInJlYWxfY2hlY2twb2ludF9wYXlsb2FkX3JlYWQiOiBmYWxzZSwKICAiY29tcGxldGVfZ2VuZXJhdGlvbiI6IGZhbHNlLAogICJncHUiOiBmYWxzZSwKICAiaW50ZXJfcGNfdHJhbnNwb3J0IjogZmFsc2UsCiAgInByb2R1Y3Rpb25fcjUzX3VzZWQiOiBmYWxzZSwKICAidW5rbm93bl9yZXBsYXllZCI6IGZhbHNlLAogICJhdXRvbWF0aWNfcmVsYXVuY2giOiAiU1RPUFBFRF9CWV9PV05FUiIsCiAgImFjdGl2ZV9vcGVyYXRpb25zIjogW10sCiAgIm5leHRfYWN0aW9uIjogIlB1Ymxpc2ggb24gYSBuZXcgcHJpdmF0ZSBHaXRMYWIgYnJhbmNoIGZyb20gdGhlIHZlcmlmaWVkIFI3MTcgcmVjZWlwdCBhbmQgdmVyaWZ5IHNvdXJjZSByZWFkYmFjayBwbHVzIGNvbmZpZ3VyZWQgc2NhbnMuIgp9Cg==
+{
+  "id": "R718",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_VERIFIED_SOURCE_NOT_YET_PUBLISHED",
+  "branch": "r718-deepseek-atomic-route-payload-read-20261102",
+  "path": "research/R718",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "route_read_api": "DeepSeekV41RouteBatch::read_selected_mxfp4_payloads",
+  "parent_source": {
+    "branch": "r717-deepseek-gate-payload-plan-20261102",
+    "verified_receipt_commit": "7195fec45407321fb58e894b0b279608bfd2d5b3"
+  },
+  "manifest_sha256": "e8b90a083d57c847fc54744cd88bd4709c4e3d1aad7cc2e8dcff91e7ab70bf49",
+  "local_cpu_tests": "debug and release 1/1; strict targeted Clippy, rustfmt and diff check pass",
+  "fixture": "36 selected payload ranges / 112803840 bytes; synthetic data; tracked pinned index/header",
+  "atomic_refusal": "35/36 payload digests refused before source I/O",
+  "residency": "six synthetic route-bound owners converted, route-preflighted, and grouped into five rank artifacts; no Session worker started",
+  "real_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "next_action": "Publish on a new private GitLab branch from the verified R717 receipt and verify source readback plus configured scans."
+}
