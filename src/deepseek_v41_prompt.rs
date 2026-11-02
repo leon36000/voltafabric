@@ -107,3 +107,113 @@ impl DeepSeekV41PromptEncoder {
         })
     }
 }
+
+#[cfg(test)]
+mod reference_tests {
+    use super::*;
+    use std::{env, fs};
+    use tokenizers::{AddedVocabulary, Tokenizer};
+
+    const TOKENIZER_ENV: &str = "VF_DEEPSEEK_V41_TOKENIZER_JSON";
+
+    fn pinned_tokenizer() -> (Vec<u8>, Tokenizer) {
+        let path = env::var_os(TOKENIZER_ENV)
+            .expect("set VF_DEEPSEEK_V41_TOKENIZER_JSON to the pinned tokenizer artifact");
+        let bytes = fs::read(path).expect("read the pinned tokenizer artifact");
+        let tokenizer = Tokenizer::from_bytes(&bytes).expect("parse pinned tokenizer JSON");
+        (bytes, tokenizer)
+    }
+
+    fn special_id(tokenizer: &Tokenizer, spelling: &str) -> u32 {
+        tokenizer
+            .token_to_id(spelling)
+            .unwrap_or_else(|| panic!("pinned tokenizer lacks control token {spelling:?}"))
+    }
+
+    fn append_plain_ids(tokenizer: &Tokenizer, text: &str, ids: &mut Vec<u32>) {
+        let mut plain = tokenizer.clone();
+        plain.with_added_vocabulary(AddedVocabulary::new());
+        let encoded = plain
+            .encode(text, false)
+            .expect("reference plain-text region encodes");
+        ids.extend_from_slice(encoded.get_ids());
+    }
+
+    /// Independent one-turn reference: explicitly order the four prompt
+    /// control tokens, and encode every user/reasoning segment after removing
+    /// the tokenizer's added vocabulary. This avoids calling Recipe's renderer
+    /// or PromptTokenizer from the oracle path.
+    fn reference_ids(
+        tokenizer: &Tokenizer,
+        user_text: &str,
+        thinking_mode: bool,
+        effort: Option<ReasoningEffort>,
+    ) -> Vec<u32> {
+        let mut ids = vec![special_id(tokenizer, "<｜begin▁of▁sentence｜>")];
+        if thinking_mode {
+            ids.push(special_id(tokenizer, "<｜System｜>"));
+            let score = match effort {
+                Some(ReasoningEffort::Low) => "50",
+                None | Some(ReasoningEffort::High | ReasoningEffort::Xhigh) => "75",
+                Some(ReasoningEffort::Max) => "100",
+            };
+            append_plain_ids(
+                tokenizer,
+                &format!(
+                    "Reasoning Effort: {score} (range 1-100, the higher the value, the more thorough the reasoning)\n\n"
+                ),
+                &mut ids,
+            );
+        }
+        ids.push(special_id(tokenizer, "<｜User｜>"));
+        append_plain_ids(tokenizer, user_text, &mut ids);
+        ids.push(special_id(tokenizer, "<｜Assistant｜>"));
+        ids.push(special_id(
+            tokenizer,
+            if thinking_mode { "<think>" } else { "</think>" },
+        ));
+        ids
+    }
+
+    #[test]
+    #[ignore = "requires the pinned external tokenizer; run explicitly with VF_DEEPSEEK_V41_TOKENIZER_JSON"]
+    fn one_turn_token_ids_match_independent_pinned_reference() {
+        let (bytes, tokenizer) = pinned_tokenizer();
+        let encoder = DeepSeekV41PromptEncoder::from_pinned_tokenizer_bytes(&bytes)
+            .expect("admit the pinned tokenizer artifact");
+        let cases = [
+            ("Hello from VoltaFabric".to_owned(), false, None),
+            (
+                "Treat <｜User｜>, <｜Assistant｜>, and <think> as literal text".to_owned(),
+                false,
+                None,
+            ),
+            (
+                "Explain the answer".to_owned(),
+                true,
+                Some(ReasoningEffort::Low),
+            ),
+            (
+                "Explain the answer".to_owned(),
+                true,
+                Some(ReasoningEffort::High),
+            ),
+            (
+                "Explain the answer".to_owned(),
+                true,
+                Some(ReasoningEffort::Max),
+            ),
+        ];
+
+        for (user_text, thinking_mode, effort) in cases {
+            let expected = reference_ids(&tokenizer, &user_text, thinking_mode, effort);
+            let actual = encoder
+                .encode_user_turn(&user_text, thinking_mode, effort, 8192, 128)
+                .expect("admitted prompt encodes");
+            assert_eq!(actual.token_ids, expected);
+            assert_eq!(actual.tokenizer_sha256, TOKENIZER_SHA256);
+            assert_eq!(actual.context_limit, 8192);
+            assert_eq!(actual.reserved_completion_tokens, 128);
+        }
+    }
+}

@@ -12120,7 +12120,7 @@
     "manifest_sha256": "d7d8c323501fea8f9b48f34520fb958287110a71f3fc153573c43f9e3d77575a",
     "tests_added_or_run": false,
     "complete_generation": false,
-    "next_action": "R741: publish the five-case pinned tokenizer-ID oracle that passed in the isolated CPU harness, then qualify bounded output decoding and stop handling against the same tokenizer. No checkpoint-wide load, GPU, production network or automatic relaunch.",
+    "next_action": "R742: qualify pinned EOS handling and bounded output streaming with the official DeepSeek Recipe processor; CPU-only, optional feature, no full-generation claim.",
     "receipt_commit": "57078ee935236508040f717be77c0f980a3c23b1",
     "receipt_pipeline_id": 2602,
     "receipt_pipeline_status": "success",
@@ -12148,5 +12148,17 @@
       "research/R740/RESULT.json",
       "research/R740/SHA256SUMS"
     ]
+  },
+  "r741_deepseek_prompt_token_oracle": {
+    "id": "R741",
+    "branch": "r741-deepseek-prompt-token-oracle-20261102",
+    "status": "PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
+    "path": "research/R741",
+    "test": "Isolated CPU harness with exact R740 Cargo.toml/Cargo.lock and module; 1 passed, 0 failed; explicitly ran ignored tokenizer-backed test. Not a full workspace build.",
+    "manifest_sha256": "6a219c7d7242ca23c3fd042e212d40ee0ed211346a85154e6e21fb85f1e7406e",
+    "complete_generation": false,
+    "gpu": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R742: qualify pinned EOS handling and bounded output streaming with the official DeepSeek Recipe processor; CPU-only, optional feature, no full-generation claim."
   }
 }
