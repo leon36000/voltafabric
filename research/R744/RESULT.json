@@ -26,9 +26,10 @@
   "verification": {
     "isolated_cpu_harness_tests_passed": 6,
     "isolated_cpu_harness_tests_failed": 0,
+    "prompt_sampler_feature_harness": "offline compilation of the actual prompt and sampler modules against deepseek-recipe-core/encoding 0.2.0 and tokenizers 0.23.2; 6 passed, 2 pinned-tokenizer tests ignored",
     "rustfmt_sampler_prompt_lib_check": "pass",
     "pinned_tokenizer_integration_test": "added but ignored; external VF_DEEPSEEK_V41_TOKENIZER_JSON fixture unavailable to this run",
-    "full_feature_gated_build": "not run locally",
+    "full_repository_build": "not run locally",
     "gpu": false,
     "real_checkpoint_payload": false,
     "complete_generation": false,

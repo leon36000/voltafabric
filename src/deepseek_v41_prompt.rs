@@ -297,7 +297,6 @@ mod reference_tests {
         ids.extend_from_slice(encoded.get_ids());
     }
 
-    #[cfg(feature = "deepseek-v41-stream")]
     fn plain_ids(tokenizer: &Tokenizer, text: &str) -> Vec<u32> {
         let mut plain = tokenizer.clone();
         plain.with_added_vocabulary(AddedVocabulary::new());

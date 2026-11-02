@@ -16,9 +16,9 @@ La règle greedy conserve le premier token au maximum en parcourant les ID dans 
 
 ## Vérification effectuée
 
-Le vrai `src/deepseek_v41_sampler.rs` a été compilé dans un petit harness Rust isolé avec un `Stamp` de la même forme que VoltaFabric. Les six tests passent: égalité, EOS terminal et non-rejouable, limite de longueur, identité/tentative/forme, valeurs non finies et construction invalide. `rustfmt --check` passe sur le sampler, l’adaptateur prompt modifié et le `lib.rs` isolé.
+Les véritables modules `src/deepseek_v41_sampler.rs` et `src/deepseek_v41_prompt.rs` ont été compilés dans un harness Rust isolé avec les dépendances épinglées `deepseek-recipe-core`/`deepseek-recipe-encoding` 0.2.0 et `tokenizers` 0.23.2, en mode offline, plus un `Stamp` et le type d’erreur de même forme que VoltaFabric. Les six tests sampler passent: égalité, EOS terminal et non-rejouable, limite de longueur, identité/tentative/forme, valeurs non finies et construction invalide. Deux tests avec tokenizer externe restent ignorés. Ce contrôle a également révélé puis corrigé une garde cfg préexistante qui masquait le helper `plain_ids` au test EOS alors que le feature stream n’était pas activé. `rustfmt --check` passe sur le sampler, l’adaptateur prompt modifié et le `lib.rs` isolé.
 
-Le test d’intégration ajouté au test ignoré de l’encodeur vérifie avec le tokenizer épinglé la création du sampler, un choix EOS et l’absence d’EOS dans le préfixe final. Il reste ignoré tant que `VF_DEEPSEEK_V41_TOKENIZER_JSON` n’est pas fourni. Le build complet feature-gated de la branche et la pipeline GitLab restent les vérifications d’intégration à faire après publication. Ce lot ne charge aucun tokenizer ni checkpoint réel.
+Le test d’intégration ajouté au test ignoré de l’encodeur vérifie avec le tokenizer épinglé la création du sampler, un choix EOS et l’absence d’EOS dans le préfixe final. Il reste ignoré tant que `VF_DEEPSEEK_V41_TOKENIZER_JSON` n’est pas fourni. Le harness compile le vrai code prompt/sampler, mais pas le crate complet ni son feature stream; la pipeline GitLab reste une vérification distincte. Ce lot ne charge aucun tokenizer ni checkpoint réel.
 
 ## Ce qui reste hors preuve
 
