@@ -55,6 +55,99 @@ pub struct PlacementProblem {
     #[serde(default = "default_work_limit")]
     pub max_work_units: u64,
 }
+/// A route-bound placement suggestion; the live routing registry remains unchanged.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct RoutedPlacementAdvice {
+    pub stamp: crate::moe::Stamp,
+    pub attempt: u64,
+    pub source_rank: u32,
+    pub route_experts_by_token: Vec<Vec<u32>>,
+    /// Hex-encoded f64 bits preserve the donor's coefficients exactly.
+    pub route_weight_bits_hex_by_token: Vec<Vec<String>>,
+    pub placement: Placement,
+}
+
+/// Plan only physical residency from one validated Qwen2MoE donor batch.
+/// Selected expert order and weight bits are preserved; this never changes the
+/// gate result or owner registry. The returned placement is advisory.
+pub fn plan_qwen2moe_advisory(
+    base: &PlacementProblem,
+    routed: &crate::routing::Qwen2MoERouteBatch,
+    source_rank: u32,
+) -> Result<RoutedPlacementAdvice> {
+    let route = routed.problem();
+    crate::routing::validate(route)?;
+    let dispatch = crate::routing::dispatch(route)?;
+    if routed.attempt() == 0 || route.routes.is_empty() || base.hidden != route.hidden as u64 {
+        return Err(invalid(
+            "routed placement identity, batch or hidden mismatch",
+        ));
+    }
+    let route_experts: BTreeSet<_> = route.experts.iter().copied().collect();
+    let profile_experts: BTreeSet<_> = base.experts.iter().map(|e| e.id).collect();
+    if route_experts.len() != route.experts.len()
+        || profile_experts.len() != base.experts.len()
+        || route_experts != profile_experts
+    {
+        return Err(invalid(
+            "placement profiles must cover routed logical experts exactly",
+        ));
+    }
+    let expected_slots = route.routes.iter().try_fold(0usize, |sum, token| {
+        sum.checked_add(token.len())
+            .ok_or_else(|| invalid("route slot count overflow"))
+    })?;
+    if dispatch.slots.len() != expected_slots {
+        return Err(invalid("dispatch does not cover every routed slot"));
+    }
+    let mut demands = Vec::with_capacity(route.routes.len());
+    let mut route_experts_by_token = Vec::with_capacity(route.routes.len());
+    let mut route_weight_bits_hex_by_token = Vec::with_capacity(route.routes.len());
+    let mut dispatch_index = 0usize;
+    for (token, slots) in route.routes.iter().enumerate() {
+        let mut experts = Vec::with_capacity(slots.len());
+        let mut weight_bits = Vec::with_capacity(slots.len());
+        for (slot, choice) in slots.iter().enumerate() {
+            let actual = dispatch
+                .slots
+                .get(dispatch_index)
+                .ok_or_else(|| invalid("dispatch slot missing"))?;
+            if actual.token != token
+                || actual.slot != slot
+                || actual.expert != choice.expert
+                || actual.weight.to_bits() != choice.weight.to_bits()
+            {
+                return Err(invalid(
+                    "dispatch changed routed slot identity or coefficient",
+                ));
+            }
+            dispatch_index += 1;
+            experts.push(choice.expert);
+            weight_bits.push(format!("{:016x}", choice.weight.to_bits()));
+        }
+        route_experts_by_token.push(experts.clone());
+        route_weight_bits_hex_by_token.push(weight_bits);
+        demands.push(Demand {
+            source_rank,
+            experts,
+            frequency: 1.0,
+        });
+    }
+    let mut candidate = base.clone();
+    candidate.demands = demands;
+    let placement = plan(&candidate)?;
+    Ok(RoutedPlacementAdvice {
+        stamp: route.stamp.clone(),
+        attempt: routed.attempt(),
+        source_rank,
+        route_experts_by_token,
+        route_weight_bits_hex_by_token,
+        placement,
+    })
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VariantCost {
     pub modeled_latency_us: f64,

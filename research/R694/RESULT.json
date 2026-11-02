@@ -1,0 +1,43 @@
+{
+  "id": "R694",
+  "state": "LOCAL_CPU_EXACT_SOURCE_MODULES_PASS_PENDING_PRIVATE_GITLAB_PUBLICATION",
+  "base_branch": "r693-qwen2moe-two-layer-public-decode-20261102",
+  "base_commit": "74e0537c361cc2c34e5764ad5ac9f1432240c4ed",
+  "branch": "r694-qwen2moe-route-bound-placement-20261102",
+  "files": [
+    "src/planner.rs",
+    "tests/r694_routed_advice.rs",
+    "research/R694/REPORT.md",
+    "research/R694/BUILD_TEST.txt",
+    "research/R694/UPSTREAM_AUDIT.md",
+    "research/R694/RESULT.json",
+    "research/R694/SHA256SUMS"
+  ],
+  "verification": {
+    "device": "CPU",
+    "exact_source_modules_from_r693_api": true,
+    "tests": 3,
+    "failures": 0,
+    "rustfmt_check": "pass",
+    "clippy_targeted": "pass with dead_code suppressed for unused extracted FP16 collector paths",
+    "serde_json_workspace_version": "1.0.145 unavailable offline; isolated harness used cached 1.0.154",
+    "synthetic_topology_only": true
+  },
+  "contracts": {
+    "routing_modified": false,
+    "coefficient_bits_preserved": true,
+    "run_model_plan_layer_batch_epoch_attempt_preserved": true,
+    "active_registry_mutated": false,
+    "new_owner_set_committed": false
+  },
+  "scope": {
+    "trained_checkpoint": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "performance_claim": false
+  },
+  "next_action": "Use the advisory adapter with an already-admitted route trace only after its source and identity are verified; keep its result offline until topology and compute costs are measured. Continue the real-checkpoint compatibility path from sources already present; no downloads or hardware."
+}
+

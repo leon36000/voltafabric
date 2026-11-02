@@ -1,0 +1,45 @@
+R694 bounded exact-source CPU validation
+========================================
+
+GitLab source base:
+  branch r693-qwen2moe-two-layer-public-decode-20261102
+  branch tip 74e0537c361cc2c34e5764ad5ac9f1432240c4ed
+  API-readback source modules reconstructed under:
+    .runs/r694-exact-source-check-20261102/
+
+The harness includes complete remote R693 copies of:
+  src/planner.rs (with only the R694 function inserted)
+  src/routing.rs, src/moe.rs, src/topology.rs, src/traffic.rs
+  src/schedule.rs, src/memory.rs, src/cost.rs, src/work.rs
+  src/preweighted.rs, src/sha256.rs
+
+Command:
+  CARGO_TARGET_DIR=<Naos .runs>/target cargo test --offline --locked --test r694_routed_advice
+Result:
+  exit 0; 3 passed, 0 failed.
+  Route expert order [40,3] then [3,40] preserved.
+  Donor f32 coefficients widened by the existing adapter were retained by exact f64 bits.
+  Full Stamp and attempt 901 preserved.
+  Current dispatch slots and registry snapshot unchanged.
+  Expert-profile mismatch and absent path return errors without advice.
+
+Additional checks:
+  rustfmt --check src/planner.rs tests/r694_routed_advice.rs: pass
+  cargo clippy --offline --locked --test r694_routed_advice -- -A dead_code: pass
+  Three dead-code warnings from FP16 Collector code appeared in the minimal
+  harness because those methods are outside this test; they are not test failures.
+  The test harness pinned serde 1.0.228 and num-bigint 0.4.6. The root project
+  pins serde_json 1.0.145, unavailable in this host's offline cache; the isolated
+  harness used cached serde_json 1.0.154 to compile the exact source modules.
+
+Harness setup notes:
+  The GitLab file API returns at most 500 lines by default, so continuation
+  windows for planner.rs and moe.rs were explicitly read before compiling. An
+  initial incomplete extraction was rejected by the compiler and was not counted.
+  The enclosing repository is a workspace, so the isolated harness has its own
+  empty [workspace] declaration. No production run, GPU, network, or UNKNOWN
+  operation was involved.
+
+This is targeted adapter evidence, not a full root-workspace cargo test and not
+hardware or performance qualification.
+
