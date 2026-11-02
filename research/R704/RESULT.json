@@ -1,6 +1,6 @@
 {
   "round": "R704",
-  "status": "CPU_SYNTHETIC_GATE_TO_IDENTITY_BOUND_VOLTAFABRIC_ROUTE_PASS",
+  "status": "CPU_SYNTHETIC_GATE_TO_IDENTITY_BOUND_ROUTE_PASS_SOURCE_READBACK_REPAIR_VERIFIED",
   "branch": "r704-deepseek-gate-route-identity-20261102",
   "parent_commit": "bcaa7ee42752abfa597d1333fd1e20f9021d7a3c",
   "component": "DeepSeek V4.1 Flash gate adapter to VoltaFabric RoutingProblem",
@@ -14,7 +14,14 @@
     "one_token_batch": true,
     "route_coefficients_rescaled": false,
     "route_scale_applied_once": true,
-    "full_stamp_bound": ["run_id", "model_revision", "plan_id", "layer", "batch", "epoch"],
+    "full_stamp_bound": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "layer",
+      "batch",
+      "epoch"
+    ],
     "attempt_nonzero_and_carried": true,
     "registry_rank_local_order_validated": true
   },
@@ -33,6 +40,30 @@
   "inter_pc_transport": false,
   "production_network": false,
   "unknown_replayed": false,
-  "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "Continue the CPU generation path using only coherent already-tracked weights and current identities; keep DeepSeek dispatch refused until real gate bytes, all six expert payload profiles, resident ownership, and memory admission are available."
+  "automatic_relaunch": "STOPPED_BY_OWNER; work only in the current owner-requested turn",
+  "next_action": "R705: continue the CPU generation path using coherent already-tracked weights and full identities; keep DeepSeek dispatch refused until its real gate payload, all six selected expert profiles, resident ownership, and memory admission are present. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+  "source_commits": [
+    "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
+    "8b6519ba41f7a4f872612541a32ce8f05e4220a3"
+  ],
+  "source_commit": "8b6519ba41f7a4f872612541a32ce8f05e4220a3",
+  "source_readback_exact": true,
+  "source_readback_sha256": "644e17ed6fd0cac8a13e906a413869bca3a5abe18404fe45a57d686d1fb8a4b1",
+  "publication_pipelines": [
+    {
+      "id": 2421,
+      "commit": "83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e",
+      "status_at_receipt": "running",
+      "scope": "configured Gitleaks/Semgrep/Trivy and fallback only; not Rust compilation or local CPU tests",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2421"
+    },
+    {
+      "id": 2426,
+      "commit": "8b6519ba41f7a4f872612541a32ce8f05e4220a3",
+      "status_at_receipt": "pending",
+      "scope": "configured Gitleaks/Semgrep/Trivy and fallback only; not Rust compilation or local CPU tests",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2426"
+    }
+  ],
+  "readback_issue": "The first R704 source commit contained an accidental duplicated final softplus helper; a new non-force corrective commit removed it. Latest GitLab readback is byte-exact with the locally tested file."
 }

@@ -18,3 +18,5 @@ Result: passed.
 
 Scope: synthetic CPU gate fixture only. No actual checkpoint gate tensor loaded, no
 memory planner invocation, no Session dispatch, no GPU, and no inter-PC transport.
+
+Source SHA-256 verified against GitLab readback after the R704 source correction: 644e17ed6fd0cac8a13e906a413869bca3a5abe18404fe45a57d686d1fb8a4b1.

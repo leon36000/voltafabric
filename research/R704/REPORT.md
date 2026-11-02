@@ -31,6 +31,12 @@ layer et de l’attempt zéro.
 - `rustfmt --edition 2021 --check src/deepseek_v41_gate.rs tests/r702_deepseek_gate_projection.rs` — réussi ;
 - `git diff --check` — réussi.
 
+## Relecture de publication
+
+La première relecture du commit source `83d8ddf0a3b2d45ae0c490263aa0c8d84dee531e` a révélé un doublon accidentel de la fonction finale `softplus_fp32`. Le commit correctif `8b6519ba41f7a4f872612541a32ce8f05e4220a3` a retiré uniquement ce suffixe; la relecture GitLab correspond ensuite exactement au fichier testé local, SHA-256 `644e17ed6fd0cac8a13e906a413869bca3a5abe18404fe45a57d686d1fb8a4b1`. Les tests CPU et Clippy ont été relancés après cette correction et passent.
+
+Le pipeline 2421 porte sur le premier commit et reste `running`; le pipeline 2426 porte sur le commit corrigé et est `pending` lors de cette vérification. Ils exécutent les scans configurés et le fallback GitLab, pas la compilation Rust ni les tests CPU. Aucun retry n’a été lancé.
+
 ## Réutilisation et limites
 
 Cette tranche réutilise l’API `RoutingProblem` et `routing::validate` de VoltaFabric,
