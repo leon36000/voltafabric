@@ -23,6 +23,7 @@ remplacé par une grande inférence CPU prétendument compétitive.
 | pipeline | DP de coupes contiguës pour ordre de stages fixé | Optimal seulement pour ce modèle additif, pas parallélisme général |
 | vf | CLI JSON bornée, erreurs explicites, capacités déclarées | Pas de daemon, RPC, API CUDA, distribution réelle |
 | deepseek_v41_sampler | Argmax greedy CPU à identité complète, digest tokenizer, EOS et budget de complétion; argmax à égalité stable | Prend les logits du backend; aucun LM head, chargement de checkpoint ou génération complète |
+| deepseek_v41_head | Plages de vocabulaire et réduction top-1 locale par rang avec refus atomique | Réduit des logits déjà calculés; aucun calcul LM head ni transport sérialisé/authentifié |
 
 The sampler adapts only the deterministic ordered-candidate argmax rule documented in
 llama.cpp's `llama-sampler.cpp` at commit

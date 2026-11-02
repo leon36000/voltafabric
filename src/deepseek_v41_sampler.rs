@@ -1,3 +1,4 @@
+use crate::deepseek_v41_head::ShardedGreedyCandidate;
 use crate::moe::Stamp;
 use crate::{Error, Result};
 
@@ -141,7 +142,7 @@ impl DeepSeekV41GreedyDecoder {
                 // Negative infinity is a valid masked-out candidate.
                 continue;
             }
-            if best.map_or(true, |(_, best_logit)| logit > best_logit) {
+            if best.is_none_or(|(_, best_logit)| logit > best_logit) {
                 best = Some((token_index, logit));
             }
         }
@@ -149,24 +150,63 @@ impl DeepSeekV41GreedyDecoder {
             best.ok_or_else(|| Error::new("INVALID_LOGITS", "logits row has no finite candidate"))?;
         let token_id = u32::try_from(token_index)
             .map_err(|_| Error::new("INVALID_LOGITS", "selected token ID exceeds u32"))?;
-        let completion_index = self.sampled_ids.len();
-        self.sampled_ids.push(token_id);
-        let finish_reason = if token_id == self.eos_token_id {
-            Some(GreedyFinishReason::EndOfSequence)
-        } else if self.sampled_ids.len() == self.max_new_tokens {
-            Some(GreedyFinishReason::LengthLimit)
-        } else {
-            None
-        };
-        self.finish_reason = finish_reason;
+        Ok(self.commit_token(token_id))
+    }
 
-        Ok(GreedySampledToken {
-            stamp: self.stamp.clone(),
-            attempt: self.attempt,
-            token_index: completion_index,
-            token_id,
-            finish_reason,
-        })
+    /// Accept a top-1 value only after the vocabulary-shard reducer completed
+    /// the exact partition admitted for this decode step.
+    pub fn sample_next_from_shards(
+        &mut self,
+        candidate: &ShardedGreedyCandidate,
+        expected_partition_sha256: &str,
+    ) -> Result<GreedySampledToken> {
+        if self.finish_reason.is_some() {
+            return Err(Error::new(
+                "DECODE_FINISHED",
+                "greedy decoder already reached EOS or its admitted token limit",
+            ));
+        }
+        if !same_stamp(candidate.stamp(), &self.stamp) {
+            return Err(Error::new(
+                "IDENTITY_MISMATCH",
+                "sharded candidate does not match the admitted run/model/plan/layer/batch/epoch",
+            ));
+        }
+        if candidate.attempt() == 0 || candidate.attempt() != self.attempt {
+            return Err(Error::new(
+                "ATTEMPT_MISMATCH",
+                "sharded candidate attempt differs from the admitted decode attempt",
+            ));
+        }
+        if candidate.token_index() != self.sampled_ids.len() {
+            return Err(Error::new(
+                "TOKEN_INDEX_MISMATCH",
+                "sharded candidate was already consumed or belongs to another token position",
+            ));
+        }
+        if candidate.tokenizer_sha256() != self.tokenizer_sha256
+            || candidate.vocab_size() != self.vocab_size
+        {
+            return Err(Error::new(
+                "TOKENIZER_MISMATCH",
+                "sharded candidate tokenizer or vocabulary differs from the admitted prompt",
+            ));
+        }
+        if !crate::sha256::is_hex_digest(expected_partition_sha256)
+            || candidate.plan_sha256() != expected_partition_sha256
+        {
+            return Err(Error::new(
+                "PLAN_MISMATCH",
+                "sharded candidate partition differs from the expected plan digest",
+            ));
+        }
+        if candidate.token_id() as usize >= self.vocab_size || !candidate.score().is_finite() {
+            return Err(Error::new(
+                "INVALID_LOGITS",
+                "sharded candidate token ID or score is invalid",
+            ));
+        }
+        Ok(self.commit_token(candidate.token_id()))
     }
 
     /// Includes EOS when it was sampled; pass these IDs through the matching prompt
@@ -193,6 +233,27 @@ impl DeepSeekV41GreedyDecoder {
 
     pub(crate) fn eos_token_id(&self) -> u32 {
         self.eos_token_id
+    }
+
+    fn commit_token(&mut self, token_id: u32) -> GreedySampledToken {
+        let completion_index = self.sampled_ids.len();
+        self.sampled_ids.push(token_id);
+        let finish_reason = if token_id == self.eos_token_id {
+            Some(GreedyFinishReason::EndOfSequence)
+        } else if self.sampled_ids.len() == self.max_new_tokens {
+            Some(GreedyFinishReason::LengthLimit)
+        } else {
+            None
+        };
+        self.finish_reason = finish_reason;
+
+        GreedySampledToken {
+            stamp: self.stamp.clone(),
+            attempt: self.attempt,
+            token_index: completion_index,
+            token_id,
+            finish_reason,
+        }
     }
 }
 
