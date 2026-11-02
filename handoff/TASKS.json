@@ -11652,7 +11652,7 @@
   },
   "r725": {
     "id": "R725",
-    "state": "SOURCE_PUBLISHED_PIPELINE_2554_SUCCESS_EXACT_READBACK_5_OF_5_RECEIPT_PIPELINE_PENDING",
+    "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_CPU_DEBUG_RELEASE_PASS_RECEIPT_PIPELINE_PENDING",
     "branch": "r725-indexed-moe-layer-20261102",
     "parent_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
     "source_commit": "0ce3654ab83c18ee4e04b7154d2b19c0b5466d77",
@@ -11678,7 +11678,41 @@
     "production_r53": false,
     "performance_measured": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_pending": false,
+    "next_action": "R726 CPU RMSNorm matching pinned ffn_norm contract plus independent oracle and selected norm payload load.",
+    "receipt_commit": "084f233e7a28e2e81b3c4298880e3b4b24e15a67",
+    "receipt_pipeline_id": 2555,
+    "receipt_pipeline_status": "success"
+  },
+  "r726": {
+    "id": "R726",
+    "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_CPU_DEBUG_RELEASE_PASS_RECEIPT_PIPELINE_PENDING",
+    "branch": "r726-deepseek-ffn-norm-20261102",
+    "parent_commit": "084f233e7a28e2e81b3c4298880e3b4b24e15a67",
+    "source_commit": "bff1cc9cedab58b98983666ee8144fc451e52983",
+    "source_pipeline_id": 2556,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_verified_files": 9,
+    "source_manifest_sha256": "8ed0fcd8178e850ba5a78b3c708b2577cff71617f1afcacb1902fb99fd5e7f89",
+    "manifest_file_count": 7,
+    "adapted_boundary": "resident indexed ffn_norm weight; pinned RMSNorm; normalized activation is bound to the indexed route and consumed unchanged by grouped CPU Sessions",
+    "local_cpu_tests": "RMSNorm and integrated route/session oracle debug/release pass; Clippy/fmt/diff pass.",
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "full_ffn_shared_expert": false,
+    "attention": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
     "receipt_pending": true,
-    "next_action": "R726 CPU RMSNorm matching pinned ffn_norm contract plus independent oracle and selected norm payload load."
+    "next_action": "R727: implement and oracle-check the pinned FFN Hyper-Connection pre-mix and shared expert; keep attention, HC post/residual and complete generation as later explicit boundaries. CPU only; no GPU or automatic relaunch."
   }
 }

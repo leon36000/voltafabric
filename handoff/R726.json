@@ -1,7 +1,7 @@
 {
   "id": "R726",
   "owner": "integrator",
-  "state": "LOCAL_CPU_INTEGRATION_PASS_READY_FOR_PRIVATE_GITLAB_SOURCE_PUBLICATION",
+  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_CPU_DEBUG_RELEASE_PASS_RECEIPT_PIPELINE_PENDING",
   "branch": "r726-deepseek-ffn-norm-20261102",
   "parent_commit": "084f233e7a28e2e81b3c4298880e3b4b24e15a67",
   "path": "research/R726",
@@ -33,7 +33,24 @@
     "route_or_coefficients_changed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER"
   },
-  "source_pipeline_pending": true,
+  "source_pipeline_pending": false,
   "receipt_pipeline_pending": true,
-  "next_action": "R727: implement and oracle-check the pinned FFN Hyper-Connection pre-mix and shared expert; keep attention, HC post/residual and complete generation as later explicit boundaries."
+  "next_action": "R727: implement and oracle-check the pinned FFN Hyper-Connection pre-mix and shared expert; keep attention, HC post/residual and complete generation as later explicit boundaries. CPU only; no GPU or automatic relaunch.",
+  "source_pipeline_id": 2556,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback": {
+    "verified_files": 9,
+    "all_hashes_match": true,
+    "exact_content_match": true
+  },
+  "source_readback_verified": true,
+  "manifest_sha256": "8ed0fcd8178e850ba5a78b3c708b2577cff71617f1afcacb1902fb99fd5e7f89",
+  "receipt_pending": true,
+  "prepared_utc": "2026-11-02 15:18:35 UTC"
 }
