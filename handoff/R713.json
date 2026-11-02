@@ -1,0 +1,41 @@
+{
+  "id": "R713",
+  "owner": "integrator",
+  "state": "SOURCE_BRANCH_CREATED_READBACK_PENDING",
+  "branch": "r713-deepseek-route-preflight-20261102",
+  "parent_commit": "f4c73db055f63b5db014c334d082ae414efb2541",
+  "path": "research/R713",
+  "code_files": [
+    "src/deepseek_v41.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "report": "research/R713/REPORT.md",
+  "result": "research/R713/RESULT.json",
+  "build_test": "research/R713/BUILD_TEST.txt",
+  "manifest": "research/R713/SHA256SUMS",
+  "manifest_sha256": "f40f9809ff326e5c1beb1572bff2135bb3e3df1a02d84b2f76518a311de66ad4",
+  "manifest_files": 12,
+  "source_sha256": "b057db8efb57c135a678c62dfd8f09b896cf91384c032159217042df45355e1a",
+  "test_sha256": "b3dc047b403bc99fca7c3187b73c73af53e7967208ec9ec0d7255650c1f63ddc",
+  "local_cpu_tests": "6 unit tests and 1 integration test passed in debug and release; Clippy -D warnings, rustfmt and diff check passed",
+  "route_contract": "exact full identity, top-6 route order and f64 coefficient bits plus routing::dispatch rank/local bindings",
+  "preflight": "all six distinct owners, artifacts and payload digests plus aggregate byte budget must pass before any Session spawn",
+  "cpu_session_loads": 6,
+  "cpu_exec_requests": 0,
+  "synthetic_payloads": true,
+  "actual_checkpoint_payload_read": false,
+  "full_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "included_historical_rounds": [
+    "R711",
+    "R712"
+  ],
+  "arxiv_scout": "research/R712/ARXIV_SCOUT.md",
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "next_action": "R714: bind the route-set proof to each Session EXEC request and the existing Rust Collector; compare a synthetic CPU layer against an independent reduction-order oracle before reading actual checkpoint payloads. Keep automatic relaunch stopped; no GPU, production network, or UNKNOWN replay.",
+  "updated_utc": "2026-11-02 10:56:22 UTC"
+}

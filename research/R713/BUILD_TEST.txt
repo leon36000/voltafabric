@@ -1,0 +1,24 @@
+R713 CPU-only build and verification receipt
+
+Debug:
+  cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests
+  result: 6 passed, 0 failed; includes six-owner preflight failure/success cases.
+
+  cargo test --offline --locked --test r712_deepseek_session_owner
+  result: 1 passed, 0 failed; six local CPU sessions each HELLO+LOAD, no EXEC.
+
+Release:
+  cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests
+  result: 6 passed, 0 failed.
+
+  cargo test --offline --locked --release --test r712_deepseek_session_owner
+  result: 1 passed, 0 failed.
+
+Static checks:
+  cargo clippy --offline --locked --lib -- -D warnings: PASS
+  cargo clippy --offline --locked --test r712_deepseek_session_owner -- -D warnings: PASS
+  rustfmt --edition 2021 --check src/deepseek_v41.rs tests/r712_deepseek_session_owner.rs: PASS
+  git diff --check -- src/deepseek_v41.rs tests/r712_deepseek_session_owner.rs: PASS
+
+Synthetic fixture only; actual checkpoint tensor payloads, GPU, inter-PC transport,
+production R53 and model generation were not exercised. No UNKNOWN was replayed.

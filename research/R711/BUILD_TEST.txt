@@ -1,0 +1,21 @@
+R711 local CPU verification
+===========================
+
+Changed source: src/deepseek_v41.rs
+Focused module: deepseek_v41::a148_pinned_expert_selective_read_tests
+
+Commands and results:
+- cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests: 5 passed, 0 failed
+- cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests: 5 passed, 0 failed
+- cargo clippy --offline --locked --lib -- -D warnings: PASS
+- rustfmt --edition 2021 --check src/deepseek_v41.rs: PASS
+- git diff --check -- src/deepseek_v41.rs: PASS
+
+R711 evidence:
+- A valid one-expert pinned metadata fixture becomes the existing Session MXFP4 Artifact.
+- Rank/local/epoch/expert identity and the six payload digests are preserved.
+- Synthetic selected payload total: 18,800,640 bytes.
+- Conservative serialization peak bound: 45,989,896 bytes; a budget one byte below it is refused before packing.
+- Mutated payload and missing tensor cases produce no resident owner.
+
+Scope: synthetic CPU fixture only. No actual checkpoint weight payload, worker process, GPU, network, or generation.

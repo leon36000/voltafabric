@@ -18,7 +18,7 @@
 //! ```
 use crate::quant::decode_fp4;
 use crate::{invalid, Error, Result};
-use safetensors::tensor::{Dtype, Metadata, SafeTensors, TensorView};
+use safetensors::tensor::{serialize, Dtype, Metadata, SafeTensors, TensorView};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::io::{Read, Seek, SeekFrom};
@@ -855,19 +855,696 @@ pub struct PinnedMxfp4RankExpertReadRequest<'a> {
 /// a constructed owner, Session LOAD, or proof of generation.
 #[derive(Debug)]
 pub struct PinnedMxfp4RankExpertRead {
-    pub stamp: crate::moe::Stamp,
-    pub attempt: u64,
-    pub route_experts: Vec<u32>,
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    expert: u32,
+    rank: u32,
+    local: u32,
+    plan: Mxfp4ExpertPayloadPlan,
+    header_sha256: String,
+    /// The first pass reads only the 8-byte Safetensors length and bounded header.
+    header_validation_io_bytes: u64,
+    /// Includes the header-only validation pass and `read_named_tensors` pass.
+    total_io_bytes: u64,
+    payloads: crate::checkpoint::NamedTensorImport,
+}
+
+impl PinnedMxfp4RankExpertRead {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn expert(&self) -> u32 {
+        self.expert
+    }
+
+    pub fn rank(&self) -> u32 {
+        self.rank
+    }
+
+    pub fn local(&self) -> u32 {
+        self.local
+    }
+
+    pub fn plan(&self) -> &Mxfp4ExpertPayloadPlan {
+        &self.plan
+    }
+
+    pub fn header_sha256(&self) -> &str {
+        &self.header_sha256
+    }
+
+    pub fn header_validation_io_bytes(&self) -> u64 {
+        self.header_validation_io_bytes
+    }
+
+    pub fn total_io_bytes(&self) -> u64 {
+        self.total_io_bytes
+    }
+
+    /// Consume this exact read receipt into the existing bounded CPU session owner.
+    /// A minimal one-expert Safetensors buffer is assembled from only the six selected
+    /// tensors; the multi-gigabyte source shard is never copied or retained. The caller
+    /// supplies a peak-memory budget covering both the selected payloads and compact
+    /// owner while serialization is in progress.
+    pub fn into_session_resident(
+        self,
+        max_peak_bytes: u64,
+    ) -> Result<PinnedMxfp4RankResidentExpert> {
+        let top_k = crate::deepseek_v41_gate::TOP_K;
+        let route_ids = self.route_experts.iter().copied().collect::<BTreeSet<_>>();
+        if self.attempt == 0
+            || self.stamp.model_revision != REVISION
+            || self.plan.model_revision != REVISION
+            || self.stamp.layer != self.plan.layer
+            || self.plan.namespace != Mxfp4ExpertNamespace::Backbone
+            || self.plan.experts.as_slice() != [self.expert]
+            || self.route_experts.len() != top_k
+            || route_ids.len() != top_k
+            || !route_ids.contains(&self.expert)
+            || self.plan.source_shard_bytes != self.payloads.file_bytes
+            || self.plan.header_bytes != self.payloads.header_bytes
+            || self.plan.data_start_bytes != self.plan.header_bytes.saturating_add(8)
+            || self.plan.tensors.len() != 6
+            || self.payloads.tensors.len() != 6
+            || self.plan.selected_payload_bytes == 0
+            || !crate::sha256::is_hex_digest(&self.header_sha256)
+        {
+            return Err(invalid(
+                "DeepSeek rank read receipt identity or six-tensor inventory is invalid",
+            ));
+        }
+
+        let prefix = format!("layers.{}.ffn.experts.{}", self.plan.layer, self.expert);
+        let expected_names = [
+            format!("{prefix}.w1.weight"),
+            format!("{prefix}.w1.scale"),
+            format!("{prefix}.w2.weight"),
+            format!("{prefix}.w2.scale"),
+            format!("{prefix}.w3.weight"),
+            format!("{prefix}.w3.scale"),
+        ]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+        let plan_names = self
+            .plan
+            .tensors
+            .iter()
+            .map(|tensor| tensor.name.clone())
+            .collect::<BTreeSet<_>>();
+        let payload_names = self
+            .payloads
+            .tensors
+            .keys()
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        if plan_names != expected_names || payload_names != expected_names {
+            return Err(invalid(
+                "DeepSeek rank owner must contain exactly the six selected expert tensor names",
+            ));
+        }
+
+        let mut payload_bytes = 0u64;
+        let mut payload_hashes = BTreeMap::new();
+        let mut views = Vec::with_capacity(self.plan.tensors.len());
+        for tensor in &self.plan.tensors {
+            if tensor.expert != self.expert || tensor.file_offset_start >= tensor.file_offset_end {
+                return Err(invalid(
+                    "DeepSeek rank owner plan contains a foreign or empty tensor range",
+                ));
+            }
+            let payload =
+                self.payloads.tensors.get(&tensor.name).ok_or_else(|| {
+                    invalid("DeepSeek selected payload disappeared before packing")
+                })?;
+            let expected_dtype = match tensor.dtype {
+                "I8" => Dtype::I8,
+                "F8_E8M0" => Dtype::F8_E8M0,
+                _ => return Err(invalid("DeepSeek selected payload dtype is unsupported")),
+            };
+            let expected_len = tensor
+                .file_offset_end
+                .checked_sub(tensor.file_offset_start)
+                .ok_or_else(|| invalid("DeepSeek selected payload range is reversed"))?;
+            if payload.dtype != expected_dtype
+                || payload.shape != tensor.shape
+                || u64::try_from(payload.bytes.len()).ok() != Some(expected_len)
+                || !crate::sha256::is_hex_digest(&payload.sha256)
+                || crate::sha256::hex(&payload.bytes) != payload.sha256
+            {
+                return Err(invalid(format!(
+                    "DeepSeek selected tensor failed its identity, length, or payload digest: {}",
+                    tensor.name
+                )));
+            }
+            payload_bytes = payload_bytes
+                .checked_add(expected_len)
+                .ok_or_else(|| invalid("DeepSeek resident payload size overflow"))?;
+            payload_hashes.insert(tensor.name.clone(), payload.sha256.clone());
+            let view = TensorView::new(payload.dtype, payload.shape.clone(), &payload.bytes)
+                .map_err(|error| invalid(format!("invalid selected MXFP4 tensor view: {error}")))?;
+            views.push((tensor.name.as_str(), view));
+        }
+        if payload_bytes != self.plan.selected_payload_bytes {
+            return Err(invalid(
+                "DeepSeek selected payload byte count differs from its checked plan",
+            ));
+        }
+
+        let header_slack = crate::checkpoint::MAX_HEADER_BYTES
+            .checked_add(8)
+            .ok_or_else(|| invalid("Safetensors header budget overflow"))?;
+        let packing_peak_bound_bytes = payload_bytes
+            .checked_mul(2)
+            .and_then(|bytes| bytes.checked_add(header_slack))
+            .ok_or_else(|| invalid("DeepSeek owner packing peak budget overflow"))?;
+        let packed_owner_bound_bytes = payload_bytes
+            .checked_add(header_slack)
+            .ok_or_else(|| invalid("DeepSeek packed owner budget overflow"))?;
+        if packing_peak_bound_bytes > max_peak_bytes
+            || packed_owner_bound_bytes > MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+        {
+            return Err(Error::new(
+                "ARTIFACT_BUDGET",
+                "DeepSeek compact expert owner exceeds the admitted memory bound",
+            ));
+        }
+
+        let packed = serialize(views, None).map_err(|error| {
+            invalid(format!("could not serialize compact MXFP4 owner: {error}"))
+        })?;
+        drop(self.payloads);
+        let packed_artifact_bytes = u64::try_from(packed.len())
+            .map_err(|_| invalid("compact MXFP4 owner size does not fit u64"))?;
+        if packed_artifact_bytes > MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+            || packed_artifact_bytes < payload_bytes
+        {
+            return Err(invalid(
+                "serialized compact MXFP4 owner violates its exact artifact bound",
+            ));
+        }
+
+        let packed_artifact_sha256 = crate::sha256::hex(&packed);
+        let binding = crate::session::mxfp4::Binding {
+            artifact_sha256: packed_artifact_sha256.clone(),
+            model_revision: self.stamp.model_revision.clone(),
+            rank: self.rank,
+            layer: self.stamp.layer,
+            epoch: self.stamp.epoch,
+            experts: vec![crate::session::mxfp4::Expert {
+                expert: self.expert,
+                local: self.local,
+            }],
+        };
+        let owner = crate::session::mxfp4::Artifact::new(packed, binding)?;
+        if owner.binding().rank != self.rank
+            || owner.binding().experts.as_slice()
+                != [crate::session::mxfp4::Expert {
+                    expert: self.expert,
+                    local: self.local,
+                }]
+        {
+            return Err(invalid(
+                "constructed MXFP4 session owner differs from the route/rank binding",
+            ));
+        }
+
+        Ok(PinnedMxfp4RankResidentExpert {
+            stamp: self.stamp,
+            attempt: self.attempt,
+            route_experts: self.route_experts,
+            route_fingerprint: self.route_fingerprint,
+            expert: self.expert,
+            rank: self.rank,
+            local: self.local,
+            source_shard: self.plan.source_shard,
+            source_header_sha256: self.header_sha256,
+            payload_sha256: payload_hashes,
+            packed_artifact_sha256,
+            packed_artifact_bytes,
+            packing_peak_bound_bytes,
+            owner,
+        })
+    }
+}
+
+/// A one-expert host resident that retains full route identity beside the existing
+/// session artifact binding (model/layer/rank/local/epoch). It has not been LOADed.
+pub struct PinnedMxfp4RankResidentExpert {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    expert: u32,
+    rank: u32,
+    local: u32,
+    source_shard: String,
+    source_header_sha256: String,
+    payload_sha256: BTreeMap<String, String>,
+    packed_artifact_sha256: String,
+    packed_artifact_bytes: u64,
+    packing_peak_bound_bytes: u64,
+    owner: crate::session::mxfp4::Artifact,
+}
+
+impl PinnedMxfp4RankResidentExpert {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn expert(&self) -> u32 {
+        self.expert
+    }
+
+    pub fn rank(&self) -> u32 {
+        self.rank
+    }
+
+    pub fn local(&self) -> u32 {
+        self.local
+    }
+
+    pub fn source_shard(&self) -> &str {
+        &self.source_shard
+    }
+
+    pub fn source_header_sha256(&self) -> &str {
+        &self.source_header_sha256
+    }
+
+    pub fn payload_sha256(&self) -> &BTreeMap<String, String> {
+        &self.payload_sha256
+    }
+
+    pub fn packed_artifact_sha256(&self) -> &str {
+        &self.packed_artifact_sha256
+    }
+
+    pub fn packed_artifact_bytes(&self) -> u64 {
+        self.packed_artifact_bytes
+    }
+
+    pub fn packing_peak_bound_bytes(&self) -> u64 {
+        self.packing_peak_bound_bytes
+    }
+
+    pub fn owner(&self) -> &crate::session::mxfp4::Artifact {
+        &self.owner
+    }
+
+    /// Transfer this single, already-built owner into an existing CPU MXFP4
+    /// Session and return its load receipt with the full route identity retained.
+    /// This consumes the receipt so callers cannot silently replay a failed or
+    /// ambiguous LOAD through the same value. It does not authorize EXEC: a batch
+    /// still has to preflight every selected expert and rank atomically first.
+    pub fn load_into_session(
+        self,
+        session: &mut crate::session::Session,
+        preflight: &PinnedMxfp4RoutePreflight,
+        timeout: std::time::Duration,
+    ) -> Result<PinnedMxfp4SessionLoadReceipt> {
+        let binding = self.owner.binding();
+        let selected = crate::session::mxfp4::Expert {
+            expert: self.expert,
+            local: self.local,
+        };
+        let route_ids = self.route_experts.iter().copied().collect::<BTreeSet<_>>();
+        if self.attempt == 0
+            || self.stamp.model_revision != REVISION
+            || self.stamp.layer != binding.layer
+            || self.stamp.epoch != binding.epoch
+            || binding.model_revision != self.stamp.model_revision
+            || binding.rank != self.rank
+            || binding.experts.as_slice() != [selected]
+            || self.route_experts.len() != crate::deepseek_v41_gate::TOP_K
+            || route_ids.len() != self.route_experts.len()
+            || !route_ids.contains(&self.expert)
+            || !crate::sha256::is_hex_digest(&self.route_fingerprint)
+            || !crate::sha256::is_hex_digest(&self.source_header_sha256)
+            || self.payload_sha256.len() != 6
+            || self
+                .payload_sha256
+                .values()
+                .any(|digest| !crate::sha256::is_hex_digest(digest))
+            || self.owner.bytes().len() as u64 != self.packed_artifact_bytes
+            || crate::sha256::hex(self.owner.bytes()) != self.packed_artifact_sha256
+            || binding.artifact_sha256 != self.packed_artifact_sha256
+            || preflight.stamp != self.stamp
+            || preflight.attempt != self.attempt
+            || preflight.route_experts != self.route_experts
+            || preflight.route_fingerprint != self.route_fingerprint
+            || !preflight.owners.iter().any(|owner| {
+                owner.expert == self.expert
+                    && owner.rank == self.rank
+                    && owner.local == self.local
+                    && owner.artifact_sha256 == self.packed_artifact_sha256
+                    && owner.artifact_bytes == self.packed_artifact_bytes
+            })
+        {
+            return Err(invalid(
+                "DeepSeek resident owner lacks a matching complete-route preflight",
+            ));
+        }
+
+        let session_load = session.load_mxfp4(&self.owner, self.stamp.epoch, timeout)?;
+        if session_load.rank != self.rank
+            || session_load.epoch != self.stamp.epoch
+            || session_load.artifact_sha256 != self.packed_artifact_sha256
+        {
+            return Err(Error::new(
+                "SESSION_PROTOCOL",
+                "CPU Session LOAD receipt differs from the pinned DeepSeek owner",
+            ));
+        }
+
+        Ok(PinnedMxfp4SessionLoadReceipt {
+            stamp: self.stamp,
+            attempt: self.attempt,
+            route_experts: self.route_experts,
+            route_fingerprint: self.route_fingerprint,
+            expert: self.expert,
+            rank: self.rank,
+            local: self.local,
+            source_shard: self.source_shard,
+            source_header_sha256: self.source_header_sha256,
+            payload_sha256: self.payload_sha256,
+            packed_artifact_sha256: self.packed_artifact_sha256,
+            session_load,
+        })
+    }
+}
+
+/// The exact single-token top-6 owner binding admitted before any rank worker starts.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PinnedMxfp4RouteOwnerBinding {
     pub expert: u32,
     pub rank: u32,
     pub local: u32,
-    pub plan: Mxfp4ExpertPayloadPlan,
-    pub header_sha256: String,
-    /// The first pass reads only the 8-byte Safetensors length and bounded header.
-    pub header_validation_io_bytes: u64,
-    /// Includes the header-only validation pass and `read_named_tensors` pass.
-    pub total_io_bytes: u64,
-    pub payloads: crate::checkpoint::NamedTensorImport,
+    pub artifact_sha256: String,
+    pub artifact_bytes: u64,
+}
+
+/// Immutable proof that every expert selected by one identified route is resident
+/// exactly once at the rank/local selected by VoltaFabric dispatch. Construct this
+/// before connecting workers; the proof includes the exact route coefficients.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct PinnedMxfp4RoutePreflight {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    owners: Vec<PinnedMxfp4RouteOwnerBinding>,
+    total_artifact_bytes: u64,
+}
+
+impl PinnedMxfp4RoutePreflight {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    /// Entries are in donor route order; coefficients are committed by the digest.
+    pub fn owners(&self) -> &[PinnedMxfp4RouteOwnerBinding] {
+        &self.owners
+    }
+
+    pub fn total_artifact_bytes(&self) -> u64 {
+        self.total_artifact_bytes
+    }
+}
+
+/// Preflight a complete route-bound resident set before opening a worker or sending
+/// LOAD. It rejects incomplete/duplicate experts, changed coefficients, foreign rank
+/// bindings, bad artifact inventories/digests, and insufficient aggregate byte budget.
+pub fn preflight_pinned_mxfp4_route_residents(
+    route: &crate::routing::RoutingProblem,
+    attempt: u64,
+    residents: &[PinnedMxfp4RankResidentExpert],
+    max_total_artifact_bytes: u64,
+) -> Result<PinnedMxfp4RoutePreflight> {
+    let route_fingerprint = pinned_top6_route_fingerprint(route, attempt)?;
+    let top_k = crate::deepseek_v41_gate::TOP_K;
+    if residents.len() != top_k || max_total_artifact_bytes == 0 {
+        return Err(invalid(
+            "DeepSeek route preflight requires exactly six owners and a nonzero aggregate budget",
+        ));
+    }
+
+    let dispatch = crate::routing::dispatch(route)?;
+    if dispatch.slots.len() != top_k {
+        return Err(invalid(
+            "DeepSeek route preflight dispatch differs from its top-6 route",
+        ));
+    }
+    let mut expected = BTreeMap::new();
+    for slot in dispatch.slots {
+        if expected
+            .insert(slot.expert, (slot.rank, slot.local))
+            .is_some()
+        {
+            return Err(invalid(
+                "DeepSeek route preflight has a duplicate dispatched expert",
+            ));
+        }
+    }
+    let route_ids = route.experts.iter().copied().collect::<BTreeSet<_>>();
+    if expected.len() != top_k || route_ids.len() != top_k {
+        return Err(invalid(
+            "DeepSeek route preflight does not identify six unique dispatched experts",
+        ));
+    }
+
+    let mut by_expert = BTreeMap::new();
+    let mut total_artifact_bytes = 0u64;
+    for resident in residents {
+        if resident.stamp != route.stamp
+            || resident.attempt != attempt
+            || resident.route_experts != route.experts
+            || resident.route_fingerprint != route_fingerprint
+            || !route_ids.contains(&resident.expert)
+            || !crate::sha256::is_hex_digest(&resident.route_fingerprint)
+            || !crate::sha256::is_hex_digest(&resident.source_header_sha256)
+            || !pinned_shard_basename(&resident.source_shard)
+            || resident.payload_sha256.len() != 6
+            || resident
+                .payload_sha256
+                .values()
+                .any(|digest| !crate::sha256::is_hex_digest(digest))
+            || resident.packed_artifact_bytes == 0
+            || resident.packed_artifact_bytes > MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+            || u64::try_from(resident.owner.bytes().len()).ok()
+                != Some(resident.packed_artifact_bytes)
+            || crate::sha256::hex(resident.owner.bytes()) != resident.packed_artifact_sha256
+        {
+            return Err(invalid(
+                "DeepSeek route resident identity, digest inventory, or artifact bytes differ",
+            ));
+        }
+        let Some(&(expected_rank, expected_local)) = expected.get(&resident.expert) else {
+            return Err(invalid(
+                "DeepSeek route resident contains an unselected expert",
+            ));
+        };
+        let binding = resident.owner.binding();
+        let selected = crate::session::mxfp4::Expert {
+            expert: resident.expert,
+            local: resident.local,
+        };
+        if resident.rank != expected_rank
+            || resident.local != expected_local
+            || binding.rank != expected_rank
+            || binding.layer != route.stamp.layer
+            || binding.epoch != route.stamp.epoch
+            || binding.model_revision != route.stamp.model_revision
+            || binding.experts.as_slice() != [selected]
+            || binding.artifact_sha256 != resident.packed_artifact_sha256
+        {
+            return Err(invalid(
+                "DeepSeek route resident does not match its selected rank/local binding",
+            ));
+        }
+        let prefix = format!(
+            "layers.{}.ffn.experts.{}",
+            route.stamp.layer, resident.expert
+        );
+        let expected_payload_names = [
+            format!("{prefix}.w1.weight"),
+            format!("{prefix}.w1.scale"),
+            format!("{prefix}.w2.weight"),
+            format!("{prefix}.w2.scale"),
+            format!("{prefix}.w3.weight"),
+            format!("{prefix}.w3.scale"),
+        ]
+        .into_iter()
+        .collect::<BTreeSet<_>>();
+        if resident
+            .payload_sha256
+            .keys()
+            .cloned()
+            .collect::<BTreeSet<_>>()
+            != expected_payload_names
+        {
+            return Err(invalid(
+                "DeepSeek route resident payload inventory is not its exact six tensors",
+            ));
+        }
+        if by_expert
+            .insert(
+                resident.expert,
+                PinnedMxfp4RouteOwnerBinding {
+                    expert: resident.expert,
+                    rank: resident.rank,
+                    local: resident.local,
+                    artifact_sha256: resident.packed_artifact_sha256.clone(),
+                    artifact_bytes: resident.packed_artifact_bytes,
+                },
+            )
+            .is_some()
+        {
+            return Err(invalid(
+                "DeepSeek route preflight contains a duplicate expert owner",
+            ));
+        }
+        total_artifact_bytes = total_artifact_bytes
+            .checked_add(resident.packed_artifact_bytes)
+            .ok_or_else(|| invalid("DeepSeek route artifact byte count overflow"))?;
+    }
+    let hard_limit = MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+        .checked_mul(top_k as u64)
+        .ok_or_else(|| invalid("DeepSeek route artifact hard limit overflow"))?;
+    if by_expert.keys().copied().collect::<BTreeSet<_>>() != route_ids {
+        return Err(invalid(
+            "DeepSeek route preflight is missing one or more selected experts",
+        ));
+    }
+    if total_artifact_bytes > max_total_artifact_bytes || total_artifact_bytes > hard_limit {
+        return Err(Error::new(
+            "ARTIFACT_BUDGET",
+            "DeepSeek selected route owners exceed the admitted aggregate artifact budget",
+        ));
+    }
+    let owners = route
+        .experts
+        .iter()
+        .map(|expert| {
+            by_expert
+                .remove(expert)
+                .ok_or_else(|| invalid("DeepSeek route owner disappeared after preflight"))
+        })
+        .collect::<Result<Vec<_>>>()?;
+    Ok(PinnedMxfp4RoutePreflight {
+        stamp: route.stamp.clone(),
+        attempt,
+        route_experts: route.experts.clone(),
+        route_fingerprint,
+        owners,
+        total_artifact_bytes,
+    })
+}
+
+/// Successful LOAD receipt that retains identity not carried by the legacy
+/// Session wire header. This records one owner only; it is not a route completion.
+#[derive(Debug)]
+pub struct PinnedMxfp4SessionLoadReceipt {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    expert: u32,
+    rank: u32,
+    local: u32,
+    source_shard: String,
+    source_header_sha256: String,
+    payload_sha256: BTreeMap<String, String>,
+    packed_artifact_sha256: String,
+    session_load: crate::session::LoadReceipt,
+}
+
+impl PinnedMxfp4SessionLoadReceipt {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn expert(&self) -> u32 {
+        self.expert
+    }
+
+    pub fn rank(&self) -> u32 {
+        self.rank
+    }
+
+    pub fn local(&self) -> u32 {
+        self.local
+    }
+
+    pub fn source_shard(&self) -> &str {
+        &self.source_shard
+    }
+
+    pub fn source_header_sha256(&self) -> &str {
+        &self.source_header_sha256
+    }
+
+    pub fn payload_sha256(&self) -> &BTreeMap<String, String> {
+        &self.payload_sha256
+    }
+
+    pub fn packed_artifact_sha256(&self) -> &str {
+        &self.packed_artifact_sha256
+    }
+
+    pub fn session_load(&self) -> &crate::session::LoadReceipt {
+        &self.session_load
+    }
 }
 
 /// One immutable, compressed DeepSeek expert. The Safetensors `Vec` is moved into a
@@ -1543,6 +2220,78 @@ fn read_pinned_safetensors_header<R: Read + Seek>(
     Ok((file_bytes, header))
 }
 
+/// Hash the complete one-token route identity and its selected rank/local owners.
+/// Routing weights are encoded as their exact IEEE-754 bit patterns: no sorting,
+/// rounding, or renormalization can silently change the route a resident belongs to.
+fn pinned_top6_route_fingerprint(
+    route: &crate::routing::RoutingProblem,
+    attempt: u64,
+) -> Result<String> {
+    crate::routing::validate(route)?;
+    let top_k = crate::deepseek_v41_gate::TOP_K;
+    if attempt == 0
+        || route.stamp.model_revision != REVISION
+        || route.hidden != crate::deepseek_v41_gate::HIDDEN_SIZE
+        || route.routes.len() != 1
+        || route.routes[0].len() != top_k
+        || route.experts.len() != top_k
+        || route.experts
+            != route.routes[0]
+                .iter()
+                .map(|choice| choice.expert)
+                .collect::<Vec<_>>()
+    {
+        return Err(invalid(
+            "DeepSeek route fingerprint requires one identified top-6 route",
+        ));
+    }
+    let dispatch = crate::routing::dispatch(route)?;
+    if dispatch.slots.len() != top_k {
+        return Err(invalid(
+            "DeepSeek route fingerprint dispatch does not contain six slots",
+        ));
+    }
+
+    let mut bytes = Vec::with_capacity(512);
+    bytes.extend_from_slice(b"VoltaFabric\0DeepSeek-MXFP4-Top6-Route\0v1\0");
+    for value in [
+        route.stamp.run_id.as_str(),
+        route.stamp.model_revision.as_str(),
+        route.stamp.plan_id.as_str(),
+    ] {
+        let length = u32::try_from(value.len())
+            .map_err(|_| invalid("DeepSeek route identity string is too long"))?;
+        bytes.extend_from_slice(&length.to_be_bytes());
+        bytes.extend_from_slice(value.as_bytes());
+    }
+    bytes.extend_from_slice(&route.stamp.layer.to_be_bytes());
+    bytes.extend_from_slice(&route.stamp.batch.to_be_bytes());
+    bytes.extend_from_slice(&route.stamp.epoch.to_be_bytes());
+    bytes.extend_from_slice(&attempt.to_be_bytes());
+    bytes.extend_from_slice(
+        &u64::try_from(route.hidden)
+            .map_err(|_| invalid("DeepSeek route hidden width does not fit u64"))?
+            .to_be_bytes(),
+    );
+    for (slot_index, (choice, selected)) in route.routes[0].iter().zip(&dispatch.slots).enumerate()
+    {
+        if selected.token != 0
+            || selected.slot != slot_index
+            || selected.expert != choice.expert
+            || selected.weight.to_bits() != choice.weight.to_bits()
+        {
+            return Err(invalid(
+                "DeepSeek route fingerprint dispatch changed donor slot order or coefficient",
+            ));
+        }
+        bytes.extend_from_slice(&choice.expert.to_be_bytes());
+        bytes.extend_from_slice(&choice.weight.to_bits().to_be_bytes());
+        bytes.extend_from_slice(&selected.rank.to_be_bytes());
+        bytes.extend_from_slice(&selected.local.to_be_bytes());
+    }
+    Ok(crate::sha256::hex(&bytes))
+}
+
 /// Read one gate-selected MXFP4 expert for one registered rank. The route is validated
 /// without changing its expert order or coefficients; all six expected tensor hashes
 /// must be supplied before any weight range is read. The existing checkpoint reader
@@ -1582,6 +2331,7 @@ pub fn read_pinned_mxfp4_rank_expert<R: Read + Seek>(
             "DeepSeek expert payload request does not match one identified top-6 route",
         ));
     }
+    let route_fingerprint = pinned_top6_route_fingerprint(route, attempt)?;
     let local = route
         .registry
         .copies
@@ -1711,6 +2461,7 @@ pub fn read_pinned_mxfp4_rank_expert<R: Read + Seek>(
         stamp: route.stamp.clone(),
         attempt,
         route_experts: route.experts.clone(),
+        route_fingerprint,
         expert,
         rank,
         local,
@@ -2539,9 +3290,10 @@ mod a105_full_pinned_expert_index_tests {
 #[cfg(test)]
 mod a148_pinned_expert_selective_read_tests {
     use super::{
-        plan_pinned_mxfp4_expert_payloads, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
-        PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, PINNED_EXPERT_INDEX_SHA256,
-        REVISION,
+        plan_pinned_mxfp4_expert_payloads, preflight_pinned_mxfp4_route_residents,
+        read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace, PinnedExpertPayloadRequest,
+        PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RankResidentExpert,
+        PINNED_EXPERT_INDEX_SHA256, REVISION,
     };
     use crate::moe::{Choice, Registry, Replica, Stamp};
     use std::{
@@ -2650,6 +3402,23 @@ mod a148_pinned_expert_selective_read_tests {
         }
     }
 
+    fn distributed_route_problem() -> crate::routing::RoutingProblem {
+        let mut route = route_problem();
+        route.registry.copies = TOP6
+            .iter()
+            .enumerate()
+            .map(|(index, &expert)| Replica {
+                expert,
+                rank: 4 + index as u32,
+                local: 0,
+            })
+            .collect();
+        route.resident_order = (0..TOP6.len())
+            .map(|index| (4 + index as u32, vec![0]))
+            .collect();
+        route
+    }
+
     fn fixture(
         expert: u32,
     ) -> (
@@ -2704,11 +3473,20 @@ mod a148_pinned_expert_selective_read_tests {
         expert: u32,
         hashes: &'a BTreeMap<String, String>,
     ) -> PinnedMxfp4RankExpertReadRequest<'a> {
+        read_request_for_rank(route, expert, 4, hashes)
+    }
+
+    fn read_request_for_rank<'a>(
+        route: &'a crate::routing::RoutingProblem,
+        expert: u32,
+        rank: u32,
+        hashes: &'a BTreeMap<String, String>,
+    ) -> PinnedMxfp4RankExpertReadRequest<'a> {
         PinnedMxfp4RankExpertReadRequest {
             route,
             attempt: 29,
             expert,
-            rank: 4,
+            rank,
             index_bytes: include_bytes!(
                 "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
             ),
@@ -2718,6 +3496,22 @@ mod a148_pinned_expert_selective_read_tests {
             max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
             max_payload_bytes: crate::checkpoint::MAX_NAMED_TENSOR_PAYLOAD_BYTES,
         }
+    }
+
+    fn resident_for_route_expert(
+        route: &crate::routing::RoutingProblem,
+        expert: u32,
+        rank: u32,
+    ) -> PinnedMxfp4RankResidentExpert {
+        let (_, hashes, mut source) = fixture(expert);
+        let read = read_pinned_mxfp4_rank_expert(
+            &mut source,
+            read_request_for_rank(route, expert, rank, &hashes),
+        )
+        .unwrap();
+        let peak =
+            read.plan.selected_payload_bytes * 2 + crate::checkpoint::MAX_HEADER_BYTES as u64 + 8;
+        read.into_session_resident(peak).unwrap()
     }
 
     #[test]
@@ -2762,6 +3556,144 @@ mod a148_pinned_expert_selective_read_tests {
             .collect::<Vec<_>>();
         actual.sort_unstable();
         assert_eq!(actual, expected, "unselected shard ranges were read");
+    }
+
+    #[test]
+    fn one_rank_read_becomes_one_compact_resident_session_owner() {
+        let route = route_problem();
+        let (expected_plan, hashes, mut source) = fixture(TOP6[0]);
+        let read =
+            read_pinned_mxfp4_rank_expert(&mut source, read_request(&route, TOP6[0], &hashes))
+                .unwrap();
+        let payload_bytes = expected_plan.selected_payload_bytes;
+        let peak_bound = payload_bytes * 2 + crate::checkpoint::MAX_HEADER_BYTES as u64 + 8;
+        let expected_w1 = expected_plan
+            .tensors
+            .iter()
+            .find(|tensor| tensor.name.ends_with(".w1.weight"))
+            .unwrap()
+            .shape
+            .clone();
+        let resident = read.into_session_resident(peak_bound).unwrap();
+
+        assert_eq!(resident.stamp(), &route.stamp);
+        assert_eq!(resident.attempt(), 29);
+        assert_eq!(resident.route_experts(), TOP6);
+        assert_eq!(
+            (resident.expert(), resident.rank(), resident.local()),
+            (TOP6[0], 4, 0)
+        );
+        assert_eq!(resident.source_header_sha256(), HEADER_SHA256);
+        assert_eq!(resident.payload_sha256().len(), 6);
+        assert_eq!(resident.packing_peak_bound_bytes(), peak_bound);
+        assert!(resident.packed_artifact_bytes() < SHARD_BYTES);
+        assert_eq!(
+            resident.owner().binding().model_revision,
+            REVISION.to_owned()
+        );
+        assert_eq!(resident.owner().binding().rank, 4);
+        assert_eq!(resident.owner().binding().layer, 0);
+        assert_eq!(resident.owner().binding().epoch, route.stamp.epoch);
+        assert_eq!(
+            resident.owner().binding().experts,
+            vec![crate::session::mxfp4::Expert {
+                expert: TOP6[0],
+                local: 0,
+            }]
+        );
+        assert_eq!(
+            resident.owner().bytes().len() as u64,
+            resident.packed_artifact_bytes()
+        );
+        let expert = resident.owner().expert(TOP6[0]).unwrap();
+        assert_eq!(expert.namespace(), Mxfp4ExpertNamespace::Backbone);
+        assert_eq!(expert.layer(), 0);
+        assert_eq!(expert.expert(), TOP6[0]);
+        assert_eq!(expert.w1().rows() as usize, expected_w1[0]);
+        assert_eq!(expert.w1().cols() as usize, expected_w1[1] * 2);
+    }
+
+    #[test]
+    fn session_owner_refuses_insufficient_peak_budget_or_changed_payloads() {
+        let route = route_problem();
+        let (_, hashes, mut source) = fixture(TOP6[0]);
+        let read =
+            read_pinned_mxfp4_rank_expert(&mut source, read_request(&route, TOP6[0], &hashes))
+                .unwrap();
+        let required =
+            read.plan.selected_payload_bytes * 2 + crate::checkpoint::MAX_HEADER_BYTES as u64 + 8;
+        assert!(read.into_session_resident(required - 1).is_err());
+
+        let (_, hashes, mut source) = fixture(TOP6[0]);
+        let mut read =
+            read_pinned_mxfp4_rank_expert(&mut source, read_request(&route, TOP6[0], &hashes))
+                .unwrap();
+        let tensor = read.plan.tensors[0].name.clone();
+        read.payloads.tensors.get_mut(&tensor).unwrap().bytes[0] ^= 1;
+        assert!(read.into_session_resident(64 * 1024 * 1024).is_err());
+
+        let (_, hashes, mut source) = fixture(TOP6[0]);
+        let mut read =
+            read_pinned_mxfp4_rank_expert(&mut source, read_request(&route, TOP6[0], &hashes))
+                .unwrap();
+        read.payloads.tensors.pop_first();
+        assert!(read.into_session_resident(64 * 1024 * 1024).is_err());
+    }
+
+    #[test]
+    fn route_preflight_requires_all_six_exact_coefficients_and_rank_bindings() {
+        let route = distributed_route_problem();
+        let residents = TOP6
+            .iter()
+            .enumerate()
+            .map(|(index, &expert)| resident_for_route_expert(&route, expert, 4 + index as u32))
+            .collect::<Vec<_>>();
+        let total = residents
+            .iter()
+            .map(PinnedMxfp4RankResidentExpert::packed_artifact_bytes)
+            .sum::<u64>();
+
+        assert!(
+            preflight_pinned_mxfp4_route_residents(&route, 29, &residents[..5], total).is_err()
+        );
+        assert!(preflight_pinned_mxfp4_route_residents(&route, 29, &residents, total - 1).is_err());
+        let mut changed_coefficients = route.clone();
+        changed_coefficients.routes[0][2].weight =
+            f64::from_bits(changed_coefficients.routes[0][2].weight.to_bits() + 1);
+        assert!(preflight_pinned_mxfp4_route_residents(
+            &changed_coefficients,
+            29,
+            &residents,
+            total,
+        )
+        .is_err());
+        let mut changed_binding = route.clone();
+        changed_binding.registry.copies[0].rank = 10;
+        changed_binding.resident_order.remove(&4);
+        changed_binding.resident_order.insert(10, vec![0]);
+        assert!(
+            preflight_pinned_mxfp4_route_residents(&changed_binding, 29, &residents, total,)
+                .is_err()
+        );
+
+        let preflight =
+            preflight_pinned_mxfp4_route_residents(&route, 29, &residents, total).unwrap();
+        assert_eq!(preflight.stamp(), &route.stamp);
+        assert_eq!(preflight.attempt(), 29);
+        assert_eq!(preflight.route_experts(), TOP6);
+        assert!(crate::sha256::is_hex_digest(preflight.route_fingerprint()));
+        assert_eq!(preflight.total_artifact_bytes(), total);
+        assert_eq!(
+            preflight
+                .owners()
+                .iter()
+                .map(|owner| (owner.expert, owner.rank, owner.local))
+                .collect::<Vec<_>>(),
+            TOP6.iter()
+                .enumerate()
+                .map(|(index, &expert)| (expert, 4 + index as u32, 0))
+                .collect::<Vec<_>>()
+        );
     }
 
     #[test]

@@ -1,0 +1,18 @@
+R712 CPU verification
+====================
+
+Implementation:
+- src/deepseek_v41.rs: consuming single-owner-to-Session adapter and identity-preserving load receipt.
+- tests/r712_deepseek_session_owner.rs: synthetic sparse pinned-metadata fixture; actual local vf-rank-session HELLO + LOAD + shutdown; no EXEC.
+
+Commands/results:
+- cargo test --offline --locked --test r712_deepseek_session_owner: 1 passed.
+- cargo test --offline --locked --release --test r712_deepseek_session_owner: 1 passed.
+- cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests: 5 passed.
+- cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests: 5 passed.
+- cargo clippy --offline --locked --lib -- -D warnings: PASS.
+- cargo clippy --offline --locked --test r712_deepseek_session_owner -- -D warnings: PASS.
+- rustfmt --edition 2021 --check src/deepseek_v41.rs tests/r712_deepseek_session_owner.rs: PASS.
+- git diff --check -- src/deepseek_v41.rs tests/r712_deepseek_session_owner.rs: PASS.
+
+The checkpoint payload is synthetic. The Session worker process was local CPU only; the test did not execute a route or return a model output.
