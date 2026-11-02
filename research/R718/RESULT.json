@@ -1,6 +1,6 @@
 {
   "id": "R718",
-  "state": "LOCAL_CPU_VERIFIED_SOURCE_NOT_YET_PUBLISHED",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS",
   "path": "research/R718",
   "branch": "r718-deepseek-atomic-route-payload-read-20261102",
   "parent_commit": "7195fec45407321fb58e894b0b279608bfd2d5b3",
@@ -43,5 +43,39 @@
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [],
-  "next_action": "Create a successor private branch from the verified R717 receipt, publish only the two scoped code files and R718 evidence, then verify exact readback and configured security scans. Continue to refuse any real load while the six payloads and a fresh checkpoint admission are incomplete. No download, GPU, production network, UNKNOWN replay, cleanup, or automatic relaunch."
+  "next_action": "R719: join the gate-bound route, complete authenticated synthetic payload read, six owners, rank grouping, local Session LOAD/EXEC and the independent MXFP4 oracle in one bounded CPU fixture. Keep all weights synthetic; no real checkpoint payload, GPU, production network, R53, UNKNOWN replay, cleanup or automatic relaunch.",
+  "source_commit": "031f5abf1655989cb587204184f07fd4de4e0575",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED_TEXT_READBACK_EXACT",
+  "readback_exact": true,
+  "readback_files_verified": 7,
+  "readback_verified_utc": "2026-11-02T12:18:48Z",
+  "pipeline_id": 2538,
+  "pipeline_status": "success",
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2538",
+  "pipeline_scope": "configured GitLab Gitleaks, Semgrep, Trivy and fallback only; not Rust compilation or local CPU-test evidence",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "semgrep_scan": {
+    "total_findings": 155,
+    "tracked_files_scanned": 6747,
+    "findings_in_r718_code_files": 0,
+    "warning_count": 5,
+    "warning_paths": [
+      "research/R651/receipts/local-fleet-claims-v2.json",
+      "research/R651/receipts/local-fleet-claims-v3.json",
+      "research/R438/RESULT.json",
+      "handoff/hardware_canary.sh",
+      "research/R651/cpu-harness/test_native_48_pool_callback.py"
+    ]
+  },
+  "superseded_source_publication": {
+    "commit": "402aadabec9016ebff5d714721907fc5c1c97fd1",
+    "pipeline_id": 2537,
+    "pipeline_status": "success",
+    "disposition": "readback showed literal Base64 text, so this scan is not source qualification; corrected by normal text update commit 031f5abf1655989cb587204184f07fd4de4e0575; history preserved, no force push"
+  }
 }

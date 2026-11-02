@@ -1,7 +1,7 @@
 {
   "id": "R718",
   "owner": "integrator",
-  "state": "LOCAL_CPU_VERIFIED_SOURCE_NOT_YET_PUBLISHED",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS",
   "branch": "r718-deepseek-atomic-route-payload-read-20261102",
   "path": "research/R718",
   "code_files": [
@@ -26,5 +26,20 @@
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [],
-  "next_action": "Publish on a new private GitLab branch from the verified R717 receipt and verify source readback plus configured scans."
+  "next_action": "R719: join the gate-bound route, complete authenticated synthetic payload read, six owners, rank grouping, local Session LOAD/EXEC and the independent MXFP4 oracle in one bounded CPU fixture. Keep all weights synthetic; no real checkpoint payload, GPU, production network, R53, UNKNOWN replay, cleanup or automatic relaunch.",
+  "source_commit": "031f5abf1655989cb587204184f07fd4de4e0575",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED_TEXT_READBACK_EXACT",
+  "readback_exact": true,
+  "readback_files_verified": 7,
+  "readback_verified_utc": "2026-11-02T12:18:48Z",
+  "pipeline_id": 2538,
+  "pipeline_status": "success",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "superseded_source_commit": "402aadabec9016ebff5d714721907fc5c1c97fd1",
+  "published_utc": "2026-11-02T12:18:48Z"
 }
