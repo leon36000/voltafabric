@@ -1,0 +1,60 @@
+{
+  "id": "R733",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "parent_branch": "r732-deepseek-hc-ffn-session-20261102",
+  "parent_commit": "570d025cf2952f0f4d1ff66aef8cfdca4ca97cb2",
+  "source_files": [
+    "src/deepseek_v41_attention.rs",
+    "src/lib.rs"
+  ],
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "model_py_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "kernel_py_sha256": "1236c3507019ed176f5dba5e04bcea58867cf654818c6cf138ed4845398c2455",
+    "code_copied": false
+  },
+  "adapted_boundary": "Stamp/attempt-bound single-token KV ring append -> source-ordered window indices with -1 future/unwritten masks -> stable sparse softmax plus denominator-only sink -> BF16 RNE per-head output.",
+  "reused_voltafabric": [
+    "Stamp run/model/plan/layer/batch/epoch identity plus explicit attempt",
+    "DeepSeek BF16 RNE reference and fail-closed Result/Error conventions",
+    "R712-R732 indexed gate, HC and routed Session boundaries as the planned next composition point"
+  ],
+  "new_dependencies": false,
+  "fixture": "Synthetic BF16 query/KV rows and sink; no checkpoint payload imported.",
+  "verification": {
+    "format": "PASS",
+    "debug": "PASS 4/4",
+    "release": "PASS 4/4",
+    "clippy_warnings_denied": "PASS"
+  },
+  "oracle": "Independent f64 stable softmax equation including sink denominator, plus BF16 RNE; source index/ring formulas cross-checked against pinned model.py. Not TileLang/PyTorch bitwise parity.",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "unknown_replayed": false,
+  "real_checkpoint_payload": false,
+  "complete_attention_pass": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53": false,
+  "performance_measured": false,
+  "route_or_coefficients_changed": false,
+  "source_pipeline": "PENDING",
+  "source_readback": "PENDING",
+  "branch": "r733-deepseek-window-attention-20261102",
+  "source_commit": "PENDING",
+  "published_utc": "PENDING",
+  "manifest": "research/R733/SHA256SUMS",
+  "manifest_file_count": 4,
+  "manifest_sha256": "d9e49d9edcf7f185045921f6ecd5f91fe90ee54d765e92b712de36d3f91a2a42",
+  "limitations": [
+    "Query/key-value projection, attention/kv RMSNorm and RoPE are not implemented in this tranche",
+    "Compressed KV indexer/top-k and sparse+compressed concatenation are not implemented",
+    "FP64 reference does not match TileLang FP32/BF16 intermediate rounding or reduction order",
+    "No output projection, HC-post composition, tokenizer, logits, sampler or generated token",
+    "No real checkpoint payload, GPU, inter-PC, production R53 or performance proof"
+  ],
+  "next_action": "R734: connect pinned attention input projections and norms to the identity-bound KV window using synthetic selected tensors; retain separate output-projection and HC-post boundaries."
+}

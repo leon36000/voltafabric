@@ -1,0 +1,41 @@
+$ cargo fmt --all -- --check
+
+exit=0
+
+$ cargo test --lib --locked deepseek_v41_attention::tests -- --nocapture
+   Compiling voltafabric v0.1.0 (/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.00s
+     Running unittests src/lib.rs (target/debug/deps/voltafabric-1c34c306ce6df789)
+
+running 4 tests
+test deepseek_v41_attention::tests::malformed_bf16_or_attention_inputs_fail_atomically ... ok
+test deepseek_v41_attention::tests::changed_identity_and_skipped_position_do_not_advance_cache ... ok
+test deepseek_v41_attention::tests::sink_only_window_returns_zero_without_nan ... ok
+test deepseek_v41_attention::tests::window_positions_follow_pinned_ring_and_sink_formula ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 124 filtered out; finished in 0.00s
+
+
+exit=0
+
+$ cargo test --lib --release --locked deepseek_v41_attention::tests -- --nocapture
+   Compiling voltafabric v0.1.0 (/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification)
+    Finished `release` profile [optimized] target(s) in 8.41s
+     Running unittests src/lib.rs (target/release/deps/voltafabric-e3720319e19e53c4)
+
+running 4 tests
+test deepseek_v41_attention::tests::sink_only_window_returns_zero_without_nan ... ok
+test deepseek_v41_attention::tests::changed_identity_and_skipped_position_do_not_advance_cache ... ok
+test deepseek_v41_attention::tests::malformed_bf16_or_attention_inputs_fail_atomically ... ok
+test deepseek_v41_attention::tests::window_positions_follow_pinned_ring_and_sink_formula ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 124 filtered out; finished in 0.00s
+
+
+exit=0
+
+$ cargo clippy --locked --lib -- -D warnings
+    Checking voltafabric v0.1.0 (/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.58s
+
+exit=0

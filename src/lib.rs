@@ -38,50 +38,8 @@ pub mod traffic;
 pub mod cost;
 pub(crate) mod work;
 
-pub mod gdn_cpu;
-pub mod gguf_expert_slices;
-#[cfg(all(feature = "native-ggml-cpu", target_os = "linux"))]
-pub mod gguf_moe_layout;
-pub mod hyperconnection_cpu;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod native_ggml_cpu;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod native_ledger;
 pub mod qpn2;
-pub mod qsa_cpu;
 pub mod routing;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_bound_layer;
-pub mod sc117_embedding;
-pub mod sc117_expert_origin;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_expert_source;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_ffn_stage;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_gdn_stage;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_head_cpu;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_layer_chain;
-pub mod sc117_layer_completion;
-pub mod sc117_ple;
-pub mod sc117_ple_post;
-pub mod sc117_ple_weights;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_post_attention;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_qsa_bound_layer;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_qsa_stage;
-pub mod sc117_router_cpu;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod sc117_shared_stage;
-pub mod shared_expert_cpu;
-pub mod strata_ingress;
-#[cfg(feature = "native-ggml-cpu")]
-pub mod strata_native_bridge;
-pub mod strata_native_layout;
 
 pub mod base64;
 pub mod process;
@@ -98,5 +56,6 @@ pub mod completion;
 pub mod checkpoint;
 
 pub mod deepseek_v41;
+pub mod deepseek_v41_attention;
 pub mod deepseek_v41_gate;
 pub mod engram;

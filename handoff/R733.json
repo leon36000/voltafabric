@@ -1,0 +1,29 @@
+{
+  "id": "R733",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "summary": "Added a bounded identity-bound CPU reference for the pinned DeepSeek sliding KV window and denominator-only attention sink. Four debug and release tests, fmt and Clippy pass.",
+  "source": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "code_copied": false
+  },
+  "source_pipeline": "PENDING",
+  "source_readback": "PENDING",
+  "receipt_pending": true,
+  "real_checkpoint_payload": false,
+  "complete_attention_pass": false,
+  "complete_generation": false,
+  "gpu": false,
+  "unknown_replayed": false,
+  "manifest": "research/R733/SHA256SUMS",
+  "manifest_file_count": 4,
+  "limitations": [
+    "Projection/RMSNorm/RoPE, compressed attention, output projection and HC-post remain unconnected",
+    "f64 reference is not PyTorch/TileLang bitwise parity"
+  ],
+  "next_action": "R734: connect the already-pinned attention projections and norms to this identity-bound window with bounded synthetic tensors; no model download or GPU without admission."
+}
