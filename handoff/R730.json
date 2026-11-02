@@ -1,7 +1,7 @@
 {
   "id": "R730",
   "date": "2026-11-02",
-  "state": "CPU_VERIFIED_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_commit": "2c1d567b8493dfb3b71d96583a7b891f9f2ae843",
   "parent_pipeline_id": 2565,
   "parent_pipeline_status": "success",
@@ -16,8 +16,22 @@
     "No attention/GDN or full generation",
     "No GPU/inter-PC/R53/performance claim"
   ],
-  "next_action": "Implement indexed HC projection/base/scale loading, coefficient projection/Sinkhorn and pre-mix with CPU oracle; then integrate attention/GDN into token path.",
+  "next_action": "R731: indexed-load the pinned HC projection/base/scale tensors, implement HC coefficient split/Sinkhorn and HC-pre against an independent CPU oracle, then bind the model's attention/GDN path and continue autoregressive generation. No automatic relaunch.",
   "manifest": "research/R730/SHA256SUMS",
   "manifest_sha256": "18ba7320685d475af6348ccb81512c7740679284e2ce9dbf7733d9179da25307",
-  "manifest_file_count": 4
+  "manifest_file_count": 4,
+  "branch": "r730-deepseek-hc-post-20261102",
+  "source_commit": "35fb3896c376f51afa96b0e6ccfb15df53227326",
+  "source_pipeline": "SUCCESS",
+  "source_pipeline_id": 2567,
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "exact_readback": "4/4 manifest files exact",
+  "source_readback_files_verified": 4,
+  "receipt_pending": false,
+  "published_utc": "2026-11-02 16:33:17 UTC"
 }

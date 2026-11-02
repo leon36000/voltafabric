@@ -5,7 +5,7 @@
   "branch": "r729-deepseek-session-shared-join-20261102",
   "parent_commit": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0",
   "source_commit": "2c1d567b8493dfb3b71d96583a7b891f9f2ae843",
-  "source_pipeline": "PENDING",
+  "source_pipeline": "SUCCESS",
   "changed_targets": [
     "tests/r712_deepseek_session_owner.rs",
     "research/R729/REPORT.md",
@@ -37,7 +37,7 @@
   "automatic_continuation": "STOPPED_BY_OWNER",
   "receipt_pending": false,
   "published_utc": "2026-11-02 16:05:00 UTC",
-  "next_action": "R730 composes pinned HC post after the verified routed-plus-shared CPU receipt; HC projection/Sinkhorn remains a separate boundary.",
+  "next_action": "R730 is published, pipeline #2567 succeeded, and its four-file source manifest was read back exactly; R731 implements HC projection/Sinkhorn and HC-pre.",
   "source_pipeline_id": 2565,
   "source_pipeline_status": "success",
   "source_pipeline_jobs": {
