@@ -1,7 +1,7 @@
 {
   "id": "R744",
   "title": "CPU greedy next-token boundary for pinned DeepSeek V4.1 recipe",
-  "status": "SOURCE_PIPELINE_SUCCESS_RECEIPT_PENDING",
+  "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED",
   "upstream": {
     "repository": "ggml-org/llama.cpp",
     "commit": "29c720eaf72fcf8e4e61a56a88b994d92668261d",
@@ -52,12 +52,19 @@
     "source_commit": "5565a8b594745af4205728a76aa005c05534e400",
     "source_pipeline_id": 2626,
     "source_pipeline_status": "success",
-    "exact_readback": false,
-    "receipt_commit": null,
-    "receipt_pipeline_id": null,
-    "receipt_pipeline_status": "pending",
-    "receipt_pending": true,
+    "exact_readback": true,
+    "receipt_commit": "77de20696363d42a01b411124eb8129a07f147b5",
+    "receipt_pipeline_id": 2628,
+    "receipt_pipeline_status": "success",
+    "receipt_pending": false,
     "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "readback_files_verified": 8,
+    "receipt_pipeline_jobs": {
       "gitleaks": "success",
       "semgrep": "success",
       "trivy": "success",
