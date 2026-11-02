@@ -4289,7 +4289,7 @@
   },
   "active_operation": null,
   "active_operations": [],
-  "active_phase": "R728_CPU_SHARED_FP8_INDEXED_LOAD_AND_ROUTE_JOIN",
+  "active_phase": "R731_DEEPSEEK_HC_PROJECTION_PUBLISHED",
   "active_workers": [],
   "actual_billing_usd": 0,
   "adapter_frontier_coverage": {
@@ -4456,7 +4456,7 @@
   "cpu_reproduction_command": "python3 -B /home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-session-20261024-r12/run_gate.py reproduction1",
   "current_integrity": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/CANONICAL_POSTCHECK.json",
   "current_operation_gpu_executed": false,
-  "current_operation_id": "r730-deepseek-hc-post-20261102",
+  "current_operation_id": "r731-deepseek-hc-projection-20261102",
   "current_operation_remote_started": true,
   "current_operation_replay_allowed": false,
   "current_operation_status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
@@ -5684,8 +5684,8 @@
   },
   "last_remote_test": "A126 read-only PC3 preflight READY for exact Tesla V100-SXM2-16GB UUID GPU-42d06a85-027a-75ea-7857-a8de27ad465e, Gen3 x4, Torch CUDA/NVRTC 12.8, SM70; no kernel dispatched yet.",
   "last_review": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/project-deep-audit-r82-20261027/REPORT.md",
-  "last_test": "R730 HC-post and R712 routed/shared/HC integration CPU suites passed debug/release.",
-  "last_test_result": "R730 unit 3/3 debug/release; R712 integrated suite 12/12 debug/release; Clippy/fmt/diff PASS; GitLab pipeline #2567 success/readback 4/4 exact.",
+  "last_test": "R731 source-pinned HC projection and R712 integrated CPU Session tests",
+  "last_test_result": "R731 source pipeline #2570 success; exact readback 7/7; HC/R712 FFN composition local debug and release targeted test passed; Clippy, rustfmt and diff check passed.",
   "last_updated": "2026-11-02 16:33:17 UTC",
   "latest_failure_receipt": ".work/a129-deepseek-layer-adapter-r1/evidence/a129-deepseek-layer-adapter-sm70-20261020-r1/GPU_RECEIPT.json",
   "latest_native_budget_observation": {
@@ -5711,7 +5711,7 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R731: indexed-load the pinned HC projection/base/scale tensors, implement HC coefficient split/Sinkhorn and HC-pre against an independent CPU oracle, then bind the model's attention/GDN path and continue autoregressive generation. No automatic relaunch.",
+  "next_action": "R732: connect identity-bound HC FFN pre/post to one normalized routed-plus-shared expert session step and verify the resulting four-copy residual against an independent CPU oracle. Then investigate one tokenizer/logit/sample decode seam; no complete generation, GPU, inter-PC or automatic relaunch claim.",
   "next_command": "CPU-only: run the R728 indexed-shared-FP8 and terminal-route join tests; preserve full Stamp/attempt, one-time route coefficients, atomic refusal and UNKNOWN non-replay.",
   "next_command_expected_result": "One synthetic sharded selected-expert layer loaded through the pinned index into the existing CPU Session path, matching an independent oracle; any missing/invalid shard yields no owner output.",
   "next_cpu_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
@@ -5727,8 +5727,8 @@
     "No CUDA/RDMA/GPUDirect/production claim from CPU evidence.",
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
-  "next_required_work": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
-  "next_task": "R728",
+  "next_required_work": "R732: connect identity-bound HC FFN pre/post to one normalized routed-plus-shared expert session step and verify the resulting four-copy residual against an independent CPU oracle. Then investigate one tokenizer/logit/sample decode seam; no complete generation, GPU, inter-PC or automatic relaunch claim.",
+  "next_task": "R732",
   "next_updated_utc": "2026-11-02 14:25:05 UTC",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
@@ -9079,8 +9079,8 @@
   "title": "R64 — deux experts réels sur RTX 5080 et V100, coordonnés par PC6 via SSH",
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
-  "updated_at_utc": "2026-11-02 16:33:17 UTC",
-  "updated_utc": "2026-11-02 16:33:17 UTC",
+  "updated_at_utc": "2026-11-02 17:08:56 UTC",
+  "updated_utc": "2026-11-02 17:08:56 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -11641,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "research/R727/REPORT.md",
+  "latest_productivity_report": "research/R731/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -14032,7 +14032,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "receipt_pending": false,
     "published_utc": "2026-11-02 16:33:17 UTC",
-    "next_action": "R731: indexed-load the pinned HC projection/base/scale tensors, implement HC coefficient split/Sinkhorn and HC-pre against an independent CPU oracle, then bind the model's attention/GDN path and continue autoregressive generation. No automatic relaunch.",
+    "next_action": "R731 is published at ff771291, pipeline #2570 passed, and all seven source/manifest reads are exact. R732 now binds the FFN HC pre/post pass to the existing routed-plus-shared CPU Session path.",
     "verified_local": {
       "r730_unit_debug": "PASS 3/3",
       "r730_unit_release": "PASS 3/3",
@@ -14049,5 +14049,54 @@
       "No PyTorch runtime comparison",
       "No GPU/inter-PC/R53/performance qualification"
     ]
+  },
+  "r731_deepseek_hc_projection": {
+    "id": "R731",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
+    "branch": "r731-deepseek-hc-projection-20261102",
+    "parent_commit": "4ab1cbd27d21c1c23f947b3f8bf84d5511706edc",
+    "path": "research/R731",
+    "source_commit": "ff771291bc7530504996215d46ecb7900bcbfa16",
+    "source_pipeline_id": 2570,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "code_files": [
+      "src/deepseek_v41_gate.rs",
+      "src/deepseek_v41_gate/hc.rs",
+      "tests/r712_deepseek_session_owner.rs",
+      "tests/r731_deepseek_hc_projection.rs"
+    ],
+    "report": "research/R731/REPORT.md",
+    "result": "research/R731/RESULT.json",
+    "manifest": "research/R731/SHA256SUMS",
+    "manifest_sha256": "9633956036fe2b8e3a2371856d50f7b94d36a36d18566b438fc2924159f40163",
+    "manifest_file_count": 6,
+    "adapted_boundary": "Indexed pinned HC attention/FFN projection -> CPU FP32 scalar HC mixes and Sinkhorn -> identity-bound HC-pre/post coefficients.",
+    "donor": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6 (MIT); no donor code copied.",
+    "new_dependencies": false,
+    "local_cpu_tests": "R731 oracle debug/release 1/1; R730 units 3/3; R712 full grouped CPU Sessions 12/12 debug/release; scoped Clippy -D warnings, rustfmt and diff-check pass.",
+    "oracle": "Independent f64 projection and HC split/softmax/Sinkhorn equations; f64 HC-pre sum then BF16 RNE. PyTorch/TileLang parity unavailable.",
+    "fixture": "Synthetic HC payloads written at pinned indexed offsets in a sparse shard; no model payload used.",
+    "source_readback_exact": true,
+    "source_readback_files_verified": 7,
+    "source_readback_scope": "Six manifest files and SHA256SUMS read back exactly at the source commit.",
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_pending": false,
+    "published_utc": "2026-11-02 17:08:56 UTC",
+    "next_action": "R732: connect identity-bound HC FFN pre/post to one normalized routed-plus-shared expert session step and verify the resulting four-copy residual against an independent CPU oracle. Then investigate one tokenizer/logit/sample decode seam; no complete generation, GPU, inter-PC or automatic relaunch claim."
   }
 }

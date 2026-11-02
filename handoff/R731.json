@@ -1,20 +1,29 @@
 {
   "id": "R731",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_commit": "4ab1cbd27d21c1c23f947b3f8bf84d5511706edc",
   "branch": "r731-deepseek-hc-projection-20261102",
   "automatic_continuation": "STOPPED_BY_OWNER",
   "active_operations": [],
   "result": "Indexed HC projection/base/scale plus FP32 scalar projection, coefficient split/Sinkhorn and identity-bound HC-pre pass a separate f64 CPU oracle for attention and FFN branches.",
-  "source_readback": "PENDING",
-  "pipeline": "PENDING",
-  "receipt_pending": true,
+  "source_readback": "7/7 exact (six manifest members plus SHA256SUMS)",
+  "pipeline": "SUCCESS #2570; all configured jobs success",
+  "receipt_pending": false,
   "real_checkpoint_payload": false,
   "complete_generation": false,
   "gpu": false,
   "unknown_replayed": false,
   "manifest": "research/R731/SHA256SUMS",
   "manifest_sha256": "9633956036fe2b8e3a2371856d50f7b94d36a36d18566b438fc2924159f40163",
-  "next_action": "After publishing and exact readback, R732 will connect identity-bound HC attention/FFN outputs to the existing normalized routed-expert and shared-expert CPU path, then continue toward a one-token decode. No automatic relaunch."
+  "next_action": "R732: connect identity-bound HC FFN pre/post to one normalized routed-plus-shared expert session step and verify the resulting four-copy residual against an independent CPU oracle. Then investigate one tokenizer/logit/sample decode seam; no complete generation, GPU, inter-PC or automatic relaunch claim.",
+  "source_commit": "ff771291bc7530504996215d46ecb7900bcbfa16",
+  "source_pipeline_id": 2570,
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "published_utc": "2026-11-02 17:08:56 UTC"
 }

@@ -1,7 +1,7 @@
 {
   "id": "R731",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_branch": "r730-deepseek-hc-post-20261102",
   "parent_commit": "4ab1cbd27d21c1c23f947b3f8bf84d5511706edc",
   "source_files": [
@@ -25,9 +25,16 @@
     "official_index_sha256": "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8",
     "official_header_sha256": "71213f444f9c15a4af6dbcbddc36f7611542884ebb3aadef54de650071357449",
     "branch_shapes": {
-      "projection_f32": [24, 20480],
-      "base_f32": [24],
-      "scale_f32": [3]
+      "projection_f32": [
+        24,
+        20480
+      ],
+      "base_f32": [
+        24
+      ],
+      "scale_f32": [
+        3
+      ]
     },
     "selected_resident_bytes": 1966188,
     "test_payloads_are_synthetic": true
@@ -52,8 +59,8 @@
   "oracle": "Independent F64 projection and HC split/softmax/Sinkhorn equations; f64 HC-pre sum then BF16 RNE. No PyTorch runtime was installed or available.",
   "unknown_replayed": false,
   "automatic_continuation": "STOPPED_BY_OWNER",
-  "publication_pipeline": "PENDING",
-  "exact_readback": "PENDING",
+  "publication_pipeline": "SUCCESS #2570",
+  "exact_readback": "7/7 manifest members and checksum read back exactly from the source commit",
   "real_checkpoint_payload": false,
   "complete_generation": false,
   "gpu": false,
@@ -68,11 +75,21 @@
     "No complete autoregressive generation",
     "No GPU/inter-PC/R53/performance qualification"
   ],
-  "next_action": "R732: connect identity-bound HC attention/FFN outputs to the existing normalized routed-expert and shared-expert CPU path, then continue toward a one-token decode. No automatic relaunch.",
+  "next_action": "R732: connect identity-bound HC FFN pre/post to one normalized routed-plus-shared expert session step and verify the resulting four-copy residual against an independent CPU oracle. Then investigate one tokenizer/logit/sample decode seam; no complete generation, GPU, inter-PC or automatic relaunch claim.",
   "manifest": "research/R731/SHA256SUMS",
   "manifest_sha256": "9633956036fe2b8e3a2371856d50f7b94d36a36d18566b438fc2924159f40163",
   "manifest_file_count": 6,
   "branch": "r731-deepseek-hc-projection-20261102",
-  "source_commit": "PENDING",
-  "published_utc": "PENDING"
+  "source_commit": "ff771291bc7530504996215d46ecb7900bcbfa16",
+  "published_utc": "2026-11-02 17:08:56 UTC",
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7,
+  "source_pipeline_id": 2570,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  }
 }

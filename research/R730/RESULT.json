@@ -49,7 +49,7 @@
   "automatic_continuation": "STOPPED_BY_OWNER",
   "publication_pipeline": "SUCCESS",
   "exact_readback": "4/4 manifest files match GitLab source commit",
-  "next_action": "R731: indexed-load the pinned HC projection/base/scale tensors, implement HC coefficient split/Sinkhorn and HC-pre against an independent CPU oracle, then bind the model's attention/GDN path and continue autoregressive generation. No automatic relaunch.",
+  "next_action": "R731 has been published with successful source pipeline #2570 and exact readback. R732 connects identity-bound FFN HC pre/post to the existing normalized routed-plus-shared CPU Session path.",
   "manifest": "research/R730/SHA256SUMS",
   "manifest_sha256": "18ba7320685d475af6348ccb81512c7740679284e2ce9dbf7733d9179da25307",
   "manifest_file_count": 4,
