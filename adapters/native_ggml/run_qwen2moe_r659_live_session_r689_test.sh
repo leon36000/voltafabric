@@ -1,1 +1,76 @@
-IyEvdXNyL2Jpbi9lbnYgYmFzaApzZXQgLWV1byBwaXBlZmFpbAoKZGllKCkgewogIHByaW50ZiAnUjY4OSBsaXZlIGxsYW1hLmNwcC9Wb2x0YUZhYnJpYyBDUFUgcm91dGUgdGVzdDogJXNcbicgIiQxIiA+JjIKICBleGl0IDIKfQoKOiAiJHtWRl9MTEFNQV9TT1VSQ0VfRElSOj9WRl9MTEFNQV9TT1VSQ0VfRElSIGlzIHJlcXVpcmVkfSIKOiAiJHtWRl9MTEFNQV9MSUJSQVJZOj9WRl9MTEFNQV9MSUJSQVJZIGlzIHJlcXVpcmVkfSIKOiAiJHtWRl9HR01MX05BVElWRV9CVUlMRDo/VkZfR0dNTF9OQVRJVkVfQlVJTEQgbXVzdCBuYW1lIHRoZSB2ZXJpZmllZCBSNjU1IHN0YXRpYyBDUFUgYnVpbGR9Igo6ICIke1ZGX1RFU1RfT1VUUFVUX0RJUjo/VkZfVEVTVF9PVVRQVVRfRElSIGlzIHJlcXVpcmVkfSIKOiAiJHtDWFg6P0NYWCBpcyByZXF1aXJlZH0iCgpleHBlY3RlZF9yZXZpc2lvbj0zY2YwMzI1N2YyMTlhZmJlNzMzNDA0NWZmN2M2YTA2YWM2OGM2MjdkCmFjdHVhbF9yZXZpc2lvbj0kKGdpdCAtQyAiJFZGX0xMQU1BX1NPVVJDRV9ESVIiIHJldi1wYXJzZSBIRUFEKQpbWyAiJGFjdHVhbF9yZXZpc2lvbiIgPT0gIiRleHBlY3RlZF9yZXZpc2lvbiIgXV0gfHwgZGllICJ1bmV4cGVjdGVkIGRvbm9yIHJldmlzaW9uOiAkYWN0dWFsX3JldmlzaW9uIgpkb25vcl9kaXJ0eT0kKGdpdCAtQyAiJFZGX0xMQU1BX1NPVVJDRV9ESVIiIHN0YXR1cyAtLXBvcmNlbGFpbiAtLSBnZ21sKQpbWyAteiAiJGRvbm9yX2RpcnR5IiBdXSB8fCBkaWUgImRvbm9yIEdHTUwgZGVwZW5kZW5jeSBoYXMgbG9jYWwgY2hhbmdlcyIKCmZvciBsaWJyYXJ5IGluIFwKICBsaWJnZ21sLWNwdS5zby4wLjI0LjAgXAogIGxpYmdnbWwtYmFzZS5zby4wLjI0LjAgXAogIGxpYmdnbWwuc28uMC4yNC4wOyBkbwogIFtbIC1mICIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikvJGxpYnJhcnkiIF1dIHx8IGRpZSAibWlzc2luZyBwaW5uZWQgZG9ub3IgbGlicmFyeTogJGxpYnJhcnkiCmRvbmUKW1sgLWYgIiRWRl9MTEFNQV9MSUJSQVJZIiBdXSB8fCBkaWUgInBpbm5lZCBsbGFtYSBsaWJyYXJ5IGRvZXMgbm90IGV4aXN0IgpbWyAiJChiYXNlbmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKSIgPT0gImxpYmxsYW1hLnNvLjAuNC4xIiBdXSB8fCBkaWUgInVuZXhwZWN0ZWQgbGxhbWEgbGlicmFyeSBmaWxlbmFtZSIKCmZvciBhcmNoaXZlIGluIFwKICAiJFZGX0dHTUxfTkFUSVZFX0JVSUxEL2xpYnZmX25hdGl2ZV9nZ21sLmEiIFwKICAiJFZGX0dHTUxfTkFUSVZFX0JVSUxEL2dnbWwvc3JjL2xpYmdnbWwtY3B1LmEiIFwKICAiJFZGX0dHTUxfTkFUSVZFX0JVSUxEL2dnbWwvc3JjL2xpYmdnbWwtYmFzZS5hIjsgZG8KICBbWyAtZiAiJGFyY2hpdmUiIF1dIHx8IGRpZSAibWlzc2luZyB2ZXJpZmllZCBWb2x0YUZhYnJpYy9HR01MIENQVSBhcmNoaXZlOiAkYXJjaGl2ZSIKZG9uZQoKbWtkaXIgLXAgIiRWRl9URVNUX09VVFBVVF9ESVIiCnNjcmlwdF9kaXI9JChjZCAtLSAiJChkaXJuYW1lIC0tICIke0JBU0hfU09VUkNFWzBdfSIpIiAmJiBwd2QpCnJlcG9fcm9vdD0kKGNkIC0tICIkc2NyaXB0X2Rpci8uLi8uLiIgJiYgcHdkKQpsb2FkZXJfbWFuaWZlc3Q9IiRzY3JpcHRfZGlyL3I2ODgvcnVzdC1sb2FkZXIvQ2FyZ28udG9tbCIKY2FyZ29fdGFyZ2V0PSIkVkZfVEVTVF9PVVRQVVRfRElSL2NhcmdvLXRhcmdldCIKd29ya2VyPSIkY2FyZ29fdGFyZ2V0L2RlYnVnL3ZmLXJhbmstc2Vzc2lvbiIKbG9hZGVyPSIkY2FyZ29fdGFyZ2V0L3JlbGVhc2UvbGlidmZfcjY4OF9sb2FkZXIuc28iCmJpbmFyeT0iJFZGX1RFU1RfT1VUUFVUX0RJUi9xd2VuMm1vZV9sbGFtYV9yNjU5X3JhbmtfbG9jYWxfcjY4OV90ZXN0IgoKQ0FSR09fVEFSR0VUX0RJUj0iJGNhcmdvX3RhcmdldCIgVkZfR0dNTF9OQVRJVkVfQlVJTEQ9IiRWRl9HR01MX05BVElWRV9CVUlMRCIgXAogIGNhcmdvIGJ1aWxkIC0tb2ZmbGluZSAtLW1hbmlmZXN0LXBhdGggIiRyZXBvX3Jvb3QvQ2FyZ28udG9tbCIgXAogIC0tZmVhdHVyZXMgbmF0aXZlLWdnbWwtY3B1IC0tYmluIHZmLXJhbmstc2Vzc2lvbgpDQVJHT19UQVJHRVRfRElSPSIkY2FyZ29fdGFyZ2V0IiBWRl9HR01MX05BVElWRV9CVUlMRD0iJFZGX0dHTUxfTkFUSVZFX0JVSUxEIiBcCiAgY2FyZ28gYnVpbGQgLS1vZmZsaW5lIC0tbWFuaWZlc3QtcGF0aCAiJGxvYWRlcl9tYW5pZmVzdCIgLS1yZWxlYXNlCltbIC14ICIkd29ya2VyIiBdXSB8fCBkaWUgInJhbmstc2Vzc2lvbiB3b3JrZXIgd2FzIG5vdCBidWlsdCIKW1sgLWYgIiRsb2FkZXIiIF1dIHx8IGRpZSAiVm9sdGFGYWJyaWMgUnVzdCBsb2FkZXIgbGlicmFyeSB3YXMgbm90IGJ1aWx0IgoKIiRDWFgiIC1zdGQ9YysrMTcgLVdhbGwgLVdleHRyYSAtV2Vycm9yIC1PMCAtZyBcCiAgLUkiJHNjcmlwdF9kaXIiIFwKICAtSSIkVkZfTExBTUFfU09VUkNFX0RJUi9zcmMiIFwKICAtSSIkVkZfTExBTUFfU09VUkNFX0RJUi9pbmNsdWRlIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvZ2dtbC9pbmNsdWRlIiBcCiAgLUkiJFZGX0xMQU1BX1NPVVJDRV9ESVIvZ2dtbC9zcmMiIFwKICAiJHNjcmlwdF9kaXIvcXdlbjJtb2VfbGxhbWFfcjY1OV9yYW5rX2xvY2FsX3I2ODhfdGVzdC5jcHAiIFwKICAiJHNjcmlwdF9kaXIvcm91dGVfZ3JhcGhfdHJhbnNhY3Rpb24uY3BwIiBcCiAgIiRzY3JpcHRfZGlyL3F3ZW4ybW9lX3JvdXRlX2ludm9jYXRpb24uY3BwIiBcCiAgIiRzY3JpcHRfZGlyL3F3ZW4ybW9lX2xsYW1hX3JvdXRlX2JyaWRnZS5jcHAiIFwKICAtTCIkY2FyZ29fdGFyZ2V0L3JlbGVhc2UiIC1XbCwtLW5vLWFzLW5lZWRlZCAtbHZmX3I2ODhfbG9hZGVyIFwKICAiJFZGX0xMQU1BX0xJQlJBUlkiIFwKICAiJChkaXJuYW1lIC0tICIkVkZfTExBTUFfTElCUkFSWSIpL2xpYmdnbWwtY3B1LnNvLjAuMjQuMCIgXAogICIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikvbGliZ2dtbC1iYXNlLnNvLjAuMjQuMCIgXAogICIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikvbGliZ2dtbC5zby4wLjI0LjAiIFwKICAtV2wsLXJwYXRoLCIkY2FyZ29fdGFyZ2V0L3JlbGVhc2UiIFwKICAtV2wsLXJwYXRoLCIkKGRpcm5hbWUgLS0gIiRWRl9MTEFNQV9MSUJSQVJZIikiIFwKICAtbyAiJGJpbmFyeSIKCmRvbm9yX2xpYnJhcnlfZGlyPSQoZGlybmFtZSAtLSAiJFZGX0xMQU1BX0xJQlJBUlkiKQpWRl9SQU5LX1NFU1NJT05fQklOPSIkd29ya2VyIiBcCkxEX0xJQlJBUllfUEFUSD0iJGNhcmdvX3RhcmdldC9yZWxlYXNlOiRkb25vcl9saWJyYXJ5X2RpciR7TERfTElCUkFSWV9QQVRIOis6JExEX0xJQlJBUllfUEFUSH0iIFwKICAiJGJpbmFyeSIK
+#!/usr/bin/env bash
+set -euo pipefail
+
+die() {
+  printf 'R689 live llama.cpp/VoltaFabric CPU route test: %s\n' "$1" >&2
+  exit 2
+}
+
+: "${VF_LLAMA_SOURCE_DIR:?VF_LLAMA_SOURCE_DIR is required}"
+: "${VF_LLAMA_LIBRARY:?VF_LLAMA_LIBRARY is required}"
+: "${VF_GGML_NATIVE_BUILD:?VF_GGML_NATIVE_BUILD must name the verified R655 static CPU build}"
+: "${VF_TEST_OUTPUT_DIR:?VF_TEST_OUTPUT_DIR is required}"
+: "${CXX:?CXX is required}"
+
+expected_revision=3cf03257f219afbe7334045ff7c6a06ac68c627d
+actual_revision=$(git -C "$VF_LLAMA_SOURCE_DIR" rev-parse HEAD)
+[[ "$actual_revision" == "$expected_revision" ]] || die "unexpected donor revision: $actual_revision"
+donor_dirty=$(git -C "$VF_LLAMA_SOURCE_DIR" status --porcelain -- ggml)
+[[ -z "$donor_dirty" ]] || die "donor GGML dependency has local changes"
+
+for library in \
+  libggml-cpu.so.0.24.0 \
+  libggml-base.so.0.24.0 \
+  libggml.so.0.24.0; do
+  [[ -f "$(dirname -- "$VF_LLAMA_LIBRARY")/$library" ]] || die "missing pinned donor library: $library"
+done
+[[ -f "$VF_LLAMA_LIBRARY" ]] || die "pinned llama library does not exist"
+[[ "$(basename -- "$VF_LLAMA_LIBRARY")" == "libllama.so.0.4.1" ]] || die "unexpected llama library filename"
+
+for archive in \
+  "$VF_GGML_NATIVE_BUILD/libvf_native_ggml.a" \
+  "$VF_GGML_NATIVE_BUILD/ggml/src/libggml-cpu.a" \
+  "$VF_GGML_NATIVE_BUILD/ggml/src/libggml-base.a"; do
+  [[ -f "$archive" ]] || die "missing verified VoltaFabric/GGML CPU archive: $archive"
+done
+
+mkdir -p "$VF_TEST_OUTPUT_DIR"
+script_dir=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+repo_root=$(cd -- "$script_dir/../.." && pwd)
+loader_manifest="$script_dir/r688/rust-loader/Cargo.toml"
+cargo_target="$VF_TEST_OUTPUT_DIR/cargo-target"
+worker="$cargo_target/debug/vf-rank-session"
+loader="$cargo_target/release/libvf_r688_loader.so"
+binary="$VF_TEST_OUTPUT_DIR/qwen2moe_llama_r659_rank_local_r689_test"
+
+CARGO_TARGET_DIR="$cargo_target" VF_GGML_NATIVE_BUILD="$VF_GGML_NATIVE_BUILD" \
+  cargo build --offline --manifest-path "$repo_root/Cargo.toml" \
+  --features native-ggml-cpu --bin vf-rank-session
+CARGO_TARGET_DIR="$cargo_target" VF_GGML_NATIVE_BUILD="$VF_GGML_NATIVE_BUILD" \
+  cargo build --offline --manifest-path "$loader_manifest" --release
+[[ -x "$worker" ]] || die "rank-session worker was not built"
+[[ -f "$loader" ]] || die "VoltaFabric Rust loader library was not built"
+
+"$CXX" -std=c++17 -Wall -Wextra -Werror -O0 -g \
+  -I"$script_dir" \
+  -I"$VF_LLAMA_SOURCE_DIR/src" \
+  -I"$VF_LLAMA_SOURCE_DIR/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/include" \
+  -I"$VF_LLAMA_SOURCE_DIR/ggml/src" \
+  "$script_dir/qwen2moe_llama_r659_rank_local_r688_test.cpp" \
+  "$script_dir/route_graph_transaction.cpp" \
+  "$script_dir/qwen2moe_route_invocation.cpp" \
+  "$script_dir/qwen2moe_llama_route_bridge.cpp" \
+  -L"$cargo_target/release" -Wl,--no-as-needed -lvf_r688_loader \
+  "$VF_LLAMA_LIBRARY" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-cpu.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml-base.so.0.24.0" \
+  "$(dirname -- "$VF_LLAMA_LIBRARY")/libggml.so.0.24.0" \
+  -Wl,-rpath,"$cargo_target/release" \
+  -Wl,-rpath,"$(dirname -- "$VF_LLAMA_LIBRARY")" \
+  -o "$binary"
+
+donor_library_dir=$(dirname -- "$VF_LLAMA_LIBRARY")
+VF_RANK_SESSION_BIN="$worker" \
+LD_LIBRARY_PATH="$cargo_target/release:$donor_library_dir${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" \
+  "$binary"

@@ -1,1 +1,435 @@
-IyFbYWxsb3codW5zYWZlX2NvZGUpXQoKdXNlIHN0ZDo6ewogICAgY29sbGVjdGlvbnM6OkJUcmVlTWFwLAogICAgZmZpOjp7Y19jaGFyLCBjX3ZvaWQsIENTdHJ9LAogICAgZnM6OntzZWxmLCBGaWxlfSwKICAgIGlvOjpSZWFkLAogICAgcGFuaWM6OntjYXRjaF91bndpbmQsIEFzc2VydFVud2luZFNhZmV9LAogICAgcGF0aDo6UGF0aCwKICAgIHRpbWU6OkR1cmF0aW9uLAp9Owp1c2Ugdm9sdGFmYWJyaWM6OnsKICAgIGdndWZfZXhwZXJ0X3NsaWNlczo6e0V4cGVydENoZWNrcG9pbnRTbGljZSwgU2VsZWN0ZWRFeHBlcnRTbGljZVJlYWRlcn0sCiAgICBtb2U6OntDaG9pY2UsIFJlZ2lzdHJ5LCBSZXBsaWNhLCBTdGFtcH0sCiAgICBuYXRpdmVfZ2dtbF9jcHU6Okdyb3VwZWRNYXRyaXhCaW5kaW5nLAogICAgbmF0aXZlX2xlZGdlcjo6TmF0aXZlQmF0Y2hMZWRnZXIsCiAgICByb3V0aW5nOjp7cXdlbjJtb2Vfcm91dGVzX2Zyb21fZG9ub3IsIFF3ZW4yTW9FRG9ub3JTZWxlY3Rpb24sIFJvdXRpbmdQcm9ibGVtfSwKICAgIHNlc3Npb246OntFbmRwb2ludCwgU2Vzc2lvbn0sCiAgICBzaGEyNTYsCn07Cgpjb25zdCBISURERU46IHVzaXplID0gMzI7CmNvbnN0IFJBTks6IHUzMiA9IDc7CmNvbnN0IEVQT0NIOiB1NjQgPSA5Owpjb25zdCBNT0RFTDogJnN0ciA9ICJyNjU5LXF3ZW4ybW9lLWNwdS1maXh0dXJlIjsKY29uc3QgVElNRU9VVDogRHVyYXRpb24gPSBEdXJhdGlvbjo6ZnJvbV9zZWNzKDEwKTsKY29uc3QgVEVOU09SUzogWyZzdHI7IDNdID0gWwogICAgImJsay4wLmZmbl9nYXRlX2V4cHMud2VpZ2h0IiwKICAgICJibGsuMC5mZm5fdXBfZXhwcy53ZWlnaHQiLAogICAgImJsay4wLmZmbl9kb3duX2V4cHMud2VpZ2h0IiwKXTsKY29uc3QgUkVTSURFTlRTOiBbKHUzMiwgdTMyKTsgMl0gPSBbKDQwLCAwKSwgKDMsIDEpXTsKY29uc3QgQ0hFQ0tQT0lOVF9TTElDRVM6IFtFeHBlcnRDaGVja3BvaW50U2xpY2U7IDJdID0gWwogICAgRXhwZXJ0Q2hlY2twb2ludFNsaWNlIHsKICAgICAgICByZXNpZGVudF9leHBlcnQ6IDQwLAogICAgICAgIHJlc2lkZW50X2xvY2FsOiAwLAogICAgICAgIGNoZWNrcG9pbnRfZXhwZXJ0OiAxLAogICAgfSwKICAgIEV4cGVydENoZWNrcG9pbnRTbGljZSB7CiAgICAgICAgcmVzaWRlbnRfZXhwZXJ0OiAzLAogICAgICAgIHJlc2lkZW50X2xvY2FsOiAxLAogICAgICAgIGNoZWNrcG9pbnRfZXhwZXJ0OiAwLAogICAgfSwKXTsKCnN0cnVjdCBSNjg4Q29udGV4dCB7CiAgICBnYXRlOiBWZWM8U2Vzc2lvbj4sCiAgICB1cDogVmVjPFNlc3Npb24+LAogICAgZG93bjogVmVjPFNlc3Npb24+LAogICAgbGVkZ2VyOiBOYXRpdmVCYXRjaExlZGdlciwKICAgIG5leHRfYmF0Y2g6IHU2NCwKfQoKZm4gc2VsZWN0ZWRfZGlnZXN0KGZpbGU6ICZtdXQgRmlsZSwgdGVuc29yOiAmc3RyKSAtPiBSZXN1bHQ8KFN0cmluZywgdTY0KSwgU3RyaW5nPiB7CiAgICBsZXQgc3BhbiA9IHZmX2dnbWxfbmF0aXZlX2ZmaTo6Z2d1Zl90ZW5zb3Jfc3BhbihmaWxlLCB0ZW5zb3IpCiAgICAgICAgLm1hcF9lcnIofGV8IGZvcm1hdCEoIkdHVUYgc3BhbiB7dGVuc29yfToge2V9IikpPzsKICAgIGlmIHNwYW4uZ2dtbF90eXBlICE9IDggfHwgc3Bhbi5kaW1lbnNpb25zICE9IFszMiwgMzIsIDQsIDFdIHx8IHNwYW4uYnl0ZXMgPT0gMCB7CiAgICAgICAgcmV0dXJuIEVycihmb3JtYXQhKCJ1bmV4cGVjdGVkIHBpbm5lZCBROF8wIHNoYXBlIGZvciB7dGVuc29yfSIpKTsKICAgIH0KICAgIGxldCBtdXQgcmVhZGVyID0gU2VsZWN0ZWRFeHBlcnRTbGljZVJlYWRlcjo6bmV3KGZpbGUsIHNwYW4ub2Zmc2V0LCBzcGFuLmJ5dGVzLCA0LCAmWzEsIDBdKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJzZWxlY3RlZCBROF8wIHJlYWRlciB7dGVuc29yfToge2V9IikpPzsKICAgIGxldCBtdXQgcGF5bG9hZCA9IFZlYzo6d2l0aF9jYXBhY2l0eSgoc3Bhbi5ieXRlcyAvIDIpIGFzIHVzaXplKTsKICAgIHJlYWRlcgogICAgICAgIC5yZWFkX3RvX2VuZCgmbXV0IHBheWxvYWQpCiAgICAgICAgLm1hcF9lcnIofGV8IGZvcm1hdCEoInJlYWQgc2VsZWN0ZWQgUThfMCBwYXlsb2FkIHt0ZW5zb3J9OiB7ZX0iKSk/OwogICAgbGV0IHNlbGVjdGVkX2J5dGVzID0gdTY0Ojp0cnlfZnJvbShwYXlsb2FkLmxlbigpKS5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICBPaygoc2hhMjU2OjpoZXgoJnBheWxvYWQpLCBzZWxlY3RlZF9ieXRlcykpCn0KCmZuIGxvYWRfcHJvamVjdGlvbihzb3VyY2U6ICZQYXRoLCB3b3JrZXI6ICZzdHIsIHRlbnNvcjogJnN0cikgLT4gUmVzdWx0PFNlc3Npb24sIFN0cmluZz4gewogICAgbGV0IG11dCBmaWxlID0gRmlsZTo6b3Blbihzb3VyY2UpLm1hcF9lcnIofGV8IGZvcm1hdCEoIm9wZW4gc291cmNlIEdHVUY6IHtlfSIpKT87CiAgICBsZXQgKGRpZ2VzdCwgc2VsZWN0ZWRfYnl0ZXMpID0gc2VsZWN0ZWRfZGlnZXN0KCZtdXQgZmlsZSwgdGVuc29yKT87CiAgICBsZXQgYmluZGluZyA9IEdyb3VwZWRNYXRyaXhCaW5kaW5nIHsKICAgICAgICBtb2RlbF9yZXZpc2lvbjogTU9ERUwudG9fb3duZWQoKSwKICAgICAgICBsYXllcjogMCwKICAgICAgICB0ZW5zb3I6IHRlbnNvci50b19vd25lZCgpLAogICAgICAgIGdnbWxfdHlwZTogOCwKICAgICAgICByYW5rOiBSQU5LLAogICAgICAgIGVwb2NoOiBFUE9DSCwKICAgICAgICByb3dzOiBISURERU4sCiAgICAgICAgY29sdW1uczogSElEREVOLAogICAgICAgIHJlc2lkZW50czogUkVTSURFTlRTLnRvX3ZlYygpLAogICAgICAgIHNoYTI1NjogZGlnZXN0LAogICAgfTsKICAgIGxldCBlbmRwb2ludCA9IEVuZHBvaW50IHsKICAgICAgICByYW5rOiBSQU5LLAogICAgICAgIGFyZ3Y6IHZlYyFbd29ya2VyLnRvX293bmVkKCldLAogICAgfTsKICAgIGxldCBtdXQgc2Vzc2lvbiA9IFNlc3Npb246OmNvbm5lY3QoJmVuZHBvaW50LCBUSU1FT1VUKS5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICBzZXNzaW9uCiAgICAgICAgLmxvYWRfZ3JvdXBlZF9tYXRyaXhfZ2d1Zl9leHBlcnRfc2xpY2VzKAogICAgICAgICAgICAmYmluZGluZywKICAgICAgICAgICAgc291cmNlLAogICAgICAgICAgICB0ZW5zb3IsCiAgICAgICAgICAgICZDSEVDS1BPSU5UX1NMSUNFUywKICAgICAgICAgICAgVElNRU9VVCwKICAgICAgICApCiAgICAgICAgLm1hcF9lcnIofGV8IGZvcm1hdCEoInJlc2lkZW50IEdHVUYgZXhwZXJ0LXNsaWNlIGxvYWQge3RlbnNvcn06IHtlfSIpKT87CiAgICBpZiBzZXNzaW9uLnRyYWZmaWMud2VpZ2h0X2J5dGVzX3NlbnQgIT0gc2VsZWN0ZWRfYnl0ZXMgewogICAgICAgIHJldHVybiBFcnIoZm9ybWF0ISgKICAgICAgICAgICAgInJhbmstbG9jYWwgbG9hZGVyIGJ5dGUgY291bnQgZGlmZmVycyBmb3Ige3RlbnNvcn06IHNlbnQge30sIGV4cGVjdGVkIHt9IiwKICAgICAgICAgICAgc2Vzc2lvbi50cmFmZmljLndlaWdodF9ieXRlc19zZW50LCBzZWxlY3RlZF9ieXRlcwogICAgICAgICkpOwogICAgfQogICAgZXByaW50bG4hKAogICAgICAgICJSNjg4IHJ1c3RfbG9hZGVyIHRlbnNvcj17dGVuc29yfSByYW5rPXtSQU5LfSByZXNpZGVudF9vcmRlcj1bNDAsM10gY2hlY2twb2ludF9vcmRlcj1bMSwwXSBieXRlcz17c2VsZWN0ZWRfYnl0ZXN9IgogICAgKTsKICAgIE9rKHNlc3Npb24pCn0KCmZuIHJvdXRlX3Byb2JsZW0oYmF0Y2g6IHU2NCkgLT4gUm91dGluZ1Byb2JsZW0gewogICAgUm91dGluZ1Byb2JsZW0gewogICAgICAgIGhpZGRlbjogSElEREVOLAogICAgICAgIGV4cGVydHM6IHZlYyFbMywgNDBdLAogICAgICAgIHJvdXRlczogdmVjIVt2ZWMhWwogICAgICAgICAgICBDaG9pY2UgewogICAgICAgICAgICAgICAgZXhwZXJ0OiA0MCwKICAgICAgICAgICAgICAgIHdlaWdodDogMC4yNSwKICAgICAgICAgICAgfSwKICAgICAgICAgICAgQ2hvaWNlIHsKICAgICAgICAgICAgICAgIGV4cGVydDogMywKICAgICAgICAgICAgICAgIHdlaWdodDogMC43NSwKICAgICAgICAgICAgfSwKICAgICAgICBdXSwKICAgICAgICByZWdpc3RyeTogUmVnaXN0cnkgewogICAgICAgICAgICBlcG9jaDogRVBPQ0gsCiAgICAgICAgICAgIGNvcGllczogdmVjIVsKICAgICAgICAgICAgICAgIFJlcGxpY2EgewogICAgICAgICAgICAgICAgICAgIGV4cGVydDogNDAsCiAgICAgICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgICAgICBsb2NhbDogMCwKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICBSZXBsaWNhIHsKICAgICAgICAgICAgICAgICAgICBleHBlcnQ6IDMsCiAgICAgICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgICAgICBsb2NhbDogMSwKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgIF0sCiAgICAgICAgfSwKICAgICAgICBzdGFtcDogU3RhbXAgewogICAgICAgICAgICBydW5faWQ6ICJyNjg4LXNhbWUtcHJvY2VzcyIuaW50bygpLAogICAgICAgICAgICBtb2RlbF9yZXZpc2lvbjogTU9ERUwuaW50bygpLAogICAgICAgICAgICBwbGFuX2lkOiAicjY4OC1yNjU5LXJhbmstbG9jYWwtcGxhbiIuaW50bygpLAogICAgICAgICAgICBsYXllcjogMCwKICAgICAgICAgICAgYmF0Y2gsCiAgICAgICAgICAgIGVwb2NoOiBFUE9DSCwKICAgICAgICB9LAogICAgICAgIHByZWZlcnJlZF9vd25lcnM6IEJUcmVlTWFwOjpuZXcoKSwKICAgICAgICByZXNpZGVudF9vcmRlcjogQlRyZWVNYXA6OmZyb20oWyhSQU5LLCB2ZWMhWzAsIDFdKV0pLAogICAgfQp9CgpmbiBtYWtlX2NvbnRleHQoc291cmNlOiAmUGF0aCwgd29ya2VyOiAmc3RyLCBsZWRnZXJfcm9vdDogJlBhdGgpIC0+IFJlc3VsdDxSNjg4Q29udGV4dCwgU3RyaW5nPiB7CiAgICBpZiAhc291cmNlLmlzX2ZpbGUoKSB8fCB3b3JrZXIudHJpbSgpLmlzX2VtcHR5KCkgewogICAgICAgIHJldHVybiBFcnIoInJhbmstbG9jYWwgc291cmNlIG9yIHdvcmtlciBleGVjdXRhYmxlIG1pc3NpbmciLmludG8oKSk7CiAgICB9CiAgICBmb3IgdGVuc29yIGluIFRFTlNPUlMgewogICAgICAgIGxldCBmaWxlID0gRmlsZTo6b3Blbihzb3VyY2UpLm1hcF9lcnIofGV8IGZvcm1hdCEoIm9wZW4gc291cmNlIEdHVUY6IHtlfSIpKT87CiAgICAgICAgdmZfZ2dtbF9uYXRpdmVfZmZpOjpnZ3VmX3RlbnNvcl9zcGFuKCZmaWxlLCB0ZW5zb3IpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJwaW5uZWQgdGVuc29yIHt0ZW5zb3J9OiB7ZX0iKSk/OwogICAgfQogICAgZnM6OmNyZWF0ZV9kaXJfYWxsKGxlZGdlcl9yb290KS5tYXBfZXJyKHxlfCBmb3JtYXQhKCJjcmVhdGUgUjY4OCBsZWRnZXIgcm9vdDoge2V9IikpPzsKICAgIGxldCBub25jZSA9IHN0ZDo6dGltZTo6U3lzdGVtVGltZTo6bm93KCkKICAgICAgICAuZHVyYXRpb25fc2luY2Uoc3RkOjp0aW1lOjpVTklYX0VQT0NIKQogICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT8KICAgICAgICAuYXNfbmFub3MoKTsKICAgIGxldCBsZWRnZXJfcGF0aCA9IGxlZGdlcl9yb290LmpvaW4oZm9ybWF0ISgicjY4OC1sb2NhbC1sZWRnZXIte30te25vbmNlfSIsIHN0ZDo6cHJvY2Vzczo6aWQoKSkpOwogICAgZnM6OmNyZWF0ZV9kaXIoJmxlZGdlcl9wYXRoKS5tYXBfZXJyKHxlfCBmb3JtYXQhKCJjcmVhdGUgUjY4OCBsZWRnZXI6IHtlfSIpKT87CiAgICBsZXQgbGVkZ2VyID0gTmF0aXZlQmF0Y2hMZWRnZXI6Om9wZW4oJmxlZGdlcl9wYXRoKS5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICBPayhSNjg4Q29udGV4dCB7CiAgICAgICAgZ2F0ZTogdmVjIVtsb2FkX3Byb2plY3Rpb24oc291cmNlLCB3b3JrZXIsIFRFTlNPUlNbMF0pP10sCiAgICAgICAgdXA6IHZlYyFbbG9hZF9wcm9qZWN0aW9uKHNvdXJjZSwgd29ya2VyLCBURU5TT1JTWzFdKT9dLAogICAgICAgIGRvd246IHZlYyFbbG9hZF9wcm9qZWN0aW9uKHNvdXJjZSwgd29ya2VyLCBURU5TT1JTWzJdKT9dLAogICAgICAgIGxlZGdlciwKICAgICAgICBuZXh0X2JhdGNoOiAxLAogICAgfSkKfQoKI1tub19tYW5nbGVdCnB1YiBleHRlcm4gIkMiIGZuIHZmX3I2ODhfb3BlbigKICAgIHNvdXJjZTogKmNvbnN0IGNfY2hhciwKICAgIHdvcmtlcjogKmNvbnN0IGNfY2hhciwKICAgIGxlZGdlcl9yb290OiAqY29uc3QgY19jaGFyLAopIC0+ICptdXQgY192b2lkIHsKICAgIGxldCByZXN1bHQgPSBjYXRjaF91bndpbmQoQXNzZXJ0VW53aW5kU2FmZSh8fCB7CiAgICAgICAgaWYgc291cmNlLmlzX251bGwoKSB8fCB3b3JrZXIuaXNfbnVsbCgpIHx8IGxlZGdlcl9yb290LmlzX251bGwoKSB7CiAgICAgICAgICAgIHJldHVybiBFcnIoIm51bGwgUjY4OCBicmlkZ2UgYXJndW1lbnQiLnRvX293bmVkKCkpOwogICAgICAgIH0KICAgICAgICBsZXQgc291cmNlID0gdW5zYWZlIHsgQ1N0cjo6ZnJvbV9wdHIoc291cmNlKSB9CiAgICAgICAgICAgIC50b19zdHIoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIGxldCB3b3JrZXIgPSB1bnNhZmUgeyBDU3RyOjpmcm9tX3B0cih3b3JrZXIpIH0KICAgICAgICAgICAgLnRvX3N0cigpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICAgICAgbGV0IGxlZGdlcl9yb290ID0gdW5zYWZlIHsgQ1N0cjo6ZnJvbV9wdHIobGVkZ2VyX3Jvb3QpIH0KICAgICAgICAgICAgLnRvX3N0cigpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICAgICAgbWFrZV9jb250ZXh0KFBhdGg6Om5ldyhzb3VyY2UpLCB3b3JrZXIsIFBhdGg6Om5ldyhsZWRnZXJfcm9vdCkpCiAgICB9KSk7CiAgICBtYXRjaCByZXN1bHQgewogICAgICAgIE9rKE9rKGNvbnRleHQpKSA9PiBCb3g6OmludG9fcmF3KEJveDo6bmV3KGNvbnRleHQpKS5jYXN0KCksCiAgICAgICAgT2soRXJyKGVycm9yKSkgPT4gewogICAgICAgICAgICBlcHJpbnRsbiEoIlI2ODggUnVzdCBsb2FkZXIgcmVmdXNlZDoge2Vycm9yfSIpOwogICAgICAgICAgICBzdGQ6OnB0cjo6bnVsbF9tdXQoKQogICAgICAgIH0KICAgICAgICBFcnIoXykgPT4gewogICAgICAgICAgICBlcHJpbnRsbiEoIlI2ODggUnVzdCBsb2FkZXIgcGFuaWNrZWQ7IGNvbnRleHQgbm90IHB1Ymxpc2hlZCIpOwogICAgICAgICAgICBzdGQ6OnB0cjo6bnVsbF9tdXQoKQogICAgICAgIH0KICAgIH0KfQoKI1tub19tYW5nbGVdCnB1YiBleHRlcm4gIkMiIGZuIHZmX3I2ODhfcnVuX2xheWVyKAogICAgb3BhcXVlOiAqbXV0IGNfdm9pZCwKICAgIG91dHB1dDogKm11dCBmNjQsCiAgICBvdXRwdXRfbGVuOiB1c2l6ZSwKKSAtPiBpMzIgewogICAgaWYgb3BhcXVlLmlzX251bGwoKSB8fCBvdXRwdXQuaXNfbnVsbCgpIHx8IG91dHB1dF9sZW4gIT0gSElEREVOIHsKICAgICAgICByZXR1cm4gMTsKICAgIH0KICAgIGxldCByZXN1bHQgPSBjYXRjaF91bndpbmQoQXNzZXJ0VW53aW5kU2FmZSh8fCB1bnNhZmUgewogICAgICAgIGxldCBjb250ZXh0ID0gJm11dCAqb3BhcXVlLmNhc3Q6OjxSNjg4Q29udGV4dD4oKTsKICAgICAgICBsZXQgYmF0Y2ggPSBjb250ZXh0Lm5leHRfYmF0Y2g7CiAgICAgICAgY29udGV4dC5uZXh0X2JhdGNoID0gY29udGV4dAogICAgICAgICAgICAubmV4dF9iYXRjaAogICAgICAgICAgICAuY2hlY2tlZF9hZGQoMSkKICAgICAgICAgICAgLm9rX29yX2Vsc2UofHwgIlI2ODggYmF0Y2ggaWRlbnRpdHkgb3ZlcmZsb3ciLnRvX293bmVkKCkpPzsKICAgICAgICBsZXQgcHJvYmxlbSA9IHJvdXRlX3Byb2JsZW0oYmF0Y2gpOwogICAgICAgIGxldCBtdXQgaW5wdXQgPSB2ZWMhWzAuMF9mMzI7IEhJRERFTl07CiAgICAgICAgaW5wdXRbMF0gPSAxLjA7CiAgICAgICAgbGV0IGRvd24gPSBTZXNzaW9uOjpleGVjX3F3ZW4ybW9lX2Zmbl9iYXRjaCgKICAgICAgICAgICAgJm11dCBjb250ZXh0LmdhdGUsCiAgICAgICAgICAgICZtdXQgY29udGV4dC51cCwKICAgICAgICAgICAgJm11dCBjb250ZXh0LmRvd24sCiAgICAgICAgICAgICZwcm9ibGVtLAogICAgICAgICAgICAmW2lucHV0XSwKICAgICAgICAgICAgJmNvbnRleHQubGVkZ2VyLAogICAgICAgICAgICBUSU1FT1VULAogICAgICAgICAgICBOb25lLAogICAgICAgICkKICAgICAgICAubWFwX2Vycih8ZXwgZm9ybWF0ISgiVm9sdGFGYWJyaWMgcmVzaWRlbnQgUXdlbjJNb0UgbGF5ZXI6IHtlfSIpKT87CiAgICAgICAgbGV0IHJvd3MgPSB2b2x0YWZhYnJpYzo6c2Vzc2lvbjo6Y29sbGVjdF9xd2VuMm1vZV9mZm5fb3V0cHV0KCZwcm9ibGVtLCAmZG93bikKICAgICAgICAgICAgLm1hcF9lcnIofGV8IGZvcm1hdCEoIlZvbHRhRmFicmljIFF3ZW4yTW9FIGNvbGxlY3Rvcjoge2V9IikpPzsKICAgICAgICBpZiByb3dzLmxlbigpICE9IDEgfHwgcm93c1swXS5sZW4oKSAhPSBISURERU4gewogICAgICAgICAgICByZXR1cm4gRXJyKCJWb2x0YUZhYnJpYyBRd2VuMk1vRSBjb2xsZWN0b3IgcmV0dXJuZWQgYW4gdW5leHBlY3RlZCBzaGFwZSIuaW50bygpKTsKICAgICAgICB9CiAgICAgICAgbGV0IHRhcmdldCA9IHN0ZDo6c2xpY2U6OmZyb21fcmF3X3BhcnRzX211dChvdXRwdXQsIEhJRERFTik7CiAgICAgICAgdGFyZ2V0LmNvcHlfZnJvbV9zbGljZSgmcm93c1swXSk7CiAgICAgICAgT2s6OjwoKSwgU3RyaW5nPigoKSkKICAgIH0pKTsKICAgIG1hdGNoIHJlc3VsdCB7CiAgICAgICAgT2soT2soKCkpKSA9PiAwLAogICAgICAgIE9rKEVycihlcnJvcikpID0+IHsKICAgICAgICAgICAgZXByaW50bG4hKCJSNjg4IFZvbHRhRmFicmljIGxheWVyIHJlZnVzZWQgYXRvbWljYWxseToge2Vycm9yfSIpOwogICAgICAgICAgICAyCiAgICAgICAgfQogICAgICAgIEVycihfKSA9PiB7CiAgICAgICAgICAgIGVwcmludGxuISgiUjY4OCBWb2x0YUZhYnJpYyBsYXllciBwYW5pY2tlZDsgb3V0cHV0IHdhcyBub3QgcHVibGlzaGVkIik7CiAgICAgICAgICAgIDMKICAgICAgICB9CiAgICB9Cn0KCiNbbm9fbWFuZ2xlXQojW2FsbG93KGNsaXBweTo6dG9vX21hbnlfYXJndW1lbnRzKV0KcHViIGV4dGVybiAiQyIgZm4gdmZfcjY4OF9ydW5fcm91dGVkX2xheWVyKAogICAgb3BhcXVlOiAqbXV0IGNfdm9pZCwKICAgIHJ1bl9pZDogKmNvbnN0IGNfY2hhciwKICAgIG1vZGVsX3JldmlzaW9uOiAqY29uc3QgY19jaGFyLAogICAgcGxhbl9pZDogKmNvbnN0IGNfY2hhciwKICAgIGxheWVyOiB1MzIsCiAgICBlcG9jaDogdTY0LAogICAgYmF0Y2g6IHU2NCwKICAgIGF0dGVtcHQ6IHU2NCwKICAgIGhpZGRlbjogdXNpemUsCiAgICBzbG90czogdXNpemUsCiAgICB0b2tlbnM6IHVzaXplLAogICAgZXhwZXJ0X2lkczogKmNvbnN0IGkzMiwKICAgIGV4cGVydF9pZHNfbGVuOiB1c2l6ZSwKICAgIHJvdXRlX3dlaWdodHM6ICpjb25zdCBmMzIsCiAgICByb3V0ZV93ZWlnaHRzX2xlbjogdXNpemUsCiAgICBhY3RpdmF0aW9uczogKmNvbnN0IGYzMiwKICAgIGFjdGl2YXRpb25zX2xlbjogdXNpemUsCiAgICBvdXRwdXQ6ICptdXQgZjY0LAogICAgb3V0cHV0X2xlbjogdXNpemUsCikgLT4gaTMyIHsKICAgIGlmIG9wYXF1ZS5pc19udWxsKCkKICAgICAgICB8fCBydW5faWQuaXNfbnVsbCgpCiAgICAgICAgfHwgbW9kZWxfcmV2aXNpb24uaXNfbnVsbCgpCiAgICAgICAgfHwgcGxhbl9pZC5pc19udWxsKCkKICAgICAgICB8fCBleHBlcnRfaWRzLmlzX251bGwoKQogICAgICAgIHx8IHJvdXRlX3dlaWdodHMuaXNfbnVsbCgpCiAgICAgICAgfHwgYWN0aXZhdGlvbnMuaXNfbnVsbCgpCiAgICAgICAgfHwgb3V0cHV0LmlzX251bGwoKQogICAgICAgIHx8IGhpZGRlbiAhPSBISURERU4KICAgICAgICB8fCBzbG90cyAhPSAyCiAgICAgICAgfHwgdG9rZW5zICE9IDEKICAgICAgICB8fCBsYXllciAhPSAwCiAgICAgICAgfHwgZXBvY2ggIT0gRVBPQ0gKICAgICAgICB8fCBiYXRjaCA9PSAwCiAgICAgICAgfHwgYXR0ZW1wdCA9PSAwCiAgICAgICAgfHwgZXhwZXJ0X2lkc19sZW4gIT0gc2xvdHMgKiB0b2tlbnMKICAgICAgICB8fCByb3V0ZV93ZWlnaHRzX2xlbiAhPSBzbG90cyAqIHRva2VucwogICAgICAgIHx8IGFjdGl2YXRpb25zX2xlbiAhPSBoaWRkZW4gKiB0b2tlbnMKICAgICAgICB8fCBvdXRwdXRfbGVuICE9IGhpZGRlbiAqIHRva2VucwogICAgewogICAgICAgIHJldHVybiAxOwogICAgfQoKICAgIGxldCByZXN1bHQgPSBjYXRjaF91bndpbmQoQXNzZXJ0VW53aW5kU2FmZSh8fCB1bnNhZmUgewogICAgICAgIGxldCBjb250ZXh0ID0gJm11dCAqb3BhcXVlLmNhc3Q6OjxSNjg4Q29udGV4dD4oKTsKICAgICAgICBsZXQgcnVuX2lkID0gQ1N0cjo6ZnJvbV9wdHIocnVuX2lkKS50b19zdHIoKS5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICAgICAgbGV0IG1vZGVsX3JldmlzaW9uID0gQ1N0cjo6ZnJvbV9wdHIobW9kZWxfcmV2aXNpb24pCiAgICAgICAgICAgIC50b19zdHIoKQogICAgICAgICAgICAubWFwX2Vycih8ZXwgZS50b19zdHJpbmcoKSk/OwogICAgICAgIGxldCBwbGFuX2lkID0gQ1N0cjo6ZnJvbV9wdHIocGxhbl9pZCkKICAgICAgICAgICAgLnRvX3N0cigpCiAgICAgICAgICAgIC5tYXBfZXJyKHxlfCBlLnRvX3N0cmluZygpKT87CiAgICAgICAgbGV0IHNlbGVjdGVkX2V4cGVydHMgPSBzdGQ6OnNsaWNlOjpmcm9tX3Jhd19wYXJ0cyhleHBlcnRfaWRzLCBleHBlcnRfaWRzX2xlbik7CiAgICAgICAgbGV0IGZpbmFsX3dlaWdodHMgPSBzdGQ6OnNsaWNlOjpmcm9tX3Jhd19wYXJ0cyhyb3V0ZV93ZWlnaHRzLCByb3V0ZV93ZWlnaHRzX2xlbik7CiAgICAgICAgbGV0IGFjdGl2YXRpb25fdmFsdWVzID0gc3RkOjpzbGljZTo6ZnJvbV9yYXdfcGFydHMoYWN0aXZhdGlvbnMsIGFjdGl2YXRpb25zX2xlbik7CiAgICAgICAgaWYgcnVuX2lkICE9ICJyNjg4LXNhbWUtcHJvY2VzcyIKICAgICAgICAgICAgfHwgbW9kZWxfcmV2aXNpb24gIT0gTU9ERUwKICAgICAgICAgICAgfHwgcGxhbl9pZCAhPSAicjY4OC1yNjU5LXJhbmstbG9jYWwtcGxhbiIKICAgICAgICAgICAgfHwgc2VsZWN0ZWRfZXhwZXJ0cwogICAgICAgICAgICAgICAgLml0ZXIoKQogICAgICAgICAgICAgICAgLmFueSh8JmV4cGVydHwgZXhwZXJ0ICE9IDMgJiYgZXhwZXJ0ICE9IDQwKQogICAgICAgICAgICB8fCBhY3RpdmF0aW9uX3ZhbHVlcy5pdGVyKCkuYW55KHx2YWx1ZXwgIXZhbHVlLmlzX2Zpbml0ZSgpKQogICAgICAgIHsKICAgICAgICAgICAgcmV0dXJuIEVycigKICAgICAgICAgICAgICAgICJWb2x0YUZhYnJpYyByb3V0ZSBpZGVudGl0eSBvciBpbnB1dCBpcyBvdXRzaWRlIHRoZSBwaW5uZWQgZml4dHVyZSIudG9fb3duZWQoKSwKICAgICAgICAgICAgKTsKICAgICAgICB9CgogICAgICAgIGxldCBzZWxlY3Rpb24gPSBRd2VuMk1vRURvbm9yU2VsZWN0aW9uIHsKICAgICAgICAgICAgc3RhbXA6IFN0YW1wIHsKICAgICAgICAgICAgICAgIHJ1bl9pZDogcnVuX2lkLnRvX293bmVkKCksCiAgICAgICAgICAgICAgICBtb2RlbF9yZXZpc2lvbjogbW9kZWxfcmV2aXNpb24udG9fb3duZWQoKSwKICAgICAgICAgICAgICAgIHBsYW5faWQ6IHBsYW5faWQudG9fb3duZWQoKSwKICAgICAgICAgICAgICAgIGxheWVyLAogICAgICAgICAgICAgICAgYmF0Y2gsCiAgICAgICAgICAgICAgICBlcG9jaCwKICAgICAgICAgICAgfSwKICAgICAgICAgICAgYXR0ZW1wdCwKICAgICAgICAgICAgdG9rZW5zLAogICAgICAgICAgICB0b3Bfazogc2xvdHMsCiAgICAgICAgICAgIHNlbGVjdGVkX2V4cGVydHM6IHNlbGVjdGVkX2V4cGVydHMudG9fdmVjKCksCiAgICAgICAgICAgIGZpbmFsX3dlaWdodHM6IGZpbmFsX3dlaWdodHMudG9fdmVjKCksCiAgICAgICAgfTsKICAgICAgICBsZXQgcHJvYmxlbSA9IHF3ZW4ybW9lX3JvdXRlc19mcm9tX2Rvbm9yKAogICAgICAgICAgICBzZWxlY3Rpb24sCiAgICAgICAgICAgIGhpZGRlbiwKICAgICAgICAgICAgdmVjIVszLCA0MF0sCiAgICAgICAgICAgIFJlZ2lzdHJ5IHsKICAgICAgICAgICAgICAgIGVwb2NoOiBFUE9DSCwKICAgICAgICAgICAgICAgIGNvcGllczogdmVjIVsKICAgICAgICAgICAgICAgICAgICBSZXBsaWNhIHsKICAgICAgICAgICAgICAgICAgICAgICAgZXhwZXJ0OiA0MCwKICAgICAgICAgICAgICAgICAgICAgICAgcmFuazogUkFOSywKICAgICAgICAgICAgICAgICAgICAgICAgbG9jYWw6IDAsCiAgICAgICAgICAgICAgICAgICAgfSwKICAgICAgICAgICAgICAgICAgICBSZXBsaWNhIHsKICAgICAgICAgICAgICAgICAgICAgICAgZXhwZXJ0OiAzLAogICAgICAgICAgICAgICAgICAgICAgICByYW5rOiBSQU5LLAogICAgICAgICAgICAgICAgICAgICAgICBsb2NhbDogMSwKICAgICAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICAgICAgXSwKICAgICAgICAgICAgfSwKICAgICAgICAgICAgQlRyZWVNYXA6Om5ldygpLAogICAgICAgICAgICBCVHJlZU1hcDo6ZnJvbShbKFJBTkssIHZlYyFbMCwgMV0pXSksCiAgICAgICAgKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJ2YWxpZGF0ZSBkb25vciByb3V0ZSBiYXRjaDoge2V9IikpPzsKICAgICAgICBsZXQgdG9rZW5faW5wdXRzID0gKDAuLnRva2VucykKICAgICAgICAgICAgLm1hcCh8dG9rZW58IHsKICAgICAgICAgICAgICAgIGxldCBzdGFydCA9IHRva2VuICogaGlkZGVuOwogICAgICAgICAgICAgICAgYWN0aXZhdGlvbl92YWx1ZXNbc3RhcnQuLnN0YXJ0ICsgaGlkZGVuXS50b192ZWMoKQogICAgICAgICAgICB9KQogICAgICAgICAgICAuY29sbGVjdDo6PFZlYzxfPj4oKTsKICAgICAgICBsZXQgZG93biA9IFNlc3Npb246OmV4ZWNfcXdlbjJtb2VfZmZuX2Zyb21fZG9ub3Jfcm91dGVzKAogICAgICAgICAgICAmbXV0IGNvbnRleHQuZ2F0ZSwKICAgICAgICAgICAgJm11dCBjb250ZXh0LnVwLAogICAgICAgICAgICAmbXV0IGNvbnRleHQuZG93biwKICAgICAgICAgICAgJnByb2JsZW0sCiAgICAgICAgICAgICZ0b2tlbl9pbnB1dHMsCiAgICAgICAgICAgICZjb250ZXh0LmxlZGdlciwKICAgICAgICAgICAgVElNRU9VVCwKICAgICAgICAgICAgTm9uZSwKICAgICAgICApCiAgICAgICAgLm1hcF9lcnIofGV8IGZvcm1hdCEoIlZvbHRhRmFicmljIGRvbm9yLXJvdXRlZCBRd2VuMk1vRSBGRk46IHtlfSIpKT87CiAgICAgICAgbGV0IHJvd3MgPSB2b2x0YWZhYnJpYzo6c2Vzc2lvbjo6Y29sbGVjdF9xd2VuMm1vZV9mZm5fb3V0cHV0X3ByZXdlaWdodGVkX2ZwMzIoCiAgICAgICAgICAgIHByb2JsZW0ucHJvYmxlbSgpLAogICAgICAgICAgICAmZG93biwKICAgICAgICAgICAgcHJvYmxlbS5hdHRlbXB0KCksCiAgICAgICAgKQogICAgICAgIC5tYXBfZXJyKHxlfCBmb3JtYXQhKCJWb2x0YUZhYnJpYyByb3V0ZWQgUXdlbjJNb0UgRlAzMiBDb2xsZWN0b3I6IHtlfSIpKT87CiAgICAgICAgaWYgcm93cy5sZW4oKSAhPSB0b2tlbnMKICAgICAgICAgICAgfHwgcm93cwogICAgICAgICAgICAgICAgLml0ZXIoKQogICAgICAgICAgICAgICAgLmFueSh8cm93fCByb3cubGVuKCkgIT0gaGlkZGVuIHx8IHJvdy5pdGVyKCkuYW55KHx2fCAhdi5pc19maW5pdGUoKSkpCiAgICAgICAgewogICAgICAgICAgICByZXR1cm4gRXJyKCJWb2x0YUZhYnJpYyByb3V0ZWQgQ29sbGVjdG9yIHJldHVybmVkIGFuIGludmFsaWQgYmF0Y2giLmludG8oKSk7CiAgICAgICAgfQogICAgICAgIGxldCBzdGFnZWQgPSByb3dzCiAgICAgICAgICAgIC5pbnRvX2l0ZXIoKQogICAgICAgICAgICAuZmxhdHRlbigpCiAgICAgICAgICAgIC5tYXAoZjY0Ojpmcm9tKQogICAgICAgICAgICAuY29sbGVjdDo6PFZlYzxfPj4oKTsKICAgICAgICBpZiBzdGFnZWQubGVuKCkgIT0gb3V0cHV0X2xlbiB8fCBzdGFnZWQuaXRlcigpLmFueSh8dmFsdWV8ICF2YWx1ZS5pc19maW5pdGUoKSkgewogICAgICAgICAgICByZXR1cm4gRXJyKCJWb2x0YUZhYnJpYyByb3V0ZWQgQ29sbGVjdG9yIG91dHB1dCBpcyBpbmNvbXBsZXRlIi5pbnRvKCkpOwogICAgICAgIH0KICAgICAgICBzdGQ6OnNsaWNlOjpmcm9tX3Jhd19wYXJ0c19tdXQob3V0cHV0LCBvdXRwdXRfbGVuKS5jb3B5X2Zyb21fc2xpY2UoJnN0YWdlZCk7CiAgICAgICAgT2s6OjwoKSwgU3RyaW5nPigoKSkKICAgIH0pKTsKICAgIG1hdGNoIHJlc3VsdCB7CiAgICAgICAgT2soT2soKCkpKSA9PiAwLAogICAgICAgIE9rKEVycihlcnJvcikpID0+IHsKICAgICAgICAgICAgZXByaW50bG4hKCJSNjg5IFZvbHRhRmFicmljIHJvdXRlZCBsYXllciByZWZ1c2VkIGF0b21pY2FsbHk6IHtlcnJvcn0iKTsKICAgICAgICAgICAgMgogICAgICAgIH0KICAgICAgICBFcnIoXykgPT4gewogICAgICAgICAgICBlcHJpbnRsbiEoIlI2ODkgVm9sdGFGYWJyaWMgcm91dGVkIGxheWVyIHBhbmlja2VkOyBvdXRwdXQgd2FzIG5vdCBwdWJsaXNoZWQiKTsKICAgICAgICAgICAgMwogICAgICAgIH0KICAgIH0KfQoKI1tub19tYW5nbGVdCnB1YiBleHRlcm4gIkMiIGZuIHZmX3I2ODhfY2xvc2Uob3BhcXVlOiAqbXV0IGNfdm9pZCkgewogICAgaWYgIW9wYXF1ZS5pc19udWxsKCkgewogICAgICAgIGxldCBfID0gY2F0Y2hfdW53aW5kKEFzc2VydFVud2luZFNhZmUofHwgdW5zYWZlIHsKICAgICAgICAgICAgZHJvcChCb3g6OmZyb21fcmF3KG9wYXF1ZS5jYXN0Ojo8UjY4OENvbnRleHQ+KCkpKTsKICAgICAgICB9KSk7CiAgICB9Cn0K
+#![allow(unsafe_code)]
+
+use std::{
+    collections::BTreeMap,
+    ffi::{c_char, c_void, CStr},
+    fs::{self, File},
+    io::Read,
+    panic::{catch_unwind, AssertUnwindSafe},
+    path::Path,
+    time::Duration,
+};
+use voltafabric::{
+    gguf_expert_slices::{ExpertCheckpointSlice, SelectedExpertSliceReader},
+    moe::{Choice, Registry, Replica, Stamp},
+    native_ggml_cpu::GroupedMatrixBinding,
+    native_ledger::NativeBatchLedger,
+    routing::{qwen2moe_routes_from_donor, Qwen2MoEDonorSelection, RoutingProblem},
+    session::{Endpoint, Session},
+    sha256,
+};
+
+const HIDDEN: usize = 32;
+const RANK: u32 = 7;
+const EPOCH: u64 = 9;
+const MODEL: &str = "r659-qwen2moe-cpu-fixture";
+const TIMEOUT: Duration = Duration::from_secs(10);
+const TENSORS: [&str; 3] = [
+    "blk.0.ffn_gate_exps.weight",
+    "blk.0.ffn_up_exps.weight",
+    "blk.0.ffn_down_exps.weight",
+];
+const RESIDENTS: [(u32, u32); 2] = [(40, 0), (3, 1)];
+const CHECKPOINT_SLICES: [ExpertCheckpointSlice; 2] = [
+    ExpertCheckpointSlice {
+        resident_expert: 40,
+        resident_local: 0,
+        checkpoint_expert: 1,
+    },
+    ExpertCheckpointSlice {
+        resident_expert: 3,
+        resident_local: 1,
+        checkpoint_expert: 0,
+    },
+];
+
+struct R688Context {
+    gate: Vec<Session>,
+    up: Vec<Session>,
+    down: Vec<Session>,
+    ledger: NativeBatchLedger,
+    next_batch: u64,
+}
+
+fn selected_digest(file: &mut File, tensor: &str) -> Result<(String, u64), String> {
+    let span = vf_ggml_native_ffi::gguf_tensor_span(file, tensor)
+        .map_err(|e| format!("GGUF span {tensor}: {e}"))?;
+    if span.ggml_type != 8 || span.dimensions != [32, 32, 4, 1] || span.bytes == 0 {
+        return Err(format!("unexpected pinned Q8_0 shape for {tensor}"));
+    }
+    let mut reader = SelectedExpertSliceReader::new(file, span.offset, span.bytes, 4, &[1, 0])
+        .map_err(|e| format!("selected Q8_0 reader {tensor}: {e}"))?;
+    let mut payload = Vec::with_capacity((span.bytes / 2) as usize);
+    reader
+        .read_to_end(&mut payload)
+        .map_err(|e| format!("read selected Q8_0 payload {tensor}: {e}"))?;
+    let selected_bytes = u64::try_from(payload.len()).map_err(|e| e.to_string())?;
+    Ok((sha256::hex(&payload), selected_bytes))
+}
+
+fn load_projection(source: &Path, worker: &str, tensor: &str) -> Result<Session, String> {
+    let mut file = File::open(source).map_err(|e| format!("open source GGUF: {e}"))?;
+    let (digest, selected_bytes) = selected_digest(&mut file, tensor)?;
+    let binding = GroupedMatrixBinding {
+        model_revision: MODEL.to_owned(),
+        layer: 0,
+        tensor: tensor.to_owned(),
+        ggml_type: 8,
+        rank: RANK,
+        epoch: EPOCH,
+        rows: HIDDEN,
+        columns: HIDDEN,
+        residents: RESIDENTS.to_vec(),
+        sha256: digest,
+    };
+    let endpoint = Endpoint {
+        rank: RANK,
+        argv: vec![worker.to_owned()],
+    };
+    let mut session = Session::connect(&endpoint, TIMEOUT).map_err(|e| e.to_string())?;
+    session
+        .load_grouped_matrix_gguf_expert_slices(
+            &binding,
+            source,
+            tensor,
+            &CHECKPOINT_SLICES,
+            TIMEOUT,
+        )
+        .map_err(|e| format!("resident GGUF expert-slice load {tensor}: {e}"))?;
+    if session.traffic.weight_bytes_sent != selected_bytes {
+        return Err(format!(
+            "rank-local loader byte count differs for {tensor}: sent {}, expected {}",
+            session.traffic.weight_bytes_sent, selected_bytes
+        ));
+    }
+    eprintln!(
+        "R688 rust_loader tensor={tensor} rank={RANK} resident_order=[40,3] checkpoint_order=[1,0] bytes={selected_bytes}"
+    );
+    Ok(session)
+}
+
+fn route_problem(batch: u64) -> RoutingProblem {
+    RoutingProblem {
+        hidden: HIDDEN,
+        experts: vec![3, 40],
+        routes: vec![vec![
+            Choice {
+                expert: 40,
+                weight: 0.25,
+            },
+            Choice {
+                expert: 3,
+                weight: 0.75,
+            },
+        ]],
+        registry: Registry {
+            epoch: EPOCH,
+            copies: vec![
+                Replica {
+                    expert: 40,
+                    rank: RANK,
+                    local: 0,
+                },
+                Replica {
+                    expert: 3,
+                    rank: RANK,
+                    local: 1,
+                },
+            ],
+        },
+        stamp: Stamp {
+            run_id: "r688-same-process".into(),
+            model_revision: MODEL.into(),
+            plan_id: "r688-r659-rank-local-plan".into(),
+            layer: 0,
+            batch,
+            epoch: EPOCH,
+        },
+        preferred_owners: BTreeMap::new(),
+        resident_order: BTreeMap::from([(RANK, vec![0, 1])]),
+    }
+}
+
+fn make_context(source: &Path, worker: &str, ledger_root: &Path) -> Result<R688Context, String> {
+    if !source.is_file() || worker.trim().is_empty() {
+        return Err("rank-local source or worker executable missing".into());
+    }
+    for tensor in TENSORS {
+        let file = File::open(source).map_err(|e| format!("open source GGUF: {e}"))?;
+        vf_ggml_native_ffi::gguf_tensor_span(&file, tensor)
+            .map_err(|e| format!("pinned tensor {tensor}: {e}"))?;
+    }
+    fs::create_dir_all(ledger_root).map_err(|e| format!("create R688 ledger root: {e}"))?;
+    let nonce = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_err(|e| e.to_string())?
+        .as_nanos();
+    let ledger_path = ledger_root.join(format!("r688-local-ledger-{}-{nonce}", std::process::id()));
+    fs::create_dir(&ledger_path).map_err(|e| format!("create R688 ledger: {e}"))?;
+    let ledger = NativeBatchLedger::open(&ledger_path).map_err(|e| e.to_string())?;
+    Ok(R688Context {
+        gate: vec![load_projection(source, worker, TENSORS[0])?],
+        up: vec![load_projection(source, worker, TENSORS[1])?],
+        down: vec![load_projection(source, worker, TENSORS[2])?],
+        ledger,
+        next_batch: 1,
+    })
+}
+
+#[no_mangle]
+pub extern "C" fn vf_r688_open(
+    source: *const c_char,
+    worker: *const c_char,
+    ledger_root: *const c_char,
+) -> *mut c_void {
+    let result = catch_unwind(AssertUnwindSafe(|| {
+        if source.is_null() || worker.is_null() || ledger_root.is_null() {
+            return Err("null R688 bridge argument".to_owned());
+        }
+        let source = unsafe { CStr::from_ptr(source) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let worker = unsafe { CStr::from_ptr(worker) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let ledger_root = unsafe { CStr::from_ptr(ledger_root) }
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        make_context(Path::new(source), worker, Path::new(ledger_root))
+    }));
+    match result {
+        Ok(Ok(context)) => Box::into_raw(Box::new(context)).cast(),
+        Ok(Err(error)) => {
+            eprintln!("R688 Rust loader refused: {error}");
+            std::ptr::null_mut()
+        }
+        Err(_) => {
+            eprintln!("R688 Rust loader panicked; context not published");
+            std::ptr::null_mut()
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn vf_r688_run_layer(
+    opaque: *mut c_void,
+    output: *mut f64,
+    output_len: usize,
+) -> i32 {
+    if opaque.is_null() || output.is_null() || output_len != HIDDEN {
+        return 1;
+    }
+    let result = catch_unwind(AssertUnwindSafe(|| unsafe {
+        let context = &mut *opaque.cast::<R688Context>();
+        let batch = context.next_batch;
+        context.next_batch = context
+            .next_batch
+            .checked_add(1)
+            .ok_or_else(|| "R688 batch identity overflow".to_owned())?;
+        let problem = route_problem(batch);
+        let mut input = vec![0.0_f32; HIDDEN];
+        input[0] = 1.0;
+        let down = Session::exec_qwen2moe_ffn_batch(
+            &mut context.gate,
+            &mut context.up,
+            &mut context.down,
+            &problem,
+            &[input],
+            &context.ledger,
+            TIMEOUT,
+            None,
+        )
+        .map_err(|e| format!("VoltaFabric resident Qwen2MoE layer: {e}"))?;
+        let rows = voltafabric::session::collect_qwen2moe_ffn_output(&problem, &down)
+            .map_err(|e| format!("VoltaFabric Qwen2MoE collector: {e}"))?;
+        if rows.len() != 1 || rows[0].len() != HIDDEN {
+            return Err("VoltaFabric Qwen2MoE collector returned an unexpected shape".into());
+        }
+        let target = std::slice::from_raw_parts_mut(output, HIDDEN);
+        target.copy_from_slice(&rows[0]);
+        Ok::<(), String>(())
+    }));
+    match result {
+        Ok(Ok(())) => 0,
+        Ok(Err(error)) => {
+            eprintln!("R688 VoltaFabric layer refused atomically: {error}");
+            2
+        }
+        Err(_) => {
+            eprintln!("R688 VoltaFabric layer panicked; output was not published");
+            3
+        }
+    }
+}
+
+#[no_mangle]
+#[allow(clippy::too_many_arguments)]
+pub extern "C" fn vf_r688_run_routed_layer(
+    opaque: *mut c_void,
+    run_id: *const c_char,
+    model_revision: *const c_char,
+    plan_id: *const c_char,
+    layer: u32,
+    epoch: u64,
+    batch: u64,
+    attempt: u64,
+    hidden: usize,
+    slots: usize,
+    tokens: usize,
+    expert_ids: *const i32,
+    expert_ids_len: usize,
+    route_weights: *const f32,
+    route_weights_len: usize,
+    activations: *const f32,
+    activations_len: usize,
+    output: *mut f64,
+    output_len: usize,
+) -> i32 {
+    if opaque.is_null()
+        || run_id.is_null()
+        || model_revision.is_null()
+        || plan_id.is_null()
+        || expert_ids.is_null()
+        || route_weights.is_null()
+        || activations.is_null()
+        || output.is_null()
+        || hidden != HIDDEN
+        || slots != 2
+        || tokens != 1
+        || layer != 0
+        || epoch != EPOCH
+        || batch == 0
+        || attempt == 0
+        || expert_ids_len != slots * tokens
+        || route_weights_len != slots * tokens
+        || activations_len != hidden * tokens
+        || output_len != hidden * tokens
+    {
+        return 1;
+    }
+
+    let result = catch_unwind(AssertUnwindSafe(|| unsafe {
+        let context = &mut *opaque.cast::<R688Context>();
+        let run_id = CStr::from_ptr(run_id).to_str().map_err(|e| e.to_string())?;
+        let model_revision = CStr::from_ptr(model_revision)
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let plan_id = CStr::from_ptr(plan_id)
+            .to_str()
+            .map_err(|e| e.to_string())?;
+        let selected_experts = std::slice::from_raw_parts(expert_ids, expert_ids_len);
+        let final_weights = std::slice::from_raw_parts(route_weights, route_weights_len);
+        let activation_values = std::slice::from_raw_parts(activations, activations_len);
+        if run_id != "r688-same-process"
+            || model_revision != MODEL
+            || plan_id != "r688-r659-rank-local-plan"
+            || selected_experts
+                .iter()
+                .any(|&expert| expert != 3 && expert != 40)
+            || activation_values.iter().any(|value| !value.is_finite())
+        {
+            return Err(
+                "VoltaFabric route identity or input is outside the pinned fixture".to_owned(),
+            );
+        }
+
+        let selection = Qwen2MoEDonorSelection {
+            stamp: Stamp {
+                run_id: run_id.to_owned(),
+                model_revision: model_revision.to_owned(),
+                plan_id: plan_id.to_owned(),
+                layer,
+                batch,
+                epoch,
+            },
+            attempt,
+            tokens,
+            top_k: slots,
+            selected_experts: selected_experts.to_vec(),
+            final_weights: final_weights.to_vec(),
+        };
+        let problem = qwen2moe_routes_from_donor(
+            selection,
+            hidden,
+            vec![3, 40],
+            Registry {
+                epoch: EPOCH,
+                copies: vec![
+                    Replica {
+                        expert: 40,
+                        rank: RANK,
+                        local: 0,
+                    },
+                    Replica {
+                        expert: 3,
+                        rank: RANK,
+                        local: 1,
+                    },
+                ],
+            },
+            BTreeMap::new(),
+            BTreeMap::from([(RANK, vec![0, 1])]),
+        )
+        .map_err(|e| format!("validate donor route batch: {e}"))?;
+        let token_inputs = (0..tokens)
+            .map(|token| {
+                let start = token * hidden;
+                activation_values[start..start + hidden].to_vec()
+            })
+            .collect::<Vec<_>>();
+        let down = Session::exec_qwen2moe_ffn_from_donor_routes(
+            &mut context.gate,
+            &mut context.up,
+            &mut context.down,
+            &problem,
+            &token_inputs,
+            &context.ledger,
+            TIMEOUT,
+            None,
+        )
+        .map_err(|e| format!("VoltaFabric donor-routed Qwen2MoE FFN: {e}"))?;
+        let rows = voltafabric::session::collect_qwen2moe_ffn_output_preweighted_fp32(
+            problem.problem(),
+            &down,
+            problem.attempt(),
+        )
+        .map_err(|e| format!("VoltaFabric routed Qwen2MoE FP32 Collector: {e}"))?;
+        if rows.len() != tokens
+            || rows
+                .iter()
+                .any(|row| row.len() != hidden || row.iter().any(|v| !v.is_finite()))
+        {
+            return Err("VoltaFabric routed Collector returned an invalid batch".into());
+        }
+        let staged = rows
+            .into_iter()
+            .flatten()
+            .map(f64::from)
+            .collect::<Vec<_>>();
+        if staged.len() != output_len || staged.iter().any(|value| !value.is_finite()) {
+            return Err("VoltaFabric routed Collector output is incomplete".into());
+        }
+        std::slice::from_raw_parts_mut(output, output_len).copy_from_slice(&staged);
+        Ok::<(), String>(())
+    }));
+    match result {
+        Ok(Ok(())) => 0,
+        Ok(Err(error)) => {
+            eprintln!("R689 VoltaFabric routed layer refused atomically: {error}");
+            2
+        }
+        Err(_) => {
+            eprintln!("R689 VoltaFabric routed layer panicked; output was not published");
+            3
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn vf_r688_close(opaque: *mut c_void) {
+    if !opaque.is_null() {
+        let _ = catch_unwind(AssertUnwindSafe(|| unsafe {
+            drop(Box::from_raw(opaque.cast::<R688Context>()));
+        }));
+    }
+}
