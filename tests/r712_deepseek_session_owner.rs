@@ -18,9 +18,9 @@ use voltafabric::deepseek_v41::{
     PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
-    DeepSeekV41Gate, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource, TokenKind,
-    GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, ROUTED_EXPERTS,
-    ROUTE_SCALE,
+    DeepSeekV41Gate, FfnNormTensorSpec, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource,
+    TokenKind, GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION,
+    PINNED_RMS_NORM_EPSILON, RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -487,6 +487,7 @@ fn indexed_gate_route_payloads() -> (
     IndexedTempDirectory,
     voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch,
     voltafabric::deepseek_v41_gate::DeepSeekV41RoutePayloadReads,
+    Vec<f32>,
 ) {
     let index = include_bytes!(
         "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
@@ -515,7 +516,9 @@ fn indexed_gate_route_payloads() -> (
         }
     }
     let mut text_bias_values = vec![0.0f32; ROUTED_EXPERTS];
-    text_bias_values[0] = 1_000.0;
+    // Keep expert 0 in the synthetic top-6 after the normalized activation
+    // changes the scale of the bit-plane gate logits.
+    text_bias_values[0] = 10_000.0;
     let image_bias_values = vec![0.0f32; ROUTED_EXPERTS];
     let encode = |values: &[f32]| {
         values
@@ -538,6 +541,18 @@ fn indexed_gate_route_payloads() -> (
         shard.seek(SeekFrom::Start(start)).unwrap();
         shard.write_all(payload).unwrap();
     }
+    let mut norm_weight = Vec::with_capacity(RMS_NORM_WEIGHT_BYTES as usize);
+    for _ in 0..HIDDEN_SIZE {
+        norm_weight.extend_from_slice(&0x4180u16.to_le_bytes()); // BF16 16.0
+    }
+    let norm_offsets = header_value["layers.0.ffn_norm.weight"]["data_offsets"]
+        .as_array()
+        .unwrap();
+    let norm_start = data_start + norm_offsets[0].as_u64().unwrap();
+    let norm_end = data_start + norm_offsets[1].as_u64().unwrap();
+    assert_eq!(norm_end - norm_start, norm_weight.len() as u64);
+    shard.seek(SeekFrom::Start(norm_start)).unwrap();
+    shard.write_all(&norm_weight).unwrap();
     drop(shard);
 
     let gate_spec = GateShardSpec {
@@ -561,7 +576,12 @@ fn indexed_gate_route_payloads() -> (
         source_shard_bytes: SHARD_BYTES,
         max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
     };
-    let layer = voltafabric::deepseek_v41_gate::DeepSeekV41IndexedMoeLayer::load(
+    let norm_spec = FfnNormTensorSpec {
+        layer: 0,
+        epsilon: PINNED_RMS_NORM_EPSILON,
+        tensor_sha256: voltafabric::sha256::hex(&norm_weight),
+    };
+    let layer = voltafabric::deepseek_v41_gate::DeepSeekV41IndexedMoeLayer::load_with_ffn_norm(
         temp.path(),
         voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
             index_bytes: index,
@@ -570,6 +590,7 @@ fn indexed_gate_route_payloads() -> (
         },
         source,
         &gate_spec,
+        &norm_spec,
     )
     .unwrap();
     let mut hidden = vec![0.0f32; HIDDEN_SIZE];
@@ -597,9 +618,36 @@ fn indexed_gate_route_payloads() -> (
             .collect(),
     };
     let token_plan = layer
+        .prepare_ffn_token(
+            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedFfnTokenRequest {
+                hidden: &hidden,
+                token_kind: TokenKind::Text,
+                stamp: stamp.clone(),
+                attempt: 29,
+                registry: registry.clone(),
+                preferred_owners: BTreeMap::new(),
+                resident_order: BTreeMap::from([
+                    (4, vec![0, 1]),
+                    (5, vec![0]),
+                    (6, vec![0]),
+                    (7, vec![0]),
+                    (8, vec![0]),
+                ]),
+                max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
+            },
+        )
+        .unwrap();
+    let batch = token_plan.batch().clone();
+    let activation = token_plan.activation().to_vec();
+    assert_eq!(batch.problem().experts, TOP6);
+    assert_eq!(activation.len(), HIDDEN_SIZE);
+    assert!(activation.iter().all(|value| {
+        voltafabric::deepseek_v41::cast_bf16_rne_reference(*value).unwrap() == *value
+    }));
+    let explicit_normalized_route = layer
         .prepare_token(
             voltafabric::deepseek_v41_gate::DeepSeekV41IndexedTokenRequest {
-                hidden: &hidden,
+                hidden: &activation,
                 token_kind: TokenKind::Text,
                 stamp,
                 attempt: 29,
@@ -616,15 +664,12 @@ fn indexed_gate_route_payloads() -> (
             },
         )
         .unwrap();
-    let batch = token_plan.batch().clone();
-    let reference_batch = gated_grouped_route_batch();
-    assert_eq!(batch.problem().experts, TOP6);
     assert_eq!(
         batch.problem().routes[0]
             .iter()
             .map(|choice| choice.weight.to_bits())
             .collect::<Vec<_>>(),
-        reference_batch.problem().routes[0]
+        explicit_normalized_route.batch().problem().routes[0]
             .iter()
             .map(|choice| choice.weight.to_bits())
             .collect::<Vec<_>>()
@@ -662,7 +707,7 @@ fn indexed_gate_route_payloads() -> (
     assert_eq!(reads.attempt(), batch.attempt());
     assert_eq!(reads.route_fingerprint(), plan.route_fingerprint());
     assert_eq!(reads.reads().len(), TOP6.len());
-    (temp, batch, reads)
+    (temp, batch, reads, activation)
 }
 
 #[test]
@@ -1025,14 +1070,11 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
 
 #[test]
 fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route() {
-    let (_checkpoint, batch, reads) = indexed_gate_route_payloads();
+    let (_checkpoint, batch, reads, input) = indexed_gate_route_payloads();
     let route = batch.problem();
     assert_eq!(route.experts, TOP6);
     assert_eq!(batch.attempt(), 29);
     let residents = reads.into_session_residents(64 * 1024 * 1024).unwrap();
-    let input: Vec<f32> = (0..route.hidden)
-        .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
-        .collect();
     for value in &input {
         assert_eq!(
             voltafabric::deepseek_v41::cast_bf16_rne_reference(*value).unwrap(),

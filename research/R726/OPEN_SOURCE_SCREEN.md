@@ -1,0 +1,16 @@
+# R726 focused source and arXiv screen
+
+Scope: selected work on fused MoE decode, linear/Gated Delta attention, and sparse decode. This is a targeted, model/hardware-oriented screen, not a claim to have exhaustively searched all of arXiv or all open-source projects.
+
+| Source | Version / license evidence | Relevance to VoltaFabric | Decision |
+|---|---|---|---|
+| [MonoMoE, arXiv:2609.04244](https://arxiv.org/abs/2609.04244); implementation in [FlashInfer](https://github.com/flashinfer-ai/flashinfer/tree/main/csrc/fused_moe/monomoe) | FlashInfer tag `v0.7.3rc1` (tag commit prefix `ba08db8`, checked by the Luna source survey); [repository Apache-2.0](https://github.com/flashinfer-ai/flashinfer/blob/main/LICENSE). Paper reports H200 evaluation. | Weight-major persistent work, expert-weight reuse, route/quantize/projection fusion, and readiness/overlap scheduling may guide a future low-batch V100 schedule. | Reuse scheduling questions only. Do not port its H200 kernel or claim V100 suitability. No code copied in R726. |
+| [Flash Linear Attention](https://github.com/fla-org/flash-linear-attention), release `v0.6.0`, commit `413ad2c` | [MIT license](https://github.com/fla-org/flash-linear-attention/blob/main/LICENSE); release page binds the tag to `413ad2c`. | Algorithm and numerical-reference material for Gated Delta / linear attention, relevant to a future pinned attention boundary. | Keep as source/oracle reference. No implementation or dependency added in R726; no V100 qualification inferred. |
+| [Gated DeltaNet-2, arXiv:2605.22791](https://arxiv.org/abs/2605.22791); [NVlabs implementation](https://github.com/NVlabs/GatedDeltaNet-2) | Repository states NVIDIA Source Code License-NC. | The paper's erase/write separation is an algorithmic comparison point, not required by the pinned checkpoint. | Do not copy or adapt its code for this project. |
+| [FlashKDA](https://github.com/MoonshotAI/FlashKDA) | Upstream README/build metadata specify SM90+ and CUDA 12.9+; check current source at adoption time. | KDA kernel techniques are not a direct match for the current V100 target or this model's proven attention path. | Exclude from V100 implementation; do not install. |
+| [DALI, arXiv:2602.03495](https://arxiv.org/abs/2602.03495) | Paper found; no matching implementation repository and effective license verified in this bounded screen. | Potential speculative/decode scheduling ideas. | Paper-only idea; no code reuse until repository and license are verified. |
+| [vLLM](https://github.com/vllm-project/vllm) and SGLang | Prior R721 evidence records inspected source versions/licenses and the HF index-to-shard convention. vLLM is Apache-2.0. | The checkpoint index convention is useful for selective Safetensors reads; it does not qualify their runtime kernels for this SM70/model combination. | R726 reuses VoltaFabric's already-adapted index reader only. No vLLM/SGLang runtime component added. |
+
+## Adoption rule
+
+Adapt ideas only after pinning effective version/license and translating the contract to the actual model and hardware. In particular, keep QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinct; do not infer V100 support from a project's general CUDA support or from a newer-GPU benchmark. R726 adds no third-party source code and no runtime dependency.

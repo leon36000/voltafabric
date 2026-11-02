@@ -1,0 +1,39 @@
+{
+  "id": "R726",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_INTEGRATION_PASS_READY_FOR_PRIVATE_GITLAB_SOURCE_PUBLICATION",
+  "branch": "r726-deepseek-ffn-norm-20261102",
+  "parent_commit": "084f233e7a28e2e81b3c4298880e3b4b24e15a67",
+  "path": "research/R726",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs",
+    "tests/r726_deepseek_ffn_norm.rs"
+  ],
+  "adapted_boundary": "Resident indexed DeepSeek ffn_norm weight; apply pinned RMSNorm once and bind the resulting activation to the gate route/payload plan so the same activation reaches the grouped CPU expert Sessions.",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "verification": {
+    "r726_norm_debug_release": "2/2 pass each",
+    "indexed_gate_norm_experts_sessions_oracle_debug_release": "1/1 pass each",
+    "clippy": "library and both targeted test targets pass with -D warnings",
+    "format_and_diff": "pass"
+  },
+  "limits": {
+    "norm_and_expert_bytes": "synthetic payloads; pinned index/header metadata",
+    "real_checkpoint_payload": false,
+    "full_ffn_shared_expert": false,
+    "hyperconnections": false,
+    "attention": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "source_pipeline_pending": true,
+  "receipt_pipeline_pending": true,
+  "next_action": "R727: implement and oracle-check the pinned FFN Hyper-Connection pre-mix and shared expert; keep attention, HC post/residual and complete generation as later explicit boundaries."
+}

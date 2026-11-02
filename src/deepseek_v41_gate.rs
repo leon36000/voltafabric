@@ -40,6 +40,8 @@ pub const PINNED_MODEL_REVISION: &str = "314113f8a7dadb388215396ba5fbee2c610a04d
 pub const GATE_WEIGHT_BYTES: u64 = (ROUTED_EXPERTS * HIDDEN_SIZE * 2) as u64;
 pub const GATE_BIAS_BYTES: u64 = (ROUTED_EXPERTS * 4) as u64;
 pub const GATE_PAYLOAD_BYTES: u64 = GATE_WEIGHT_BYTES + 2 * GATE_BIAS_BYTES;
+pub const PINNED_RMS_NORM_EPSILON: f32 = 1.0e-20;
+pub const RMS_NORM_WEIGHT_BYTES: u64 = (HIDDEN_SIZE * 2) as u64;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenKind {
@@ -227,6 +229,237 @@ pub struct PinnedMxfp4PayloadSource<'a> {
     pub max_source_shard_bytes: u64,
 }
 
+/// Caller-provided digest and the exact epsilon for the pinned layer's ffn_norm.
+/// The model index/header identify its location and BF16 shape, not its payload.
+#[derive(Debug, Clone)]
+pub struct FfnNormTensorSpec {
+    pub layer: u32,
+    pub epsilon: f32,
+    pub tensor_sha256: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FfnNormLoadReceipt {
+    pub layer: u32,
+    pub tensor_name: String,
+    pub tensor_sha256: String,
+    pub tensor_bytes: u64,
+    pub shard_bytes: u64,
+    pub header_bytes: u64,
+    pub io_bytes: u64,
+}
+
+/// Resident CPU RMSNorm weight imported from the pinned BF16 ffn_norm tensor.
+/// Math follows the pinned source's FP32 accumulation/multiply and BF16 output
+/// cast; it is a scalar CPU reference, not a GPU kernel.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41FfnRmsNorm {
+    layer: u32,
+    epsilon: f32,
+    weight_f32: Box<[f32]>,
+    receipt: FfnNormLoadReceipt,
+}
+
+impl DeepSeekV41FfnRmsNorm {
+    /// Authenticate and load only `layers.{layer}.ffn_norm.weight` from the
+    /// caller-admitted shard. The pinned index, header digest, tensor identity,
+    /// byte count and tensor SHA-256 must all agree before the resident weight
+    /// is returned.
+    pub fn load_indexed(
+        root: &Path,
+        source: PinnedMxfp4PayloadSource<'_>,
+        spec: &FfnNormTensorSpec,
+    ) -> Result<Self> {
+        if spec.layer >= 40
+            || spec.epsilon.to_bits() != PINNED_RMS_NORM_EPSILON.to_bits()
+            || !crate::sha256::is_hex_digest(&spec.tensor_sha256)
+            || crate::sha256::hex(source.index_bytes)
+                != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+            || source.expected_header_sha256.len() != 64
+            || !crate::sha256::is_hex_digest(source.expected_header_sha256)
+            || crate::sha256::hex(source.header_bytes) != source.expected_header_sha256
+            || source.source_shard_bytes == 0
+            || source.source_shard_bytes > source.max_source_shard_bytes
+        {
+            return Err(invalid(
+                "pinned DeepSeek ffn_norm identity, epsilon, digest or bounds are invalid",
+            ));
+        }
+
+        let tensor_name = format!("layers.{}.ffn_norm.weight", spec.layer);
+        let expected_plan = checkpoint::plan_indexed_safetensors_shards(
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            std::slice::from_ref(&tensor_name),
+        )?;
+        if expected_plan
+            .tensor_to_shard
+            .get(&tensor_name)
+            .map(String::as_str)
+            != Some(source.header_shard_name)
+        {
+            return Err(invalid(
+                "pinned DeepSeek ffn_norm must use the admitted layer shard",
+            ));
+        }
+
+        let header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            source.header_shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if header.sha256 != source.expected_header_sha256
+            || header.file_bytes != source.source_shard_bytes
+            || header.header_bytes != source.header_bytes
+        {
+            return Err(invalid(
+                "pinned DeepSeek ffn_norm shard header or size differs",
+            ));
+        }
+
+        let named = NamedTensorSpec {
+            name: tensor_name.clone(),
+            dtype: Dtype::BF16,
+            shape: vec![HIDDEN_SIZE],
+            bytes: RMS_NORM_WEIGHT_BYTES,
+            sha256: spec.tensor_sha256.clone(),
+        };
+        let imported = checkpoint::read_indexed_named_tensors(
+            root,
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            &[named],
+            RMS_NORM_WEIGHT_BYTES,
+        )?;
+        if imported.plan != expected_plan
+            || imported.file_bytes != source.source_shard_bytes
+            || imported.header_bytes != header.header_bytes.len() as u64
+            || imported.tensors.len() != 1
+        {
+            return Err(invalid(
+                "indexed DeepSeek ffn_norm payload import differs from its preflight",
+            ));
+        }
+        let tensor = imported
+            .tensors
+            .get(&tensor_name)
+            .ok_or_else(|| invalid("indexed DeepSeek ffn_norm payload is absent"))?;
+        if tensor.dtype != Dtype::BF16
+            || tensor.shape != [HIDDEN_SIZE]
+            || tensor.bytes.len() as u64 != RMS_NORM_WEIGHT_BYTES
+            || tensor.sha256 != spec.tensor_sha256
+        {
+            return Err(invalid(
+                "indexed DeepSeek ffn_norm tensor metadata or digest differs",
+            ));
+        }
+        let final_header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            source.header_shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if final_header.file_bytes != header.file_bytes || final_header.sha256 != header.sha256 {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "DeepSeek ffn_norm shard changed during indexed payload import",
+            ));
+        }
+
+        let mut weight_f32 = Vec::with_capacity(HIDDEN_SIZE);
+        for pair in tensor.bytes.chunks_exact(2) {
+            let bf16 = u16::from_le_bytes([pair[0], pair[1]]);
+            let value = f32::from_bits(u32::from(bf16) << 16);
+            if !value.is_finite() {
+                return Err(Error::new(
+                    "NONFINITE_INPUT",
+                    "DeepSeek ffn_norm weight contains NaN or infinity",
+                ));
+            }
+            weight_f32.push(value);
+        }
+        if weight_f32.len() != HIDDEN_SIZE {
+            return Err(invalid("DeepSeek ffn_norm weight has wrong hidden width"));
+        }
+
+        Ok(Self {
+            layer: spec.layer,
+            epsilon: spec.epsilon,
+            weight_f32: weight_f32.into_boxed_slice(),
+            receipt: FfnNormLoadReceipt {
+                layer: spec.layer,
+                tensor_name,
+                tensor_sha256: spec.tensor_sha256.clone(),
+                tensor_bytes: RMS_NORM_WEIGHT_BYTES,
+                shard_bytes: imported.file_bytes,
+                header_bytes: imported.header_bytes,
+                io_bytes: imported.io_bytes,
+            },
+        })
+    }
+
+    pub fn layer(&self) -> u32 {
+        self.layer
+    }
+
+    pub fn receipt(&self) -> &FfnNormLoadReceipt {
+        &self.receipt
+    }
+
+    /// Apply the pinned per-token RMSNorm to one exact-BF16 activation represented
+    /// as FP32. Accumulation and the learned-weight product are FP32, followed by
+    /// the model's BF16 round-to-nearest-even output cast.
+    pub fn apply(&self, input_bf16_f32: &[f32]) -> Result<Vec<f32>> {
+        if input_bf16_f32.len() != HIDDEN_SIZE
+            || self.weight_f32.len() != HIDDEN_SIZE
+            || !self.epsilon.is_finite()
+            || self.epsilon.to_bits() != PINNED_RMS_NORM_EPSILON.to_bits()
+        {
+            return Err(invalid(
+                "DeepSeek ffn_norm input, weight or epsilon is invalid",
+            ));
+        }
+        let mut sum_squares = 0.0f32;
+        for &value in input_bf16_f32 {
+            if !value.is_finite()
+                || crate::deepseek_v41::cast_bf16_rne_reference(value)?.to_bits() != value.to_bits()
+            {
+                return Err(invalid(
+                    "DeepSeek ffn_norm input must contain finite exact BF16 values",
+                ));
+            }
+            sum_squares += value * value;
+        }
+        if !sum_squares.is_finite() {
+            return Err(Error::new(
+                "NUMERICAL_OVERFLOW",
+                "DeepSeek ffn_norm square sum overflowed",
+            ));
+        }
+        let mean_square = sum_squares / HIDDEN_SIZE as f32;
+        let variance = mean_square + self.epsilon;
+        if !variance.is_finite() || variance <= 0.0 {
+            return Err(Error::new(
+                "NUMERICAL_OVERFLOW",
+                "DeepSeek ffn_norm variance is invalid",
+            ));
+        }
+        let inverse_rms = variance.sqrt().recip();
+        if !inverse_rms.is_finite() {
+            return Err(Error::new(
+                "NUMERICAL_OVERFLOW",
+                "DeepSeek ffn_norm reciprocal RMS is invalid",
+            ));
+        }
+        input_bf16_f32
+            .iter()
+            .zip(self.weight_f32.iter())
+            .map(|(&value, &weight)| {
+                crate::deepseek_v41::cast_bf16_rne_reference((value * inverse_rms) * weight)
+            })
+            .collect()
+    }
+}
+
 /// Immutable metadata-only payload plan derived from one gate-produced top-6 route.
 /// The stamp, attempt, route order, coefficient/rank dispatch fingerprint and exact
 /// selected source ranges stay together for the later authenticated read stage.
@@ -356,12 +589,26 @@ pub struct DeepSeekV41IndexedTokenRequest<'a> {
     pub max_total_selected_payload_bytes: u64,
 }
 
+/// Raw block activation entering the model's ffn_norm immediately before this
+/// indexed MoE sublayer. The normalization is applied exactly once by the layer.
+pub struct DeepSeekV41IndexedFfnTokenRequest<'a> {
+    pub hidden: &'a [f32],
+    pub token_kind: TokenKind,
+    pub stamp: crate::moe::Stamp,
+    pub attempt: u64,
+    pub registry: crate::moe::Registry,
+    pub preferred_owners: BTreeMap<u32, u32>,
+    pub resident_order: BTreeMap<u32, Vec<u32>>,
+    pub max_total_selected_payload_bytes: u64,
+}
+
 /// Route and selected source ranges produced together by one resident indexed gate.
 /// The route remains private so callers cannot swap in expert IDs or coefficient bits.
 #[derive(Debug)]
 pub struct DeepSeekV41IndexedMoeTokenPlan {
     batch: DeepSeekV41RouteBatch,
     payloads: DeepSeekV41RoutePayloadPlan,
+    activation: Vec<f32>,
 }
 
 impl DeepSeekV41IndexedMoeTokenPlan {
@@ -371,6 +618,13 @@ impl DeepSeekV41IndexedMoeTokenPlan {
 
     pub fn payloads(&self) -> &DeepSeekV41RoutePayloadPlan {
         &self.payloads
+    }
+
+    /// Exact BF16-representable activation used to derive this route. Keeping it
+    /// beside the private route prevents a caller from routing one tensor and
+    /// executing the selected experts on a separately normalized tensor.
+    pub fn activation(&self) -> &[f32] {
+        &self.activation
     }
 }
 
@@ -1169,6 +1423,7 @@ pub struct DeepSeekV41IndexedMoeLayer<'a> {
     root: &'a Path,
     gate: DeepSeekV41Gate,
     expert_source: PinnedMxfp4PayloadSource<'a>,
+    ffn_norm: Option<DeepSeekV41FfnRmsNorm>,
 }
 
 impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
@@ -1216,11 +1471,74 @@ impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
             root,
             gate,
             expert_source,
+            ffn_norm: None,
         })
+    }
+
+    /// Load the indexed gate/expert boundary together with this layer's resident
+    /// `ffn_norm.weight`; the attention norm belongs to the preceding sublayer.
+    pub fn load_with_ffn_norm(
+        root: &'a Path,
+        gate_source: PinnedGateIndexSource<'a>,
+        expert_source: PinnedMxfp4PayloadSource<'a>,
+        gate_spec: &GateShardSpec,
+        norm_spec: &FfnNormTensorSpec,
+    ) -> Result<Self> {
+        if norm_spec.layer != gate_spec.layer
+            || norm_spec.epsilon.to_bits() != PINNED_RMS_NORM_EPSILON.to_bits()
+            || !crate::sha256::is_hex_digest(&norm_spec.tensor_sha256)
+        {
+            return Err(invalid(
+                "DeepSeek gate and ffn_norm layer specifications differ",
+            ));
+        }
+        let mut layer = Self::load(root, gate_source, expert_source, gate_spec)?;
+        let ffn_norm = DeepSeekV41FfnRmsNorm::load_indexed(root, expert_source, norm_spec)?;
+        if ffn_norm.layer() != layer.gate.receipt().layer
+            || ffn_norm.receipt().shard_bytes != layer.gate.receipt().file_bytes
+            || ffn_norm.receipt().header_bytes != layer.gate.receipt().header_bytes
+        {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "indexed DeepSeek gate and ffn_norm imports differ in layer, shard or header",
+            ));
+        }
+        layer.ffn_norm = Some(ffn_norm);
+        Ok(layer)
     }
 
     pub fn gate_receipt(&self) -> &GateLoadReceipt {
         self.gate.receipt()
+    }
+
+    pub fn ffn_norm_receipt(&self) -> Option<&FfnNormLoadReceipt> {
+        self.ffn_norm.as_ref().map(DeepSeekV41FfnRmsNorm::receipt)
+    }
+
+    pub fn normalize_ffn_hidden(&self, hidden_bf16_f32: &[f32]) -> Result<Vec<f32>> {
+        self.ffn_norm
+            .as_ref()
+            .ok_or_else(|| invalid("indexed DeepSeek layer has no resident ffn_norm weight"))?
+            .apply(hidden_bf16_f32)
+    }
+
+    /// Apply the pinned post-attention `ffn_norm` once, then derive the gate route
+    /// and selected expert payload plan from its BF16 output.
+    pub fn prepare_ffn_token(
+        &self,
+        request: DeepSeekV41IndexedFfnTokenRequest<'_>,
+    ) -> Result<DeepSeekV41IndexedMoeTokenPlan> {
+        let normalized = self.normalize_ffn_hidden(request.hidden)?;
+        self.prepare_token(DeepSeekV41IndexedTokenRequest {
+            hidden: &normalized,
+            token_kind: request.token_kind,
+            stamp: request.stamp,
+            attempt: request.attempt,
+            registry: request.registry,
+            preferred_owners: request.preferred_owners,
+            resident_order: request.resident_order,
+            max_total_selected_payload_bytes: request.max_total_selected_payload_bytes,
+        })
     }
 
     /// Bind one post-normalization MoE activation to the route and exact selected
@@ -1243,7 +1561,11 @@ impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
             self.expert_source,
             request.max_total_selected_payload_bytes,
         )?;
-        Ok(DeepSeekV41IndexedMoeTokenPlan { batch, payloads })
+        Ok(DeepSeekV41IndexedMoeTokenPlan {
+            batch,
+            payloads,
+            activation: request.hidden.to_vec(),
+        })
     }
 
     /// Read the full selected payload set for a token plan. The underlying route
