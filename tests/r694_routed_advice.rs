@@ -1,5 +1,5 @@
 use std::collections::BTreeMap;
-use voltafabric_r694_exact_source_check::{
+use voltafabric::{
     cost::{CostOrigin, CostProvenance},
     moe::{Registry, Replica, Stamp},
     planner::{

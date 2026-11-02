@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 06:34:31 UTC",
+  "updated_utc": "2026-11-02 07:04:21 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1492,6 +1492,24 @@
       "published_utc": "2026-11-02 06:34:31 UTC",
       "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384",
       "manifest_files": 3
+    },
+    {
+      "id": "R699",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_CPU_TESTS_PASS_PIPELINE_PENDING",
+      "branch": "r699-deepseek-mxfp4-memory-admission-20261102",
+      "parent_commit": "e11d4b3d971d90875a13e7f474593c622b4ce77b",
+      "commit": null,
+      "path": "research/R699",
+      "manifest_sha256": "1784de2093d04346099fdb15a01678ec75447873f3ace245b14e605d38766e2a",
+      "manifest_files": 7,
+      "local_test": "R694 7 passed; R699 2 passed; two real MXFP4 expert Sessions on CPU; same stamp and attempt 903; one-byte-under-memory refusal before Session",
+      "route_from_model_gate": false,
+      "pipeline_id": null,
+      "pipeline_status": "pending",
+      "pipeline_scope": "configured scans/fallback only; not Rust compilation",
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "replay_allowed": false
     }
   ],
   "acceptance": [
@@ -2077,5 +2095,30 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
     "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
+  }
+,
+  "r699_result": {
+    "id": "R699",
+    "state": "PUBLISHED_PRIVATE_GITLAB_CPU_TESTS_PASS_PIPELINE_PENDING",
+    "branch": "r699-deepseek-mxfp4-memory-admission-20261102",
+    "parent_commit": "e11d4b3d971d90875a13e7f474593c622b4ce77b",
+    "source_commit": null,
+    "path": "research/R699",
+    "report": "research/R699/REPORT.md",
+    "result": "research/R699/RESULT.json",
+    "manifest": "research/R699/SHA256SUMS",
+    "manifest_sha256": "1784de2093d04346099fdb15a01678ec75447873f3ace245b14e605d38766e2a",
+    "manifest_files": 7,
+    "readback_exact": false,
+    "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "format": "MXFP4 K32",
+    "test_result": "R694 7 passed; R699 2 passed; 10.36s R699 CPU test; rustfmt and Clippy pass",
+    "route_from_model_gate": false,
+    "pipeline_id": null,
+    "pipeline_status": "pending",
+    "pipeline_scope": "configured GitLab scans/fallback expected; not Rust compilation",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false,
+    "next_action": "R700: identify and pin one license-compatible upstream inference component that materially closes a generation gap, then adapt it behind VoltaFabric gate, format and identity boundaries with a CPU oracle."
   }
 }

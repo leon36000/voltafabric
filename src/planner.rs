@@ -68,18 +68,19 @@ pub struct RoutedPlacementAdvice {
     pub placement: Placement,
 }
 
-/// Plan only physical residency from one validated Qwen2MoE donor batch.
-/// Selected expert order and weight bits are preserved; this never changes the
-/// gate result or owner registry. The returned placement is advisory.
-pub fn plan_qwen2moe_advisory(
+/// Plan physical residency from a validated general VoltaFabric route. This stays
+/// advisory: the supplied route and live owner registry are read-only, and callers
+/// retain the gate as the sole authority. `attempt` identifies this dispatch; route
+/// provenance is not attested here.
+pub fn plan_routing_advisory(
     base: &PlacementProblem,
-    routed: &crate::routing::Qwen2MoERouteBatch,
+    route: &crate::routing::RoutingProblem,
+    attempt: u64,
     source_rank: u32,
 ) -> Result<RoutedPlacementAdvice> {
-    let route = routed.problem();
     crate::routing::validate(route)?;
     let dispatch = crate::routing::dispatch(route)?;
-    if routed.attempt() == 0 || route.routes.is_empty() || base.hidden != route.hidden as u64 {
+    if attempt == 0 || route.routes.is_empty() || base.hidden != route.hidden as u64 {
         return Err(invalid(
             "routed placement identity, batch or hidden mismatch",
         ));
@@ -139,12 +140,21 @@ pub fn plan_qwen2moe_advisory(
     let placement = plan(&candidate)?;
     Ok(RoutedPlacementAdvice {
         stamp: route.stamp.clone(),
-        attempt: routed.attempt(),
+        attempt,
         source_rank,
         route_experts_by_token,
         route_weight_bits_hex_by_token,
         placement,
     })
+}
+
+/// Qwen2MoE compatibility wrapper over the model-agnostic advisory planner.
+pub fn plan_qwen2moe_advisory(
+    base: &PlacementProblem,
+    routed: &crate::routing::Qwen2MoERouteBatch,
+    source_rank: u32,
+) -> Result<RoutedPlacementAdvice> {
+    plan_routing_advisory(base, routed.problem(), routed.attempt(), source_rank)
 }
 
 /// Per-rank starting footprint for a routed-layer placement.
@@ -193,13 +203,13 @@ pub struct RoutedPlacementMemoryAdvice {
     pub ranks: Vec<RankMemoryAdvice>,
 }
 
-/// Build route-bound placement advice with separate KV, recurrent, graph, workspace,
-/// communication, margin, and temporary-loading budgets for every topology rank.
-/// The route and live owner registry are read-only; missing or over-budget inputs fail
-/// before any advice is returned.
-pub fn plan_qwen2moe_advisory_with_memory(
+/// Build general route-bound placement advice with separate KV, recurrent, graph,
+/// workspace, communication, margin, and temporary-loading budgets for every topology rank.
+/// Routes and registries are read-only; the result is advisory and does not mutate the gate.
+pub fn plan_routing_advisory_with_memory(
     base: &PlacementProblem,
-    routed: &crate::routing::Qwen2MoERouteBatch,
+    route: &crate::routing::RoutingProblem,
+    attempt: u64,
     source_rank: u32,
     envelopes: &[PerRankMemoryEnvelope],
 ) -> Result<RoutedPlacementMemoryAdvice> {
@@ -235,7 +245,7 @@ pub fn plan_qwen2moe_advisory_with_memory(
         device.reserved_bytes = non_weight.loading_peak_bytes;
     }
 
-    let routed_advice = plan_qwen2moe_advisory(&candidate, routed, source_rank)?;
+    let routed_advice = plan_routing_advisory(&candidate, route, attempt, source_rank)?;
     let mut ranks = Vec::with_capacity(candidate.topology.devices.len());
     for device in &candidate.topology.devices {
         let envelope = by_rank[&device.rank];
@@ -315,6 +325,22 @@ pub fn plan_qwen2moe_advisory_with_memory(
         routed: routed_advice,
         ranks,
     })
+}
+
+/// Qwen2MoE compatibility wrapper over the general route memory advisory.
+pub fn plan_qwen2moe_advisory_with_memory(
+    base: &PlacementProblem,
+    routed: &crate::routing::Qwen2MoERouteBatch,
+    source_rank: u32,
+    envelopes: &[PerRankMemoryEnvelope],
+) -> Result<RoutedPlacementMemoryAdvice> {
+    plan_routing_advisory_with_memory(
+        base,
+        routed.problem(),
+        routed.attempt(),
+        source_rank,
+        envelopes,
+    )
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "id": "R699",
+  "state": "PUBLISHED_PRIVATE_GITLAB_CPU_TESTS_PASS_PIPELINE_PENDING",
+  "branch": "r699-deepseek-mxfp4-memory-admission-20261102",
+  "parent_branch": "r698-deepseek-real-mxfp4-session-20261102",
+  "parent_commit": "e11d4b3d971d90875a13e7f474593c622b4ce77b",
+  "source_commit": null,
+  "source_model": {
+    "repo": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "usage": "pinned layer-0 expert fragments/oracle fixtures only; no donor software copied"
+  },
+  "format": "MXFP4 K32; no conversion to NVFP4 K16 or IQ3",
+  "code_changes": [
+    "general plan_routing_advisory over RoutingProblem with stamp and explicit nonzero attempt",
+    "general plan_routing_advisory_with_memory; preserve existing Qwen2MoE wrappers",
+    "fix R694 test crate import to Cargo package name voltafabric"
+  ],
+  "reused_internal_components": [
+    "RoutingProblem and validated dispatch",
+    "existing PlacementProblem, ExpertProfile and checked per-rank Budget",
+    "Mxfp4ExpertShard artifacts",
+    "persistent CPU Session MXFP4 executor",
+    "FP32-preweighted Collector"
+  ],
+  "external_source_code_copied": false,
+  "verification": {
+    "checkout_base_commit": "604764703f0a12af4fe264041ebecc0ed9c21a90",
+    "focused_tests": "R694 7 passed; R699 2 passed; 0 failed",
+    "r699_duration_seconds": 10.36,
+    "rustfmt": "pass",
+    "clippy": "pass with -D warnings",
+    "device": "CPU",
+    "run_id": "r699-deepseek-memory-session-v1",
+    "plan_id": "r699-one-token-two-rank-cpu-v1",
+    "attempt": 903,
+    "experts": [
+      0,
+      383
+    ],
+    "tokens": 1,
+    "output_shape": [
+      1,
+      5120
+    ],
+    "route_coefficients": [
+      0.375,
+      0.375
+    ],
+    "route_from_model_gate": false,
+    "memory_preflight": "one byte below candidate plus temporary loading peak refuses before any Session is created",
+    "oracle_assertion": "max absolute error <= 5e-4 against sum of pinned per-expert BF16 oracle outputs"
+  },
+  "limitations": {
+    "advisory_only": true,
+    "synthetic_route": true,
+    "synthetic_topology_and_capacity": true,
+    "actual_file_byte_sizes_used": true,
+    "full_checkpoint": false,
+    "full_generation": false,
+    "model_gate": false,
+    "attention_or_kv": false,
+    "tokenizer": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "production_r53": false,
+    "performance_claim": false
+  },
+  "pipeline_id": null,
+  "pipeline_status": "pending",
+  "pipeline_scope": "configured GitLab scans/fallback expected; not Rust compilation",
+  "readback_exact": false,
+  "manifest_sha256": "1784de2093d04346099fdb15a01678ec75447873f3ace245b14e605d38766e2a",
+  "manifest_files": 7,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "replay_allowed": false
+}

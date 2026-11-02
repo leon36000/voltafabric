@@ -1,0 +1,25 @@
+R699 targeted build/test record
+==============================
+
+Worktree: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification
+Base local commit: 604764703f0a12af4fe264041ebecc0ed9c21a90
+Cargo target: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r699-deepseek-memory-admission-20261102/verify-target
+
+Formatting:
+  rustfmt --edition 2021 --check src/planner.rs src/routing.rs tests/r699_deepseek_memory_admission.rs tests/r694_routed_advice.rs
+  exit 0
+
+Focused tests:
+  cargo test --offline --locked --test r699_deepseek_memory_admission --test r694_routed_advice -- --nocapture --test-threads=1
+  R694: 7 passed, 0 failed.
+  R699: 2 passed, 0 failed; 10.36 seconds.
+  R699 test one runs two persistent local CPU vf-rank-session processes with pinned experts 0 and 383, one BF16 token, MXFP4 K32 and FP32-preweighted Collector. Attempt 903 is the same in the planner advice and both Session calls; the returned ExecReceipt attempt is checked.
+  R699 test two supplies a rank-0 budget one byte below candidate+temporary loading peak and asserts error before creating a Session.
+
+Clippy:
+  cargo clippy --offline --locked --lib --test r699_deepseek_memory_admission --test r694_routed_advice -- -D warnings
+  exit 0; warnings denied.
+
+One compile check during development attempted to read `ExecReceipt.stamp`, which this type does not expose. The invalid assertion was removed; Stamp fields remain checked on the routed advice and the receipt attempt is asserted against the same Session attempt. No claim of a worker receipt Stamp is made.
+
+R699 uses exact R698 planner/routing sources as its GitLab base plus the focused local change; this is CPU-only evidence. It is not remote pipeline compilation, a model-gate route, a production topology, a full model generation or a performance test.
