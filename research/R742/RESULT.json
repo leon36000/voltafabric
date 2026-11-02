@@ -1,6 +1,6 @@
 {
   "id": "R742",
-  "status": "PRIVATE_GITLAB_SOURCE_COMMIT_PENDING_PIPELINE",
+  "status": "PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SUCCESS",
   "parent_branch": "r741-deepseek-prompt-token-oracle-20261102",
   "source_files": [
     "src/deepseek_v41_prompt.rs",
@@ -47,7 +47,7 @@
   "prompt_parity_cases_included": 5,
   "real_checkpoint_payload": false,
   "generation_executed": false,
-  "output_decoder_qualified": false,
+  "output_decoder_qualified": true,
   "stop_handling_unit_qualified": true,
   "gpu_executed": false,
   "inter_pc_transport_used": false,
@@ -55,11 +55,14 @@
   "performance_measured": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "Publish R742 on a branch from the verified R741 tip; wait for complete GitLab CI and exact readback. If the root build rejects num-bigint 0.4.8 or lock delta, isolate the optional stream parser instead of weakening core pins.",
+  "next_action": "R743: adapt one arXiv cost-based placement or overlap idea in the existing CPU planner while preserving resident-weight capacity checks and exact routes.",
   "branch": "r742-deepseek-output-stop-boundary-20261102",
   "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
-  "pipeline_status": "pending",
-  "source_readback_exact": false,
+  "pipeline_status": "success",
+  "source_readback_exact": true,
   "build_log": "BUILD-RESULT.txt",
-  "build_log_raw_local_only": ".runs/r742-oracle/research/R742/BUILD-RAW.txt"
+  "build_log_raw_local_only": ".runs/r742-oracle/research/R742/BUILD-RAW.txt",
+  "source_commit": "c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b",
+  "source_pipeline_id": 2610,
+  "output_decoder_scope": "isolated official DeepSeek Recipe 0.2.0 StreamProcessor with the pinned tokenizer; special token IDs remain distinct from identical plain text"
 }

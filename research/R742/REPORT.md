@@ -43,3 +43,9 @@ Pas de poids du checkpoint chargé, de logits, d'échantillonneur, de générati
 ## Suite
 
 Vérifier le pipeline et la relecture GitLab R741, puis publier R742 sur une nouvelle branche sans réécrire l'historique. Faire exécuter le pipeline complet avant de revendiquer l'intégration du changement de verrou.
+
+## Reçu GitLab
+
+Le commit source `c6ac701e8bbe92767a6df7eba1f96c2ff4c0572b` a passé le pipeline GitLab #2610. Les quatre tâches (`gitleaks`, `semgrep`, `trivy`, `ci_fallback`) sont en succès. Les fichiers de la source et les sept entrées de `SHA256SUMS` avaient été relus exactement avant ce pipeline.
+
+Prochaine tranche : adapter une idée arXiv de placement fondée sur les coûts ou de chevauchement dans le planner CPU existant, avec plans stables, poids résidents protégés par les capacités mémoire et routes inchangées.
