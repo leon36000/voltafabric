@@ -1,0 +1,56 @@
+{
+  "id": "R730",
+  "date": "2026-11-02",
+  "state": "CPU_VERIFIED_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "parent_branch": "r729-deepseek-session-shared-join-20261102",
+  "parent_commit": "2c1d567b8493dfb3b71d96583a7b891f9f2ae843",
+  "parent_pipeline_id": 2565,
+  "parent_pipeline_status": "success",
+  "code_targets": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "adapted_boundary": "Completed receipt from five CPU Sessions -> shared FP8 result join -> source-pinned HC-post scalar over four residual copies under one exact Stamp and attempt.",
+  "donor": {
+    "name": "DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "source_path": "evidence/continuation_a97_model_metadata/upstream_314113f8/model.py",
+    "source_sha256": "e5decd76fe70fd56ef2f10124d245c6f64fb6a0003cc9068a1d3182a168b8d2d",
+    "copied_code": false
+  },
+  "reused_voltafabric": [
+    "R712 grouped CPU Sessions",
+    "R728 shared FP8 reference and identity-bound route join",
+    "R729 Completed CPU Session receipt"
+  ],
+  "new_dependencies": false,
+  "verification": {
+    "r730_unit_debug": "PASS 3/3",
+    "r712_debug": "PASS 12/12, 123.99 s",
+    "r712_release": "PASS 12/12, 7.70 s",
+    "clippy_test_warnings": "PASS",
+    "clippy_lib_warnings": "PASS",
+    "rustfmt": "PASS",
+    "diff_check": "PASS",
+    "r730_unit_release": "PASS 3/3"
+  },
+  "oracle": "Separate f64 mathematical formula plus independent BF16 RNE bit formula; donor PyTorch runtime unavailable (ModuleNotFoundError, no install).",
+  "fixture": "Synthetic checkpoint tensor planes, residual copies and HC coefficients; actual route receipt is produced by grouped CPU Sessions.",
+  "limitations": [
+    "No actual checkpoint weight payload",
+    "HC projection/Sinkhorn and HC pre not implemented",
+    "Attention/GDN not implemented or qualified",
+    "No complete autoregressive generation",
+    "No GPU/inter-PC/R53/performance qualification",
+    "No PyTorch backend comparison"
+  ],
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "publication_pipeline": "PENDING",
+  "exact_readback": "PENDING",
+  "next_action": "Index and validate HC projection/base/scale tensors; implement HC coefficient split/Sinkhorn and pre-mix with CPU oracle, then bind attention/GDN and token loop.",
+  "manifest": "research/R730/SHA256SUMS",
+  "manifest_sha256": "18ba7320685d475af6348ccb81512c7740679284e2ce9dbf7733d9179da25307",
+  "manifest_file_count": 4
+}

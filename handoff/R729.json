@@ -1,10 +1,10 @@
 {
   "id": "R729",
   "date": "2026-11-02",
-  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_EXACT_READBACK",
   "branch": "r729-deepseek-session-shared-join-20261102",
   "parent_commit": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0",
-  "source_commit": null,
+  "source_commit": "2c1d567b8493dfb3b71d96583a7b891f9f2ae843",
   "source_pipeline": "PENDING",
   "changed_targets": [
     "tests/r712_deepseek_session_owner.rs",
@@ -35,7 +35,17 @@
   ],
   "unknown_replayed": false,
   "automatic_continuation": "STOPPED_BY_OWNER",
-  "receipt_pending": true,
+  "receipt_pending": false,
   "published_utc": "2026-11-02 16:05:00 UTC",
-  "next_action": "R730: compose HC post/residual on the verified CPU routed-plus-shared sublayer using an independent oracle; then bind attention/GDN and autoregressive token loop."
+  "next_action": "R730 composes pinned HC post after the verified routed-plus-shared CPU receipt; HC projection/Sinkhorn remains a separate boundary.",
+  "source_pipeline_id": 2565,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 9
 }

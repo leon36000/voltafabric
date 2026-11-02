@@ -1,0 +1,26 @@
+R730 local CPU verification (Linux, Rust locked dependencies, offline)
+
+1. cargo test --locked --offline --lib r730_hc_post_tests
+   PASS 3/3 (debug)
+2. cargo test --locked --offline --release --lib r730_hc_post_tests
+   PASS 3/3 (release)
+3. cargo test --locked --offline --test r712_deepseek_session_owner
+   PASS 12/12 (debug, 123.99 s)
+4. cargo test --locked --offline --release --test r712_deepseek_session_owner
+   PASS 12/12 (release, 7.70 s)
+5. cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings
+   PASS
+6. cargo clippy --locked --offline --lib -- -D warnings
+   PASS
+7. rustfmt --edition 2021 --check src/deepseek_v41_gate.rs tests/r712_deepseek_session_owner.rs
+   PASS
+8. git diff --check -- src/deepseek_v41_gate.rs tests/r712_deepseek_session_owner.rs
+   PASS
+
+PyTorch oracle availability probe:
+  python3 -c 'import torch; print(torch.__version__)'
+  BLOCKED: ModuleNotFoundError: No module named 'torch'; no installation attempted.
+
+GitLab predecessor source pipeline #2565: SUCCESS, commit
+2c1d567b8493dfb3b71d96583a7b891f9f2ae843; all four jobs succeeded. R730's own
+pipeline and exact readback are pending at publication time.

@@ -1,0 +1,23 @@
+{
+  "id": "R730",
+  "date": "2026-11-02",
+  "state": "CPU_VERIFIED_PRIVATE_GITLAB_PUBLICATION_PENDING",
+  "parent_commit": "2c1d567b8493dfb3b71d96583a7b891f9f2ae843",
+  "parent_pipeline_id": 2565,
+  "parent_pipeline_status": "success",
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "result": "R712 Completed CPU Session receipt passes through the R728 shared expert join and R730 source-pinned HC-post formula; identity and attempt preserved.",
+  "verified": "R730 HC-post unit tests 3/3 debug; R712 suite 12/12 debug and release; Clippy, rustfmt and diff checks pass.",
+  "limitations": [
+    "Synthetic model tensors/residuals/HC coefficients",
+    "No donor PyTorch runtime comparison",
+    "No HC coefficient projection/Sinkhorn or pre-mix",
+    "No attention/GDN or full generation",
+    "No GPU/inter-PC/R53/performance claim"
+  ],
+  "next_action": "Implement indexed HC projection/base/scale loading, coefficient projection/Sinkhorn and pre-mix with CPU oracle; then integrate attention/GDN into token path.",
+  "manifest": "research/R730/SHA256SUMS",
+  "manifest_sha256": "18ba7320685d475af6348ccb81512c7740679284e2ce9dbf7733d9179da25307",
+  "manifest_file_count": 4
+}

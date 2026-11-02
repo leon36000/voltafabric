@@ -18,7 +18,8 @@ use voltafabric::deepseek_v41::{
     PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
-    combine_pinned_moe_route_with_shared, DeepSeekV41Gate, DeepSeekV41IndexedMoeLayer,
+    combine_pinned_moe_route_with_shared, deepseek_hc_post_reference, DeepSeekV41Gate,
+    DeepSeekV41HcPostCoefficients, DeepSeekV41IndexedMoeLayer, DeepSeekV41ResidualStream,
     FfnNormTensorSpec, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource,
     SharedExpertTensorHashes, SharedExpertTensorSpec, TokenKind, GATE_PAYLOAD_BYTES,
     GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, PINNED_RMS_NORM_EPSILON,
@@ -1143,7 +1144,7 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
 }
 
 #[test]
-fn completed_cpu_session_receipt_joins_the_matching_shared_result_once() {
+fn completed_cpu_session_receipt_joins_shared_then_composes_hc_post_once() {
     let (_checkpoint, batch, reads, input, shared_output) = indexed_gate_route_payloads(true);
     let route = batch.problem();
     let route_stamp = route.stamp.clone();
@@ -1269,6 +1270,61 @@ fn completed_cpu_session_receipt_joins_the_matching_shared_result_once() {
             expected.to_bits(),
             "joined output index {index}"
         );
+    }
+
+    let hc_residual_values = (0..4)
+        .map(|copy| {
+            input
+                .iter()
+                .map(|&value| {
+                    voltafabric::deepseek_v41::cast_bf16_rne_reference(
+                        value * ((copy + 1) as f32 / 4.0),
+                    )
+                    .unwrap()
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect::<Vec<_>>();
+    let hc_residual = DeepSeekV41ResidualStream::new(
+        route_stamp.clone(),
+        route_attempt,
+        hc_residual_values.clone(),
+    )
+    .unwrap();
+    let hc_post = vec![0.75, 1.0, 0.875, 1.25];
+    let hc_comb = vec![
+        vec![0.5, 0.25, 0.125, 0.125],
+        vec![0.125, 0.5, 0.25, 0.125],
+        vec![0.25, 0.125, 0.5, 0.125],
+        vec![0.125, 0.125, 0.25, 0.5],
+    ];
+    let hc_coefficients = DeepSeekV41HcPostCoefficients::new(
+        route_stamp.clone(),
+        route_attempt,
+        hc_post.clone(),
+        hc_comb.clone(),
+    )
+    .unwrap();
+    let hc_output = deepseek_hc_post_reference(&combined, &hc_residual, &hc_coefficients).unwrap();
+    assert_eq!(hc_output.stamp(), &route_stamp);
+    assert_eq!(hc_output.attempt(), route_attempt);
+    assert_eq!(hc_output.copies_bf16_f32().len(), 4);
+    for destination in 0..4 {
+        for hidden in 0..HIDDEN_SIZE {
+            let residual_mix = (0..4).fold(0.0f64, |sum, source| {
+                sum + f64::from(hc_comb[destination][source])
+                    * f64::from(hc_residual_values[source][hidden])
+            });
+            let expected = independent_bf16_rne(
+                (f64::from(hc_post[destination]) * f64::from(combined.output_bf16_f32()[hidden])
+                    + residual_mix) as f32,
+            );
+            assert_eq!(
+                hc_output.copies_bf16_f32()[destination][hidden].to_bits(),
+                expected.to_bits(),
+                "HC post copy {destination}, hidden {hidden}"
+            );
+        }
     }
     for (_, session) in sessions {
         assert_eq!(session.traffic.execs, 1);

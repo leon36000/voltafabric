@@ -339,6 +339,170 @@ impl DeepSeekV41MoeTokenOutput {
     }
 }
 
+/// The four pinned residual copies entering one HC post operation. Every row is
+/// exact BF16 represented in FP32 and retains the same token identity.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41ResidualStream {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    copies_bf16_f32: Vec<Vec<f32>>,
+}
+
+impl DeepSeekV41ResidualStream {
+    pub fn new(
+        stamp: crate::moe::Stamp,
+        attempt: u64,
+        copies_bf16_f32: Vec<Vec<f32>>,
+    ) -> Result<Self> {
+        validate_hc_identity(&stamp, attempt)?;
+        if copies_bf16_f32.len() != crate::deepseek_v41::PINNED_HC_MULT
+            || copies_bf16_f32.iter().any(|copy| {
+                copy.len() != HIDDEN_SIZE
+                    || copy.iter().any(|value| {
+                        !value.is_finite()
+                            || crate::deepseek_v41::cast_bf16_rne_reference(*value)
+                                .map(|rounded| rounded.to_bits() != value.to_bits())
+                                .unwrap_or(true)
+                    })
+            })
+        {
+            return Err(invalid(
+                "DeepSeek HC residual must contain four finite exact-BF16 hidden rows",
+            ));
+        }
+        Ok(Self {
+            stamp,
+            attempt,
+            copies_bf16_f32,
+        })
+    }
+
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn copies_bf16_f32(&self) -> &[Vec<f32>] {
+        &self.copies_bf16_f32
+    }
+}
+
+/// `post` and `comb` outputs of the pinned HC mix operator, bound to one exact token.
+/// Coefficients are supplied by the caller; learned projection and Sinkhorn remain
+/// a separate boundary.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41HcPostCoefficients {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    post: Vec<f32>,
+    comb: Vec<Vec<f32>>,
+}
+
+impl DeepSeekV41HcPostCoefficients {
+    pub fn new(
+        stamp: crate::moe::Stamp,
+        attempt: u64,
+        post: Vec<f32>,
+        comb: Vec<Vec<f32>>,
+    ) -> Result<Self> {
+        validate_hc_identity(&stamp, attempt)?;
+        let copies = crate::deepseek_v41::PINNED_HC_MULT;
+        if post.len() != copies
+            || comb.len() != copies
+            || comb.iter().any(|row| row.len() != copies)
+            || post
+                .iter()
+                .chain(comb.iter().flatten())
+                .any(|value| !value.is_finite())
+        {
+            return Err(invalid(
+                "DeepSeek HC post/comb coefficients have invalid shape or nonfinite values",
+            ));
+        }
+        Ok(Self {
+            stamp,
+            attempt,
+            post,
+            comb,
+        })
+    }
+}
+
+fn validate_hc_identity(stamp: &crate::moe::Stamp, attempt: u64) -> Result<()> {
+    if stamp.run_id.trim().is_empty()
+        || stamp.model_revision != PINNED_MODEL_REVISION
+        || stamp.plan_id.trim().is_empty()
+        || stamp.layer >= 40
+        || attempt == 0
+    {
+        return Err(invalid(
+            "DeepSeek HC input requires a pinned model, layer, run, plan and nonzero attempt",
+        ));
+    }
+    Ok(())
+}
+
+/// CPU scalar adaptation of the pinned Block.hc_post expression:
+/// `post[i] * x + sum_j(comb[i,j] * residual[j])`, rounded once to BF16.
+/// It accepts caller-supplied mixes and does not compute `hc_mixes` or Sinkhorn.
+pub fn deepseek_hc_post_reference(
+    sublayer: &DeepSeekV41MoeTokenOutput,
+    residual: &DeepSeekV41ResidualStream,
+    coefficients: &DeepSeekV41HcPostCoefficients,
+) -> Result<DeepSeekV41ResidualStream> {
+    let stamp = sublayer.stamp();
+    validate_hc_identity(stamp, sublayer.attempt())?;
+    if stamp != residual.stamp()
+        || stamp != &coefficients.stamp
+        || sublayer.attempt() != residual.attempt()
+        || sublayer.attempt() != coefficients.attempt
+        || sublayer.output_bf16_f32.len() != HIDDEN_SIZE
+        || sublayer.output_bf16_f32.iter().any(|value| {
+            !value.is_finite()
+                || crate::deepseek_v41::cast_bf16_rne_reference(*value)
+                    .map(|rounded| rounded.to_bits() != value.to_bits())
+                    .unwrap_or(true)
+        })
+    {
+        return Err(invalid(
+            "DeepSeek HC post inputs do not share one exact token identity and BF16 row",
+        ));
+    }
+
+    // Keep the result private until all four full rows are finite and rounded.
+    let mut outputs = Vec::with_capacity(crate::deepseek_v41::PINNED_HC_MULT);
+    for destination in 0..crate::deepseek_v41::PINNED_HC_MULT {
+        let mut row = Vec::with_capacity(HIDDEN_SIZE);
+        for hidden in 0..HIDDEN_SIZE {
+            let mut residual_mix = 0.0f32;
+            for source in 0..crate::deepseek_v41::PINNED_HC_MULT {
+                residual_mix += coefficients.comb[destination][source]
+                    * residual.copies_bf16_f32[source][hidden];
+                if !residual_mix.is_finite() {
+                    return Err(Error::new(
+                        "NUMERICAL_OVERFLOW",
+                        "DeepSeek HC residual mix became nonfinite",
+                    ));
+                }
+            }
+            let value =
+                coefficients.post[destination] * sublayer.output_bf16_f32[hidden] + residual_mix;
+            if !value.is_finite() {
+                return Err(Error::new(
+                    "NUMERICAL_OVERFLOW",
+                    "DeepSeek HC post result became nonfinite",
+                ));
+            }
+            row.push(crate::deepseek_v41::cast_bf16_rne_reference(value)?);
+        }
+        outputs.push(row);
+    }
+    DeepSeekV41ResidualStream::new(stamp.clone(), sublayer.attempt(), outputs)
+}
+
 /// Add the shared expert exactly once after the routed FP32-preweighted Collector
 /// completes. Any Aborted/Unknown, identity mismatch, malformed or nonfinite row
 /// returns no output. The route receipt is borrowed and remains available to the
@@ -2232,5 +2396,163 @@ fn softplus_fp32(value: f32) -> f32 {
         value
     } else {
         value.exp().ln_1p()
+    }
+}
+
+#[cfg(test)]
+mod r730_hc_post_tests {
+    use super::{
+        deepseek_hc_post_reference, DeepSeekV41HcPostCoefficients, DeepSeekV41MoeTokenOutput,
+        DeepSeekV41ResidualStream, HIDDEN_SIZE, PINNED_MODEL_REVISION,
+    };
+
+    fn stamp() -> crate::moe::Stamp {
+        crate::moe::Stamp {
+            run_id: "r730-hc-post".to_owned(),
+            model_revision: PINNED_MODEL_REVISION.to_owned(),
+            plan_id: "r730-cpu-fixture".to_owned(),
+            layer: 0,
+            batch: 3,
+            epoch: 19,
+        }
+    }
+
+    fn oracle_bf16_rne(value: f64) -> f32 {
+        let value = value as f32;
+        let bits = value.to_bits();
+        let bias = 0x7fffu32 + ((bits >> 16) & 1);
+        f32::from_bits(bits.wrapping_add(bias) & 0xffff_0000)
+    }
+
+    #[test]
+    fn pinned_hc_post_matches_separate_f64_formula_and_rounds_once() {
+        let stamp = stamp();
+        let attempt = 7;
+        let x = (0..HIDDEN_SIZE)
+            .map(|i| ((i % 16) as f32 - 8.0) / 8.0)
+            .collect::<Vec<_>>();
+        let residual = (0..4)
+            .map(|copy| {
+                (0..HIDDEN_SIZE)
+                    .map(|i| (((i + 3 * copy) % 32) as f32 - 16.0) / 16.0)
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let post = vec![0.913, 1.107, -0.271, 0.333];
+        let comb = vec![
+            vec![0.19, -0.31, 0.77, 0.43],
+            vec![0.51, 0.23, -0.14, 0.37],
+            vec![-0.17, 0.62, 0.29, 0.11],
+            vec![0.38, -0.21, 0.56, 0.27],
+        ];
+        let x = x
+            .into_iter()
+            .map(|v| crate::deepseek_v41::cast_bf16_rne_reference(v).unwrap())
+            .collect::<Vec<_>>();
+        let residual = residual
+            .into_iter()
+            .map(|row| {
+                row.into_iter()
+                    .map(|v| crate::deepseek_v41::cast_bf16_rne_reference(v).unwrap())
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let sublayer = DeepSeekV41MoeTokenOutput {
+            stamp: stamp.clone(),
+            attempt,
+            output_bf16_f32: x.clone(),
+        };
+        let residual_stream =
+            DeepSeekV41ResidualStream::new(stamp.clone(), attempt, residual.clone()).unwrap();
+        let mixes =
+            DeepSeekV41HcPostCoefficients::new(stamp.clone(), attempt, post.clone(), comb.clone())
+                .unwrap();
+
+        let output = deepseek_hc_post_reference(&sublayer, &residual_stream, &mixes).unwrap();
+        assert_eq!(output.stamp(), &stamp);
+        assert_eq!(output.attempt(), attempt);
+        assert_eq!(output.copies_bf16_f32().len(), 4);
+        for destination in 0..4 {
+            for hidden in 0..HIDDEN_SIZE {
+                let residual_mix = (0..4).fold(0.0f64, |sum, source| {
+                    sum + f64::from(comb[destination][source]) * f64::from(residual[source][hidden])
+                });
+                let expected = oracle_bf16_rne(
+                    f64::from(post[destination]) * f64::from(x[hidden]) + residual_mix,
+                );
+                assert_eq!(
+                    output.copies_bf16_f32()[destination][hidden].to_bits(),
+                    expected.to_bits(),
+                    "copy {destination}, hidden {hidden}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn pinned_hc_post_bf16_cast_uses_ties_to_even_once() {
+        let stamp = stamp();
+        let mut x = vec![0.0; HIDDEN_SIZE];
+        x[0] = 1.0;
+        let mut residual = vec![vec![0.0; HIDDEN_SIZE]; 4];
+        residual[0][0] = 1.0;
+        let mut comb = vec![vec![0.0; 4]; 4];
+        // 1 + 2^-8 is exactly halfway between adjacent BF16 numbers near 1.
+        comb[0][0] = 1.0 / 256.0;
+        let sublayer = DeepSeekV41MoeTokenOutput {
+            stamp: stamp.clone(),
+            attempt: 9,
+            output_bf16_f32: x,
+        };
+        let residual = DeepSeekV41ResidualStream::new(stamp.clone(), 9, residual).unwrap();
+        let coefficients =
+            DeepSeekV41HcPostCoefficients::new(stamp, 9, vec![1.0; 4], comb).unwrap();
+
+        let output = deepseek_hc_post_reference(&sublayer, &residual, &coefficients).unwrap();
+        assert_eq!(output.copies_bf16_f32()[0][0].to_bits(), 1.0f32.to_bits());
+    }
+
+    #[test]
+    fn pinned_hc_post_rejects_wrong_identity_shapes_and_nonfinite_values() {
+        let stamp = stamp();
+        let copies = vec![vec![0.0; HIDDEN_SIZE]; 4];
+        let residual = DeepSeekV41ResidualStream::new(stamp.clone(), 7, copies.clone()).unwrap();
+        assert!(
+            DeepSeekV41ResidualStream::new(stamp.clone(), 7, vec![vec![0.0; HIDDEN_SIZE]; 3])
+                .is_err()
+        );
+        let mut non_bf16 = copies.clone();
+        non_bf16[0][0] = 0.1;
+        assert!(DeepSeekV41ResidualStream::new(stamp.clone(), 7, non_bf16).is_err());
+        assert!(DeepSeekV41HcPostCoefficients::new(
+            stamp.clone(),
+            7,
+            vec![1.0; 3],
+            vec![vec![1.0; 4]; 4]
+        )
+        .is_err());
+        assert!(DeepSeekV41HcPostCoefficients::new(
+            stamp.clone(),
+            7,
+            vec![f32::NAN; 4],
+            vec![vec![1.0; 4]; 4]
+        )
+        .is_err());
+
+        let sublayer = DeepSeekV41MoeTokenOutput {
+            stamp: stamp.clone(),
+            attempt: 7,
+            output_bf16_f32: vec![0.0; HIDDEN_SIZE],
+        };
+        let mut other = stamp.clone();
+        other.plan_id.push_str("-mismatch");
+        let wrong_mix =
+            DeepSeekV41HcPostCoefficients::new(other, 7, vec![1.0; 4], vec![vec![0.25; 4]; 4])
+                .unwrap();
+        assert!(deepseek_hc_post_reference(&sublayer, &residual, &wrong_mix).is_err());
+        let wrong_attempt =
+            DeepSeekV41HcPostCoefficients::new(stamp, 8, vec![1.0; 4], vec![vec![0.25; 4]; 4])
+                .unwrap();
+        assert!(deepseek_hc_post_reference(&sublayer, &residual, &wrong_attempt).is_err());
     }
 }
