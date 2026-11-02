@@ -98,4 +98,5 @@ pub mod completion;
 pub mod checkpoint;
 
 pub mod deepseek_v41;
+pub mod deepseek_v41_gate;
 pub mod engram;

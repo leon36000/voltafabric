@@ -28,12 +28,21 @@
   reference covers compressed weight decoding and a single w1 matvec only; it
   does not reproduce activation quantization, the official GEMM accumulation,
   expert forward, routing, or a GPU kernel.
-- Files consulted: `config.json` (`swiglu_limit` 10.0, `expert_dtype` fp4,
-  `scale_fmt` ue8m0), `inference/model.py` (`Linear` FP4 layout: weight
+- Files consulted: pinned `config.json` (`text_config`: 40 backbone layers,
+  384 routed experts, top-6, `sqrtsoftplus`, normalized top-k weights, route
+  scale 1.5; `vision_config` present; `dspark_n_routed_experts` 128 and
+  `dspark_num_experts_per_tok` 3), and `inference/model.py` (`gate_temp` default
+  1.0; gate linear -> temperature -> sqrt-softplus; text/image correction bias
+  chooses experts only; normalization adds 1e-20; route scale applied once;
+  DSpark layers use their separate 128/3 configuration). The config also sets
+  `swiglu_limit` 10.0, `expert_dtype` fp4, and `scale_fmt` ue8m0. `Linear` FP4 layout: weight
   `[out, in//2]` float4_e2m1fn_x2, scale `[out, in//32]` float8_e8m0fnu;
   `Expert.forward` clamps and routing weight), one shard safetensors header
   (`layers.0.ffn.experts.0.w{1,2,3}` I8/F8_E8M0 shapes).
-- Adaptation: semantics re-implemented in Rust (`src/deepseek_v41.rs`); no source
-  code is copied or vendored. Only the pre-down activation and the MXFP4 format
-  decode are implemented; no BF16 cast, activation quant, GEMM, routing, GPU kernel
-  or full model.
+- Adaptation: no donor code is copied or vendored. Rust implements MXFP4 K32
+  decoding and activation references in `src/deepseek_v41.rs`, plus the primary
+  text/image routed-gate score, correction-bias selection, top-6 normalization
+  and route-scale boundary in `src/deepseek_v41_gate.rs`. Gate input is already
+  projected FP32 logits; this does not load gate weights, compute the projection,
+  implement DSpark's 128/3 auxiliary gate, reproduce the PyTorch reduction bit for
+  bit, or provide a GPU kernel or complete model.
