@@ -1,0 +1,68 @@
+{
+  "round": "R702",
+  "status": "CPU_SYNTHETIC_GATE_PROJECTION_PASS",
+  "branch": "r702-deepseek-gate-safetensors-20261102",
+  "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+  "component": "bounded Safetensors reader + pinned DeepSeek V4.1 Flash gate projection adapter",
+  "donor": {
+    "name": "DeepSeek V4.1 Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "code_copied": false
+  },
+  "reused_dependencies": [
+    {
+      "name": "safetensors",
+      "version": "0.8.0",
+      "license": "Apache-2.0",
+      "already_pinned": true,
+      "code_copied": false
+    },
+    {
+      "name": "VoltaFabric in-crate SHA-256",
+      "code_copied": false
+    }
+  ],
+  "gate_spec": {
+    "weight_dtype": "BF16",
+    "weight_shape": [384, 5120],
+    "text_bias_dtype": "F32",
+    "text_bias_shape": [384],
+    "image_bias_dtype": "F32",
+    "image_bias_shape": [384],
+    "selected_payload_bytes": 3935232,
+    "explicit_temperature": true,
+    "explicit_route_scale": true,
+    "per_tensor_sha256_required": true
+  },
+  "fixture": {
+    "kind": "synthetic Safetensors shard",
+    "projected_logits": "exact FP32 values 0..383 from binary-coded BF16 rows",
+    "unrelated_tensor_bytes": 65536,
+    "selected_only_io_asserted": true,
+    "text_route_ids": [0, 383, 382, 381, 380, 379],
+    "image_route_ids": [1, 383, 382, 381, 380, 379],
+    "text_route_matches_r701_decimal_oracle_tolerance": 2e-7,
+    "refusal_cases": [
+      "unrecognized model revision",
+      "selected tensor SHA-256 mismatch",
+      "missing layer/name",
+      "wrong tensor dtype/shape",
+      "payload byte cap too small"
+    ]
+  },
+  "tests": {
+    "focused_rust_tests_passed": 2,
+    "clippy_warnings_as_errors": "pass",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "actual_checkpoint_gate_weights_loaded": false,
+  "session_dispatch": false,
+  "full_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_service": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "Use only an already-present, exact shard and predeclared tensor hashes to test the streaming loader if an admitted artifact becomes available; Session dispatch still requires all six gate-selected expert payload profiles."
+}

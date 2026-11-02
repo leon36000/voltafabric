@@ -14,6 +14,7 @@ use std::{
     path::PathBuf,
 };
 pub const MAX_HEADER_BYTES: u64 = 8 * 1024 * 1024;
+pub const MAX_NAMED_TENSOR_PAYLOAD_BYTES: u64 = 64 * 1024 * 1024;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Selection {
@@ -188,6 +189,148 @@ fn tensor<R: Read + Seek>(
         .ok_or_else(|| invalid("byte count overflow"))?;
     Ok(b)
 }
+
+/// A single named tensor to select from a larger Safetensors shard. The caller
+/// supplies the exact pinned dtype, shape, payload length, and SHA-256 expected
+/// for this tensor; the reader validates every field before exposing payloads.
+#[derive(Debug, Clone)]
+pub struct NamedTensorSpec {
+    pub name: String,
+    pub dtype: Dtype,
+    pub shape: Vec<usize>,
+    pub bytes: u64,
+    pub sha256: String,
+}
+
+#[derive(Debug)]
+pub struct NamedTensor {
+    pub dtype: Dtype,
+    pub shape: Vec<usize>,
+    pub bytes: Vec<u8>,
+    pub sha256: String,
+}
+
+#[derive(Debug)]
+pub struct NamedTensorImport {
+    pub file_bytes: u64,
+    pub header_bytes: u64,
+    /// Header plus selected tensor payloads actually read; unrelated tensors
+    /// are skipped with seeks and are not copied into memory.
+    pub io_bytes: u64,
+    pub tensors: BTreeMap<String, NamedTensor>,
+}
+
+/// Read an explicit, small set of tensors from a potentially very large shard.
+/// All names/shapes/types/lengths and the total byte cap are preflighted before
+/// payload reads. Any read/hash failure returns no partial import.
+pub fn read_named_tensors<R: Read + Seek>(
+    r: &mut R,
+    selected: &[NamedTensorSpec],
+    max_payload_bytes: u64,
+) -> Result<NamedTensorImport> {
+    if selected.is_empty() || selected.len() > 64 {
+        return Err(invalid("selected tensor count must be between 1 and 64"));
+    }
+    let mut names = BTreeSet::new();
+    let mut budget = 0u64;
+    for item in selected {
+        if item.name.is_empty()
+            || item.name.len() > 512
+            || !names.insert(item.name.as_str())
+            || item.shape.is_empty()
+            || item.shape.len() > 8
+            || item.shape.contains(&0)
+            || item.bytes == 0
+            || !crate::sha256::is_hex_digest(&item.sha256)
+        {
+            return Err(invalid("selected tensor specification is invalid"));
+        }
+        budget = budget
+            .checked_add(item.bytes)
+            .ok_or_else(|| invalid("selected tensor byte count overflow"))?;
+    }
+    if max_payload_bytes == 0
+        || max_payload_bytes > MAX_NAMED_TENSOR_PAYLOAD_BYTES
+        || budget > max_payload_bytes
+    {
+        return Err(invalid("selected tensors exceed the payload byte cap"));
+    }
+
+    let file_bytes = r.seek(SeekFrom::End(0)).map_err(io)?;
+    r.seek(SeekFrom::Start(0)).map_err(io)?;
+    let mut length = [0; 8];
+    r.read_exact(&mut length).map_err(io)?;
+    let header_bytes = u64::from_le_bytes(length);
+    if header_bytes == 0 || header_bytes > MAX_HEADER_BYTES {
+        return Err(invalid("checkpoint header exceeds 8 MiB bound or is empty"));
+    }
+    let data_start = header_bytes
+        .checked_add(8)
+        .ok_or_else(|| invalid("header offset overflow"))?;
+    if data_start > file_bytes {
+        return Err(invalid("truncated checkpoint header"));
+    }
+    let header = bytes(r, header_bytes as usize)?;
+    serde_json::from_slice::<UniqueHeader>(&header).map_err(json)?;
+    let metadata: Metadata = serde_json::from_slice(&header).map_err(json)?;
+    if data_start.checked_add(metadata.data_len() as u64) != Some(file_bytes) {
+        return Err(invalid(
+            "safetensors offsets do not cover exact file length",
+        ));
+    }
+
+    // Preflight exact metadata and source bounds for every request before any
+    // selected payload allocation/read.
+    for item in selected {
+        let tensor = info(&metadata, &item.name, item.dtype, &item.shape)?;
+        let payload_len = tensor
+            .data_offsets
+            .1
+            .checked_sub(tensor.data_offsets.0)
+            .ok_or_else(|| invalid("selected tensor offsets are reversed"))?;
+        if payload_len as u64 != item.bytes {
+            return Err(invalid(format!(
+                "selected tensor byte length differs: {}",
+                item.name
+            )));
+        }
+        let absolute_end = data_start
+            .checked_add(tensor.data_offsets.1 as u64)
+            .ok_or_else(|| invalid("selected tensor offset overflow"))?;
+        if absolute_end > file_bytes {
+            return Err(invalid("selected tensor extends beyond the source shard"));
+        }
+    }
+
+    let mut io_bytes = data_start;
+    let mut tensors = BTreeMap::new();
+    for item in selected {
+        let payload = tensor(r, &metadata, &item.name, data_start, &mut io_bytes)?;
+        let actual_sha256 = crate::sha256::hex(&payload);
+        if actual_sha256 != item.sha256 {
+            return Err(invalid(format!(
+                "selected tensor SHA-256 differs: {}",
+                item.name
+            )));
+        }
+        tensors.insert(
+            item.name.clone(),
+            NamedTensor {
+                dtype: item.dtype,
+                shape: item.shape.clone(),
+                bytes: payload,
+                sha256: actual_sha256,
+            },
+        );
+    }
+    Ok(NamedTensorImport {
+        file_bytes,
+        header_bytes,
+        io_bytes,
+        tensors,
+    })
+}
+
 /// Read only the bounded header and nine tensors per selected expert, then reuse
 /// resident validation/permutation. No tensor outside the selection is read.
 /// Payload limit is final compressed buffers, not RSS; header/source/output coexist.

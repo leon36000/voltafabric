@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 07:49:53 UTC",
+  "updated_utc": "2026-11-02 08:08:23 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1514,6 +1514,51 @@
       "readback_exact": true,
       "readback_files_verified": 9,
       "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2395"
+    },
+    {
+      "id": "R700",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_CPU_GATE_AND_FAIL_CLOSED_ADMISSION_PIPELINE_SUCCESS",
+      "branch": "r700-deepseek-v41-gate-cpu-20261102",
+      "commit": "d48e24130b94d86b9e692e761ced9ca56b63ebec",
+      "path": "research/R700",
+      "pipeline_id": 2400,
+      "pipeline_status": "success",
+      "readback_exact": true,
+      "full_generation": false,
+      "gpu": false
+    },
+    {
+      "id": "R701",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_CPU_DECIMAL_ORACLE_PASS_EXACT_READBACK_PIPELINES_2404_2405_SUCCESS",
+      "branch": "r701-deepseek-gate-decimal-oracle-20261102",
+      "commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+      "path": "research/R701",
+      "pipeline_id": 2404,
+      "pipeline_status": "success",
+      "receipt_pipeline_id": 2405,
+      "receipt_pipeline_status": "success",
+      "readback_exact": true,
+      "synthetic_fixture_only": true,
+      "full_generation": false,
+      "gpu": false
+    },
+    {
+      "id": "R702",
+      "owner": "integrator",
+      "state": "SOURCE_COMMIT_PIPELINE_PENDING_RECEIPT",
+      "branch": "r702-deepseek-gate-safetensors-20261102",
+      "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+      "path": "research/R702",
+      "local_cpu_tests": 2,
+      "readback_exact": false,
+      "pipeline_status": "pending",
+      "actual_checkpoint_gate_weights_loaded": false,
+      "session_dispatch": false,
+      "full_generation": false,
+      "gpu": false,
+      "automatic_relaunch": "STOPPED_BY_OWNER"
     }
   ],
   "acceptance": [
@@ -1570,17 +1615,17 @@
   "last_verified_results": "R637,R638,R642_CPU_LAUNCHER_FIXTURE_ONLY,R643_PINNED_GGML_PROVIDER_AND_RUST_BRIDGE_CPU_BUILD_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R644_NATIVE_GGML_RESIDENT_TO_RUST_COLLECTOR_SYNTHETIC_CPU_ONLY,R645_VFB3_IDENTITY_HELPER_SYNTHETIC_CPU_ONLY,R646_VFB3_IDENTITY_FIELDS_CPU_SYNTHETIC_ONLY,R648_NATIVE_BINARY_LOOP_LOCAL_CPU_SESSION_SYNTHETIC_GGML_ONE_BATCH,R649_TWO_FRESH_VFB3_BATCHES_ONE_LOCAL_PERSISTENT_CPU_SESSION_SYNTHETIC_GGML,R650_EXISTING_LAUNCHER_HELPER_TO_REAL_RUST_BRIDGE_AND_LOCAL_GGML_SESSION_CPU_ONLY,R651_CPP_POOL_OWNER_48_LOCAL_RUST_SESSIONS_TWO_BATCHES_CPU_SYNTHETIC_ONLY,R653_EXACT_STRATA_PATCH_REPRODUCED_CMAKE_CONFIG_PASS_BUILD_BLOCKED_AARCH64_AND_SM80_MINIMUM,R654_GGML_MUL_MAT_ID_GROUPED_CPU_Q8_0_INDEPENDENT_FP64_ORACLE_PASS_SYNTHETIC_ONLY,R655_GGML_GROUPED_RAW_OUTPUT_TO_VOLTAFABRIC_FP16_F64_COLLECTOR_CPU_SYNTHETIC_PASS,R656_GGML_GROUPED_MATRIX_FLEET_MULTI_BATCH_ROUTING_COLLECTOR_CPU_Q8_0_PASS_ATOMIC_FAILURE,R657_GGML_GROUPED_MATRIX_PERSISTENT_CPU_SESSION_SYNTHETIC_Q8_0_DEBUG_RELEASE_PASS_ATOMIC_FAILURE,R658_GGUF_TENSOR_SPAN_STREAM_TO_IDENTIFIED_CPU_SESSION_Q8_0_DEBUG_RELEASE_PASS,R659_SYNTHETIC_GGUF_MOE_FFN_THREE_CPU_SESSION_SCALAR_Q8_0_SWIGLU_ORACLE_PASS_RECTANGULAR_RESOLUTION_ONLY,R660_PER_SLOT_RECTANGULAR_GGML_PROJECTION_SOURCE_PUBLISHED_SECURITY_SCANS_PASS_RUST_TEST_PENDING,R665_QWEN2MOE_FP16_DECODED_COLLECTOR_CPU_DEBUG_9_RELEASE_1_SYNTHETIC_Q8_0,R666_QWEN2MOE_SYNTHETIC_DONOR_ROUTE_ADAPTER_CPU_DEBUG_11_RELEASE_1,R667_PINNED_GGML_QWEN2MOE_ROUTE_OPS_CPU_DEBUG_RELEASE_12_PASS_SYNTHETIC,R668_LLAMA_EVAL_CALLBACK_EARLY_BREAK_RETURNS_SUCCESS_SOURCE_AUDIT_LEAD_REJECTED,R669_GGML_CUSTOM_GRAPH_CPU_ATOMIC_FAILURE_BOUNDARY_SYNTHETIC,R670_REUSABLE_VF_NATIVE_GGML_TRANSACTION_LIBRARY_CPU_SINGLE_USE_TEST,R671_GGML_GRAPH_VFR3_COLLECTOR_CPU_FAKE_PEER_FP16_F64_FAIL_CLOSED_3_CTEST_PASS,R672_GGML_ROUTE_GRAPH_REAL_LOCAL_COORDINATOR_WORKER_CPU_CTEST_4_PASS; PINNED_LLAMA_CPP_QWEN2MOE_ROUTE_SEAM_SOURCE_TRACE_ONLY; PIPELINE_2282_SECURITY_SCANS_SUCCESS,R673_PINNED_GGML_DYNAMIC_ROUTE_CAPTURE_CPU_CTEST_3_PASS; LIVE_COORDINATOR_WORKER_PASS; GITLAB_READBACK_SHA8_8; PIPELINE_2284_RUNNING,R674_LLAMA_GRAPH_REUSE_SINGLE_USE_TRANSACTION_REFUSAL_CPU_CTEST_3_PASS,R675_FRESH_GRAPH_NEW_STAMP_CPU_FP64_ORACLE_CTEST_3_PASS,R674_GRAPH_REUSE_GUARD_PIPELINE_2286_SUCCESS,R676_HOST_ROUTE_INVOCATION_BARRIER_CPU_CTEST_3_PASS,R677_DYNAMIC_EXPERT_OWNER_PROJECTION_CPU_CTEST_3_PASS; GITLAB_READBACK_7_FILES; PIPELINE_2293_SCANS_RUNNING,R678_QWEN2MOE_PER_LAYER_INVOCATION_ADAPTER_CPU_CTEST_4_PASS; TWO_LAYER_FP32_ORACLE; MISSING_LAYER_HOST_REFUSAL; GITLAB_READBACK_8_FILES; PIPELINE_2295_SCANS_RUNNING,R679_PINNED_LLAMA_QWEN2MOE_ROUTE_HOOK_CPU_LIBRARY_BUILD_PASS; GITLAB_READBACK_5_FILES_PLAINTEXT; PIPELINE_2298_SCANS_RUNNING,R680_LLAMA_HOOK_CALLBACK_BRIDGE_CPU_CTEST_6_PASS_1_SKIP_TWO_LAYER_ORACLE_IDENTITY_CHECK; PINNED_LLAMA_LIBRARY_REBUILD_PASS; GITLAB_READBACK_10_FILES_EXACT; PIPELINE_2301_RUNNING,R682_LIVE_LLAMA_CONTEXT_PROCESS_UBATCH_SYNTHETIC_QWEN2MOE_GRAPH_CPU_CTEST_1_PASS_EXACT_READBACK_7_OF_7; DONOR_BUILD_MOE_FFN_AND_GENERATION_NOT_QUALIFIED,R683_DONOR_BUILD_MOE_FFN_CALLBACK_CPU_CTEST_1_PASS_RAW_6_20_WEIGHT_0_5_ONCE_OUTPUT_3_10_GITLAB_READBACK_7_OF_7; PIPELINE_2316_RUNNING,R684_GGUF_V3_F32_DONOR_PARSER_AND_LIVE_BUILD_MOE_FFN_CPU_PASS_RAW_6_20_WEIGHT_ONCE_OUTPUT_3_10_COLLECTOR_REFUSAL_NO_PUBLICATION_GITLAB_READBACK_7_OF_7,R685_DONOR_TOP1_Q8_0_GGUF_CPU_PASS; checkpoint IDs projected once to registry [3,40]; atomic failure and duplicate map refused; pipeline 2323 success; readback 7/7.,R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.,R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED,R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.,R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.,R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation.,R691_PUBLIC_LLAMA_DECODE_CPU_SYNTHETIC_QWEN2MOE_PASS; donor/VF tokens 3,3,3; logits max_abs=0; exact GitLab readback 10/10; no real checkpoint/full-generation/GPU claim.,R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim.,GITLAB_PIPELINES_2358_AND_2360_CONFIGURED_SCANS_AND_FALLBACK_SUCCESS; local CPU tests remain separate evidence.,R693_QWEN2MOE_PUBLIC_DECODE_CPU_SYNTHETIC_TWO_LAYER,R694_ROUTE_BOUND_ADVISORY_PLACEMENT_CPU_SYNTHETIC,R695_PER_RANK_KV_AND_LOAD_ENVELOPE_CPU_SYNTHETIC,R696_ATOMIC_REPLACEMENT_RESIDENT_WEIGHT_PEAK_CPU_SYNTHETIC;R697_PUBLIC_LLAMA_DECODE_MEMORY_ADVISORY_CPU_SYNTHETIC_PASS_READBACK_EXACT_11_FILES;TOKENS_3_3_3_LOGIT_MAX_ABS_0;LATE_REFUSAL_ATOMIC_NO_SAMPLE;PIPELINE_2382_PENDING\nR697 GitLab pipeline 2382: success on configured scans/fallback only. R698: exact GitLab readback of 7 files at commit 033ac7cb90c1189febc48700b4c261e071d49487; CPU test passed on two real DeepSeek MXFP4 K32 layer-0 experts through two local Sessions and the FP32-preweighted Collector. R698 pipeline 2384 remains running; it is not compile/test evidence.;R700_DEEPSEEK_GATE_CPU_6_TESTS_PASS_TOP6_MISSING_PROFILES_REFUSED_PIPELINE_2400_SUCCESS;R701_PYTHON_DECIMAL_60D_ORACLE_MATCHES_RUST_GATE_ROUTE_1_PASS_READBACK_6_OF_6_PIPELINE_2404_RUNNING",
   "active_operations": [
     {
-      "id": "R701_PIPELINE_2404",
-      "state": "RUNNING",
-      "branch": "r701-deepseek-gate-decimal-oracle-20261102",
-      "commit": "4aaeae668c3c2242551e96ae00fd54a07af14bd3",
-      "pipeline_id": 2404,
-      "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2404",
-      "scope": "configured scans/fallback only; not Rust compilation",
+      "id": "R702_SOURCE_COMMIT_PIPELINE",
+      "state": "PIPELINE_PENDING",
+      "branch": "r702-deepseek-gate-safetensors-20261102",
+      "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+      "path": "research/R702",
+      "pipeline_id": null,
+      "scope": "CPU fixture was run locally; GitLab pipeline is not Rust compile evidence",
       "automatic_relaunch": "STOPPED_BY_OWNER"
     }
   ],
-  "next_action": "After R701 pipeline 2404 completes, finalize its receipt. Then inspect only already-present source/fixture files for the matching gate projection and six selected expert payloads; retain atomic refusal if any are absent. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+  "next_action": "Wait for R702's private-branch pipeline, then verify exact GitLab readback and record the commit/pipeline receipt. Do not dispatch the gate route to Sessions until all six selected expert profiles and the matching gate tensors are actually available. No full checkpoint download, GPU, production network, UNKNOWN replay, or background relaunch.",
   "report": "research/R699/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source development on private GitLab. Superpowers absent; no skills used. Automatic relaunch remains stopped; no production checkpoint, GPU, production network, cleanup or formatting.",
   "wave_manifest": {
@@ -2110,8 +2155,7 @@
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
     "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2384"
-  }
-,
+  },
   "r699_result": {
     "id": "R699",
     "state": "PUBLISHED_PRIVATE_GITLAB_EXACT_READBACK_CPU_TESTS_PASS_PIPELINE_SUCCESS",
@@ -2177,7 +2221,7 @@
   },
   "r701_result": {
     "id": "R701",
-    "state": "PUBLISHED_PRIVATE_CPU_DECIMAL_ORACLE_PASS_EXACT_READBACK_PIPELINE_RUNNING",
+    "state": "PUBLISHED_PRIVATE_CPU_DECIMAL_ORACLE_PASS_EXACT_READBACK_PIPELINES_2404_2405_SUCCESS",
     "branch": "r701-deepseek-gate-decimal-oracle-20261102",
     "parent_commit": "d48e24130b94d86b9e692e761ced9ca56b63ebec",
     "source_commit": "4aaeae668c3c2242551e96ae00fd54a07af14bd3",
@@ -2191,7 +2235,7 @@
     "oracle": "Python stdlib Decimal at 60 digits; separate implementation from Rust and donor code",
     "local_test": "1 Rust integration test passed; scoped Clippy -D warnings/rustfmt/diff checks passed",
     "pipeline_id": 2404,
-    "pipeline_status": "running",
+    "pipeline_status": "success",
     "pipeline_scope": "configured security scans/CI fallback only; not Rust compilation or local CPU oracle",
     "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2404",
     "synthetic_fixture_only": true,
@@ -2204,6 +2248,39 @@
     "performance_claim": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "After R701 pipeline 2404 completes, finalize its receipt. Then inspect only already-present source/fixture files for the matching gate projection and six selected expert payloads; retain atomic refusal if any are absent. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+    "next_action": "R702: connect only the pinned gate projection through the existing bounded Safetensors reader on synthetic CPU data; keep six-expert Session admission closed until all selected payloads are present.",
+    "receipt_pipeline_id": 2405,
+    "receipt_pipeline_status": "success"
+  },
+  "r702_result": {
+    "id": "R702",
+    "state": "SOURCE_COMMIT_PIPELINE_PENDING_RECEIPT",
+    "branch": "r702-deepseek-gate-safetensors-20261102",
+    "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+    "path": "research/R702",
+    "code_files": [
+      "src/checkpoint.rs",
+      "src/deepseek_v41_gate.rs",
+      "tests/r702_deepseek_gate_projection.rs"
+    ],
+    "report": "research/R702/REPORT.md",
+    "build_test": "research/R702/BUILD_TEST.txt",
+    "result": "research/R702/RESULT.json",
+    "manifest": "research/R702/SHA256SUMS",
+    "manifest_sha256": "d737768139abc6c5f02a0bdf5b560d2780cfda5eadf7b2b1af0db2b058c51dfa",
+    "manifest_files": 6,
+    "local_cpu_tests": "2 focused fixture tests passed; scoped Clippy -D warnings, rustfmt and diff checks passed",
+    "pipeline_id": null,
+    "pipeline_status": "pending",
+    "pipeline_scope": "configured GitLab security scans/fallback only; not Rust compilation",
+    "readback_exact": false,
+    "actual_checkpoint_gate_weights_loaded": false,
+    "session_dispatch": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false,
+    "next_action": "After the branch pipeline completes, read back the exact code, tests, report, manifest and handoffs; record receipt. Keep Session admission closed because four of the six synthetic top-k expert IDs lack matching real payload profiles."
   }
 }

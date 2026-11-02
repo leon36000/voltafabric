@@ -11038,7 +11038,7 @@
   },
   "r701_deepseek_gate_cpu_oracle": {
     "id": "R701",
-    "state": "PUBLISHED_PRIVATE_CPU_DECIMAL_ORACLE_PASS_EXACT_READBACK_PIPELINE_RUNNING",
+    "state": "PUBLISHED_PRIVATE_CPU_DECIMAL_ORACLE_PASS_EXACT_READBACK_PIPELINES_2404_2405_SUCCESS",
     "branch": "r701-deepseek-gate-decimal-oracle-20261102",
     "parent_commit": "d48e24130b94d86b9e692e761ced9ca56b63ebec",
     "source_commit": "4aaeae668c3c2242551e96ae00fd54a07af14bd3",
@@ -11052,7 +11052,7 @@
     "oracle": "Python stdlib Decimal at 60 digits; separate implementation from Rust and donor code",
     "local_test": "1 Rust integration test passed; scoped Clippy -D warnings/rustfmt/diff checks passed",
     "pipeline_id": 2404,
-    "pipeline_status": "running",
+    "pipeline_status": "success",
     "pipeline_scope": "configured security scans/CI fallback only; not Rust compilation or local CPU oracle",
     "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2404",
     "synthetic_fixture_only": true,
@@ -11065,6 +11065,31 @@
     "performance_claim": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "After R701 pipeline 2404 completes, finalize its receipt. Then inspect only already-present source/fixture files for the matching gate projection and six selected expert payloads; retain atomic refusal if any are absent. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+    "next_action": "R702: synthetic CPU gate projection through the bounded Safetensors reader; retain Session refusal until all six selected real expert payloads are available.",
+    "receipt_pipeline_id": 2405,
+    "receipt_pipeline_status": "success"
+  },
+  "r702_deepseek_gate_projection": {
+    "id": "R702",
+    "state": "SOURCE_COMMIT_PIPELINE_PENDING_RECEIPT",
+    "branch": "r702-deepseek-gate-safetensors-20261102",
+    "parent_commit": "f897902386f2290a294eb1af7a581b8a87d84f99",
+    "path": "research/R702",
+    "report": "research/R702/REPORT.md",
+    "result": "research/R702/RESULT.json",
+    "manifest": "research/R702/SHA256SUMS",
+    "manifest_sha256": "d737768139abc6c5f02a0bdf5b560d2780cfda5eadf7b2b1af0db2b058c51dfa",
+    "manifest_files": 6,
+    "local_cpu_tests": 2,
+    "pipeline_id": null,
+    "pipeline_status": "pending",
+    "readback_exact": false,
+    "actual_checkpoint_gate_weights_loaded": false,
+    "six_expert_session_dispatch": false,
+    "full_generation": false,
+    "gpu": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false,
+    "next_action": "Verify pipeline and exact readback; preserve fail-closed Session admission pending the four missing selected expert payloads."
   }
 }

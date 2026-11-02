@@ -1,0 +1,25 @@
+R702 CPU-only fixture commands and results
+==========================================
+
+Environment: rustc 1.90.0, cargo 1.90.0; locked dependencies; no GPU.
+
+Command:
+CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r702_deepseek_gate_projection
+Result: 2 passed, 0 failed.
+
+Command:
+CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --test r702_deepseek_gate_projection -- -D warnings
+Result: passed.
+
+Command:
+rustfmt --edition 2021 --check src/checkpoint.rs src/deepseek_v41_gate.rs tests/r702_deepseek_gate_projection.rs
+Result: passed.
+
+Command:
+git diff --check
+Result: passed.
+
+The 3,935,232 selected bytes are synthetic gate tensors. A separate 65,536-byte
+unrelated tensor is present in the same serialized fixture; the test asserts
+that reported I/O is exactly header + 8-byte length + selected bytes and less
+than total shard size. The fixture is not checkpoint-backed evidence.
