@@ -1,0 +1,14 @@
+R720 local CPU verification
+
+1. `CARGO_BUILD_JOBS=1 cargo test --locked --offline --test r720_primary_rank_advice`
+   PASS: 4 passed, 0 failed.
+2. `CARGO_BUILD_JOBS=1 cargo test --release --locked --offline --test r720_primary_rank_advice`
+   PASS: 4 passed, 0 failed.
+3. `CARGO_BUILD_JOBS=1 cargo clippy --locked --offline --test r720_primary_rank_advice -- -D warnings`
+   PASS.
+4. `cargo fmt --check`
+   PASS.
+5. `git diff --check`
+   PASS.
+
+The fixture labels all costs as imported only to exercise the API; they are synthetic test values, not a hardware measurement or a production receipt. The test covers bandwidth ordering, an explicit tie-band/memory decision, provenance refusal, bad tolerance, duplicate/unknown ranks, and cross-host refusal. No GPU or network operation ran.

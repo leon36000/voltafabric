@@ -1,7 +1,7 @@
-use crate::cost::CostProvenance;
+use crate::cost::{CostOrigin, CostProvenance};
 use crate::memory::{add, mul, Budget};
 use crate::schedule::{self, schedule_with_budget, Job};
-use crate::topology::{PreparedTopology, Topology};
+use crate::topology::{Origin, PreparedTopology, Topology};
 use crate::traffic::{message_sizes, WireFormat};
 use crate::work::{WorkBudget, DEFAULT_WORK_LIMIT};
 use crate::{invalid, Error, Result};
@@ -66,6 +66,134 @@ pub struct RoutedPlacementAdvice {
     /// Hex-encoded f64 bits preserve the donor's coefficients exactly.
     pub route_weight_bits_hex_by_token: Vec<Vec<String>>,
     pub placement: Placement,
+}
+
+/// Advisory choice for the rank that should host dense weights, KV state and
+/// prefill buffers when a runtime separates a primary GPU from expert GPUs.
+/// This does not place experts, alter routing, or authorize an allocation.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct PrimaryRankAdvice {
+    pub source_rank: u32,
+    pub primary_rank: u32,
+    pub bandwidth_tie_fraction: f64,
+    pub primary_link_bytes_per_s: f64,
+    pub available_memory_bytes: u64,
+    pub ranks_within_bandwidth_tie: Vec<u32>,
+    pub evidence_sources_by_rank: BTreeMap<u32, String>,
+    pub result_kind: String,
+}
+
+/// Select a primary accelerator from imported host-to-device link measurements.
+///
+/// The donor-derived policy is deliberately narrow: rank candidates by measured
+/// host-link bandwidth; when their results fall within the caller's explicit
+/// tolerance band, prefer the candidate with more unreserved memory, then the
+/// lower rank for deterministic ties. No donor-specific tolerance is assumed.
+/// Provenance labels must point to the measurement receipt, but this function does
+/// not independently authenticate that receipt or turn the advice into a hardware
+/// qualification. The existing route and owner registry remain untouched.
+pub fn recommend_primary_rank_advisory(
+    topology: &Topology,
+    source_rank: u32,
+    accelerator_ranks: &[u32],
+    bandwidth_tie_fraction: f64,
+) -> Result<PrimaryRankAdvice> {
+    if !bandwidth_tie_fraction.is_finite()
+        || !(0.0..1.0).contains(&bandwidth_tie_fraction)
+        || accelerator_ranks.is_empty()
+    {
+        return Err(invalid(
+            "primary-rank tolerance or candidate set is invalid",
+        ));
+    }
+    topology.validate()?;
+    if !matches!(&topology.origin, Origin::ImportedMeasurement) {
+        return Err(Error::new(
+            "UNMEASURED_TOPOLOGY",
+            "primary-rank advice requires imported topology measurements",
+        ));
+    }
+
+    let devices: BTreeMap<_, _> = topology.devices.iter().map(|d| (d.rank, d)).collect();
+    let source = devices
+        .get(&source_rank)
+        .ok_or_else(|| invalid("primary-rank measurement source is absent"))?;
+    let mut seen = BTreeSet::new();
+    let mut measured = Vec::with_capacity(accelerator_ranks.len());
+    for &rank in accelerator_ranks {
+        if rank == source_rank || !seen.insert(rank) {
+            return Err(invalid(
+                "primary-rank candidates contain source or duplicate rank",
+            ));
+        }
+        let device = devices
+            .get(&rank)
+            .ok_or_else(|| invalid("primary-rank candidate is absent"))?;
+        if device.host != source.host {
+            return Err(invalid("host-to-device role candidates must share a host"));
+        }
+        let links: Vec<_> = topology
+            .links
+            .iter()
+            .filter(|link| link.enabled && link.src == source_rank && link.dst == rank)
+            .collect();
+        if links.len() != 1 {
+            return Err(invalid(
+                "each primary-rank candidate requires exactly one enabled measured host link",
+            ));
+        }
+        let link = links[0];
+        if link.cost_provenance.origin != CostOrigin::ImportedMeasurement {
+            return Err(Error::new(
+                "UNMEASURED_HOST_LINK",
+                format!(
+                    "primary-rank link {} lacks imported measurement provenance",
+                    link.id
+                ),
+            ));
+        }
+        let evidence = link
+            .cost_provenance
+            .source
+            .as_ref()
+            .ok_or_else(|| invalid("primary-rank link measurement reference is absent"))?;
+        measured.push((
+            rank,
+            link.bandwidth_bytes_per_s,
+            device.capacity_bytes - device.reserved_bytes,
+            evidence.clone(),
+        ));
+    }
+
+    let fastest = measured
+        .iter()
+        .map(|entry| entry.1)
+        .max_by(f64::total_cmp)
+        .ok_or_else(|| invalid("primary-rank candidate set is empty"))?;
+    let cutoff = fastest * (1.0 - bandwidth_tie_fraction);
+    let mut tied: Vec<_> = measured.iter().filter(|entry| entry.1 >= cutoff).collect();
+    tied.sort_by(|left, right| right.2.cmp(&left.2).then_with(|| left.0.cmp(&right.0)));
+    let primary = tied
+        .first()
+        .ok_or_else(|| invalid("no primary-rank candidate remains"))?;
+    let mut ranks_within_bandwidth_tie: Vec<_> = tied.iter().map(|entry| entry.0).collect();
+    ranks_within_bandwidth_tie.sort_unstable();
+    let evidence_sources_by_rank = measured
+        .iter()
+        .map(|entry| (entry.0, entry.3.clone()))
+        .collect();
+
+    Ok(PrimaryRankAdvice {
+        source_rank,
+        primary_rank: primary.0,
+        bandwidth_tie_fraction,
+        primary_link_bytes_per_s: primary.1,
+        available_memory_bytes: primary.2,
+        ranks_within_bandwidth_tie,
+        evidence_sources_by_rank,
+        result_kind: "imported_link_role_advice_not_executor_placement".into(),
+    })
 }
 
 /// Plan physical residency from a validated general VoltaFabric route. This stays

@@ -1,0 +1,37 @@
+{
+  "id": "R720",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_VERIFIED_SOURCE_PUBLICATION_PENDING",
+  "branch": "r720-dsx-primary-device-role-20261102",
+  "parent_source_commit": "4fea54c052df071096126f68bd6cb8835a9ba46e",
+  "path": "research/R720",
+  "code_files": [
+    "src/planner.rs",
+    "tests/r720_primary_rank_advice.rs"
+  ],
+  "donor": {
+    "repository": "https://github.com/lxe/dsx",
+    "revision": "aa2dc5c6b12c24720c55a63e1da7c8ae31a18471",
+    "license": "MIT",
+    "license_sha256": "21606d2231fc37d5d042843402e7a51ccfcf1b4eb0f465363248c37e012a3a54",
+    "code_copied": false,
+    "adapted_idea": "Choose primary accelerator by imported host-to-device bandwidth; use caller-defined near-tie band, then available memory and stable rank."
+  },
+  "local_cpu_tests": {
+    "debug": "PASS 4/4",
+    "release": "PASS 4/4",
+    "clippy": "PASS -D warnings",
+    "rustfmt": "PASS",
+    "diff_check": "PASS"
+  },
+  "synthetic_fixture_only": true,
+  "real_host_gpu_measurements_imported": false,
+  "route_or_coefficients_changed": false,
+  "expert_owner_registry_changed": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R721: inspect pinned vLLM and SGLang adapters for V100/SM70 inference boundaries, licenses and any CPU-testable component that can connect a real checkpoint generation to VoltaFabric expert owners. Preserve route/coefficient and format boundaries; no model download or GPU run."
+}
