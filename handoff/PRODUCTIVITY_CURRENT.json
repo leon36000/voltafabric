@@ -3132,5 +3132,41 @@
     "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
     "active_operations": [],
     "next_action": "R715: group exact co-located top-6 owners into one bounded rank artifact and qualify one Session EXEC per rank against the independent MXFP4 oracle."
+  },
+  "r715_deepseek_colocated_rank_exec": {
+    "id": "R715",
+    "owner": "integrator",
+    "state": "SOURCE_COMMITTED_READBACK_PENDING",
+    "branch": "r715-deepseek-colocated-rank-exec-20261102",
+    "parent_commit": "6bfcb7aee4ae51b07527b6d6d62ecf55ed82b8c0",
+    "path": "research/R715",
+    "code_files": [
+      "src/deepseek_v41.rs",
+      "tests/r712_deepseek_session_owner.rs"
+    ],
+    "report": "research/R715/REPORT.md",
+    "build_test": "research/R715/BUILD_TEST.txt",
+    "result": "research/R715/RESULT.json",
+    "manifest": "research/R715/SHA256SUMS",
+    "manifest_sha256": "c5fdad660c7ba1756e759f384c3cb01ca17b724449f515908d7bf4144d63c87d",
+    "manifest_file_count": 4,
+    "readback_exact": false,
+    "readback_files_verified": 0,
+    "pipeline_id": null,
+    "pipeline_status": "not_started",
+    "local_cpu_tests": "4 debug and 4 release integration tests; grouped focused 1/1 debug and release after final provenance adjustment; 6 selective-read tests in each configuration; strict Clippy, rustfmt and diff check passed",
+    "grouped_contract": "exact route-selected rank/local bindings; one owner artifact and one Session LOAD per active rank; multiple slots reduced by existing R9 FP32-preweighted Collector",
+    "synthetic_weight_payloads": true,
+    "actual_checkpoint_payload_read": false,
+    "production_registry_used": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53_used": false,
+    "unknown_replayed": false,
+    "third_party_code_copied": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
+    "active_operations": [],
+    "next_action": "R716: bind grouped execution to an owner-admitted real route and exact selected checkpoint payload inventory; refuse while any selected MXFP4 payload is absent. No download, GPU, production network, UNKNOWN replay, or automatic relaunch."
   }
 }

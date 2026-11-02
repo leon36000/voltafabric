@@ -6,7 +6,8 @@ use std::collections::BTreeMap;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::time::Duration;
 use voltafabric::deepseek_v41::{
-    execute_pinned_mxfp4_route, plan_pinned_mxfp4_expert_payloads,
+    execute_pinned_mxfp4_route, execute_pinned_mxfp4_route_grouped,
+    group_pinned_mxfp4_route_residents, plan_pinned_mxfp4_expert_payloads,
     preflight_pinned_mxfp4_route_residents, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
     PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RouteExecutionState,
     REVISION,
@@ -113,12 +114,18 @@ fn route_problem() -> RoutingProblem {
 }
 
 #[test]
-fn colocated_top6_is_refused_before_the_owner_set_or_any_worker_exists() {
+fn colocated_top6_dispatch_requires_all_six_owner_receipts_before_a_worker_exists() {
     let route = route_problem();
     let error = preflight_pinned_mxfp4_route_residents(&route, 29, &[], 1).unwrap_err();
-    assert!(error
-        .message
-        .contains("one distinct rank per selected expert"));
+    assert!(error.message.contains("exactly six owners"));
+    let dispatch = voltafabric::routing::dispatch(&route).unwrap();
+    assert_eq!(dispatch.slots.len(), TOP6.len());
+    assert_eq!(dispatch.ranks.len(), 1);
+    assert_eq!(dispatch.ranks[0].rank, 4);
+    assert_eq!(
+        dispatch.ranks[0].resident_order,
+        (0..TOP6.len() as u32).collect::<Vec<_>>()
+    );
 }
 
 fn distributed_route_problem() -> RoutingProblem {
@@ -135,6 +142,27 @@ fn distributed_route_problem() -> RoutingProblem {
     route.resident_order = (0..TOP6.len())
         .map(|index| (4 + index as u32, vec![0]))
         .collect();
+    route
+}
+
+fn grouped_route_problem() -> RoutingProblem {
+    let mut route = distributed_route_problem();
+    route.registry.copies = TOP6
+        .iter()
+        .enumerate()
+        .map(|(index, &expert)| Replica {
+            expert,
+            rank: if index < 2 { 4 } else { 3 + index as u32 },
+            local: if index < 2 { index as u32 } else { 0 },
+        })
+        .collect();
+    route.resident_order = BTreeMap::from([
+        (4, vec![0, 1]),
+        (5, vec![0]),
+        (6, vec![0]),
+        (7, vec![0]),
+        (8, vec![0]),
+    ]);
     route
 }
 
@@ -367,6 +395,171 @@ fn complete_top6_exec_uses_one_route_weight_and_matches_fp64_oracle() {
         assert!(exec.started);
         assert_eq!(exec.expected_slots, 1);
         assert_eq!(exec.received_slots, 1);
+    }
+    let actual = receipt
+        .output_bits()
+        .unwrap()
+        .first()
+        .unwrap()
+        .iter()
+        .map(|bits| f32::from_bits(*bits))
+        .collect::<Vec<_>>();
+    assert_eq!(actual.len(), route.hidden);
+    let max_abs = actual
+        .iter()
+        .zip(&expected)
+        .map(|(actual, expected)| (actual - expected).abs())
+        .fold(0.0_f32, f32::max);
+    assert!(
+        max_abs <= 5.0e-4,
+        "FP64 MXFP4 oracle max abs error {max_abs}"
+    );
+
+    for (_, session) in sessions {
+        assert_eq!(session.traffic.execs, 1);
+        let close = session.close(Duration::from_secs(10));
+        assert_eq!(close.bye_execs, Some(1));
+        assert!(close.error.is_none(), "{close:?}");
+    }
+}
+
+#[test]
+fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle() {
+    let route = grouped_route_problem();
+    let residents = TOP6
+        .iter()
+        .enumerate()
+        .map(|(index, &expert)| {
+            let rank = if index < 2 { 4 } else { 3 + index as u32 };
+            resident_for_expert(&route, expert, rank)
+        })
+        .collect::<Vec<_>>();
+    let input: Vec<f32> = (0..route.hidden)
+        .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
+        .collect();
+    for value in &input {
+        assert_eq!(
+            voltafabric::deepseek_v41::cast_bf16_rne_reference(*value).unwrap(),
+            *value
+        );
+    }
+
+    let expected = route.routes[0]
+        .iter()
+        .try_fold(
+            vec![0.0_f32; route.hidden],
+            |mut sum, choice| -> Result<_, String> {
+                let resident = residents
+                    .iter()
+                    .find(|resident| resident.expert() == choice.expert)
+                    .ok_or_else(|| "oracle resident missing".to_owned())?;
+                let expert = resident
+                    .owner()
+                    .expert(choice.expert)
+                    .map_err(|error| error.to_string())?;
+                let row = expert
+                    .forward_reference(&input, Some(choice.weight as f32))
+                    .map_err(|error| error.to_string())?;
+                for (target, value) in sum.iter_mut().zip(row) {
+                    *target += value;
+                }
+                Ok(sum)
+            },
+        )
+        .unwrap();
+
+    let total = residents
+        .iter()
+        .map(|resident| resident.packed_artifact_bytes())
+        .sum::<u64>();
+    let preflight = preflight_pinned_mxfp4_route_residents(&route, 29, &residents, total).unwrap();
+    assert!(
+        group_pinned_mxfp4_route_residents(&route, preflight, residents, 1).is_err(),
+        "group packing must honor its peak-memory admission before creating any Session"
+    );
+
+    // Rebuild residents after the deliberately refused ownership move. A separate
+    // `UNKNOWN` or partial route is never retried; this is a fresh CPU test fixture.
+    let residents = TOP6
+        .iter()
+        .enumerate()
+        .map(|(index, &expert)| {
+            let rank = if index < 2 { 4 } else { 3 + index as u32 };
+            resident_for_expert(&route, expert, rank)
+        })
+        .collect::<Vec<_>>();
+    let total = residents
+        .iter()
+        .map(|resident| resident.packed_artifact_bytes())
+        .sum::<u64>();
+    let preflight = preflight_pinned_mxfp4_route_residents(&route, 29, &residents, total).unwrap();
+    let (preflight, groups) =
+        group_pinned_mxfp4_route_residents(&route, preflight, residents, 256 * 1024 * 1024)
+            .unwrap();
+    assert_eq!(groups.len(), 5);
+    let colocated = groups.iter().find(|group| group.rank() == 4).unwrap();
+    assert_eq!(colocated.members().len(), 2);
+    assert!(
+        colocated.packed_artifact_bytes()
+            <= voltafabric::deepseek_v41::MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+    );
+    assert!(colocated.packing_peak_bound_bytes() <= 256 * 1024 * 1024);
+
+    let mut sessions = BTreeMap::new();
+    let mut loads = Vec::new();
+    for group in groups {
+        let rank = group.rank();
+        let endpoint = Endpoint {
+            rank,
+            argv: vec![env!("CARGO_BIN_EXE_vf-rank-session").into()],
+        };
+        let mut session = Session::connect_mxfp4(
+            &endpoint,
+            Duration::from_secs(10),
+            &mxfp4::Producer::default(),
+        )
+        .unwrap();
+        loads.push(
+            group
+                .load_into_session(&mut session, &preflight, Duration::from_secs(30))
+                .unwrap(),
+        );
+        assert!(sessions.insert(rank, session).is_none());
+    }
+    assert_eq!(sessions.len(), 5);
+    assert!(sessions.values().all(|session| session.traffic.execs == 0));
+
+    let receipt = execute_pinned_mxfp4_route_grouped(
+        preflight,
+        &route,
+        29,
+        vec![mxfp4::TokenInput {
+            token: 0,
+            value_bits: input.iter().map(|value| value.to_bits()).collect(),
+        }],
+        loads,
+        &mut sessions,
+        Duration::from_secs(90),
+    )
+    .unwrap();
+    assert_eq!(receipt.state(), PinnedMxfp4RouteExecutionState::Completed);
+    assert_eq!(receipt.stamp(), &route.stamp);
+    assert_eq!(receipt.attempt(), 29);
+    assert_eq!(receipt.route_experts(), TOP6);
+    assert_eq!(receipt.exec_receipts().len(), 5);
+    assert!(receipt.error().is_none());
+    assert_eq!(
+        receipt
+            .exec_receipts()
+            .iter()
+            .map(|row| row.expected_slots)
+            .sum::<usize>(),
+        6
+    );
+    for exec in receipt.exec_receipts() {
+        assert_eq!(exec.state, voltafabric::process::ReceiptState::Completed);
+        assert!(exec.started);
+        assert_eq!(exec.expected_slots, exec.received_slots);
     }
     let actual = receipt
         .output_bits()

@@ -1,0 +1,29 @@
+{
+  "id": "R715",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_DEBUG_RELEASE_AND_STRICT_CHECKS_PASS_PREPARED_FOR_PRIVATE_BRANCH",
+  "branch": "r715-deepseek-colocated-rank-exec-20261102",
+  "parent_commit": "6bfcb7aee4ae51b07527b6d6d62ecf55ed82b8c0",
+  "path": "research/R715",
+  "code_files": [
+    "src/deepseek_v41.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "report": "research/R715/REPORT.md",
+  "result": "research/R715/RESULT.json",
+  "build_test": "research/R715/BUILD_TEST.txt",
+  "manifest": "research/R715/SHA256SUMS",
+  "local_cpu_tests": "4 debug and 4 release integration tests; grouped focused 1/1 debug and release after final provenance adjustment; 6 selective-read tests in each configuration; strict Clippy, rustfmt and diff check passed",
+  "synthetic_weight_payloads": true,
+  "actual_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "next_action": "R716: bind grouped execution to an owner-admitted real route and exact selected checkpoint payload inventory; refuse while any selected MXFP4 payload is absent. No download, GPU, production network, UNKNOWN replay, or automatic relaunch.",
+  "manifest_sha256": "c5fdad660c7ba1756e759f384c3cb01ca17b724449f515908d7bf4144d63c87d",
+  "manifest_file_count": 4
+}

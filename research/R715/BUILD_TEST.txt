@@ -1,0 +1,28 @@
+R715 CPU verification receipt
+
+Debug integration:
+  cargo test --offline --locked --test r712_deepseek_session_owner -- --nocapture
+  result: 4 passed, 0 failed; includes top-6 execution with two selected experts sharing one rank.
+
+Focused grouped route after the final source-shard provenance adjustment:
+  cargo test --offline --locked --test r712_deepseek_session_owner colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle -- --exact
+  result: 1 passed, 0 failed.
+  cargo test --offline --locked --release --test r712_deepseek_session_owner colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle -- --exact
+  result: 1 passed, 0 failed.
+
+Release integration:
+  cargo test --offline --locked --release --test r712_deepseek_session_owner -- --nocapture
+  result: 4 passed, 0 failed.
+
+Selective-read unit tests:
+  cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests
+  result: 6 passed, 0 failed.
+  cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests
+  result: 6 passed, 0 failed.
+
+Static checks:
+  cargo clippy --offline --locked --lib --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+  git diff --check: PASS
+
+All expert payloads in the grouped execution fixture are synthetic. No GPU, real checkpoint payload, production registry, inter-PC transport, production R53, complete generation, or UNKNOWN replay was involved. The GitLab pipeline is tracked separately and does not replace these local CPU receipts.

@@ -1260,6 +1260,440 @@ impl PinnedMxfp4RankResidentExpert {
     }
 }
 
+/// One LOAD receipt per rank artifact, regardless of how many selected experts it
+/// contains. The member list is in the Session binding's physical-local order.
+#[derive(Debug)]
+pub struct PinnedMxfp4RouteRankGroupLoadReceipt {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    rank: u32,
+    members: Vec<PinnedMxfp4RouteOwnerBinding>,
+    packed_artifact_sha256: String,
+    session_load: crate::session::LoadReceipt,
+}
+
+impl PinnedMxfp4RouteRankGroupLoadReceipt {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn rank(&self) -> u32 {
+        self.rank
+    }
+
+    pub fn members(&self) -> &[PinnedMxfp4RouteOwnerBinding] {
+        &self.members
+    }
+
+    pub fn packed_artifact_sha256(&self) -> &str {
+        &self.packed_artifact_sha256
+    }
+
+    pub fn session_load(&self) -> &crate::session::LoadReceipt {
+        &self.session_load
+    }
+}
+
+/// One route-selected rank-local Safetensors owner. A rank may contain several of the
+/// selected experts, but the combined artifact remains subject to the existing 64-MiB
+/// Session owner limit and exact `resident_order` contract.
+pub struct PinnedMxfp4RankResidentGroup {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    rank: u32,
+    members: Vec<PinnedMxfp4RouteOwnerBinding>,
+    source_shards: BTreeMap<u32, (String, String)>,
+    payload_sha256: BTreeMap<String, String>,
+    packed_artifact_sha256: String,
+    packed_artifact_bytes: u64,
+    packing_peak_bound_bytes: u64,
+    owner: crate::session::mxfp4::Artifact,
+}
+
+impl PinnedMxfp4RankResidentGroup {
+    pub fn rank(&self) -> u32 {
+        self.rank
+    }
+
+    pub fn members(&self) -> &[PinnedMxfp4RouteOwnerBinding] {
+        &self.members
+    }
+
+    pub fn packed_artifact_sha256(&self) -> &str {
+        &self.packed_artifact_sha256
+    }
+
+    pub fn packed_artifact_bytes(&self) -> u64 {
+        self.packed_artifact_bytes
+    }
+
+    /// Per-expert (source shard basename, verified source header digest).
+    pub fn source_shards(&self) -> &BTreeMap<u32, (String, String)> {
+        &self.source_shards
+    }
+
+    pub fn payload_sha256(&self) -> &BTreeMap<String, String> {
+        &self.payload_sha256
+    }
+
+    pub fn packing_peak_bound_bytes(&self) -> u64 {
+        self.packing_peak_bound_bytes
+    }
+
+    /// One rank receives one artifact containing exactly the selected local owners.
+    /// The input route preflight is retained so the later EXEC can still be tied to the
+    /// full donor order, coefficients and original per-expert read receipts.
+    pub fn load_into_session(
+        self,
+        session: &mut crate::session::Session,
+        preflight: &PinnedMxfp4RoutePreflight,
+        timeout: std::time::Duration,
+    ) -> Result<PinnedMxfp4RouteRankGroupLoadReceipt> {
+        let binding = self.owner.binding();
+        let expected_members = preflight
+            .owners
+            .iter()
+            .filter(|owner| owner.rank == self.rank)
+            .cloned()
+            .collect::<Vec<_>>();
+        let mut expected_members_by_local = expected_members;
+        expected_members_by_local.sort_by_key(|owner| owner.local);
+        if self.attempt != preflight.attempt
+            || self.stamp != preflight.stamp
+            || self.route_experts != preflight.route_experts
+            || self.route_fingerprint != preflight.route_fingerprint
+            || self.members != expected_members_by_local
+            || self.members.is_empty()
+            || session.rank != self.rank
+            || binding.rank != self.rank
+            || binding.model_revision != self.stamp.model_revision
+            || binding.layer != self.stamp.layer
+            || binding.epoch != self.stamp.epoch
+            || binding.experts
+                != self
+                    .members
+                    .iter()
+                    .map(|owner| crate::session::mxfp4::Expert {
+                        expert: owner.expert,
+                        local: owner.local,
+                    })
+                    .collect::<Vec<_>>()
+            || self.owner.bytes().len() as u64 != self.packed_artifact_bytes
+            || crate::sha256::hex(self.owner.bytes()) != self.packed_artifact_sha256
+            || binding.artifact_sha256 != self.packed_artifact_sha256
+        {
+            return Err(invalid(
+                "DeepSeek rank-group owner differs from its route preflight or Session rank",
+            ));
+        }
+
+        let session_load = session.load_mxfp4(&self.owner, self.stamp.epoch, timeout)?;
+        if session_load.rank != self.rank
+            || session_load.epoch != self.stamp.epoch
+            || session_load.artifact_sha256 != self.packed_artifact_sha256
+        {
+            return Err(Error::new(
+                "SESSION_PROTOCOL",
+                "CPU Session rank-group LOAD receipt differs from its bound artifact",
+            ));
+        }
+        Ok(PinnedMxfp4RouteRankGroupLoadReceipt {
+            stamp: self.stamp,
+            attempt: self.attempt,
+            route_experts: self.route_experts,
+            route_fingerprint: self.route_fingerprint,
+            rank: self.rank,
+            members: self.members,
+            packed_artifact_sha256: self.packed_artifact_sha256,
+            session_load,
+        })
+    }
+}
+
+/// Merge the single-expert selective-read receipts for each selected rank into the
+/// exact multi-expert artifacts accepted by Session. If a rank's route projection
+/// includes additional resident locals, this adaptation refuses; it never forges a
+/// shorter binding than the dispatch describes.
+pub fn group_pinned_mxfp4_route_residents(
+    route: &crate::routing::RoutingProblem,
+    preflight: PinnedMxfp4RoutePreflight,
+    residents: Vec<PinnedMxfp4RankResidentExpert>,
+    max_peak_bytes: u64,
+) -> Result<(PinnedMxfp4RoutePreflight, Vec<PinnedMxfp4RankResidentGroup>)> {
+    if max_peak_bytes == 0 {
+        return Err(Error::new(
+            "ARTIFACT_BUDGET",
+            "DeepSeek rank-group packing requires a nonzero aggregate peak budget",
+        ));
+    }
+    let verified = preflight_pinned_mxfp4_route_residents(
+        route,
+        preflight.attempt,
+        &residents,
+        preflight.total_artifact_bytes,
+    )?;
+    if verified != preflight {
+        return Err(invalid(
+            "DeepSeek rank-group residents differ from the consumed complete-route preflight",
+        ));
+    }
+    let dispatch = crate::routing::dispatch(route)?;
+    let mut by_expert = residents
+        .into_iter()
+        .map(|resident| (resident.expert, resident))
+        .collect::<BTreeMap<_, _>>();
+    if by_expert.len() != preflight.owners.len() {
+        return Err(invalid(
+            "DeepSeek rank-group packing received duplicate or missing route residents",
+        ));
+    }
+
+    let mut grouped = Vec::with_capacity(dispatch.ranks.len());
+    let mut grouped_bytes = 0u64;
+    for rank_dispatch in &dispatch.ranks {
+        let mut members = preflight
+            .owners
+            .iter()
+            .filter(|owner| owner.rank == rank_dispatch.rank)
+            .cloned()
+            .collect::<Vec<_>>();
+        members.sort_by_key(|owner| owner.local);
+        if members.is_empty()
+            || members.iter().map(|owner| owner.local).collect::<Vec<_>>()
+                != rank_dispatch.resident_order
+        {
+            return Err(invalid(
+                "DeepSeek rank-group must contain exactly the selected locals in Session resident order",
+            ));
+        }
+        let mut source_residents = members
+            .iter()
+            .map(|owner| {
+                by_expert
+                    .remove(&owner.expert)
+                    .ok_or_else(|| invalid("DeepSeek rank-group resident disappeared"))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        if source_residents.is_empty() {
+            return Err(invalid("DeepSeek rank-group has no resident owners"));
+        }
+        if source_residents.iter().any(|resident| {
+            resident.rank != rank_dispatch.rank
+                || resident.stamp != preflight.stamp
+                || resident.attempt != preflight.attempt
+                || resident.route_experts != preflight.route_experts
+                || resident.route_fingerprint != preflight.route_fingerprint
+        }) {
+            return Err(invalid(
+                "DeepSeek rank-group identity differs across selected owners",
+            ));
+        }
+        let source_shards = source_residents
+            .iter()
+            .map(|resident| {
+                (
+                    resident.expert,
+                    (
+                        resident.source_shard.clone(),
+                        resident.source_header_sha256.clone(),
+                    ),
+                )
+            })
+            .collect::<BTreeMap<_, _>>();
+
+        let (
+            owner,
+            payload_sha256,
+            packed_artifact_sha256,
+            packed_artifact_bytes,
+            packing_peak_bound_bytes,
+        ) = if source_residents.len() == 1 {
+            let resident = source_residents
+                .pop()
+                .ok_or_else(|| invalid("DeepSeek singleton rank owner disappeared"))?;
+            (
+                resident.owner,
+                resident.payload_sha256,
+                resident.packed_artifact_sha256,
+                resident.packed_artifact_bytes,
+                resident.packing_peak_bound_bytes,
+            )
+        } else {
+            let source_artifact_bytes =
+                source_residents.iter().try_fold(0u64, |sum, resident| {
+                    sum.checked_add(resident.packed_artifact_bytes)
+                        .ok_or_else(|| invalid("DeepSeek rank-group source byte count overflow"))
+                })?;
+            let mut buffers = BTreeMap::<String, (Dtype, Vec<usize>, Vec<u8>, String)>::new();
+            let mut payload_bytes = 0u64;
+            for resident in &source_residents {
+                let tensors = SafeTensors::deserialize(resident.owner.bytes())
+                    .map_err(|error| invalid(format!("invalid source resident owner: {error}")))?;
+                let prefix = format!(
+                    "layers.{}.ffn.experts.{}",
+                    route.stamp.layer, resident.expert
+                );
+                let expected_names = [
+                    format!("{prefix}.w1.weight"),
+                    format!("{prefix}.w1.scale"),
+                    format!("{prefix}.w2.weight"),
+                    format!("{prefix}.w2.scale"),
+                    format!("{prefix}.w3.weight"),
+                    format!("{prefix}.w3.scale"),
+                ]
+                .into_iter()
+                .collect::<BTreeSet<_>>();
+                if tensors
+                    .names()
+                    .into_iter()
+                    .map(str::to_owned)
+                    .collect::<BTreeSet<_>>()
+                    != expected_names
+                    || resident.payload_sha256.len() != expected_names.len()
+                {
+                    return Err(invalid(
+                            "DeepSeek rank-group input does not contain exactly six selected tensors per expert",
+                        ));
+                }
+                for name in expected_names {
+                    let view = tensors
+                        .tensor(&name)
+                        .map_err(|error| invalid(format!("invalid rank-group tensor: {error}")))?;
+                    let bytes = view.data().to_vec();
+                    let digest = crate::sha256::hex(&bytes);
+                    if resident.payload_sha256.get(&name) != Some(&digest)
+                        || buffers
+                            .insert(name, (view.dtype(), view.shape().to_vec(), bytes, digest))
+                            .is_some()
+                    {
+                        return Err(invalid(
+                            "DeepSeek rank-group payload hash or tensor identity differs",
+                        ));
+                    }
+                    payload_bytes = payload_bytes
+                        .checked_add(view.data().len() as u64)
+                        .ok_or_else(|| invalid("DeepSeek rank-group payload size overflow"))?;
+                }
+            }
+            let header_slack = crate::checkpoint::MAX_HEADER_BYTES
+                .checked_add(8)
+                .ok_or_else(|| invalid("DeepSeek rank-group header bound overflow"))?;
+            if payload_bytes > MAX_MXFP4_EXPERT_ARTIFACT_BYTES.saturating_sub(header_slack) {
+                return Err(Error::new(
+                    "ARTIFACT_BUDGET",
+                    "DeepSeek grouped tensor payload cannot fit the 64-MiB Session artifact bound",
+                ));
+            }
+            let packing_peak_bound_bytes = source_artifact_bytes
+                .checked_add(payload_bytes.checked_mul(2).ok_or_else(|| {
+                    invalid("DeepSeek rank-group packing peak multiplication overflow")
+                })?)
+                .and_then(|bytes| bytes.checked_add(header_slack.checked_mul(2)?))
+                .ok_or_else(|| invalid("DeepSeek rank-group packing peak overflow"))?;
+            if packing_peak_bound_bytes > max_peak_bytes {
+                return Err(Error::new(
+                    "ARTIFACT_BUDGET",
+                    "DeepSeek rank-group owner packing exceeds its aggregate peak budget",
+                ));
+            }
+            let views = buffers
+                .iter()
+                .map(|(name, (dtype, shape, bytes, _))| {
+                    TensorView::new(*dtype, shape.clone(), bytes)
+                        .map(|view| (name.as_str(), view))
+                        .map_err(|error| invalid(format!("invalid grouped tensor view: {error}")))
+                })
+                .collect::<Result<Vec<_>>>()?;
+            let packed = serialize(views, None).map_err(|error| {
+                invalid(format!("could not serialize grouped MXFP4 owner: {error}"))
+            })?;
+            let packed_artifact_bytes = u64::try_from(packed.len())
+                .map_err(|_| invalid("grouped MXFP4 owner size does not fit u64"))?;
+            if packed_artifact_bytes > MAX_MXFP4_EXPERT_ARTIFACT_BYTES
+                || packed_artifact_bytes < payload_bytes
+            {
+                return Err(Error::new(
+                    "ARTIFACT_BUDGET",
+                    "DeepSeek grouped owner exceeds the existing 64-MiB Session artifact bound",
+                ));
+            }
+            let packed_artifact_sha256 = crate::sha256::hex(&packed);
+            let binding = crate::session::mxfp4::Binding {
+                artifact_sha256: packed_artifact_sha256.clone(),
+                model_revision: route.stamp.model_revision.clone(),
+                rank: rank_dispatch.rank,
+                layer: route.stamp.layer,
+                epoch: route.stamp.epoch,
+                experts: members
+                    .iter()
+                    .map(|member| crate::session::mxfp4::Expert {
+                        expert: member.expert,
+                        local: member.local,
+                    })
+                    .collect(),
+            };
+            let owner = crate::session::mxfp4::Artifact::new(packed, binding)?;
+            let payload_sha256 = buffers
+                .into_iter()
+                .map(|(name, (_, _, _, digest))| (name, digest))
+                .collect();
+            (
+                owner,
+                payload_sha256,
+                packed_artifact_sha256,
+                packed_artifact_bytes,
+                packing_peak_bound_bytes,
+            )
+        };
+
+        grouped_bytes = grouped_bytes
+            .checked_add(packed_artifact_bytes)
+            .ok_or_else(|| invalid("DeepSeek grouped artifact byte count overflow"))?;
+        if grouped_bytes > preflight.total_artifact_bytes {
+            return Err(Error::new(
+                "ARTIFACT_BUDGET",
+                "DeepSeek rank-group artifacts exceed the preflighted aggregate owner budget",
+            ));
+        }
+        grouped.push(PinnedMxfp4RankResidentGroup {
+            stamp: preflight.stamp.clone(),
+            attempt: preflight.attempt,
+            route_experts: preflight.route_experts.clone(),
+            route_fingerprint: preflight.route_fingerprint.clone(),
+            rank: rank_dispatch.rank,
+            members,
+            source_shards,
+            payload_sha256,
+            packed_artifact_sha256,
+            packed_artifact_bytes,
+            packing_peak_bound_bytes,
+            owner,
+        });
+    }
+    if !by_expert.is_empty() {
+        return Err(invalid(
+            "DeepSeek route rank grouping left an unselected resident owner",
+        ));
+    }
+    Ok((preflight, grouped))
+}
+
 /// The exact single-token top-6 owner binding admitted before any rank worker starts.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PinnedMxfp4RouteOwnerBinding {
@@ -1328,11 +1762,11 @@ pub fn preflight_pinned_mxfp4_route_residents(
         ));
     }
     let mut expected = BTreeMap::new();
-    let mut expected_ranks = BTreeSet::new();
+    let mut expected_local_bindings = BTreeSet::new();
     for slot in dispatch.slots {
-        if !expected_ranks.insert(slot.rank) {
+        if !expected_local_bindings.insert((slot.rank, slot.local)) {
             return Err(invalid(
-                "DeepSeek single-owner Session adapter requires one distinct rank per selected expert",
+                "DeepSeek route preflight maps multiple selected experts to one rank-local owner",
             ));
         }
         if expected
@@ -1819,6 +2253,250 @@ pub fn execute_pinned_mxfp4_route(
             result_error = Some(Error::new(
                 "BATCH_INCOMPLETE",
                 "DeepSeek route EXEC did not complete every rank slot; output withheld",
+            ));
+        }
+        (
+            if unknown {
+                PinnedMxfp4RouteExecutionState::Unknown
+            } else {
+                PinnedMxfp4RouteExecutionState::Aborted
+            },
+            None,
+            result_error,
+        )
+    };
+    Ok(PinnedMxfp4RouteExecutionReceipt {
+        state,
+        stamp: preflight.stamp,
+        attempt: preflight.attempt,
+        route_experts: preflight.route_experts,
+        route_fingerprint: preflight.route_fingerprint,
+        exec_receipts,
+        output_bits,
+        error,
+    })
+}
+
+/// Execute one complete top-6 route when multiple selected experts are co-located on
+/// a rank. One already-loaded Session and one group LOAD receipt are required for each
+/// participating rank. Every rank is preflighted before the first EXEC; the existing
+/// FP32-preweighted Collector applies each route coefficient exactly once.
+pub fn execute_pinned_mxfp4_route_grouped(
+    preflight: PinnedMxfp4RoutePreflight,
+    problem: &crate::routing::RoutingProblem,
+    attempt: u64,
+    inputs: Vec<crate::session::mxfp4::TokenInput>,
+    load_receipts: Vec<PinnedMxfp4RouteRankGroupLoadReceipt>,
+    sessions: &mut BTreeMap<u32, crate::session::Session>,
+    timeout: std::time::Duration,
+) -> Result<PinnedMxfp4RouteExecutionReceipt> {
+    let top_k = crate::deepseek_v41_gate::TOP_K;
+    if timeout.is_zero()
+        || attempt == 0
+        || attempt != preflight.attempt
+        || problem.stamp != preflight.stamp
+        || problem.experts != preflight.route_experts
+        || preflight.route_fingerprint != pinned_top6_route_fingerprint(problem, attempt)?
+        || problem.routes.len() != 1
+        || preflight.owners.len() != top_k
+        || inputs.len() != 1
+        || inputs[0].token != 0
+        || inputs[0].value_bits.len() != problem.hidden
+    {
+        return Err(invalid(
+            "DeepSeek grouped EXEC requires its exact one-token route, complete owner preflight, and nonzero deadline",
+        ));
+    }
+    for &bits in &inputs[0].value_bits {
+        let value = f32::from_bits(bits);
+        if crate::deepseek_v41::cast_bf16_rne_reference(value)?.to_bits() != bits {
+            return Err(invalid(
+                "DeepSeek grouped EXEC input must be finite and exactly BF16 before any rank is sent",
+            ));
+        }
+    }
+
+    let dispatch = crate::routing::dispatch(problem)?;
+    if dispatch.slots.len() != top_k || dispatch.ranks.is_empty() {
+        return Err(invalid(
+            "DeepSeek grouped EXEC requires all six selected route slots",
+        ));
+    }
+    let expected_ranks = preflight
+        .owners
+        .iter()
+        .map(|owner| owner.rank)
+        .collect::<BTreeSet<_>>();
+    let dispatch_ranks = dispatch
+        .ranks
+        .iter()
+        .map(|rank| rank.rank)
+        .collect::<BTreeSet<_>>();
+    if expected_ranks != dispatch_ranks
+        || sessions.len() != expected_ranks.len()
+        || sessions.keys().copied().collect::<BTreeSet<_>>() != expected_ranks
+    {
+        return Err(invalid(
+            "DeepSeek grouped EXEC Session set does not match all participating route ranks",
+        ));
+    }
+
+    let mut expected_members = BTreeMap::<u32, Vec<PinnedMxfp4RouteOwnerBinding>>::new();
+    for owner in &preflight.owners {
+        expected_members
+            .entry(owner.rank)
+            .or_default()
+            .push(owner.clone());
+    }
+    for members in expected_members.values_mut() {
+        members.sort_by_key(|owner| owner.local);
+    }
+    for rank in &dispatch.ranks {
+        let members = expected_members
+            .get(&rank.rank)
+            .ok_or_else(|| invalid("DeepSeek grouped EXEC dispatch rank has no owners"))?;
+        let locals = members.iter().map(|owner| owner.local).collect::<Vec<_>>();
+        if rank.resident_order != locals
+            || rank.slots.len() != members.len()
+            || rank.slots.iter().any(|slot| slot.slot.token != 0)
+        {
+            return Err(invalid(
+                "DeepSeek grouped EXEC selected locals do not match the exact Session resident order",
+            ));
+        }
+    }
+
+    let mut loads_by_rank = BTreeMap::new();
+    for receipt in load_receipts {
+        if receipt.stamp != preflight.stamp
+            || receipt.attempt != preflight.attempt
+            || receipt.route_experts != preflight.route_experts
+            || receipt.route_fingerprint != preflight.route_fingerprint
+            || receipt.session_load.rank != receipt.rank
+            || receipt.session_load.epoch != preflight.stamp.epoch
+            || receipt.session_load.artifact_sha256 != receipt.packed_artifact_sha256
+            || expected_members.get(&receipt.rank) != Some(&receipt.members)
+            || loads_by_rank.insert(receipt.rank, receipt).is_some()
+        {
+            return Err(invalid(
+                "DeepSeek grouped EXEC LOAD receipt is stale, duplicated, or has a foreign rank owner set",
+            ));
+        }
+    }
+    if loads_by_rank.keys().copied().collect::<BTreeSet<_>>() != expected_ranks {
+        return Err(invalid(
+            "DeepSeek grouped EXEC is missing a participating rank's LOAD receipt",
+        ));
+    }
+    for (&rank, session) in sessions.iter() {
+        if session.rank != rank
+            || loads_by_rank
+                .get(&rank)
+                .is_none_or(|receipt| receipt.session_load.rank != session.rank)
+        {
+            return Err(invalid(
+                "DeepSeek grouped EXEC Session identity differs from its rank LOAD receipt",
+            ));
+        }
+    }
+
+    let mut collector = crate::preweighted::Collector::new(problem)?;
+    let deadline = std::time::Instant::now()
+        .checked_add(timeout)
+        .ok_or_else(|| invalid("DeepSeek grouped EXEC timeout overflows Instant"))?;
+    // Validate every live Session and activation before any rank can observe EXEC.
+    for rank in &dispatch.ranks {
+        sessions
+            .get_mut(&rank.rank)
+            .ok_or_else(|| invalid("DeepSeek grouped EXEC rank Session disappeared"))?
+            .preflight_preweighted_fp32_until(
+                problem,
+                &collector,
+                attempt,
+                &inputs,
+                &crate::process::Fault::None,
+                deadline,
+            )?;
+    }
+
+    let mut pending = Vec::with_capacity(dispatch.ranks.len());
+    let mut start_error = None;
+    for rank in &dispatch.ranks {
+        let session = sessions
+            .get_mut(&rank.rank)
+            .expect("the complete grouped Session set was preflighted");
+        match session.start_preweighted_fp32_until(
+            problem,
+            &collector,
+            attempt,
+            inputs.clone(),
+            crate::process::Fault::None,
+            deadline,
+        ) {
+            Ok(work) => pending.push((rank.rank, work)),
+            Err(error) => {
+                start_error = Some(error);
+                break;
+            }
+        }
+    }
+
+    let mut exec_receipts = Vec::with_capacity(pending.len());
+    let mut result_error = start_error;
+    for (rank, work) in pending {
+        let receipt = sessions
+            .get_mut(&rank)
+            .expect("rank Session remains in the preflighted grouped set")
+            .finish_preweighted_fp32(work, &mut collector, deadline);
+        if result_error.is_none() {
+            result_error = receipt.error.clone();
+        }
+        exec_receipts.push(receipt);
+    }
+
+    let all_completed = exec_receipts.len() == dispatch.ranks.len()
+        && exec_receipts.iter().all(|receipt| {
+            receipt.state == crate::process::ReceiptState::Completed && receipt.error.is_none()
+        })
+        && result_error.is_none();
+    let (state, output_bits, error) = if all_completed {
+        match collector.finish() {
+            Ok(output) if output.len() == 1 => (
+                PinnedMxfp4RouteExecutionState::Completed,
+                Some(
+                    output
+                        .into_iter()
+                        .map(|row| row.into_iter().map(f32::to_bits).collect())
+                        .collect(),
+                ),
+                None,
+            ),
+            Ok(_) => (
+                PinnedMxfp4RouteExecutionState::Aborted,
+                None,
+                Some(invalid(
+                    "DeepSeek grouped EXEC collector returned a non-single-token result",
+                )),
+            ),
+            Err(error) => (PinnedMxfp4RouteExecutionState::Aborted, None, Some(error)),
+        }
+    } else {
+        collector.expire();
+        let unknown = exec_receipts.iter().any(|receipt| {
+            matches!(
+                receipt.state,
+                crate::process::ReceiptState::Unknown | crate::process::ReceiptState::Started
+            )
+        });
+        if result_error.is_none() {
+            result_error = exec_receipts
+                .iter()
+                .find_map(|receipt| receipt.error.clone());
+        }
+        if result_error.is_none() {
+            result_error = Some(Error::new(
+                "BATCH_INCOMPLETE",
+                "DeepSeek grouped EXEC did not complete every rank slot; output withheld",
             ));
         }
         (
