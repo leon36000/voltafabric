@@ -14257,7 +14257,7 @@
     "source_readback_exact": true,
     "source_readback_files_verified": 8,
     "source_manifest_sha256": "a748ba8ae110435378824de511683c4906d98b695605ae70f5627a55f1c57d55",
-    "manifest_sha256": "c0b3933bcb8f8c27b8b47de4f677c2090fce28f1f22cfa7a53e25d0772ba6ac5",
+    "manifest_sha256": "d7d8c323501fea8f9b48f34520fb958287110a71f3fc153573c43f9e3d77575a",
     "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_PIPELINE_2602_SUCCESS",
     "complete_generation": false,
     "real_checkpoint_payload": false,

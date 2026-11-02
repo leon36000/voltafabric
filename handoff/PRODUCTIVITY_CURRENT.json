@@ -4530,7 +4530,7 @@
     "arxiv_priorities": "research/R740/ARXIV-PRIORITIES.md",
     "result": "research/R740/RESULT.json",
     "manifest": "research/R740/SHA256SUMS",
-    "manifest_sha256": "c0b3933bcb8f8c27b8b47de4f677c2090fce28f1f22cfa7a53e25d0772ba6ac5",
+    "manifest_sha256": "d7d8c323501fea8f9b48f34520fb958287110a71f3fc153573c43f9e3d77575a",
     "manifest_file_count": 8,
     "adapted_boundary": "Optional source-pinned DeepSeek V4.1 Recipe prompt encoding for exactly one plain user turn, with tokenizer size/SHA admission and context reservation rejection.",
     "donor_components": [

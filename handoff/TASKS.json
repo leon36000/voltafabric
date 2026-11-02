@@ -12117,7 +12117,7 @@
     "source_readback_exact": true,
     "source_readback_files_verified": 8,
     "output": "research/R740",
-    "manifest_sha256": "c0b3933bcb8f8c27b8b47de4f677c2090fce28f1f22cfa7a53e25d0772ba6ac5",
+    "manifest_sha256": "d7d8c323501fea8f9b48f34520fb958287110a71f3fc153573c43f9e3d77575a",
     "tests_added_or_run": false,
     "complete_generation": false,
     "next_action": "R741: publish the five-case pinned tokenizer-ID oracle that passed in the isolated CPU harness, then qualify bounded output decoding and stop handling against the same tokenizer. No checkpoint-wide load, GPU, production network or automatic relaunch.",
