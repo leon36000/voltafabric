@@ -1,15 +1,15 @@
 {
   "id": "R717",
   "path": "research/R717",
-  "state": "SOURCE_COMMIT_PENDING_READBACK",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS",
   "branch": "r717-deepseek-gate-payload-plan-20261102",
   "parent_commit": "e80a2d2a8163f25c0f523ba6644a71632c1137a8",
-  "source_commit": null,
-  "publication": "SOURCE_COMMIT_PENDING_READBACK",
-  "readback_exact": false,
-  "readback_files_verified": 0,
-  "pipeline_id": null,
-  "pipeline_status": "not_started",
+  "source_commit": "3392c21cc081f00a7cd3e44a3abbdc296080ca84",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED",
+  "readback_exact": true,
+  "readback_files_verified": 6,
+  "pipeline_id": 2531,
+  "pipeline_status": "success",
   "pipeline_scope_expected": "configured GitLab scans and fallback only; not Rust compilation or local CPU test evidence",
   "code_files": [
     "src/deepseek_v41.rs",
@@ -58,5 +58,21 @@
   "active_operations": [],
   "manifest_sha256": "39ad9c1357cd0e65c825429e2150847b95347238e3ded9b858e1d72ead37b725",
   "manifest_file_count": 5,
-  "next_action": "R718: bind gate-derived ranges to a complete retained six-expert payload hash/availability inventory and refuse atomically before reading any selected bytes when any item is missing. No download, GPU, production network, UNKNOWN replay, cleanup or automatic relaunch."
+  "next_action": "R718: preflight all 36 route-selected tensor digests before any weight read, then return the six verified payload owners atomically. Synthetic CPU fixture only; the tracked inventory lacks payloads 379-382. No model download, GPU, production network, R53, UNKNOWN replay, deletion or automatic relaunch.",
+  "readback_verified_utc": "2026-11-02T12:05:22Z",
+  "pipeline_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2531",
+  "pipeline_scope": "configured GitLab Gitleaks, Semgrep, Trivy and fallback only; not Rust compilation or local CPU-test evidence",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "semgrep_scan": {
+    "total_findings": 155,
+    "tracked_files_scanned": 6742,
+    "findings_in_r717_code_files": 0,
+    "warning_errors": 5,
+    "warning_scope": "unrelated historical R651/R438/handoff files"
+  }
 }

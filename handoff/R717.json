@@ -1,7 +1,7 @@
 {
   "id": "R717",
   "owner": "integrator",
-  "state": "SOURCE_COMMIT_PENDING_READBACK",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS",
   "branch": "r717-deepseek-gate-payload-plan-20261102",
   "parent_commit": "e80a2d2a8163f25c0f523ba6644a71632c1137a8",
   "path": "research/R717",
@@ -26,5 +26,17 @@
   "active_operations": [],
   "manifest_sha256": "39ad9c1357cd0e65c825429e2150847b95347238e3ded9b858e1d72ead37b725",
   "manifest_file_count": 5,
-  "next_action": "R718: bind gate-derived ranges to complete retained payload availability/hashes for all six experts; fail closed before any payload read if inventory is incomplete. No download, GPU, production network, UNKNOWN replay or automatic relaunch."
+  "next_action": "R718: preflight all 36 route-selected tensor digests before any weight read, then return the six verified payload owners atomically. Synthetic CPU fixture only; the tracked inventory lacks payloads 379-382. No model download, GPU, production network, R53, UNKNOWN replay, deletion or automatic relaunch.",
+  "source_commit": "3392c21cc081f00a7cd3e44a3abbdc296080ca84",
+  "readback_exact": true,
+  "readback_files_verified": 6,
+  "readback_verified_utc": "2026-11-02T12:05:22Z",
+  "pipeline_id": 2531,
+  "pipeline_status": "success",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  }
 }
