@@ -1,1 +1,162 @@
-dXNlIHN0ZDo6Y29sbGVjdGlvbnM6OkJUcmVlTWFwOwoKdXNlIHZvbHRhZmFicmljOjp7CiAgICBjb3N0OjpDb3N0UHJvdmVuYW5jZSwKICAgIHBsYW5uZXI6OnsKICAgICAgICBwbGFuLCBwbGFuX3dpdGhfY29uY3VycmVudF9zY2VuYXJpb3MsIHNjb3JlX3dpdGhfY29uY3VycmVudF9zY2VuYXJpb3MsCiAgICAgICAgQ29uY3VycmVudERlbWFuZFNjZW5hcmlvLCBEZW1hbmQsIEV4cGVydFByb2ZpbGUsIFBsYWNlbWVudFByb2JsZW0sCiAgICB9LAogICAgdG9wb2xvZ3k6OntEZXZpY2UsIExpbmssIE9yaWdpbiwgVG9wb2xvZ3ksIFRyYW5zcG9ydH0sCiAgICB0cmFmZmljOjpXaXJlRm9ybWF0LAp9OwoKZm4gbGluayhpZDogJnN0ciwgc3JjOiB1MzIsIGRzdDogdTMyKSAtPiBMaW5rIHsKICAgIExpbmsgewogICAgICAgIGlkOiBpZC5pbnRvKCksCiAgICAgICAgc3JjLAogICAgICAgIGRzdCwKICAgICAgICBiYW5kd2lkdGhfYnl0ZXNfcGVyX3M6IDFfMDAwXzAwMF8wMDAuMCwKICAgICAgICBsYXRlbmN5X3VzOiAxMC4wLAogICAgICAgIGVuYWJsZWQ6IHRydWUsCiAgICAgICAgdHJhbnNwb3J0OiBUcmFuc3BvcnQ6OlN5bnRoZXRpYywKICAgICAgICBwY2llOiBOb25lLAogICAgICAgIHJlc291cmNlczogdmVjIVtdLAogICAgICAgIGNvc3RfcHJvdmVuYW5jZTogQ29zdFByb3ZlbmFuY2U6OmRlZmF1bHQoKSwKICAgIH0KfQoKZm4gcHJvYmxlbShleHBlcnRfY2FwYWNpdHk6IHU2NCkgLT4gUGxhY2VtZW50UHJvYmxlbSB7CiAgICBQbGFjZW1lbnRQcm9ibGVtIHsKICAgICAgICB0b3BvbG9neTogVG9wb2xvZ3kgewogICAgICAgICAgICBzY2hlbWFfdmVyc2lvbjogMSwKICAgICAgICAgICAgb3JpZ2luOiBPcmlnaW46OlN5bnRoZXRpYywKICAgICAgICAgICAgc291cmNlX25vdGU6ICJSNzQzIHN5bnRoZXRpYyBjb25jdXJyZW5jeSBzY2hlZHVsZTsgbm8gaGFyZHdhcmUgY2xhaW0iLmludG8oKSwKICAgICAgICAgICAgZGV2aWNlczogdmVjIVsKICAgICAgICAgICAgICAgIERldmljZSB7CiAgICAgICAgICAgICAgICAgICAgcmFuazogMCwKICAgICAgICAgICAgICAgICAgICBob3N0OiAic3ludGhldGljIi5pbnRvKCksCiAgICAgICAgICAgICAgICAgICAgY2FwYWNpdHlfYnl0ZXM6IGV4cGVydF9jYXBhY2l0eSwKICAgICAgICAgICAgICAgICAgICByZXNlcnZlZF9ieXRlczogMCwKICAgICAgICAgICAgICAgIH0sCiAgICAgICAgICAgICAgICBEZXZpY2UgewogICAgICAgICAgICAgICAgICAgIHJhbms6IDEsCiAgICAgICAgICAgICAgICAgICAgaG9zdDogInN5bnRoZXRpYyIuaW50bygpLAogICAgICAgICAgICAgICAgICAgIGNhcGFjaXR5X2J5dGVzOiBleHBlcnRfY2FwYWNpdHksCiAgICAgICAgICAgICAgICAgICAgcmVzZXJ2ZWRfYnl0ZXM6IDAsCiAgICAgICAgICAgICAgICB9LAogICAgICAgICAgICBdLAogICAgICAgICAgICBsaW5rczogdmVjIVtsaW5rKCIwLTEiLCAwLCAxKSwgbGluaygiMS0wIiwgMSwgMCldLAogICAgICAgIH0sCiAgICAgICAgZXhwZXJ0czogdmVjIVsKICAgICAgICAgICAgRXhwZXJ0UHJvZmlsZSB7CiAgICAgICAgICAgICAgICBpZDogMCwKICAgICAgICAgICAgICAgIHJlc2lkZW50X2J5dGVzOiAxLAogICAgICAgICAgICAgICAgY29tcHV0ZV91czogNS4wLAogICAgICAgICAgICAgICAgY29zdF9wcm92ZW5hbmNlOiBDb3N0UHJvdmVuYW5jZTo6ZGVmYXVsdCgpLAogICAgICAgICAgICB9LAogICAgICAgICAgICBFeHBlcnRQcm9maWxlIHsKICAgICAgICAgICAgICAgIGlkOiAxLAogICAgICAgICAgICAgICAgcmVzaWRlbnRfYnl0ZXM6IDEsCiAgICAgICAgICAgICAgICBjb21wdXRlX3VzOiA1LjAsCiAgICAgICAgICAgICAgICBjb3N0X3Byb3ZlbmFuY2U6IENvc3RQcm92ZW5hbmNlOjpkZWZhdWx0KCksCiAgICAgICAgICAgIH0sCiAgICAgICAgXSwKICAgICAgICBkZW1hbmRzOiB2ZWMhWwogICAgICAgICAgICBEZW1hbmQgewogICAgICAgICAgICAgICAgc291cmNlX3Jhbms6IDAsCiAgICAgICAgICAgICAgICBleHBlcnRzOiB2ZWMhWzBdLAogICAgICAgICAgICAgICAgZnJlcXVlbmN5OiAwLjAsCiAgICAgICAgICAgIH0sCiAgICAgICAgICAgIERlbWFuZCB7CiAgICAgICAgICAgICAgICBzb3VyY2VfcmFuazogMSwKICAgICAgICAgICAgICAgIGV4cGVydHM6IHZlYyFbMV0sCiAgICAgICAgICAgICAgICBmcmVxdWVuY3k6IDAuMCwKICAgICAgICAgICAgfSwKICAgICAgICBdLAogICAgICAgIGhpZGRlbjogMSwKICAgICAgICB3aXJlOiBXaXJlRm9ybWF0OjpkZWZhdWx0KCksCiAgICAgICAgbWF4X2l0ZXJhdGlvbnM6IDIsCiAgICAgICAgd2lyZV9wb2xpY3k6IERlZmF1bHQ6OmRlZmF1bHQoKSwKICAgICAgICBtYXhfd29ya191bml0czogMTAwXzAwMCwKICAgIH0KfQoKZm4gc2NlbmFyaW8oaW5kaWNlczogVmVjPHVzaXplPikgLT4gQ29uY3VycmVudERlbWFuZFNjZW5hcmlvIHsKICAgIENvbmN1cnJlbnREZW1hbmRTY2VuYXJpbyB7CiAgICAgICAgZGVtYW5kX2luZGljZXM6IGluZGljZXMsCiAgICAgICAgZnJlcXVlbmN5OiAxLjAsCiAgICB9Cn0KCiNbdGVzdF0KZm4gc2NlbmFyaW9fY29zdF9leHBvc2VzX3NoYXJlZF9ncHVfc2VyaWFsaXphdGlvbl9hbmRfaW5kZXBlbmRlbnRfZ3B1X292ZXJsYXAoKSB7CiAgICBsZXQgcCA9IHByb2JsZW0oNjQpOwogICAgbGV0IHNhbWVfcmFuazogQlRyZWVNYXA8XywgXz4gPSBbKDAsIDApLCAoMSwgMCldLmludG9faXRlcigpLmNvbGxlY3QoKTsKICAgIGxldCBzcGxpdF9yYW5rczogQlRyZWVNYXA8XywgXz4gPSBbKDAsIDApLCAoMSwgMSldLmludG9faXRlcigpLmNvbGxlY3QoKTsKCiAgICBsZXQgc2VyaWFsaXplZCA9CiAgICAgICAgc2NvcmVfd2l0aF9jb25jdXJyZW50X3NjZW5hcmlvcygmcCwgJnNhbWVfcmFuaywgJltzY2VuYXJpbyh2ZWMhWzEsIDBdKV0pLnVud3JhcCgpOwogICAgbGV0IG92ZXJsYXBwZWQgPQogICAgICAgIHNjb3JlX3dpdGhfY29uY3VycmVudF9zY2VuYXJpb3MoJnAsICZzcGxpdF9yYW5rcywgJltzY2VuYXJpbyh2ZWMhWzAsIDFdKV0pLnVud3JhcCgpOwogICAgYXNzZXJ0IShzZXJpYWxpemVkID4gb3ZlcmxhcHBlZCwgIntzZXJpYWxpemVkfSA8PSB7b3ZlcmxhcHBlZH0iKTsKICAgIGFzc2VydF9lcSEob3ZlcmxhcHBlZCwgNS4wKTsKICAgIGFzc2VydF9lcSEoCiAgICAgICAgc2VyaWFsaXplZC50b19iaXRzKCksCiAgICAgICAgc2NvcmVfd2l0aF9jb25jdXJyZW50X3NjZW5hcmlvcygmcCwgJnNhbWVfcmFuaywgJltzY2VuYXJpbyh2ZWMhWzAsIDFdKV0pCiAgICAgICAgICAgIC51bndyYXAoKQogICAgICAgICAgICAudG9fYml0cygpCiAgICApOwp9CgojW3Rlc3RdCmZuIHBsYW5uZXJfbW92ZXNfcmVzaWRlbnRfZXhwZXJ0c190b19yZWR1Y2VfY29uY3VycmVudF9jb21wbGV0aW9uX2Nvc3QoKSB7CiAgICBsZXQgcCA9IHByb2JsZW0oNjQpOwogICAgbGV0IG9yaWdpbmFsX3JvdXRlcyA9IHAuZGVtYW5kcy5jbG9uZSgpOwogICAgbGV0IHBsYW5uZWQgPSBwbGFuX3dpdGhfY29uY3VycmVudF9zY2VuYXJpb3MoJnAsICZbc2NlbmFyaW8odmVjIVsxLCAwXSldKS51bndyYXAoKTsKCiAgICBhc3NlcnRfZXEhKHBsYW5uZWQub3duZXJzLmdldCgmMCksIFNvbWUoJjApKTsKICAgIGFzc2VydF9lcSEocGxhbm5lZC5vd25lcnMuZ2V0KCYxKSwgU29tZSgmMSkpOwogICAgYXNzZXJ0IShwbGFubmVkLmluaXRpYWxfbGF0ZW5jeV91cyA+IHBsYW5uZWQubW9kZWxlZF93ZWlnaHRlZF9sYXRlbmN5X3VzKTsKICAgIGFzc2VydF9lcSEocGxhbm5lZC5tb2RlbGVkX3dlaWdodGVkX2xhdGVuY3lfdXMsIDUuMCk7CiAgICBhc3NlcnRfZXEhKAogICAgICAgIHBsYW5uZWQuY29uY3VycmVudF9zY2VuYXJpb19jb21wYXJpc29uc1swXS5kZW1hbmRfaW5kaWNlcywKICAgICAgICB2ZWMhWzAsIDFdCiAgICApOwogICAgYXNzZXJ0X2VxIShwLmRlbWFuZHMubGVuKCksIG9yaWdpbmFsX3JvdXRlcy5sZW4oKSk7CiAgICBhc3NlcnRfZXEhKHAuZGVtYW5kc1swXS5leHBlcnRzLCBvcmlnaW5hbF9yb3V0ZXNbMF0uZXhwZXJ0cyk7CiAgICBhc3NlcnRfZXEhKHAuZGVtYW5kc1sxXS5leHBlcnRzLCBvcmlnaW5hbF9yb3V0ZXNbMV0uZXhwZXJ0cyk7CiAgICBhc3NlcnQhKHBsYW5uZWQucmVzdWx0X2tpbmQuY29udGFpbnMoIm5vdF9ncHVfbWVhc3VyZW1lbnQiKSk7Cn0KCiNbdGVzdF0KZm4gcmVzaWRlbnRfd2VpZ2h0X2NhcGFjaXR5X2d1YXJkX3N0aWxsX3JlamVjdHNfc2NlbmFyaW9zX2F0b21pY2FsbHkoKSB7CiAgICBsZXQgcCA9IHByb2JsZW0oMSk7CiAgICBsZXQgc2FtZV9yYW5rOiBCVHJlZU1hcDxfLCBfPiA9IFsoMCwgMCksICgxLCAwKV0uaW50b19pdGVyKCkuY29sbGVjdCgpOwogICAgbGV0IGVycm9yID0KICAgICAgICBzY29yZV93aXRoX2NvbmN1cnJlbnRfc2NlbmFyaW9zKCZwLCAmc2FtZV9yYW5rLCAmW3NjZW5hcmlvKHZlYyFbMCwgMV0pXSkudW53cmFwX2VycigpOwogICAgYXNzZXJ0X2VxIShlcnJvci5jb2RlLCAiQ0FQQUNJVFlfRVhDRUVERUQiKTsKfQoKI1t0ZXN0XQpmbiBtYWxmb3JtZWRfc2NlbmFyaW9faXNfcmVqZWN0ZWRfYW5kX2xlZ2FjeV9wbGFuX3NoYXBlX3N0YXlzX3VuY2hhbmdlZCgpIHsKICAgIGxldCBwID0gcHJvYmxlbSg2NCk7CiAgICBsZXQgb3duZXJzOiBCVHJlZU1hcDxfLCBfPiA9IFsoMCwgMCksICgxLCAxKV0uaW50b19pdGVyKCkuY29sbGVjdCgpOwogICAgZm9yIGluZGljZXMgaW4gW3ZlYyFbMCwgMF0sIHZlYyFbMCwgOV1dIHsKICAgICAgICBsZXQgZXJyb3IgPSBzY29yZV93aXRoX2NvbmN1cnJlbnRfc2NlbmFyaW9zKCZwLCAmb3duZXJzLCAmW3NjZW5hcmlvKGluZGljZXMpXSkudW53cmFwX2VycigpOwogICAgICAgIGFzc2VydF9lcSEoZXJyb3IuY29kZSwgIklOVkFMSURfSU5QVVQiKTsKICAgIH0KCiAgICBsZXQgbXV0IGxlZ2FjeSA9IHAuY2xvbmUoKTsKICAgIGxlZ2FjeS5kZW1hbmRzWzBdLmZyZXF1ZW5jeSA9IDEuMDsKICAgIGxlZ2FjeS5kZW1hbmRzWzFdLmZyZXF1ZW5jeSA9IDEuMDsKICAgIGxldCB2YWx1ZSA9IHNlcmRlX2pzb246OnRvX3ZhbHVlKHBsYW4oJmxlZ2FjeSkudW53cmFwKCkpLnVud3JhcCgpOwogICAgYXNzZXJ0ISh2YWx1ZS5nZXQoImNvbmN1cnJlbnRfc2NlbmFyaW9fY29tcGFyaXNvbnMiKS5pc19ub25lKCkpOwp9CgojW3Rlc3RdCmZuIHdvcmtfYnVkZ2V0X2V4aGF1c3Rpb25fcmV0dXJuc19ub19wYXJ0aWFsX3BsYW4oKSB7CiAgICBsZXQgbXV0IHAgPSBwcm9ibGVtKDY0KTsKICAgIHAubWF4X3dvcmtfdW5pdHMgPSAxOwogICAgbGV0IGVycm9yID0gcGxhbl93aXRoX2NvbmN1cnJlbnRfc2NlbmFyaW9zKCZwLCAmW3NjZW5hcmlvKHZlYyFbMCwgMV0pXSkudW53cmFwX2VycigpOwogICAgYXNzZXJ0X2VxIShlcnJvci5jb2RlLCAiV09SS19CVURHRVRfRVhDRUVERUQiKTsKfQo=
+use std::collections::BTreeMap;
+
+use voltafabric::{
+    cost::CostProvenance,
+    planner::{
+        plan, plan_with_concurrent_scenarios, score_with_concurrent_scenarios,
+        ConcurrentDemandScenario, Demand, ExpertProfile, PlacementProblem,
+    },
+    topology::{Device, Link, Origin, Topology, Transport},
+    traffic::WireFormat,
+};
+
+fn link(id: &str, src: u32, dst: u32) -> Link {
+    Link {
+        id: id.into(),
+        src,
+        dst,
+        bandwidth_bytes_per_s: 1_000_000_000.0,
+        latency_us: 10.0,
+        enabled: true,
+        transport: Transport::Synthetic,
+        pcie: None,
+        resources: vec![],
+        cost_provenance: CostProvenance::default(),
+    }
+}
+
+fn problem(expert_capacity: u64) -> PlacementProblem {
+    PlacementProblem {
+        topology: Topology {
+            schema_version: 1,
+            origin: Origin::Synthetic,
+            source_note: "R743 synthetic concurrency schedule; no hardware claim".into(),
+            devices: vec![
+                Device {
+                    rank: 0,
+                    host: "synthetic".into(),
+                    capacity_bytes: expert_capacity,
+                    reserved_bytes: 0,
+                },
+                Device {
+                    rank: 1,
+                    host: "synthetic".into(),
+                    capacity_bytes: expert_capacity,
+                    reserved_bytes: 0,
+                },
+            ],
+            links: vec![link("0-1", 0, 1), link("1-0", 1, 0)],
+        },
+        experts: vec![
+            ExpertProfile {
+                id: 0,
+                resident_bytes: 1,
+                compute_us: 5.0,
+                cost_provenance: CostProvenance::default(),
+            },
+            ExpertProfile {
+                id: 1,
+                resident_bytes: 1,
+                compute_us: 5.0,
+                cost_provenance: CostProvenance::default(),
+            },
+        ],
+        demands: vec![
+            Demand {
+                source_rank: 0,
+                experts: vec![0],
+                frequency: 0.0,
+            },
+            Demand {
+                source_rank: 1,
+                experts: vec![1],
+                frequency: 0.0,
+            },
+        ],
+        hidden: 1,
+        wire: WireFormat::default(),
+        max_iterations: 2,
+        wire_policy: Default::default(),
+        max_work_units: 100_000,
+    }
+}
+
+fn scenario(indices: Vec<usize>) -> ConcurrentDemandScenario {
+    ConcurrentDemandScenario {
+        demand_indices: indices,
+        frequency: 1.0,
+    }
+}
+
+#[test]
+fn scenario_cost_exposes_shared_gpu_serialization_and_independent_gpu_overlap() {
+    let p = problem(64);
+    let same_rank: BTreeMap<_, _> = [(0, 0), (1, 0)].into_iter().collect();
+    let split_ranks: BTreeMap<_, _> = [(0, 0), (1, 1)].into_iter().collect();
+
+    let serialized =
+        score_with_concurrent_scenarios(&p, &same_rank, &[scenario(vec![1, 0])]).unwrap();
+    let overlapped =
+        score_with_concurrent_scenarios(&p, &split_ranks, &[scenario(vec![0, 1])]).unwrap();
+    assert!(serialized > overlapped, "{serialized} <= {overlapped}");
+    assert_eq!(overlapped, 5.0);
+    assert_eq!(
+        serialized.to_bits(),
+        score_with_concurrent_scenarios(&p, &same_rank, &[scenario(vec![0, 1])])
+            .unwrap()
+            .to_bits()
+    );
+}
+
+#[test]
+fn planner_moves_resident_experts_to_reduce_concurrent_completion_cost() {
+    let p = problem(64);
+    let original_routes = p.demands.clone();
+    let planned = plan_with_concurrent_scenarios(&p, &[scenario(vec![1, 0])]).unwrap();
+
+    assert_eq!(planned.owners.get(&0), Some(&0));
+    assert_eq!(planned.owners.get(&1), Some(&1));
+    assert!(planned.initial_latency_us > planned.modeled_weighted_latency_us);
+    assert_eq!(planned.modeled_weighted_latency_us, 5.0);
+    assert_eq!(
+        planned.concurrent_scenario_comparisons[0].demand_indices,
+        vec![0, 1]
+    );
+    assert_eq!(p.demands.len(), original_routes.len());
+    assert_eq!(p.demands[0].experts, original_routes[0].experts);
+    assert_eq!(p.demands[1].experts, original_routes[1].experts);
+    assert!(planned.result_kind.contains("not_gpu_measurement"));
+}
+
+#[test]
+fn resident_weight_capacity_guard_still_rejects_scenarios_atomically() {
+    let p = problem(1);
+    let same_rank: BTreeMap<_, _> = [(0, 0), (1, 0)].into_iter().collect();
+    let error =
+        score_with_concurrent_scenarios(&p, &same_rank, &[scenario(vec![0, 1])]).unwrap_err();
+    assert_eq!(error.code, "CAPACITY_EXCEEDED");
+}
+
+#[test]
+fn malformed_scenario_is_rejected_and_legacy_plan_shape_stays_unchanged() {
+    let p = problem(64);
+    let owners: BTreeMap<_, _> = [(0, 0), (1, 1)].into_iter().collect();
+    for indices in [vec![0, 0], vec![0, 9]] {
+        let error = score_with_concurrent_scenarios(&p, &owners, &[scenario(indices)]).unwrap_err();
+        assert_eq!(error.code, "INVALID_INPUT");
+    }
+
+    let mut legacy = p.clone();
+    legacy.demands[0].frequency = 1.0;
+    legacy.demands[1].frequency = 1.0;
+    let value = serde_json::to_value(plan(&legacy).unwrap()).unwrap();
+    assert!(value.get("concurrent_scenario_comparisons").is_none());
+}
+
+#[test]
+fn work_budget_exhaustion_returns_no_partial_plan() {
+    let mut p = problem(64);
+    p.max_work_units = 1;
+    let error = plan_with_concurrent_scenarios(&p, &[scenario(vec![0, 1])]).unwrap_err();
+    assert_eq!(error.code, "WORK_BUDGET_EXCEEDED");
+}
