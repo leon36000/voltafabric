@@ -1,0 +1,18 @@
+R701 independent Decimal gate fixture
+
+Commands:
+  python3 research/R701/r700_gate_decimal_oracle.py
+  cargo test --offline --locked --test r701_deepseek_gate_decimal_oracle
+  cargo clippy --offline --locked --test r701_deepseek_gate_decimal_oracle --test r700_deepseek_gate_route --test r699_deepseek_memory_admission -- -D warnings
+  rustfmt --check --edition 2021 tests/r701_deepseek_gate_decimal_oracle.rs src/deepseek_v41_gate.rs tests/r700_deepseek_gate_route.rs tests/r699_deepseek_memory_admission.rs
+  git diff --check
+
+Results:
+  Python Decimal oracle emitted the six pinned fixture choices and 60-digit coefficients.
+  R701 focused Rust test: 1 passed, 0 failed.
+  Scoped Clippy with warnings denied: pass.
+  rustfmt check: pass.
+  diff whitespace check: pass.
+
+The Rust test used the retained older/grafted CPU worktree, not a full GitLab checkout.
+No GPU, network worker, checkpoint, model gate projection, or performance test ran.

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "id": "R701",
+  "branch": "r701-deepseek-gate-decimal-oracle-20261102",
+  "parent_commit": "d48e24130b94d86b9e692e761ced9ca56b63ebec",
+  "files": [
+    "tests/r701_deepseek_gate_decimal_oracle.rs",
+    "research/R701/r700_gate_decimal_oracle.py",
+    "research/R701/REPORT.md",
+    "research/R701/BUILD_TEST.txt",
+    "research/R701/RESULT.json"
+  ],
+  "oracle": {
+    "implementation": "Python standard library Decimal, 60-digit context",
+    "donor_code_imported": false,
+    "rust_gate_imported": false,
+    "expert_ids": [0, 383, 382, 381, 380, 379],
+    "route_scale": "1.5",
+    "normalization_epsilon": "1e-20",
+    "coefficient_sum": "1.49999999999999999999984760510354542957937574122110057758166"
+  },
+  "local_verification": {
+    "python_oracle": "pass",
+    "focused_rust_test": "1 passed, 0 failed",
+    "scoped_clippy_warnings_denied": "pass",
+    "rustfmt": "pass",
+    "git_diff_check": "pass",
+    "worktree_limit": "older/grafted local snapshot with R700 source overlaid"
+  },
+  "qualification": {
+    "synthetic_fixture_only": true,
+    "pytorch_bitwise_parity": false,
+    "checkpoint_loaded": false,
+    "gate_projection_loaded": false,
+    "six_real_expert_session_dispatch": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_network": false,
+    "performance_claim": false,
+    "unknown_replay": false
+  },
+  "next_action": "Use only already-present files to locate the matching DeepSeek gate projection and all six routed payloads; keep memory admission atomic if any are missing. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+}
