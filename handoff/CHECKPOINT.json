@@ -12878,5 +12878,62 @@
     "production_network": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch."
+  },
+  "r691_public_decode_cpu": {
+    "state": "CPU_SYNTHETIC_PUBLIC_LLAMA_DECODE_TO_VOLTAFABRIC_SESSION_PASS_LIMITED",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "donor_local_r679_hook_patch": true,
+    "source_commit": "52e27c0280c432e43f32b14355eebda1b5b00db0",
+    "branch": "r691-public-llama-decode-20261102",
+    "base_commit": "39b916df2d65a7559bc39e439a8144fb66c29e4d",
+    "report": "research/R691/REPORT.md",
+    "result": "research/R691/RESULT.json",
+    "build_test": "research/R691/BUILD_TEST.txt",
+    "manifest": "research/R691/SHA256SUMS",
+    "manifest_sha256": "156c5481e09f619e554d8916884b0de976e2414e59c79caa8cb02de54bdc1e1d",
+    "readback_files_verified": 10,
+    "local_cpu_pass": true,
+    "donor_tokens": [
+      3,
+      3,
+      3
+    ],
+    "voltafabric_tokens": [
+      3,
+      3,
+      3
+    ],
+    "logits_max_abs": 0,
+    "route_oracle": "independent 41-way softmax recomputed from synthetic gate and routed activation",
+    "selected_experts": [
+      40,
+      3
+    ],
+    "selected_weight_sum": 0.127954,
+    "route_coefficients_applied_once": true,
+    "atomic_reject_decode_status": -3,
+    "test_scope": "Synthetic hidden=32, one layer, 41 experts/top-k=2, Q8_0 expert tensors and four direct token IDs; no trained checkpoint or tokenizer.",
+    "arithmetic_contract": "Qwen2MoE post-down preweighted FP32 slot sum; kept distinct from R9/MXFP4 FP32 and FP16-decode/f64 reduction contracts.",
+    "pipeline_id": 2358,
+    "pipeline_status": "running",
+    "pipeline_scope": "configured security scans/fallback only; not local CPU test evidence",
+    "unknown_no_replay": [
+      [
+        "r691-public-decode",
+        300,
+        3000
+      ],
+      [
+        "r691-public-decode-v3",
+        501,
+        5001
+      ]
+    ],
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_r53": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch."
   }
 }
