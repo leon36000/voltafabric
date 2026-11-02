@@ -197,3 +197,21 @@ where
         residual: final_residual,
     })
 }
+
+/// Execute one token using the already-loaded Sessions for its layer and selected ranks.
+/// This adapter issues EXEC only; Session preflight refuses a missing/stale owner before
+/// any rank receives bytes. Aborted and UNKNOWN routes remain terminal and do not commit KV.
+pub fn forward_token_with_sessions<'request, 'source>(
+    request: DeepSeekV41WindowBlockRequest<'request, 'source>,
+    sessions_by_layer: &mut BTreeMap<u32, BTreeMap<u32, crate::session::Session>>,
+    timeout: std::time::Duration,
+) -> Result<DeepSeekV41WindowBlockOutput> {
+    if timeout.is_zero() {
+        return Err(invalid("DeepSeek Session block timeout must be nonzero"));
+    }
+    let layer = request.residual.stamp().layer;
+    let sessions = sessions_by_layer
+        .get_mut(&layer)
+        .ok_or_else(|| invalid("DeepSeek block has no persistent Session set for its layer"))?;
+    forward_token_with_route(request, |plan| plan.execute_preloaded_mxfp4(sessions, timeout))
+}

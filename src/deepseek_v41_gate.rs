@@ -1371,6 +1371,26 @@ impl DeepSeekV41IndexedMoeTokenPlan {
     pub fn activation(&self) -> &[f32] {
         &self.activation
     }
+
+    /// Execute this gate-created activation through already-loaded Sessions.
+    /// The plan preserves its route coefficients and attempt; this path issues no LOAD.
+    pub(crate) fn execute_preloaded_mxfp4(
+        &self,
+        sessions: &mut BTreeMap<u32, crate::session::Session>,
+        timeout: std::time::Duration,
+    ) -> Result<crate::deepseek_v41::PinnedMxfp4RouteExecutionReceipt> {
+        let inputs = vec![crate::session::mxfp4::TokenInput {
+            token: 0,
+            value_bits: self.activation.iter().map(|value| value.to_bits()).collect(),
+        }];
+        crate::deepseek_v41::execute_preloaded_pinned_mxfp4_route(
+            &self.batch.problem,
+            self.batch.attempt,
+            inputs,
+            sessions,
+            timeout,
+        )
+    }
 }
 
 impl DeepSeekV41RouteBatch {

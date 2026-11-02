@@ -1,0 +1,65 @@
+{
+  "id": "R738",
+  "date": "2026-11-02",
+  "state": "SOURCE_PIPELINE_PENDING",
+  "parent_branch": "r737-deepseek-window-block-20261102",
+  "parent_commit": "b8a2535731a60dc6786af0f855a7c25cd2ca58de",
+  "target_branch": "r738-deepseek-preloaded-session-route-20261102",
+  "source_files": [
+    "src/deepseek_v41.rs",
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_window_block.rs"
+  ],
+  "added_api": "forward_token_with_sessions(request, sessions_by_layer, timeout)",
+  "execution_contract": {
+    "no_hot_path_load": true,
+    "preflight_all_participating_sessions_before_first_exec": true,
+    "collector": "existing FP32-preweighted Collector; coefficients applied once",
+    "completion_requires_six_slots": true,
+    "partial_output": false,
+    "unknown_retry": false,
+    "kv_commit": "only after full attention+FFN block success"
+  },
+  "reused_voltafabric": [
+    "Session::preflight_preweighted_fp32_until",
+    "Session::start_preweighted_fp32_until",
+    "Session::finish_preweighted_fp32",
+    "existing FP32-preweighted Collector",
+    "R737 atomic attention+FFN/KV composition"
+  ],
+  "external_reuse": {
+    "donor": "DeepSeek-V4.1-Flash 314113f8a7dadb388215396ba5fbee2c610a04d6 (MIT), semantic reference only",
+    "copied_code": false,
+    "vllm": false,
+    "tensorrt_llm": false,
+    "llama_cpp": false,
+    "sglang": false,
+    "maya": false,
+    "strata": false
+  },
+  "verification": {
+    "local_tests_added_or_run": false,
+    "manual_tests_run": false,
+    "local_cargo_fmt_check": "not run",
+    "local_cargo_check": "not run",
+    "local_clippy": "not run",
+    "automatic_pipeline": "pending"
+  },
+  "actual_checkpoint_payload_loaded": false,
+  "independent_numeric_oracle": false,
+  "complete_layer_executed": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "performance_measured": false,
+  "unknown_replayed": false,
+  "limitations": [
+    "initial Session loading must remain bound to a verified checkpoint/index; this adapter validates the live Session binding rather than reopening official model files per token",
+    "the layer/rank resident set must fit the existing Session owner and memory budgets",
+    "no logits, tokenizer, sampling, GPU, inter-PC, or multi-token generation"
+  ],
+  "manifest": "research/R738/SHA256SUMS",
+  "manifest_sha256": "9db49e0a70ee69b814686c9452e20ae4c316152ae0f0af01a1e551c4b2354667",
+  "receipt_pending": true,
+  "next_action": "R739: bind a verified checkpoint owner admission to persistent per-layer Sessions and compare one full block against an independent numeric oracle."
+}

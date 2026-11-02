@@ -2323,6 +2323,223 @@ impl PinnedMxfp4RouteExecutionReceipt {
     }
 }
 
+/// Execute one identified route with already-loaded MXFP4 Session owners.
+///
+/// This path sends no LOAD requests. Every participating Session validates its
+/// immutable resident binding and exact rank-local dispatch before any EXEC starts.
+/// Calls are started on all ranks before collection; the existing FP32-preweighted
+/// Collector applies route coefficients once and publishes only a complete token.
+pub(crate) fn execute_preloaded_pinned_mxfp4_route(
+    problem: &crate::routing::RoutingProblem,
+    attempt: u64,
+    inputs: Vec<crate::session::mxfp4::TokenInput>,
+    sessions: &mut BTreeMap<u32, crate::session::Session>,
+    timeout: std::time::Duration,
+) -> Result<PinnedMxfp4RouteExecutionReceipt> {
+    let top_k = crate::deepseek_v41_gate::TOP_K;
+    if timeout.is_zero()
+        || attempt == 0
+        || problem.stamp.model_revision != crate::deepseek_v41_gate::PINNED_MODEL_REVISION
+        || problem.stamp.layer >= 40
+        || problem.hidden != crate::deepseek_v41_gate::HIDDEN_SIZE
+        || problem.routes.len() != 1
+        || problem.routes[0].len() != top_k
+        || problem.experts.len() != top_k
+        || problem.experts
+            != problem.routes[0]
+                .iter()
+                .map(|choice| choice.expert)
+                .collect::<Vec<_>>()
+        || inputs.len() != 1
+        || inputs[0].token != 0
+        || inputs[0].value_bits.len() != problem.hidden
+    {
+        return Err(invalid(
+            "preloaded DeepSeek EXEC requires one exact top-6 token route and a nonzero deadline",
+        ));
+    }
+    crate::routing::validate(problem)?;
+    let route_fingerprint = pinned_top6_route_fingerprint(problem, attempt)?;
+    for &bits in &inputs[0].value_bits {
+        let value = f32::from_bits(bits);
+        if cast_bf16_rne_reference(value)?.to_bits() != bits {
+            return Err(invalid(
+                "preloaded DeepSeek EXEC input must be finite and exactly BF16",
+            ));
+        }
+    }
+
+    let dispatch = crate::routing::dispatch(problem)?;
+    let route_slots = dispatch.ranks.iter().try_fold(0usize, |sum, rank| {
+        sum.checked_add(rank.slots.len())
+    });
+    if dispatch.slots.len() != top_k
+        || dispatch.ranks.is_empty()
+        || route_slots != Some(top_k)
+        || dispatch
+            .ranks
+            .iter()
+            .any(|rank| rank.slots.iter().any(|slot| slot.slot.token != 0))
+    {
+        return Err(invalid(
+            "preloaded DeepSeek EXEC dispatch does not cover exactly six top-6 slots",
+        ));
+    }
+    let expected_ranks = dispatch
+        .ranks
+        .iter()
+        .map(|rank| rank.rank)
+        .collect::<BTreeSet<_>>();
+    if expected_ranks.len() != dispatch.ranks.len()
+        || expected_ranks.iter().any(|rank| !sessions.contains_key(rank))
+        || sessions.iter().any(|(&rank, session)| session.rank != rank)
+    {
+        return Err(invalid(
+            "preloaded DeepSeek EXEC is missing a participating rank Session or has a mismatched rank key",
+        ));
+    }
+
+    let mut collector = crate::preweighted::Collector::new(problem)?;
+    let deadline = std::time::Instant::now()
+        .checked_add(timeout)
+        .ok_or_else(|| invalid("preloaded DeepSeek EXEC timeout overflows Instant"))?;
+    // Session preflight verifies loaded model/layer/epoch, physical resident order,
+    // selected expert/local IDs, activation and collector contract before any EXEC.
+    for rank in &dispatch.ranks {
+        let session = sessions
+            .get_mut(&rank.rank)
+            .ok_or_else(|| invalid("preloaded DeepSeek EXEC rank Session disappeared"))?;
+        let validated = session.preflight_preweighted_fp32_until(
+            problem,
+            &collector,
+            attempt,
+            &inputs,
+            &crate::process::Fault::None,
+            deadline,
+        )?;
+        if &validated != rank {
+            return Err(invalid(
+                "preloaded Session preflight changed the identified rank dispatch",
+            ));
+        }
+    }
+
+    let mut pending = Vec::with_capacity(dispatch.ranks.len());
+    let mut start_error = None;
+    for rank in &dispatch.ranks {
+        let session = sessions
+            .get_mut(&rank.rank)
+            .expect("all participating Sessions passed the preflight");
+        match session.start_preweighted_fp32_until(
+            problem,
+            &collector,
+            attempt,
+            inputs.clone(),
+            crate::process::Fault::None,
+            deadline,
+        ) {
+            Ok(work) => pending.push((rank.rank, work)),
+            Err(error) => {
+                start_error = Some(error);
+                break;
+            }
+        }
+    }
+
+    let mut exec_receipts = Vec::with_capacity(pending.len());
+    let mut result_error = start_error;
+    for (rank, work) in pending {
+        let receipt = sessions
+            .get_mut(&rank)
+            .expect("rank Session remains in the preflighted set")
+            .finish_preweighted_fp32(work, &mut collector, deadline);
+        if result_error.is_none() {
+            result_error = receipt.error.clone();
+        }
+        exec_receipts.push(receipt);
+    }
+
+    let complete_slots = exec_receipts.iter().try_fold(0usize, |sum, receipt| {
+        if receipt.state != crate::process::ReceiptState::Completed
+            || !receipt.started
+            || receipt.error.is_some()
+            || receipt.expected_slots == 0
+            || receipt.received_slots != receipt.expected_slots
+        {
+            return None;
+        }
+        sum.checked_add(receipt.received_slots)
+    });
+    let unique_receipt_ranks = exec_receipts
+        .iter()
+        .map(|receipt| receipt.rank)
+        .collect::<BTreeSet<_>>();
+    let all_completed = exec_receipts.len() == dispatch.ranks.len()
+        && unique_receipt_ranks.len() == exec_receipts.len()
+        && complete_slots == Some(top_k)
+        && result_error.is_none();
+    let (state, output_bits, error) = if all_completed {
+        match collector.finish() {
+            Ok(output) if output.len() == 1 => (
+                PinnedMxfp4RouteExecutionState::Completed,
+                Some(
+                    output
+                        .into_iter()
+                        .map(|row| row.into_iter().map(f32::to_bits).collect())
+                        .collect(),
+                ),
+                None,
+            ),
+            Ok(_) => (
+                PinnedMxfp4RouteExecutionState::Aborted,
+                None,
+                Some(invalid(
+                    "preloaded DeepSeek Collector returned a non-single-token result",
+                )),
+            ),
+            Err(error) => (PinnedMxfp4RouteExecutionState::Aborted, None, Some(error)),
+        }
+    } else {
+        collector.expire();
+        let unknown = exec_receipts.iter().any(|receipt| {
+            matches!(
+                receipt.state,
+                crate::process::ReceiptState::Unknown | crate::process::ReceiptState::Started
+            )
+        });
+        if result_error.is_none() {
+            result_error = exec_receipts
+                .iter()
+                .find_map(|receipt| receipt.error.clone());
+        }
+        if result_error.is_none() {
+            result_error = Some(Error::new(
+                "BATCH_INCOMPLETE",
+                "preloaded DeepSeek EXEC did not complete every route slot; output withheld",
+            ));
+        }
+        (
+            if unknown {
+                PinnedMxfp4RouteExecutionState::Unknown
+            } else {
+                PinnedMxfp4RouteExecutionState::Aborted
+            },
+            None,
+            result_error,
+        )
+    };
+    Ok(PinnedMxfp4RouteExecutionReceipt {
+        state,
+        stamp: problem.stamp.clone(),
+        attempt,
+        route_experts: problem.experts.clone(),
+        route_fingerprint,
+        exec_receipts,
+        output_bits,
+        error,
+    })
+}
+
 /// Execute one preflighted six-expert token through the existing CPU MXFP4 Sessions
 /// and FP32-preweighted Collector. The preflight and LOAD receipts are consumed so this
 /// adapter cannot accidentally reuse the same values for a retry. Any ambiguous EXEC

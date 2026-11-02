@@ -1,0 +1,26 @@
+{
+  "id": "R738",
+  "date": "2026-11-02",
+  "state": "SOURCE_PIPELINE_PENDING",
+  "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
+  "active_operations": [],
+  "summary": "Replaced R737's abstract route executor seam with a concrete per-layer persistent Session adapter for a one-token top-6 MXFP4 route; no token-path LOAD.",
+  "parent": {
+    "branch": "r737-deepseek-window-block-20261102",
+    "commit": "b8a2535731a60dc6786af0f855a7c25cd2ca58de",
+    "pipeline_id": 2590,
+    "pipeline_status": "success"
+  },
+  "source_files": [
+    "src/deepseek_v41.rs",
+    "src/deepseek_v41_gate.rs",
+    "src/deepseek_v41_window_block.rs"
+  ],
+  "manifest": "research/R738/SHA256SUMS",
+  "manifest_sha256": "9db49e0a70ee69b814686c9452e20ae4c316152ae0f0af01a1e551c4b2354667",
+  "source_commit_pending": true,
+  "source_pipeline_pending": true,
+  "receipt_pending": true,
+  "verification": "No tests added or run manually. Automatic GitLab pipeline and exact readback pending.",
+  "next_action": "After source pipeline success, verify all committed source/docs and record its receipt; then implement checkpoint-bound Session admission plus an independent block oracle."
+}
