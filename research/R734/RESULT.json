@@ -1,7 +1,7 @@
 {
   "id": "R734",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "parent_branch": "r733-deepseek-window-attention-20261102",
   "parent_commit": "80907fdc3b758b37850d17933dcb34100cd2158d",
   "source_files": [
@@ -39,11 +39,11 @@
   "oracle": "Scalar independent E4M3/E8M0 identity-matrix calculation and chunked-vs-one-shot reference. No Torch/CUDA GEMM parity claim.",
   "private_gitlab": {
     "branch": "r734-deepseek-attention-projection-20261102",
-    "source_commit": "PENDING",
-    "source_pipeline_id": null,
-    "source_pipeline_status": "PENDING",
-    "source_readback_exact": false,
-    "source_readback_files_verified": 0
+    "source_commit": "90b64f5a64654c79b5b5c8c569ccb7d90f8d207a",
+    "source_pipeline_id": 2577,
+    "source_pipeline_status": "success",
+    "source_readback_exact": true,
+    "source_readback_files_verified": 7
   },
   "automatic_continuation": "STOPPED_BY_OWNER",
   "unknown_replayed": false,
@@ -60,8 +60,21 @@
     "RoPE, window attention, compressed KV/indexer, output projection and HC-post are not connected",
     "No tokenizer, logits, sampler or generated token"
   ],
-  "next_action": "R735: validate admitted DeepSeek RoPE parameters and connect the identity-bound pre-RoPE Q/KV to R733 after RoPE, preserving compressed KV and output projection as separate boundaries.",
+  "next_action": "R735: reconcile the pinned config's qk_rope_head_dim=64 with model.py ModelArgs.rope_head_dim default=32. Confirm the mapping and effective layer-0 profile (compress_ratio=0, theta=10000, YaRN disabled) before implementing identity-bound BF16 RoPE and composing with the R733 window cache; CPU only, no payload/GPU.",
   "manifest": "research/R734/SHA256SUMS",
   "manifest_sha256": "7280efeb3e8b5e2309afc6fa3a1a193823838a23f6ba6b2e6c67fe6bfdc25334",
-  "manifest_file_count": 4
+  "manifest_file_count": 4,
+  "source_commit": "90b64f5a64654c79b5b5c8c569ccb7d90f8d207a",
+  "source_pipeline_id": 2577,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7,
+  "receipt_pending": false,
+  "published_utc": "2026-11-02 17:43:16 UTC"
 }

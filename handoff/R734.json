@@ -1,7 +1,7 @@
 {
   "id": "R734",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_VERIFIED_PRIVATE_GITLAB_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK",
   "automatic_continuation": "STOPPED_BY_OWNER",
   "active_operations": [],
   "summary": "Ajout d'un import indexé des huit tenseurs FP8/BF16 de l'attention DeepSeek et de la référence Q/KV pré-RoPE liée au Stamp et à l'attempt.",
@@ -12,9 +12,9 @@
     "license": "MIT",
     "code_copied": false
   },
-  "source_pipeline": "PENDING",
-  "source_readback": "PENDING",
-  "receipt_pending": true,
+  "source_pipeline": "SUCCESS #2577; gitleaks, semgrep, trivy and fallback all passed",
+  "source_readback": "7/7 files read back exactly at 90b64f5a64654c79b5b5c8c569ccb7d90f8d207a",
+  "receipt_pending": false,
   "real_checkpoint_payload": false,
   "pre_rope_projection_only": true,
   "complete_attention_pass": false,
@@ -28,5 +28,17 @@
     "RoPE, attention, KV compressé, projection de sortie et HC-post non raccordés",
     "La référence GEMV CPU ne démontre pas la parité CUDA/Torch"
   ],
-  "next_action": "R735 : qualifier RoPE sur source/configuration admise puis raccorder les Q/KV post-RoPE au cache R733."
+  "next_action": "R735: reconcile the pinned config's qk_rope_head_dim=64 with model.py ModelArgs.rope_head_dim default=32. Confirm the mapping and effective layer-0 profile (compress_ratio=0, theta=10000, YaRN disabled) before implementing identity-bound BF16 RoPE and composing with the R733 window cache; CPU only, no payload/GPU.",
+  "source_commit": "90b64f5a64654c79b5b5c8c569ccb7d90f8d207a",
+  "source_pipeline_id": 2577,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 7,
+  "published_utc": "2026-11-02 17:43:16 UTC"
 }
