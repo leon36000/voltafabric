@@ -1,0 +1,21 @@
+R719 local CPU verification
+
+Focused debug:
+  cargo test --locked --offline --test r712_deepseek_session_owner route_payload_read_preflights_all_digests_then_returns_six_residents_atomically -- --exact
+  PASS: 1 passed, 0 failed; 71.12 s
+
+Focused release:
+  cargo test --release --locked --offline --test r712_deepseek_session_owner route_payload_read_preflights_all_digests_then_returns_six_residents_atomically -- --exact
+  PASS: 1 passed, 0 failed; 4.46 s
+
+Strict targeted Clippy:
+  cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings
+  PASS
+
+Formatting and diff:
+  cargo fmt --check
+  PASS
+  git diff --check
+  PASS
+
+Test scope: one deterministic CPU route-read -> six owners -> five rank groups -> Session LOAD/EXEC -> MXFP4 CPU reference comparison. The input and generated MXFP4 payload are nonzero synthetic values. No real checkpoint, GPU, production network/R53, or UNKNOWN replay.

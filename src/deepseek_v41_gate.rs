@@ -21,7 +21,7 @@
 //! not a stable cross-backend contract.
 use crate::checkpoint::{self, NamedTensorSpec};
 use crate::moe::Choice;
-use crate::{Error, Result, invalid};
+use crate::{invalid, Error, Result};
 use safetensors::tensor::Dtype;
 use std::{
     collections::BTreeMap,

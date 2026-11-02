@@ -1,0 +1,44 @@
+{
+  "id": "R719",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_VERIFIED_SOURCE_PUBLICATION_PENDING",
+  "branch": "r719-deepseek-route-read-session-exec-20261102",
+  "parent_source_commit": "aa288a12c717bc5b64564ccc94b4480f9ba21246",
+  "path": "research/R719",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "fixture": {
+    "source_index_header": "pinned DeepSeek-V4.1-Flash metadata",
+    "weights": "synthetic MXFP4 E2M1=0x22, E8M0=0x6f",
+    "input": "BF16-exact 0.5 values",
+    "route_experts": [0, 383, 382, 381, 380, 379],
+    "route_payload_tensors": 36,
+    "route_payload_bytes": 112803840,
+    "missing_digest_refusal": "35/36 rejected before source I/O; reader cursor remains zero",
+    "resident_owners": 6,
+    "rank_groups": 5,
+    "colocated_rank": 4,
+    "expected_owner_slots": 6,
+    "actual_exec_receipts": 5,
+    "nonzero_oracle_and_session_output": true,
+    "max_abs_error_tolerance": 0.0005
+  },
+  "local_cpu_tests": {
+    "debug": "PASS 1/1, 71.12 s",
+    "release": "PASS 1/1, 4.46 s",
+    "clippy": "PASS targeted -D warnings",
+    "rustfmt": "PASS repository cargo fmt --check",
+    "diff_check": "PASS"
+  },
+  "real_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "active_operations": [],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R720: read-only inventory the authorized local checkpoint/source directories for complete pinned selected MXFP4 payloads and exact digest metadata. Use any compatible data only if already present; do not download or start GPU/network work. If no complete payload is present, identify the smallest safe manifest/import boundary needed to resume actual generation."
+}
