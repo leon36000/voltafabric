@@ -1,0 +1,17 @@
+R695 exact-module CPU validation
+================================
+
+Source basis: R694 branch after source correction `ff97fed0ad9374c07194fb56a7972fdd67e309e4`, parent R694 route-advice commit `b2ec530cec030218da9e011e95c65009a52a190c`. The local harness uses the exact R693/R694 Rust modules fetched from the private GitLab branch; R695 modifies only planner.rs and extends the targeted test.
+
+Commands (from this .runs harness):
+  cargo test --offline --locked --test r694_routed_advice
+  rustfmt --check src/planner.rs tests/r694_routed_advice.rs
+  cargo clippy --offline --locked --test r694_routed_advice -- -A dead_code
+
+Result: 6 passed, 0 failed; rustfmt pass; targeted Clippy pass. The test run emits 3 dead-code warnings for Collector FP16 code not called by this isolated harness.
+
+Tests cover: route order/weight bits/identity and registry unchanged; exact route/profile expert set; missing path refusal; valid per-rank KV/load-temporary envelope; capacity failure with no partial advice; missing/duplicate rank budgets and checked-overflow refusal.
+
+The fixture is synthetic and CPU-only. It does not run a full root workspace build, trained checkpoint, GPU, network worker, production R53, or performance comparison. The project lock requests serde_json 1.0.145, unavailable in this host's offline cache; this tiny harness used cached serde_json 1.0.154 without changing the project lock.
+
+GitLab publication/readback: commit dc8e737738042a7d6d2e025307a093b74846d830 on r695-layer-memory-envelope-20261102; src/planner.rs and tests/r694_routed_advice.rs matched local R695 baseline byte-for-byte (32,383 and 8,070 bytes). Pipeline 2370 succeeded on its four configured jobs; it did not compile Rust. R695 source hashes are stored in RESULT.json.

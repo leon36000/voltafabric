@@ -188,6 +188,7 @@ fn missing_path_returns_error_without_an_advice() {
 fn envelope(rank: u32, kv: u64, load_temporary: u64) -> PerRankMemoryEnvelope {
     PerRankMemoryEnvelope {
         rank,
+        resident_expert_bytes: 0,
         kv_bytes: kv,
         recurrent_bytes: 0,
         workspace_bytes: 0,
@@ -209,7 +210,17 @@ fn per_rank_kv_and_loading_budgets_are_bound_to_route_advice() {
         &p,
         &b,
         0,
-        &[envelope(0, 0, 0), envelope(1, 8, 2), envelope(2, 4, 1)],
+        &[
+            envelope(0, 0, 0),
+            PerRankMemoryEnvelope {
+                resident_expert_bytes: 2,
+                ..envelope(1, 8, 2)
+            },
+            PerRankMemoryEnvelope {
+                resident_expert_bytes: 1,
+                ..envelope(2, 4, 1)
+            },
+        ],
     )
     .unwrap();
 
@@ -224,9 +235,38 @@ fn per_rank_kv_and_loading_budgets_are_bound_to_route_advice() {
         assert!(rank.loading_peak_bytes <= rank.capacity_bytes);
         assert_eq!(
             rank.loading_peak_bytes,
-            rank.steady_bytes + rank.load_temporary_bytes
+            rank.steady_bytes + rank.resident_expert_bytes + rank.load_temporary_bytes
         );
     }
+}
+
+#[test]
+fn previous_expert_residency_is_reserved_during_atomic_replacement() {
+    let b = routed();
+    let before = snapshot(&b);
+    let mut p = problem();
+    p.topology.devices[1].capacity_bytes = 32;
+    p.topology.devices[2].capacity_bytes = 32;
+    let err = plan_qwen2moe_advisory_with_memory(
+        &p,
+        &b,
+        0,
+        &[
+            envelope(0, 0, 0),
+            PerRankMemoryEnvelope {
+                resident_expert_bytes: 16,
+                ..envelope(1, 8, 3)
+            },
+            PerRankMemoryEnvelope {
+                resident_expert_bytes: 16,
+                ..envelope(2, 8, 3)
+            },
+        ],
+    )
+    .unwrap_err();
+
+    assert_eq!(err.code, "CAPACITY_EXCEEDED");
+    assert_eq!(snapshot(&b), before);
 }
 
 #[test]

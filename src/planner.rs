@@ -147,13 +147,18 @@ pub fn plan_qwen2moe_advisory(
     })
 }
 
-/// Non-weight per-rank memory that must remain available while placing a routed layer.
-/// `load_temporary_bytes` is included during placement so a suggested owner set is safe
-/// both while loading resident weights and after the temporary buffer is released.
+/// Per-rank starting footprint for a routed-layer placement.
+/// Existing expert allocations remain live while candidate weights and temporary load
+/// buffers are staged; after the atomic replacement, steady state contains the candidate
+/// expert set. `resident_expert_bytes` must include every current expert allocation on
+/// that rank, not only experts selected by this route.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct PerRankMemoryEnvelope {
     pub rank: u32,
+    /// Bytes of expert weights that are resident before the candidate placement
+    /// is installed. Keep these alive in the admission peak while new owners load.
+    pub resident_expert_bytes: u64,
     pub kv_bytes: u64,
     pub recurrent_bytes: u64,
     pub workspace_bytes: u64,
@@ -168,6 +173,7 @@ pub struct RankMemoryAdvice {
     pub rank: u32,
     pub capacity_bytes: u64,
     pub preexisting_reserved_bytes: u64,
+    pub resident_expert_bytes: u64,
     pub expert_weight_bytes: u64,
     pub kv_bytes: u64,
     pub recurrent_bytes: u64,
@@ -216,7 +222,7 @@ pub fn plan_qwen2moe_advisory_with_memory(
         let envelope = by_rank[&device.rank];
         let budget = Budget {
             capacity: device.capacity_bytes,
-            weights: 0,
+            weights: envelope.resident_expert_bytes,
             kv: envelope.kv_bytes,
             recurrent: envelope.recurrent_bytes,
             workspace: envelope.workspace_bytes,
@@ -239,7 +245,7 @@ pub fn plan_qwen2moe_advisory_with_memory(
             .get(&device.rank)
             .copied()
             .unwrap_or(0);
-        let budget = Budget {
+        let steady_budget = Budget {
             capacity: device.capacity_bytes,
             weights: expert_weight_bytes,
             kv: envelope.kv_bytes,
@@ -256,9 +262,30 @@ pub fn plan_qwen2moe_advisory_with_memory(
                     .reserved_bytes,
                 envelope.safety_margin_bytes,
             )?,
+            load_temporary: 0,
+        };
+        let steady_report = steady_budget.check()?;
+        let loading_weights = add(expert_weight_bytes, envelope.resident_expert_bytes)?;
+        let loading_budget = Budget {
+            capacity: device.capacity_bytes,
+            weights: loading_weights,
+            kv: envelope.kv_bytes,
+            recurrent: envelope.recurrent_bytes,
+            workspace: envelope.workspace_bytes,
+            graphs: envelope.graph_bytes,
+            communication: envelope.communication_bytes,
+            margin: add(
+                base.topology
+                    .devices
+                    .iter()
+                    .find(|d| d.rank == device.rank)
+                    .ok_or_else(|| invalid("topology rank disappeared"))?
+                    .reserved_bytes,
+                envelope.safety_margin_bytes,
+            )?,
             load_temporary: envelope.load_temporary_bytes,
         };
-        let report = budget.check()?;
+        let loading_report = loading_budget.check()?;
         let preexisting_reserved_bytes = base
             .topology
             .devices
@@ -270,6 +297,7 @@ pub fn plan_qwen2moe_advisory_with_memory(
             rank: device.rank,
             capacity_bytes: device.capacity_bytes,
             preexisting_reserved_bytes,
+            resident_expert_bytes: envelope.resident_expert_bytes,
             expert_weight_bytes,
             kv_bytes: envelope.kv_bytes,
             recurrent_bytes: envelope.recurrent_bytes,
@@ -278,9 +306,9 @@ pub fn plan_qwen2moe_advisory_with_memory(
             communication_bytes: envelope.communication_bytes,
             safety_margin_bytes: envelope.safety_margin_bytes,
             load_temporary_bytes: envelope.load_temporary_bytes,
-            steady_bytes: report.steady_bytes,
-            loading_peak_bytes: report.loading_peak_bytes,
-            headroom_bytes: report.headroom_bytes,
+            steady_bytes: steady_report.steady_bytes,
+            loading_peak_bytes: loading_report.loading_peak_bytes,
+            headroom_bytes: loading_report.headroom_bytes,
         });
     }
     Ok(RoutedPlacementMemoryAdvice {

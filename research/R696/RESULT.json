@@ -1,0 +1,44 @@
+{
+  "id": "R696",
+  "state": "LOCAL_CPU_TEST_PASS_PENDING_PRIVATE_GITLAB_PUBLICATION",
+  "branch": "r696-atomic-expert-replacement-memory-20261102",
+  "base_branch": "r695-layer-memory-envelope-20261102",
+  "base_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
+  "code_files": [
+    "src/planner.rs",
+    "tests/r694_routed_advice.rs"
+  ],
+  "verification": {
+    "device": "CPU",
+    "test_passed": 7,
+    "test_failed": 0,
+    "rustfmt_check": "pass",
+    "clippy_targeted": "pass; three extracted-module dead-code warnings suppressed",
+    "full_crate_test": false,
+    "pipeline_2370_r695": "success; four configured jobs, scans/fallback only"
+  },
+  "contracts": {
+    "resident_weights_counted_during_candidate_load": true,
+    "candidate_weights_and_load_temporary_counted_in_peak": true,
+    "steady_and_loading_peak_reported_separately": true,
+    "capacity_failure_returns_no_partial_advice": true,
+    "route_identity_and_attempt_unchanged": true,
+    "coefficients_and_order_unchanged": true,
+    "owner_registry_mutated": false,
+    "unknown_replayed": false
+  },
+  "upstream": {
+    "llama_cpp": "inherited R693 public API seam; MIT commit 3cf03257f219afbe7334045ff7c6a06ac68c627d; no upstream code changed",
+    "inplacekvcache": "arXiv:2609.14507v1 design reference only; no code or license verified, no code copied"
+  },
+  "scope": {
+    "memory_inputs_synthetic": true,
+    "runtime_llama_decode_callback_connected": false,
+    "trained_checkpoint": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "performance_claim": false
+  },
+  "next_action": "R697: connect the per-rank memory envelope as advisory to a fresh llama_decode route callback and validate exact GGUF expert bytes; keep routing authoritative and CPU-only."
+}

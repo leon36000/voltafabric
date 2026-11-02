@@ -1,0 +1,74 @@
+{
+  "id": "R695",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2370_SUCCESS",
+  "branch": "r695-layer-memory-envelope-20261102",
+  "base_branch": "r694-qwen2moe-route-bound-placement-20261102",
+  "base_commit": "ff97fed0ad9374c07194fb56a7972fdd67e309e4",
+  "code_files": [
+    "src/planner.rs",
+    "tests/r694_routed_advice.rs"
+  ],
+  "research_files": [
+    "research/R695/REPORT.md",
+    "research/R695/BUILD_TEST.txt",
+    "research/R695/UPSTREAM_AUDIT.md",
+    "research/R695/RESULT.json",
+    "research/R695/SHA256SUMS"
+  ],
+  "verification": {
+    "device": "CPU",
+    "source_modules": "exact R693/R694 source module extraction; R695 planner change published and read back byte-exact",
+    "tests_passed": 6,
+    "tests_failed": 0,
+    "rustfmt": "pass",
+    "clippy_targeted": "pass; dead-code warnings from uncalled FP16 Collector paths",
+    "full_root_cargo_test": false,
+    "serde_json_project_locked": "1.0.145 absent from local offline cache; harness used cached 1.0.154",
+    "pipeline_2370": "success; configured Gitleaks, Semgrep, Trivy and fallback only, not Rust compilation"
+  },
+  "contracts": {
+    "route_order_preserved": true,
+    "coefficient_bits_preserved": true,
+    "identity_and_attempt_preserved": true,
+    "active_registry_mutated": false,
+    "partial_advice_on_budget_error": false,
+    "kv_and_recurrent_budgets_distinct": true,
+    "load_temporary_in_placement_budget": true
+  },
+  "upstream": {
+    "inplacekvcache": "arXiv:2609.14507v1 design idea only; no code/license verified, no code copied",
+    "fluxmoe": "arXiv:2604.02715v3 reference only; target hardware differs, no code/license verified",
+    "llama_cpp": "inherited R693 public API seam, pinned MIT commit 3cf03257f219afbe7334045ff7c6a06ac68c627d; R695 adds no donor files"
+  },
+  "scope": {
+    "trained_checkpoint": false,
+    "full_generation": false,
+    "llama_decode_route_callback_connected": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "performance_claim": false
+  },
+  "next_action": "R696: reserve currently resident expert weights throughout candidate loading and fail atomically if old plus candidate weights exceed the per-rank envelope; keep route/registry advisory-only.",
+  "gitlab_readback": {
+    "branch": "r695-layer-memory-envelope-20261102",
+    "source_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
+    "parent_commit": "ff97fed0ad9374c07194fb56a7972fdd67e309e4",
+    "files_exact_readback": [
+      "src/planner.rs",
+      "tests/r694_routed_advice.rs"
+    ],
+    "planner_bytes": 32383,
+    "test_bytes": 8070,
+    "planner_sha256": "69f49cfef927ce34c5218b4223c5e0be7a58928e83054ce24e38b69dc998e674",
+    "test_sha256": "bd54cdddd24b24556afad44e326015032bcdc7e72eef0048ae642beb466ff5c1",
+    "pipeline_id": 2370,
+    "pipeline_status": "success",
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
+  }
+}

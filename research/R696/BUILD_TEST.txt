@@ -1,0 +1,14 @@
+R696 local CPU verification
+
+Workspace: isolated extracted-module harness under Naos `.runs/r695-layer-memory-advice-20261102`.
+Source basis: exact planner/routing/topology/moe modules read from private GitLab R695 commit dc8e737738042a7d6d2e025307a093b74846d830; R696 edits planner.rs and tests/r694_routed_advice.rs locally.
+
+Commands:
+  cargo test --offline --locked --test r694_routed_advice
+  rustfmt --check src/planner.rs tests/r694_routed_advice.rs
+  cargo clippy --offline --locked --test r694_routed_advice -- -A dead_code
+
+Expected/final targeted test result: 7 passed, 0 failed.
+Clippy: pass. `-A dead_code` suppresses three warnings from FP16 Collector paths omitted from this extracted test harness.
+Full root crate test: not run in this harness.
+GPU / inter-PC / R53 hardware reservation: not run.
