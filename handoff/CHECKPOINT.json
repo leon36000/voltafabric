@@ -14296,11 +14296,15 @@
   "r741_deepseek_prompt_token_oracle": {
     "id": "R741",
     "branch": "r741-deepseek-prompt-token-oracle-20261102",
-    "status": "PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
-    "manifest_sha256": "6a219c7d7242ca23c3fd042e212d40ee0ed211346a85154e6e21fb85f1e7406e",
-    "test": "Isolated CPU harness with exact R740 Cargo.toml/Cargo.lock and module; 1 passed, 0 failed; explicitly ran ignored tokenizer-backed test. Not a full workspace build.",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_SOURCE_PIPELINE_SUCCESS",
+    "source_commit": "39c8b7d22f69bd54b1f4fd675727272c81b7755d",
+    "source_pipeline_id": 2608,
+    "source_pipeline_status": "success",
+    "source_readback_exact": true,
+    "manifest_sha256": "6f500ac664424d551842ad47c71dbac1515ba48d2f10135db53f29fb41986411",
     "complete_generation": false,
     "gpu": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R742: qualify pinned EOS handling and bounded output streaming with the official DeepSeek Recipe processor; CPU-only, optional feature, no full-generation claim."
+    "next_action": "R742: qualify pinned EOS handling and bounded output streaming with the official DeepSeek Recipe processor; CPU-only, optional feature, no full-generation claim.",
+    "test": "Isolated CPU pinned token-ID oracle: 1 passed; five cases; not a full workspace build."
   }}

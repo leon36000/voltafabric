@@ -1,10 +1,10 @@
 {
   "id": "R741",
-  "status": "LOCAL_CPU_PINNED_TOKEN_ID_ORACLE_PASS_PENDING_PRIVATE_BRANCH",
+  "status": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_READBACK_VERIFIED",
   "branch": "r741-deepseek-prompt-token-oracle-20261102",
   "parent_branch": "r740-deepseek-recipe-prompt-boundary-20261102",
   "parent_commit": "f4533e942593cb8d5ebd44b6bfd2c95500455bcb",
-  "source_commit": "3381700ba4804f0271cdce68d514b89fd83295fc",
+  "source_commit": "39c8b7d22f69bd54b1f4fd675727272c81b7755d",
   "source_file": "src/deepseek_v41_prompt.rs",
   "source_sha256": "cb08969321f28143ef4c8748ff65dccabad4506ec9183a8837613170d94b3b4f",
   "test": "deepseek_v41_prompt::reference_tests::one_turn_token_ids_match_independent_pinned_reference",
@@ -55,5 +55,22 @@
   "performance_measured": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R742 bounded V4.1 output token decoder and stop-token oracle; connect only after the tokenization reference stays exact."
+  "next_action": "R742 bounded V4.1 output token decoder and stop-token oracle; connect only after the tokenization reference stays exact.",
+  "source_pipeline_id": 2608,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "source_readback_exact": true,
+  "source_readback_files_verified": 5,
+  "source_readback_files": [
+    "src/deepseek_v41_prompt.rs",
+    "research/R741/REPORT.md",
+    "research/R741/RESULT.json",
+    "research/R741/TEST-RESULT.txt",
+    "research/R741/SHA256SUMS"
+  ]
 }
