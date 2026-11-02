@@ -1,0 +1,74 @@
+{
+  "id": "R719",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS_CPU_DEBUG_RELEASE_PASS",
+  "branch": "r719-deepseek-route-read-session-exec-20261102",
+  "parent_source_commit": "aa288a12c717bc5b64564ccc94b4480f9ba21246",
+  "source_commit": "7c0215d803a67b4dbf100210bd957e21669f0a62",
+  "gitlab_project_id": 3,
+  "source_readback": {
+    "exact": true,
+    "files_verified": 6,
+    "files": [
+      "src/deepseek_v41_gate.rs",
+      "tests/r712_deepseek_session_owner.rs",
+      "research/R719/REPORT.md",
+      "research/R719/BUILD_TEST.txt",
+      "research/R719/SHA256SUMS",
+      "handoff/R719.json"
+    ]
+  },
+  "pipeline": {
+    "id": 2541,
+    "status": "success",
+    "source_commit": "7c0215d803a67b4dbf100210bd957e21669f0a62",
+    "jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "semgrep": {
+      "version": "1.182.0",
+      "findings": 155,
+      "unique_paths": 121,
+      "changed_scope_findings": 0,
+      "existing_file_parse_errors": 5,
+      "parse_error_paths": [
+        "research/R651/receipts/local-fleet-claims-v2.json",
+        "research/R651/receipts/local-fleet-claims-v3.json",
+        "research/R438/RESULT.json",
+        "handoff/hardware_canary.sh",
+        "research/R651/cpu-harness/test_native_48_pool_callback.py"
+      ]
+    }
+  },
+  "local_cpu_verification": {
+    "debug": "PASS 1/1, 71.12 s",
+    "release": "PASS 1/1, 4.46 s",
+    "strict_targeted_clippy": "PASS",
+    "cargo_fmt_check": "PASS",
+    "git_diff_check": "PASS"
+  },
+  "fixture": {
+    "real_checkpoint_payload": false,
+    "synthetic_nonzero_mxfp4_payload": true,
+    "route_payload_tensors": 36,
+    "selected_payload_bytes": 112803840,
+    "owners": 6,
+    "rank_groups": 5,
+    "local_cpu_sessions": 5,
+    "nonzero_independent_oracle_and_session_outputs": true,
+    "max_abs_error_tolerance": 0.0005
+  },
+  "not_qualified": [
+    "complete model generation",
+    "real checkpoint payload ingestion",
+    "GPU execution",
+    "production R53 reservation or registry",
+    "production inter-PC transport",
+    "performance comparison",
+    "UNKNOWN replay"
+  ],
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "R720: read-only audit the pinned lxe/dsx source revision, license, SM70 kernel paths, and memory/placement design for one explicitly adaptable VoltaFabric boundary. No model download, installation, GPU, or route changes."
+}
