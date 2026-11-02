@@ -1,7 +1,7 @@
 {
   "id": "R725",
   "owner": "integrator",
-  "state": "CPU_SOURCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_EXACT_READBACK_CPU_DEBUG_RELEASE_PASS_RECEIPT_PENDING",
   "branch": "r725-indexed-moe-layer-20261102",
   "parent_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
   "path": "research/R725",
@@ -42,12 +42,26 @@
     "payload_values_loaded": false
   },
   "next_action": "R726: implement a separate CPU RMSNorm primitive matching the pinned eps=1e-20 and FP32 math contract with an independent oracle; then import the actual selected norm payload and connect its normalized activation to this indexed MoE sub-layer. Attention integration remains a later boundary.",
-  "source_commit": "awaiting GitLab source commit",
-  "source_pipeline_id": null,
-  "source_pipeline_status": "pending",
-  "source_readback_verified": false,
-  "manifest_file_count": 5,
+  "source_commit": "0ce3654ab83c18ee4e04b7154d2b19c0b5466d77",
+  "source_pipeline_id": 2554,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback": {
+    "verified_manifest_entries": 5,
+    "total_manifest_entries": 5,
+    "all_hashes_match": true,
+    "full_pagination": true,
+    "exact_content_match": true
+  },
+  "source_readback_verified": true,
+  "manifest_file_count": 6,
   "manifest_sha256": null,
   "manifest_sha256_note": "Final manifest digest is recorded in root handoffs after generation to avoid self-reference.",
-  "prepared_utc": "2026-11-02T14:35:02Z"
+  "receipt_pipeline_pending": true,
+  "prepared_utc": "2026-11-02T14:44:21Z"
 }

@@ -1,0 +1,56 @@
+{
+  "id": "R725",
+  "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_EXACT_READBACK_CPU_FIXTURE_PASS",
+  "branch": "r725-indexed-moe-layer-20261102",
+  "parent_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
+  "source_commit": "0ce3654ab83c18ee4e04b7154d2b19c0b5466d77",
+  "source_pipeline": {
+    "id": 2554,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    }
+  },
+  "source_readback": {
+    "manifest_entries_verified": 5,
+    "all_manifest_hashes_match": true,
+    "full_pagination": true,
+    "exact_content_match": true
+  },
+  "local_cpu_verification": {
+    "indexed_gate_to_session_oracle_debug": "1/1 pass",
+    "indexed_gate_to_session_oracle_release": "1/1 pass",
+    "gate_expert_shard_mismatch_debug_release": "refused before any shard open",
+    "pinned_gate_norm_expert_colocation_debug_release": "1/1 pass; 40/40 layers",
+    "pinned_layer0_norm_metadata": "attn_norm.weight and ffn_norm.weight are BF16 [5120], same shard as gate and expert payloads",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "git_diff_check": "pass"
+  },
+  "pinned_rmsnorm_reference": {
+    "model_revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "config_epsilon": 1e-20,
+    "formula": "FP32 input; mean-square over hidden dimension; rsqrt(mean-square+eps); multiply learned weight in FP32; cast to input dtype",
+    "code_copied": false,
+    "norm_payload_values_read": false
+  },
+  "scope": {
+    "real_checkpoint_payload": false,
+    "normalization_executed": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "receipt_commit_sha": "recorded by subsequent branch verification; not self-referenced here",
+  "next_action": "R726: implement the pinned CPU RMSNorm math with an independent oracle, import the actual selected ffn_norm.weight payload, and connect its output to the indexed MoE entry point; attention integration remains a later boundary.",
+  "verified_utc": "2026-11-02T14:44:21Z"
+}
+

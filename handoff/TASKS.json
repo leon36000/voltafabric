@@ -7053,7 +7053,7 @@
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
   "updated_at_utc": "2026-11-02T14:25:05Z",
-  "updated_utc": "2026-11-02 14:25:05 UTC",
+  "updated_utc": "2026-11-02 14:44:21 UTC",
   "warmup_pairs": 4,
   "workers_running": [],
   "write_set": [
@@ -11619,7 +11619,7 @@
   },
   "r724": {
     "id": "R724",
-    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_2552_SUCCESS_EXACT_READBACK_7_OF_7_RECEIPT_PIPELINE_PENDING",
+    "state": "SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
     "branch": "r724-indexed-gate-forward-20261102",
     "parent_commit": "818ace98a0283861c0113fe59a81601c40dabb4c",
     "source_commit": "7db448ccc62a71f3ab36c77f0919a4e96daec8c3",
@@ -11643,7 +11643,42 @@
     "production_r53": false,
     "performance_measured": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_pending": false,
+    "next_action": "R725: connect indexed gate/expert imports to a model-layer entry point and implement the next single-token layer/forward boundary while preserving existing attention/norm, resident-owner and Collector contracts; real checkpoint admission remains separate.",
+    "receipt_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
+    "receipt_pipeline_id": 2553,
+    "receipt_pipeline_status": "success",
+    "receipt_readback_manifest_entries": 7
+  },
+  "r725": {
+    "id": "R725",
+    "state": "SOURCE_PUBLISHED_PIPELINE_2554_SUCCESS_EXACT_READBACK_5_OF_5_RECEIPT_PIPELINE_PENDING",
+    "branch": "r725-indexed-moe-layer-20261102",
+    "parent_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
+    "source_commit": "0ce3654ab83c18ee4e04b7154d2b19c0b5466d77",
+    "source_pipeline_id": 2554,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_verified_files": 5,
+    "source_manifest_sha256": "4ac2abcfea72ca07b5d89849ad7226985bb5c0ef90b7438f631763fcb81bb2fb",
+    "final_manifest_sha256": "70fe591de928aa5955e6b9bd6bd8f12529f36fb93945b12db92a8efb260b0626",
+    "manifest_file_count": 6,
+    "adapted_boundary": "Resident indexed DeepSeek MoE sublayer binds gate projection, route and six expert payload reads.",
+    "local_cpu_tests": "debug/release integrated route/session oracle, pre-open shard mismatch refusal, pinned 40-layer gate+norm+expert colocation; Clippy/fmt/diff pass.",
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "normalization_executed": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
     "receipt_pending": true,
-    "next_action": "R725: connect indexed gate/expert imports to a model-layer entry point and implement the next single-token layer/forward boundary while preserving existing attention/norm, resident-owner and Collector contracts; real checkpoint admission remains separate."
+    "next_action": "R726 CPU RMSNorm matching pinned ffn_norm contract plus independent oracle and selected norm payload load."
   }
 }

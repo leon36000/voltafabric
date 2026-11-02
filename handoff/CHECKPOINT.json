@@ -13799,7 +13799,32 @@
     "inter_pc_transport": false,
     "production_r53": false,
     "performance_measured": false,
-    "receipt_commit_pending": true,
+    "receipt_commit_pending": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
+    "receipt_pipeline_id": 2553,
+    "receipt_pipeline_status": "success",
+    "receipt_readback_exact": true,
+    "receipt_manifest_entries_verified": 7
+  },
+  "r725_indexed_moe_layer": {
+    "id": "R725",
+    "branch": "r725-indexed-moe-layer-20261102",
+    "source_commit": "0ce3654ab83c18ee4e04b7154d2b19c0b5466d77",
+    "source_pipeline_id": 2554,
+    "source_pipeline_status": "success",
+    "source_readback_verified_manifest_entries": 5,
+    "final_manifest_sha256": "70fe591de928aa5955e6b9bd6bd8f12529f36fb93945b12db92a8efb260b0626",
+    "adapted_boundary": "Indexed gate->route->expert-read MoE sublayer after post-attention/post-normalization activation.",
+    "pinned_index_norm_metadata": "40/40 layers co-locate gate, attn_norm, ffn_norm and 384x6 expert tensors; layer-0 norms BF16 [5120], eps=1e-20.",
+    "real_checkpoint_payload": false,
+    "normalization_executed": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "receipt_pending": true,
     "automatic_relaunch": "STOPPED_BY_OWNER"
   }
 }
