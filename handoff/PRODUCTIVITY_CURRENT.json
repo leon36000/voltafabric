@@ -4507,7 +4507,7 @@
   "r740_deepseek_recipe_prompt_boundary": {
     "id": "R740",
     "owner": "integrator",
-    "state": "EXACT_HISTORICAL_FALSE_POSITIVE_SCOPED_RESCAN_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_PIPELINE_2602_SUCCESS",
     "branch": "r740-deepseek-recipe-prompt-boundary-20261102",
     "parent_commit": "2533b5c2ee094de4cb13810fcb79e0c948d44fd4",
     "source_commit": "3381700ba4804f0271cdce68d514b89fd83295fc",
@@ -4522,15 +4522,15 @@
     "source_readback_exact": true,
     "source_readback_verified_files": 8,
     "source_manifest_sha256": "a748ba8ae110435378824de511683c4906d98b695605ae70f5627a55f1c57d55",
-    "receipt_commit": "1618be41f956502846b55630feca77872e26dbb1",
-    "receipt_pipeline_id": 2600,
-    "receipt_pipeline_status": "gitleaks_failed_false_positive_historical_fingerprint",
+    "receipt_commit": "57078ee935236508040f717be77c0f980a3c23b1",
+    "receipt_pipeline_id": 2602,
+    "receipt_pipeline_status": "success",
     "path": "research/R740",
     "report": "research/R740/REPORT.md",
     "arxiv_priorities": "research/R740/ARXIV-PRIORITIES.md",
     "result": "research/R740/RESULT.json",
     "manifest": "research/R740/SHA256SUMS",
-    "manifest_sha256": "85594d1926f753bd23b6e95ba2f7f144d8e0f0dc26977205cbf7260c1939b578",
+    "manifest_sha256": "c0b3933bcb8f8c27b8b47de4f677c2090fce28f1f22cfa7a53e25d0772ba6ac5",
     "manifest_file_count": 8,
     "adapted_boundary": "Optional source-pinned DeepSeek V4.1 Recipe prompt encoding for exactly one plain user turn, with tokenizer size/SHA admission and context reservation rejection.",
     "donor_components": [
@@ -4552,17 +4552,31 @@
     "performance_measured": false,
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "receipt_pending": true,
-    "published_utc": "2026-11-02T20:10:18Z",
-    "next_action": "Confirm exact readback and security pipeline #2602; then reconcile R740 and continue with the pinned prompt-token oracle in R741.",
-    "receipt_remediation": "Gitleaks flagged a public tokenizer artifact fingerprint in a historic receipt commit; the exact finding is scoped in .gitleaksignore. The file and detection rule are not globally exempted; pipeline #2602 is pending.",
+    "receipt_pending": false,
+    "published_utc": "2026-11-02 20:32:58 UTC",
+    "next_action": "R741: publish the five-case pinned tokenizer-ID oracle that passed in the isolated CPU harness, then qualify bounded output decoding and stop handling against the same tokenizer. No checkpoint-wide load, GPU, production network or automatic relaunch.",
+    "receipt_remediation": "Pipeline #2602 passed Gitleaks, Semgrep, Trivy and fallback after the exact historical fingerprint exception. Exact read-back of the ignore file and the three R740 receipt files was verified.",
     "artifact_digest_ref": "research/R740/RESULT.json",
-    "receipt_remediation_commit": "79393c0ce91fc5cb8efc555091f9c9d73f0520d",
+    "receipt_remediation_commit": "57078ee935236508040f717be77c0f980a3c23b1",
     "metadata_rename_rescan_pipeline_id": 2601,
     "metadata_rename_rescan_pipeline_status": "failed_same_historical_finding",
     "gitleaks_ignore_file": ".gitleaksignore",
     "gitleaks_ignore_scope": "one exact historical fingerprint",
     "security_rescan_pipeline_id": 2602,
-    "security_rescan_status": "pending"
+    "security_rescan_status": "success",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "receipt_readback_exact": true,
+    "receipt_readback_files_verified": 4,
+    "receipt_readback_files": [
+      ".gitleaksignore",
+      "research/R740/REPORT.md",
+      "research/R740/RESULT.json",
+      "research/R740/SHA256SUMS"
+    ]
   }
 }
