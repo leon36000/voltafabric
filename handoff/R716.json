@@ -1,7 +1,7 @@
 {
   "id": "R716",
   "owner": "integrator",
-  "state": "SOURCE_COMMIT_PENDING_READBACK",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2529_SUCCESS",
   "branch": "r716-deepseek-gate-to-grouped-exec-20261102",
   "parent_commit": "dfd0a220386a6b1ffe4a9d2ce46b8e2d3df06839",
   "path": "research/R716",
@@ -26,5 +26,28 @@
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [],
-  "next_action": "R717: verify the real checkpoint/registry inventory from retained sources; keep gate route refusal before Session startup while experts 379-382 are absent. No download, GPU, production network, UNKNOWN replay, cleanup or automatic relaunch."
+  "next_action": "R717: publish the locally verified gate-bound exact checkpoint range plan using the pinned index/header; no payload bytes were read. Keep experts 379-382 unavailable and refuse resident admission until payloads are actually present and authenticated. No download, GPU, production network, UNKNOWN replay or automatic relaunch.",
+  "source_commit": "fa7ae168fa91f517aa77b3a879de0bf90b656553",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED",
+  "readback_exact": true,
+  "readback_files_verified": 5,
+  "metadata_readback_parsed": true,
+  "pipeline_id": 2529,
+  "pipeline_status": "success",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "semgrep_scan": {
+    "total_findings": 155,
+    "tracked_files_scanned": 6732,
+    "findings_in_r716_code_files": 0,
+    "code_files": [
+      "src/deepseek_v41_gate.rs",
+      "tests/r712_deepseek_session_owner.rs",
+      "src/deepseek_v41.rs"
+    ]
+  }
 }

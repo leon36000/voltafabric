@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 11:49:35 UTC",
+  "updated_utc": "2026-11-02 11:55:50 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -3194,10 +3194,10 @@
   "r716_deepseek_gate_to_grouped_exec": {
     "id": "R716",
     "owner": "integrator",
-    "state": "SOURCE_COMMIT_PENDING_READBACK",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2529_SUCCESS",
     "branch": "r716-deepseek-gate-to-grouped-exec-20261102",
     "parent_commit": "dfd0a220386a6b1ffe4a9d2ce46b8e2d3df06839",
-    "source_commit": null,
+    "source_commit": "fa7ae168fa91f517aa77b3a879de0bf90b656553",
     "path": "research/R716",
     "code_files": [
       "src/deepseek_v41_gate.rs",
@@ -3209,10 +3209,10 @@
     "manifest": "research/R716/SHA256SUMS",
     "manifest_sha256": "05527d7d3c5a5926408dfa6a83df1ee1b8da22331c81d52ec9eaed8db1888dfd",
     "manifest_file_count": 4,
-    "readback_exact": false,
-    "readback_files_verified": 0,
-    "pipeline_id": null,
-    "pipeline_status": "not_started",
+    "readback_exact": true,
+    "readback_files_verified": 5,
+    "pipeline_id": 2529,
+    "pipeline_status": "success",
     "local_cpu_test": "gate-produced top-6 to six grouped synthetic MXFP4 owners, five Sessions, completed six slots, independent FP64 expert oracle; debug 1/1, release 1/1",
     "route_coefficients_applied_once": true,
     "synthetic_gate_tensors": true,
@@ -3223,8 +3223,27 @@
     "complete_generation": false,
     "gpu": false,
     "inter_pc_transport": false,
-    "automatic_relaunch": "STOPPED_BY_OWNER; no scheduled continuation",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
     "active_operations": [],
-    "next_action": "R717: inventory retained source/index artifacts and bind selected route to payload availability before Session startup; preserve refusal while required checkpoint data is absent. No download, GPU, production network, UNKNOWN replay, cleanup or automatic relaunch."
+    "next_action": "R717: publish the locally verified gate-bound exact checkpoint range plan using the pinned index/header; no payload bytes were read. Keep experts 379-382 unavailable and refuse resident admission until payloads are actually present and authenticated. No download, GPU, production network, UNKNOWN replay or automatic relaunch.",
+    "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED",
+    "metadata_readback_parsed": true,
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "semgrep_scan": {
+      "total_findings": 155,
+      "tracked_files_scanned": 6732,
+      "findings_in_r716_code_files": 0,
+      "code_files": [
+        "src/deepseek_v41_gate.rs",
+        "tests/r712_deepseek_session_owner.rs",
+        "src/deepseek_v41.rs"
+      ]
+    },
+    "pipeline_scope": "configured Gitleaks, Semgrep, Trivy and fallback only; not Rust compilation or local CPU test evidence"
   }
 }

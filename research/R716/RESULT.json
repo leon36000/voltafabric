@@ -1,15 +1,15 @@
 {
   "id": "R716",
   "path": "research/R716",
-  "state": "LOCAL_CPU_FOCUSED_DEBUG_RELEASE_AND_STRICT_CHECKS_PASS_SOURCE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2529_SUCCESS",
   "branch": "r716-deepseek-gate-to-grouped-exec-20261102",
   "parent_commit": "dfd0a220386a6b1ffe4a9d2ce46b8e2d3df06839",
-  "source_commit": null,
-  "publication": "SOURCE_COMMIT_PENDING_READBACK",
-  "readback_exact": false,
-  "readback_files_verified": 0,
-  "pipeline_id": null,
-  "pipeline_status": "not_started",
+  "source_commit": "fa7ae168fa91f517aa77b3a879de0bf90b656553",
+  "publication": "PRIVATE_BRANCH_SOURCE_CONFIRMED",
+  "readback_exact": true,
+  "readback_files_verified": 5,
+  "pipeline_id": 2529,
+  "pipeline_status": "success",
   "pipeline_scope_expected": "configured GitLab scans and fallback only; not Rust compile or local CPU tests",
   "code_files": [
     "src/deepseek_v41_gate.rs",
@@ -38,5 +38,23 @@
   "active_operations": [],
   "manifest_sha256": "05527d7d3c5a5926408dfa6a83df1ee1b8da22331c81d52ec9eaed8db1888dfd",
   "manifest_file_count": 4,
-  "next_action": "R717: verify the real checkpoint/registry inventory from retained sources; keep gate route refusal before Session startup while experts 379-382 are absent. No download, GPU, production network, UNKNOWN replay, cleanup or automatic relaunch."
+  "next_action": "R717: publish the locally verified gate-bound exact checkpoint range plan using the pinned index/header; no payload bytes were read. Keep experts 379-382 unavailable and refuse resident admission until payloads are actually present and authenticated. No download, GPU, production network, UNKNOWN replay or automatic relaunch.",
+  "metadata_readback_parsed": true,
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "semgrep_scan": {
+    "total_findings": 155,
+    "tracked_files_scanned": 6732,
+    "findings_in_r716_code_files": 0,
+    "code_files": [
+      "src/deepseek_v41_gate.rs",
+      "tests/r712_deepseek_session_owner.rs",
+      "src/deepseek_v41.rs"
+    ]
+  },
+  "pipeline_scope": "configured Gitleaks, Semgrep, Trivy and fallback only; not Rust compilation or local CPU test evidence"
 }
