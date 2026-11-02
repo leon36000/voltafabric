@@ -4289,7 +4289,7 @@
   },
   "active_operation": null,
   "active_operations": [],
-  "active_phase": "R721_INDEXED_SAFETENSORS_MULTI_SHARD_CPU_PASS",
+  "active_phase": "R728_CPU_SHARED_FP8_INDEXED_LOAD_AND_ROUTE_JOIN",
   "active_workers": [],
   "actual_billing_usd": 0,
   "adapter_frontier_coverage": {
@@ -5701,8 +5701,8 @@
     "policy": "No extended autonomous R&D wave or new agents on unbudgeted credits; finish only the already CPU-qualified staging and its readback, then wait for ordinary quota.",
     "quota_checks_this_wake": 1
   },
-  "latest_phase": "R720_PRIMARY_RANK_ADVICE_CPU_DEBUG_RELEASE_PASS_AND_GITLAB_PIPELINE_SUCCESS",
-  "latest_phase_evidence": "research/R719/REPORT.md",
+  "latest_phase": "R727_DEEPSEEK_SHARED_FP8_HC",
+  "latest_phase_evidence": "research/R727/REPORT.md",
   "latest_source_manifest": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-admission-r59/source_final.json",
   "latest_source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
   "method_recorded_in_docs": {
@@ -5711,8 +5711,8 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R725: connect indexed gate/expert imports to a model-layer entry point and implement the next single-token layer/forward boundary while preserving existing attention/norm, resident-owner and Collector contracts; real checkpoint admission remains separate.",
-  "next_command": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
+  "next_action": "R728: implement and CPU-verify indexed loading of the six pinned shared FP8 tensors, then atomically join its raw result to the exact completed routed Collector receipt.",
+  "next_command": "CPU-only: run the R728 indexed-shared-FP8 and terminal-route join tests; preserve full Stamp/attempt, one-time route coefficients, atomic refusal and UNKNOWN non-replay.",
   "next_command_expected_result": "One synthetic sharded selected-expert layer loaded through the pinned index into the existing CPU Session path, matching an independent oracle; any missing/invalid shard yields no owner output.",
   "next_cpu_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
   "next_cwd": "/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification",
@@ -5728,7 +5728,7 @@
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
   "next_required_work": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
-  "next_task": "R722",
+  "next_task": "R728",
   "next_updated_utc": "2026-11-02 14:25:05 UTC",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
@@ -9059,8 +9059,8 @@
   "source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
   "source_manifest_state": "R59_CURRENT_CANONICAL_FUNCTIONAL_SOURCES_UNCHANGED_IN_R69",
   "source_map_sha256": "cf02e002f790675324031ac2c1cb59e1adb7acaf4fa5bcf1f42ea01690220e89",
-  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2546_SUCCESS_CPU_DEBUG_RELEASE_5_OF_5",
-  "status": "R721_PRIVATE_GITLAB_SOURCE_READBACK_6_OF_6_PIPELINE_2546_SUCCESS_CPU_DEBUG_RELEASE_5_OF_5",
+  "state": "R727_SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_RECEIPT_PENDING",
+  "status": "R727_DEEPSEEK_SHARED_FP8_HC_SOURCE_PIPELINE_SUCCESS",
   "target_model": {
     "cuda_or_full_model_executed": false,
     "evidence": "evidence/continuation_a58_deepseek41/phase.json",
@@ -9080,7 +9080,7 @@
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
   "updated_at_utc": "2026-11-02T14:25:05Z",
-  "updated_utc": "2026-11-02 14:25:05 UTC",
+  "updated_utc": "2026-11-02 15:45:05 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -9241,7 +9241,7 @@
     "id": "voltafabric-recherches-et-exp-riences-r32",
     "kind": "heartbeat",
     "status": "STOPPED_BY_OWNER",
-    "reason": "Owner stopped automatic relaunch. Continue only during an active owner-requested turn.",
+    "reason": "Owner stopped automatic relaunch. Continue only during explicitly owner-requested active turns.",
     "confirmed_tool_status": "STOPPED_BY_OWNER",
     "old_resource_blocker_remains_separate": true
   },
@@ -11641,7 +11641,7 @@
     "voltafabric_integrated": false
   },
   "r81_gpu_pending": false,
-  "latest_productivity_report": "research/R718/REPORT.md",
+  "latest_productivity_report": "research/R727/REPORT.md",
   "r102": {
     "status": "CLOSED_VERIFIED_PRODUCTIVITY_WAVE",
     "evidence": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028",
@@ -13867,5 +13867,35 @@
     "receipt_readback_exact": true,
     "receipt_readback_files_verified": 6,
     "receipt_reconciled_utc": "2026-11-02 15:25:24 UTC"
+  },
+  "r727": {
+    "id": "R727",
+    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_RECEIPT_PENDING",
+    "branch": "r727-deepseek-shared-fp8-hc-20261102",
+    "source_commit": "edb68b8fa0665b5728aac860f9a7ab31bb4efb05",
+    "parent_commit": "8550acd70d206fb15855e2d6e24f736a75969de0",
+    "source_pipeline_id": 2560,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_verified_files": 8,
+    "source_manifest_sha256": "cb8eb3c5daf032ddbd30ca57b25703c139165c6b39b971e80dd72b5f2fb2e7d2",
+    "adapted_boundary": "CPU-only pinned DeepSeek hc_pre and shared E4M3FN/E8M0 reference; raw shared path remains separate from routed MXFP4 K32 Collector.",
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "published_utc": "2026-11-02 15:45:05 UTC",
+    "receipt_pipeline_status": "pending",
+    "next_action": "R728 CPU implementation: authenticated six-plane shared FP8 load from the pinned layer shard; execute from the gate-bound activation; join only to matching completed route receipts."
   }
 }

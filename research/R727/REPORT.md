@@ -18,13 +18,14 @@ weights were opened.
 
 ## Adapted boundary and provenance
 
-The reference follows the pinned MIT implementation at
-[`model.py`](https://github.com/deepseek-ai/DeepSeek-V4.1-Flash/blob/314113f8a7dadb388215396ba5fbee2c610a04d6/inference/model.py)
-and [`kernel.py`](https://github.com/deepseek-ai/DeepSeek-V4.1-Flash/blob/314113f8a7dadb388215396ba5fbee2c610a04d6/inference/kernel.py).
-No upstream implementation code was copied and no dependency was added. FP8 E4M3FN
-codes with E8M0 scales remain a distinct type; they are not routed MXFP4 K32 experts
-and have no route coefficient. The code remains a scalar CPU reference, not a production
-fallback or GPU kernel.
+The reference follows the pinned MIT implementation in the official
+[DeepSeek-V4.1-Flash Hugging Face revision](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/tree/314113f8a7dadb388215396ba5fbee2c610a04d6).
+The exact consulted `inference/model.py` and `inference/kernel.py` snapshots are retained
+under `evidence/continuation_a97_model_metadata/upstream_314113f8/`, with provenance and
+SHA-256s in `third_party/deepseek-v41-flash/PROVENANCE.md`. No upstream implementation
+code was copied and no dependency was added. FP8 E4M3FN codes with E8M0 scales remain a
+distinct type; they are not routed MXFP4 K32 experts and have no route coefficient. The
+code remains a scalar CPU reference, not a production fallback or GPU kernel.
 
 The separate arXiv/repository screen in `OPEN_SOURCE_SCREEN.md` found a promising
 write-time KV-residency design for later study and an optional expert-prefetch idea.
@@ -37,6 +38,9 @@ The focused CPU suite checks pinned metadata and 40-layer shard colocation, the 
 equation against an independent FP64 calculation, all three shared FP8 projections
 against an independent blockwise oracle, and refusal of malformed FP8/HC inputs. The
 exact final command outputs and hashes are in `BUILD_TEST.txt` and `SHA256SUMS`.
+The private GitLab source commit is `edb68b8fa0665b5728aac860f9a7ab31bb4efb05`;
+its security/fallback pipeline 2560 succeeded. A separate receipt pipeline still
+needs to reconcile the root handoffs and status fields.
 
 ## Limits and next boundary
 

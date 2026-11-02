@@ -30,6 +30,11 @@ Commands and results
 8. git diff --check -- src/deepseek_v41.rs tests/r727_deepseek_shared_hc.rs research/R727
    PASS (tracked diff; new files were also whitespace-scanned before publication).
 
+9. GitLab source pipeline 2560 on commit edb68b8fa0665b5728aac860f9a7ab31bb4efb05
+   PASS: gitleaks, semgrep, trivy and fallback jobs all succeeded. This pipeline
+   validates repository scans/fallback only; Rust verification remains local. Exact
+   source readback verified 8/8 committed R727 targets before this receipt update.
+
 Scope limits
 ============
 

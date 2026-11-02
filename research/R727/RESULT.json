@@ -1,6 +1,6 @@
 {
   "id": "R727",
-  "state": "LOCAL_CPU_OPERATOR_AND_METADATA_PASS_READY_FOR_PRIVATE_GITLAB_SOURCE_PUBLICATION",
+  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_RECEIPT_PENDING",
   "branch": "r727-deepseek-shared-fp8-hc-20261102",
   "parent_commit": "8550acd70d206fb15855e2d6e24f736a75969de0",
   "code_files": [
@@ -18,10 +18,22 @@
   "pinned_metadata": {
     "shared_projection_dtypes": "weights F8_E4M3, scales F8_E8M0",
     "layer0_shapes": {
-      "w1_w3_weight": [2304, 5120],
-      "w1_w3_scale": [72, 160],
-      "w2_weight": [5120, 2304],
-      "w2_scale": [160, 72]
+      "w1_w3_weight": [
+        2304,
+        5120
+      ],
+      "w1_w3_scale": [
+        72,
+        160
+      ],
+      "w2_weight": [
+        5120,
+        2304
+      ],
+      "w2_scale": [
+        160,
+        72
+      ]
     },
     "shared_gate_norm_shard_colocation": "40/40 backbone layers"
   },
@@ -39,5 +51,19 @@
   "performance_measured": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R728: indexed-load the six FP8 shared-expert tensors and bind unweighted shared output to the routed Collector completion, preserving identities and atomic refusal; no GPU or full-generation claim."
+  "next_action": "R728: indexed-load the six FP8 shared-expert tensors and bind unweighted shared output to the routed Collector completion, preserving identities and atomic refusal; no GPU or full-generation claim.",
+  "source_commit": "edb68b8fa0665b5728aac860f9a7ab31bb4efb05",
+  "source_pipeline_id": 2560,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback_verified_files": 8,
+  "source_readback_exact": true,
+  "source_published_utc": "2026-11-02 15:42:41 UTC",
+  "receipt_pipeline_status": "pending",
+  "source_manifest_sha256": "cb8eb3c5daf032ddbd30ca57b25703c139165c6b39b971e80dd72b5f2fb2e7d2"
 }
