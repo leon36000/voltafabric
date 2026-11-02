@@ -1,0 +1,42 @@
+{
+  "round": "R703",
+  "status": "TRACKED_ARTIFACT_GAP_CONFIRMED_CPU_SAFETENSORS_GUARDS_PASS",
+  "branch": "r703-gate-artifact-inventory-20261102",
+  "parent_commit": "d4a20ec8d8bc91e2c4cb9f45e1fc7159d9553c2f",
+  "inventory": {
+    "ref": "r702-deepseek-gate-safetensors-20261102",
+    "method": "complete recursive GitLab repository tree enumeration",
+    "entries": 7920,
+    "pages": 80,
+    "complete": true,
+    "gate_shard_tracked": false,
+    "expected_gate_shard": "model-00003-of-00048.safetensors",
+    "expected_gate_shard_bytes_from_pinned_metadata": 7389759032,
+    "selected_top6": [0, 383, 382, 381, 380, 379],
+    "available_real_expert_payloads": [0, 383, "96-192 grouped"],
+    "missing_selected_expert_payloads": [379, 380, 381, 382],
+    "metadata_only": true
+  },
+  "code_file": "tests/r703_safetensors_fail_closed.rs",
+  "safetensors": {
+    "version": "0.8.0",
+    "license": "Apache-2.0",
+    "already_pinned": true,
+    "donor_source_copied": false
+  },
+  "tests": {
+    "focused_cpu_tests_passed": 5,
+    "clippy_warnings_as_errors": "pass",
+    "rustfmt": "pass",
+    "diff_check": "pass"
+  },
+  "session_dispatch": false,
+  "complete_generation": false,
+  "checkpoint_payload_loaded": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_service": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "next_action": "Continue CPU engine integration with already-tracked components; preserve pre-dispatch refusal until the actual gate and every gate-selected expert payload are available. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+}

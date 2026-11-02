@@ -1,0 +1,20 @@
+Environment: Rust 1.90.0 / Cargo 1.90.0; offline locked dependency graph; one build job.
+
+Command:
+CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r703_safetensors_fail_closed
+Result: 5 passed, 0 failed.
+
+Command:
+CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --test r703_safetensors_fail_closed -- -D warnings
+Result: passed.
+
+Command:
+rustfmt --edition 2021 --check tests/r703_safetensors_fail_closed.rs
+Result: passed.
+
+Command:
+git diff --check
+Result: passed.
+
+Scope: local CPU tests only. No checkpoint payload read, GPU execution, Session dispatch,
+inter-PC transport, or production service interaction.
