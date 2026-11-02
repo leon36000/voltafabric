@@ -13851,8 +13851,21 @@
     "performance_measured": false,
     "route_or_coefficients_changed": false,
     "unknown_replayed": false,
-    "receipt_pending": true,
+    "receipt_pending": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R727: implement and oracle-check the pinned FFN Hyper-Connection pre-mix and shared expert; keep attention, HC post/residual and complete generation as later explicit boundaries. CPU only; no GPU or automatic relaunch."
+    "next_action": "R727: indexed-load the six FP8 shared-expert tensors and bind unweighted shared output to the routed Collector completion, preserving identities and atomic refusal; no GPU or full-generation claim.",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINE_SUCCESS_EXACT_READBACK_CPU_DEBUG_RELEASE_PASS",
+    "receipt_commit": "0ddef344a922d41455f5b55213322cdff6be2998",
+    "receipt_pipeline_id": 2557,
+    "receipt_pipeline_status": "success",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "receipt_readback_exact": true,
+    "receipt_readback_files_verified": 6,
+    "receipt_reconciled_utc": "2026-11-02 15:25:24 UTC"
   }
 }
