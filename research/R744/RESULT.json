@@ -1,0 +1,53 @@
+{
+  "id": "R744",
+  "title": "CPU greedy next-token boundary for pinned DeepSeek V4.1 recipe",
+  "status": "LOCAL_CPU_SAMPLER_VERIFIED_AWAITING_PRIVATE_GITLAB_PIPELINES",
+  "upstream": {
+    "repository": "ggml-org/llama.cpp",
+    "commit": "29c720eaf72fcf8e4e61a56a88b994d92668261d",
+    "license": "MIT",
+    "adapted_behavior": "ordered candidate argmax with strict greater-than replacement; ties keep the first/lowest token ID",
+    "source_code_copied": false
+  },
+  "implementation": {
+    "files": [
+      "src/deepseek_v41_sampler.rs",
+      "src/deepseek_v41_prompt.rs",
+      "src/lib.rs",
+      "docs/ARCHITECTURE.md"
+    ],
+    "prompt_factory": "admits only the pinned tokenizer digest and model revision; checks prompt IDs, context and reserved completion budget before decoder construction",
+    "decode_identity": ["run_id", "model_revision", "plan_id", "layer", "batch", "epoch", "attempt"],
+    "numerical_policy": "NaN, positive infinity, and all-masked rows reject without state mutation; negative infinity is an allowed masked candidate",
+    "terminal_policy": "EOS and max_new_tokens end the decoder; further sampling is refused; only a finished decoder may cross the EOS-safe prefix boundary",
+    "routes_or_coefficients_changed": false,
+    "weights_or_owners_changed": false
+  },
+  "verification": {
+    "isolated_cpu_harness_tests_passed": 6,
+    "isolated_cpu_harness_tests_failed": 0,
+    "rustfmt_sampler_prompt_lib_check": "pass",
+    "pinned_tokenizer_integration_test": "added but ignored; external VF_DEEPSEEK_V41_TOKENIZER_JSON fixture unavailable to this run",
+    "full_feature_gated_build": "not run locally",
+    "gpu": false,
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false
+  },
+  "publication": {
+    "branch": "r744-llama-greedy-step-20261102",
+    "base_commit": "7a5692dd70d57261c2601d3a8fa970370356bc1a",
+    "source_commit": null,
+    "source_pipeline_id": null,
+    "source_pipeline_status": "pending",
+    "exact_readback": false,
+    "receipt_commit": null,
+    "receipt_pipeline_id": null,
+    "receipt_pipeline_status": "pending",
+    "receipt_pending": true
+  },
+  "next_action": "Connect the logits provider produced by authenticated resident checkpoint owners to this one-token CPU boundary under a new request identity; refuse partial tensor sets and keep GPU/production admission separate."
+}

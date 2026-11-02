@@ -1,0 +1,9 @@
+R744 local CPU verification
+
+Command: cargo test --offline --manifest-path .runs/r744-work/mini/Cargo.toml
+Result: 6 passed, 0 failed, 0 ignored; doc-tests 0.
+Tests cover stable low-ID tie, one-shot EOS, length termination, identity/attempt/shape refusal without token mutation, NaN/+infinity/all-masked refusal, negative-infinity masking, and invalid decoder admission.
+
+Formatting: rustfmt --edition 2021 --check on src/deepseek_v41_prompt.rs and src/deepseek_v41_sampler.rs; rustfmt --edition 2021 --config skip_children=true --check on isolated src/lib.rs — all passed.
+
+The harness compiled the actual sampler module with an exact-shape Stamp and Error stub. It did not compile the complete VoltaFabric crate or feature-gated prompt module. The pinned-tokenizer integration test in deepseek_v41_prompt.rs is deliberately ignored unless the exact external tokenizer fixture is supplied; it was not run. No GPU, model payload, network worker, or full generation was exercised.

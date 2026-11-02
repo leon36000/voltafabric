@@ -6,6 +6,8 @@ use deepseek_recipe_encoding::v4::dsv41::DeepseekV41Encoding;
 use deepseek_recipe_encoding::{PromptEncoding, PromptTokenizer};
 use tokenizers::Tokenizer;
 
+use crate::deepseek_v41_sampler::DeepSeekV41GreedyDecoder;
+use crate::moe::Stamp;
 use crate::sha256;
 
 pub const MODEL_ID: &str = "deepseek-ai/DeepSeek-V4.1-Flash";
@@ -98,6 +100,94 @@ impl DeepSeekV41PromptEncoder {
         }
     }
 
+    /// Admit a greedy decoder only for a prompt produced by this pinned encoder.
+    /// The model backend still supplies each logits row; this method does not run
+    /// model layers, load weights, or manufacture a generation result.
+    pub fn greedy_decoder(
+        &self,
+        prompt: &EncodedPrompt,
+        stamp: Stamp,
+        attempt: u64,
+        max_new_tokens: usize,
+    ) -> crate::Result<DeepSeekV41GreedyDecoder> {
+        if stamp.model_revision != MODEL_REVISION {
+            return Err(crate::Error::new(
+                "MODEL_REVISION_MISMATCH",
+                "greedy decoder identity must use the pinned DeepSeek V4.1 model revision",
+            ));
+        }
+        if prompt.tokenizer_sha256 != self.tokenizer_sha256 {
+            return Err(crate::Error::new(
+                "TOKENIZER_MISMATCH",
+                "encoded prompt was not produced with this pinned tokenizer",
+            ));
+        }
+        if prompt.token_ids.is_empty()
+            || prompt.token_ids.len() > MAX_PROMPT_TOKENS
+            || prompt.context_limit == 0
+            || prompt.context_limit > MAX_PROMPT_TOKENS
+            || prompt.reserved_completion_tokens == 0
+            || prompt.reserved_completion_tokens > prompt.context_limit
+            || max_new_tokens == 0
+            || max_new_tokens > prompt.reserved_completion_tokens
+        {
+            return Err(crate::Error::new(
+                "INVALID_INPUT",
+                "prompt and completion limits do not satisfy the pinned recipe contract",
+            ));
+        }
+        let reserved_total = prompt
+            .token_ids
+            .len()
+            .checked_add(prompt.reserved_completion_tokens)
+            .ok_or_else(|| crate::Error::new("INVALID_INPUT", "prompt length overflowed"))?;
+        if reserved_total > prompt.context_limit {
+            return Err(crate::Error::new(
+                "CONTEXT_LIMIT",
+                "prompt plus its admitted completion reservation exceeds context",
+            ));
+        }
+        let vocab_size = self.tokenizer.get_vocab_size(true);
+        if prompt
+            .token_ids
+            .iter()
+            .any(|&token_id| token_id as usize >= vocab_size)
+        {
+            return Err(crate::Error::new(
+                "INVALID_INPUT",
+                "encoded prompt contains a token outside the pinned vocabulary",
+            ));
+        }
+        DeepSeekV41GreedyDecoder::new(
+            stamp,
+            attempt,
+            self.tokenizer_sha256.clone(),
+            vocab_size,
+            self.eos_token_id,
+            prompt.reserved_completion_tokens,
+            max_new_tokens,
+        )
+    }
+
+    /// Return the terminal sample sequence in the exact EOS-safe form expected by
+    /// `generated_prefix` and the existing DeepSeek Recipe stream adapter.
+    pub fn completed_generated_prefix<'a>(
+        &self,
+        decoder: &'a DeepSeekV41GreedyDecoder,
+    ) -> Result<GeneratedTokenPrefix<'a>, String> {
+        if decoder.tokenizer_sha256() != self.tokenizer_sha256
+            || decoder.eos_token_id() != self.eos_token_id
+        {
+            return Err("greedy decoder belongs to a different tokenizer contract".to_owned());
+        }
+        if !decoder.is_finished() {
+            return Err(
+                "greedy decoder must reach EOS or its length limit before streaming".to_owned(),
+            );
+        }
+        Ok(self.generated_prefix(decoder.sampled_ids()))
+    }
+
     /// Build DeepSeek Recipe's output processor with the same admitted tokenizer.
     /// Recipe preserves token boundaries so plain text that merely spells a
     /// control token cannot be mistaken for actual model control output.
@@ -180,7 +270,7 @@ mod reference_tests {
     use std::{env, fs};
     use tokenizers::{AddedVocabulary, Tokenizer};
     #[cfg(feature = "deepseek-v41-stream")]
-    use tokio_stream::{StreamExt, iter};
+    use tokio_stream::{iter, StreamExt};
 
     const TOKENIZER_ENV: &str = "VF_DEEPSEEK_V41_TOKENIZER_JSON";
 
@@ -211,7 +301,11 @@ mod reference_tests {
     fn plain_ids(tokenizer: &Tokenizer, text: &str) -> Vec<u32> {
         let mut plain = tokenizer.clone();
         plain.with_added_vocabulary(AddedVocabulary::new());
-        plain.encode(text, false).expect("plain text encodes").get_ids().to_vec()
+        plain
+            .encode(text, false)
+            .expect("plain text encodes")
+            .get_ids()
+            .to_vec()
     }
 
     #[cfg(feature = "deepseek-v41-stream")]
@@ -331,6 +425,68 @@ mod reference_tests {
         let eos_only = encoder.generated_prefix(&eos_token);
         assert!(eos_only.end_of_turn);
         assert!(eos_only.token_ids.is_empty());
+
+        let prompt = encoder
+            .encode_user_turn("one pinned test prompt", false, None, 8192, 4)
+            .expect("fixture prompt fits the pinned context");
+        let stamp = Stamp {
+            run_id: "run-r744-tokenizer-fixture".into(),
+            model_revision: MODEL_REVISION.into(),
+            plan_id: "plan-r744-tokenizer-fixture".into(),
+            layer: 60,
+            batch: 1,
+            epoch: 1,
+        };
+        let mut decoder = encoder
+            .greedy_decoder(&prompt, stamp.clone(), 8, 4)
+            .expect("prompt admits an identity-bound decoder");
+        let before_terminal = encoder.completed_generated_prefix(&decoder);
+        assert!(before_terminal.is_err());
+        let mut eos_logits = vec![f32::NEG_INFINITY; tokenizer.get_vocab_size(true)];
+        eos_logits[EOS_TOKEN_ID as usize] = 1.0;
+        let terminal = decoder
+            .sample_next(&stamp, 8, &eos_logits)
+            .expect("pinned EOS is the single selected token");
+        assert_eq!(terminal.token_id, EOS_TOKEN_ID);
+        assert_eq!(
+            terminal.finish_reason,
+            Some(crate::deepseek_v41_sampler::GreedyFinishReason::EndOfSequence)
+        );
+        let finished = encoder
+            .completed_generated_prefix(&decoder)
+            .expect("terminal decoder may cross the EOS-safe stream boundary");
+        assert!(finished.end_of_turn);
+        assert!(finished.token_ids.is_empty());
+
+        let mut wrong_revision = stamp.clone();
+        wrong_revision.model_revision = "unadmitted-model-revision".into();
+        assert_eq!(
+            encoder
+                .greedy_decoder(&prompt, wrong_revision, 9, 4)
+                .unwrap_err()
+                .code,
+            "MODEL_REVISION_MISMATCH"
+        );
+        let mut wrong_tokenizer = prompt.clone();
+        wrong_tokenizer.tokenizer_sha256 = "0".repeat(64);
+        assert_eq!(
+            encoder
+                .greedy_decoder(&wrong_tokenizer, stamp.clone(), 9, 4)
+                .unwrap_err()
+                .code,
+            "TOKENIZER_MISMATCH"
+        );
+        let mut out_of_vocab = prompt.clone();
+        out_of_vocab
+            .token_ids
+            .push(tokenizer.get_vocab_size(true) as u32);
+        assert_eq!(
+            encoder
+                .greedy_decoder(&out_of_vocab, stamp, 9, 4)
+                .unwrap_err()
+                .code,
+            "INVALID_INPUT"
+        );
     }
 
     #[cfg(feature = "deepseek-v41-stream")]

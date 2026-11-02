@@ -63,5 +63,7 @@ pub mod deepseek_v41_projection;
 #[cfg(feature = "deepseek-v41-recipe")]
 pub mod deepseek_v41_prompt;
 pub mod deepseek_v41_rope;
+#[cfg(feature = "deepseek-v41-recipe")]
+pub mod deepseek_v41_sampler;
 pub mod deepseek_v41_window_block;
 pub mod engram;

@@ -22,6 +22,14 @@ remplacé par une grande inférence CPU prétendument compétitive.
 | planner | Best-fit puis déplacements/échanges améliorants et bornés; API facultative de scénarios concurrents | Scénarios explicitement fournis, ressources GPU/liens exclusives, makespan analytique; pas de partage fluide de bande passante ni mesure réelle |
 | pipeline | DP de coupes contiguës pour ordre de stages fixé | Optimal seulement pour ce modèle additif, pas parallélisme général |
 | vf | CLI JSON bornée, erreurs explicites, capacités déclarées | Pas de daemon, RPC, API CUDA, distribution réelle |
+| deepseek_v41_sampler | Argmax greedy CPU à identité complète, digest tokenizer, EOS et budget de complétion; argmax à égalité stable | Prend les logits du backend; aucun LM head, chargement de checkpoint ou génération complète |
+
+The sampler adapts only the deterministic ordered-candidate argmax rule documented in
+llama.cpp's `llama-sampler.cpp` at commit
+[`29c720eaf72fcf8e4e61a56a88b994d92668261d`](https://github.com/ggml-org/llama.cpp/blob/29c720eaf72fcf8e4e61a56a88b994d92668261d/src/llama-sampler.cpp#L1054-L1061).
+That upstream revision is MIT-licensed; no llama.cpp source code was copied into this
+crate. The VoltaFabric adapter adds checkpoint tokenizer/EOS and request-identity
+admission around the argmax policy.
 
 Le planner ne modifie pas les choix d'experts ni leurs poids. Il n'alloue qu'un
 propriétaire par expert; la réplication du registre MoE est testée séparément.
@@ -73,3 +81,4 @@ prétexte pour contourner une FFI indispensable dans un crate séparé.
 Réutiliser un moteur corrigé TP+PP comme baseline. EP, FlashMoE, NCCL Device API ou
 MSCCL++ sont des candidats, pas des dépendances toutes obligatoires. Aucun backend
 n'est qualifié par le simple fait qu'une documentation amont annonce SM70.
+
