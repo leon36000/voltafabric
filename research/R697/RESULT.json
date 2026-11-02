@@ -1,9 +1,14 @@
 {
   "schema_version": 1,
   "id": "R697",
-  "state": "CPU_SYNTHETIC_PASS_PENDING_GITLAB_READBACK",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_SYNTHETIC_PASS_PIPELINE_2382_SCANS_SUCCESS",
   "branch": "r697-llama-route-memory-advisory-20261102",
   "parent_commit": "c436aad904ad7395523611a3b4209b758c1dfdcd",
+  "publication_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+  "readback_exact": true,
+  "readback_files_verified": 11,
+  "pipeline_id": 2382,
+  "pipeline_status_at_readback": "success",
   "donor": {
     "repository": "ggml-org/llama.cpp",
     "commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
@@ -23,8 +28,16 @@
     "selected_gguf_slice_bytes": 13056,
     "selected_gguf_bytes_per_projection": 2176,
     "selected_gguf_bytes_per_expert_projection": 1088,
-    "donor_tokens": [3, 3, 3],
-    "voltafabric_tokens": [3, 3, 3],
+    "donor_tokens": [
+      3,
+      3,
+      3
+    ],
+    "voltafabric_tokens": [
+      3,
+      3,
+      3
+    ],
     "max_abs_logit_error": 0.0,
     "late_layer_refusal_status": -3,
     "sampled_after_late_layer_reject": false,
@@ -51,5 +64,14 @@
     "format": "Q8_0 fixture only; no conversion to QPN2/NVFP4 K16, MXFP4 K32, or IQ3"
   },
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "replay_allowed": false
+  "replay_allowed": false,
+  "initial_encoded_content_commit": "1a8322c281098a243fab7a9f1677d16ac8919e21",
+  "encoding_repair_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+  "pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "pipeline_scope": "configured security scans and CI fallback only; not C++/Rust compilation or local CPU execution"
 }

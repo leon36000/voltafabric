@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "id": "R698",
+  "state": "CPU_LOCAL_REAL_DEEPSEEK_EXPERT_TWO_SESSION_PASS_PENDING_PRIVATE_GITLAB_READBACK",
+  "branch": "r698-deepseek-real-mxfp4-session-20261102",
+  "parent_branch": "r697-llama-route-memory-advisory-20261102",
+  "parent_commit": "a2a62088d09cac2d557bd43e3609c97b373228db",
+  "model": {
+    "name": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "full_checkpoint_downloaded": false,
+    "full_checkpoint_bytes": 510000000000,
+    "official_shard_size_bytes": 7390000000
+  },
+  "actual_expert_artifacts": [
+    {
+      "path": "fixtures/deepseek_v41_layer0_expert0_314113f8.safetensors",
+      "expert_ids": [
+        0
+      ],
+      "size_bytes": 18801312,
+      "sha256": "f1bdb87fe86fcafa8ae72e4154a8b4a0e66b90eaba8366a398676cb2fbe4510b"
+    },
+    {
+      "path": "fixtures/deepseek_v41_layer0_experts96-192_314113f8.safetensors",
+      "expert_ids": [
+        96,
+        192
+      ],
+      "size_bytes": 37602576,
+      "sha256": "e6d39f1821c0e3f7f1cc4827d206391aa428a6f3944731069d45dee4135f8c00"
+    },
+    {
+      "path": "fixtures/deepseek_v41_layer0_expert383_314113f8.safetensors",
+      "expert_ids": [
+        383
+      ],
+      "size_bytes": 18801288,
+      "sha256": "9f80cd6bd1244876fb9df5c3a8571ea2c44a981767bbff039e05bab3380e1ab3"
+    }
+  ],
+  "format": {
+    "name": "DeepSeek MXFP4 K32",
+    "weight_storage": "I8 packed E2M1 nibbles",
+    "scale_storage": "F8_E8M0",
+    "scale_block_k": 32,
+    "converted_to_nvfp4": false,
+    "converted_to_iq3": false
+  },
+  "adaptation": {
+    "existing_components_reused": [
+      "Mxfp4ExpertShard",
+      "persistent mxfp4 Session/vf-rank-session CPU executor",
+      "routing::RoutingProblem",
+      "FP32 preweighted Collector"
+    ],
+    "external_source_code_copied": false,
+    "llama_decode_boundary_used": false,
+    "new_code": [
+      "tests/r698_deepseek_real_mxfp4_session.rs"
+    ]
+  },
+  "verification": {
+    "device": "CPU",
+    "focused_test": "cargo test --offline --locked --test r698_deepseek_real_mxfp4_session -- --nocapture",
+    "test_result": "1 passed; 0 failed; exit 0",
+    "test_duration_seconds": 10.14,
+    "local_checkout_branch": "r367-strata-exact-ingress",
+    "run_id": "r698-real-deepseek-session-v2",
+    "plan_id": "r698-one-token-two-rank-cpu-v2",
+    "local_ranks": [
+      0,
+      1
+    ],
+    "experts": [
+      0,
+      383
+    ],
+    "token_count": 1,
+    "hidden": 5120,
+    "output_shape": [
+      1,
+      5120
+    ],
+    "routing_coefficients_f32": [
+      0.375,
+      0.375
+    ],
+    "max_abs_error_upper_bound": 0.0005,
+    "error_metric": "assertion threshold against FP32 sum of two pinned per-expert Python-oracle outputs",
+    "failed_preflight_before_session": "expert-383 expected SHA was missing its last character; fixed before the passing attempt",
+    "unknown_claims": 0
+  },
+  "limitations": {
+    "complete_checkpoint": false,
+    "full_generation": false,
+    "model_gate": false,
+    "model_attention_or_kv": false,
+    "tokenizer": false,
+    "gpu": false,
+    "inter_pc_worker": false,
+    "production_network": false,
+    "production_r53": false,
+    "performance_claim": false
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "replay_allowed": false,
+  "r697_pipeline_id": 2382,
+  "r697_pipeline_status_at_check": "success",
+  "r697_pipeline_scope": "Gitleaks/Semgrep/Trivy/CI fallback scans only; not source compile or local CPU run",
+  "r697_manifest_sha256": "6b0aaa348621adffb1e3d48fc6dcae659402c326710805e33d6bf2ac9906843e"
+}

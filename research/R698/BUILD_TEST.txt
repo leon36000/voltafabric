@@ -1,0 +1,20 @@
+R698 test record
+================
+
+Checkout: /home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365
+Local branch: r367-strata-exact-ingress. The owner working tree was already modified; this wave added only the uniquely named test.
+
+Formatting:
+  rustfmt --edition 2021 tests/r698_deepseek_real_mxfp4_session.rs
+  exit 0
+
+Attempt 1:
+  The focused test stopped at fixture SHA preflight before creating Sessions or sending LOAD/EXEC.
+  Expert-383 expected digest was missing its final character; exit 101.
+  No worker processes or execution receipts were created.
+
+Attempt 2 (fresh run_id/plan_id suffix v2):
+  CARGO_TARGET_DIR=/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.runs/r697-llama-route-memory-advisory-20261102/output/cargo-target cargo test --offline --locked --test r698_deepseek_real_mxfp4_session -- --nocapture
+  1 passed, 0 failed, 10.14 seconds, exit 0.
+
+Scope: two local CPU vf-rank-session subprocesses; pinned expert-0 and expert-383 safetensors fragments; one 5120-element BF16 token; the FP32-preweighted Collector. No GPU, model download, inter-PC connection, or production R53 operation.
