@@ -1,0 +1,13 @@
+R708 local CPU validation.
+
+Worktree: `/home/pc6/NAOS/60_travaux/voltafabric-gitlab-r365/.worktrees/r699-gitlab-verification`; detached R699 base, with pre-existing later-wave changes preserved.
+
+1. `CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r699_deepseek_memory_admission six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_start` — PASS, 1/1 debug.
+2. Same focused test with `--release` — PASS, 1/1 release.
+3. `CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --lib -- -D warnings` — PASS.
+4. `rustfmt --edition 2021 --check src/session/mxfp4/series.rs tests/r699_deepseek_memory_admission.rs` — PASS.
+5. `git diff --check -- src/session/mxfp4/series.rs tests/r699_deepseek_memory_admission.rs` — PASS.
+
+The route is a synthetic six-choice top-k with only rank-0 expert-0 binding. Its artifact path does not exist. `run_series` returns the missing-rank preflight error before attempting to open that path. No Session process or worker was started.
+
+Source commit: `6c66ca3acd514f6cd6291990230f9e9d8863b404`. Its GitLab pipeline #2453 was running when this receipt was written; the pipeline is configured scans/fallback only and cannot substitute for the local CPU tests.
