@@ -17,3 +17,4 @@ Commands and results:
    PASS
 
 No GPU, checkpoint, worker, production network or replay was used. The local `src/session/mxfp4.rs` is not byte-identical to R705; R706 does not edit it. This limits the validation claim to the available CPU worktree plus source readback and API inspection, not a clean checkout of the complete R705 branch. GitLab pipeline #2440 was running at publication time and is configured for scans/fallback only.
+6. GitLab pipeline #2440: success. Scope remains configured scans/fallback only; no Rust compilation or tests were run by this pipeline.

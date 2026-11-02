@@ -17,7 +17,7 @@ La Session MXFP4 exige désormais un `attempt` explicite et non nul par batch, r
 - Test unitaire: unicité et valeur non nulle des attempts — **1 réussi**.
 - Test ciblé `r702_deepseek_gate_projection` — **5 réussis**, dont l’adaptateur gate→Session, l’égalité bit à bit des coefficients et le refus d’entrée inexacte.
 - `cargo clippy --offline --locked --lib -- -D warnings`, `rustfmt --check` sur les fichiers touchés et `git diff --check` — réussis.
-- Le test a tourné dans le worktree disponible basé sur R699, qui contenait déjà les sources locales des vagues suivantes. Les fichiers gate, test et Session-series avant patch correspondent exactement à leurs objets GitLab R705; `src/session/mxfp4.rs` local diffère du fichier R705, mais R706 ne le modifie pas et sa signature d’EXEC a été relue sur GitLab. Le pipeline R706 #2440 est un pipeline de scans, pas une compilation Rust.
+- Le test a tourné dans le worktree disponible basé sur R699, qui contenait déjà les sources locales des vagues suivantes. Les fichiers gate, test et Session-series avant patch correspondent exactement à leurs objets GitLab R705; `src/session/mxfp4.rs` local diffère du fichier R705, mais R706 ne le modifie pas et sa signature d’EXEC a été relue sur GitLab. Le pipeline R706 #2440 est un pipeline de scans, pas une compilation Rust. Il est maintenant terminé avec le statut `success`; cette réussite reste limitée aux scans/fallback configurés.
 
 ## Limites
 
