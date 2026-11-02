@@ -1,0 +1,14 @@
+R717 CPU verification receipt
+
+Focused route-bound checkpoint range plan:
+  CARGO_BUILD_JOBS=1 cargo test --offline --locked --test r712_deepseek_session_owner gate_selected_route_plans_exact_pinned_checkpoint_ranges_before_payload_reads
+  result: debug 1 passed, 0 failed.
+  CARGO_BUILD_JOBS=1 cargo test --offline --locked --release --test r712_deepseek_session_owner gate_selected_route_plans_exact_pinned_checkpoint_ranges_before_payload_reads
+  result: release 1 passed, 0 failed.
+
+Static checks:
+  CARGO_BUILD_JOBS=1 cargo clippy --offline --locked --lib --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+  git diff --check: PASS
+
+The test reads only the tracked model index/header fixtures and synthetic gate tensors. It plans 36 selected MXFP4 tensor ranges, checks the aggregate byte cap and does not read any source checkpoint payload bytes or start Sessions.

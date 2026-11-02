@@ -809,3 +809,46 @@ fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
         assert!(close.error.is_none(), "{close:?}");
     }
 }
+
+#[test]
+fn gate_selected_route_plans_exact_pinned_checkpoint_ranges_before_payload_reads() {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let header = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    );
+    let batch = gated_grouped_route_batch();
+    let source = voltafabric::deepseek_v41_gate::PinnedMxfp4PayloadSource {
+        index_bytes: index,
+        header_bytes: header,
+        expected_header_sha256: HEADER_SHA256,
+        header_shard_name: "model-00003-of-00048.safetensors",
+        source_shard_bytes: SHARD_BYTES,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+    };
+    const ROUTE_PAYLOAD_BYTES: u64 = 112_803_840;
+
+    let plan = batch
+        .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES)
+        .unwrap();
+    assert_eq!(plan.stamp(), &batch.problem().stamp);
+    assert_eq!(plan.attempt(), batch.attempt());
+    assert_eq!(plan.route_experts(), TOP6);
+    assert!(!plan.route_fingerprint().is_empty());
+    assert_eq!(
+        plan.payload_plan().source_shard,
+        "model-00003-of-00048.safetensors"
+    );
+    assert_eq!(plan.payload_plan().source_shard_bytes, SHARD_BYTES);
+    assert_eq!(plan.payload_plan().tensors.len(), 36);
+    assert_eq!(
+        plan.payload_plan().selected_payload_bytes,
+        ROUTE_PAYLOAD_BYTES
+    );
+
+    let err = batch
+        .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES - 1)
+        .unwrap_err();
+    assert_eq!(err.code, "ARTIFACT_BUDGET");
+}

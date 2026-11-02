@@ -3197,7 +3197,7 @@ fn read_pinned_safetensors_header<R: Read + Seek>(
 /// Hash the complete one-token route identity and its selected rank/local owners.
 /// Routing weights are encoded as their exact IEEE-754 bit patterns: no sorting,
 /// rounding, or renormalization can silently change the route a resident belongs to.
-fn pinned_top6_route_fingerprint(
+pub(crate) fn pinned_top6_route_fingerprint(
     route: &crate::routing::RoutingProblem,
     attempt: u64,
 ) -> Result<String> {

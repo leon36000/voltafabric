@@ -1,0 +1,30 @@
+{
+  "id": "R717",
+  "owner": "integrator",
+  "state": "SOURCE_COMMIT_PENDING_READBACK",
+  "branch": "r717-deepseek-gate-payload-plan-20261102",
+  "parent_commit": "e80a2d2a8163f25c0f523ba6644a71632c1137a8",
+  "path": "research/R717",
+  "code_files": [
+    "src/deepseek_v41.rs",
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "report": "research/R717/REPORT.md",
+  "result": "research/R717/RESULT.json",
+  "build_test": "research/R717/BUILD_TEST.txt",
+  "manifest": "research/R717/SHA256SUMS",
+  "local_cpu_tests": "focused route-bound 36-range plan 1/1 debug and release; Clippy -D warnings, rustfmt and diff check pass",
+  "synthetic_gate_tensors": true,
+  "actual_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "manifest_sha256": "39ad9c1357cd0e65c825429e2150847b95347238e3ded9b858e1d72ead37b725",
+  "manifest_file_count": 5,
+  "next_action": "R718: bind gate-derived ranges to complete retained payload availability/hashes for all six experts; fail closed before any payload read if inventory is incomplete. No download, GPU, production network, UNKNOWN replay or automatic relaunch."
+}

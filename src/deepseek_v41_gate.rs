@@ -203,6 +203,52 @@ pub struct GateLoadReceipt {
     pub tensors: Vec<GateTensorReceipt>,
 }
 
+/// Pinned checkpoint metadata for planning the gate-selected experts. This contains
+/// only the Safetensors index/header and explicit source-size bounds; it is not proof
+/// that any selected weight payload is present or authenticated.
+#[derive(Debug, Clone, Copy)]
+pub struct PinnedMxfp4PayloadSource<'a> {
+    pub index_bytes: &'a [u8],
+    pub header_bytes: &'a [u8],
+    pub expected_header_sha256: &'a str,
+    pub header_shard_name: &'a str,
+    pub source_shard_bytes: u64,
+    pub max_source_shard_bytes: u64,
+}
+
+/// Immutable metadata-only payload plan derived from one gate-produced top-6 route.
+/// The stamp, attempt, route order, coefficient/rank dispatch fingerprint and exact
+/// selected source ranges stay together for the later authenticated read stage.
+#[derive(Debug)]
+pub struct DeepSeekV41RoutePayloadPlan {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_fingerprint: String,
+    payload_plan: crate::deepseek_v41::Mxfp4ExpertPayloadPlan,
+}
+
+impl DeepSeekV41RoutePayloadPlan {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.payload_plan.experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn payload_plan(&self) -> &crate::deepseek_v41::Mxfp4ExpertPayloadPlan {
+        &self.payload_plan
+    }
+}
+
 /// A one-token gate decision bound to VoltaFabric's route identity and attempt.
 /// The route problem is private so the validated stamp cannot be replaced after
 /// construction; its already-scaled coefficients are carried through unchanged.
@@ -219,6 +265,67 @@ impl DeepSeekV41RouteBatch {
 
     pub fn attempt(&self) -> u64 {
         self.attempt
+    }
+
+    /// Resolve all six gate-selected experts against the pinned index and one exact
+    /// Safetensors header, without reading any weight range. The checkpoint index
+    /// must place those six experts in the supplied shard; incomplete or oversized
+    /// plans refuse before a caller opens a payload reader or starts Sessions.
+    pub fn plan_selected_mxfp4_payloads(
+        &self,
+        source: PinnedMxfp4PayloadSource<'_>,
+        max_total_selected_payload_bytes: u64,
+    ) -> Result<DeepSeekV41RoutePayloadPlan> {
+        crate::routing::validate(&self.problem)?;
+        if self.attempt == 0
+            || self.problem.stamp.model_revision != PINNED_MODEL_REVISION
+            || self.problem.hidden != HIDDEN_SIZE
+            || self.problem.routes.len() != 1
+            || self.problem.routes[0].len() != TOP_K
+            || self.problem.experts.len() != TOP_K
+            || self.problem.experts
+                != self.problem.routes[0]
+                    .iter()
+                    .map(|choice| choice.expert)
+                    .collect::<Vec<_>>()
+            || max_total_selected_payload_bytes == 0
+        {
+            return Err(invalid(
+                "DeepSeek payload planning requires one identified top-6 gate route and a positive byte ceiling",
+            ));
+        }
+        let route_fingerprint =
+            crate::deepseek_v41::pinned_top6_route_fingerprint(&self.problem, self.attempt)?;
+        let payload_plan = crate::deepseek_v41::plan_pinned_mxfp4_expert_payloads(
+            crate::deepseek_v41::PinnedExpertPayloadRequest {
+                index_bytes: source.index_bytes,
+                header_bytes: source.header_bytes,
+                expected_header_sha256: source.expected_header_sha256,
+                header_shard_name: source.header_shard_name,
+                source_shard_bytes: source.source_shard_bytes,
+                max_source_shard_bytes: source.max_source_shard_bytes,
+                namespace: crate::deepseek_v41::Mxfp4ExpertNamespace::Backbone,
+                layer: self.problem.stamp.layer,
+                experts: &self.problem.experts,
+            },
+        )?;
+        if payload_plan.experts != self.problem.experts {
+            return Err(invalid(
+                "pinned payload planner changed gate-selected expert order",
+            ));
+        }
+        if payload_plan.selected_payload_bytes > max_total_selected_payload_bytes {
+            return Err(crate::Error::new(
+                "ARTIFACT_BUDGET",
+                "gate-selected MXFP4 payload plan exceeds its explicit aggregate byte ceiling",
+            ));
+        }
+        Ok(DeepSeekV41RoutePayloadPlan {
+            stamp: self.problem.stamp.clone(),
+            attempt: self.attempt,
+            route_fingerprint,
+            payload_plan,
+        })
     }
 
     /// Build the existing one-token MXFP4 Session input without changing routes,
