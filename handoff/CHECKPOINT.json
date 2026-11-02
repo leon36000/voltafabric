@@ -4456,10 +4456,10 @@
   "cpu_reproduction_command": "python3 -B /home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/preweighted-session-20261024-r12/run_gate.py reproduction1",
   "current_integrity": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/productivity-live-wave-r102-20261028/CANONICAL_POSTCHECK.json",
   "current_operation_gpu_executed": false,
-  "current_operation_id": "r719-deepseek-route-read-session-exec-20261102",
+  "current_operation_id": "r720-dsx-primary-device-role-20261102",
   "current_operation_remote_started": true,
   "current_operation_replay_allowed": false,
-  "current_operation_status": "R719_SOURCE_READBACK_EXACT_PIPELINE_SCANS_SUCCESS_CPU_DEBUG_RELEASE_PASS",
+  "current_operation_status": "SOURCE_READBACK_EXACT_PIPELINE_2544_SUCCESS_CPU_DEBUG_RELEASE_4_OF_4",
   "current_source_manifest": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-admission-r59/source_final.json",
   "current_source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
   "deep_audit_findings_open": [],
@@ -5684,8 +5684,8 @@
   },
   "last_remote_test": "A126 read-only PC3 preflight READY for exact Tesla V100-SXM2-16GB UUID GPU-42d06a85-027a-75ea-7857-a8de27ad465e, Gen3 x4, Torch CUDA/NVRTC 12.8, SM70; no kernel dispatched yet.",
   "last_review": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/project-deep-audit-r82-20261027/REPORT.md",
-  "last_test": "research/R708/BUILD_TEST.txt",
-  "last_test_result": "Focused fail-closed preflight test 1/1 debug and release; route/bindings rejected missing ranks before the deliberately nonexistent artifact path or any Session. Clippy -D warnings, rustfmt and diff check pass. Pipeline 2453 running configured scans/fallback only; no Rust compile/test, model, worker, GPU or inter-PC run.",
+  "last_test": "research/R720/BUILD_TEST.txt",
+  "last_test_result": "R720 focused synthetic topology tests passed 4/4 in debug and release; Clippy -D warnings, rustfmt and diff check passed. GitLab source commit exact readback 6/6; configured gitleaks, Semgrep, Trivy and fallback pipeline 2544 succeeded. No real host placement, model checkpoint, complete generation, GPU or production network qualification.",
   "last_updated": "2026-11-02 12:18:48 UTC",
   "latest_failure_receipt": ".work/a129-deepseek-layer-adapter-r1/evidence/a129-deepseek-layer-adapter-sm70-20261020-r1/GPU_RECEIPT.json",
   "latest_native_budget_observation": {
@@ -5701,7 +5701,7 @@
     "policy": "No extended autonomous R&D wave or new agents on unbudgeted credits; finish only the already CPU-qualified staging and its readback, then wait for ordinary quota.",
     "quota_checks_this_wake": 1
   },
-  "latest_phase": "R719_ROUTE_PAYLOAD_SESSION_EXEC_CPU_DEBUG_RELEASE_PASS",
+  "latest_phase": "R720_PRIMARY_RANK_ADVICE_CPU_DEBUG_RELEASE_PASS_AND_GITLAB_PIPELINE_SUCCESS",
   "latest_phase_evidence": "research/R719/REPORT.md",
   "latest_source_manifest": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-admission-r59/source_final.json",
   "latest_source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
@@ -5711,7 +5711,7 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R720: audit read-only the pinned lxe/dsx source revision, license, SM70 kernel paths, and memory/placement design for one explicitly adaptable VoltaFabric boundary. No model download, installation, GPU, or route changes.",
+  "next_action": "R721: pin official vLLM and SGLang releases/licenses, reconcile their V100/SM70 and DeepSeek-V4.1-Flash requirements against PC1's known CUDA 12 line, then choose one CPU-testable adapter boundary. No install, model download, GPU or route changes.",
   "next_command": "R719: join the gate-bound route, complete authenticated synthetic payload read, six owners, rank grouping, local Session LOAD/EXEC and the independent MXFP4 oracle in one bounded CPU fixture. Keep all weights synthetic; no real checkpoint payload, GPU, production network, R53, UNKNOWN replay, cleanup or automatic relaunch.",
   "next_command_expected_result": "One synthetic gate route: 36 digest preflight before I/O; six authenticated-by-fixture resident owners; exact rank grouping; local Session LOAD/EXEC and independent oracle; no real model payload.",
   "next_cpu_action": "R719: join the gate-bound route, complete authenticated synthetic payload read, six owners, rank grouping, local Session LOAD/EXEC and the independent MXFP4 oracle in one bounded CPU fixture. Keep all weights synthetic; no real checkpoint payload, GPU, production network, R53, UNKNOWN replay, cleanup or automatic relaunch.",
@@ -5727,8 +5727,8 @@
     "No CUDA/RDMA/GPUDirect/production claim from CPU evidence.",
     "Do not modify frozen A150/A151/H1 predecessor artifacts."
   ],
-  "next_required_work": "R719: join the gate-bound route, complete authenticated synthetic payload read, six owners, rank grouping, local Session LOAD/EXEC and the independent MXFP4 oracle in one bounded CPU fixture. Keep all weights synthetic; no real checkpoint payload, GPU, production network, R53, UNKNOWN replay, cleanup or automatic relaunch.",
-  "next_task": "R720",
+  "next_required_work": "R721: audit pinned vLLM and SGLang release, license, model and device requirements; select one CPU-testable boundary useful to a complete VoltaFabric checkpoint-to-generation path. Keep native route/coefficient/format contracts unchanged. No install, model download, GPU, R53 or UNKNOWN replay.",
+  "next_task": "R721",
   "next_updated_utc": "2026-11-02 12:18:48 UTC",
   "no_processes_left_after_tests": true,
   "optimization_lab_20261023": {
@@ -9059,8 +9059,8 @@
   "source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
   "source_manifest_state": "R59_CURRENT_CANONICAL_FUNCTIONAL_SOURCES_UNCHANGED_IN_R69",
   "source_map_sha256": "cf02e002f790675324031ac2c1cb59e1adb7acaf4fa5bcf1f42ea01690220e89",
-  "state": "PRIVATE_CPU_ROUTE_PAYLOAD_TO_SESSION_EXEC_PROOF",
-  "status": "R719_PRIVATE_GITLAB_SOURCE_READBACK_AND_PIPELINE_SUCCESS",
+  "state": "PRIVATE_GITLAB_SOURCE_READBACK_AND_PIPELINE_SUCCESS",
+  "status": "R720_PRIVATE_GITLAB_SOURCE_READBACK_6_OF_6_PIPELINE_2544_SUCCESS_CPU_DEBUG_RELEASE_4_OF_4",
   "target_model": {
     "cuda_or_full_model_executed": false,
     "evidence": "evidence/continuation_a58_deepseek41/phase.json",
@@ -9079,8 +9079,8 @@
   "title": "R64 — deux experts réels sur RTX 5080 et V100, coordonnés par PC6 via SSH",
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
-  "updated_at_utc": "2026-11-02T12:45:08Z",
-  "updated_utc": "2026-11-02 12:45:08 UTC",
+  "updated_at_utc": "2026-11-02T13:04:39Z",
+  "updated_utc": "2026-11-02 13:04:39 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -13627,5 +13627,12 @@
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R720: audit read-only the pinned lxe/dsx source revision, license, SM70 kernel paths, and memory/placement design for one explicitly adaptable VoltaFabric boundary. No model download, installation, GPU, or route changes."
+  },
+  "r720": {
+    "source_commit": "1a003f1625e6d477c9403622b37d3de751554ca4",
+    "pipeline_id": 2544,
+    "exact_readback_files": "6/6",
+    "local_tests": "debug/release 4/4; clippy/fmt/diff pass",
+    "automatic_relaunch": "STOPPED_BY_OWNER"
   }
 }

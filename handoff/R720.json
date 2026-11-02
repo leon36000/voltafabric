@@ -1,7 +1,7 @@
 {
   "id": "R720",
   "owner": "integrator",
-  "state": "LOCAL_CPU_VERIFIED_SOURCE_PUBLICATION_PENDING",
+  "state": "PRIVATE_GITLAB_SOURCE_READBACK_AND_PIPELINE_SUCCESS",
   "branch": "r720-dsx-primary-device-role-20261102",
   "parent_source_commit": "4fea54c052df071096126f68bd6cb8835a9ba46e",
   "path": "research/R720",
@@ -33,5 +33,23 @@
   "production_r53_used": false,
   "unknown_replayed": false,
   "automatic_relaunch": "STOPPED_BY_OWNER",
-  "next_action": "R721: inspect pinned vLLM and SGLang adapters for V100/SM70 inference boundaries, licenses and any CPU-testable component that can connect a real checkpoint generation to VoltaFabric expert owners. Preserve route/coefficient and format boundaries; no model download or GPU run."
+  "next_action": "R721: pin official vLLM and SGLang releases/licenses, reconcile their V100/SM70 and DeepSeek-V4.1-Flash requirements against PC1's known CUDA 12 line, then choose one CPU-testable adapter boundary. No install, model download, GPU or route changes.",
+  "source_commit": "1a003f1625e6d477c9403622b37d3de751554ca4",
+  "source_pipeline_id": 2544,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "gitlab_readback": {
+    "ref": "1a003f1625e6d477c9403622b37d3de751554ca4",
+    "files_verified": 6,
+    "total_files": 6,
+    "manifest_verified": true,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "completed_utc": "2026-11-02 13:04:39 UTC"
 }

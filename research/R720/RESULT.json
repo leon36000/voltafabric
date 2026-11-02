@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "R720",
+  "state": "PRIVATE_GITLAB_SOURCE_READBACK_AND_PIPELINE_SUCCESS",
+  "branch": "r720-dsx-primary-device-role-20261102",
+  "source_commit": "1a003f1625e6d477c9403622b37d3de751554ca4",
+  "parent_source_commit": "4fea54c052df071096126f68bd6cb8835a9ba46e",
+  "source_pipeline_id": 2544,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "exact_readback": {
+    "ref": "1a003f1625e6d477c9403622b37d3de751554ca4",
+    "verified_files": 6,
+    "total_files": 6,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "files": [
+    {
+      "path": "src/planner.rs",
+      "sha256": "4b1d9c4756c2ca8884d3952182ed80ac1706b26ab6fa4564753a91189c07931b"
+    },
+    {
+      "path": "tests/r720_primary_rank_advice.rs",
+      "sha256": "75453f30b2fd5a511102071bad31c9ba47b82806bca316fef6b1b33c1e773531"
+    },
+    {
+      "path": "research/R720/REPORT.md",
+      "sha256": "24bd1e51df5cef0b648e558c5ed83a917d631e4ed21471ba3e3743d504bce20b"
+    },
+    {
+      "path": "research/R720/BUILD_TEST.txt",
+      "sha256": "5002e37d34551b73d08c9efecb71c145d8aaf0ca6cc489989695fca994d4f18e"
+    }
+  ],
+  "local_cpu_validation": {
+    "debug": "4/4 pass",
+    "release": "4/4 pass",
+    "clippy": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "diff_check": "pass",
+    "scope": "local synthetic topology fixture; tests do not qualify a real host link or placement"
+  },
+  "donor": {
+    "repository": "https://github.com/lxe/dsx",
+    "revision": "aa2dc5c6b12c24720c55a63e1da7c8ae31a18471",
+    "license": "MIT",
+    "code_copied": false,
+    "idea_adapted": "Select primary-rank advice from measured same-host link bandwidth; explicit caller tolerance, then available memory, then rank."
+  },
+  "limitations": {
+    "real_model_checkpoint": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "route_coefficients_or_registry_changed": false,
+    "unknown_replayed": false
+  },
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "completed_utc": "2026-11-02 13:04:39 UTC",
+  "next_action": "R721: pin official vLLM and SGLang releases/licenses, reconcile their V100/SM70 and DeepSeek-V4.1-Flash requirements against PC1's known CUDA 12 line, then choose one CPU-testable adapter boundary. No install, model download, GPU or route changes."
+}
