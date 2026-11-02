@@ -10775,8 +10775,8 @@
     "test_scope": "Synthetic hidden=32, one layer, 41 experts/top-k=2, Q8_0 expert tensors and four direct token IDs; no trained checkpoint or tokenizer.",
     "arithmetic_contract": "Qwen2MoE post-down preweighted FP32 slot sum; kept distinct from R9/MXFP4 FP32 and FP16-decode/f64 reduction contracts.",
     "pipeline_id": 2358,
-    "pipeline_status": "running",
-    "pipeline_scope": "configured security scans/fallback only; not local CPU test evidence",
+    "pipeline_status": "success",
+    "pipeline_scope": "configured scans and fallback only; not local CPU test evidence",
     "unknown_no_replay": [
       [
         "r691-public-decode",
@@ -10796,7 +10796,13 @@
     "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch.",
     "task": "Use the public llama.cpp generation boundary with VoltaFabric routed Qwen2MoE experts.",
     "local_test_pass": true,
-    "full_generation": false
+    "full_generation": false,
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   },
   "r692_gguf_metadata_inventory": {
     "state": "VERIFIED_METADATA_ONLY_SYNTHETIC_FIXTURE_LIMITED",
@@ -10837,14 +10843,20 @@
     "pc4_probe_exit_code": 255,
     "pc4_absence_conclusion": false,
     "pipeline_id": 2360,
-    "pipeline_status": "running",
-    "pipeline_scope": "configured security scans/fallback only; not local C++ test evidence",
+    "pipeline_status": "success",
+    "pipeline_scope": "configured scans and fallback only; not local CPU test evidence",
     "gpu": false,
     "production_network": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch.",
     "task": "Add a llama.cpp GGUF metadata-only checkpoint preflight with fail-closed parsing.",
     "local_test_pass": true,
-    "real_checkpoint_compatibility": false
+    "real_checkpoint_compatibility": false,
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   }
 }

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 04:23:12 UTC",
+  "updated_utc": "2026-11-02 04:26:46 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1282,7 +1282,7 @@
     {
       "id": "R691",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_10_OF_10_CPU_PUBLIC_LLAMA_DECODE_SYNTHETIC_PASS_PIPELINE_2358_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_10_OF_10_CPU_PUBLIC_LLAMA_DECODE_SYNTHETIC_PASS_PIPELINE_2358_SCANS_SUCCESS",
       "branch": "r691-public-llama-decode-20261102",
       "parent_commit": "39b916df2d65a7559bc39e439a8144fb66c29e4d",
       "source_commit": "52e27c0280c432e43f32b14355eebda1b5b00db0",
@@ -1298,8 +1298,8 @@
       "manifest_path": "research/R691/SHA256SUMS",
       "manifest_sha256": "156c5481e09f619e554d8916884b0de976e2414e59c79caa8cb02de54bdc1e1d",
       "pipeline_id": 2358,
-      "pipeline_status": "running",
-      "pipeline_scope": "configured security scans/fallback only; not local CPU test evidence",
+      "pipeline_status": "success",
+      "pipeline_scope": "configured security scans and CI fallback only; not C++/Rust CPU test evidence",
       "route_coefficients_applied_once": true,
       "atomic_refusal": true,
       "cpu_only": true,
@@ -1319,12 +1319,18 @@
         ]
       ],
       "automatic_relaunch": "STOPPED_BY_OWNER",
-      "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch."
+      "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch.",
+      "pipeline_jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     },
     {
       "id": "R692",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_6_OF_6_GGUF_METADATA_ONLY_CPU_PASS_PIPELINE_2360_RUNNING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_6_OF_6_GGUF_METADATA_ONLY_CPU_PASS_PIPELINE_2360_SCANS_SUCCESS",
       "branch": "r692-gguf-metadata-inventory-20261102",
       "parent_branch": "r691-public-llama-decode-20261102",
       "parent_commit": "4a6670f3f08e6833d1aa4b48ae285e695fa4a9bd",
@@ -1341,8 +1347,8 @@
       "manifest_path": "research/R692/SHA256SUMS",
       "manifest_sha256": "5821f7094fc3ec268f8d2b6a4f5b25ff918f5099f46b22246b04c0f0435032da",
       "pipeline_id": 2360,
-      "pipeline_status": "running",
-      "pipeline_scope": "configured security scans/fallback only; not local C++ test evidence",
+      "pipeline_status": "success",
+      "pipeline_scope": "configured security scans and CI fallback only; not C++/Rust CPU test evidence",
       "cpu_only": true,
       "weights_loaded": false,
       "gpu": false,
@@ -1350,7 +1356,13 @@
       "compatibility_assessment": "NOT_ATTEMPTED",
       "license_verification_required": true,
       "automatic_relaunch": "STOPPED_BY_OWNER",
-      "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch."
+      "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch.",
+      "pipeline_jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     }
   ],
   "acceptance": [
@@ -1452,7 +1464,8 @@
     "R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.",
     "R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation.",
     "R691_PUBLIC_LLAMA_DECODE_CPU_SYNTHETIC_QWEN2MOE_PASS; donor/VF tokens 3,3,3; logits max_abs=0; exact GitLab readback 10/10; no real checkpoint/full-generation/GPU claim.",
-    "R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim."
+    "R692_LLAMA_CPP_GGUF_METADATA_ONLY_INVENTORY_SYNTHETIC_CPU_PASS; no weights loaded; malformed file rejected without JSON; real checkpoint inventory unavailable, no absence claim.",
+    "GITLAB_PIPELINES_2358_AND_2360_CONFIGURED_SCANS_AND_FALLBACK_SUCCESS; local CPU tests remain separate evidence."
   ],
   "active_operations": [
     {
@@ -1857,15 +1870,27 @@
       "id": "gitlab-pipeline-2358",
       "ref": "r691-public-llama-decode-20261102",
       "commit": "52e27c0280c432e43f32b14355eebda1b5b00db0",
-      "status": "running",
-      "scope": "configured security scans/fallback only; not local CPU test evidence"
+      "status": "success",
+      "scope": "configured scans and fallback only; not local CPU test evidence",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     },
     {
       "id": "gitlab-pipeline-2360",
       "ref": "r692-gguf-metadata-inventory-20261102",
       "commit": "0d5098eb95807b476526c2e3ec6a388fb8788c74",
-      "status": "running",
-      "scope": "configured security scans/fallback only; not local C++ test evidence"
+      "status": "success",
+      "scope": "configured scans and fallback only; not local CPU test evidence",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     }
   ],
   "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch.",
@@ -2016,7 +2041,7 @@
   "r691_result": {
     "id": "R691",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_10_OF_10_CPU_PUBLIC_LLAMA_DECODE_SYNTHETIC_PASS_PIPELINE_2358_RUNNING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_10_OF_10_CPU_PUBLIC_LLAMA_DECODE_SYNTHETIC_PASS_PIPELINE_2358_SCANS_SUCCESS",
     "branch": "r691-public-llama-decode-20261102",
     "parent_commit": "39b916df2d65a7559bc39e439a8144fb66c29e4d",
     "source_commit": "52e27c0280c432e43f32b14355eebda1b5b00db0",
@@ -2032,8 +2057,8 @@
     "manifest_path": "research/R691/SHA256SUMS",
     "manifest_sha256": "156c5481e09f619e554d8916884b0de976e2414e59c79caa8cb02de54bdc1e1d",
     "pipeline_id": 2358,
-    "pipeline_status": "running",
-    "pipeline_scope": "configured security scans/fallback only; not local CPU test evidence",
+    "pipeline_status": "success",
+    "pipeline_scope": "configured security scans and CI fallback only; not C++/Rust CPU test evidence",
     "route_coefficients_applied_once": true,
     "atomic_refusal": true,
     "cpu_only": true,
@@ -2053,12 +2078,18 @@
       ]
     ],
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch."
+    "next_action": "R692: inspect only owner-admitted checkpoint candidates already present in the retained workspace or approved PC4 source paths; record format, architecture, tokenizer and license, then select one compatible CPU layer for checkpoint-backed replacement. No download, GPU, production-network test, cleanup, or automatic relaunch.",
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   },
   "r692_result": {
     "id": "R692",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_6_OF_6_GGUF_METADATA_ONLY_CPU_PASS_PIPELINE_2360_RUNNING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_6_OF_6_GGUF_METADATA_ONLY_CPU_PASS_PIPELINE_2360_SCANS_SUCCESS",
     "branch": "r692-gguf-metadata-inventory-20261102",
     "parent_branch": "r691-public-llama-decode-20261102",
     "parent_commit": "4a6670f3f08e6833d1aa4b48ae285e695fa4a9bd",
@@ -2075,8 +2106,8 @@
     "manifest_path": "research/R692/SHA256SUMS",
     "manifest_sha256": "5821f7094fc3ec268f8d2b6a4f5b25ff918f5099f46b22246b04c0f0435032da",
     "pipeline_id": 2360,
-    "pipeline_status": "running",
-    "pipeline_scope": "configured security scans/fallback only; not local C++ test evidence",
+    "pipeline_status": "success",
+    "pipeline_scope": "configured security scans and CI fallback only; not C++/Rust CPU test evidence",
     "cpu_only": true,
     "weights_loaded": false,
     "gpu": false,
@@ -2084,6 +2115,12 @@
     "compatibility_assessment": "NOT_ATTEMPTED",
     "license_verification_required": true,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch."
+    "next_action": "R693: use the metadata-only GGUF inventory on an already-present, owner-admitted real checkpoint once its source path is accessible; verify architecture, tensor formats, tokenizer metadata, and authoritative license, then choose a compatible CPU layer for checkpoint-backed comparison. No download, GPU, cleanup, or automatic relaunch.",
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   }
 }
