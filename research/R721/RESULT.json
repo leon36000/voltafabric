@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "id": "R721",
+  "state": "PRIVATE_GITLAB_SOURCE_READBACK_VERIFIED_PIPELINE_SUCCESS_CPU_DEBUG_RELEASE_PASS",
+  "branch": "r721-vllm-sglang-checkpoint-index-20261102",
+  "parent_commit": "3eaffa82e49934ee28c0b4f915215691c804f323",
+  "source_commit": "9586f60e0022b669c2534bab3f87d79ba71cd7b5",
+  "source_pipeline_id": 2546,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "exact_readback": {
+    "ref": "9586f60e0022b669c2534bab3f87d79ba71cd7b5",
+    "verified_files": 6,
+    "total_files": 6,
+    "manifest_entries_match": true,
+    "manifest_file_count": 5,
+    "manifest_sha256": "776c6420a7828c21273c00d22599abfabb7a4a2a301973a19ab08f2dbebc4b64",
+    "full_pagination": true
+  },
+  "files": [
+    {
+      "path": "src/checkpoint.rs",
+      "sha256": "a264afc8ef5853abdd3cee6bcc10339f883e534e3a7f4303fe0830b64f60208d"
+    },
+    {
+      "path": "tests/r721_indexed_safetensors.rs",
+      "sha256": "355028fa38d705942830f4a295ef7c88ff0deb4dbfcbd3d7b901e97600b2e53e"
+    },
+    {
+      "path": "research/R721/REPORT.md",
+      "sha256": "ff73a7db58e8399f8fccbfb01f29649a49c927bc3ffd32a58333cda359da8f4d"
+    },
+    {
+      "path": "research/R721/BUILD_TEST.txt",
+      "sha256": "5bc5a81cc05aee9cc5582a125d0e3293126dd284e0887432ece5e167c8ce1f9c"
+    },
+    {
+      "path": "research/R721/SHA256SUMS",
+      "sha256": "776c6420a7828c21273c00d22599abfabb7a4a2a301973a19ab08f2dbebc4b64"
+    },
+    {
+      "path": "handoff/R721.json",
+      "sha256": "4249f28c9798716092d966bc84fff407620850e6d588af82ae44f8988f3ece9b"
+    }
+  ],
+  "local_cpu_validation": {
+    "debug": "5/5 pass",
+    "release": "5/5 pass",
+    "clippy": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "diff_check": "pass",
+    "scope": "synthetic two-shard CPU fixture; GitLab pipeline scans are not compilation or Rust-test evidence"
+  },
+  "semgrep": {
+    "version": "1.182.0",
+    "total_findings": 155,
+    "findings_in_R721_files": 0,
+    "parser_errors": 5
+  },
+  "donor": {
+    "projects": [
+      "vLLM",
+      "SGLang"
+    ],
+    "revisions_screened": [
+      "vLLM v0.17.0",
+      "vLLM v0.31.0",
+      "SGLang v0.5.19",
+      "SGLang v0.5.21"
+    ],
+    "license": "Apache-2.0",
+    "code_copied": false,
+    "idea_adapted": "HF Safetensors weight_map resolves selected tensors to shards; existing VoltaFabric named-tensor reader validates selected bytes"
+  },
+  "limits": {
+    "real_checkpoint": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "completed_utc": "2026-11-02 13:26:56 UTC",
+  "next_action": "R722: connect the indexed tensor reader to the pinned DeepSeek expert checkpoint path and existing CPU Session flow with a synthetic sharded layer; preserve expert identities, coefficients, format distinctions, and atomic output."
+}

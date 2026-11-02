@@ -1,7 +1,7 @@
 {
   "id": "R721",
   "owner": "integrator",
-  "state": "SOURCE_COMMIT_PENDING",
+  "state": "PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SUCCESS_CPU_DEBUG_RELEASE_PASS",
   "branch": "r721-vllm-sglang-checkpoint-index-20261102",
   "parent_commit": "3eaffa82e49934ee28c0b4f915215691c804f323",
   "path": "research/R721",
@@ -30,5 +30,28 @@
     "route_or_coefficients_changed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER"
   },
-  "next_action": "R722: connect indexed selected-tensor loading to a pinned model/checkpoint manifest and one synthetic selected-expert layer; run it through the existing CPU Session path and an independent tensor oracle without changing routing, coefficients, or format contracts."
+  "next_action": "R722: connect indexed selected-tensor loading to a pinned model/checkpoint manifest and one synthetic selected-expert layer; run it through the existing CPU Session path and an independent tensor oracle without changing routing, coefficients, or format contracts.",
+  "source_commit": "9586f60e0022b669c2534bab3f87d79ba71cd7b5",
+  "source_pipeline_id": 2546,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "pc4_gitleaks": "success",
+    "pc4_semgrep": "success",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "success"
+  },
+  "exact_readback": {
+    "verified_files": 6,
+    "total_files": 6,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "security_scan": {
+    "semgrep_version": "1.182.0",
+    "semgrep_total_findings": 155,
+    "semgrep_findings_in_R721_files": 0,
+    "semgrep_parser_errors": 5,
+    "ci_compile_or_rust_tests": false
+  },
+  "completed_utc": "2026-11-02 13:25:55 UTC"
 }
