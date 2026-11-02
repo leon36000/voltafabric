@@ -342,6 +342,38 @@ pub struct DeepSeekV41RouteBatch {
     attempt: u64,
 }
 
+/// Complete input identity for one token entering the indexed DeepSeek MoE layer.
+/// `hidden` is the caller's post-attention/post-normalization activation; this type
+/// does not claim to implement the attention or normalization sublayers.
+pub struct DeepSeekV41IndexedTokenRequest<'a> {
+    pub hidden: &'a [f32],
+    pub token_kind: TokenKind,
+    pub stamp: crate::moe::Stamp,
+    pub attempt: u64,
+    pub registry: crate::moe::Registry,
+    pub preferred_owners: BTreeMap<u32, u32>,
+    pub resident_order: BTreeMap<u32, Vec<u32>>,
+    pub max_total_selected_payload_bytes: u64,
+}
+
+/// Route and selected source ranges produced together by one resident indexed gate.
+/// The route remains private so callers cannot swap in expert IDs or coefficient bits.
+#[derive(Debug)]
+pub struct DeepSeekV41IndexedMoeTokenPlan {
+    batch: DeepSeekV41RouteBatch,
+    payloads: DeepSeekV41RoutePayloadPlan,
+}
+
+impl DeepSeekV41IndexedMoeTokenPlan {
+    pub fn batch(&self) -> &DeepSeekV41RouteBatch {
+        &self.batch
+    }
+
+    pub fn payloads(&self) -> &DeepSeekV41RoutePayloadPlan {
+        &self.payloads
+    }
+}
+
 impl DeepSeekV41RouteBatch {
     pub fn problem(&self) -> &crate::routing::RoutingProblem {
         &self.problem
@@ -868,6 +900,15 @@ impl DeepSeekV41Gate {
         source: PinnedGateIndexSource<'_>,
         spec: &GateShardSpec,
     ) -> Result<Self> {
+        Self::load_indexed_expected_shard(root, source, spec, None)
+    }
+
+    fn load_indexed_expected_shard(
+        root: &Path,
+        source: PinnedGateIndexSource<'_>,
+        spec: &GateShardSpec,
+        expected_source_shard: Option<&str>,
+    ) -> Result<Self> {
         validate_gate_spec(spec)?;
         if source.max_source_shard_bytes == 0
             || !crate::sha256::is_hex_digest(source.expected_header_sha256)
@@ -896,6 +937,11 @@ impl DeepSeekV41Gate {
             .iter()
             .next()
             .ok_or_else(|| invalid("pinned DeepSeek gate index selected no shard"))?;
+        if expected_source_shard.is_some_and(|expected| expected != shard_name.as_str()) {
+            return Err(invalid(
+                "pinned gate and routed expert tensors must share one source shard",
+            ));
+        }
         let expected_names = selected_names
             .iter()
             .collect::<std::collections::BTreeSet<_>>();
@@ -1112,6 +1158,109 @@ impl DeepSeekV41Gate {
             logits.push(sum);
         }
         Ok(logits)
+    }
+}
+
+/// Resident, indexed MoE sublayer for a pinned DeepSeek V4.1 backbone layer.
+/// It keeps the gate and expert reads bound to the same checkpoint index, header,
+/// shard name, and source-size ceiling across successive token requests.
+#[derive(Debug)]
+pub struct DeepSeekV41IndexedMoeLayer<'a> {
+    root: &'a Path,
+    gate: DeepSeekV41Gate,
+    expert_source: PinnedMxfp4PayloadSource<'a>,
+}
+
+impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
+    /// Load only the gate tensors and prove from the pinned index that gate and
+    /// expert tensors share the caller-admitted source shard before opening it.
+    pub fn load(
+        root: &'a Path,
+        gate_source: PinnedGateIndexSource<'a>,
+        expert_source: PinnedMxfp4PayloadSource<'a>,
+        spec: &GateShardSpec,
+    ) -> Result<Self> {
+        if gate_source.index_bytes != expert_source.index_bytes
+            || gate_source.expected_header_sha256 != expert_source.expected_header_sha256
+            || gate_source.max_source_shard_bytes != expert_source.max_source_shard_bytes
+            || !crate::sha256::is_hex_digest(expert_source.expected_header_sha256)
+            || crate::sha256::hex(expert_source.index_bytes)
+                != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+            || crate::sha256::hex(expert_source.header_bytes)
+                != expert_source.expected_header_sha256
+            || expert_source.source_shard_bytes == 0
+            || expert_source.source_shard_bytes > expert_source.max_source_shard_bytes
+        {
+            return Err(invalid(
+                "indexed DeepSeek layer gate and expert source identities or bounds differ",
+            ));
+        }
+
+        let gate = DeepSeekV41Gate::load_indexed_expected_shard(
+            root,
+            gate_source,
+            spec,
+            Some(expert_source.header_shard_name),
+        )?;
+        let expected_header_bytes = u64::try_from(expert_source.header_bytes.len())
+            .map_err(|_| invalid("indexed DeepSeek layer header length does not fit u64"))?;
+        if gate.receipt().file_bytes != expert_source.source_shard_bytes
+            || gate.receipt().header_bytes != expected_header_bytes
+        {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "indexed DeepSeek gate and expert source metadata differ",
+            ));
+        }
+        Ok(Self {
+            root,
+            gate,
+            expert_source,
+        })
+    }
+
+    pub fn gate_receipt(&self) -> &GateLoadReceipt {
+        self.gate.receipt()
+    }
+
+    /// Bind one post-normalization MoE activation to the route and exact selected
+    /// source ranges. The route coefficients are calculated by the gate once and
+    /// retained unchanged by the returned private token plan.
+    pub fn prepare_token(
+        &self,
+        request: DeepSeekV41IndexedTokenRequest<'_>,
+    ) -> Result<DeepSeekV41IndexedMoeTokenPlan> {
+        let batch = self.gate.prepare_route_batch(
+            request.hidden,
+            request.token_kind,
+            request.stamp,
+            request.attempt,
+            request.registry,
+            request.preferred_owners,
+            request.resident_order,
+        )?;
+        let payloads = batch.plan_selected_mxfp4_payloads(
+            self.expert_source,
+            request.max_total_selected_payload_bytes,
+        )?;
+        Ok(DeepSeekV41IndexedMoeTokenPlan { batch, payloads })
+    }
+
+    /// Read the full selected payload set for a token plan. The underlying route
+    /// reader validates every tensor digest before exposing any resident owner.
+    pub fn read_selected_payloads(
+        &self,
+        plan: &DeepSeekV41IndexedMoeTokenPlan,
+        expected_payload_sha256: &BTreeMap<String, String>,
+        max_total_selected_payload_bytes: u64,
+    ) -> Result<DeepSeekV41RoutePayloadReads> {
+        plan.batch.read_selected_mxfp4_indexed_payloads(
+            self.root,
+            &plan.payloads,
+            self.expert_source,
+            expected_payload_sha256,
+            max_total_selected_payload_bytes,
+        )
     }
 }
 

@@ -1,0 +1,53 @@
+{
+  "id": "R725",
+  "owner": "integrator",
+  "state": "CPU_SOURCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "branch": "r725-indexed-moe-layer-20261102",
+  "parent_commit": "4074c49558acaa92045779235cf3f2f5e5853adc",
+  "path": "research/R725",
+  "code_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "adapted_boundary": "Resident indexed DeepSeek MoE sub-layer binding the gate projection, selected route, exact index/header/shard and six atomic expert payload reads.",
+  "donor_code_copied": false,
+  "new_dependencies": false,
+  "local_tests": {
+    "indexed_gate_to_session_oracle_debug": "1/1 pass",
+    "indexed_gate_to_session_oracle_release": "1/1 pass",
+    "gate_expert_shard_mismatch_debug_release": "pass before file open",
+    "40_layer_index_colocation_debug_release": "pass",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "git_diff_check": "pass"
+  },
+  "limits": {
+    "real_checkpoint_payload": false,
+    "attention_implemented": false,
+    "normalization_implemented": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "normalization_metadata": {
+    "pinned_index_colocation": "40/40 layers: gate + attn_norm.weight + ffn_norm.weight + all expert payload tensor names share a shard",
+    "layer_0_tensors": "attn_norm.weight and ffn_norm.weight are BF16 [5120] in model-00003-of-00048.safetensors",
+    "config_rms_norm_eps": 1e-20,
+    "upstream_math": "FP32 input; mean of squares over last dimension; rsqrt(mean_square + eps); multiply learned weight in FP32; cast result back to input dtype",
+    "payload_values_loaded": false
+  },
+  "next_action": "R726: implement a separate CPU RMSNorm primitive matching the pinned eps=1e-20 and FP32 math contract with an independent oracle; then import the actual selected norm payload and connect its normalized activation to this indexed MoE sub-layer. Attention integration remains a later boundary.",
+  "source_commit": "awaiting GitLab source commit",
+  "source_pipeline_id": null,
+  "source_pipeline_status": "pending",
+  "source_readback_verified": false,
+  "manifest_file_count": 5,
+  "manifest_sha256": null,
+  "manifest_sha256_note": "Final manifest digest is recorded in root handoffs after generation to avoid self-reference.",
+  "prepared_utc": "2026-11-02T14:35:02Z"
+}

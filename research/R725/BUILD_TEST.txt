@@ -1,0 +1,27 @@
+R725 scoped CPU verification
+=============================
+
+Indexed gate -> bound route and payload plan -> six indexed experts -> resident owners -> grouped CPU Sessions -> FP64 MXFP4 oracle:
+  cargo test --locked --offline --test r712_deepseek_session_owner gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
+  debug: 1 passed; 11 filtered out; 83.01 s
+  release: 1 passed; 11 filtered out; 5.16 s
+
+Gate/expert shard mismatch rejected before opening any file:
+  cargo test --locked --offline --test r712_deepseek_session_owner indexed_moe_layer_rejects_gate_expert_shard_mismatch_before_opening_files
+  debug: 1 passed; 11 filtered out; 1.12 s
+  release: 1 passed; 11 filtered out; 0.08 s
+
+Pinned index colocates gate, both norm tensors and all expert payload names per layer (40/40):
+  cargo test --locked --offline --test r712_deepseek_session_owner pinned_index_colocates_each_layer_norms_gate_and_all_expert_payloads
+  debug: 1 passed; 11 filtered out; 1.20 s
+  release: 1 passed; 11 filtered out; 0.06 s
+
+Pinned layer-0 norm metadata: `attn_norm.weight` and `ffn_norm.weight` are BF16 `[5120]` in `model-00003-of-00048.safetensors`. Pinned config sets `rms_norm_eps=1e-20`; upstream reference computes in FP32 and casts the weighted result back to the input dtype. This test reads index/header metadata, not norm payload values.
+
+Additional checks:
+  cargo clippy --locked --offline --lib -- -D warnings: PASS
+  cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings: PASS
+  cargo fmt --all -- --check: PASS
+  git diff --check: PASS
+
+Gate and expert payload bytes are synthetic. Temporary sparse shards are created below .work and removed by RAII. No real norm payload was read. No weight download, GPU, production R53, inter-PC transport, UNKNOWN replay or performance benchmark was used.

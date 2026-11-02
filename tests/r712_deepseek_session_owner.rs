@@ -552,13 +552,23 @@ fn indexed_gate_route_payloads() -> (
         },
         max_payload_bytes: GATE_PAYLOAD_BYTES,
     };
-    let gate = DeepSeekV41Gate::load_indexed(
+    const ROUTE_PAYLOAD_BYTES: u64 = 112_803_840;
+    let source = PinnedMxfp4PayloadSource {
+        index_bytes: index,
+        header_bytes: header,
+        expected_header_sha256: HEADER_SHA256,
+        header_shard_name: "model-00003-of-00048.safetensors",
+        source_shard_bytes: SHARD_BYTES,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+    };
+    let layer = voltafabric::deepseek_v41_gate::DeepSeekV41IndexedMoeLayer::load(
         temp.path(),
         voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
             index_bytes: index,
             expected_header_sha256: HEADER_SHA256,
             max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
         },
+        source,
         &gate_spec,
     )
     .unwrap();
@@ -586,23 +596,27 @@ fn indexed_gate_route_payloads() -> (
             })
             .collect(),
     };
-    let batch = gate
-        .prepare_route_batch(
-            &hidden,
-            TokenKind::Text,
-            stamp,
-            29,
-            registry,
-            BTreeMap::new(),
-            BTreeMap::from([
-                (4, vec![0, 1]),
-                (5, vec![0]),
-                (6, vec![0]),
-                (7, vec![0]),
-                (8, vec![0]),
-            ]),
+    let token_plan = layer
+        .prepare_token(
+            voltafabric::deepseek_v41_gate::DeepSeekV41IndexedTokenRequest {
+                hidden: &hidden,
+                token_kind: TokenKind::Text,
+                stamp,
+                attempt: 29,
+                registry,
+                preferred_owners: BTreeMap::new(),
+                resident_order: BTreeMap::from([
+                    (4, vec![0, 1]),
+                    (5, vec![0]),
+                    (6, vec![0]),
+                    (7, vec![0]),
+                    (8, vec![0]),
+                ]),
+                max_total_selected_payload_bytes: ROUTE_PAYLOAD_BYTES,
+            },
         )
         .unwrap();
+    let batch = token_plan.batch().clone();
     let reference_batch = gated_grouped_route_batch();
     assert_eq!(batch.problem().experts, TOP6);
     assert_eq!(
@@ -616,18 +630,7 @@ fn indexed_gate_route_payloads() -> (
             .collect::<Vec<_>>()
     );
 
-    let source = PinnedMxfp4PayloadSource {
-        index_bytes: index,
-        header_bytes: header,
-        expected_header_sha256: HEADER_SHA256,
-        header_shard_name: "model-00003-of-00048.safetensors",
-        source_shard_bytes: SHARD_BYTES,
-        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
-    };
-    const ROUTE_PAYLOAD_BYTES: u64 = 112_803_840;
-    let plan = batch
-        .plan_selected_mxfp4_payloads(source, ROUTE_PAYLOAD_BYTES)
-        .unwrap();
+    let plan = token_plan.payloads();
     assert_eq!(
         plan.payload_plan().source_shard,
         "model-00003-of-00048.safetensors"
@@ -652,14 +655,8 @@ fn indexed_gate_route_payloads() -> (
         shard.write_all(&payload).unwrap();
     }
     drop(shard);
-    let reads = batch
-        .read_selected_mxfp4_indexed_payloads(
-            temp.path(),
-            &plan,
-            source,
-            &hashes,
-            ROUTE_PAYLOAD_BYTES,
-        )
+    let reads = layer
+        .read_selected_payloads(&token_plan, &hashes, ROUTE_PAYLOAD_BYTES)
         .unwrap();
     assert_eq!(reads.stamp(), &batch.problem().stamp);
     assert_eq!(reads.attempt(), batch.attempt());
@@ -1492,7 +1489,7 @@ fn indexed_gate_load_rejects_malformed_tensor_hashes_before_opening_shard() {
 }
 
 #[test]
-fn pinned_index_colocates_each_layer_gate_and_all_expert_payloads() {
+fn pinned_index_colocates_each_layer_norms_gate_and_all_expert_payloads() {
     let index = include_bytes!(
         "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
     );
@@ -1515,6 +1512,8 @@ fn pinned_index_colocates_each_layer_gate_and_all_expert_payloads() {
         for suffix in ["weight", "bias", "bias_vl"] {
             record(format!("layers.{layer}.ffn.gate.{suffix}"));
         }
+        record(format!("layers.{layer}.attn_norm.weight"));
+        record(format!("layers.{layer}.ffn_norm.weight"));
         for expert in 0..ROUTED_EXPERTS {
             for projection in ["w1", "w2", "w3"] {
                 for suffix in ["weight", "scale"] {
@@ -1526,4 +1525,58 @@ fn pinned_index_colocates_each_layer_gate_and_all_expert_payloads() {
         }
         assert!(layer_shard.is_some());
     }
+
+    let layer0_shard = weight_map["layers.0.attn_norm.weight"].as_str().unwrap();
+    assert_eq!(layer0_shard, "model-00003-of-00048.safetensors");
+    let header: serde_json::Value = serde_json::from_slice(include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    ))
+    .unwrap();
+    for name in ["layers.0.attn_norm.weight", "layers.0.ffn_norm.weight"] {
+        assert_eq!(header[name]["dtype"], "BF16");
+        assert_eq!(header[name]["shape"], serde_json::json!([5120]));
+    }
+}
+
+#[test]
+fn indexed_moe_layer_rejects_gate_expert_shard_mismatch_before_opening_files() {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    let header = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model-00003.header.314113f8.json"
+    );
+    let temp = IndexedTempDirectory::new();
+    let spec = GateShardSpec {
+        model_revision: PINNED_MODEL_REVISION.to_owned(),
+        layer: 0,
+        gate_temperature: 1.0,
+        route_scale: ROUTE_SCALE,
+        tensor_sha256: GateTensorHashes {
+            weight: "0".repeat(64),
+            text_bias: "0".repeat(64),
+            image_bias: "0".repeat(64),
+        },
+        max_payload_bytes: GATE_PAYLOAD_BYTES,
+    };
+    let error = voltafabric::deepseek_v41_gate::DeepSeekV41IndexedMoeLayer::load(
+        temp.path(),
+        voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
+            index_bytes: index,
+            expected_header_sha256: HEADER_SHA256,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        },
+        PinnedMxfp4PayloadSource {
+            index_bytes: index,
+            header_bytes: header,
+            expected_header_sha256: HEADER_SHA256,
+            header_shard_name: "model-00004-of-00048.safetensors",
+            source_shard_bytes: SHARD_BYTES,
+            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+        },
+        &spec,
+    )
+    .unwrap_err();
+    assert!(error.message.contains("must share one source shard"));
+    assert_eq!(fs::read_dir(temp.path()).unwrap().count(), 0);
 }
