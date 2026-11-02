@@ -1,0 +1,33 @@
+{
+  "id": "R714",
+  "owner": "integrator",
+  "state": "LOCAL_CPU_DEBUG_RELEASE_VERIFIED_PREPARED_FOR_PRIVATE_SUCCESSOR_BRANCH",
+  "branch": "r714-deepseek-session-exec-oracle-20261102",
+  "parent_commit": "dad27c07ddd44c4fdcd6b1a3b46312514f7248ec",
+  "path": "research/R714",
+  "code_files": [
+    "src/deepseek_v41.rs",
+    "src/session/mxfp4.rs",
+    "tests/r712_deepseek_session_owner.rs"
+  ],
+  "report": "research/R714/REPORT.md",
+  "result": "research/R714/RESULT.json",
+  "build_test": "research/R714/BUILD_TEST.txt",
+  "manifest": "research/R714/SHA256SUMS",
+  "manifest_sha256": "eb69d24ac7422869e9f080d02f42c216615c0a93a99c1a0818517d397971f572",
+  "manifest_file_count": 5,
+  "local_cpu_tests": "debug and release: 3 focused integration tests plus 6 selective-read unit tests passed; strict Clippy, rustfmt and diff check pass",
+  "readback_exact": false,
+  "pipeline_id": null,
+  "pipeline_status": "not_started",
+  "synthetic_weight_payloads": true,
+  "actual_checkpoint_payload_read": false,
+  "complete_generation": false,
+  "gpu": false,
+  "inter_pc_transport": false,
+  "production_r53_used": false,
+  "unknown_replayed": false,
+  "automatic_relaunch": "STOPPED_BY_OWNER",
+  "active_operations": [],
+  "next_action": "R715: build and test exact per-rank grouped MXFP4 owners for routes with co-located experts; preserve one coefficient application, atomic completeness and one-shot UNKNOWN semantics."
+}

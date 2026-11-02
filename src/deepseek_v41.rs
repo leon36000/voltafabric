@@ -1273,7 +1273,7 @@ pub struct PinnedMxfp4RouteOwnerBinding {
 /// Immutable proof that every expert selected by one identified route is resident
 /// exactly once at the rank/local selected by VoltaFabric dispatch. Construct this
 /// before connecting workers; the proof includes the exact route coefficients.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PinnedMxfp4RoutePreflight {
     stamp: crate::moe::Stamp,
     attempt: u64,
@@ -1321,12 +1321,6 @@ pub fn preflight_pinned_mxfp4_route_residents(
 ) -> Result<PinnedMxfp4RoutePreflight> {
     let route_fingerprint = pinned_top6_route_fingerprint(route, attempt)?;
     let top_k = crate::deepseek_v41_gate::TOP_K;
-    if residents.len() != top_k || max_total_artifact_bytes == 0 {
-        return Err(invalid(
-            "DeepSeek route preflight requires exactly six owners and a nonzero aggregate budget",
-        ));
-    }
-
     let dispatch = crate::routing::dispatch(route)?;
     if dispatch.slots.len() != top_k {
         return Err(invalid(
@@ -1334,7 +1328,13 @@ pub fn preflight_pinned_mxfp4_route_residents(
         ));
     }
     let mut expected = BTreeMap::new();
+    let mut expected_ranks = BTreeSet::new();
     for slot in dispatch.slots {
+        if !expected_ranks.insert(slot.rank) {
+            return Err(invalid(
+                "DeepSeek single-owner Session adapter requires one distinct rank per selected expert",
+            ));
+        }
         if expected
             .insert(slot.expert, (slot.rank, slot.local))
             .is_some()
@@ -1343,6 +1343,11 @@ pub fn preflight_pinned_mxfp4_route_residents(
                 "DeepSeek route preflight has a duplicate dispatched expert",
             ));
         }
+    }
+    if residents.len() != top_k || max_total_artifact_bytes == 0 {
+        return Err(invalid(
+            "DeepSeek route preflight requires exactly six owners and a nonzero aggregate budget",
+        ));
     }
     let route_ids = route.experts.iter().copied().collect::<BTreeSet<_>>();
     if expected.len() != top_k || route_ids.len() != top_k {
@@ -1545,6 +1550,297 @@ impl PinnedMxfp4SessionLoadReceipt {
     pub fn session_load(&self) -> &crate::session::LoadReceipt {
         &self.session_load
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PinnedMxfp4RouteExecutionState {
+    Completed,
+    Aborted,
+    Unknown,
+}
+
+/// One-shot result for one single-token top-6 route. Output is present only after all
+/// six rank receipts are Completed and the existing FP32-preweighted Collector finishes.
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PinnedMxfp4RouteExecutionReceipt {
+    state: PinnedMxfp4RouteExecutionState,
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    route_experts: Vec<u32>,
+    route_fingerprint: String,
+    exec_receipts: Vec<crate::session::ExecReceipt>,
+    output_bits: Option<Vec<Vec<u32>>>,
+    error: Option<Error>,
+}
+
+impl PinnedMxfp4RouteExecutionReceipt {
+    pub fn state(&self) -> PinnedMxfp4RouteExecutionState {
+        self.state
+    }
+
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn route_experts(&self) -> &[u32] {
+        &self.route_experts
+    }
+
+    pub fn route_fingerprint(&self) -> &str {
+        &self.route_fingerprint
+    }
+
+    pub fn exec_receipts(&self) -> &[crate::session::ExecReceipt] {
+        &self.exec_receipts
+    }
+
+    pub fn output_bits(&self) -> Option<&[Vec<u32>]> {
+        self.output_bits.as_deref()
+    }
+
+    pub fn error(&self) -> Option<&Error> {
+        self.error.as_ref()
+    }
+}
+
+/// Execute one preflighted six-expert token through the existing CPU MXFP4 Sessions
+/// and FP32-preweighted Collector. The preflight and LOAD receipts are consumed so this
+/// adapter cannot accidentally reuse the same values for a retry. Any ambiguous EXEC
+/// is returned as `Unknown` with its receipts; it never resends or exposes partial output.
+///
+/// Preflight errors return `Err` before any EXEC request. After the first EXEC attempt,
+/// the function returns a terminal receipt, including failures, to preserve uncertainty.
+pub fn execute_pinned_mxfp4_route(
+    preflight: PinnedMxfp4RoutePreflight,
+    problem: &crate::routing::RoutingProblem,
+    attempt: u64,
+    inputs: Vec<crate::session::mxfp4::TokenInput>,
+    load_receipts: Vec<PinnedMxfp4SessionLoadReceipt>,
+    sessions: &mut BTreeMap<u32, crate::session::Session>,
+    timeout: std::time::Duration,
+) -> Result<PinnedMxfp4RouteExecutionReceipt> {
+    let top_k = crate::deepseek_v41_gate::TOP_K;
+    if timeout.is_zero()
+        || attempt == 0
+        || attempt != preflight.attempt
+        || problem.stamp != preflight.stamp
+        || problem.experts != preflight.route_experts
+        || preflight.route_fingerprint != pinned_top6_route_fingerprint(problem, attempt)?
+        || problem.routes.len() != 1
+        || preflight.owners.len() != top_k
+        || load_receipts.len() != top_k
+        || inputs.len() != 1
+        || inputs[0].token != 0
+        || inputs[0].value_bits.len() != problem.hidden
+    {
+        return Err(invalid(
+            "DeepSeek EXEC requires its exact one-token route, six LOAD receipts, and nonzero deadline",
+        ));
+    }
+    for &bits in &inputs[0].value_bits {
+        let value = f32::from_bits(bits);
+        if crate::deepseek_v41::cast_bf16_rne_reference(value)?.to_bits() != bits {
+            return Err(invalid(
+                "DeepSeek EXEC input must be finite and exactly BF16 before any rank is sent",
+            ));
+        }
+    }
+
+    let dispatch = crate::routing::dispatch(problem)?;
+    if dispatch.slots.len() != top_k || dispatch.ranks.len() != top_k {
+        return Err(invalid(
+            "DeepSeek EXEC requires exactly one distinct participating rank per route expert",
+        ));
+    }
+    let expected_ranks = preflight
+        .owners
+        .iter()
+        .map(|owner| owner.rank)
+        .collect::<BTreeSet<_>>();
+    let dispatch_ranks = dispatch
+        .ranks
+        .iter()
+        .map(|rank| rank.rank)
+        .collect::<BTreeSet<_>>();
+    if expected_ranks.len() != top_k
+        || dispatch_ranks != expected_ranks
+        || dispatch
+            .ranks
+            .iter()
+            .any(|rank| rank.slots.len() != 1 || rank.slots[0].slot.token != 0)
+        || sessions.len() != top_k
+        || sessions.keys().copied().collect::<BTreeSet<_>>() != expected_ranks
+    {
+        return Err(invalid(
+            "DeepSeek EXEC Session set does not match all six distinct route ranks",
+        ));
+    }
+
+    let mut loads_by_expert = BTreeMap::new();
+    for receipt in load_receipts {
+        if receipt.stamp != preflight.stamp
+            || receipt.attempt != preflight.attempt
+            || receipt.route_experts != preflight.route_experts
+            || receipt.route_fingerprint != preflight.route_fingerprint
+            || receipt.session_load.rank != receipt.rank
+            || receipt.session_load.epoch != preflight.stamp.epoch
+            || receipt.session_load.artifact_sha256 != receipt.packed_artifact_sha256
+            || loads_by_expert.insert(receipt.expert, receipt).is_some()
+        {
+            return Err(invalid(
+                "DeepSeek EXEC LOAD receipt is stale, duplicated, or has a foreign artifact",
+            ));
+        }
+    }
+    for owner in &preflight.owners {
+        let receipt = loads_by_expert
+            .remove(&owner.expert)
+            .ok_or_else(|| invalid("DeepSeek EXEC is missing one route owner's LOAD receipt"))?;
+        if receipt.rank != owner.rank
+            || receipt.local != owner.local
+            || receipt.packed_artifact_sha256 != owner.artifact_sha256
+            || receipt.session_load.artifact_sha256 != owner.artifact_sha256
+        {
+            return Err(invalid(
+                "DeepSeek EXEC LOAD receipt does not match the complete route preflight",
+            ));
+        }
+    }
+    if !loads_by_expert.is_empty() {
+        return Err(invalid("DeepSeek EXEC received an unselected LOAD receipt"));
+    }
+    for (&rank, session) in sessions.iter() {
+        if session.rank != rank {
+            return Err(invalid(
+                "DeepSeek EXEC Session map key differs from HELLO rank",
+            ));
+        }
+    }
+
+    let mut collector = crate::preweighted::Collector::new(problem)?;
+    let deadline = std::time::Instant::now()
+        .checked_add(timeout)
+        .ok_or_else(|| invalid("DeepSeek EXEC timeout overflows Instant"))?;
+    // Validate every live worker's immutable loaded binding and all activations before
+    // the first rank receives bytes. start_preweighted_fp32_until repeats this check.
+    for rank in &dispatch.ranks {
+        sessions
+            .get_mut(&rank.rank)
+            .ok_or_else(|| invalid("DeepSeek EXEC rank Session disappeared"))?
+            .preflight_preweighted_fp32_until(
+                problem,
+                &collector,
+                attempt,
+                &inputs,
+                &crate::process::Fault::None,
+                deadline,
+            )?;
+    }
+
+    let mut pending = Vec::with_capacity(top_k);
+    let mut start_error = None;
+    for rank in &dispatch.ranks {
+        let session = sessions
+            .get_mut(&rank.rank)
+            .expect("the complete Session set was preflighted");
+        match session.start_preweighted_fp32_until(
+            problem,
+            &collector,
+            attempt,
+            inputs.clone(),
+            crate::process::Fault::None,
+            deadline,
+        ) {
+            Ok(work) => pending.push((rank.rank, work)),
+            Err(error) => {
+                start_error = Some(error);
+                break;
+            }
+        }
+    }
+
+    let mut exec_receipts = Vec::with_capacity(pending.len());
+    let mut result_error = start_error;
+    for (rank, work) in pending {
+        let receipt = sessions
+            .get_mut(&rank)
+            .expect("rank Session remains in the preflighted set")
+            .finish_preweighted_fp32(work, &mut collector, deadline);
+        if result_error.is_none() {
+            result_error = receipt.error.clone();
+        }
+        exec_receipts.push(receipt);
+    }
+
+    let all_completed = exec_receipts.len() == top_k
+        && exec_receipts.iter().all(|receipt| {
+            receipt.state == crate::process::ReceiptState::Completed && receipt.error.is_none()
+        })
+        && result_error.is_none();
+    let (state, output_bits, error) = if all_completed {
+        match collector.finish() {
+            Ok(output) if output.len() == 1 => (
+                PinnedMxfp4RouteExecutionState::Completed,
+                Some(
+                    output
+                        .into_iter()
+                        .map(|row| row.into_iter().map(f32::to_bits).collect())
+                        .collect(),
+                ),
+                None,
+            ),
+            Ok(_) => (
+                PinnedMxfp4RouteExecutionState::Aborted,
+                None,
+                Some(invalid(
+                    "DeepSeek EXEC collector returned a non-single-token result",
+                )),
+            ),
+            Err(error) => (PinnedMxfp4RouteExecutionState::Aborted, None, Some(error)),
+        }
+    } else {
+        collector.expire();
+        let unknown = exec_receipts.iter().any(|receipt| {
+            matches!(
+                receipt.state,
+                crate::process::ReceiptState::Unknown | crate::process::ReceiptState::Started
+            )
+        });
+        if result_error.is_none() {
+            result_error = exec_receipts
+                .iter()
+                .find_map(|receipt| receipt.error.clone());
+        }
+        if result_error.is_none() {
+            result_error = Some(Error::new(
+                "BATCH_INCOMPLETE",
+                "DeepSeek route EXEC did not complete every rank slot; output withheld",
+            ));
+        }
+        (
+            if unknown {
+                PinnedMxfp4RouteExecutionState::Unknown
+            } else {
+                PinnedMxfp4RouteExecutionState::Aborted
+            },
+            None,
+            result_error,
+        )
+    };
+    Ok(PinnedMxfp4RouteExecutionReceipt {
+        state,
+        stamp: preflight.stamp,
+        attempt: preflight.attempt,
+        route_experts: preflight.route_experts,
+        route_fingerprint: preflight.route_fingerprint,
+        exec_receipts,
+        output_bits,
+        error,
+    })
 }
 
 /// One immutable, compressed DeepSeek expert. The Safetensors `Vec` is moved into a

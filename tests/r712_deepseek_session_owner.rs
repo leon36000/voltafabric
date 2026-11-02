@@ -1,13 +1,15 @@
-//! R713 preflights and LOADs all six route-bound DeepSeek owners through CPU Sessions.
-//! The sparse source is synthetic and the test intentionally performs no EXEC.
+//! R713/R714 preflight, LOAD and execute a synthetic six-expert DeepSeek route on CPU.
+//! The sparse source weights are synthetic; no checkpoint payload is read.
 #![cfg(target_os = "linux")]
 
 use std::collections::BTreeMap;
 use std::io::{self, Read, Seek, SeekFrom};
 use std::time::Duration;
 use voltafabric::deepseek_v41::{
-    plan_pinned_mxfp4_expert_payloads, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
-    PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, REVISION,
+    execute_pinned_mxfp4_route, plan_pinned_mxfp4_expert_payloads,
+    preflight_pinned_mxfp4_route_residents, read_pinned_mxfp4_rank_expert, Mxfp4ExpertNamespace,
+    PinnedExpertPayloadRequest, PinnedMxfp4RankExpertReadRequest, PinnedMxfp4RouteExecutionState,
+    REVISION,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -18,6 +20,7 @@ const SHARD_BYTES: u64 = 7_389_759_032;
 const PINNED_INDEX_SHA256: &str =
     "74b0686a3d2891980d5e303251b075a3bccae2c2ff650747db2620a649b98fa8";
 const TOP6: [u32; 6] = [0, 383, 382, 381, 380, 379];
+const ROUTE_WEIGHTS: [f64; 6] = [0.5, 0.25, 0.125, 0.0625, 0.03125, 0.03125];
 
 struct SparseShard {
     file_bytes: u64,
@@ -81,10 +84,8 @@ fn route_problem() -> RoutingProblem {
         experts: TOP6.to_vec(),
         routes: vec![TOP6
             .iter()
-            .map(|&expert| Choice {
-                expert,
-                weight: 0.25,
-            })
+            .zip(ROUTE_WEIGHTS)
+            .map(|(&expert, weight)| Choice { expert, weight })
             .collect()],
         registry: Registry {
             epoch: 13,
@@ -109,6 +110,15 @@ fn route_problem() -> RoutingProblem {
         preferred_owners: BTreeMap::new(),
         resident_order: BTreeMap::from([(4, (0..TOP6.len() as u32).collect())]),
     }
+}
+
+#[test]
+fn colocated_top6_is_refused_before_the_owner_set_or_any_worker_exists() {
+    let route = route_problem();
+    let error = preflight_pinned_mxfp4_route_residents(&route, 29, &[], 1).unwrap_err();
+    assert!(error
+        .message
+        .contains("one distinct rank per selected expert"));
 }
 
 fn distributed_route_problem() -> RoutingProblem {
@@ -190,8 +200,6 @@ fn resident_for_expert(
 
 #[test]
 fn complete_top6_is_preflighted_then_loaded_on_six_cpu_sessions_without_exec() {
-    use voltafabric::deepseek_v41::preflight_pinned_mxfp4_route_residents;
-
     let route = distributed_route_problem();
     let residents = TOP6
         .iter()
@@ -259,6 +267,130 @@ fn complete_top6_is_preflighted_then_loaded_on_six_cpu_sessions_without_exec() {
     for session in sessions {
         let close = session.close(Duration::from_secs(10));
         assert_eq!(close.bye_execs, Some(0));
+        assert!(close.error.is_none(), "{close:?}");
+    }
+}
+
+#[test]
+fn complete_top6_exec_uses_one_route_weight_and_matches_fp64_oracle() {
+    let route = distributed_route_problem();
+    let residents = TOP6
+        .iter()
+        .enumerate()
+        .map(|(index, &expert)| resident_for_expert(&route, expert, 4 + index as u32))
+        .collect::<Vec<_>>();
+    let input: Vec<f32> = (0..route.hidden)
+        .map(|index| ((index % 17) as i32 - 8) as f32 / 8.0)
+        .collect();
+    let input = input
+        .into_iter()
+        .inspect(|value| {
+            assert_eq!(
+                voltafabric::deepseek_v41::cast_bf16_rne_reference(*value).unwrap(),
+                *value
+            );
+        })
+        .collect::<Vec<_>>();
+
+    // Independent format path: the resident's FP64 MXFP4 matvec oracle performs
+    // quantization/dequantization and SwiGLU separately from the Session's R9 FP32
+    // warp producer. The route coefficient enters once, before each oracle W2.
+    let mut expected = vec![0.0_f32; route.hidden];
+    for choice in &route.routes[0] {
+        let resident = residents
+            .iter()
+            .find(|resident| resident.expert() == choice.expert)
+            .unwrap();
+        let expert = resident.owner().expert(choice.expert).unwrap();
+        let row = expert
+            .forward_reference(&input, Some(choice.weight as f32))
+            .unwrap();
+        for (sum, value) in expected.iter_mut().zip(row) {
+            *sum += value;
+        }
+    }
+
+    let total = residents
+        .iter()
+        .map(|resident| resident.packed_artifact_bytes())
+        .sum::<u64>();
+    let preflight = preflight_pinned_mxfp4_route_residents(&route, 29, &residents, total).unwrap();
+    let mut unconsumed = residents
+        .into_iter()
+        .map(|owner| (owner.expert(), owner))
+        .collect::<BTreeMap<_, _>>();
+    let mut sessions = BTreeMap::new();
+    let mut loads = Vec::with_capacity(TOP6.len());
+    for expected_owner in preflight.owners() {
+        let owner = unconsumed.remove(&expected_owner.expert).unwrap();
+        let endpoint = Endpoint {
+            rank: expected_owner.rank,
+            argv: vec![env!("CARGO_BIN_EXE_vf-rank-session").into()],
+        };
+        let mut session = Session::connect_mxfp4(
+            &endpoint,
+            Duration::from_secs(10),
+            &mxfp4::Producer::default(),
+        )
+        .unwrap();
+        loads.push(
+            owner
+                .load_into_session(&mut session, &preflight, Duration::from_secs(30))
+                .unwrap(),
+        );
+        assert!(sessions.insert(expected_owner.rank, session).is_none());
+    }
+    assert!(unconsumed.is_empty());
+    assert!(sessions.values().all(|session| session.traffic.execs == 0));
+
+    let receipt = execute_pinned_mxfp4_route(
+        preflight,
+        &route,
+        29,
+        vec![mxfp4::TokenInput {
+            token: 0,
+            value_bits: input.iter().map(|value| value.to_bits()).collect(),
+        }],
+        loads,
+        &mut sessions,
+        Duration::from_secs(90),
+    )
+    .unwrap();
+    assert_eq!(receipt.state(), PinnedMxfp4RouteExecutionState::Completed);
+    assert_eq!(receipt.stamp(), &route.stamp);
+    assert_eq!(receipt.attempt(), 29);
+    assert_eq!(receipt.route_experts(), TOP6);
+    assert_eq!(receipt.exec_receipts().len(), TOP6.len());
+    assert!(receipt.error().is_none());
+    for exec in receipt.exec_receipts() {
+        assert_eq!(exec.state, voltafabric::process::ReceiptState::Completed);
+        assert!(exec.started);
+        assert_eq!(exec.expected_slots, 1);
+        assert_eq!(exec.received_slots, 1);
+    }
+    let actual = receipt
+        .output_bits()
+        .unwrap()
+        .first()
+        .unwrap()
+        .iter()
+        .map(|bits| f32::from_bits(*bits))
+        .collect::<Vec<_>>();
+    assert_eq!(actual.len(), route.hidden);
+    let max_abs = actual
+        .iter()
+        .zip(&expected)
+        .map(|(actual, expected)| (actual - expected).abs())
+        .fold(0.0_f32, f32::max);
+    assert!(
+        max_abs <= 5.0e-4,
+        "FP64 MXFP4 oracle max abs error {max_abs}"
+    );
+
+    for (_, session) in sessions {
+        assert_eq!(session.traffic.execs, 1);
+        let close = session.close(Duration::from_secs(10));
+        assert_eq!(close.bye_execs, Some(1));
         assert!(close.error.is_none(), "{close:?}");
     }
 }

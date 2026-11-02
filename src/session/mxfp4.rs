@@ -1134,34 +1134,18 @@ impl Session {
     }
 
     /// Fully validate the original plan and collector before any request byte is sent.
-    pub fn start_preweighted_fp32(
+    /// This read-only boundary lets a multi-rank adapter validate every Session before
+    /// any rank receives EXEC. `start_preweighted_fp32_until` repeats the checks at the
+    /// actual write boundary so callers cannot rely on this result after mutation.
+    pub(crate) fn preflight_preweighted_fp32_until(
         &mut self,
         problem: &routing::RoutingProblem,
         collector: &arithmetic::Collector,
         attempt: u64,
-        inputs: Vec<TokenInput>,
-        fault: Fault,
-    ) -> Result<Pending> {
-        self.start_preweighted_fp32_until(
-            problem,
-            collector,
-            attempt,
-            inputs,
-            fault,
-            Instant::now() + Duration::from_secs(60),
-        )
-    }
-
-    /// Caller-controlled deadline bounds both transmission and later collection.
-    pub fn start_preweighted_fp32_until(
-        &mut self,
-        problem: &routing::RoutingProblem,
-        collector: &arithmetic::Collector,
-        attempt: u64,
-        inputs: Vec<TokenInput>,
-        fault: Fault,
+        inputs: &[TokenInput],
+        fault: &Fault,
         deadline: Instant,
-    ) -> Result<Pending> {
+    ) -> Result<routing::RankDispatch> {
         if !self.usable {
             return Err(Error::new("SESSION_UNUSABLE", "session must be reopened"));
         }
@@ -1205,8 +1189,52 @@ impl Session {
             .as_ref()
             .ok_or_else(|| invalid("no MXFP4 artifact is loaded"))?;
         validate_binding(binding, *hidden, &dispatch)?;
-        check_fault(&fault)?;
-        checked_inputs(&dispatch, inputs.clone())?;
+        check_fault(fault)?;
+        checked_inputs(&dispatch, inputs.to_vec())?;
+        if Instant::now() >= deadline {
+            return Err(Error::new(
+                "SESSION_DEADLINE",
+                "deadline elapsed before transmission; nothing sent",
+            ));
+        }
+        Ok(dispatch)
+    }
+
+    pub fn start_preweighted_fp32(
+        &mut self,
+        problem: &routing::RoutingProblem,
+        collector: &arithmetic::Collector,
+        attempt: u64,
+        inputs: Vec<TokenInput>,
+        fault: Fault,
+    ) -> Result<Pending> {
+        self.start_preweighted_fp32_until(
+            problem,
+            collector,
+            attempt,
+            inputs,
+            fault,
+            Instant::now() + Duration::from_secs(60),
+        )
+    }
+
+    /// Caller-controlled deadline bounds both transmission and later collection.
+    pub fn start_preweighted_fp32_until(
+        &mut self,
+        problem: &routing::RoutingProblem,
+        collector: &arithmetic::Collector,
+        attempt: u64,
+        inputs: Vec<TokenInput>,
+        fault: Fault,
+        deadline: Instant,
+    ) -> Result<Pending> {
+        let dispatch = self.preflight_preweighted_fp32_until(
+            problem, collector, attempt, &inputs, &fault, deadline,
+        )?;
+        let (binding, _) = self
+            .mxfp4_binding
+            .as_ref()
+            .ok_or_else(|| invalid("no MXFP4 artifact is loaded"))?;
         let bf16_activations = self.prefer_mxfp4_bf16_activations
             && self
                 .hello
@@ -1460,7 +1488,6 @@ impl Session {
                         }
                         rows.push(arithmetic::Completion {
                             contract: contract.clone(),
-                            attempt: None,
                             stamp: dispatch.stamp.clone(),
                             token: meta.token,
                             slot: meta.slot,

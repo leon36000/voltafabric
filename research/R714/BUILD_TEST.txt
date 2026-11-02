@@ -1,0 +1,27 @@
+R714 CPU-only verification receipt
+
+Debug integration:
+  cargo test --offline --locked --test r712_deepseek_session_owner -- --nocapture
+  result: 3 passed, 0 failed; six-Session route execution and independent MXFP4 reference comparison.
+
+Debug selective-read unit tests:
+  cargo test --offline --locked --lib a148_pinned_expert_selective_read_tests -- --nocapture
+  result: 6 passed, 0 failed.
+
+Release integration:
+  cargo test --offline --locked --release --test r712_deepseek_session_owner -- --nocapture
+  result: 3 passed, 0 failed.
+
+Release selective-read unit tests:
+  cargo test --offline --locked --release --lib a148_pinned_expert_selective_read_tests -- --nocapture
+  result: 6 passed, 0 failed.
+
+Static checks:
+  cargo clippy --offline --locked --lib --test r712_deepseek_session_owner -- -D warnings: PASS
+  rustfmt --edition 2021 --check src/deepseek_v41.rs src/session/mxfp4.rs tests/r712_deepseek_session_owner.rs: PASS
+  git diff --check -- src/deepseek_v41.rs src/session/mxfp4.rs tests/r712_deepseek_session_owner.rs: PASS
+
+All payload bytes in the execution fixture are synthetic. No real checkpoint payload,
+GPU, V100, inter-PC transport, production R53, complete model generation, or UNKNOWN
+replay was involved. The CI scans/fallback are tracked separately and do not replace
+these local Rust receipts.
