@@ -1,0 +1,26 @@
+R700 focused CPU validation
+
+Worktree base: 604764703f0a12af4fe264041ebecc0ed9c21a90 (older/grafted local snapshot)
+R700 source commits on GitLab: 4483db95eca7b46e7e0ecc7bd6f81ee093e6c3b5, 3982dff1f1bfd2ad4aaa5faaf2d5253555face9e
+
+Commands:
+  cargo test --offline --locked --test r700_deepseek_gate_route
+  cargo test --offline --locked --test r699_deepseek_memory_admission full_gate_top6_route_refuses_when_only_two_deepseek_experts_have_weight_profiles
+  rustfmt --check --edition 2021 src/deepseek_v41_gate.rs tests/r700_deepseek_gate_route.rs tests/r699_deepseek_memory_admission.rs
+  cargo clippy --offline --locked --test r700_deepseek_gate_route --test r699_deepseek_memory_admission -- -D warnings
+  git diff --check
+
+Results:
+  focused integration tests: 5 passed, 0 failed
+  gate-to-memory-admission refusal: 1 passed, 0 failed
+  rustfmt: pass
+  scoped Clippy with warnings denied: pass
+  diff whitespace check: pass
+
+GitLab pipelines 2398, 2399, and 2400 succeeded on their configured
+Gitleaks/Semgrep/Trivy and fallback jobs. Pipeline 2400 validates the
+route-to-admission source commit, but none of these pipelines compiles or tests
+Rust. The six Rust test passes and lint checks above were run locally in the
+older/grafted worktree described in the report.
+
+Pipeline 2400: https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2400

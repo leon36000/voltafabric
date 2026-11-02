@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "id": "R700",
+  "branch": "r700-deepseek-v41-gate-cpu-20261102",
+  "parent_commit": "7a6cfeb0aa1a85c77d6783ac4dc8322e91c54bf7",
+  "source_commits": [
+    "4483db95eca7b46e7e0ecc7bd6f81ee093e6c3b5",
+    "3982dff1f1bfd2ad4aaa5faaf2d5253555face9e"
+  ],
+  "source_files": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r700_deepseek_gate_route.rs",
+    "tests/r699_deepseek_memory_admission.rs",
+    "third_party/deepseek-v41-flash/PROVENANCE.md"
+  ],
+  "upstream": {
+    "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "algorithm_adapted_without_copying_code": true,
+    "config_route_scale": 1.5,
+    "ModelArgs_demo_default_route_scale": 1.0,
+    "field_mapping_verified": false
+  },
+  "result": {
+    "primary_text_image_gate_cpu_reference": true,
+    "route_choices": 6,
+    "routed_experts": 384,
+    "route_scale_explicit_constructor_input": true,
+    "selection_bias_changes_membership_only": true,
+    "gate_top6_connected_to_memory_advisor": true,
+    "missing_four_of_six_expert_profiles_refused": true,
+    "valid_six_expert_session_dispatch": false,
+    "shared_expert_included": false,
+    "dspark_aux_gate_included": false,
+    "gate_projection_or_weights_loaded": false,
+    "full_generation": false,
+    "model_checkpoint_loaded": false,
+    "gpu": false,
+    "inter_pc_network": false,
+    "production_r53": false,
+    "performance_comparison": false
+  },
+  "local_verification": {
+    "worktree_base": "604764703f0a12af4fe264041ebecc0ed9c21a90",
+    "test_commands": [
+      "cargo test --offline --locked --test r700_deepseek_gate_route",
+      "cargo test --offline --locked --test r699_deepseek_memory_admission full_gate_top6_route_refuses_when_only_two_deepseek_experts_have_weight_profiles"
+    ],
+    "test_result": "5 gate tests + 1 gate-to-memory-admission refusal test passed",
+    "rustfmt_check": "pass",
+    "scoped_clippy_warnings_denied": "pass",
+    "git_diff_check": "pass",
+    "worktree_limitation": "older/grafted local snapshot with R700 source overlaid; not a full checkout of current GitLab branch"
+  },
+  "gitlab": {
+    "pipeline_2398": "success; configured Gitleaks/Semgrep/Trivy/fallback only",
+    "pipeline_2399": "success; configured Gitleaks/Semgrep/Trivy/fallback only",
+    "pipeline_2400": "success; configured Gitleaks/Semgrep/Trivy/fallback only, not Rust compilation or local CPU tests",
+    "pipeline_2400_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2400",
+    "source_readback_exact": true,
+    "source_readback_files": 4
+  },
+  "arxiv_scout": {
+    "model": "GPT-6 Luna",
+    "scope": "one bounded broad scout pass; selected actionable shortlist, not a claim of exhaustive coverage of all arXiv",
+    "shortlist": [
+      "DAOP 2501.10375v3",
+      "LayerScope/PreScope 2509.23638v2",
+      "ELDR 2607.00466v2",
+      "PiKV 2508.06526v3"
+    ],
+    "code_copied": false
+  },
+  "next_action": "Connect model-derived six-choice routes to the existing per-rank memory admission and Session path only when all selected pinned expert payloads and the matching gate projection are available; reject missing experts atomically. No checkpoint-wide download, GPU, production network, or automatic relaunch."
+}
