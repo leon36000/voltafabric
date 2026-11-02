@@ -4305,7 +4305,7 @@
     "receipt_pipeline_status": "pending",
     "next_action": "R728 CPU implementation: authenticated six-plane shared FP8 load from the pinned layer shard; execute from the gate-bound activation; join only to matching completed route receipts."
   },
-  "latest_productivity_report": "research/R735/REPORT.md",
+  "latest_productivity_report": "research/R743/REPORT.md",
   "r731_deepseek_hc_projection": {
     "id": "R731",
     "owner": "integrator",
@@ -4582,7 +4582,7 @@
   "r741_deepseek_prompt_token_oracle": {
     "id": "R741",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_RECEIPT_PIPELINE_RUNNING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS",
     "branch": "r741-deepseek-prompt-token-oracle-20261102",
     "parent_commit": "f4533e942593cb8d5ebd44b6bfd2c95500455bcb",
     "source_commit": "39c8b7d22f69bd54b1f4fd675727272c81b7755d",
@@ -4605,8 +4605,8 @@
     "source_readback_files_verified": 5,
     "receipt_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
     "receipt_pipeline_id": 2609,
-    "receipt_pipeline_status": "running",
-    "receipt_pending": true,
+    "receipt_pipeline_status": "success",
+    "receipt_pending": false,
     "adapted_boundary": "Five-case pinned prompt token-ID parity against an independent manual reference.",
     "local_verification": "Isolated CPU harness: 1 passed; five cases; not a full workspace build.",
     "real_checkpoint_payload": false,
@@ -4617,12 +4617,18 @@
     "performance_measured": false,
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R742: qualify pinned EOS truncation and output parsing with the official DeepSeek Recipe StreamProcessor."
+    "next_action": "R744: continue the indexed-checkpoint-to-resident-owner generation path using only authenticated synthetic CPU fixtures; refuse missing/partial tensors atomically, preserve route coefficients, and do not claim full generation, GPU, transport, or performance.",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   },
   "r742_deepseek_output_stop_boundary": {
     "id": "R742",
     "owner": "integrator",
-    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_SUCCESS",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_CORRECTION_PIPELINES_SUCCESS",
     "branch": "r742-deepseek-output-stop-boundary-20261102",
     "path": "research/R742",
     "parent_commit": "862a2a49d5993b927cfdf20f9df33ec10ea4bc6d",
@@ -4664,6 +4670,56 @@
     "performance_measured": false,
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "next_action": "R743: apply one cost-based placement or overlap idea from the arXiv survey in the existing CPU planner, with stable plans, resident-weight guards and unchanged routes; no hardware or performance claim."
+    "next_action": "R744: continue the indexed-checkpoint-to-resident-owner generation path using only authenticated synthetic CPU fixtures; refuse missing/partial tensors atomically, preserve route coefficients, and do not claim full generation, GPU, transport, or performance.",
+    "receipt_correction_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
+    "receipt_correction_pipeline_id": 2612,
+    "receipt_correction_pipeline_status": "success",
+    "receipt_correction_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
+  }
+,
+  "r743_cpu_planner_concurrent_scenarios": {
+    "id": "R743",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_PENDING",
+    "branch": "r743-cpu-planner-concurrent-scenarios-20261102",
+    "parent_commit": "49d443dce6a16ad3604f57d708770ce1becd6bb8",
+    "source_commit": "PENDING_GITLAB_COMMIT_RESPONSE",
+    "path": "research/R743",
+    "code_files": [
+      "src/planner.rs",
+      "tests/a743_planner_concurrency.rs",
+      "docs/ARCHITECTURE.md"
+    ],
+    "report": "research/R743/REPORT.md",
+    "result": "research/R743/RESULT.json",
+    "build_test": "research/R743/TEST-RESULT.txt",
+    "manifest": "research/R743/SHA256SUMS",
+    "manifest_sha256": "722f33fb4654eaefe6594b45e34e3e171af85728392db3774f33f8a2a927c3bf",
+    "manifest_file_count": 6,
+    "adapted_idea": "HeteGen arXiv:2403.01164 asynchronous overlap idea, adapted as explicit concurrent demand DAG scenarios over VoltaFabric exclusive rank/link resources; no donor code copied",
+    "donor_code_copied": false,
+    "cpu_offload_implemented": false,
+    "local_cpu_verification": "5/5 isolated CPU tests; rustfmt check pass; reduced exact R742 support-module harness; repository Cargo.lock unchanged",
+    "source_pipeline_status": "pending",
+    "source_readback_exact": false,
+    "receipt_pending": true,
+    "routes_mutated": false,
+    "coefficient_application_changed": false,
+    "resident_weights_guarded": true,
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "active_operations": [],
+    "next_action": "R744: continue the indexed-checkpoint-to-resident-owner generation path using only authenticated synthetic CPU fixtures; refuse missing/partial tensors atomically, preserve route coefficients, and do not claim full generation, GPU, transport, or performance."
   }
 }
