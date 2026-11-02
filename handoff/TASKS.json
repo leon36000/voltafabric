@@ -3837,7 +3837,7 @@
   "measured_forwards": 64,
   "measured_pairs": 32,
   "native_agent_cost_usd": null,
-  "next_action": "R735: reconcile the pinned config's qk_rope_head_dim=64 with model.py ModelArgs.rope_head_dim default=32. Confirm the mapping and effective layer-0 profile (compress_ratio=0, theta=10000, YaRN disabled) before implementing identity-bound BF16 RoPE and composing with the R733 window cache; CPU only, no payload/GPU.",
+  "next_action": "R736: finish the pinned pure-window attention sublayer through inverse output RoPE, in-place FP8 activation quantize/dequantize (32-element UE8M0 groups), grouped BF16 wo_a, BF16 wo_b, and attention-branch HC post; indexed-load sink/wo_a/wo_b from one authenticated shard with a strict payload budget. CPU-only, synthetic fixture, no actual model payload, no GPU or complete-generation claim.",
   "next_command": "CPU-only: run the R728 indexed-shared-FP8 and terminal-route join tests; preserve full Stamp/attempt, one-time route coefficients, atomic refusal and UNKNOWN non-replay.",
   "next_command_expected_result": "One synthetic sharded selected-expert layer loaded through the pinned index into the existing CPU Session path, matching an independent oracle; any missing/invalid shard yields no owner output.",
   "next_cpu_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
@@ -7052,8 +7052,8 @@
   "torch_cuda_kernel_count_instrumented": false,
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
-  "updated_at_utc": "2026-11-02 17:08:56 UTC",
-  "updated_utc": "2026-11-02 17:43:16 UTC",
+  "updated_at_utc": "2026-11-02 18:09:29 UTC",
+  "updated_utc": "2026-11-02 18:09:29 UTC",
   "warmup_pairs": 4,
   "workers_running": [],
   "write_set": [
@@ -12055,7 +12055,7 @@
   "r735_deepseek_window_rope": {
     "id": "R735",
     "owner": "integrator",
-    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PENDING",
+    "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
     "branch": "r735-deepseek-window-rope-20261102",
     "parent_commit": "4c5645c252357fb532502b0dab4946cfd20ecccc",
     "source_commit": "b7a3bf9631499ec1a6e273b6fd602e3de62a4861",
@@ -12091,8 +12091,20 @@
     "performance_measured": false,
     "unknown_replayed": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
-    "published_utc": "2026-11-02 18:01:40 UTC",
-    "receipt_pending": true,
-    "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation."
+    "published_utc": "2026-11-02 18:09:29 UTC",
+    "receipt_pending": false,
+    "next_action": "R736: finish the pinned pure-window attention sublayer through inverse output RoPE, in-place FP8 activation quantize/dequantize (32-element UE8M0 groups), grouped BF16 wo_a, BF16 wo_b, and attention-branch HC post; indexed-load sink/wo_a/wo_b from one authenticated shard with a strict payload budget. CPU-only, synthetic fixture, no actual model payload, no GPU or complete-generation claim.",
+    "receipt_commit": "702cc18295801e33c5a01891b170dc1ab76315d6",
+    "receipt_pipeline_id": 2581,
+    "receipt_pipeline_status": "success",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "receipt_readback_exact": true,
+    "receipt_readback_files_verified": 5,
+    "receipt_reconciled_utc": "2026-11-02 18:09:29 UTC"
   }
 }

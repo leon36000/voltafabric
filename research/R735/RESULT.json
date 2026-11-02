@@ -1,7 +1,7 @@
 {
   "id": "R735",
   "date": "2026-11-02",
-  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "parent_branch": "r734-deepseek-attention-projection-20261102",
   "parent_commit": "4c5645c252357fb532502b0dab4946cfd20ecccc",
   "source_files": [
@@ -65,10 +65,18 @@
     },
     "source_readback_exact": true,
     "source_readback_files_verified": 8,
-    "receipt_pending": true,
-    "receipt_commit": null,
-    "receipt_pipeline_id": null,
-    "receipt_pipeline_status": "pending"
+    "receipt_pending": false,
+    "receipt_commit": "702cc18295801e33c5a01891b170dc1ab76315d6",
+    "receipt_pipeline_id": 2581,
+    "receipt_pipeline_status": "success",
+    "receipt_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "receipt_readback_exact": true,
+    "receipt_readback_files_verified": 5
   },
   "automatic_continuation": "STOPPED_BY_OWNER",
   "limitations": [
@@ -77,7 +85,7 @@
     "Attention sink and output projection weights/payload not admitted",
     "No full layer, token logits, sampler or generation"
   ],
-  "next_action": "R736: indexed-load the pinned layer-0 attention sink and wo_a/wo_b tensors, then connect the complete attention result to the HC residual under the same Stamp/attempt. Keep payload admission bounded and CPU-only; do not claim generation.",
+  "next_action": "R736: finish the pinned pure-window attention sublayer through inverse output RoPE, in-place FP8 activation quantize/dequantize (32-element UE8M0 groups), grouped BF16 wo_a, BF16 wo_b, and attention-branch HC post; indexed-load sink/wo_a/wo_b from one authenticated shard with a strict payload budget. CPU-only, synthetic fixture, no actual model payload, no GPU or complete-generation claim.",
   "manifest": "research/R735/SHA256SUMS",
   "manifest_sha256": "b1a8e31744ce04dc262ef235bde91ff4af15f94d06ecd62b4ee95d80b09566e9",
   "manifest_file_count": 5,
