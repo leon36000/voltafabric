@@ -12,3 +12,8 @@ Expected/final targeted test result: 7 passed, 0 failed.
 Clippy: pass. `-A dead_code` suppresses three warnings from FP16 Collector paths omitted from this extracted test harness.
 Full root crate test: not run in this harness.
 GPU / inter-PC / R53 hardware reservation: not run.
+
+GitLab publication/readback:
+  source commit 7489c376de6841eb371141b6b5e4a5284af8b1dc; 12/12 files exact readback
+  pipeline 2373 success: Gitleaks, Semgrep, Trivy, fallback
+  pipeline scope is configured scans/fallback, not Rust compilation or the local CPU test

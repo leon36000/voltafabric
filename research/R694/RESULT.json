@@ -1,6 +1,6 @@
 {
   "id": "R694",
-  "state": "LOCAL_CPU_EXACT_SOURCE_MODULES_PASS_PENDING_PRIVATE_GITLAB_PUBLICATION",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_TEST_PASS_PIPELINES_2367_2368_2369_SUCCESS",
   "base_branch": "r693-qwen2moe-two-layer-public-decode-20261102",
   "base_commit": "74e0537c361cc2c34e5764ad5ac9f1432240c4ed",
   "branch": "r694-qwen2moe-route-bound-placement-20261102",
@@ -38,6 +38,19 @@
     "production_network": false,
     "performance_claim": false
   },
-  "next_action": "Use the advisory adapter with an already-admitted route trace only after its source and identity are verified; keep its result offline until topology and compute costs are measured. Continue the real-checkpoint compatibility path from sources already present; no downloads or hardware."
+  "next_action": "Wire this advisory optionally to a route batch captured by the pinned llama.cpp callback before the Session execution commit; retain advisory-only semantics and verify with a fresh CPU synthetic decode identity.",
+  "gitlab_readback": {
+    "branch": "r694-qwen2moe-route-bound-placement-20261102",
+    "source_commit": "b2ec530cec030218da9e011e95c65009a52a190c",
+    "correction_commit": "ff97fed0ad9374c07194fb56a7972fdd67e309e4",
+    "tip_readback": "ff97fed0ad9374c07194fb56a7972fdd67e309e4",
+    "files_exact_readback": 7,
+    "planner_bytes": 26923,
+    "planner_matches_local_corrected_source": true,
+    "correction": "Removed one duplicate derive attribute on VariantCost found by GitLab API readback; no force push.",
+    "pipeline_2367": "success; configured scans and fallback only",
+    "pipeline_2368": "success; Gitleaks, Semgrep, Trivy and fallback all success",
+    "pipeline_2369": "success; duplicate successful scan/fallback pipeline for corrected tip ff97fed0ad9374c07194fb56a7972fdd67e309e4"
+  },
+  "manifest_scope": "Research evidence files only at the R696 descendant tip; immutable R694 code/readback is identified by branch and correction commit in gitlab_readback."
 }
-

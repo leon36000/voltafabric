@@ -10858,5 +10858,41 @@
       "pc4_trivy": "success",
       "pc4_ci_fallback": "success"
     }
+  },
+  "r693_qwen2moe_public_decode_cpu": {
+    "task": "Connect synthetic two-layer Qwen2MoE decode to VoltaFabric public llama_decode route/Session path.",
+    "state": "published-readback-verified",
+    "local_cpu_fixture": true,
+    "trained_checkpoint": false,
+    "gpu": false,
+    "pipeline_id": 2364
+  },
+  "r694_qwen2moe_route_bound_placement": {
+    "task": "Produce advisory-only topology placement from exact route slots without route or registry mutation.",
+    "state": "published-readback-verified",
+    "local_tests": 3,
+    "gpu": false,
+    "pipelines": [
+      2367,
+      2368,
+      2369
+    ]
+  },
+  "r695_layer_memory_envelope": {
+    "task": "Account separately for per-rank KV/recurrent/workspace/graph/communication/margin and load temporary.",
+    "state": "published-readback-verified",
+    "local_tests": 6,
+    "gpu": false,
+    "pipeline_id": 2370
+  },
+  "r696_atomic_expert_replacement_memory": {
+    "task": "Reserve old resident expert weights while candidate weights and load temporary coexist; fail closed before advice.",
+    "state": "published-readback-verified",
+    "local_tests": 7,
+    "gpu": false,
+    "pipeline_id": 2373,
+    "readback_files_verified": 12,
+    "full_crate_test": false,
+    "next_action": "R697 connect budget advice to fresh llama_decode callback on CPU."
   }
 }

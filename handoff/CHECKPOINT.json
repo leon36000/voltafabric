@@ -12993,5 +12993,50 @@
       "pc4_trivy": "success",
       "pc4_ci_fallback": "success"
     }
+  },
+  "r693_qwen2moe_public_decode_cpu": {
+    "state": "PUBLISHED_PRIVATE_READBACK_VERIFIED_CPU_SYNTHETIC_LIMITED",
+    "source_commit": "e6130a32ca39d7614b845c7ddacfa741aab02608",
+    "evidence_commit": "74e0537c361cc2c34e5764ad5ac9f1432240c4ed",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "pipeline_id": 2364,
+    "pipeline_status": "success",
+    "gpu": false,
+    "trained_checkpoint": false,
+    "full_generation": false
+  },
+  "r694_qwen2moe_route_bound_placement": {
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_TEST_PASS_PIPELINES_2367_2368_2369_SUCCESS",
+    "source_commit": "ff97fed0ad9374c07194fb56a7972fdd67e309e4",
+    "pipeline_2367": "success",
+    "pipeline_2368": "success",
+    "pipeline_2369": "success",
+    "readback_files_verified": 7,
+    "local_cpu_tests": 3,
+    "registry_mutated": false
+  },
+  "r695_layer_memory_envelope": {
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2370_SUCCESS",
+    "source_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
+    "pipeline_id": 2370,
+    "pipeline_status": "success",
+    "readback_files_verified": 2,
+    "local_cpu_tests": 6,
+    "full_crate_test": false,
+    "gpu": false
+  },
+  "r696_atomic_expert_replacement_memory": {
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2373_SUCCESS",
+    "source_commit": "7489c376de6841eb371141b6b5e4a5284af8b1dc",
+    "pipeline_id": 2373,
+    "pipeline_status": "success",
+    "readback_files_verified": 12,
+    "local_cpu_tests": 7,
+    "capacity_failure_atomic": true,
+    "route_and_registry_unchanged": true,
+    "gpu": false,
+    "full_crate_test": false,
+    "next_action": "R697 llama_decode advisory callback CPU fixture."
   }
 }

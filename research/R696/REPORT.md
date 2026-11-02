@@ -53,3 +53,7 @@ R697 : connecter l'enveloppe à la frontière de routes llama.cpp sous forme de
 conseil optionnel avec Stamp/attempt frais, vérifier les octets de poids depuis le
 GGUF déjà admis, et garder le registre et le dispatch autoritaires. CPU seulement;
 pas de GPU, R53 matériel, worker réseau ou UNKNOWN consommé.
+
+## Publication GitLab privée
+
+Le commit source `7489c376de6841eb371141b6b5e4a5284af8b1dc` a été relu depuis la branche R696; les 12 fichiers du code et des dossiers R695/R696 correspondent exactement aux contenus locaux. La pipeline 2373 est terminée avec Gitleaks, Semgrep, Trivy et le fallback en succès. Elle ne compile pas le crate Rust; les 7 tests CPU ciblés restent la preuve de cette tranche.

@@ -1,6 +1,6 @@
 {
   "id": "R696",
-  "state": "LOCAL_CPU_TEST_PASS_PENDING_PRIVATE_GITLAB_PUBLICATION",
+  "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_PIPELINE_2373_SUCCESS",
   "branch": "r696-atomic-expert-replacement-memory-20261102",
   "base_branch": "r695-layer-memory-envelope-20261102",
   "base_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
@@ -15,7 +15,8 @@
     "rustfmt_check": "pass",
     "clippy_targeted": "pass; three extracted-module dead-code warnings suppressed",
     "full_crate_test": false,
-    "pipeline_2370_r695": "success; four configured jobs, scans/fallback only"
+    "pipeline_2370_r695": "success; four configured jobs, scans/fallback only",
+    "pipeline_2373": "success; Gitleaks, Semgrep, Trivy and fallback; configured CI does not compile/test Rust"
   },
   "contracts": {
     "resident_weights_counted_during_candidate_load": true,
@@ -40,5 +41,37 @@
     "production_network": false,
     "performance_claim": false
   },
-  "next_action": "R697: connect the per-rank memory envelope as advisory to a fresh llama_decode route callback and validate exact GGUF expert bytes; keep routing authoritative and CPU-only."
+  "next_action": "R697: connect the per-rank memory envelope as advisory to a fresh llama_decode route callback and validate exact GGUF expert bytes; keep routing authoritative and CPU-only.",
+  "source_commit": "7489c376de6841eb371141b6b5e4a5284af8b1dc",
+  "parent_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
+  "published_files_verified": 12,
+  "gitlab_readback": {
+    "branch": "r696-atomic-expert-replacement-memory-20261102",
+    "source_commit": "7489c376de6841eb371141b6b5e4a5284af8b1dc",
+    "parent_commit": "dc8e737738042a7d6d2e025307a093b74846d830",
+    "readback_exact": true,
+    "files_verified": [
+      "src/planner.rs",
+      "tests/r694_routed_advice.rs",
+      "research/R695/REPORT.md",
+      "research/R695/BUILD_TEST.txt",
+      "research/R695/UPSTREAM_AUDIT.md",
+      "research/R695/RESULT.json",
+      "research/R695/SHA256SUMS",
+      "research/R696/REPORT.md",
+      "research/R696/BUILD_TEST.txt",
+      "research/R696/UPSTREAM_AUDIT.md",
+      "research/R696/RESULT.json",
+      "research/R696/SHA256SUMS"
+    ],
+    "pipeline_id": 2373,
+    "pipeline_status": "success",
+    "pipeline_scope": "configured security scans and fallback; does not compile the Rust crate or replace local tests",
+    "pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
+  }
 }
