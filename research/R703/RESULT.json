@@ -1,8 +1,14 @@
 {
   "round": "R703",
-  "status": "TRACKED_ARTIFACT_GAP_CONFIRMED_CPU_SAFETENSORS_GUARDS_PASS",
+  "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_PASS_PIPELINE_PENDING",
   "branch": "r703-gate-artifact-inventory-20261102",
   "parent_commit": "d4a20ec8d8bc91e2c4cb9f45e1fc7159d9553c2f",
+  "source_commit": "9b2231894fc34371aacd6464ee09d0ced0c42b85",
+  "pipeline_id": 2417,
+  "pipeline_status": "pending",
+  "pipeline_scope": "configured Gitleaks/Semgrep/Trivy and fallback jobs only; not Rust compilation or local CPU test evidence",
+  "readback_exact": true,
+  "readback_files_verified": 5,
   "inventory": {
     "ref": "r702-deepseek-gate-safetensors-20261102",
     "method": "complete recursive GitLab repository tree enumeration",

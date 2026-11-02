@@ -13275,5 +13275,50 @@
     "readback_files_verified": 10,
     "result_sha256": "610a6455cacf4dfd7b54548fac313be8c57f833852c344de46482c8029c03757",
     "six_expert_session_dispatch": false
+  },
+  "r703_safetensors_fail_closed": {
+    "id": "R703",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_TESTS_PASS_PIPELINE_PENDING",
+    "branch": "r703-gate-artifact-inventory-20261102",
+    "parent_commit": "d4a20ec8d8bc91e2c4cb9f45e1fc7159d9553c2f",
+    "source_commit": "9b2231894fc34371aacd6464ee09d0ced0c42b85",
+    "path": "research/R703",
+    "code_files": [
+      "tests/r703_safetensors_fail_closed.rs"
+    ],
+    "report": "research/R703/REPORT.md",
+    "build_test": "research/R703/BUILD_TEST.txt",
+    "result": "research/R703/RESULT.json",
+    "manifest": "research/R703/SHA256SUMS",
+    "manifest_sha256": "0eaf8d4be1053e91d644dc34e3c71c5404319c7af5a008f9eb0d3064e0d81748",
+    "manifest_files": 4,
+    "readback_exact": true,
+    "readback_files_verified": 5,
+    "inventory_entries": 7920,
+    "inventory_complete": true,
+    "gate_payload_tracked": false,
+    "missing_selected_expert_payloads": [
+      379,
+      380,
+      381,
+      382
+    ],
+    "local_cpu_tests": "5 passed; scoped Clippy -D warnings, rustfmt and diff checks passed",
+    "pipeline_id": 2417,
+    "pipeline_status": "pending",
+    "pipeline_scope": "configured security scans/fallback only; not Rust compilation or local CPU tests",
+    "result_sha256": "0a631122be5bd23cb3a817ae780840820bd5e6c882ec21cae3a2c907e21502e4",
+    "session_dispatch": false,
+    "full_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_network": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "replay_allowed": false,
+    "next_action": "R704: check pipeline 2417 once without retry if queued, then continue CPU engine integration with already-tracked components; keep DeepSeek dispatch refused until the gate payload and all six selected expert profiles exist. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+    "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_EXACT_CPU_TESTS_PASS_PIPELINE_PENDING",
+    "tests": "5 passed; scoped Clippy -D warnings, rustfmt and diff checks passed"
   }
 }
