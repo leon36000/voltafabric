@@ -1,7 +1,7 @@
 {
   "id": "R745",
   "title": "CPU reduction of vocabulary-sharded DeepSeek V4.1 greedy logits",
-  "status": "SOURCE_PUBLISHED_PRIVATE_GITLAB_RECEIPT_PENDING",
+  "status": "PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ORACLE_PASS",
   "upstream": {
     "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
     "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
@@ -59,11 +59,39 @@
     "branch": "r745-vocab-shard-greedy-20261102",
     "parent_commit": "153a57ab9d550cf2be41cd99f40d225a563eee5d",
     "source_commit": "a8069e854421fdf056a2bf44c68cd4f2ed73480b",
-    "pipeline_id": null,
-    "pipeline_status": "running",
+    "pipeline_id": 2632,
+    "pipeline_status": "success",
     "exact_readback": true,
-    "readback_files_verified": 4,
-    "source_pipeline_id": 2631
+    "readback_files_verified": 11,
+    "source_pipeline_id": 2631,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "receipt_commit": "3486b78fc7196907edbb1b24b587fbb1782485c1",
+    "receipt_pipeline_jobs": {
+      "pc4_gitleaks": "success",
+      "pc4_semgrep": "success",
+      "pc4_trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "receipt_artifacts_verified": [
+      "src/deepseek_v41_head.rs",
+      "src/deepseek_v41_sampler.rs",
+      "src/lib.rs",
+      "docs/ARCHITECTURE.md",
+      "research/R745/REPORT.md",
+      "research/R745/RESULT.json",
+      "research/R745/TEST-RESULT.txt",
+      "research/R745/SHA256SUMS",
+      "research/R745/cpu-harness/Cargo.toml",
+      "research/R745/cpu-harness/Cargo.lock",
+      "research/R745/cpu-harness/src/lib.rs"
+    ],
+    "receipt_handoff_records_present": true
   },
-  "next_action": "Define an authenticated, versioned partial transport and wire it to compatible resident checkpoint LM-head shards; retain atomic completeness and defer hardware/network admission."
+  "next_action": "R746: prepare a CPU-only, versioned shard-partial codec against the existing VFB3/session boundary only after confirming its exact wire contract; do not claim authenticated transport, full generation, GPU, inter-PC operation or performance."
 }
