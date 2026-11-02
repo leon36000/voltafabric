@@ -16,9 +16,14 @@ Malformed gate tensor hash rejected before opening any source shard:
   debug: 1 passed; 9 filtered out; 0.00 s
   release: 1 passed; 9 filtered out; 0.00 s
 
+Pinned checkpoint index places each layer's three gate tensors and all 384 x 6 expert payload tensors in one common shard (40/40 layers):
+  cargo test --locked --offline --test r712_deepseek_session_owner pinned_index_colocates_each_layer_gate_and_all_expert_payloads
+  debug: 1 passed; 10 filtered out; 0.66 s
+  release: 1 passed; 10 filtered out; 0.06 s
+
 Additional checks:
   cargo clippy --locked --offline --lib -- -D warnings: PASS
   cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings: PASS
   cargo fmt --all -- --check: PASS
 
-The source file is a temporary sparse fixture below .work and is cleaned by RAII. Its gate and expert payload bytes are synthetic. No model weights/download, GPU, network transport, R53 production worker, UNKNOWN replay or performance benchmark was used.
+The source file is a temporary sparse fixture below .work and is cleaned by RAII. Its gate and expert payload bytes are synthetic. The shard-colocation regression reads only the committed index metadata. No model weights/download, GPU, network transport, R53 production worker, UNKNOWN replay or performance benchmark was used.

@@ -1,0 +1,48 @@
+{
+  "id": "R724",
+  "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_EXACT_READBACK_CPU_FIXTURE_PASS",
+  "branch": "r724-indexed-gate-forward-20261102",
+  "parent_commit": "818ace98a0283861c0113fe59a81601c40dabb4c",
+  "source_commit": "7db448ccc62a71f3ab36c77f0919a4e96daec8c3",
+  "source_pipeline": {
+    "id": 2552,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    }
+  },
+  "source_readback": {
+    "verified_files": 7,
+    "total_files": 7,
+    "all_manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "local_cpu_verification": {
+    "gate_indexed_full_route_debug": "1/1 pass",
+    "gate_indexed_full_route_release": "1/1 pass",
+    "nonpinned_index_preflight_debug_release": "pass before shard open",
+    "malformed_hash_preflight_debug_release": "pass before shard open",
+    "pinned_index_gate_expert_colocation_debug": "1/1 pass; 40/40 layers",
+    "pinned_index_gate_expert_colocation_release": "1/1 pass; 40/40 layers",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass",
+    "git_diff_check": "pass"
+  },
+  "scope": {
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "receipt_commit_sha": "recorded by subsequent branch verification; not self-referenced here",
+  "next_action": "R725: connect indexed gate/expert imports to a model-layer entry point and implement the next single-token layer/forward boundary while preserving existing attention/norm, resident-owner and Collector contracts; real checkpoint admission remains separate.",
+  "verified_utc": "2026-11-02T14:22:18Z"
+}

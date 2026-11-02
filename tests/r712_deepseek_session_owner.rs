@@ -1490,3 +1490,40 @@ fn indexed_gate_load_rejects_malformed_tensor_hashes_before_opening_shard() {
     .unwrap_err();
     assert!(error.message.contains("three complete SHA-256 digests"));
 }
+
+#[test]
+fn pinned_index_colocates_each_layer_gate_and_all_expert_payloads() {
+    let index = include_bytes!(
+        "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
+    );
+    assert_eq!(voltafabric::sha256::hex(index), PINNED_INDEX_SHA256);
+    let parsed: serde_json::Value = serde_json::from_slice(index).unwrap();
+    let weight_map = parsed["weight_map"].as_object().unwrap();
+    for layer in 0..40 {
+        let mut layer_shard = None;
+        let mut record = |name: String| {
+            let shard = weight_map
+                .get(&name)
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or_else(|| panic!("pinned index is missing {name}"));
+            if let Some(previous) = layer_shard {
+                assert_eq!(previous, shard, "layer {layer} is spread across shards");
+            } else {
+                layer_shard = Some(shard);
+            }
+        };
+        for suffix in ["weight", "bias", "bias_vl"] {
+            record(format!("layers.{layer}.ffn.gate.{suffix}"));
+        }
+        for expert in 0..ROUTED_EXPERTS {
+            for projection in ["w1", "w2", "w3"] {
+                for suffix in ["weight", "scale"] {
+                    record(format!(
+                        "layers.{layer}.ffn.experts.{expert}.{projection}.{suffix}"
+                    ));
+                }
+            }
+        }
+        assert!(layer_shard.is_some());
+    }
+}

@@ -1,7 +1,7 @@
 {
   "id": "R724",
   "owner": "integrator",
-  "state": "CPU_SOURCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_READBACK_EXACT_CPU_ONLY_RECEIPT_PENDING",
   "branch": "r724-indexed-gate-forward-20261102",
   "parent_commit": "818ace98a0283861c0113fe59a81601c40dabb4c",
   "path": "research/R724",
@@ -18,6 +18,13 @@
     "gate_indexed_full_route_release": "1/1 pass",
     "bad_index_preflight_debug_release": "pass before shard open",
     "bad_hash_preflight_debug_release": "pass before shard open",
+    "pinned_index_gate_expert_shard_colocation": {
+      "layers": 40,
+      "tensors_per_layer": "3 gate + 384 x 6 expert payloads",
+      "debug": "1/1 pass",
+      "release": "1/1 pass",
+      "payload_bytes_read": false
+    },
     "clippy_library": "pass (-D warnings)",
     "clippy_integration": "pass (-D warnings)",
     "rustfmt": "pass"
@@ -33,9 +40,27 @@
     "automatic_relaunch": "STOPPED_BY_OWNER"
   },
   "next_action": "R725: connect indexed gate/expert imports to a model-layer entry point and implement the next single-token layer/forward boundary while preserving the existing attention/norm, resident-owner and Collector contracts; actual checkpoint admission remains separate.",
-  "source_commit": "awaiting GitLab source commit",
-  "source_pipeline_id": null,
-  "source_pipeline_status": "pending",
-  "readback_verified": false,
-  "prepared_utc": "2026-11-02T14:17:56Z"
+  "source_commit": "7db448ccc62a71f3ab36c77f0919a4e96daec8c3",
+  "source_pipeline_id": 2552,
+  "source_pipeline_status": "success",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback": {
+    "verified_files": 7,
+    "total_files": 7,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "readback_verified": true,
+  "manifest_file_count": 7,
+  "manifest_sha256": null,
+  "manifest_sha256_note": "Final manifest digest is recorded in the root handoffs after generation to avoid self-reference.",
+  "source_readback_verified_utc": "2026-11-02T14:22:18Z",
+  "published_utc": "2026-11-02T14:18:34Z",
+  "receipt_pipeline_pending": true,
+  "prepared_utc": "2026-11-02T14:22:18Z"
 }
