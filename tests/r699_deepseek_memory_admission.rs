@@ -465,3 +465,76 @@ fn full_gate_top6_route_refuses_when_only_two_deepseek_experts_have_weight_profi
         "the complete gate top-6 must not be truncated to the two available experts"
     );
 }
+
+#[test]
+fn six_expert_session_preflight_refuses_missing_resident_ranks_before_worker_start() {
+    let mut text_bias = vec![0.0; ROUTED_EXPERTS];
+    text_bias[0] = 1_000.0;
+    let gate = RouterBiases::new(text_bias, vec![0.0; ROUTED_EXPERTS], ROUTE_SCALE).unwrap();
+    let logits: Vec<f32> = (0..ROUTED_EXPERTS).map(|index| index as f32).collect();
+    let gate_route = gate.route(&logits, TokenKind::Text).unwrap();
+    assert_eq!(gate_route.len(), TOP_K);
+
+    // Make the exact six gate choices require six rank-local residents. Only the
+    // pinned expert-0 artifact is supplied below; the other five ranks are absent.
+    let locals = [EXPERT0_LOCAL, 4, 5, 6, 7, 8];
+    let mut route = problem(0.375, 0.375);
+    route.experts = gate_route.iter().map(|choice| choice.expert).collect();
+    route.routes = vec![gate_route.clone()];
+    route.registry.copies = gate_route
+        .iter()
+        .enumerate()
+        .map(|(rank, choice)| Replica {
+            expert: choice.expert,
+            rank: rank as u32,
+            local: locals[rank],
+        })
+        .collect();
+    route.resident_order = gate_route
+        .iter()
+        .enumerate()
+        .map(|(rank, _)| (rank as u32, vec![locals[rank]]))
+        .collect();
+    voltafabric::routing::validate(&route).expect("complete six-expert route identity");
+
+    let artifact_path = format!(
+        "{}/fixtures/deepseek_v41_layer0_expert0_314113f8.safetensors",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    let attempt = 906;
+    let outcome = mxfp4::run_series(mxfp4::SeriesInput {
+        workers: vec![mxfp4::WorkerSource {
+            endpoint: Endpoint {
+                rank: EXPERT0_RANK,
+                argv: vec!["/must-not-be-started-r707".into()],
+            },
+            binding: binding(0, EXPERT0_LOCAL, EXPERT0_RANK, EXPERT0_SHA256),
+            artifact_path,
+            producer: Default::default(),
+            prefer_bf16_activations: false,
+        }],
+        batches: vec![mxfp4::Batch {
+            problem: route,
+            attempt,
+            inputs: vec![mxfp4::TokenInput {
+                token: 0,
+                value_bits: vec![0; HIDDEN],
+            }],
+            faults: BTreeMap::new(),
+        }],
+        timeout_ms: 1_000,
+        startup_parallelism: 1,
+    });
+
+    let error = match outcome {
+        Err(error) => error,
+        Ok(report) => panic!(
+            "incomplete six-expert admission must fail before Session startup: {}",
+            serde_json::to_string(&report).unwrap()
+        ),
+    };
+    assert!(
+        format!("{error:?}").contains("missing MXFP4 rank endpoint"),
+        "unexpected preflight refusal: {error:?}"
+    );
+}

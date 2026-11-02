@@ -99,6 +99,63 @@ fn validate_batch_attempts(attempts: impl IntoIterator<Item = u64>) -> Result<()
     Ok(())
 }
 
+/// Validate every routed batch against the complete set of loaded resident
+/// artifacts before the first Session::connect or worker LOAD can occur.
+fn preflight_execution(input: &SeriesInput, artifacts: &BTreeMap<u32, Artifact>) -> Result<()> {
+    let mut identities = BTreeSet::new();
+    let mut participants = BTreeSet::new();
+    for batch in &input.batches {
+        arithmetic::Collector::new(&batch.problem)?;
+        if !identities.insert(encode(&batch.problem.stamp)?) {
+            return Err(invalid("MXFP4 series repeats a full execution identity"));
+        }
+        let mut tokens = BTreeSet::new();
+        for row in &batch.inputs {
+            if row.token >= batch.problem.routes.len()
+                || row.value_bits.len() != batch.problem.hidden
+                || !tokens.insert(row.token)
+            {
+                return Err(invalid(
+                    "MXFP4 series global inputs have duplicate/foreign tokens or shapes",
+                ));
+            }
+            for &bits in &row.value_bits {
+                if deepseek_v41::cast_bf16_rne_reference(f32::from_bits(bits))?.to_bits() != bits {
+                    return Err(invalid("MXFP4 series input must already be exactly BF16"));
+                }
+            }
+        }
+        if tokens.len() != batch.problem.routes.len() {
+            return Err(invalid("MXFP4 series has missing inputs"));
+        }
+        let dispatch = routing::dispatch(&batch.problem)?;
+        for rank in dispatch.ranks.iter().filter(|rank| !rank.slots.is_empty()) {
+            let artifact = artifacts
+                .get(&rank.rank)
+                .ok_or_else(|| invalid("missing MXFP4 rank endpoint"))?;
+            artifact.validate_dispatch(rank)?;
+            checked_inputs(rank, compact(batch, rank))?;
+            participants.insert(rank.rank);
+        }
+        for (&rank, fault) in &batch.faults {
+            if !dispatch
+                .ranks
+                .iter()
+                .any(|entry| entry.rank == rank && !entry.slots.is_empty())
+            {
+                return Err(invalid("MXFP4 fault names a nonparticipating rank"));
+            }
+            check_fault(fault)?;
+        }
+    }
+    if participants != artifacts.keys().copied().collect() {
+        return Err(invalid(
+            "MXFP4 series endpoints must match its participating ranks",
+        ));
+    }
+    Ok(())
+}
+
 type StartupResult = (u32, Option<Session>, Result<LoadReceipt>);
 
 fn connect_load(
@@ -230,57 +287,7 @@ pub fn run_series(input: SeriesInput) -> Result<Report> {
         };
         artifacts.insert(worker.endpoint.rank, artifact);
     }
-    let mut identities = BTreeSet::new();
-    let mut participants = BTreeSet::new();
-    for batch in &input.batches {
-        arithmetic::Collector::new(&batch.problem)?;
-        if !identities.insert(encode(&batch.problem.stamp)?) {
-            return Err(invalid("MXFP4 series repeats a full execution identity"));
-        }
-        let mut tokens = BTreeSet::new();
-        for row in &batch.inputs {
-            if row.token >= batch.problem.routes.len()
-                || row.value_bits.len() != batch.problem.hidden
-                || !tokens.insert(row.token)
-            {
-                return Err(invalid(
-                    "MXFP4 series global inputs have duplicate/foreign tokens or shapes",
-                ));
-            }
-            for &bits in &row.value_bits {
-                if deepseek_v41::cast_bf16_rne_reference(f32::from_bits(bits))?.to_bits() != bits {
-                    return Err(invalid("MXFP4 series input must already be exactly BF16"));
-                }
-            }
-        }
-        if tokens.len() != batch.problem.routes.len() {
-            return Err(invalid("MXFP4 series has missing inputs"));
-        }
-        let d = routing::dispatch(&batch.problem)?;
-        for rank in d.ranks.iter().filter(|r| !r.slots.is_empty()) {
-            let artifact = artifacts
-                .get(&rank.rank)
-                .ok_or_else(|| invalid("missing MXFP4 rank endpoint"))?;
-            artifact.validate_dispatch(rank)?;
-            checked_inputs(rank, compact(batch, rank))?;
-            participants.insert(rank.rank);
-        }
-        for (&rank, fault) in &batch.faults {
-            if !d
-                .ranks
-                .iter()
-                .any(|r| r.rank == rank && !r.slots.is_empty())
-            {
-                return Err(invalid("MXFP4 fault names a nonparticipating rank"));
-            }
-            check_fault(fault)?;
-        }
-    }
-    if participants != artifacts.keys().copied().collect() {
-        return Err(invalid(
-            "MXFP4 series endpoints must match its participating ranks",
-        ));
-    }
+    preflight_execution(&input, &artifacts)?;
     let timeout = Duration::from_millis(input.timeout_ms);
     let mut sessions = BTreeMap::new();
     let mut report = Report {
