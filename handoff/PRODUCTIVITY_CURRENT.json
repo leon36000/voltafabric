@@ -4750,5 +4750,52 @@
     ],
     "receipt_handoff_records_present": true,
     "updated_utc": "2026-11-02 21:30:07 UTC"
+  },
+  "r744_deepseek_greedy_sampler": {
+    "id": "R744",
+    "owner": "integrator",
+    "state": "SOURCE_PIPELINE_SUCCESS_RECEIPT_PENDING",
+    "branch": "r744-llama-greedy-step-20261102",
+    "parent_commit": "7a5692dd70d57261c2601d3a8fa970370356bc1a",
+    "source_commit": "5565a8b594745af4205728a76aa005c05534e400",
+    "source_pipeline_id": 2626,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "pc4_ci_fallback": "success"
+    },
+    "path": "research/R744",
+    "code_files": [
+      "src/deepseek_v41_sampler.rs",
+      "src/deepseek_v41_prompt.rs",
+      "src/lib.rs",
+      "docs/ARCHITECTURE.md"
+    ],
+    "report": "research/R744/REPORT.md",
+    "result": "research/R744/RESULT.json",
+    "test_result": "research/R744/TEST-RESULT.txt",
+    "manifest": "research/R744/SHA256SUMS",
+    "manifest_sha256": "ce514d6d9cd85b261c9751dfe6abe81593df203bcdd7bc60c107ade29a7016ec",
+    "manifest_file_count": 7,
+    "adapted_idea": "llama.cpp 29c720eaf72fcf8e4e61a56a88b994d92668261d (MIT): ordered argmax with strict greater-than, preserving the first token ID on ties; no donor source copied.",
+    "verification": "CPU-only isolated tests: sampler 6/6; actual prompt/sampler+stream-feature harness 9 passed, 3 pinned-tokenizer tests ignored; rustfmt pass. GitLab source pipeline #2626 all four jobs success.",
+    "source_readback_exact": false,
+    "source_readback_files_verified": 0,
+    "complete_generation": false,
+    "real_checkpoint_payload": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "active_operations": [],
+    "receipt_pending": true,
+    "next_action": "R745: connect the authenticated CPU resident-checkpoint logits producer to the one-token boundary using a new request identity; reject partial tensor sets atomically. Keep GPU and production admission separate.",
+    "receipt_commit": null,
+    "receipt_pipeline_id": null,
+    "receipt_pipeline_status": "pending"
   }
 }

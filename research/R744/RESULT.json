@@ -1,7 +1,7 @@
 {
   "id": "R744",
   "title": "CPU greedy next-token boundary for pinned DeepSeek V4.1 recipe",
-  "status": "LOCAL_CPU_SAMPLER_VERIFIED_AWAITING_PRIVATE_GITLAB_PIPELINES",
+  "status": "SOURCE_PIPELINE_SUCCESS_RECEIPT_PENDING",
   "upstream": {
     "repository": "ggml-org/llama.cpp",
     "commit": "29c720eaf72fcf8e4e61a56a88b994d92668261d",
@@ -17,7 +17,15 @@
       "docs/ARCHITECTURE.md"
     ],
     "prompt_factory": "admits only the pinned tokenizer digest and model revision; a private admission seal binds the token-ID digest, context limit and reservation before decoder construction",
-    "decode_identity": ["run_id", "model_revision", "plan_id", "layer", "batch", "epoch", "attempt"],
+    "decode_identity": [
+      "run_id",
+      "model_revision",
+      "plan_id",
+      "layer",
+      "batch",
+      "epoch",
+      "attempt"
+    ],
     "numerical_policy": "NaN, positive infinity, and all-masked rows reject without state mutation; negative infinity is an allowed masked candidate",
     "terminal_policy": "EOS and max_new_tokens end the decoder; further sampling is refused; only a finished decoder may cross the EOS-safe prefix boundary",
     "routes_or_coefficients_changed": false,
@@ -26,7 +34,7 @@
   "verification": {
     "isolated_cpu_harness_tests_passed": 6,
     "isolated_cpu_harness_tests_failed": 0,
-    "prompt_sampler_feature_harness": "offline compilation of the actual prompt and sampler modules against deepseek-recipe-core/encoding 0.2.0, tokenizers 0.23.2 and VoltaFabric SHA-256; 9 passed, 2 pinned-tokenizer tests ignored",
+    "prompt_sampler_feature_harness": "offline compilation of actual prompt/sampler plus stream feature against deepseek-recipe 0.2.0, deepseek-recipe-core/encoding 0.2.0, tokenizers 0.23.2 and VoltaFabric SHA-256; 9 passed, 3 pinned-tokenizer tests ignored",
     "rustfmt_sampler_prompt_lib_check": "pass",
     "pinned_tokenizer_integration_test": "added but ignored; external VF_DEEPSEEK_V41_TOKENIZER_JSON fixture unavailable to this run",
     "full_repository_build": "not run locally",
@@ -41,14 +49,20 @@
   "publication": {
     "branch": "r744-llama-greedy-step-20261102",
     "base_commit": "7a5692dd70d57261c2601d3a8fa970370356bc1a",
-    "source_commit": null,
-    "source_pipeline_id": null,
-    "source_pipeline_status": "pending",
+    "source_commit": "5565a8b594745af4205728a76aa005c05534e400",
+    "source_pipeline_id": 2626,
+    "source_pipeline_status": "success",
     "exact_readback": false,
     "receipt_commit": null,
     "receipt_pipeline_id": null,
     "receipt_pipeline_status": "pending",
-    "receipt_pending": true
+    "receipt_pending": true,
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "pc4_ci_fallback": "success"
+    }
   },
   "next_action": "Connect the logits provider produced by authenticated resident checkpoint owners to this one-token CPU boundary under a new request identity; refuse partial tensor sets and keep GPU/production admission separate."
 }
