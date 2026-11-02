@@ -24,7 +24,7 @@ use crate::moe::Choice;
 use crate::{invalid, Error, Result};
 use safetensors::tensor::Dtype;
 use std::{
-    collections::BTreeMap,
+    collections::{BTreeMap, BTreeSet},
     io::{Read, Seek},
     path::Path,
 };
@@ -42,6 +42,12 @@ pub const GATE_BIAS_BYTES: u64 = (ROUTED_EXPERTS * 4) as u64;
 pub const GATE_PAYLOAD_BYTES: u64 = GATE_WEIGHT_BYTES + 2 * GATE_BIAS_BYTES;
 pub const PINNED_RMS_NORM_EPSILON: f32 = 1.0e-20;
 pub const RMS_NORM_WEIGHT_BYTES: u64 = (HIDDEN_SIZE * 2) as u64;
+pub const SHARED_EXPERT_INTERMEDIATE_SIZE: usize = 2304;
+pub const SHARED_EXPERT_WEIGHT_BYTES: u64 = (SHARED_EXPERT_INTERMEDIATE_SIZE * HIDDEN_SIZE) as u64;
+pub const SHARED_EXPERT_SCALE_BYTES: u64 =
+    ((SHARED_EXPERT_INTERMEDIATE_SIZE / 32) * (HIDDEN_SIZE / 32)) as u64;
+pub const SHARED_EXPERT_PAYLOAD_BYTES: u64 =
+    3 * (SHARED_EXPERT_WEIGHT_BYTES + SHARED_EXPERT_SCALE_BYTES);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum TokenKind {
@@ -247,6 +253,192 @@ pub struct FfnNormLoadReceipt {
     pub shard_bytes: u64,
     pub header_bytes: u64,
     pub io_bytes: u64,
+}
+
+/// Caller-pinned hashes for all six planes in the always-active shared FP8 expert.
+/// The weight and scale encodings remain distinct: E4M3FN and E8M0 respectively.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedExpertTensorHashes {
+    pub w1_weight: String,
+    pub w1_scale: String,
+    pub w2_weight: String,
+    pub w2_scale: String,
+    pub w3_weight: String,
+    pub w3_scale: String,
+}
+
+#[derive(Debug, Clone)]
+pub struct SharedExpertTensorSpec {
+    pub layer: u32,
+    pub tensor_sha256: SharedExpertTensorHashes,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct SharedExpertLoadReceipt {
+    pub layer: u32,
+    pub source_shard_name: String,
+    pub index_sha256: String,
+    pub header_sha256: String,
+    pub shard_bytes: u64,
+    pub header_bytes: u64,
+    pub tensor_bytes: u64,
+    pub io_bytes: u64,
+    pub tensor_sha256: SharedExpertTensorHashes,
+}
+
+#[derive(Debug)]
+struct ResidentSharedExpert {
+    expert: crate::deepseek_v41::DeepSeekV41SharedExpert,
+    receipt: SharedExpertLoadReceipt,
+}
+
+/// Raw, unweighted FP32 result of the always-active shared expert. It carries the
+/// full VoltaFabric token identity and attempt so it can only be joined to the
+/// matching completed routed Collector result.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41SharedTokenOutput {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    output_fp32: Vec<f32>,
+}
+
+impl DeepSeekV41SharedTokenOutput {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn output_fp32(&self) -> &[f32] {
+        &self.output_fp32
+    }
+}
+
+/// Final single-token MoE activation. Values are exact BF16 values represented as
+/// FP32 after one pinned FP32 routed-plus-shared addition and one BF16 RNE cast.
+#[derive(Debug, Clone)]
+pub struct DeepSeekV41MoeTokenOutput {
+    stamp: crate::moe::Stamp,
+    attempt: u64,
+    output_bf16_f32: Vec<f32>,
+}
+
+impl DeepSeekV41MoeTokenOutput {
+    pub fn stamp(&self) -> &crate::moe::Stamp {
+        &self.stamp
+    }
+
+    pub fn attempt(&self) -> u64 {
+        self.attempt
+    }
+
+    pub fn output_bf16_f32(&self) -> &[f32] {
+        &self.output_bf16_f32
+    }
+}
+
+/// Add the shared expert exactly once after the routed FP32-preweighted Collector
+/// completes. Any Aborted/Unknown, identity mismatch, malformed or nonfinite row
+/// returns no output. The route receipt is borrowed and remains available to the
+/// caller for audit; this function performs no Session requests and never retries.
+pub fn combine_pinned_moe_route_with_shared(
+    route: &crate::deepseek_v41::PinnedMxfp4RouteExecutionReceipt,
+    shared: &DeepSeekV41SharedTokenOutput,
+) -> Result<DeepSeekV41MoeTokenOutput> {
+    use crate::deepseek_v41::PinnedMxfp4RouteExecutionState;
+
+    match route.state() {
+        PinnedMxfp4RouteExecutionState::Completed => {}
+        PinnedMxfp4RouteExecutionState::Aborted => {
+            return Err(Error::new(
+                "ROUTE_ABORTED",
+                "DeepSeek shared result withheld because the routed Collector aborted",
+            ));
+        }
+        PinnedMxfp4RouteExecutionState::Unknown => {
+            return Err(Error::new(
+                "ROUTE_UNKNOWN",
+                "DeepSeek shared result withheld because the routed attempt is unknown",
+            ));
+        }
+    }
+
+    let stamp = route.stamp();
+    if stamp != shared.stamp()
+        || route.attempt() == 0
+        || route.attempt() != shared.attempt()
+        || stamp.model_revision != PINNED_MODEL_REVISION
+        || stamp.layer != shared.stamp().layer
+        || route.route_experts().len() != TOP_K
+        || !crate::sha256::is_hex_digest(route.route_fingerprint())
+        || shared.output_fp32.len() != HIDDEN_SIZE
+        || shared.output_fp32.iter().any(|value| !value.is_finite())
+    {
+        return Err(invalid(
+            "DeepSeek routed and shared outputs do not share one complete token identity",
+        ));
+    }
+    let receipts = route.exec_receipts();
+    let unique_route_experts = route
+        .route_experts()
+        .iter()
+        .copied()
+        .collect::<BTreeSet<_>>();
+    let unique_ranks = receipts
+        .iter()
+        .map(|receipt| receipt.rank)
+        .collect::<BTreeSet<_>>();
+    let complete_slots = receipts.iter().try_fold(0usize, |sum, receipt| {
+        if receipt.attempt != route.attempt()
+            || receipt.state != crate::process::ReceiptState::Completed
+            || !receipt.started
+            || receipt.error.is_some()
+            || receipt.expected_slots == 0
+            || receipt.received_slots != receipt.expected_slots
+        {
+            return None;
+        }
+        sum.checked_add(receipt.received_slots)
+    });
+    if route.error().is_some()
+        || receipts.is_empty()
+        || unique_ranks.len() != receipts.len()
+        || unique_route_experts.len() != TOP_K
+        || complete_slots != Some(TOP_K)
+    {
+        return Err(invalid(
+            "DeepSeek completed Collector receipt lacks six completed route slots",
+        ));
+    }
+    let routed_rows = route
+        .output_bits()
+        .ok_or_else(|| invalid("completed DeepSeek route has no Collector output"))?;
+    if routed_rows.len() != 1 || routed_rows[0].len() != HIDDEN_SIZE {
+        return Err(invalid(
+            "DeepSeek completed route must contain one full hidden row",
+        ));
+    }
+
+    // Stage locally so no partially combined row can escape if a value overflows.
+    let mut output_bf16_f32 = Vec::with_capacity(HIDDEN_SIZE);
+    for (&routed_bits, &shared_value) in routed_rows[0].iter().zip(&shared.output_fp32) {
+        let routed_value = f32::from_bits(routed_bits);
+        let sum = routed_value + shared_value;
+        if !routed_value.is_finite() || !sum.is_finite() {
+            return Err(Error::new(
+                "NUMERICAL_OVERFLOW",
+                "DeepSeek routed-plus-shared FP32 sum is nonfinite",
+            ));
+        }
+        output_bf16_f32.push(crate::deepseek_v41::cast_bf16_rne_reference(sum)?);
+    }
+    Ok(DeepSeekV41MoeTokenOutput {
+        stamp: stamp.clone(),
+        attempt: route.attempt(),
+        output_bf16_f32,
+    })
 }
 
 /// Resident CPU RMSNorm weight imported from the pinned BF16 ffn_norm tensor.
@@ -457,6 +649,330 @@ impl DeepSeekV41FfnRmsNorm {
                 crate::deepseek_v41::cast_bf16_rne_reference((value * inverse_rms) * weight)
             })
             .collect()
+    }
+}
+
+impl SharedExpertTensorSpec {
+    fn named_tensors(&self) -> Result<Vec<NamedTensorSpec>> {
+        if self.layer >= 40 {
+            return Err(invalid(
+                "pinned DeepSeek shared expert layer is out of range",
+            ));
+        }
+        let layer = self.layer;
+        let intermediate = SHARED_EXPERT_INTERMEDIATE_SIZE;
+        let hidden = HIDDEN_SIZE;
+        let entries = [
+            (
+                format!("layers.{layer}.ffn.shared_experts.w1.weight"),
+                Dtype::F8_E4M3,
+                vec![intermediate, hidden],
+                SHARED_EXPERT_WEIGHT_BYTES,
+                &self.tensor_sha256.w1_weight,
+            ),
+            (
+                format!("layers.{layer}.ffn.shared_experts.w1.scale"),
+                Dtype::F8_E8M0,
+                vec![intermediate / 32, hidden / 32],
+                SHARED_EXPERT_SCALE_BYTES,
+                &self.tensor_sha256.w1_scale,
+            ),
+            (
+                format!("layers.{layer}.ffn.shared_experts.w2.weight"),
+                Dtype::F8_E4M3,
+                vec![hidden, intermediate],
+                SHARED_EXPERT_WEIGHT_BYTES,
+                &self.tensor_sha256.w2_weight,
+            ),
+            (
+                format!("layers.{layer}.ffn.shared_experts.w2.scale"),
+                Dtype::F8_E8M0,
+                vec![hidden / 32, intermediate / 32],
+                SHARED_EXPERT_SCALE_BYTES,
+                &self.tensor_sha256.w2_scale,
+            ),
+            (
+                format!("layers.{layer}.ffn.shared_experts.w3.weight"),
+                Dtype::F8_E4M3,
+                vec![intermediate, hidden],
+                SHARED_EXPERT_WEIGHT_BYTES,
+                &self.tensor_sha256.w3_weight,
+            ),
+            (
+                format!("layers.{layer}.ffn.shared_experts.w3.scale"),
+                Dtype::F8_E8M0,
+                vec![intermediate / 32, hidden / 32],
+                SHARED_EXPERT_SCALE_BYTES,
+                &self.tensor_sha256.w3_scale,
+            ),
+        ];
+        if entries
+            .iter()
+            .any(|(_, _, _, _, digest)| !crate::sha256::is_hex_digest(digest))
+        {
+            return Err(invalid(
+                "pinned DeepSeek shared expert tensor digest is malformed",
+            ));
+        }
+        Ok(entries
+            .into_iter()
+            .map(|(name, dtype, shape, bytes, sha256)| NamedTensorSpec {
+                name,
+                dtype,
+                shape,
+                bytes,
+                sha256: sha256.clone(),
+            })
+            .collect())
+    }
+}
+
+impl ResidentSharedExpert {
+    fn load_indexed(
+        root: &Path,
+        source: PinnedMxfp4PayloadSource<'_>,
+        spec: &SharedExpertTensorSpec,
+    ) -> Result<Self> {
+        if spec.layer >= 40
+            || !crate::sha256::is_hex_digest(source.expected_header_sha256)
+            || crate::sha256::hex(source.index_bytes)
+                != crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256
+            || crate::sha256::hex(source.header_bytes) != source.expected_header_sha256
+            || source.source_shard_bytes == 0
+            || source.source_shard_bytes > source.max_source_shard_bytes
+            || source.header_shard_name.is_empty()
+        {
+            return Err(invalid(
+                "pinned DeepSeek shared expert source identity or bounds are invalid",
+            ));
+        }
+
+        let selected = spec.named_tensors()?;
+        let names = selected
+            .iter()
+            .map(|tensor| tensor.name.clone())
+            .collect::<Vec<_>>();
+        let expected_plan = checkpoint::plan_indexed_safetensors_shards(
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            &names,
+        )?;
+        if expected_plan.tensor_to_shard.len() != selected.len()
+            || expected_plan
+                .tensor_to_shard
+                .values()
+                .any(|shard| shard != source.header_shard_name)
+        {
+            return Err(invalid(
+                "pinned DeepSeek shared expert planes must share the admitted layer shard",
+            ));
+        }
+
+        let header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            source.header_shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if header.sha256 != source.expected_header_sha256
+            || header.file_bytes != source.source_shard_bytes
+            || header.header_bytes != source.header_bytes
+        {
+            return Err(invalid(
+                "pinned DeepSeek shared expert header or shard size differs",
+            ));
+        }
+
+        let imported = checkpoint::read_indexed_named_tensors(
+            root,
+            source.index_bytes,
+            crate::deepseek_v41::PINNED_EXPERT_INDEX_SHA256,
+            &selected,
+            SHARED_EXPERT_PAYLOAD_BYTES,
+        )?;
+        if imported.plan != expected_plan
+            || imported.file_bytes != source.source_shard_bytes
+            || imported.header_bytes != header.header_bytes.len() as u64
+            || imported.tensors.len() != selected.len()
+        {
+            return Err(invalid(
+                "indexed DeepSeek shared expert import differs from its preflight",
+            ));
+        }
+
+        let mut tensors = imported.tensors;
+        let mut take = |name: &str,
+                        dtype: Dtype,
+                        shape: &[usize],
+                        byte_count: u64,
+                        expected_sha256: &str|
+         -> Result<Vec<u8>> {
+            let tensor = tensors
+                .remove(name)
+                .ok_or_else(|| invalid(format!("indexed shared tensor is absent: {name}")))?;
+            if tensor.dtype != dtype
+                || tensor.shape != shape
+                || tensor.bytes.len() as u64 != byte_count
+                || tensor.sha256 != expected_sha256
+            {
+                return Err(invalid(format!(
+                    "indexed shared tensor metadata or digest differs: {name}"
+                )));
+            }
+            Ok(tensor.bytes)
+        };
+
+        let layer = spec.layer;
+        let intermediate = SHARED_EXPERT_INTERMEDIATE_SIZE;
+        let hidden = HIDDEN_SIZE;
+        let w1_weight = take(
+            &format!("layers.{layer}.ffn.shared_experts.w1.weight"),
+            Dtype::F8_E4M3,
+            &[intermediate, hidden],
+            SHARED_EXPERT_WEIGHT_BYTES,
+            &spec.tensor_sha256.w1_weight,
+        )?;
+        let w1_scale_blocks = take(
+            &format!("layers.{layer}.ffn.shared_experts.w1.scale"),
+            Dtype::F8_E8M0,
+            &[intermediate / 32, hidden / 32],
+            SHARED_EXPERT_SCALE_BYTES,
+            &spec.tensor_sha256.w1_scale,
+        )?;
+        let w1 = crate::deepseek_v41::Fp8E4m3Matrix::new(
+            intermediate as u64,
+            hidden as u64,
+            w1_weight,
+            expand_fp8_block_scales(intermediate, hidden, &w1_scale_blocks)?,
+        )?;
+        let w2_weight = take(
+            &format!("layers.{layer}.ffn.shared_experts.w2.weight"),
+            Dtype::F8_E4M3,
+            &[hidden, intermediate],
+            SHARED_EXPERT_WEIGHT_BYTES,
+            &spec.tensor_sha256.w2_weight,
+        )?;
+        let w2_scale_blocks = take(
+            &format!("layers.{layer}.ffn.shared_experts.w2.scale"),
+            Dtype::F8_E8M0,
+            &[hidden / 32, intermediate / 32],
+            SHARED_EXPERT_SCALE_BYTES,
+            &spec.tensor_sha256.w2_scale,
+        )?;
+        let w2 = crate::deepseek_v41::Fp8E4m3Matrix::new(
+            hidden as u64,
+            intermediate as u64,
+            w2_weight,
+            expand_fp8_block_scales(hidden, intermediate, &w2_scale_blocks)?,
+        )?;
+        let w3_weight = take(
+            &format!("layers.{layer}.ffn.shared_experts.w3.weight"),
+            Dtype::F8_E4M3,
+            &[intermediate, hidden],
+            SHARED_EXPERT_WEIGHT_BYTES,
+            &spec.tensor_sha256.w3_weight,
+        )?;
+        let w3_scale_blocks = take(
+            &format!("layers.{layer}.ffn.shared_experts.w3.scale"),
+            Dtype::F8_E8M0,
+            &[intermediate / 32, hidden / 32],
+            SHARED_EXPERT_SCALE_BYTES,
+            &spec.tensor_sha256.w3_scale,
+        )?;
+        let w3 = crate::deepseek_v41::Fp8E4m3Matrix::new(
+            intermediate as u64,
+            hidden as u64,
+            w3_weight,
+            expand_fp8_block_scales(intermediate, hidden, &w3_scale_blocks)?,
+        )?;
+        if !tensors.is_empty() {
+            return Err(invalid(
+                "indexed DeepSeek shared expert import returned unrequested tensors",
+            ));
+        }
+
+        let final_header = checkpoint::read_indexed_safetensors_shard_header(
+            root,
+            source.header_shard_name,
+            source.max_source_shard_bytes,
+        )?;
+        if final_header.file_bytes != header.file_bytes || final_header.sha256 != header.sha256 {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "DeepSeek shared expert shard changed during indexed payload import",
+            ));
+        }
+
+        let expert = crate::deepseek_v41::DeepSeekV41SharedExpert::new(w1, w2, w3)?;
+        Ok(Self {
+            expert,
+            receipt: SharedExpertLoadReceipt {
+                layer,
+                source_shard_name: source.header_shard_name.to_owned(),
+                index_sha256: crate::sha256::hex(source.index_bytes),
+                header_sha256: header.sha256,
+                shard_bytes: imported.file_bytes,
+                header_bytes: imported.header_bytes,
+                tensor_bytes: SHARED_EXPERT_PAYLOAD_BYTES,
+                io_bytes: imported.io_bytes,
+                tensor_sha256: spec.tensor_sha256.clone(),
+            },
+        })
+    }
+}
+
+/// Expand the checkpoint's E8M0 [M/32,K/32] scales into the existing CPU
+/// reference's row-major [M,K/32] view. One source scale applies to 32 matrix rows.
+fn expand_fp8_block_scales(rows: usize, cols: usize, block_scales: &[u8]) -> Result<Vec<u8>> {
+    if rows == 0 || cols == 0 || !rows.is_multiple_of(32) || !cols.is_multiple_of(32) {
+        return Err(invalid(
+            "DeepSeek FP8 block scales require dimensions divisible by 32",
+        ));
+    }
+    let scale_blocks_per_row = cols / 32;
+    let expected = (rows / 32)
+        .checked_mul(scale_blocks_per_row)
+        .ok_or_else(|| invalid("DeepSeek FP8 block-scale count overflow"))?;
+    if block_scales.len() != expected || block_scales.contains(&255) {
+        return Err(invalid(
+            "DeepSeek FP8 block-scale plane has invalid size or E8M0 NaN",
+        ));
+    }
+    let expanded_len = rows
+        .checked_mul(scale_blocks_per_row)
+        .ok_or_else(|| invalid("DeepSeek expanded FP8 scale count overflow"))?;
+    let mut expanded = Vec::with_capacity(expanded_len);
+    for block_row in 0..rows / 32 {
+        let start = block_row * scale_blocks_per_row;
+        let row = &block_scales[start..start + scale_blocks_per_row];
+        for _ in 0..32 {
+            expanded.extend_from_slice(row);
+        }
+    }
+    Ok(expanded)
+}
+
+#[cfg(test)]
+mod r728_fp8_scale_layout_tests {
+    use super::expand_fp8_block_scales;
+
+    #[test]
+    fn checkpoint_32_by_32_scales_expand_to_the_existing_row_major_view() {
+        let source = [10, 11, 12, 13]; // [M/32=2,K/32=2]
+        let expanded = expand_fp8_block_scales(64, 64, &source).unwrap();
+        assert_eq!(expanded.len(), 128);
+        for row in 0..32 {
+            assert_eq!(&expanded[row * 2..row * 2 + 2], &[10, 11]);
+        }
+        for row in 32..64 {
+            assert_eq!(&expanded[row * 2..row * 2 + 2], &[12, 13]);
+        }
+    }
+
+    #[test]
+    fn checkpoint_scale_expansion_rejects_wrong_shape_length_and_e8m0_nan() {
+        assert!(expand_fp8_block_scales(63, 64, &[10, 11]).is_err());
+        assert!(expand_fp8_block_scales(64, 64, &[10, 11, 12]).is_err());
+        assert!(expand_fp8_block_scales(64, 64, &[10, 11, 12, 255]).is_err());
     }
 }
 
@@ -1424,6 +1940,7 @@ pub struct DeepSeekV41IndexedMoeLayer<'a> {
     gate: DeepSeekV41Gate,
     expert_source: PinnedMxfp4PayloadSource<'a>,
     ffn_norm: Option<DeepSeekV41FfnRmsNorm>,
+    shared_expert: Option<ResidentSharedExpert>,
 }
 
 impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
@@ -1472,6 +1989,7 @@ impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
             gate,
             expert_source,
             ffn_norm: None,
+            shared_expert: None,
         })
     }
 
@@ -1507,12 +2025,94 @@ impl<'a> DeepSeekV41IndexedMoeLayer<'a> {
         Ok(layer)
     }
 
+    /// Load the indexed routed gate, ffn_norm, and all six shared-expert FP8 planes
+    /// from one pinned layer shard. The shared planes are E4M3FN/E8M0, not MXFP4.
+    pub fn load_with_ffn_norm_and_shared_expert(
+        root: &'a Path,
+        gate_source: PinnedGateIndexSource<'a>,
+        expert_source: PinnedMxfp4PayloadSource<'a>,
+        gate_spec: &GateShardSpec,
+        norm_spec: &FfnNormTensorSpec,
+        shared_spec: &SharedExpertTensorSpec,
+    ) -> Result<Self> {
+        if shared_spec.layer != gate_spec.layer || shared_spec.layer != norm_spec.layer {
+            return Err(invalid(
+                "DeepSeek gate, ffn_norm and shared-expert layer specifications differ",
+            ));
+        }
+        let mut layer =
+            Self::load_with_ffn_norm(root, gate_source, expert_source, gate_spec, norm_spec)?;
+        let shared = ResidentSharedExpert::load_indexed(root, expert_source, shared_spec)?;
+        let gate_receipt = layer.gate.receipt();
+        let norm_receipt = layer
+            .ffn_norm
+            .as_ref()
+            .ok_or_else(|| invalid("indexed DeepSeek layer has no ffn_norm after load"))?
+            .receipt();
+        if shared.receipt.layer != gate_receipt.layer
+            || shared.receipt.layer != norm_receipt.layer
+            || shared.receipt.shard_bytes != gate_receipt.file_bytes
+            || shared.receipt.shard_bytes != norm_receipt.shard_bytes
+            || shared.receipt.header_bytes != gate_receipt.header_bytes
+            || shared.receipt.header_bytes != norm_receipt.header_bytes
+            || shared.receipt.header_sha256 != expert_source.expected_header_sha256
+            || shared.receipt.source_shard_name != expert_source.header_shard_name
+        {
+            return Err(Error::new(
+                "CHECKPOINT_CHANGED",
+                "indexed DeepSeek gate, norm and shared-expert imports differ in layer, shard or header",
+            ));
+        }
+        layer.shared_expert = Some(shared);
+        Ok(layer)
+    }
+
     pub fn gate_receipt(&self) -> &GateLoadReceipt {
         self.gate.receipt()
     }
 
     pub fn ffn_norm_receipt(&self) -> Option<&FfnNormLoadReceipt> {
         self.ffn_norm.as_ref().map(DeepSeekV41FfnRmsNorm::receipt)
+    }
+
+    pub fn shared_expert_receipt(&self) -> Option<&SharedExpertLoadReceipt> {
+        self.shared_expert.as_ref().map(|shared| &shared.receipt)
+    }
+
+    /// Evaluate the resident shared path on the exact activation retained by the
+    /// gate-produced token plan. The output is raw FP32 and is not route weighted.
+    pub fn execute_shared_reference(
+        &self,
+        plan: &DeepSeekV41IndexedMoeTokenPlan,
+    ) -> Result<DeepSeekV41SharedTokenOutput> {
+        let shared = self
+            .shared_expert
+            .as_ref()
+            .ok_or_else(|| invalid("indexed DeepSeek layer has no resident shared expert"))?;
+        let stamp = &plan.batch.problem.stamp;
+        if plan.batch.attempt == 0
+            || stamp.model_revision != PINNED_MODEL_REVISION
+            || stamp.layer != shared.receipt.layer
+            || plan.activation.len() != HIDDEN_SIZE
+            || plan.batch.problem.routes.len() != 1
+            || plan.batch.problem.routes[0].len() != TOP_K
+        {
+            return Err(invalid(
+                "DeepSeek shared reference requires one identified gate-produced top-6 token",
+            ));
+        }
+        let output_fp32 = shared.expert.forward_reference(&plan.activation)?;
+        if output_fp32.len() != HIDDEN_SIZE || output_fp32.iter().any(|value| !value.is_finite()) {
+            return Err(Error::new(
+                "NUMERICAL_OVERFLOW",
+                "DeepSeek shared expert returned an invalid hidden row",
+            ));
+        }
+        Ok(DeepSeekV41SharedTokenOutput {
+            stamp: stamp.clone(),
+            attempt: plan.batch.attempt,
+            output_fp32,
+        })
     }
 
     pub fn normalize_ffn_hidden(&self, hidden_bf16_f32: &[f32]) -> Result<Vec<f32>> {

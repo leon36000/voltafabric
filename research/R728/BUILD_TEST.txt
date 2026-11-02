@@ -1,0 +1,23 @@
+# R728 build and test record
+
+Environment: local CPU only; no GPU, model payload, service or inter-PC operation was run.
+
+## Targeted tests
+
+- `cargo test --locked --offline --test r728_deepseek_shared_route_join --test r727_deepseek_shared_hc --test r726_deepseek_ffn_norm` — PASS, 8/8 (R726 2, R727 4, R728 2).
+- Same three targets with `--release` — PASS, 8/8.
+- `cargo test --locked --offline --release --lib r728_fp8_scale_layout_tests` — PASS, 2/2.
+- `cargo test --locked --offline --test r712_deepseek_session_owner` — PASS, 12/12 (debug; 124.16 s).
+- Same R712 target with `--release` — PASS, 12/12 (7.70 s).
+
+## Static checks
+
+- `cargo clippy --locked --offline --lib -- -D warnings` — PASS.
+- `cargo clippy --locked --offline --test r728_deepseek_shared_route_join -- -D warnings` — PASS.
+- `rustfmt --edition 2021 --check src/deepseek_v41_gate.rs tests/r728_deepseek_shared_route_join.rs` — PASS.
+- `git diff --check` — PASS.
+
+R727 receipt pipeline #2561 on private GitLab was separately observed SUCCESS for
+`gitleaks`, `semgrep`, `trivy` and `pc4_ci_fallback` at commit
+`a343a6896d50d0db09b35b2778b9fa0172d627ea`. The GitLab fallback job is not a substitute
+for these local Rust CPU tests.

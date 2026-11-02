@@ -1,0 +1,63 @@
+{
+  "id": "R728",
+  "date": "2026-11-02",
+  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+  "branch": "r728-deepseek-shared-route-join-20261102",
+  "parent_commit": "a343a6896d50d0db09b35b2778b9fa0172d627ea",
+  "source_commit": null,
+  "source_pipeline": "PENDING",
+  "source_pipeline_jobs": null,
+  "receipt_pipeline": "PENDING",
+  "changed_targets": [
+    "src/deepseek_v41_gate.rs",
+    "tests/r728_deepseek_shared_route_join.rs",
+    "research/R728/REPORT.md",
+    "research/R728/OPEN_SOURCE_SCREEN.md",
+    "research/R728/BUILD_TEST.txt",
+    "research/R728/RESULT.json",
+    "research/R728/SHA256SUMS",
+    "handoff/R727.json",
+    "handoff/R728.json",
+    "handoff/PRODUCTIVITY_CURRENT.json",
+    "handoff/CHECKPOINT.json",
+    "handoff/TASKS.json"
+  ],
+  "adaptation": {
+    "pinned_layer": "40-layer text backbone; hidden=5120; shared intermediate=2304",
+    "tensor_planes": 6,
+    "weight_dtype": "F8_E4M3 / E4M3FN",
+    "scale_dtype": "F8_E8M0",
+    "scale_checkpoint_shape": "[M/32,K/32]",
+    "scale_cpu_view": "[M,K/32], expanded by 32 matrix rows",
+    "selected_payload_bytes": 35424000,
+    "route_coefficient_applied_to_shared": false,
+    "join": "one FP32 sum after completed FP32-preweighted routed Collector, then BF16 RNE"
+  },
+  "donor": {
+    "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "donor_code_copied": false,
+    "new_dependencies": false
+  },
+  "verified_local": {
+    "debug_r726_r727_r728": "PASS 8/8",
+    "release_r726_r727_r728": "PASS 8/8",
+    "release_scale_layout_unit": "PASS 2/2",
+    "r712_session_owner_debug": "PASS 12/12",
+    "r712_session_owner_release": "PASS 12/12",
+    "clippy_library_and_r728_test": "PASS",
+    "rustfmt_and_diff_check": "PASS"
+  },
+  "fixture": "Pinned index/header metadata with synthetic selected payloads in sparse 7,389,759,032-byte shard; no actual checkpoint weights read.",
+  "r728_join_receipt": "Synthetic Completed route receipt; existing R712 actual CPU Session tests pass separately. Session-produced route -> R728 join remains unqualified.",
+  "limitations": [
+    "No actual model-weight payload read.",
+    "No complete transformer block or generation.",
+    "No GPU, inter-PC transport, production R53 or performance qualification.",
+    "HC post/residual mixing and attention/GDN remain separate."
+  ],
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "next_action": "R729: use a completed receipt from the existing CPU Session path as input to the R728 shared join and compare to an independent oracle; then proceed to HC post/residual and attention/GDN composition."
+}

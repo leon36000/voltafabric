@@ -1,7 +1,7 @@
 {
   "id": "R727",
   "date": "2026-11-02",
-  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_RECEIPT_PENDING",
+  "state": "SOURCE_AND_RECEIPT_PIPELINES_SUCCESS",
   "parent_commit": "8550acd70d206fb15855e2d6e24f736a75969de0",
   "branch": "r727-deepseek-shared-fp8-hc-20261102",
   "source_pipeline": {
@@ -15,7 +15,17 @@
     },
     "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2560"
   },
-  "receipt_pipeline": "PENDING",
+  "receipt_pipeline": {
+    "id": 2561,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2561"
+  },
   "verified_local": {
     "r726_and_r727_debug_cpu": "PASS; R726 2/2, R727 4/4",
     "r712_session_owner_debug_cpu": "PASS; 1/1",
@@ -50,12 +60,18 @@
   ],
   "unknown_replayed": false,
   "automatic_continuation": "STOPPED_BY_OWNER",
-  "next_action": "R727 receipt update after readback; R728 code is being developed locally for indexed shared FP8 loading and terminal routed-result composition.",
+  "next_action": "R729: use a completed receipt from the existing CPU Session path as input to the R728 shared join and compare to an independent oracle; then proceed to HC post/residual and attention/GDN composition.",
   "source_commit": "edb68b8fa0665b5728aac860f9a7ab31bb4efb05",
   "source_readback": {
     "exact": true,
     "files_verified": 8,
     "branch_head": "edb68b8fa0665b5728aac860f9a7ab31bb4efb05"
   },
-  "source_published_utc": "2026-11-02 15:42:41 UTC"
+  "source_published_utc": "2026-11-02 15:42:41 UTC",
+  "receipt_commit": "a343a6896d50d0db09b35b2778b9fa0172d627ea",
+  "receipt_commit_readback": {
+    "branch_head": "a343a6896d50d0db09b35b2778b9fa0172d627ea",
+    "r727_handoff_exact": true
+  },
+  "receipt_pending": false
 }

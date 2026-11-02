@@ -5711,7 +5711,7 @@
     "where": "docs/EVIDENCE_CONTRACT.md section \"Mutation plutôt que comptage de couverture\""
   },
   "native_agent_cost_usd": null,
-  "next_action": "R728: implement and CPU-verify indexed loading of the six pinned shared FP8 tensors, then atomically join its raw result to the exact completed routed Collector receipt.",
+  "next_action": "R728 source pipeline and exact GitLab readback; then R729 must pass a real completed CPU Session receipt through the shared-result join before attention/GDN composition.",
   "next_command": "CPU-only: run the R728 indexed-shared-FP8 and terminal-route join tests; preserve full Stamp/attempt, one-time route coefficients, atomic refusal and UNKNOWN non-replay.",
   "next_command_expected_result": "One synthetic sharded selected-expert layer loaded through the pinned index into the existing CPU Session path, matching an independent oracle; any missing/invalid shard yields no owner output.",
   "next_cpu_action": "R722: connect the indexed named-tensor reader to the pinned DeepSeek expert checkpoint path and the existing CPU Session execution with a synthetic sharded layer. Preserve expert identities, route coefficients, QPN2/NVFP4 K16, MXFP4 K32 and IQ3 distinctions; require complete shard/hash validation before publishing owners. No model download, GPU, production R53, UNKNOWN replay or automatic relaunch.",
@@ -9059,8 +9059,8 @@
   "source_manifest_sha256": "41f179ce7d7076748e907e566182aa1d3298b4deb776cb52ecd0f694edba526d",
   "source_manifest_state": "R59_CURRENT_CANONICAL_FUNCTIONAL_SOURCES_UNCHANGED_IN_R69",
   "source_map_sha256": "cf02e002f790675324031ac2c1cb59e1adb7acaf4fa5bcf1f42ea01690220e89",
-  "state": "R727_SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_SUCCESS_RECEIPT_PENDING",
-  "status": "R727_DEEPSEEK_SHARED_FP8_HC_SOURCE_PIPELINE_SUCCESS",
+  "state": "R728_SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+  "status": "R728_SHARED_EXPERT_ROUTE_JOIN_SOURCE_PIPELINE_PENDING",
   "target_model": {
     "cuda_or_full_model_executed": false,
     "evidence": "evidence/continuation_a58_deepseek41/phase.json",
@@ -9080,7 +9080,7 @@
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
   "updated_at_utc": "2026-11-02T14:25:05Z",
-  "updated_utc": "2026-11-02 15:45:05 UTC",
+  "updated_utc": "2026-11-02 15:59:32 UTC",
   "workers_running": [],
   "r64": {
     "status": "DUAL_GPU_REAL_EXPERTS_EXACT_SSH_VERIFIED",
@@ -13897,5 +13897,42 @@
     "published_utc": "2026-11-02 15:45:05 UTC",
     "receipt_pipeline_status": "pending",
     "next_action": "R728 CPU implementation: authenticated six-plane shared FP8 load from the pinned layer shard; execute from the gate-bound activation; join only to matching completed route receipts."
+  },
+  "r728_deepseek_shared_route_join": {
+    "id": "R728",
+    "owner": "integrator",
+    "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+    "branch": "r728-deepseek-shared-route-join-20261102",
+    "parent_commit": "a343a6896d50d0db09b35b2778b9fa0172d627ea",
+    "path": "research/R728",
+    "source_commit": null,
+    "source_pipeline_status": "pending",
+    "code_files": [
+      "src/deepseek_v41_gate.rs",
+      "tests/r728_deepseek_shared_route_join.rs"
+    ],
+    "report": "research/R728/REPORT.md",
+    "result": "research/R728/RESULT.json",
+    "manifest": "research/R728/SHA256SUMS",
+    "manifest_sha256": "83c9aedbc662775e21ba460cbe1534d8846d601301fd924d89916b53bdc8955c",
+    "manifest_file_count": 8,
+    "adapted_boundary": "Pinned six-plane shared E4M3FN/E8M0 FP8 load with exact index/header/hash/shape checks, plus atomic FP32 route+shared join and one BF16 RNE cast.",
+    "donor_code_copied": false,
+    "new_dependencies": false,
+    "local_cpu_tests": "Debug and release R726/R727/R728 8/8; R712 CPU Sessions 12/12 each; Clippy, fmt and diff-check pass.",
+    "test_fixture": "Pinned index/header with synthetic selected payloads; R728 route receipt itself is synthetic.",
+    "source_readback_exact": false,
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "unknown_replayed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "receipt_pending": true,
+    "published_utc": "2026-11-02 15:59:32 UTC",
+    "next_action": "R728 source pipeline and exact GitLab readback; then R729 must pass a real completed CPU Session receipt through the shared-result join before attention/GDN composition."
   }
 }
