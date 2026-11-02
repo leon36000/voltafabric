@@ -469,13 +469,3 @@ fn softplus_fp32(value: f32) -> f32 {
         value.exp().ln_1p()
     }
 }
-}
-
-/// PyTorch `F.softplus` defaults to threshold 20; preserve that FP32 branch.
-fn softplus_fp32(value: f32) -> f32 {
-    if value > SOFTPLUS_THRESHOLD {
-        value
-    } else {
-        value.exp().ln_1p()
-    }
-}
