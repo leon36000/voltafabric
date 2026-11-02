@@ -71,6 +71,8 @@ Pipelines 2398, 2399, and 2400 passed the configured Gitleaks, Semgrep, Trivy,
 and fallback jobs. Pipeline 2400 validates the route-to-admission test commit.
 These GitLab jobs are security scans and fallback only and do not compile Rust;
 the six CPU test passes and lint checks above are the separate local evidence.
+The five R700 receipt files were read back byte-for-byte from private GitLab
+commit `6e3e5f1492ce7ea2de312efb77bd993e96f18bf9`.
 
 ## arXiv scout shortlist
 

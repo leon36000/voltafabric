@@ -59,7 +59,10 @@
     "pipeline_2400": "success; configured Gitleaks/Semgrep/Trivy/fallback only, not Rust compilation or local CPU tests",
     "pipeline_2400_url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2400",
     "source_readback_exact": true,
-    "source_readback_files": 4
+    "source_readback_files": 4,
+    "receipt_commit": "6e3e5f1492ce7ea2de312efb77bd993e96f18bf9",
+    "receipt_readback_exact": true,
+    "receipt_files_read_back": 5
   },
   "arxiv_scout": {
     "model": "GPT-6 Luna",

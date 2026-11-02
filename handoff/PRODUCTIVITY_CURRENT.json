@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 07:45:27 UTC",
+  "updated_utc": "2026-11-02 07:46:27 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -2130,7 +2130,7 @@
   },
   "r700_result": {
     "id": "R700",
-    "state": "PUBLISHED_PRIVATE_CPU_GATE_AND_FAIL_CLOSED_ADMISSION_PIPELINE_SUCCESS_RECEIPT_READBACK_PENDING",
+    "state": "PUBLISHED_PRIVATE_CPU_GATE_AND_FAIL_CLOSED_ADMISSION_PIPELINE_SUCCESS_EXACT_READBACK",
     "branch": "r700-deepseek-v41-gate-cpu-20261102",
     "parent_commit": "7a6cfeb0aa1a85c77d6783ac4dc8322e91c54bf7",
     "source_commits": [
@@ -2140,7 +2140,7 @@
     "report": "research/R700/REPORT.md",
     "result": "research/R700/RESULT.json",
     "manifest": "research/R700/SHA256SUMS",
-    "manifest_sha256": "be9c06013d8192bc834cb6ecbfd4995bc0f3e1fe5484f41a11187cafbe4ba177",
+    "manifest_sha256": "ba6682431f6638c7dffd71f96efcfb9a401d1517b99552d313668715b2123d02",
     "manifest_files": 8,
     "source_readback_exact": true,
     "source_readback_files": 4,
@@ -2159,6 +2159,9 @@
     "performance_claim": false,
     "automatic_relaunch": "STOPPED_BY_OWNER",
     "replay_allowed": false,
-    "next_action": "R701: validate R700 gate scoring against an independent CPU oracle and inspect only already-present artifacts for the missing projection and six selected expert payloads; if the complete set is absent, retain atomic refusal. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch."
+    "next_action": "R701: validate R700 gate scoring against an independent CPU oracle and inspect only already-present artifacts for the missing projection and six selected expert payloads; if the complete set is absent, retain atomic refusal. No checkpoint-wide download, GPU, production network, UNKNOWN replay, or background relaunch.",
+    "receipt_commit": "6e3e5f1492ce7ea2de312efb77bd993e96f18bf9",
+    "receipt_readback_exact": true,
+    "receipt_files_read_back": 5
   }
 }
