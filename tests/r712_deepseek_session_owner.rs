@@ -18,9 +18,11 @@ use voltafabric::deepseek_v41::{
     PinnedMxfp4RouteExecutionState, REVISION,
 };
 use voltafabric::deepseek_v41_gate::{
-    DeepSeekV41Gate, FfnNormTensorSpec, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource,
-    TokenKind, GATE_PAYLOAD_BYTES, GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION,
-    PINNED_RMS_NORM_EPSILON, RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE,
+    combine_pinned_moe_route_with_shared, DeepSeekV41Gate, DeepSeekV41IndexedMoeLayer,
+    FfnNormTensorSpec, GateShardSpec, GateTensorHashes, PinnedMxfp4PayloadSource,
+    SharedExpertTensorHashes, SharedExpertTensorSpec, TokenKind, GATE_PAYLOAD_BYTES,
+    GATE_WEIGHT_BYTES, HIDDEN_SIZE, PINNED_MODEL_REVISION, PINNED_RMS_NORM_EPSILON,
+    RMS_NORM_WEIGHT_BYTES, ROUTED_EXPERTS, ROUTE_SCALE, SHARED_EXPERT_INTERMEDIATE_SIZE,
 };
 use voltafabric::moe::{Choice, Registry, Replica, Stamp};
 use voltafabric::routing::RoutingProblem;
@@ -33,6 +35,12 @@ const PINNED_INDEX_SHA256: &str =
 const TOP6: [u32; 6] = [0, 383, 382, 381, 380, 379];
 const ROUTE_WEIGHTS: [f64; 6] = [0.5, 0.25, 0.125, 0.0625, 0.03125, 0.03125];
 static NEXT_INDEXED_TEMP: AtomicU64 = AtomicU64::new(0);
+
+fn independent_bf16_rne(value: f32) -> f32 {
+    let bits = value.to_bits();
+    let round_bias = 0x7fffu32 + ((bits >> 16) & 1);
+    f32::from_bits(bits.wrapping_add(round_bias) & 0xffff_0000)
+}
 
 struct IndexedTempDirectory(PathBuf);
 
@@ -483,11 +491,14 @@ fn indexed_residents_for_route(
     (temp, residents)
 }
 
-fn indexed_gate_route_payloads() -> (
+fn indexed_gate_route_payloads(
+    include_shared: bool,
+) -> (
     IndexedTempDirectory,
     voltafabric::deepseek_v41_gate::DeepSeekV41RouteBatch,
     voltafabric::deepseek_v41_gate::DeepSeekV41RoutePayloadReads,
     Vec<f32>,
+    Option<voltafabric::deepseek_v41_gate::DeepSeekV41SharedTokenOutput>,
 ) {
     let index = include_bytes!(
         "../evidence/continuation_a97_model_metadata/model.safetensors.index.314113f8.json"
@@ -553,6 +564,35 @@ fn indexed_gate_route_payloads() -> (
     assert_eq!(norm_end - norm_start, norm_weight.len() as u64);
     shard.seek(SeekFrom::Start(norm_start)).unwrap();
     shard.write_all(&norm_weight).unwrap();
+    let mut shared_hashes = BTreeMap::new();
+    if include_shared {
+        for projection in ["w1", "w2", "w3"] {
+            let rows = if projection == "w2" {
+                HIDDEN_SIZE
+            } else {
+                SHARED_EXPERT_INTERMEDIATE_SIZE
+            };
+            let cols = if projection == "w2" {
+                SHARED_EXPERT_INTERMEDIATE_SIZE
+            } else {
+                HIDDEN_SIZE
+            };
+            let weight = vec![0x38; rows * cols];
+            let scales = vec![127; (rows / 32) * (cols / 32)];
+            for (plane, payload) in [("weight", weight.as_slice()), ("scale", scales.as_slice())] {
+                let name = format!("layers.0.ffn.shared_experts.{projection}.{plane}");
+                let offsets = header_value[name.as_str()]["data_offsets"]
+                    .as_array()
+                    .unwrap();
+                let start = data_start + offsets[0].as_u64().unwrap();
+                let end = data_start + offsets[1].as_u64().unwrap();
+                assert_eq!(end - start, payload.len() as u64);
+                shard.seek(SeekFrom::Start(start)).unwrap();
+                shard.write_all(payload).unwrap();
+                shared_hashes.insert(name, voltafabric::sha256::hex(payload));
+            }
+        }
+    }
     drop(shard);
 
     let gate_spec = GateShardSpec {
@@ -581,17 +621,46 @@ fn indexed_gate_route_payloads() -> (
         epsilon: PINNED_RMS_NORM_EPSILON,
         tensor_sha256: voltafabric::sha256::hex(&norm_weight),
     };
-    let layer = voltafabric::deepseek_v41_gate::DeepSeekV41IndexedMoeLayer::load_with_ffn_norm(
-        temp.path(),
-        voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
-            index_bytes: index,
-            expected_header_sha256: HEADER_SHA256,
-            max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
-        },
-        source,
-        &gate_spec,
-        &norm_spec,
-    )
+    let shared_spec = if include_shared {
+        let hash = |projection: &str, plane: &str| {
+            shared_hashes[&format!("layers.0.ffn.shared_experts.{projection}.{plane}")].clone()
+        };
+        Some(SharedExpertTensorSpec {
+            layer: 0,
+            tensor_sha256: SharedExpertTensorHashes {
+                w1_weight: hash("w1", "weight"),
+                w1_scale: hash("w1", "scale"),
+                w2_weight: hash("w2", "weight"),
+                w2_scale: hash("w2", "scale"),
+                w3_weight: hash("w3", "weight"),
+                w3_scale: hash("w3", "scale"),
+            },
+        })
+    } else {
+        None
+    };
+    let gate_source = voltafabric::deepseek_v41_gate::PinnedGateIndexSource {
+        index_bytes: index,
+        expected_header_sha256: HEADER_SHA256,
+        max_source_shard_bytes: 8 * 1024 * 1024 * 1024,
+    };
+    let layer = match shared_spec.as_ref() {
+        Some(spec) => DeepSeekV41IndexedMoeLayer::load_with_ffn_norm_and_shared_expert(
+            temp.path(),
+            gate_source,
+            source,
+            &gate_spec,
+            &norm_spec,
+            spec,
+        ),
+        None => DeepSeekV41IndexedMoeLayer::load_with_ffn_norm(
+            temp.path(),
+            gate_source,
+            source,
+            &gate_spec,
+            &norm_spec,
+        ),
+    }
     .unwrap();
     let mut hidden = vec![0.0f32; HIDDEN_SIZE];
     for (bit, value) in hidden.iter_mut().take(9).enumerate() {
@@ -639,6 +708,11 @@ fn indexed_gate_route_payloads() -> (
         .unwrap();
     let batch = token_plan.batch().clone();
     let activation = token_plan.activation().to_vec();
+    let shared_output = if include_shared {
+        Some(layer.execute_shared_reference(&token_plan).unwrap())
+    } else {
+        None
+    };
     assert_eq!(batch.problem().experts, TOP6);
     assert_eq!(activation.len(), HIDDEN_SIZE);
     assert!(activation.iter().all(|value| {
@@ -707,7 +781,7 @@ fn indexed_gate_route_payloads() -> (
     assert_eq!(reads.attempt(), batch.attempt());
     assert_eq!(reads.route_fingerprint(), plan.route_fingerprint());
     assert_eq!(reads.reads().len(), TOP6.len());
-    (temp, batch, reads, activation)
+    (temp, batch, reads, activation, shared_output)
 }
 
 #[test]
@@ -1069,11 +1143,13 @@ fn colocated_top6_groups_two_selected_experts_and_executes_against_fp64_oracle()
 }
 
 #[test]
-fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route() {
-    let (_checkpoint, batch, reads, input) = indexed_gate_route_payloads();
+fn completed_cpu_session_receipt_joins_the_matching_shared_result_once() {
+    let (_checkpoint, batch, reads, input, shared_output) = indexed_gate_route_payloads(true);
     let route = batch.problem();
+    let route_stamp = route.stamp.clone();
+    let route_attempt = batch.attempt();
     assert_eq!(route.experts, TOP6);
-    assert_eq!(batch.attempt(), 29);
+    assert_eq!(route_attempt, 29);
     let residents = reads.into_session_residents(64 * 1024 * 1024).unwrap();
     for value in &input {
         assert_eq!(
@@ -1173,6 +1249,27 @@ fn gated_top6_is_preflighted_grouped_loaded_and_executed_without_restating_route
         max_abs <= 5.0e-4,
         "gated route oracle max abs error {max_abs}"
     );
+    let shared = shared_output.expect("the gated fixture loads the shared expert");
+    assert_eq!(shared.stamp(), &route_stamp);
+    assert_eq!(shared.attempt(), route_attempt);
+    let combined = combine_pinned_moe_route_with_shared(&receipt, &shared).unwrap();
+    assert_eq!(combined.stamp(), &route_stamp);
+    assert_eq!(combined.attempt(), route_attempt);
+    let routed_bits = receipt.output_bits().unwrap().first().unwrap();
+    assert_eq!(routed_bits.len(), combined.output_bf16_f32().len());
+    for (index, ((&routed_bits, &shared_value), &actual)) in routed_bits
+        .iter()
+        .zip(shared.output_fp32())
+        .zip(combined.output_bf16_f32())
+        .enumerate()
+    {
+        let expected = independent_bf16_rne(f32::from_bits(routed_bits) + shared_value);
+        assert_eq!(
+            actual.to_bits(),
+            expected.to_bits(),
+            "joined output index {index}"
+        );
+    }
     for (_, session) in sessions {
         assert_eq!(session.traffic.execs, 1);
         let close = session.close(Duration::from_secs(10));

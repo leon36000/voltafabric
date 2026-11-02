@@ -1,0 +1,41 @@
+{
+  "id": "R729",
+  "date": "2026-11-02",
+  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+  "branch": "r729-deepseek-session-shared-join-20261102",
+  "parent_commit": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0",
+  "source_commit": null,
+  "source_pipeline": "PENDING",
+  "changed_targets": [
+    "tests/r712_deepseek_session_owner.rs",
+    "research/R729/REPORT.md",
+    "research/R729/OPEN_SOURCE_SCREEN.md",
+    "research/R729/BUILD_TEST.txt",
+    "research/R729/RESULT.json",
+    "research/R729/SHA256SUMS",
+    "handoff/R728.json",
+    "handoff/R729.json"
+  ],
+  "adaptation": "Actual Completed receipt from five grouped CPU Sessions, carrying six route slots, passed through the R728 identity-bound shared-expert join.",
+  "verified_local": {
+    "new_case_debug": "PASS 1/1, 91.82 s",
+    "new_case_release": "PASS 1/1, 5.77 s",
+    "r712_full_debug": "PASS 12/12, 123.62 s",
+    "r712_full_release": "PASS 12/12, 7.64 s",
+    "clippy": "PASS -D warnings",
+    "rustfmt": "PASS",
+    "diff_check": "PASS"
+  },
+  "fixture": "Pinned index/header with synthetic selected gate/norm/MXFP4/shared-FP8 payloads in a sparse shard; no actual checkpoint weight payload read.",
+  "route_receipt": "Produced by actual grouped CPU Sessions in this test, not deserialized synthetic receipt.",
+  "limitations": [
+    "No actual model payload.",
+    "No attention/GDN, HC post, complete transformer block or generation.",
+    "No GPU, inter-PC transport, production R53 or performance qualification."
+  ],
+  "unknown_replayed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "receipt_pending": true,
+  "published_utc": "2026-11-02 16:05:00 UTC",
+  "next_action": "R730: compose HC post/residual on the verified CPU routed-plus-shared sublayer using an independent oracle; then bind attention/GDN and autoregressive token loop."
+}

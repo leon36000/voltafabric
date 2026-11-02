@@ -1,11 +1,21 @@
 {
   "id": "R728",
   "date": "2026-11-02",
-  "state": "SOURCE_PUBLISHED_PRIVATE_GITLAB_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_READBACK_EXACT",
   "base_branch": "r727-deepseek-shared-fp8-hc-20261102",
   "parent_commit": "a343a6896d50d0db09b35b2778b9fa0172d627ea",
-  "source_commit": null,
-  "source_pipeline": null,
+  "source_commit": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0",
+  "source_pipeline": {
+    "id": 2563,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2563"
+  },
   "private_gitlab": true,
   "donor": {
     "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
@@ -62,5 +72,11 @@
   ],
   "unknown_replayed": false,
   "automatic_continuation": "STOPPED_BY_OWNER",
-  "next_action": "R729: use a completed receipt from the existing CPU Session path as input to the R728 shared join and compare to an independent oracle; then proceed to HC post/residual and attention/GDN composition."
+  "next_action": "R730: compose HC post/residual over the verified CPU routed-plus-shared sublayer using an independent oracle; then bind attention/GDN and autoregressive generation.",
+  "source_readback": {
+    "exact": true,
+    "files_verified": 8,
+    "branch_head": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0"
+  },
+  "receipt_pending": false
 }

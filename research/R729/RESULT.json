@@ -1,0 +1,42 @@
+{
+  "id": "R729",
+  "date": "2026-11-02",
+  "state": "LOCAL_CPU_VERIFIED_READY_FOR_PRIVATE_GITLAB_PUBLICATION",
+  "base_branch": "r728-deepseek-shared-route-join-20261102",
+  "parent_commit": "c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0",
+  "source_commit": null,
+  "source_pipeline": "PENDING",
+  "adapted_boundary": "Actual Completed receipt from five grouped CPU Sessions, carrying six route slots, passed through the R728 identity-bound shared-expert join.",
+  "donor": {
+    "repository": "deepseek-ai/DeepSeek-V4.1-Flash",
+    "revision": "314113f8a7dadb388215396ba5fbee2c610a04d6",
+    "license": "MIT",
+    "donor_code_copied": false,
+    "new_dependencies": false
+  },
+  "reused_components": [
+    "R712 grouped CPU Sessions and FP32-preweighted Collector",
+    "R728 indexed shared E4M3FN/E8M0 CPU expert and join"
+  ],
+  "independent_oracle": "Existing FP64 route oracle plus test-side bit-level BF16 RNE formula for each joined output element.",
+  "verified_local": {
+    "new_case_debug": "PASS 1/1, 91.82 s",
+    "new_case_release": "PASS 1/1, 5.77 s",
+    "r712_full_debug": "PASS 12/12, 123.62 s",
+    "r712_full_release": "PASS 12/12, 7.64 s",
+    "clippy": "PASS -D warnings",
+    "rustfmt": "PASS",
+    "diff_check": "PASS"
+  },
+  "fixture": "Pinned index/header with synthetic selected gate/norm/MXFP4/shared-FP8 payloads in a sparse shard; no actual checkpoint weight payload read.",
+  "route_receipt": "Produced by actual grouped CPU Sessions in this test, not deserialized synthetic receipt.",
+  "unknown_replayed": false,
+  "route_or_coefficients_changed": false,
+  "automatic_continuation": "STOPPED_BY_OWNER",
+  "limitations": [
+    "No actual model payload.",
+    "No attention/GDN, HC post, complete transformer block or generation.",
+    "No GPU, inter-PC transport, production R53 or performance qualification."
+  ],
+  "next_action": "R730: compose HC post/residual on the verified CPU routed-plus-shared sublayer using an independent oracle; then bind attention/GDN and autoregressive token loop."
+}

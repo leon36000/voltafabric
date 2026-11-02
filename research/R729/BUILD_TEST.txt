@@ -1,0 +1,21 @@
+# R729 build and test record
+
+Environment: CPU-only local Rust tests; no GPU, actual model weights, service or
+inter-PC operation was run.
+
+- `cargo test --locked --offline --test r712_deepseek_session_owner completed_cpu_session_receipt_joins_the_matching_shared_result_once -- --exact --nocapture` — PASS 1/1 debug (91.82 s).
+- Same exact test with `--release` — PASS 1/1 (5.77 s).
+- `cargo test --locked --offline --test r712_deepseek_session_owner` — PASS 12/12 debug (123.62 s).
+- Same R712 suite with `--release` — PASS 12/12 (7.64 s).
+- `cargo clippy --locked --offline --test r712_deepseek_session_owner -- -D warnings` — PASS.
+- `rustfmt --edition 2021 --check tests/r712_deepseek_session_owner.rs src/deepseek_v41_gate.rs` — PASS.
+- `git diff --check` — PASS.
+
+The first compile of the added test caught a borrow-after-move in the test harness. The
+harness now snapshots the route Stamp and attempt before consuming the batch; the final
+debug and release suites above are green.
+
+R728 source commit `c74b45e8fa20d2d9ae47bf73e75a685d391a8ec0` has private GitLab
+pipeline #2563 success on all four jobs and its eight manifest entries were read back
+with exact SHA-256 matches. That GitLab scan/fallback pipeline does not compile Rust;
+local Rust commands above provide the code evidence.
