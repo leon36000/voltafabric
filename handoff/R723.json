@@ -1,7 +1,7 @@
 {
   "id": "R723",
   "owner": "integrator",
-  "state": "CPU_SOURCE_READY_FOR_PRIVATE_GITLAB_COMMIT",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_READBACK_EXACT_PIPELINE_2550_SUCCESS_CPU_DEBUG_RELEASE_PASS",
   "branch": "r723-gate-indexed-session-20261102",
   "parent_commit": "d018741e60e434826051cd0268d78254e68784c5",
   "path": "research/R723",
@@ -33,9 +33,28 @@
     "automatic_relaunch": "STOPPED_BY_OWNER"
   },
   "next_action": "R724: connect the route-level indexed import to a model-layer loader entry point and add an admitted real-checkpoint manifest boundary before claiming full generation.",
-  "source_commit": "awaiting GitLab source commit",
-  "source_pipeline_id": null,
-  "source_pipeline_status": "pending",
+  "source_commit": "173daf81cc33e00d250f1c067105e9555b62fad9",
+  "source_pipeline_id": 2550,
+  "source_pipeline_status": "success",
   "readback_verified": false,
-  "prepared_utc": "2026-11-02T13:52:34Z"
+  "prepared_utc": "2026-11-02T13:52:34Z",
+  "source_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "source_readback": {
+    "verified_files": 6,
+    "total_files": 6,
+    "manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "manifest_file_count": 6,
+  "manifest_sha256": null,
+  "manifest_sha256_note": "Final manifest digest is recorded in root handoffs after generation to avoid self-reference.",
+  "result": "research/R723/RESULT.json",
+  "published_utc": "2026-11-02T14:03:17Z",
+  "readback_verified_utc": "2026-11-02T14:03:19Z",
+  "verified_utc": "2026-11-02T14:07:36Z"
 }

@@ -1,0 +1,46 @@
+{
+  "id": "R723",
+  "state": "SOURCE_PUBLISHED_PIPELINE_SUCCESS_EXACT_READBACK_CPU_FIXTURE_PASS",
+  "branch": "r723-gate-indexed-session-20261102",
+  "parent_commit": "d018741e60e434826051cd0268d78254e68784c5",
+  "source_commit": "173daf81cc33e00d250f1c067105e9555b62fad9",
+  "source_pipeline": {
+    "id": 2550,
+    "status": "success",
+    "jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    }
+  },
+  "source_readback": {
+    "verified_files": 6,
+    "total_files": 6,
+    "all_manifest_entries_match": true,
+    "full_pagination": true
+  },
+  "local_cpu_verification": {
+    "gate_indexed_session_debug": "1/1 pass",
+    "gate_indexed_session_release": "1/1 pass",
+    "incomplete_hash_preflight_debug": "1/1 pass before missing source open",
+    "incomplete_hash_preflight_release": "1/1 pass before missing source open",
+    "legacy_route_reader_regression_debug": "1/1 pass",
+    "clippy_library": "pass (-D warnings)",
+    "clippy_integration": "pass (-D warnings)",
+    "rustfmt": "pass"
+  },
+  "scope": {
+    "real_checkpoint_payload": false,
+    "complete_generation": false,
+    "gpu": false,
+    "inter_pc_transport": false,
+    "production_r53": false,
+    "performance_measured": false,
+    "route_or_coefficients_changed": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER"
+  },
+  "receipt_commit_sha": "recorded by subsequent branch verification; not self-referenced here",
+  "next_action": "R724: connect the route-level indexed import to a model-layer loader entry point and add an admitted real-checkpoint manifest boundary before claiming full generation.",
+  "verified_utc": "2026-11-02T14:07:36Z"
+}
