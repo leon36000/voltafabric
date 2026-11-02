@@ -1,7 +1,7 @@
 {
   "id": "R737",
   "date": "2026-11-02",
-  "state": "LOCAL_CPU_COMPOSITION_CHECKED_PRIVATE_GITLAB_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
   "parent_branch": "r736-deepseek-window-output-20261102",
   "parent_commit": "2f194bd2d6f0003c9434343359527bca9399aa43",
   "target_branch": "r737-deepseek-window-block-20261102",
@@ -60,5 +60,22 @@
   "manifest": "research/R737/SHA256SUMS",
   "manifest_sha256": "420a1df24990dfe2f37c91618c12afc72e827967296e3ada923874894ab1e070",
   "receipt_pending": true,
-  "next_action": "R738: bind the one-shot callback to resident MXFP4 owners and persistent Sessions without hot-path LOAD, then specify an independent numerical oracle."
+  "next_action": "R738: bind the one-shot callback to resident MXFP4 owners and persistent Sessions without hot-path LOAD, then specify an independent numerical oracle.",
+  "private_gitlab": {
+    "branch": "r737-deepseek-window-block-20261102",
+    "parent_commit": "2f194bd2d6f0003c9434343359527bca9399aa43",
+    "source_commit": "b1618e2b8f0f24d618b7b4e14f9bb6a98524e411",
+    "source_pipeline_id": 2588,
+    "source_pipeline_status": "success",
+    "source_pipeline_jobs": {
+      "gitleaks": "success",
+      "semgrep": "success",
+      "trivy": "success",
+      "fallback": "success"
+    },
+    "source_readback_exact": true,
+    "source_readback_files_verified": 6,
+    "receipt_pending": true,
+    "receipt_pipeline_pending": true
+  }
 }
