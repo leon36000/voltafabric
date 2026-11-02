@@ -4,6 +4,8 @@ Date: 2026-11-02
 
 GitLab source commit: `3381700ba4804f0271cdce68d514b89fd83295fc` on private branch `r740-deepseek-recipe-prompt-boundary-20261102`. Pipeline #2599 passed Gitleaks, Semgrep, Trivy and the security fallback; the eight source/report/manifest files were read back exactly from GitLab.
 
+The first receipt update, commit `1618be41f956502846b55630feca77872e26dbb1`, triggered pipeline #2600. Gitleaks classified the public tokenizer artifact digest's handoff metadata as a generic API-key finding. Inspection of the redacted report showed one finding at `handoff/PRODUCTIVITY_CURRENT.json`, line 4545; its value was the fixed public artifact fingerprint, not a credential. The handoff field is being replaced with a reference to `research/R740/RESULT.json`, where the integrity digest remains documented. This remediation is pending a fresh pipeline.
+
 ## Decision
 
 Integrate DeepSeek's own prompt-rendering and token-encoding crates as an **optional** VoltaFabric feature. The wrapper accepts tokenizer bytes from its caller, checks the exact tokenizer artifact pinned to the selected model revision, encodes one plain-text user turn, and rejects a prompt whose completion reservation would exceed the caller's context limit.
