@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated_utc": "2026-11-02 03:20:22 UTC",
+  "updated_utc": "2026-11-02 03:45:50 UTC",
   "owner_authorization": "Owner authorizes continued VoltaFabric source development and private GitLab branches. No automatic relaunch. Do not expose credentials, alter neighboring services, delete project data, format hosts, or run GPU/production-network work without fresh admission.",
   "objective": "Continue developing VoltaFabric for the verified hardware and model targets, preserving useful engine-source adaptations and registry/handoff evidence in the private GitLab repository. Advance toward complete generation and expert distribution without promoting unqualified GPU/inter-PC claims.",
   "canonical": {
@@ -1176,7 +1176,7 @@
     {
       "id": "R689",
       "owner": "integrator",
-      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_12_OF_12_CPU_FIXTURE_PASS_PIPELINE_PENDING",
+      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_12_OF_12_CPU_FIXTURE_PASS_PIPELINES_2351_2352_SUCCESS",
       "branch": "r689-qwen2moe-fp32-live-session-20261101",
       "parent_commit": "bc78d8a19c841933ce09baf6a33a230e09843db2",
       "source_commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
@@ -1197,7 +1197,7 @@
       "manifest_path": "research/R689/SHA256SUMS",
       "manifest_sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
       "pipeline_id": 2352,
-      "pipeline_status": "pending",
+      "pipeline_status": "success",
       "text_encoding_correction": "Initial base64-encoded API payloads were stored literally. R689 source bundle and hashes were rewritten as raw UTF-8 text, then every manifest entry was re-read and verified.",
       "checkpoint_inventory": {
         "pc6": "Inspected paths contained only small synthetic Qwen fixtures; no real Qwen2MoE checkpoint located.",
@@ -1205,7 +1205,79 @@
         "pc4": "SSH inventory unavailable (access denied); no absence conclusion."
       },
       "automatic_relaunch": "STOPPED_BY_OWNER",
-      "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only."
+      "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch.",
+      "pipeline_2351": {
+        "status": "success",
+        "jobs": {
+          "pc4_gitleaks": "success",
+          "pc4_semgrep": "success",
+          "pc4_trivy": "success",
+          "pc4_ci_fallback": "success"
+        }
+      },
+      "pipeline_2352": {
+        "status": "success",
+        "jobs": {
+          "pc4_gitleaks": "success",
+          "pc4_semgrep": "success",
+          "pc4_trivy": "success",
+          "pc4_ci_fallback": "success"
+        }
+      },
+      "pipeline_2353": {
+        "status": "skipped",
+        "scope": "expected skip-ci handoff commit"
+      }
+    },
+    {
+      "id": "R690",
+      "owner": "integrator",
+      "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_7_OF_7_CPU_LOGITS_SAMPLER_PASS_PIPELINE_2356_SUCCESS",
+      "branch": "r690-llama-cpu-logits-token-sampler-20261102",
+      "parent_commit": "084e8ae4a5a08f349442ade3c0e82d0b95272311",
+      "superseded_encoding_commit": "93a9595f5cc6533c1bf6bb1dbd1237b211a2b6a7",
+      "source_commit": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+      "path": "research/R690",
+      "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+      "reused": "Pinned Qwen2MoE build_moe_ffn, internal process_ubatch custom graph, GGML ggml_mul_mat/get_logits, public llama.cpp greedy sampler; no upstream source copied.",
+      "adaptation": "Synthetic F32 vocab head follows the resident Rust Session-routed Q8_0 MoE FFN; fail-closed staged logits then public greedy sampling; route coefficients remain applied once at the R689 Session boundary.",
+      "test": "CPU runner exit 0; donor/VF logits max_abs=0; independent scalar lm_head max_abs=0; donor/VF/scalar sampler token 3/3/3; refused and duplicate identity publish no logits/token.",
+      "test_scope": "Synthetic one-layer, one-token, hidden=32, vocab=4 top-2 Q8_0 fixture calling internal process_ubatch on a custom graph, not public llama_decode. No real token embedding/attention/KV/tokenizer/checkpoint, GPU, inter-PC/RDMA, production R53, or performance.",
+      "donor_modified": false,
+      "route_coefficients_applied_once": true,
+      "atomic_refusal": true,
+      "cpu_only": true,
+      "gpu": false,
+      "production_network": false,
+      "readback_files_verified": 7,
+      "source_sha256": "67ed68d37e24074c7261deac403f3e96f29bd14899a26c9f631d3281cd6a6e1a",
+      "manifest_path": "research/R690/SHA256SUMS",
+      "manifest_sha256": "28e47f18796921fb0c3a48c9adfe95f39cc0ece4ed546a5d916b401dd7dadce1",
+      "arxiv_survey_records": 24,
+      "arxiv_scope": "bounded targeted survey, not exhaustive arXiv census",
+      "superseded_pipeline_2355": {
+        "status": "success",
+        "scope": "malformed literal-Base64 commit; superseded by raw-text correction, not evidence for valid source"
+      },
+      "pipeline_2356": {
+        "status": "success",
+        "sha": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+        "jobs": {
+          "pc4_gitleaks": "success",
+          "pc4_semgrep": "success",
+          "pc4_trivy": "success",
+          "pc4_ci_fallback": "success"
+        },
+        "semgrep_findings": 155,
+        "semgrep_findings_in_R690_paths": 0,
+        "semgrep_other_findings_note": "155 blocking findings reported in unrelated repository paths; Semgrep job exited success. Parse warnings also reported in unrelated files. This is not a clean repository-wide Semgrep gate."
+      },
+      "unknown_manual_invocation": {
+        "status": "UNKNOWN_NO_REPLAY",
+        "reason": "One direct binary invocation omitted VF_TEST_OUTPUT_DIR, exited 1 with empty log; local synthetic receipts remain RESERVED_UNKNOWN_NO_REPLAY and were not replayed."
+      },
+      "automatic_relaunch": "STOPPED_BY_OWNER",
+      "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch."
     }
   ],
   "acceptance": [
@@ -1255,7 +1327,8 @@
     "R677 resolves synthetic dynamic expert IDs to owner kinds before Collector dispatch, but the pinned llama.cpp Qwen2MoE runtime callback remains unintegrated; no real checkpoint, complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance.",
     "R678 tests a per-layer Qwen2MoE invocation adapter against a synthetic two-layer GGML graph, but the adapter is not yet wired into pinned llama.cpp process_ubatch/build_moe_ffn; no model/checkpoint, generation, GPU, inter-PC/RDMA, production R53 or performance.",
     "R679 publishes a compile-qualified internal llama.cpp Qwen2MoE hook, but the hook is not yet wired to Qwen2MoERouteInvocation or a Rust Session. No real checkpoint or complete generation, GPU/CUDA graph, inter-PC/RDMA, production R53 or performance is qualified.",
-    "R684 verifies a new F32 2-wide generated GGUF v3 fixture through the pinned parser and donor build_moe_ffn, but does not execute the existing R659 Q8_0 width-32 generated fixture or model architecture top-k/gate-up/SwiGLU."
+    "R684 verifies a new F32 2-wide generated GGUF v3 fixture through the pinned parser and donor build_moe_ffn, but does not execute the existing R659 Q8_0 width-32 generated fixture or model architecture top-k/gate-up/SwiGLU.",
+    "R690 adds only a synthetic custom process_ubatch logits-to-sampler seam. It does not execute public llama_decode or provide a real tokenizer, attention/KV, production checkpoint, complete generation, GPU, inter-PC/RDMA, or performance evidence."
   ],
   "automatic_continuation": "STOPPED_BY_OWNER; continue only on explicit owner request.",
   "last_verified_results": [
@@ -1303,7 +1376,8 @@
     "R686_R659_STYLE_RANK_LOCAL_Q8_0_SLICE_TO_DONOR_GRAPH_CPU_PASS; 6528/13056 source tensor bytes read; atomic refusal and duplicate mapping rejected; scalar FP16/f64 collector divergence 0.00195304 retained; no full-equivalence claim.",
     "R687_PINNED_GGML_Q8_0_ACTIVATION_QUANTIZATION_SCALAR_ORACLE_CPU_PASS_READBACK_CORRECTED",
     "R688_RANK_LOCAL_SESSION_TO_PINNED_QWEN2MOE_CPU_HOST_INTEGRATION_PASS; donor-vs-VoltaFabric max_abs=8.71369e-08 <=1e-6; 6528/13056 Q8_0 tensor bytes loaded; route coefficients applied once; invalid shape leaves sentinel unchanged; partial provider failure withheld; 10/10 GitLab readbacks; pipeline 2330 success.",
-    "R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network."
+    "R689_QWEN2MOE_RUST_SESSION_TO_PINNED_LLAMA_CPP_FP32_SLOT_CONTRACT_CPU_SYNTHETIC_FIXTURE_PASS; 12/12 GitLab readback hashes match; literal Base64 storage corrected; no production checkpoint/full generation/GPU/network.",
+    "R690_SYNTHETIC_CPU_QWEN2MOE_LOGITS_TO_PUBLIC_GREEDY_SAMPLER_SEAM_PASS_LIMITED; donor/VF/scalar token 3, logits oracle max_abs=0; not public llama_decode/full generation."
   ],
   "active_operations": [
     {
@@ -1648,15 +1722,27 @@
       "id": "gitlab-pipeline-2352",
       "ref": "r689-qwen2moe-fp32-live-session-20261101",
       "commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
-      "status": "running",
-      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
+      "status": "success",
+      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate.",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     },
     {
       "id": "gitlab-pipeline-2351",
       "ref": "r689-qwen2moe-fp32-live-session-20261101",
       "commit": "d109e704d731e5720b03cee4de5be1ae3ac3637f",
-      "status": "running",
-      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
+      "status": "success",
+      "scope": "R689 source scans/fallback only; local CPU runner evidence is separate.",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     },
     {
       "id": "gitlab-pipeline-2350",
@@ -1664,15 +1750,42 @@
       "commit": "4d2c1f34c5727e620d0e14696e1d0db47a3c5bc3",
       "status": "success",
       "scope": "R689 source scans/fallback only; local CPU runner evidence is separate."
+    },
+    {
+      "id": "gitlab-pipeline-2354",
+      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
+      "commit": "084e8ae4a5a08f349442ade3c0e82d0b95272311",
+      "status": "skipped",
+      "scope": "branch creation ref; no source validation"
+    },
+    {
+      "id": "gitlab-pipeline-2355",
+      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
+      "commit": "93a9595f5cc6533c1bf6bb1dbd1237b211a2b6a7",
+      "status": "success",
+      "scope": "superseded literal-Base64 content scan; not source readback evidence"
+    },
+    {
+      "id": "gitlab-pipeline-2356",
+      "ref": "r690-llama-cpu-logits-token-sampler-20261102",
+      "commit": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "scope": "corrected raw-text source readback; configured scans/fallback only, not local C++ test"
     }
   ],
-  "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only.",
-  "report": "research/R688/REPORT.md",
+  "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch.",
+  "report": "research/R690/REPORT.md",
   "operating_mode": "Owner-requested bounded CPU/source development on private GitLab. Superpowers absent; no skills used. Automatic relaunch remains stopped; no production checkpoint, GPU, production network, cleanup or formatting.",
   "wave_manifest": {
-    "path": "research/R689/SHA256SUMS",
-    "sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
-    "files": 12
+    "path": "research/R690/SHA256SUMS",
+    "sha256": "28e47f18796921fb0c3a48c9adfe95f39cc0ece4ed546a5d916b401dd7dadce1",
+    "files": 6
   },
   "r688_result": {
     "state": "CPU_HOST_INTEGRATION_PASS_SYNTHETIC_FIXTURE_ONLY",
@@ -1729,13 +1842,86 @@
     "gitlab_pipeline": {
       "id": 2352,
       "sha": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
-      "status": "pending"
+      "status": "success",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2352",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
     },
     "checkpoint_inventory": {
       "pc6": "Inspected paths contained only small synthetic Qwen fixtures; no real Qwen2MoE checkpoint located.",
       "pc1": "Inspected paths contained no real Qwen2MoE/GLM checkpoint; only Project_Maya_20261020/data/glm5-synth.gguf (~11.7 MB), synthetic. This does not prove global absence.",
       "pc4": "SSH inventory unavailable (access denied); no absence conclusion."
     },
-    "next_action": "R690: inspect pinned llama.cpp's full CPU eval/logits/sampler boundary and VoltaFabric's resident-session interface; build a bounded synthetic one-token generation fixture only if required checkpoint tensors fit without a model download. Keep route contracts and fail-closed publication; CPU only."
+    "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch.",
+    "gitlab_pipeline_2351": {
+      "id": 2351,
+      "sha": "d109e704d731e5720b03cee4de5be1ae3ac3637f",
+      "status": "success",
+      "url": "https://pc4.tail0c55ff.ts.net/root/voltafabric/-/pipelines/2351",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      }
+    },
+    "pipeline_2353": {
+      "id": 2353,
+      "status": "skipped"
+    }
+  },
+  "r690_result": {
+    "id": "R690",
+    "owner": "integrator",
+    "state": "PUBLISHED_PRIVATE_GITLAB_RAW_TEXT_READBACK_VERIFIED_7_OF_7_CPU_LOGITS_SAMPLER_PASS_PIPELINE_2356_SUCCESS",
+    "branch": "r690-llama-cpu-logits-token-sampler-20261102",
+    "parent_commit": "084e8ae4a5a08f349442ade3c0e82d0b95272311",
+    "superseded_encoding_commit": "93a9595f5cc6533c1bf6bb1dbd1237b211a2b6a7",
+    "source_commit": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+    "path": "research/R690",
+    "donor": "ggml-org/llama.cpp 3cf03257f219afbe7334045ff7c6a06ac68c627d; MIT",
+    "reused": "Pinned Qwen2MoE build_moe_ffn, internal process_ubatch custom graph, GGML ggml_mul_mat/get_logits, public llama.cpp greedy sampler; no upstream source copied.",
+    "adaptation": "Synthetic F32 vocab head follows the resident Rust Session-routed Q8_0 MoE FFN; fail-closed staged logits then public greedy sampling; route coefficients remain applied once at the R689 Session boundary.",
+    "test": "CPU runner exit 0; donor/VF logits max_abs=0; independent scalar lm_head max_abs=0; donor/VF/scalar sampler token 3/3/3; refused and duplicate identity publish no logits/token.",
+    "test_scope": "Synthetic one-layer, one-token, hidden=32, vocab=4 top-2 Q8_0 fixture calling internal process_ubatch on a custom graph, not public llama_decode. No real token embedding/attention/KV/tokenizer/checkpoint, GPU, inter-PC/RDMA, production R53, or performance.",
+    "donor_modified": false,
+    "route_coefficients_applied_once": true,
+    "atomic_refusal": true,
+    "cpu_only": true,
+    "gpu": false,
+    "production_network": false,
+    "readback_files_verified": 7,
+    "source_sha256": "67ed68d37e24074c7261deac403f3e96f29bd14899a26c9f631d3281cd6a6e1a",
+    "manifest_path": "research/R690/SHA256SUMS",
+    "manifest_sha256": "28e47f18796921fb0c3a48c9adfe95f39cc0ece4ed546a5d916b401dd7dadce1",
+    "arxiv_survey_records": 24,
+    "arxiv_scope": "bounded targeted survey, not exhaustive arXiv census",
+    "superseded_pipeline_2355": {
+      "status": "success",
+      "scope": "malformed literal-Base64 commit; superseded by raw-text correction, not evidence for valid source"
+    },
+    "pipeline_2356": {
+      "status": "success",
+      "sha": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "semgrep_findings": 155,
+      "semgrep_findings_in_R690_paths": 0,
+      "semgrep_other_findings_note": "155 blocking findings reported in unrelated repository paths; Semgrep job exited success. Parse warnings also reported in unrelated files. This is not a clean repository-wide Semgrep gate."
+    },
+    "unknown_manual_invocation": {
+      "status": "UNKNOWN_NO_REPLAY",
+      "reason": "One direct binary invocation omitted VF_TEST_OUTPUT_DIR, exited 1 with empty log; local synthetic receipts remain RESERVED_UNKNOWN_NO_REPLAY and were not replayed."
+    },
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch."
   }
 }

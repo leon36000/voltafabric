@@ -2126,7 +2126,7 @@
   ],
   "active_operation": null,
   "active_operations": [],
-  "active_phase": "R640_PUBLISHED_MIXED_OWNER_DISPATCH_PATCH_SOURCE_REVIEW_ONLY",
+  "active_phase": "R690_PUBLISHED_PRIVATE_GITLAB_READBACK_VERIFIED_CPU_ONLY",
   "active_workers": [],
   "agent_cost_usd": null,
   "automatic_retry": false,
@@ -3815,7 +3815,7 @@
   "last_review": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/project-deep-audit-r82-20261027/REPORT.md",
   "last_test": "/home/pc6/NAOS/60_travaux/VoltaFabric-A53-20261012/.runs/gpu-rdma-package-staging-r63/evidence/final-package-qualification.json",
   "last_test_result": "52 source-linked CPU package/plan tests; real two-host staging and loader checks; no model/GPU/RDMA executed",
-  "last_updated": "2026-10-27T22:47:57.802538+00:00",
+  "last_updated": "2026-11-02T03:45:50Z",
   "latest_native_budget_observation": {
     "observed_utc": "2026-10-27T22:47:57.802538+00:00",
     "ordinaryUsageAllowed": false,
@@ -3837,7 +3837,7 @@
   "measured_forwards": 64,
   "measured_pairs": 32,
   "native_agent_cost_usd": null,
-  "next_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
+  "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch.",
   "next_command": "NONE until snapshot is prepared and GitLab authentication exists.",
   "next_command_expected_result": "Read-only filenames of actual native-pack loader; no engine execution, no payload/model/GPU. Store bounded receipt.",
   "next_cpu_action": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
@@ -3845,7 +3845,7 @@
   "next_hardware_command": "NONE: no new hardware case admitted; R81 budget1/1 exhausted.",
   "next_required_work": "R687: isolate donor versus VoltaFabric intermediate rounding and SiLU with scalar FP32 and stage-by-stage FP16 controls; implement or reject an explicit compatibility mode before full-layer equivalence work. CPU-only; no automatic relaunch.",
   "next_task": "R687_DONOR_FP16_INTERMEDIATE_ROUNDING_AND_SILU_ORACLE",
-  "next_updated_utc": "2026-11-01T02:54:29Z",
+  "next_updated_utc": "2026-11-02T03:45:50Z",
   "no_processes_left_after_tests": true,
   "numerical_acceptance_gap": null,
   "optimization_lab_20261023": {
@@ -7053,7 +7053,7 @@
   "uncertain_operations": [],
   "unreconciled_process_operations": [],
   "updated_at_utc": "2026-10-27T20:55:19.428217+00:00",
-  "updated_utc": "2026-11-01 11:34:00 UTC",
+  "updated_utc": "2026-11-02 03:45:50 UTC",
   "warmup_pairs": 4,
   "workers_running": [],
   "write_set": [
@@ -10679,5 +10679,63 @@
     },
     "readback_files_verified": 10,
     "next_action": "R689: inventory already-present Qwen2MoE checkpoints and formats on PC6/PC4; if a compatible local checkpoint exists, design the next CPU-only layer integration. No download, auto relaunch, GPU or production network."
+  },
+  "r689_qwen2moe_live_session": {
+    "state": "CPU_SYNTHETIC_QWEN2MOE_SESSION_TO_PINNED_LLAMA_CPP_PASS_LIMITED",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "donor_modified": false,
+    "route_contract": "qwen2moe_ffn_postdown_preweighted_fp32_slot_sum_v1",
+    "route_coefficients_applied_once": true,
+    "local_cpu_tests": "14 Rust tests passed; direct pinned-donor runner exit 0, donor/VF/scalar comparisons max_abs=0",
+    "test_scope": "Synthetic one-layer one-token top-2 Q8_0 fixture only; not public llama_decode/full generation, GPU, inter-PC/RDMA, production checkpoint or performance.",
+    "readback_files_verified": 12,
+    "manifest_sha256": "e1fac9174f98a4c52c8d9e0022b549065b25c40ce88a771bbf3e8843157eb874",
+    "gitlab_commit": "da7a64a2f6a6321aed43579b81392cc22f86aa0a",
+    "pipeline_2351": "success",
+    "pipeline_2352": "success",
+    "pipeline_2353": "skipped",
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch."
+  },
+  "r690_llama_logits_sampler_cpu": {
+    "state": "CPU_SYNTHETIC_LOGITS_TO_SAMPLER_SEAM_PASS_LIMITED",
+    "donor_commit": "3cf03257f219afbe7334045ff7c6a06ac68c627d",
+    "donor_license": "MIT",
+    "donor_modified": false,
+    "source_commit": "385fc6634b6075f3013ae1cd37fbc76c17d0d9f6",
+    "superseded_literal_base64_commit": "93a9595f5cc6533c1bf6bb1dbd1237b211a2b6a7",
+    "report": "research/R690/REPORT.md",
+    "result": "research/R690/RESULT.json",
+    "build_test": "research/R690/BUILD_TEST.txt",
+    "arxiv_survey": "research/R690/ARXIV_SURVEY_24.md",
+    "manifest": "research/R690/SHA256SUMS",
+    "manifest_sha256": "28e47f18796921fb0c3a48c9adfe95f39cc0ece4ed546a5d916b401dd7dadce1",
+    "readback_files_verified": 7,
+    "local_cpu_pass": true,
+    "logits_max_abs": 0,
+    "scalar_oracle_max_abs": 0,
+    "greedy_token": 3,
+    "test_scope": "Custom internal process_ubatch graph with synthetic lm_head and public sampler; not public llama_decode or full generation.",
+    "pipeline_2355": {
+      "status": "success",
+      "superseded": true
+    },
+    "pipeline_2356": {
+      "status": "success",
+      "jobs": {
+        "pc4_gitleaks": "success",
+        "pc4_semgrep": "success",
+        "pc4_trivy": "success",
+        "pc4_ci_fallback": "success"
+      },
+      "semgrep_findings": 155,
+      "findings_in_R690_paths": 0
+    },
+    "unknown_no_replay": true,
+    "gpu": false,
+    "production_network": false,
+    "automatic_relaunch": "STOPPED_BY_OWNER",
+    "next_action": "R691: assess the pinned public llama_decode boundary using only a deterministic tiny CPU fixture. First determine whether the complete model, tokenizer, attention and KV tensors can be synthesized consistently without a checkpoint download; otherwise record the precise missing contract and prioritize an owner-admitted compatible local checkpoint. Keep the existing Qwen2MoE route hook/Session identity and atomic refusal; no GPU, download, production network or automatic relaunch."
   }
 }
