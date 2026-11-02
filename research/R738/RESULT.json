@@ -1,7 +1,7 @@
 {
   "id": "R738",
   "date": "2026-11-02",
-  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "parent_branch": "r737-deepseek-window-block-20261102",
   "parent_commit": "b8a2535731a60dc6786af0f855a7c25cd2ca58de",
   "target_branch": "r738-deepseek-preloaded-session-route-20261102",
@@ -54,6 +54,16 @@
         "pc4_ci_fallback"
       ],
       "compile_or_generation_proof": false
+    },
+    "receipt_pipeline": {
+      "id": 2592,
+      "status": "success",
+      "jobs": [
+        "pc4_gitleaks",
+        "pc4_semgrep",
+        "pc4_trivy",
+        "pc4_ci_fallback"
+      ]
     }
   },
   "external_reuse": {
@@ -81,6 +91,18 @@
   ],
   "manifest": "research/R738/SHA256SUMS",
   "manifest_sha256": "c6578ad63ea2770f1b4213915132ca2a7f11305a05ac854fc2f7f426a4ed4daf",
-  "receipt_pending": true,
-  "next_action": "After receipt pipeline success, record exact receipt readback. R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle."
+  "receipt_pending": false,
+  "next_action": "R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle.",
+  "receipt_commit": "88f86ab04a16f6a7269b881f5385c46b29cc6870",
+  "receipt_pipeline_id": 2592,
+  "receipt_pipeline_status": "success",
+  "receipt_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "receipt_readback_exact": true,
+  "receipt_readback_files_verified": 4,
+  "receipt_readback_commit": "88f86ab04a16f6a7269b881f5385c46b29cc6870"
 }

@@ -1,7 +1,7 @@
 {
   "id": "R738",
   "date": "2026-11-02",
-  "state": "SOURCE_PIPELINE_SUCCESS_EXACT_READBACK_RECEIPT_PIPELINE_PENDING",
+  "state": "PUBLISHED_PRIVATE_GITLAB_SOURCE_AND_RECEIPT_PIPELINES_SUCCESS_EXACT_READBACK",
   "automatic_continuation": "STOPPED_BY_OWNER; current-turn work only, no unattended process",
   "active_operations": [],
   "summary": "Connected the R737 gate-selected top-6 route to already-loaded per-layer MXFP4 Sessions. Every participating Session is preflighted before EXEC; no token-path LOAD; incomplete and UNKNOWN results publish no block/KV output.",
@@ -48,7 +48,27 @@
       "compile_or_generation_proof": false
     }
   },
-  "receipt_pending": true,
-  "receipt_pipeline_pending": true,
-  "next_action": "After receipt pipeline success, record exact receipt readback. R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle."
+  "receipt_pending": false,
+  "receipt_pipeline_pending": false,
+  "next_action": "R739: bind verified checkpoint owner admission to persistent per-layer Sessions and compare a full block to an independent numerical oracle.",
+  "receipt_commit": "88f86ab04a16f6a7269b881f5385c46b29cc6870",
+  "receipt_pipeline_id": 2592,
+  "receipt_pipeline_status": "success",
+  "receipt_pipeline_jobs": {
+    "gitleaks": "success",
+    "semgrep": "success",
+    "trivy": "success",
+    "fallback": "success"
+  },
+  "receipt_readback": {
+    "exact": true,
+    "commit": "88f86ab04a16f6a7269b881f5385c46b29cc6870",
+    "files_verified": 4,
+    "files": [
+      "research/R738/REPORT.md",
+      "research/R738/SHA256SUMS",
+      "research/R738/RESULT.json",
+      "handoff/R738.json"
+    ]
+  }
 }
