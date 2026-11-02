@@ -28,6 +28,23 @@ pub struct EncodedPrompt {
     pub tokenizer_sha256: String,
     pub context_limit: usize,
     pub reserved_completion_tokens: usize,
+    admission: PromptAdmission,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+struct PromptAdmission {
+    tokenizer_sha256: String,
+    token_ids_sha256: String,
+    context_limit: usize,
+    reserved_completion_tokens: usize,
+}
+
+fn token_ids_sha256(token_ids: &[u32]) -> String {
+    let mut bytes = Vec::with_capacity(token_ids.len().saturating_mul(4));
+    for &token_id in token_ids {
+        bytes.extend_from_slice(&token_id.to_le_bytes());
+    }
+    sha256::hex(&bytes)
 }
 
 /// Generated token IDs up to, but not including, the first checkpoint EOS.
@@ -134,6 +151,21 @@ impl DeepSeekV41PromptEncoder {
             return Err(crate::Error::new(
                 "INVALID_INPUT",
                 "prompt and completion limits do not satisfy the pinned recipe contract",
+            ));
+        }
+        if prompt.admission.tokenizer_sha256 != self.tokenizer_sha256 {
+            return Err(crate::Error::new(
+                "TOKENIZER_MISMATCH",
+                "encoded prompt admission is bound to a different tokenizer",
+            ));
+        }
+        if prompt.context_limit != prompt.admission.context_limit
+            || prompt.reserved_completion_tokens != prompt.admission.reserved_completion_tokens
+            || token_ids_sha256(&prompt.token_ids) != prompt.admission.token_ids_sha256
+        {
+            return Err(crate::Error::new(
+                "PROMPT_PROVENANCE_MISMATCH",
+                "encoded prompt IDs or admission limits changed after encoder admission",
             ));
         }
         let reserved_total = prompt
@@ -250,11 +282,18 @@ impl DeepSeekV41PromptEncoder {
                 "prompt and completion reservation require {total} tokens; context limit is {context_limit}"
             ));
         }
+        let admission = PromptAdmission {
+            tokenizer_sha256: self.tokenizer_sha256.clone(),
+            token_ids_sha256: token_ids_sha256(&token_ids),
+            context_limit,
+            reserved_completion_tokens,
+        };
         Ok(EncodedPrompt {
             token_ids,
             tokenizer_sha256: self.tokenizer_sha256.clone(),
             context_limit,
             reserved_completion_tokens,
+            admission,
         })
     }
 }
@@ -273,6 +312,13 @@ mod reference_tests {
     use tokio_stream::{iter, StreamExt};
 
     const TOKENIZER_ENV: &str = "VF_DEEPSEEK_V41_TOKENIZER_JSON";
+
+    #[test]
+    fn prompt_id_admission_digest_is_stable_and_order_sensitive() {
+        assert_eq!(token_ids_sha256(&[1, 2, 3]), token_ids_sha256(&[1, 2, 3]));
+        assert_ne!(token_ids_sha256(&[1, 2, 3]), token_ids_sha256(&[1, 3, 2]));
+        assert_ne!(token_ids_sha256(&[1]), token_ids_sha256(&[1, 0]));
+    }
 
     fn pinned_tokenizer() -> (Vec<u8>, Tokenizer) {
         let path = env::var_os(TOKENIZER_ENV)
@@ -484,7 +530,7 @@ mod reference_tests {
                 .greedy_decoder(&out_of_vocab, stamp, 9, 4)
                 .unwrap_err()
                 .code,
-            "INVALID_INPUT"
+            "PROMPT_PROVENANCE_MISMATCH"
         );
     }
 

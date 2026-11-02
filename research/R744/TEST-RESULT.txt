@@ -7,6 +7,6 @@ Tests cover stable low-ID tie, one-shot EOS, length termination, identity/attemp
 Formatting: rustfmt --edition 2021 --check on src/deepseek_v41_prompt.rs and src/deepseek_v41_sampler.rs; rustfmt --edition 2021 --config skip_children=true --check on isolated src/lib.rs — all passed.
 
 Feature command: cargo test --offline --manifest-path .runs/r744-work/feature-harness/Cargo.toml
-Result: actual prompt and sampler modules compiled against deepseek-recipe-core/encoding 0.2.0 and tokenizers 0.23.2; 6 passed, 0 failed, 2 ignored. The ignored tests require the exact external tokenizer fixture (`VF_DEEPSEEK_V41_TOKENIZER_JSON`). This also reproduced and then fixed a cfg guard that prevented the EOS fixture test helper from compiling without the separate stream feature.
+Result: actual prompt and sampler modules compiled against deepseek-recipe-core/encoding 0.2.0, tokenizers 0.23.2, and the existing VoltaFabric SHA-256 module; 9 passed, 0 failed, 2 ignored. The ignored tests require the exact external tokenizer fixture (`VF_DEEPSEEK_V41_TOKENIZER_JSON`). Passing tests include prompt-ID digest stability/order checks and existing NIST SHA-256 vectors. This also reproduced and fixed a cfg guard that prevented the EOS fixture test helper from compiling without the separate stream feature. The tokenizer-backed test checks rejection of token-ID mutation after prompt admission.
 
 Neither harness builds the complete VoltaFabric crate. No real tokenizer/checkpoint payload, GPU, network worker, or full generation was exercised.

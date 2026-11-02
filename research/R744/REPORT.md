@@ -6,6 +6,8 @@ R744 ajoute un sélecteur de prochain token greedy déterministe sur CPU et le r
 
 La règle greedy conserve le premier token au maximum en parcourant les ID dans l’ordre et en ne remplaçant le choix courant que pour un logit strictement supérieur. Un logit `-∞` est un candidat masqué admissible; NaN, `+∞` et une ligne sans candidat fini sont refusés sans ajouter de token. Une égalité stable ne signifie pas que la génération complète est déterministe: le backend de logits, les kernels, la précision et le reste du moteur ne sont pas couverts ici.
 
+L’objet `EncodedPrompt` garde ses champs de lecture mais porte aussi une admission privée liant digest tokenizer, digest des IDs, limite de contexte et réservation. Le factory du sampler vérifie ce sceau avant de calculer; modifier ou fabriquer les champs publics après encodage entraîne un refus. Les IDs sont hashés comme `u32` little-endian, et la longueur est bornée avant ce contrôle.
+
 ## Réemploi amont
 
 - Source examinée: `ggml-org/llama.cpp`, commit [`29c720eaf72fcf8e4e61a56a88b994d92668261d`](https://github.com/ggml-org/llama.cpp/tree/29c720eaf72fcf8e4e61a56a88b994d92668261d).
@@ -16,9 +18,9 @@ La règle greedy conserve le premier token au maximum en parcourant les ID dans 
 
 ## Vérification effectuée
 
-Les véritables modules `src/deepseek_v41_sampler.rs` et `src/deepseek_v41_prompt.rs` ont été compilés dans un harness Rust isolé avec les dépendances épinglées `deepseek-recipe-core`/`deepseek-recipe-encoding` 0.2.0 et `tokenizers` 0.23.2, en mode offline, plus un `Stamp` et le type d’erreur de même forme que VoltaFabric. Les six tests sampler passent: égalité, EOS terminal et non-rejouable, limite de longueur, identité/tentative/forme, valeurs non finies et construction invalide. Deux tests avec tokenizer externe restent ignorés. Ce contrôle a également révélé puis corrigé une garde cfg préexistante qui masquait le helper `plain_ids` au test EOS alors que le feature stream n’était pas activé. `rustfmt --check` passe sur le sampler, l’adaptateur prompt modifié et le `lib.rs` isolé.
+Les véritables modules `src/deepseek_v41_sampler.rs` et `src/deepseek_v41_prompt.rs` ont été compilés dans un harness Rust isolé avec les dépendances épinglées `deepseek-recipe-core`/`deepseek-recipe-encoding` 0.2.0 et `tokenizers` 0.23.2, en mode offline, plus le `Stamp`, l’erreur et le SHA-256 VoltaFabric. Le harness obtient 9 succès et 2 tests ignorés; il inclut les six tests sampler, les vecteurs NIST existants et le test d’ordre du digest des IDs. Le contrôle a aussi révélé puis corrigé une garde cfg préexistante qui masquait le helper `plain_ids` au test EOS alors que le feature stream n’était pas activé. `rustfmt --check` passe sur le sampler, l’adaptateur prompt modifié et le `lib.rs` isolé.
 
-Le test d’intégration ajouté au test ignoré de l’encodeur vérifie avec le tokenizer épinglé la création du sampler, un choix EOS et l’absence d’EOS dans le préfixe final. Il reste ignoré tant que `VF_DEEPSEEK_V41_TOKENIZER_JSON` n’est pas fourni. Le harness compile le vrai code prompt/sampler, mais pas le crate complet ni son feature stream; la pipeline GitLab reste une vérification distincte. Ce lot ne charge aucun tokenizer ni checkpoint réel.
+Le test d’intégration ajouté au test ignoré de l’encodeur vérifie avec le tokenizer épinglé la création du sampler, un choix EOS, le refus d’une mutation d’IDs et l’absence d’EOS dans le préfixe final. Il reste ignoré tant que `VF_DEEPSEEK_V41_TOKENIZER_JSON` n’est pas fourni. Le harness compile le vrai code prompt/sampler, mais pas le crate complet ni son feature stream; la pipeline GitLab reste une vérification distincte. Ce lot ne charge aucun tokenizer ni checkpoint réel.
 
 ## Ce qui reste hors preuve
 

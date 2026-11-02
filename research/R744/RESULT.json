@@ -16,7 +16,7 @@
       "src/lib.rs",
       "docs/ARCHITECTURE.md"
     ],
-    "prompt_factory": "admits only the pinned tokenizer digest and model revision; checks prompt IDs, context and reserved completion budget before decoder construction",
+    "prompt_factory": "admits only the pinned tokenizer digest and model revision; a private admission seal binds the token-ID digest, context limit and reservation before decoder construction",
     "decode_identity": ["run_id", "model_revision", "plan_id", "layer", "batch", "epoch", "attempt"],
     "numerical_policy": "NaN, positive infinity, and all-masked rows reject without state mutation; negative infinity is an allowed masked candidate",
     "terminal_policy": "EOS and max_new_tokens end the decoder; further sampling is refused; only a finished decoder may cross the EOS-safe prefix boundary",
@@ -26,7 +26,7 @@
   "verification": {
     "isolated_cpu_harness_tests_passed": 6,
     "isolated_cpu_harness_tests_failed": 0,
-    "prompt_sampler_feature_harness": "offline compilation of the actual prompt and sampler modules against deepseek-recipe-core/encoding 0.2.0 and tokenizers 0.23.2; 6 passed, 2 pinned-tokenizer tests ignored",
+    "prompt_sampler_feature_harness": "offline compilation of the actual prompt and sampler modules against deepseek-recipe-core/encoding 0.2.0, tokenizers 0.23.2 and VoltaFabric SHA-256; 9 passed, 2 pinned-tokenizer tests ignored",
     "rustfmt_sampler_prompt_lib_check": "pass",
     "pinned_tokenizer_integration_test": "added but ignored; external VF_DEEPSEEK_V41_TOKENIZER_JSON fixture unavailable to this run",
     "full_repository_build": "not run locally",
