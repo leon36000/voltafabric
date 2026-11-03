@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "round": "R746",
+  "updated_utc": "2026-11-03T09:25:32Z",
+  "owner_authorization": "Continue source development on the private GitLab project. Automatic relaunch remains stopped by owner request.",
+  "project": "root/voltafabric",
+  "branch": "r746-deepseek-greedy-wire-20261103",
+  "base_branch": "r745-vocab-shard-greedy-20261102",
+  "base_commit": "2aa8127c9ba856bf22e69da9576493298d4b987e",
+  "state": "CPU_CODEC_SLICE_VERIFIED_PENDING_GITLAB_PUBLICATION",
+  "change": "Add strict version-1 bounded one-line JSON codec for rank-local greedy partials; carry FP32 score bits exactly; bind claimed rank to caller-supplied Session rank before existing atomic reducer checks.",
+  "reused": "Extends the VoltaFabric greedy reducer from R745. DeepSeek V4.1 Flash source revision 314113f8a7dadb388215396ba5fbee2c610a04d6 and its MIT license are recorded by R745; no donor engine code is copied in this round.",
+  "verified": {
+    "debug_tests": "22 passed, 0 failed, 3 ignored (external tokenizer fixture required)",
+    "release_tests": "22 passed, 0 failed, 3 ignored (external tokenizer fixture required)",
+    "clippy": "exit 0; two existing SHA-256 test-counter dead_code warnings",
+    "rustfmt": "pass",
+    "manifest_sha256": "c7dab1a00a3af9b6c8fdf66e8ff6f06dbeff25dd52f7cfc0b0598e6a47fcb48a"
+  },
+  "limitations": [
+    "Not yet a variant of Session::Reply; no worker producer or Session reader is connected.",
+    "The isolated CPU harness does not build the full VoltaFabric application.",
+    "No transport authentication, network, GPU, checkpoint, complete model, full-generation, or performance qualification."
+  ],
+  "active_operations": [],
+  "next_action": "Integrate a strict Session::Reply variant and connect its producer/collector against the exact current GitLab session source; verify atomic rejection and Session identity. Then continue the compatible-checkpoint generation path.",
+  "no_relaunch": "STOPPED_BY_OWNER"
+}

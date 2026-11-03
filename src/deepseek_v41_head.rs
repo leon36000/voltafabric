@@ -7,6 +7,7 @@
 
 use crate::moe::Stamp;
 use crate::{Error, Result};
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 
 const MAX_VOCAB_SHARDS: usize = 4096;
@@ -182,6 +183,146 @@ impl ShardedGreedyPartial {
     pub fn local_best(&self) -> Option<(u32, f32)> {
         self.best
     }
+}
+
+const MAX_GREEDY_PARTIAL_FRAME_BYTES: usize = 4096;
+const GREEDY_PARTIAL_WIRE_KIND: &str = "deepseek_v41_greedy_partial";
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct ShardedGreedyPartialWireV1 {
+    version: u8,
+    kind: String,
+    stamp: Stamp,
+    attempt: u64,
+    token_index: u64,
+    tokenizer_sha256: String,
+    plan_sha256: String,
+    rank: u32,
+    best_token_id: Option<u32>,
+    best_score_bits: Option<u32>,
+}
+
+impl ShardedGreedyPartial {
+    /// Encode one bounded UTF-8 JSON line. This is a versioned payload codec;
+    /// the current session::Reply enum still needs a dedicated variant before
+    /// this line is accepted by a VoltaFabric Session.
+    pub fn encode_wire_frame(&self) -> Result<Vec<u8>> {
+        let token_index = u64::try_from(self.token_index)
+            .map_err(|_| invalid_wire("token position exceeds the wire integer range"))?;
+        let (best_token_id, best_score_bits) = match self.best {
+            Some((token_id, score)) => (Some(token_id), Some(score.to_bits())),
+            None => (None, None),
+        };
+        let wire = ShardedGreedyPartialWireV1 {
+            version: 1,
+            kind: GREEDY_PARTIAL_WIRE_KIND.to_owned(),
+            stamp: self.stamp.clone(),
+            attempt: self.attempt,
+            token_index,
+            tokenizer_sha256: self.tokenizer_sha256.clone(),
+            plan_sha256: self.plan_sha256.clone(),
+            rank: self.rank,
+            best_token_id,
+            best_score_bits,
+        };
+        let mut frame = serde_json::to_vec(&wire)
+            .map_err(|_| invalid_wire("rank-local winner could not be encoded"))?;
+        if frame
+            .len()
+            .checked_add(1)
+            .is_none_or(|n| n > MAX_GREEDY_PARTIAL_FRAME_BYTES)
+        {
+            return Err(invalid_wire(
+                "rank-local winner exceeds the bounded wire frame",
+            ));
+        }
+        frame.push(b'\n');
+        Ok(frame)
+    }
+
+    /// Decode exactly one version-1 JSON line, rejecting oversized input before
+    /// JSON parsing. The peer rank is checked separately by the reducer caller.
+    pub fn decode_wire_frame(frame: &[u8]) -> Result<Self> {
+        if frame.len() < 2
+            || frame.len() > MAX_GREEDY_PARTIAL_FRAME_BYTES
+            || frame.last() != Some(&b'\n')
+            || frame[..frame.len() - 1]
+                .iter()
+                .any(|b| *b == b'\n' || *b == b'\r')
+        {
+            return Err(invalid_wire(
+                "rank-local winner is not one bounded JSON line",
+            ));
+        }
+        let wire: ShardedGreedyPartialWireV1 = serde_json::from_slice(&frame[..frame.len() - 1])
+            .map_err(|_| {
+                invalid_wire("rank-local winner JSON is malformed or has unknown fields")
+            })?;
+        if wire.version != 1 || wire.kind != GREEDY_PARTIAL_WIRE_KIND {
+            return Err(invalid_wire(
+                "unsupported rank-local winner wire kind or version",
+            ));
+        }
+        validate_stamp(&wire.stamp)
+            .map_err(|_| invalid_wire("rank-local winner identity is incomplete"))?;
+        if wire.attempt == 0
+            || !crate::sha256::is_hex_digest(&wire.tokenizer_sha256)
+            || wire.tokenizer_sha256 != wire.tokenizer_sha256.to_ascii_lowercase()
+            || !crate::sha256::is_hex_digest(&wire.plan_sha256)
+            || wire.plan_sha256 != wire.plan_sha256.to_ascii_lowercase()
+        {
+            return Err(invalid_wire(
+                "rank-local winner identity or digest is invalid",
+            ));
+        }
+        let best = match (wire.best_token_id, wire.best_score_bits) {
+            (None, None) => None,
+            (Some(token_id), Some(bits)) => {
+                let score = f32::from_bits(bits);
+                if !score.is_finite() {
+                    return Err(invalid_wire("rank-local winner score is not finite"));
+                }
+                Some((token_id, score))
+            }
+            _ => {
+                return Err(invalid_wire(
+                    "rank-local winner score fields are incomplete",
+                ))
+            }
+        };
+        let token_index = usize::try_from(wire.token_index)
+            .map_err(|_| invalid_wire("token position exceeds the host integer range"))?;
+        Ok(Self {
+            stamp: wire.stamp,
+            attempt: wire.attempt,
+            token_index,
+            tokenizer_sha256: wire.tokenizer_sha256,
+            plan_sha256: wire.plan_sha256,
+            rank: wire.rank,
+            best,
+        })
+    }
+}
+
+impl ShardedGreedyReducer {
+    /// Bind the claimed rank to the caller's trusted Session endpoint identity,
+    /// then pass through the reducer's complete identity and atomicity checks.
+    /// This comparison does not authenticate the transport or peer.
+    pub fn accept_wire_frame(&mut self, frame: &[u8], expected_session_rank: u32) -> Result<()> {
+        let partial = ShardedGreedyPartial::decode_wire_frame(frame)?;
+        if partial.rank != expected_session_rank {
+            return Err(Error::new(
+                "SESSION_RANK_MISMATCH",
+                "rank-local winner does not match the Session endpoint rank",
+            ));
+        }
+        self.accept_partial(partial)
+    }
+}
+
+fn invalid_wire(message: &str) -> Error {
+    Error::new("INVALID_GREEDY_FRAME", message)
 }
 
 /// Collects local argmax values from all head shards without retaining or
@@ -443,6 +584,119 @@ mod tests {
             }
         }
         best
+    }
+
+    #[test]
+    fn versioned_wire_roundtrip_preserves_exact_fp32_score_bits() {
+        let plan = plan();
+        let score = f32::from_bits(0x3f80_0001);
+        let partial = plan.local_argmax(&stamp(), 9, 0, 7, &[0.0, score]).unwrap();
+        let frame = partial.encode_wire_frame().unwrap();
+        assert_eq!(frame.last(), Some(&b'\n'));
+        assert_eq!(frame.iter().filter(|b| **b == b'\n').count(), 1);
+        let decoded = ShardedGreedyPartial::decode_wire_frame(&frame).unwrap();
+        assert_eq!(decoded.rank(), 7);
+        assert_eq!(decoded.local_best().unwrap().1.to_bits(), score.to_bits());
+    }
+
+    #[test]
+    fn versioned_wire_rejects_bad_versions_unknown_fields_and_bad_framing() {
+        let plan = plan();
+        let partial_value = partial(&plan, &stamp(), 9, 0, 7, &[1.0, 2.0]);
+        let frame = partial_value.encode_wire_frame().unwrap();
+
+        let json = std::str::from_utf8(&frame[..frame.len() - 1]).unwrap();
+        let bad_version = json.replace("\"version\":1", "\"version\":2");
+        let mut bad_version = bad_version.into_bytes();
+        bad_version.push(b'\n');
+        assert_eq!(
+            ShardedGreedyPartial::decode_wire_frame(&bad_version)
+                .unwrap_err()
+                .code,
+            "INVALID_GREEDY_FRAME"
+        );
+
+        let mut wrong_kind: serde_json::Value =
+            serde_json::from_slice(&frame[..frame.len() - 1]).unwrap();
+        wrong_kind.as_object_mut().unwrap().insert(
+            "kind".to_owned(),
+            serde_json::Value::String("worker_event".to_owned()),
+        );
+        let mut wrong_kind = serde_json::to_vec(&wrong_kind).unwrap();
+        wrong_kind.push(b'\n');
+        assert!(ShardedGreedyPartial::decode_wire_frame(&wrong_kind).is_err());
+
+        let mut value: serde_json::Value =
+            serde_json::from_slice(&frame[..frame.len() - 1]).unwrap();
+        value
+            .as_object_mut()
+            .unwrap()
+            .insert("extra".to_owned(), serde_json::Value::Bool(true));
+        let mut unknown = serde_json::to_vec(&value).unwrap();
+        unknown.push(b'\n');
+        assert_eq!(
+            ShardedGreedyPartial::decode_wire_frame(&unknown)
+                .unwrap_err()
+                .code,
+            "INVALID_GREEDY_FRAME"
+        );
+
+        assert!(ShardedGreedyPartial::decode_wire_frame(&frame[..frame.len() - 1]).is_err());
+        let mut multiline = frame.clone();
+        multiline.extend_from_slice(b"{}\n");
+        assert!(ShardedGreedyPartial::decode_wire_frame(&multiline).is_err());
+        assert!(ShardedGreedyPartial::decode_wire_frame(&vec![
+            b' ';
+            MAX_GREEDY_PARTIAL_FRAME_BYTES + 1
+        ])
+        .is_err());
+    }
+
+    #[test]
+    fn versioned_wire_rejects_incomplete_or_nonfinite_winner() {
+        let plan = plan();
+        let partial = partial(&plan, &stamp(), 9, 0, 7, &[1.0, 2.0]);
+        let frame = partial.encode_wire_frame().unwrap();
+
+        let mut missing_score: serde_json::Value =
+            serde_json::from_slice(&frame[..frame.len() - 1]).unwrap();
+        missing_score
+            .as_object_mut()
+            .unwrap()
+            .insert("best_score_bits".to_owned(), serde_json::Value::Null);
+        let mut missing_score = serde_json::to_vec(&missing_score).unwrap();
+        missing_score.push(b'\n');
+        assert!(ShardedGreedyPartial::decode_wire_frame(&missing_score).is_err());
+
+        let mut nonfinite: serde_json::Value =
+            serde_json::from_slice(&frame[..frame.len() - 1]).unwrap();
+        nonfinite.as_object_mut().unwrap().insert(
+            "best_score_bits".to_owned(),
+            serde_json::Value::from(f32::NAN.to_bits()),
+        );
+        let mut nonfinite = serde_json::to_vec(&nonfinite).unwrap();
+        nonfinite.push(b'\n');
+        assert!(ShardedGreedyPartial::decode_wire_frame(&nonfinite).is_err());
+    }
+
+    #[test]
+    fn wire_rank_mismatch_is_rejected_without_consuming_shard() {
+        let plan = plan();
+        let mut reducer = reducer(plan.clone());
+        let rank7 = partial(&plan, &stamp(), 9, 0, 7, &[1.0, 2.0])
+            .encode_wire_frame()
+            .unwrap();
+        assert_eq!(
+            reducer.accept_wire_frame(&rank7, 3).unwrap_err().code,
+            "SESSION_RANK_MISMATCH"
+        );
+        reducer.accept_wire_frame(&rank7, 7).unwrap();
+
+        let rank3 = partial(&plan, &stamp(), 9, 0, 3, &[3.0, 4.0, 0.0])
+            .encode_wire_frame()
+            .unwrap();
+        reducer.accept_wire_frame(&rank3, 3).unwrap();
+        assert_eq!(reducer.finish().unwrap().token_id(), 3);
     }
 
     #[test]

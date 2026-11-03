@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "round": "R746",
+  "status": "CPU_CODEC_SLICE_VERIFIED",
+  "base_branch": "r745-vocab-shard-greedy-20261102",
+  "base_commit": "2aa8127c9ba856bf22e69da9576493298d4b987e",
+  "scope": "bounded versioned wire payload for rank-local greedy token partials",
+  "integration_status": "payload codec and reducer adapter added; Session::Reply and worker producer remain unconnected",
+  "test_summary": {
+    "passed": 22,
+    "failed": 0,
+    "ignored": 3,
+    "clippy_exit": 0,
+    "rustfmt_check": "pass"
+  },
+  "claims": {
+    "transport_authenticated": false,
+    "network_qualified": false,
+    "gpu_qualified": false,
+    "full_generation_qualified": false,
+    "performance_gain_measured": false
+  },
+  "next_action": "integrate a strict Session::Reply variant and producer/collector against the exact current GitLab session source"
+}

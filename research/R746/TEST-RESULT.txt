@@ -1,0 +1,24 @@
+R746 source: src/deepseek_v41_head.rs
+Harness: research/R746/cpu-harness (CPU-only isolated harness, imports the production source by relative path)
+
+Debug command:
+CARGO_TARGET_DIR=.runs/r746-work/target cargo test --offline --manifest-path .runs/r746-work/research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream
+Result: exit 0; 22 passed, 0 failed, 3 ignored; doc tests 0/0.
+
+Release command:
+CARGO_TARGET_DIR=.runs/r746-work/target cargo test --offline --manifest-path .runs/r746-work/research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --release
+Result: exit 0; 22 passed, 0 failed, 3 ignored; doc tests 0/0.
+The 3 ignored reference tests require a pinned external tokenizer fixture; they are not represented as passes.
+
+Clippy command:
+CARGO_TARGET_DIR=.runs/r746-work/target cargo clippy --offline --manifest-path .runs/r746-work/research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets
+Result: exit 0; two dead_code warnings for existing SHA-256 test-counter helpers reset_test_hashed_bytes and test_hashed_bytes.
+
+Formatting commands:
+rustfmt --edition 2021 --check .runs/r746-work/src/deepseek_v41_head.rs
+rustfmt --edition 2021 --config skip_children=true --check .runs/r746-work/research/R746/cpu-harness/src/lib.rs
+Result: both exit 0.
+
+Focused checks cover exact FP32 bit round-trip; unsupported version/kind and unknown fields; bounded single-line framing; incomplete/non-finite scores; and rank mismatch without consuming a reducer shard. Existing R745 greedy reduction and sampler tests also pass.
+
+Limit: this isolated harness verifies the CPU behavior of the imported module, not the full VoltaFabric crate, Session protocol, network, GPU, checkpoint, or full generation.
