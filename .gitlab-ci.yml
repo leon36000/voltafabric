@@ -14,6 +14,8 @@ r746_cpu_contract:
   before_script:
     - rustup component add clippy rustfmt
   script:
+    - cargo test --locked --lib --features deepseek-v41-stream
+    - cargo clippy --locked --lib --features deepseek-v41-stream
     - cargo test --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream
     - cargo clippy --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets
-    - rustfmt --edition 2021 --check src/deepseek_v41_head.rs research/R746/cpu-harness/src/lib.rs
+    - rustfmt --edition 2021 --check src/deepseek_v41_head.rs src/deepseek_v41_prompt.rs src/deepseek_v41_sampler.rs research/R746/cpu-harness/src/lib.rs

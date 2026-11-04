@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "round": "R748",
+  "updated_utc": "2026-11-04T23:40:00Z",
+  "owner_authorization": "Continue source work on private GitLab and use the PC4 runner. Do not use Superpowers or codex-engineering-guardrails skills or instructions. Automatic relaunch remains stopped by owner request.",
+  "project": "root/voltafabric",
+  "source_branch": "r747-gitlab-cpu-ci-20261104",
+  "source_head": "a6b48a31502c4ac2935b1ce98b7221eeadf2fd27",
+  "branch": "r748-root-crate-ci-20261104",
+  "state": "ROOT_CARGO_CI_PENDING",
+  "change": "Add locked test and Clippy runs for the actual root library with DeepSeek v4.1 stream enabled; keep the independent R746 harness and global security scans.",
+  "sonarqube": "No MCP connector, CLI, PC4 service on port 9000, or SONAR_HOST_URL. The masked token value was not read. No service was installed or started.",
+  "gitguardian": "No connector/project variable; GitLeaks is a distinct scan and remains enabled in the pipeline.",
+  "active_operations": [
+    "Publish R748 as a new branch from the verified R747 receipt, then inspect its PC4 pipeline and root-library test results."
+  ],
+  "next_action": "Read R748 pipeline and update this handoff with exact root-library test and scan outcomes before any further code change.",
+  "no_relaunch": "STOPPED_BY_OWNER",
+  "artifact_manifest_sha256": "2e741138600b9503e0cfefab578a746dbb048377bfa1b7ad8c84dd7ebc78a4dd"
+}

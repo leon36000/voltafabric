@@ -1,0 +1,9 @@
+R748 is pending PC4 GitLab execution. It extends CI from the independent R746 CPU harness to the actual VoltaFabric root library under `deepseek-v41-stream`.
+
+Previous verified R747 pipeline #2873 on PC4:
+- Isolated R746 harness: 22 passed, 0 failed, 3 ignored because the pinned external tokenizer fixture was not present.
+- Clippy: exit 0 with two existing dead_code warnings in SHA-256 test-counter helpers.
+- rustfmt: pass.
+- Gitleaks, Semgrep and Trivy: jobs succeeded; Semgrep reported 155 findings across 6,898 files, not yet triaged.
+
+No R748 root test result is claimed until its pipeline is read back.
