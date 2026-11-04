@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "round": "R747",
-  "status": "CI_IMAGE_PULL_WORKARDED_RETRY_PENDING",
+  "status": "PC4_CPU_CI_PASS_WITH_PINNED_TOKENIZER_CASES_IGNORED",
   "base_branch": "r746-deepseek-greedy-wire-20261103",
   "base_commit": "76372968ff308401a0c8c2bd7d04dd9f0732d1c6",
   "ci_job": "r746_cpu_contract",
@@ -21,7 +21,19 @@
     "global_trivy": "success",
     "cpu_script_started": false
   },
+  "r747_pipeline_2873": {
+    "commit": "2bc629d65ef055211b4b6381a11f4e3b1e00d62e",
+    "status": "success",
+    "duration_seconds": 386,
+    "cpu_job": "success; ran on PC4 runner using the public ECR Rust image",
+    "cargo_test": "22 passed; 0 failed; 3 ignored because the pinned external tokenizer fixture was unavailable",
+    "clippy": "success; 2 existing dead_code warnings in SHA-256 test-counter helpers",
+    "rustfmt": "success",
+    "global_gitleaks": "success; no leaks in 887 commits (~160 MB)",
+    "global_semgrep": "success; 155 findings across 6,898 files, untriaged",
+    "global_trivy": "success"
+  },
   "sonarqube": "not run; connector and reachable host URL unavailable",
   "gitguardian": "not run; connector unavailable; Gitleaks ran as a distinct scanner",
-  "next_action": "Verify the retry pipeline for actual Rust job execution on PC4."
+  "next_action": "Commit this verified receipt without rewriting history; resume component extraction and connect generation only through tested VoltaFabric boundaries."
 }

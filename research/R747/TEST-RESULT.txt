@@ -1,9 +1,16 @@
 R747 pipeline 2870 (commit before image-source correction): failed before the Rust script because the runner could not resolve production.cloudfront.docker.com while pulling rust:1.90.0-bookworm from Docker Hub. The CPU test command did not run; classify this as infrastructure/image-pull failure, not a code-test result.
 
-The replacement image tag public.ecr.aws/docker/library/rust:1.90.0-bookworm was verified locally with `docker manifest inspect` using an empty Docker config. The R747 retry must still verify the image pull on the PC4 runner and execution of all commands.
+The replacement image tag public.ecr.aws/docker/library/rust:1.90.0-bookworm was verified locally with `docker manifest inspect` using an empty Docker config. Pipeline 2873 on commit 2bc629d65ef055211b4b6381a11f4e3b1e00d62e then pulled it on PC4 and executed the full job successfully:
+- cargo test: 22 passed, 0 failed, 3 ignored because the pinned external tokenizer fixture is unavailable on the runner.
+- cargo clippy: success, with two existing dead_code warnings for SHA-256 test-counter helpers.
+- rustfmt --check: pass.
+
+Pipeline 2873 global jobs also succeeded: Gitleaks (887 commits, no leaks), Semgrep (155 findings across 6,898 files; findings remain untriaged), and Trivy.
 
 Existing R746 local CPU evidence:
 - Debug: 22 passed, 0 failed, 3 ignored (pinned external tokenizer fixture required).
 - Release: 22 passed, 0 failed, 3 ignored.
 - Clippy: exit 0 with two existing dead_code warnings in SHA-256 test-counter helpers.
 - rustfmt: pass.
+
+Scope remains a CPU harness check only. This does not qualify a complete generation path, network serving, GPU execution, or full model correctness.
