@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "round": "R747",
+  "updated_utc": "2026-11-04T23:14:25Z",
+  "owner_authorization": "Continue VoltaFabric source work in private GitLab and use the PC4 CI runner. Do not restart automatic relaunch. No Superpowers or other skills.",
+  "project": "root/voltafabric",
+  "branch": "r747-gitlab-cpu-ci-20261104",
+  "base_branch": "r746-deepseek-greedy-wire-20261103",
+  "base_commit": "76372968ff308401a0c8c2bd7d04dd9f0732d1c6",
+  "state": "CPU_CI_JOB_ADDED_PENDING_PIPELINE",
+  "change": "Add a repository GitLab CI test job on rust:1.90.0-bookworm for the R746 CPU harness: cargo test --locked, Clippy, and rustfmt. Uses default test stage to preserve injected global scan stages.",
+  "previous_evidence": {
+    "r746_pipeline_2702": "success",
+    "r746_pipeline_2703": "success",
+    "pc4_runner": "Kubernetes executor; AMD Ryzen 9 9950X3D2 CPU reported in job log",
+    "pc4_gitleaks": "success, no leaks found across 885 commits (~160 MB)",
+    "pc4_semgrep": "success with 155 findings across 6,898 tracked files; findings not triaged and green status does not mean zero findings",
+    "pc4_trivy": "success",
+    "pc4_ci_fallback": "echo-only; not a compile or test gate"
+  },
+  "verified_local": {
+    "debug_tests": "22 passed, 0 failed, 3 ignored for pinned tokenizer fixture",
+    "release_tests": "22 passed, 0 failed, 3 ignored for pinned tokenizer fixture",
+    "clippy": "exit 0 with two existing dead_code warnings",
+    "rustfmt": "pass",
+    "manifest_sha256": "aefaf197c37bb1bfb82ceaf36f2c6917060b32ef526dc77cf8fb9a3087fda165"
+  },
+  "apps": {
+    "sonarqube": "Not run: no SonarQube MCP connector; local browser use is disabled; PC6 loopback and PC4 hostname port 9000 refused. Project exposes a masked SONAR_TOKEN but no project SONAR_HOST_URL. Token value was not read or changed.",
+    "gitguardian": "No GitGuardian MCP connector. Gitleaks is active in PC4 CI but is a distinct scanner."
+  },
+  "active_operations": [
+    "Verify the R747 push pipeline, new r746_cpu_contract result, and presence of global security jobs."
+  ],
+  "next_action": "Read pipeline and job logs after the R747 commit; confirm Rust tests ran on PC4 and global security scans remain. Then continue Sonar/GitGuardian integration only through established app endpoints/connectors, and resume component extraction toward complete generation.",
+  "no_relaunch": "STOPPED_BY_OWNER"
+}

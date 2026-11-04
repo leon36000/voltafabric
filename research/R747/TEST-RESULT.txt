@@ -1,0 +1,12 @@
+R747 adds CI configuration; pipeline test result is pending at publication time.
+
+Previously verified local CPU harness (R746):
+- Debug: 22 passed, 0 failed, 3 ignored; 3 require the pinned external tokenizer fixture.
+- Release: 22 passed, 0 failed, 3 ignored.
+- Clippy: exit 0; two dead_code warnings in existing SHA-256 test-counter helpers.
+- rustfmt: pass.
+
+R746 GitLab pipeline 2702 (source commit e87779f): success.
+R746 GitLab pipeline 2703 (handoff commit 7637296): success.
+Both used global security jobs and the echo-only fallback, not the new Rust test job.
+R747 pipeline must run the Rust job before any CI result is marked verified.

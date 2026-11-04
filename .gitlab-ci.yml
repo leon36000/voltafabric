@@ -1,0 +1,19 @@
+r746_cpu_contract:
+  stage: test
+  image: rust:1.90.0-bookworm
+  timeout: 20m
+  variables:
+    CARGO_HOME: "$CI_PROJECT_DIR/.cargo"
+    CARGO_TARGET_DIR: "$CI_PROJECT_DIR/target/r746-cpu-harness"
+    CARGO_TERM_COLOR: "always"
+  cache:
+    key: "voltafabric-rust-1.90"
+    paths:
+      - .cargo/registry/index/
+      - .cargo/registry/cache/
+  before_script:
+    - rustup component add clippy rustfmt
+  script:
+    - cargo test --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream
+    - cargo clippy --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets
+    - rustfmt --edition 2021 --check src/deepseek_v41_head.rs research/R746/cpu-harness/src/lib.rs
