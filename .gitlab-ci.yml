@@ -1,6 +1,6 @@
 r746_cpu_contract:
   stage: test
-  image: rust:1.90.0-bookworm
+  image: public.ecr.aws/docker/library/rust:1.90.0-bookworm
   timeout: 20m
   variables:
     CARGO_HOME: "$CI_PROJECT_DIR/.cargo"

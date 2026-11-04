@@ -1,12 +1,9 @@
-R747 adds CI configuration; pipeline test result is pending at publication time.
+R747 pipeline 2870 (commit before image-source correction): failed before the Rust script because the runner could not resolve production.cloudfront.docker.com while pulling rust:1.90.0-bookworm from Docker Hub. The CPU test command did not run; classify this as infrastructure/image-pull failure, not a code-test result.
 
-Previously verified local CPU harness (R746):
-- Debug: 22 passed, 0 failed, 3 ignored; 3 require the pinned external tokenizer fixture.
+The replacement image tag public.ecr.aws/docker/library/rust:1.90.0-bookworm was verified locally with `docker manifest inspect` using an empty Docker config. The R747 retry must still verify the image pull on the PC4 runner and execution of all commands.
+
+Existing R746 local CPU evidence:
+- Debug: 22 passed, 0 failed, 3 ignored (pinned external tokenizer fixture required).
 - Release: 22 passed, 0 failed, 3 ignored.
-- Clippy: exit 0; two dead_code warnings in existing SHA-256 test-counter helpers.
+- Clippy: exit 0 with two existing dead_code warnings in SHA-256 test-counter helpers.
 - rustfmt: pass.
-
-R746 GitLab pipeline 2702 (source commit e87779f): success.
-R746 GitLab pipeline 2703 (handoff commit 7637296): success.
-Both used global security jobs and the echo-only fallback, not the new Rust test job.
-R747 pipeline must run the Rust job before any CI result is marked verified.

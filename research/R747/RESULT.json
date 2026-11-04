@@ -1,25 +1,27 @@
 {
   "schema_version": 1,
   "round": "R747",
-  "status": "CI_CPU_JOB_ADDED_PENDING_PIPELINE",
+  "status": "CI_IMAGE_PULL_WORKARDED_RETRY_PENDING",
   "base_branch": "r746-deepseek-greedy-wire-20261103",
   "base_commit": "76372968ff308401a0c8c2bd7d04dd9f0732d1c6",
   "ci_job": "r746_cpu_contract",
-  "runner_image": "rust:1.90.0-bookworm",
+  "runner_image": "public.ecr.aws/docker/library/rust:1.90.0-bookworm",
+  "image_manifest_verified": true,
+  "image_manifest_check": "docker manifest inspect with an empty Docker config returned success",
   "commands": [
     "cargo test --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream",
     "cargo clippy --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets",
     "rustfmt --edition 2021 --check src/deepseek_v41_head.rs research/R746/cpu-harness/src/lib.rs"
   ],
-  "previous_pipeline": {
-    "r746_2702": "success",
-    "r746_2703": "success",
-    "pc4_gitleaks": "success; no leaks found",
-    "pc4_semgrep": "success; 155 findings reported across tracked repository",
-    "pc4_trivy": "success",
-    "pc4_ci_fallback": "success; echo only, no compile or tests"
+  "r747_pipeline_2870": {
+    "status": "failed",
+    "cause": "runner could not resolve Docker Hub CloudFront image-layer host before job script",
+    "global_gitleaks": "success",
+    "global_semgrep": "success; 155 findings across 6,898 tracked files",
+    "global_trivy": "success",
+    "cpu_script_started": false
   },
-  "sonarqube": "not run; connector/browser unavailable and host URL not established",
-  "gitguardian": "not run; connector unavailable; GitLeaks ran as a distinct scanner",
-  "next_action": "Verify R747 pipeline execution and ensure the PC4 CPU test and global security jobs both appear."
+  "sonarqube": "not run; connector and reachable host URL unavailable",
+  "gitguardian": "not run; connector unavailable; Gitleaks ran as a distinct scanner",
+  "next_action": "Verify the retry pipeline for actual Rust job execution on PC4."
 }
