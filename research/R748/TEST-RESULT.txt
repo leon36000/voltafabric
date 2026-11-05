@@ -1,15 +1,7 @@
 R748 first root crate pipeline #2878 (commit 18964df7f7b13d1416cbc2c3d4cfb7f1034f4154): FAILED.
+- Gitleaks #6707, Semgrep #6708, Trivy #6709: success.
+- Semgrep: 155 findings across 6,898 files; untriaged.
+- Rust job #6710: E0063, missing `attempt` in `preweighted::Completion` initializer at src/session/mxfp4.rs:1489.
+- Root tests, Clippy, isolated R746 harness, and rustfmt: not reached.
 
-Pre-checks:
-- Gitleaks job #6707: success
-- Semgrep job #6708: success, 155 findings across 6,898 files; findings not triaged
-- Trivy job #6709: success
-
-PC4 root job #6710:
-- Cargo dependencies downloaded and root crate compilation began.
-- Failed before unit tests: E0063, missing `attempt` in initializer of `preweighted::Completion`, src/session/mxfp4.rs:1489.
-- Root tests: not reached.
-- Clippy: not reached.
-- Isolated R746 harness and rustfmt: not reached because the script stops on the first error.
-
-Fix prepared for the successor commit: restore `attempt: None`. New pipeline result is pending; no root-library pass is claimed.
+The fix commit d88073ac6fa46407e73359860d81df370bb04dea restores `attempt: None`. Follow-up pipeline #2937 is pending on that exact SHA; its .pre jobs have no logs/runner assignment yet, and the Rust job remains created. No root-library pass is claimed.

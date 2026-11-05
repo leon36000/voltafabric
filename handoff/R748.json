@@ -1,32 +1,38 @@
 {
   "schema_version": 1,
   "round": "R748",
-  "updated_utc": "2026-11-05T00:05:29Z",
+  "updated_utc": "2026-11-05T00:13:01Z",
   "owner_authorization": "Continue source work on private GitLab and use the PC4 runner. Do not use Superpowers or codex-engineering-guardrails skills or instructions. Automatic relaunch remains stopped by owner request.",
   "project": "root/voltafabric",
   "branch": "r748-root-crate-ci-20261104",
-  "parent_commit": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
-  "state": "ROOT_COMPILE_FIX_COMMITTED_PIPELINE_PENDING",
+  "state": "ROOT_COMPILE_FIX_PIPELINE_PENDING",
   "failed_pipeline": {
     "id": 2878,
     "status": "failed",
     "sha": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
     "job_id": 6710
   },
-  "diagnosis": "Root unit-test compilation exposed E0063 at src/session/mxfp4.rs:1489: missing attempt in preweighted::Completion. R689 introduced the optional field and attempt: None; R714 removed this initializer during refactoring.",
-  "fix": "Restore attempt: None for the ordinary MXFP4 R9 collector. The Session envelope independently validates the positive request attempt and event/reply attempt before accepting any completion.",
-  "source_sha256": "d2714771216ca929331a4afdd421481fb1903fbb3b68e7426309096883aeed16",
-  "artifact_manifest_sha256": "eda3b5608193fecc35f7c6d32fbbab29ee3317604de1600cfecceab717bd869a",
-  "scans": {
-    "gitleaks": "success",
-    "semgrep": "success; 155 findings across 6898 files remain untriaged",
-    "trivy": "success"
+  "fix_commit": "d88073ac6fa46407e73359860d81df370bb04dea",
+  "followup_pipeline": {
+    "id": 2937,
+    "status": "pending",
+    "sha": "d88073ac6fa46407e73359860d81df370bb04dea"
   },
-  "sonarqube": "not run; no connector, CLI, reachable PC4 service, or SONAR_HOST_URL verified; masked token not read",
+  "diagnosis": "R689 added the optional preweighted::Completion.attempt field with None for R9; R714 removed the initializer. Root unit-test compilation in 2878 exposed E0063.",
+  "fix": "Restored attempt: None for ordinary MXFP4 R9. Session validates the positive request attempt and event/reply identity independently.",
+  "runner_observation": "Pipeline 2937 jobs remain pending with empty logs. PC4 K3s reports active; system kubeconfig is permission-protected and no user kubeconfig is present. No services or runners were modified.",
+  "source_sha256": "d2714771216ca929331a4afdd421481fb1903fbb3b68e7426309096883aeed16",
+  "artifact_manifest_sha256": "4d94ac12300bae7733ed54a427527357c1e52483235245f20b1d16466deac9d8",
+  "scans": {
+    "gitleaks": "success on pipeline 2878",
+    "semgrep": "success on 2878; 155 findings across 6898 files remain untriaged",
+    "trivy": "success on 2878"
+  },
+  "sonarqube": "not run; no connector/CLI/reachable local service; masked token not read",
   "gitguardian": "not run; no connector; Gitleaks is distinct",
   "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [
-    "Commit the one-field MXFP4 completion fix with R748 evidence; inspect its new PC4 pipeline."
+    "Wait for PC4 to assign pipeline 2937; record its results. No runner/service changes."
   ],
-  "next_action": "Wait for the fix commit pipeline. Record exact root tests, Clippy, formatting and scans. No full-generation, real-checkpoint, GPU, inter-PC, or performance claim."
+  "next_action": "Read pipeline 2937 and update the evidence with root tests, Clippy, format and scans; no full-generation, GPU, inter-PC, or performance claim."
 }
