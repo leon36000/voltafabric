@@ -12086,15 +12086,10 @@ mod a155_completion_batch_latch_tests {
         session
     }
 
-    fn stop(mut session: Session) {
-        let _ = session.child.kill();
-        let _ = session.child.wait();
-        if let Some(reader) = session.reader.take() {
-            let _ = reader.join();
-        }
-        if let Some(stderr) = session.stderr.take() {
-            let _ = stderr.join();
-        }
+    fn stop(session: Session) {
+        // EOF lets the test worker exit normally; the bounded close path also
+        // cancels output readers before joining them.
+        let _ = session.close_input(std::time::Duration::from_millis(500));
     }
 
     #[test]
@@ -12252,15 +12247,10 @@ mod a166_fp16_mode_tests {
         session
     }
 
-    fn stop(mut session: Session) {
-        let _ = session.child.kill();
-        let _ = session.child.wait();
-        if let Some(reader) = session.reader.take() {
-            let _ = reader.join();
-        }
-        if let Some(stderr) = session.stderr.take() {
-            let _ = stderr.join();
-        }
+    fn stop(session: Session) {
+        // EOF lets the test worker exit normally; the bounded close path also
+        // cancels output readers before joining them.
+        let _ = session.close_input(std::time::Duration::from_millis(500));
     }
 
     #[test]
