@@ -1,27 +1,33 @@
 {
   "schema_version": 1,
   "round": "R748",
-  "status": "ROOT_CARGO_CI_PENDING",
+  "status": "ROOT_COMPILE_FIX_COMMITTED_PIPELINE_PENDING",
   "project": "root/voltafabric",
-  "source_branch": "r747-gitlab-cpu-ci-20261104",
-  "source_head": "a6b48a31502c4ac2935b1ce98b7221eeadf2fd27",
   "branch": "r748-root-crate-ci-20261104",
-  "change": "Run locked tests and Clippy against the actual root VoltaFabric library, while preserving the independent R746 harness checks and PC4 security scans.",
-  "commands": [
-    "cargo test --locked --lib --features deepseek-v41-stream",
-    "cargo clippy --locked --lib --features deepseek-v41-stream",
-    "cargo test --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream",
-    "cargo clippy --locked --manifest-path research/R746/cpu-harness/Cargo.toml --features deepseek-v41-stream --all-targets",
-    "rustfmt --edition 2021 --check src/deepseek_v41_head.rs src/deepseek_v41_prompt.rs src/deepseek_v41_sampler.rs research/R746/cpu-harness/src/lib.rs"
-  ],
-  "prior_verified_ci": {
-    "pipeline": 2873,
-    "commit": "2bc629d65ef055211b4b6381a11f4e3b1e00d62e",
-    "status": "success",
-    "isolated_harness_tests": "22 passed; 0 failed; 3 ignored",
-    "scans": "Gitleaks, Semgrep and Trivy succeeded; 155 Semgrep findings remain untriaged"
+  "parent_commit": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
+  "initial_pipeline": {
+    "id": 2878,
+    "status": "failed",
+    "sha": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
+    "job_id": 6710,
+    "job": "r746_cpu_contract"
   },
-  "sonarqube": "not run; no connector, CLI, reachable host, or SONAR_HOST_URL; masked SONAR_TOKEN value not read",
-  "gitguardian": "not run; no connector or project variable; Gitleaks is distinct",
-  "next_action": "Inspect the fresh R748 pipeline and record root-library test, Clippy, format, and security-scan outcomes."
+  "root_library_result": "Compilation failed before tests: missing attempt field in preweighted::Completion initializer at src/session/mxfp4.rs:1489.",
+  "root_clippy": "not reached",
+  "isolated_harness": "not reached",
+  "security_scans": {
+    "gitleaks": "success",
+    "semgrep": "success; 155 findings across 6898 files, not yet triaged",
+    "trivy": "success"
+  },
+  "diagnosis": "R689 added Completion.attempt: Option<u64> with attempt=None for the R9 collector; R714 removed the initializer while extracting Session preflight.",
+  "fix": "Restore attempt: None in the MXFP4 R9 completion initializer. Session still verifies the nonzero attempt on the request and every event/reply; R9 arithmetic collector expects no attempt scope.",
+  "next_action": "Inspect the new commit pipeline. Record exact root tests, Clippy, formatting and scans; do not report root CI green until all required jobs pass.",
+  "sonar": "not run; no connector, local CLI or reachable PC4 service verified; masked token value not read",
+  "gitguardian": "not run; no connector; Gitleaks is distinct",
+  "gpu": false,
+  "real_checkpoint_payload": false,
+  "complete_generation": false,
+  "inter_pc": false,
+  "unknown_replayed": false
 }

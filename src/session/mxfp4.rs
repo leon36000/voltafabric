@@ -1488,6 +1488,7 @@ impl Session {
                         }
                         rows.push(arithmetic::Completion {
                             contract: contract.clone(),
+                            attempt: None,
                             stamp: dispatch.stamp.clone(),
                             token: meta.token,
                             slot: meta.slot,

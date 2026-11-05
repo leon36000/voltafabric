@@ -1,20 +1,32 @@
 {
   "schema_version": 1,
   "round": "R748",
-  "updated_utc": "2026-11-04T23:40:00Z",
+  "updated_utc": "2026-11-05T00:05:29Z",
   "owner_authorization": "Continue source work on private GitLab and use the PC4 runner. Do not use Superpowers or codex-engineering-guardrails skills or instructions. Automatic relaunch remains stopped by owner request.",
   "project": "root/voltafabric",
-  "source_branch": "r747-gitlab-cpu-ci-20261104",
-  "source_head": "a6b48a31502c4ac2935b1ce98b7221eeadf2fd27",
   "branch": "r748-root-crate-ci-20261104",
-  "state": "ROOT_CARGO_CI_PENDING",
-  "change": "Add locked test and Clippy runs for the actual root library with DeepSeek v4.1 stream enabled; keep the independent R746 harness and global security scans.",
-  "sonarqube": "No MCP connector, CLI, PC4 service on port 9000, or SONAR_HOST_URL. The masked token value was not read. No service was installed or started.",
-  "gitguardian": "No connector/project variable; GitLeaks is a distinct scan and remains enabled in the pipeline.",
+  "parent_commit": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
+  "state": "ROOT_COMPILE_FIX_COMMITTED_PIPELINE_PENDING",
+  "failed_pipeline": {
+    "id": 2878,
+    "status": "failed",
+    "sha": "18964df7f7b13d1416cbc2c3d4cfb7f1034f4154",
+    "job_id": 6710
+  },
+  "diagnosis": "Root unit-test compilation exposed E0063 at src/session/mxfp4.rs:1489: missing attempt in preweighted::Completion. R689 introduced the optional field and attempt: None; R714 removed this initializer during refactoring.",
+  "fix": "Restore attempt: None for the ordinary MXFP4 R9 collector. The Session envelope independently validates the positive request attempt and event/reply attempt before accepting any completion.",
+  "source_sha256": "d2714771216ca929331a4afdd421481fb1903fbb3b68e7426309096883aeed16",
+  "artifact_manifest_sha256": "eda3b5608193fecc35f7c6d32fbbab29ee3317604de1600cfecceab717bd869a",
+  "scans": {
+    "gitleaks": "success",
+    "semgrep": "success; 155 findings across 6898 files remain untriaged",
+    "trivy": "success"
+  },
+  "sonarqube": "not run; no connector, CLI, reachable PC4 service, or SONAR_HOST_URL verified; masked token not read",
+  "gitguardian": "not run; no connector; Gitleaks is distinct",
+  "automatic_relaunch": "STOPPED_BY_OWNER",
   "active_operations": [
-    "Publish R748 as a new branch from the verified R747 receipt, then inspect its PC4 pipeline and root-library test results."
+    "Commit the one-field MXFP4 completion fix with R748 evidence; inspect its new PC4 pipeline."
   ],
-  "next_action": "Read R748 pipeline and update this handoff with exact root-library test and scan outcomes before any further code change.",
-  "no_relaunch": "STOPPED_BY_OWNER",
-  "artifact_manifest_sha256": "2e741138600b9503e0cfefab578a746dbb048377bfa1b7ad8c84dd7ebc78a4dd"
+  "next_action": "Wait for the fix commit pipeline. Record exact root tests, Clippy, formatting and scans. No full-generation, real-checkpoint, GPU, inter-PC, or performance claim."
 }

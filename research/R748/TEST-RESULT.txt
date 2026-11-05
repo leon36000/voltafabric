@@ -1,9 +1,15 @@
-R748 is pending PC4 GitLab execution. It extends CI from the independent R746 CPU harness to the actual VoltaFabric root library under `deepseek-v41-stream`.
+R748 first root crate pipeline #2878 (commit 18964df7f7b13d1416cbc2c3d4cfb7f1034f4154): FAILED.
 
-Previous verified R747 pipeline #2873 on PC4:
-- Isolated R746 harness: 22 passed, 0 failed, 3 ignored because the pinned external tokenizer fixture was not present.
-- Clippy: exit 0 with two existing dead_code warnings in SHA-256 test-counter helpers.
-- rustfmt: pass.
-- Gitleaks, Semgrep and Trivy: jobs succeeded; Semgrep reported 155 findings across 6,898 files, not yet triaged.
+Pre-checks:
+- Gitleaks job #6707: success
+- Semgrep job #6708: success, 155 findings across 6,898 files; findings not triaged
+- Trivy job #6709: success
 
-No R748 root test result is claimed until its pipeline is read back.
+PC4 root job #6710:
+- Cargo dependencies downloaded and root crate compilation began.
+- Failed before unit tests: E0063, missing `attempt` in initializer of `preweighted::Completion`, src/session/mxfp4.rs:1489.
+- Root tests: not reached.
+- Clippy: not reached.
+- Isolated R746 harness and rustfmt: not reached because the script stops on the first error.
+
+Fix prepared for the successor commit: restore `attempt: None`. New pipeline result is pending; no root-library pass is claimed.
