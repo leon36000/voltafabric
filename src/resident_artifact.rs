@@ -290,12 +290,33 @@ pub fn export(stack: &ResidentStack, output: &Path) -> Result<ArtifactReceipt> {
     })
 }
 
-/// The same SafeTensors file with its header JSON keys in sorted order. `safetensors`
+/// The same SafeTensors file with recursively sorted header JSON keys. `safetensors`
 /// writes `__metadata__` in `HashMap` order, which differs from one process to the next:
 /// until A53 the same stack exported to one of two byte strings. Header text is padded
 /// with spaces to 8 bytes, as `safetensors` pads it; the payload bytes are unchanged.
 /// Sorting keys keeps the header's length, so the header is rewritten in place and the
 /// file is held once, not twice; a header of another length gets a new buffer.
+// serde_json may use either BTreeMap or insertion-ordered Map, depending on
+// features unified by optional dependencies. Make canonical bytes independent of that.
+fn sort_json_keys(value: &mut serde_json::Value) {
+    match value {
+        serde_json::Value::Object(object) => {
+            let mut entries: Vec<_> = std::mem::take(object).into_iter().collect();
+            for (_, child) in &mut entries {
+                sort_json_keys(child);
+            }
+            entries.sort_unstable_by(|(left, _), (right, _)| left.cmp(right));
+            object.extend(entries);
+        }
+        serde_json::Value::Array(values) => {
+            for child in values {
+                sort_json_keys(child);
+            }
+        }
+        _ => {}
+    }
+}
+
 fn canonical(mut raw: Vec<u8>) -> Result<Vec<u8>> {
     let malformed = || Error::new("ARTIFACT_SERIALIZE", "SafeTensors header is malformed");
     let n = raw
@@ -305,8 +326,8 @@ fn canonical(mut raw: Vec<u8>) -> Result<Vec<u8>> {
         .and_then(|n| usize::try_from(n).ok())
         .ok_or_else(malformed)?;
     let header = raw.get(8..8 + n).ok_or_else(malformed)?;
-    // serde_json::Map is a BTreeMap here (no preserve_order): keys come out sorted.
-    let header: serde_json::Value = serde_json::from_slice(header).map_err(|_| malformed())?;
+    let mut header: serde_json::Value = serde_json::from_slice(header).map_err(|_| malformed())?;
+    sort_json_keys(&mut header);
     let mut text = serde_json::to_vec(&header).map_err(|_| malformed())?;
     text.resize(text.len().div_ceil(8) * 8, b' ');
     if text.len() == n {
@@ -397,8 +418,9 @@ fn canonical_encoding_matches(stack: &ResidentStack, bytes: &[u8]) -> Result<boo
     }
     let header = Metadata::new(Some(metadata), infos)
         .map_err(|err| io_error("ARTIFACT_SERIALIZE", "tensor metadata invalid", err))?;
-    let value = serde_json::to_value(header)
+    let mut value = serde_json::to_value(header)
         .map_err(|err| io_error("ARTIFACT_SERIALIZE", "header serialization failed", err))?;
+    sort_json_keys(&mut value);
     let mut text = serde_json::to_vec(&value)
         .map_err(|err| io_error("ARTIFACT_SERIALIZE", "header serialization failed", err))?;
     text.resize(text.len().div_ceil(8) * 8, b' ');
@@ -683,5 +705,12 @@ mod tests {
         let spaced = canonical(file("{ \"z\" : 1 , \"a\" : 2 }   ", payload)).unwrap();
         assert_eq!(same, sorted);
         assert_eq!(spaced, sorted);
+
+        let nested = canonical(file("{\"z\":1,\"a\":{\"z\":0,\"b\":1}}", payload)).unwrap();
+        let header_len = u64::from_le_bytes(nested[..8].try_into().unwrap()) as usize;
+        let header = std::str::from_utf8(&nested[8..8 + header_len])
+            .unwrap()
+            .trim_end();
+        assert_eq!(header, "{\"a\":{\"b\":1,\"z\":0},\"z\":1}");
     }
 }
